@@ -20,11 +20,11 @@ releases.
 4. Ask the owner what to change in the summary, the objectives, or the
    release, and which objectives are complete. Apply the answers in the
    worktree.
-5. Commit the summary at docs/sprint-ends/<release>.md, push, and run
-   `tpm program open-merge-request --project <project> --issue <iid> --closes <project#iid> --json`
-   with one --closes per objective the owner reports complete. A reviewer
-   merges it; the merge closes the issue and those objectives.
+5. Commit the summary at docs/sprint-ends/<release>.md and run
+   `tpm program merge --project <project> --issue <iid> --closes <project#iid> --json`
+   with one --closes per objective the owner reports complete; the merge
+   closes the issue and those objectives.
 6. Ask the owner to confirm the release and its version (facts recommends
    one). With no confirmation, or nothing to release, stop here.
-7. Once the merge request merges, on main: `tpm release gate --artifact <artifact> --version <version> --issue <project#iid>`,
+7. Once the summary merges, on main: `tpm release gate --artifact <artifact> --version <version> --issue <project#iid>`,
    then `tpm release tag` with the same flags. Show the tag.

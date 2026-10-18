@@ -74,9 +74,9 @@ confirms or reports as lost when tpm tracker reconcile runs back online. Every c
 ## Choosing the backend
 
 TPM_TRACKER, set to the tracker repository's URL, selects the beads
-backend; unset, tpm talks to GitLab as before. The tracker clone lives at
+backend, and tpm requires it. The tracker clone lives at
 TPM_TRACKER_CLONE, or under the user cache directory, cloned on first use.
-The person is TPM_USER, or git's user.name. Issues come from the tracker
+The person is TPM_USER, or git's user.name. TPM_WEB_BASE is the web root repositories are cited under, which goals and plan need to write a pinned citation. Issues come from the tracker
 repository; files, branches, tags, and comparisons come from git: a
 project's checkout is the sibling of the command's checkout named for the
 project's last path segment, as repositories sit side by side under their

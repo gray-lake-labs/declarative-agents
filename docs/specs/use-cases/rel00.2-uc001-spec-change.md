@@ -40,7 +40,7 @@ A design change to a component SRD, use case, test suite, or the architecture.
 - F3: tpm sets plane::data and kind::spec and files the issue unassigned through tpm program file; it is admitted into the backlog.
 - F4: The Developer pops it into its worktree and changes the documents there.
 - F5: issue-pop runs mage audit; a failure is reported with its findings and no merge request is opened.
-- F6: With the audit passing, tpm program open-merge-request opens the merge request, whose reviewer focus names mage audit; its merge closes the issue.
+- F6: tpm program merge runs mage audit in the worktree; with the audit passing it merges the branch, and the merge closes the issue.
 
 <!-- field: touchpoints -->
 ## Touchpoints

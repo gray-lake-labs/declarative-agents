@@ -1,6 +1,6 @@
 ---
 name: issue-pop
-description: Take an issue into its own branch and worktree, and finish with the merge request that closes it (srd036). Use when a person asks to work, take, or pop an issue in this repository, or to finish the work with a merge request.
+description: Take an issue into its own branch and worktree, and finish with the merge that closes it (srd036). Use when a person asks to work, take, or pop an issue in this repository, or to finish and merge the work.
 ---
 
 # issue-pop
@@ -17,21 +17,12 @@ Input: the project path of this repository and the issue number.
    the instructions: its Requirements are the steps and its Acceptance
    Criteria are what must hold. A question the Requirements ask, such as a
    sprint-end issue's confirmation, is part of the work (srd036 R4.1).
-3. Commit in the worktree and push the branch (`git push`); the worktree
-   already tracks the branch on the remote.
-4. Run `tpm program open-merge-request --project <project> --issue <iid> --json` from
+3. Commit in the worktree.
+4. Run `tpm program merge --project <project> --issue <iid> --json` from
    the worktree, adding `--closes <project#iid>` for each issue the
-   Requirements say the merge also closes. For a change under docs/ it runs the corpus audit there
-   first. On a refusal (no commits yet, the issue closed, or the audit
-   failing), show its reason and the audit's findings, and stop.
-5. Show the merge request URL. A reviewer merges it; the merge closes the
-   issue.
-
-On the beads tracker (pop's `web_url` starts with `beads:`) there is no
-merge request; delivery is a local merge (srd042 R2.3). Replace steps 4
-and 5: run `tpm program merge --project <project> --issue <iid> --json`
-from the worktree, adding `--closes <project#iid>` for each issue the
-Requirements say the merge also closes. It runs the corpus audit for a
-change under docs/, merges, pushes, and closes each issue. On a refusal,
-show its reason and the audit's findings, and stop; otherwise show the
-merge commit and the issues it closed.
+   Requirements say the merge also closes. For a change under docs/ it
+   runs the corpus audit first; then it merges the branch into the default
+   branch, pushes, and closes each issue (srd042 R2.3). On a refusal (no
+   commits yet, the issue closed, or the audit failing), show its reason
+   and the audit's findings, and stop.
+5. Show the merge commit and the issues it closed.

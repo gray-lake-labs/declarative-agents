@@ -34,7 +34,7 @@ prose.
 <!-- req: R1.1 -->
 ### R1.1
 
-Scaffolds a reports repository: a reports directory per quarter, the report schema, a summaries directory, the configuration reports.md (config format reports-config), a CI job that runs tpm reports validate on every merge request, a scheduled CI job that runs tpm reports status-issues each week, and a deck template.
+Scaffolds a reports repository: a reports directory per quarter, the report schema, a summaries directory, the configuration reports.md (config format reports-config), and a deck template. The team runs tpm reports status-issues each week on a schedule of its own, and tpm reports validate before each report merges.
 
 <!-- req: R1.2 -->
 ### R1.2

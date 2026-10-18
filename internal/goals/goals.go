@@ -2,6 +2,7 @@ package goals
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -12,8 +13,15 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 )
 
-// WebBase is the instance's web root, derived from GITLAB_BASE_URL.
-func WebBase() string { return strings.TrimSuffix(gitlab.BaseURL(), "/api/v4") }
+// WebBase is the web root repositories are cited under, TPM_WEB_BASE: a
+// pinned citation is <web base>/<project>/-/blob/<tag>/<path> (srd007).
+func WebBase() (string, error) {
+	base := strings.TrimSuffix(strings.TrimSpace(os.Getenv("TPM_WEB_BASE")), "/")
+	if base == "" {
+		return "", errors.New("no web base for citations: set TPM_WEB_BASE to the web root repositories are cited under")
+	}
+	return base, nil
+}
 
 func init() {
 	var a struct{ system, release, ref, planFile, control string }
@@ -86,7 +94,11 @@ func init() {
 			if err != nil {
 				return err
 			}
-			res, err := Push(t, s, p, WebBase(), policy, ctx.DryRun)
+			web, err := WebBase()
+			if err != nil {
+				return err
+			}
+			res, err := Push(t, s, p, web, policy, ctx.DryRun)
 			if err != nil {
 				return err
 			}

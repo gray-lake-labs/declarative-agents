@@ -367,7 +367,7 @@ cases are written when the release is planned.
 - srd033-sprint-retrospective
 - srd041-states
 
-<!-- release: 03.0 | status: specified -->
+<!-- release: 03.0 | status: implemented -->
 ## 03.0 - The tracker becomes beads
 
 The program's facts move from the hosted GitLab instance to beads in a

@@ -75,13 +75,13 @@ mage integration:docsChange
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/program -run '^TestOpenMergeRequest(NamesAuditForDocsChange|RefusesWhenAuditFails)$'
+go test ./internal/program -run '^TestMergeDeliversOnBeads$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
 - failing_audit: findings reported, nothing delivered
-- passing_audit: the delivery names or runs mage audit; the merge closes the issue
+- passing_audit: the merge runs mage audit, merges, and closes the issue
 
 <!-- field: traces -->
 #### Traces

@@ -307,7 +307,7 @@ func (r *rigEnv) runTPMAs(user string, args ...string) ([]byte, error) {
 	cmd := exec.Command(r.tpm, args...)
 	cmd.Dir = filepath.Join(r.run.Dir, "checkouts", "work")
 	cmd.Env = append(os.Environ(), "TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
-		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+user), "TPM_USER="+user)
+		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+user), "TPM_USER="+user, "TPM_WEB_BASE="+r.webBase)
 	var out, errb bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errb
 	if err := cmd.Run(); err != nil {

@@ -23,10 +23,10 @@ import (
 
 func main() {
 	tracker := func() (gitlab.Tracker, error) {
-		if beads.Configured() {
-			return beads.FromEnv()
+		if !beads.Configured() {
+			return nil, errors.New("no tracker: set TPM_TRACKER to the tracker repository (eng04-beads-sync)")
 		}
-		return gitlab.New()
+		return beads.FromEnv()
 	}
 	err := cli.Default.Run(os.Args[1:], os.Stdout, tracker)
 	switch {

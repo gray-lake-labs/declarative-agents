@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
 	"github.com/gray-lake-labs/scrum-master/internal/plan"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
@@ -81,7 +80,7 @@ func testReportedCompleteClosesWithoutMet(t *testing.T, p trackertest.Program) {
 	// The sprint-end delivery closes the sprint-end issue and the objective
 	// the owner reported complete, and no met event is posted.
 	if checkout := p.Checkout(po1); checkout == "" {
-		mergeRequestCloses(t, f.(*gitlabtest.Fake))
+		closeBoth(t, f)
 	} else {
 		localMergeCloses(t, f, checkout)
 	}
@@ -99,26 +98,15 @@ func testReportedCompleteClosesWithoutMet(t *testing.T, p trackertest.Program) {
 // steps to the order srd038 R1.2 and R5.3 state: the summary merges, then
 // the owner confirms, then the gate and tag run on main; without
 // confirmation the merge alone closes the issue.
-// mergeRequestCloses is the GitLab delivery: the sprint-end merge request
-// names both issues it closes, and its merge closes them.
-func mergeRequestCloses(t *testing.T, f *gitlabtest.Fake) {
+// closeBoth stands in for delivery on the fake, which has no repositories
+// to merge in: both issues close.
+func closeBoth(t *testing.T, f gitlab.Tracker) {
 	t.Helper()
-	f.Ahead[po1+"@2-sprint-end"] = gitlabtest.Commits{Count: 1, Paths: []string{"docs/sprint-ends/01.0.md"}}
-	gate := program.AuditGate{Command: "mage audit", Run: func(string, string) (string, error) { return "", nil }}
-	mr, err := program.OpenMergeRequestClosing(f, po1, po1, 2, "2-sprint-end", gate, []string{po1 + "#1"}, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	desc := f.MRs[po1][0].Description
-	if !mr.Created || !strings.Contains(desc, "Closes #2\n") || !strings.Contains(desc, "Closes "+po1+"#1\n") {
-		t.Fatalf("merge request %+v:\n%s", mr, desc)
-	}
-	if _, err := program.OpenMergeRequestClosing(f, po1, po1, 2, "2-sprint-end", gate, []string{"not-a-ref"}, false); err == nil {
-		t.Fatal("a --closes that is not project#iid was accepted")
-	}
 	closed := "close"
 	for _, iid := range []int{1, 2} {
-		f.UpdateIssue(po1, iid, gitlab.IssueUpdate{State: &closed})
+		if _, err := f.UpdateIssue(po1, iid, gitlab.IssueUpdate{State: &closed}); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
@@ -160,7 +148,7 @@ func localMergeCloses(t *testing.T, f gitlab.Tracker, checkout string) {
 
 func TestSprintEndReleasesOnlyAfterConfirmation(t *testing.T) {
 	body := plan.SprintEndBody("01.1", "2026-11-27")
-	steps := []string{"tpm sprint-end facts", "docs/sprint-ends/01.1.md", "--closes", "confirm the release and its version", "the merge alone closes this issue", "Once the merge request merges", "tpm release gate"}
+	steps := []string{"tpm sprint-end facts", "docs/sprint-ends/01.1.md", "tpm program merge", "--closes", "confirm the release and its version", "the merge alone closes this issue", "Once the summary merges", "tpm release gate"}
 	at := -1
 	for _, s := range steps {
 		i := strings.Index(body, s)

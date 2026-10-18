@@ -51,8 +51,8 @@ for every role and every kind of work: make-work turns a plan into
 issues, issue-push files an issue in do-work's input format with the
 plane that says whether it is project work or a requirements change,
 issue-pop takes it into its own branch and worktree, do-work builds it
-against its Requirements and Acceptance Criteria, a merge request closes
-it, and tpm release tag tags a release once its gate passed. On GitLab, issue-push and
+against its Requirements and Acceptance Criteria, tpm program merge
+delivers it and closes it, and tpm release tag tags a release once its gate passed. issue-push and
 issue-pop are commands in this repository over tpm (srd035, srd036,
 release 00.0); do-work and sub-issues arrive with epics later. The outer loops are the five Scrum
 skills (srd020 to srd033): each reads the tracker, asks people bounded
@@ -60,7 +60,7 @@ questions, and pushes issues or posts ledger events.
 
 Facts come from subcommands of the tpm CLI, a single Go binary; "script"
 below means such a subcommand. Scripts are deterministic, idempotent,
-reach the tracker through the GitLab Go client, and never ask a person
+reach the tracker through the beads tracker (srd042), and never ask a person
 anything.
 
 <!-- field: layer_diagram -->
@@ -99,12 +99,11 @@ flowchart TB
     TRACK[track-goals: follow pinned references, collect evidence]
   end
 
-  subgraph TRACKER[GitLab Free]
+  subgraph TRACKER[beads tracker repository and code repositories]
     ISSUES[issues, labels]
     MILESTONES[group milestones]
-    COMMENTS[comments, events, to-dos]
-    TAGS[tags, releases]
-    CI[CI jobs]
+    COMMENTS[comments, events]
+    TAGS[tags, merges]
   end
 
   ROADMAP --> PLAN
@@ -194,7 +193,7 @@ flowchart TB
 <!-- interface: tracker -->
 ### tracker
 
-GitLab Free through the glab CLI and the REST and GraphQL APIs. The only persistent state the process has.
+A beads tracker repository, synchronized through git (srd042, eng04-beads-sync), and the code repositories it tracks. The only persistent state the process has.
 
 It reads issues with their labels, assignee, milestone, description, and
 sub-issues; related-issue links; comments and the current user's to-do
@@ -456,7 +455,7 @@ The process runs every week in every repository, so a step the model does costs 
 
 | component | technology | purpose |
 | --- | --- | --- |
-| tracker | GitLab Free, self-managed or gitlab.com, through the official Go client (gitlab.com/gitlab-org/api/client-go); GraphQL for sub-issues; the token comes from glab's existing login | the only persistent state of the process |
+| tracker | beads: issues, milestones, and labels as JSONL in one tracker repository that every clone pulls before reading and pushes after writing; delivery is a local merge commit; TPM_TRACKER names the repository (srd042, eng04-beads-sync) | the only persistent state of the process |
 | scripts | Go, exposed as subcommand groups of a single tpm binary (tpm standup score, tpm handoff fanout); one Go package per script SRD in this module; every subcommand takes --json and --dry-run; distributed as a released binary (GitLab release or go install), with the version a consuming repository uses pinned in its control/policy.md | every step a program can do |
 | skills | one Agent Skills directory per skill in the Agent Plugins 1.0 package plugin/, its SKILL.md at most 50 lines, that calls the tpm subcommands for every fact and step and uses the model only to turn conversation into structured files, combine files into summaries, and iterate on them with the person (design decision 13, eng02); mage audit enforces the size limit and the Agent Plugins and Agent Skills rules; the package is embedded in the tpm binary and tpm install writes each skill for Cursor (.cursor/skills), Claude Code (.claude/skills), or GitHub Copilot (.github/skills) in the consuming repository, and a client that loads Agent Plugins can install plugin/ itself, stamped with the tpm version and ignored by git, since they belong to the local tpm; tpm install --check reports drift locally (srd037); a consuming repository needs only the tpm binary on PATH and its control/ files, and each developer installs the skills | the steps an agent runs, the model doing language only |
 | policy | YAML files under the system repository's control/ directory | the rules issues move by |
@@ -482,14 +481,12 @@ The process runs every week in every repository, so a step the model does costs 
 | docs/specs/semantic-models/ | planes, roles, objects, agents |
 | docs/specs/use-cases/ | one use case per path through a release, citing the requirement items it delivers; release 01 has eight |
 | docs/specs/test-suites/ | one suite per release, tracing its use cases and acceptance criteria; release 01 has three |
-| docs/engineering/ | engineering guidelines (eng01 the GitLab regression rig, eng02 tpm and skills, eng03 releasing scrum-master) |
+| docs/engineering/ | engineering guidelines (eng01 the regression rig, eng02 tpm and skills, eng03 releasing scrum-master, eng04 beads sync) |
 | docs/guides/ | prose a person reads start to finish (process.md for the outer loops, ai-native-sdlc.md for the inner loop) |
 | go.mod | the Go module the tpm binary and the magefiles build from |
-| internal/<script>/ | one package per script SRD (program, goals in 01.0; reports, standup in 01.1; plan for plan-release and sprintend for the sprint-end issue in 01.2), tracker access through internal/gitlab; objectives, links, events, cli, and corpus (which reads a Markdown corpus document or config document) are shared; internal/release runs a gates file and cuts v0.YYYYMMDD.N tags (eng03), and tpm release (srd015) builds on it |
+| internal/<script>/ | one package per script SRD (program, goals in 01.0; reports, standup in 01.1; plan for plan-release and sprintend for the sprint-end issue in 01.2), tracker access through the tracker interface in internal/gitlab, served by internal/beads; objectives, links, events, cli, and corpus (which reads a Markdown corpus document or config document) are shared; internal/release runs a gates file and cuts v0.YYYYMMDD.N tags (eng03), and tpm release (srd015) builds on it |
 | magefiles/ | mage audit (gate tests, including the skill size limit, then the specification-critic corpus-audit agent), the regression rig and the mage regression targets, the integration targets the test suites name, and mage tag and mage tagDryRun, which run release-gates.md through internal/release (eng03) |
 | release-gates.md | the gates a scrum-master release passes (mage audit, go test ./..., mage integration:install), in the declarative-agents gates-file format (eng03) |
-| infra/modules/program/ | the program's GitLab layout as one Terraform module |
-| infra/platform/ | the production root; every project protected by prevent_destroy |
 | cmd/tpm/ | the tpm CLI entry point, one subcommand group per script (program, goals, install, release, reports, standup, plan, and sprint-end built; handoff planned) |
 | d2/ and figures/ | diagram sources and their renderings (scrum-today, scrum-ai-native, scrum-planes, scrum-roles-today, levels, release-cycle, environments) |
 | plugin/ | the Agent Plugins 1.0 package and the single source of the skills: plugin.json and skills/<name>/SKILL.md, one per skill SRD (issue-push, issue-pop, and the outer-loop skills), each an Agent Skills directory at most 50 lines, embedded in the tpm binary and installed per agent by tpm install (create-goals, issue-push, issue-pop, plan-release, and sprint-end built; the rest planned) |

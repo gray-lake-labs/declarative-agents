@@ -81,27 +81,27 @@ A data issue filed without a milestone and without a type gets the sprint: the a
 Returns one issue with its labels, its state per srd041 R1–R32, its sub-issues and their states, its Upstream, Requires, and Cites lines with track-goals' explanation of each (srd019), its epic if any, and its event comments, including its ledger events for an objective.
 
 <!-- req: R5 -->
-## R5 - tpm program open-merge-request
+## R5 - tpm program merge
 
 <!-- req: R5.1 -->
 ### R5.1
 
-Opens a merge request from a worktree branch that closes a given issue and every sub-issue named, with a description listing what the reviewer is asked to look at (srd008 R1.4), the issue's Acceptance Criteria with their tests and environments, and a closing line per issue.
+Merges a worktree branch into the default branch of the repository's main checkout with a merge commit whose message cites the issue and every issue named with --closes, pushes it, and closes each issue on that merge (srd042 R2.3).
 
 <!-- req: R5.2 -->
 ### R5.2
 
-Refuses when the branch has no commits ahead of the default branch or when the issue is closed.
+Refuses when the branch has no commits ahead of the default branch, when the issue is closed, or when an issue named with --closes is malformed or closed.
 
 <!-- req: R5.3 -->
 ### R5.3
 
-For any issue whose branch changes docs/, the reviewer focus names mage audit, the corpus gate the merge request must pass (srd034 R2.2).
+For a branch that changes docs/, runs the corpus gate, mage audit or the policy's audit_command, in the worktree first, and merges nothing when it fails (srd034 R2.2).
 
 <!-- req: R5.4 -->
 ### R5.4
 
-With --issue-project, opens the merge request in the given project and closes the issue in the other by its full reference; the weekly status report merges in the reports repository and closes the status issue in the owner's repository (srd018 R6.1).
+With --issue-project, merges in the given project and closes the issue in the other by its full reference; the weekly status report merges in the reports repository and closes the status issue in the owner's repository (srd018 R6.1).
 
 <!-- req: R6 -->
 ## R6 - tpm program labels
@@ -188,7 +188,7 @@ file creates an unassigned, linted issue (or an epic member, or a sub-issue of a
 <!-- ac: AC4 -->
 ### AC4
 
-open-merge-request opens a merge request closing the issue and named sub-issues with reviewer focus and acceptance criteria in its description, and refuses an empty branch or a closed issue; with --issue-project it opens in one project and closes the issue in another.
+merge merges the branch with a merge commit citing the issue and named sub-issues, pushes it, and closes each on it, runs the corpus gate first for a docs/ change, and refuses an empty branch or a closed issue; with --issue-project it merges in one project and closes the issue in another.
 
 <!-- field: traces -->
 #### Traces

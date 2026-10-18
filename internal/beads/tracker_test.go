@@ -84,9 +84,6 @@ func TestTrackerMapsIssuesAndNotes(t *testing.T) {
 		t.Fatalf("start = %+v, %v, want status::in-progress", got, err)
 	}
 
-	if _, err := tr.OpenMergeRequest("g/po-1", "1-first"); !errors.Is(err, ErrNotServed) {
-		t.Fatalf("open merge request = %v, want ErrNotServed", err)
-	}
 }
 
 // TestCreatesRenumberOnCollidingIIDs: two clones create an issue in the same

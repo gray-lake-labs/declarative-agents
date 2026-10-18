@@ -22,14 +22,13 @@ var notMarkdown = []string{
 }
 
 // yamlOutsideAllowed returns the YAML and JSON files among paths that D2
-// does not allow; a GitLab CI file is allowed wherever it is, since GitLab
-// reads only YAML.
+// does not allow.
 func yamlOutsideAllowed(paths []string) []string {
 	var out []string
 	for _, p := range paths {
 		switch {
 		case !strings.HasSuffix(p, ".yaml") && !strings.HasSuffix(p, ".yml") && !strings.HasSuffix(p, ".json"):
-		case slices.Contains(notMarkdown, p), strings.HasSuffix(p, ".gitlab-ci.yml"):
+		case slices.Contains(notMarkdown, p):
 		default:
 			out = append(out, p)
 		}
@@ -39,18 +38,18 @@ func yamlOutsideAllowed(paths []string) []string {
 
 // TestNoYAMLOutsideTheAllowedFiles holds the repository to design.md D2
 // (srd040 R2.1):
-// every tracked file is Markdown with tags except the files notMarkdown and
-// the GitLab CI files name.
+// every tracked file is Markdown with tags except the files notMarkdown
+// names.
 func TestNoYAMLOutsideTheAllowedFiles(t *testing.T) {
 	out, err := exec.Command("git", "-C", "..", "ls-files").Output()
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, p := range yamlOutsideAllowed(strings.Split(strings.TrimSpace(string(out)), "\n")) {
-		t.Errorf("%s is not Markdown; design.md D2 allows only %s and *.gitlab-ci.yml", p, strings.Join(notMarkdown, ", "))
+		t.Errorf("%s is not Markdown; design.md D2 allows only %s", p, strings.Join(notMarkdown, ", "))
 	}
-	planted := []string{"docs/VISION.md", "control/policy.yaml", "infra/platform/ci/code.gitlab-ci.yml", "plugin/plugin.json", "x/settings.json"}
-	if got := yamlOutsideAllowed(planted); !slices.Equal(got, []string{"control/policy.yaml", "x/settings.json"}) {
+	planted := []string{"docs/VISION.md", "control/policy.yaml", "ci/code.gitlab-ci.yml", "plugin/plugin.json", "x/settings.json"}
+	if got := yamlOutsideAllowed(planted); !slices.Equal(got, []string{"control/policy.yaml", "ci/code.gitlab-ci.yml", "x/settings.json"}) {
 		t.Fatalf("planted files found as %v", got)
 	}
 }
