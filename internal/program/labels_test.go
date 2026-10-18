@@ -7,7 +7,33 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
+
+// seeded is a tracker whose group g already holds labels.
+func seeded(t *testing.T, p trackertest.Program, labels ...gitlab.Label) gitlab.Tracker {
+	t.Helper()
+	f := p.Tracker()
+	for _, l := range labels {
+		if err := f.CreateGroupLabel("g", l); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return f
+}
+
+func groupLabels(t *testing.T, f gitlab.Tracker) map[string]gitlab.Label {
+	t.Helper()
+	have, err := f.GroupLabels("g")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := map[string]gitlab.Label{}
+	for _, l := range have {
+		m[l.Name] = l
+	}
+	return m
+}
 
 func actions(res []LabelResult) map[string]int {
 	m := map[string]int{}
@@ -18,51 +44,55 @@ func actions(res []LabelResult) map[string]int {
 }
 
 func TestLabelsCreatesOnceAndNeverDeletes(t *testing.T) {
-	f := gitlabtest.New()
-	f.Labels["g"] = []gitlab.Label{{Name: "team-only", Color: "#000000"}}
-	want := DefaultLabels()
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		f := seeded(t, p, gitlab.Label{Name: "team-only", Color: "#000000"})
+		want := DefaultLabels()
 
-	res, err := SyncLabels(f, "g", want, false, false)
-	if err != nil || actions(res)["created"] != len(want) {
-		t.Fatalf("first run: %v %v", actions(res), err)
-	}
-	writes := f.Writes
-	res, err = SyncLabels(f, "g", want, false, false)
-	if err != nil || actions(res)["unchanged"] != len(want) || f.Writes != writes {
-		t.Fatalf("second run: %v writes=%d err=%v", actions(res), f.Writes-writes, err)
-	}
-	if len(f.Labels["g"]) != len(want)+1 || f.Labels["g"][0].Name != "team-only" {
-		t.Fatalf("labels: %+v", f.Labels["g"])
-	}
+		res, err := SyncLabels(f, "g", want, false, false)
+		if err != nil || actions(res)["created"] != len(want) {
+			t.Fatalf("first run: %v %v", actions(res), err)
+		}
+		writes := p.Writes()
+		res, err = SyncLabels(f, "g", want, false, false)
+		if err != nil || actions(res)["unchanged"] != len(want) || p.Writes() != writes {
+			t.Fatalf("second run: %v writes=%d err=%v", actions(res), p.Writes()-writes, err)
+		}
+		if have := groupLabels(t, f); len(have) != len(want)+1 || have["team-only"].Name == "" {
+			t.Fatalf("labels: %+v", have)
+		}
+	})
 }
 
 func TestDifferingLabelIsReportedThenUpdatedOnRequest(t *testing.T) {
-	f := gitlabtest.New()
-	f.Labels["g"] = []gitlab.Label{{Name: "plane::data", Color: "#2CA02C", Description: "managed by terraform"}}
-	want := []gitlab.Label{{Name: "plane::data", Color: "#1f75cb", Description: "Work"}}
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		f := seeded(t, p, gitlab.Label{Name: "plane::data", Color: "#2CA02C", Description: "managed by terraform"})
+		want := []gitlab.Label{{Name: "plane::data", Color: "#1f75cb", Description: "Work"}}
 
-	res, _ := SyncLabels(f, "g", want, false, false)
-	if res[0].Action != "differs" || f.Labels["g"][0].Color != "#2CA02C" {
-		t.Fatalf("without update: %+v %+v", res, f.Labels["g"])
-	}
-	res, _ = SyncLabels(f, "g", want, true, false)
-	if res[0].Action != "updated" || f.Labels["g"][0].Color != "#1f75cb" {
-		t.Fatalf("with update: %+v %+v", res, f.Labels["g"])
-	}
+		res, _ := SyncLabels(f, "g", want, false, false)
+		if res[0].Action != "differs" || groupLabels(t, f)["plane::data"].Color != "#2CA02C" {
+			t.Fatalf("without update: %+v %+v", res, groupLabels(t, f))
+		}
+		res, _ = SyncLabels(f, "g", want, true, false)
+		if res[0].Action != "updated" || groupLabels(t, f)["plane::data"].Color != "#1f75cb" {
+			t.Fatalf("with update: %+v %+v", res, groupLabels(t, f))
+		}
+	})
 }
 
 func TestLabelsColorCompareIgnoresCaseAndDryRunWritesNothing(t *testing.T) {
-	f := gitlabtest.New()
-	f.Labels["g"] = []gitlab.Label{{Name: "kind::spec", Color: "#8E7CC3", Description: "Changes requirements or design documents under docs/"}}
-	res, err := SyncLabels(f, "g", DefaultLabels(), true, true)
-	if err != nil || f.Writes != 0 {
-		t.Fatalf("dry run wrote: %d %v", f.Writes, err)
-	}
-	for _, r := range res {
-		if r.Name == "kind::spec" && r.Action != "unchanged" {
-			t.Fatalf("case-different color treated as change: %+v", r)
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		f := seeded(t, p, gitlab.Label{Name: "kind::spec", Color: "#8E7CC3", Description: "Changes requirements or design documents under docs/"})
+		writes := p.Writes()
+		res, err := SyncLabels(f, "g", DefaultLabels(), true, true)
+		if err != nil || p.Writes() != writes {
+			t.Fatalf("dry run wrote: %d %v", p.Writes()-writes, err)
 		}
-	}
+		for _, r := range res {
+			if r.Name == "kind::spec" && r.Action != "unchanged" {
+				t.Fatalf("case-different color treated as change: %+v", r)
+			}
+		}
+	})
 }
 
 func TestLoadLabelsReadsControlFileOrDefaults(t *testing.T) {

@@ -405,7 +405,7 @@ func (t *Tracker) Compare(project, base, head string) (int, []string, error) {
 	return ahead, strings.Split(paths, "\n"), nil
 }
 
-// Not served yet: merge requests, awards, and group labels
+// Not served yet: merge requests and awards
 // belong to commands that still run on GitLab (GAP10).
 
 // FindMilestone looks in the project, then in its ancestor groups.
@@ -459,11 +459,32 @@ func (t *Tracker) MergedMergeRequests(string, string, string) ([]gitlab.MergeReq
 
 func (t *Tracker) IssueAwards(string, int) ([]gitlab.Award, error) { return nil, ErrNotServed }
 
-func (t *Tracker) GroupLabels(string) ([]gitlab.Label, error) { return nil, ErrNotServed }
+// GroupLabels lists the labels defined on the group itself.
+func (t *Tracker) GroupLabels(group string) ([]gitlab.Label, error) {
+	ls, _, err := t.Store.Labels()
+	if err != nil {
+		return nil, err
+	}
+	var out []gitlab.Label
+	for _, l := range ls {
+		if l.Scope == group {
+			out = append(out, gitlab.Label{Name: l.Name, Color: l.Color, Description: l.Description})
+		}
+	}
+	return out, nil
+}
 
-func (t *Tracker) CreateGroupLabel(string, gitlab.Label) error { return ErrNotServed }
+func (t *Tracker) CreateGroupLabel(group string, l gitlab.Label) error {
+	return t.Store.PutLabel(Label{Scope: group, Name: l.Name, Color: l.Color, Description: l.Description}, false)
+}
 
-func (t *Tracker) UpdateGroupLabel(string, gitlab.Label) error { return ErrNotServed }
+func (t *Tracker) UpdateGroupLabel(group string, l gitlab.Label) error {
+	err := t.Store.PutLabel(Label{Scope: group, Name: l.Name, Color: l.Color, Description: l.Description}, true)
+	if errors.Is(err, ErrNotFound) {
+		return fmt.Errorf("%w: %v", gitlab.ErrNotFound, err)
+	}
+	return err
+}
 
 func (t *Tracker) OpenMergeRequest(string, string) (*gitlab.MergeRequest, error) {
 	return nil, ErrNotServed
