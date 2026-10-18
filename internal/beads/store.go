@@ -281,13 +281,30 @@ func (s *Store) merge(base, remote string) error {
 		return err
 	}
 	merged := mergeIssues(b, o, t, s.stamp())
+	bm, err := s.showMilestones(base)
+	if err != nil {
+		return err
+	}
+	om, err := s.showMilestones("HEAD")
+	if err != nil {
+		return err
+	}
+	tm, err := s.showMilestones(remote)
+	if err != nil {
+		return err
+	}
 	if _, err := s.git("merge", "-q", "--no-ff", "--no-commit", "-s", "ours", remote); err != nil {
 		return err
 	}
 	if err := writeIssues(filepath.Join(s.Dir, IssuesFile), merged); err != nil {
 		return err
 	}
-	if _, err := s.git("add", IssuesFile); err != nil {
+	if ms := mergeMilestones(bm, om, tm); len(ms) > 0 {
+		if err := writeMilestones(filepath.Join(s.Dir, MilestonesFile), ms); err != nil {
+			return err
+		}
+	}
+	if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
 		return err
 	}
 	_, err = s.git("commit", "-q", "-m", "tpm: merge the tracker repository")
@@ -336,27 +353,36 @@ func (s *Store) mutate(id, what string, fn func(*Issue) (bool, error)) (fr Fresh
 	})
 }
 
-// write is every write: pull, apply fn to the issues, commit, push. A write
-// made offline is committed and queued for the next synchronization.
+// write is every write to the issues: pull, apply fn, commit, push.
 func (s *Store) write(what string, fn func(*[]Issue) (bool, error)) (fr Freshness, written, queued bool, err error) {
+	return s.writeFiles(what, func() (bool, error) {
+		issues, err := s.read()
+		if err != nil {
+			return false, err
+		}
+		changed, err := fn(&issues)
+		if err != nil || !changed {
+			return false, err
+		}
+		return true, writeIssues(filepath.Join(s.Dir, IssuesFile), issues)
+	})
+}
+
+// writeFiles is every write: pull, let fn change the tracker files, commit,
+// push. A write made offline is committed and queued for the next
+// synchronization.
+func (s *Store) writeFiles(what string, fn func() (bool, error)) (fr Freshness, written, queued bool, err error) {
 	if fr, err = s.Sync(); err != nil {
-		return fr, false, false, err
-	}
-	issues, err := s.read()
-	if err != nil {
 		return fr, false, false, err
 	}
 	if s.beforeWrite != nil {
 		s.beforeWrite()
 	}
-	changed, err := fn(&issues)
+	changed, err := fn()
 	if err != nil || !changed {
 		return fr, false, false, err
 	}
-	if err := writeIssues(filepath.Join(s.Dir, IssuesFile), issues); err != nil {
-		return fr, false, false, err
-	}
-	if _, err := s.git("add", IssuesFile); err != nil {
+	if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
 		return fr, false, false, err
 	}
 	if _, err := s.git("commit", "-q", "-m", fmt.Sprintf("tpm: %s (%s)", what, s.User)); err != nil {

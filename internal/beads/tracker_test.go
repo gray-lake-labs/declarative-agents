@@ -84,8 +84,8 @@ func TestTrackerMapsIssuesAndNotes(t *testing.T) {
 		t.Fatalf("start = %+v, %v, want status::in-progress", got, err)
 	}
 
-	if _, err := tr.ActiveMilestones("g/po-1"); !errors.Is(err, ErrNotServed) {
-		t.Fatalf("milestones = %v, want ErrNotServed", err)
+	if _, err := tr.IssueAwards("g/po-1", 1); !errors.Is(err, ErrNotServed) {
+		t.Fatalf("awards = %v, want ErrNotServed", err)
 	}
 }
 
