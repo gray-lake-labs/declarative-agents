@@ -20,8 +20,6 @@ var notMarkdown = []string{
 	"docs/external-checkouts.yaml", // the parent's audit reads it by path
 	"docs/corpus-charter.yaml",     // the parent's audit executes it
 	"plugin/plugin.json",           // the Agent Plugins 1.0 standard
-	".beads/config.yaml",           // the beads tracker reads it
-	".beads/metadata.json",         // the beads tracker reads it
 }
 
 // yamlOutsideAllowed returns the YAML and JSON files among paths that D2
