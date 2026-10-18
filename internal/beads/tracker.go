@@ -356,16 +356,53 @@ func (t *Tracker) Compare(_, base, head string) (int, []string, error) {
 	return ahead, strings.Split(paths, "\n"), nil
 }
 
-// Not served yet: milestones, merge requests, awards, and group labels
+// Not served yet: merge requests, awards, and group labels
 // belong to commands that still run on GitLab (GAP10).
 
-func (t *Tracker) FindMilestone(string, string) (gitlab.Milestone, error) {
-	return gitlab.Milestone{}, ErrNotServed
+// FindMilestone looks in the project, then in its ancestor groups.
+func (t *Tracker) FindMilestone(project, title string) (gitlab.Milestone, error) {
+	ms, _, err := t.Store.Milestones()
+	if err != nil {
+		return gitlab.Milestone{}, err
+	}
+	for _, scope := range ancestors(project) {
+		for _, m := range ms {
+			if m.Scope == scope && m.Title == title {
+				return toGitlab(m), nil
+			}
+		}
+	}
+	return gitlab.Milestone{}, fmt.Errorf("milestone %s for %s: %w", title, project, gitlab.ErrNotFound)
 }
 
-func (t *Tracker) ActiveMilestones(string) ([]gitlab.Milestone, error) { return nil, ErrNotServed }
+// ActiveMilestones lists the milestones of the project and its ancestor
+// groups by due date. A beads milestone is never closed, so all are active.
+func (t *Tracker) ActiveMilestones(project string) ([]gitlab.Milestone, error) {
+	ms, _, err := t.Store.Milestones()
+	if err != nil {
+		return nil, err
+	}
+	scopes := ancestors(project)
+	var out []gitlab.Milestone
+	for _, m := range ms {
+		if slices.Contains(scopes, m.Scope) {
+			out = append(out, toGitlab(m))
+		}
+	}
+	slices.SortStableFunc(out, func(a, b gitlab.Milestone) int {
+		return strings.Compare(a.DueDate+"\x00"+a.Title, b.DueDate+"\x00"+b.Title)
+	})
+	return out, nil
+}
 
-func (t *Tracker) EnsureMilestone(string, gitlab.Milestone) (string, error) { return "", ErrNotServed }
+func (t *Tracker) EnsureMilestone(group string, m gitlab.Milestone) (string, error) {
+	return t.Store.EnsureMilestone(Milestone{Scope: group, Title: m.Title, Description: m.Description,
+		StartDate: m.StartDate, DueDate: m.DueDate})
+}
+
+func toGitlab(m Milestone) gitlab.Milestone {
+	return gitlab.Milestone{Title: m.Title, Description: m.Description, StartDate: m.StartDate, DueDate: m.DueDate}
+}
 
 func (t *Tracker) MergedMergeRequests(string, string, string) ([]gitlab.MergeRequest, error) {
 	return nil, ErrNotServed
