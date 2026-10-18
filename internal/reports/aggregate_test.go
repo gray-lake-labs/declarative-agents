@@ -9,8 +9,8 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
 func work(obj, comp, status, complete string) Entry {
@@ -24,7 +24,7 @@ func block(what, comp, since, waiting string) Entry {
 // aggregateFixture is two weeks of reports from three people, a tracker
 // with one met objective and two merged merge requests, and the
 // configuration naming them.
-func aggregateFixture(t *testing.T) (string, *gitlabtest.Fake, Config) {
+func aggregateFixture(t *testing.T, p trackertest.Program) (string, gitlab.Tracker, Config) {
 	t.Helper()
 	dir := t.TempDir()
 	put := func(user, week string, w, b []Entry) {
@@ -38,22 +38,24 @@ func aggregateFixture(t *testing.T) (string, *gitlabtest.Fake, Config) {
 	put("bob", "2026-W42", []Entry{work("g/po-2#1", "fleet", "on-track", "no"), work("g/po-2#2", "fleet", "done", "yes")},
 		[]Entry{block("no scoring quota", "fleet", "2026-10-12", "scoring-api")})
 
-	f := gitlabtest.New()
+	p.AddMerge("g/po-1", gitlab.MergeRequest{IID: 7, Title: "Fix the grader cache", Author: "alice", MergedAt: "2026-10-13", Description: "Closes #9"})
+	p.AddMerge("g/po-1", gitlab.MergeRequest{IID: 8, Title: "Score one agent", Author: "alice", MergedAt: "2026-10-14", Description: "Closes #4"})
+	f := p.Tracker()
 	for i := 0; i < 2; i++ {
 		f.CreateIssue("g/po-2", gitlab.NewIssue{Title: "objective"})
 	}
 	f.CreateNote("g/po-2", 2, "Met.\n\n<!-- tpm program event=met objective=obj001 -->")
-	f.MRs["g/po-1"] = []*gitlab.MergeRequest{
-		{IID: 7, Title: "Fix the grader cache", State: "merged", Author: "alice", MergedAt: "2026-10-13", Description: "Closes #9"},
-		{IID: 8, Title: "Score one agent", State: "merged", Author: "alice", MergedAt: "2026-10-14", Description: "Closes #4"},
-	}
 	cfg := Config{Team: []Member{{"alice", "g/po-1"}, {"bob", "g/po-2"}, {"carol", "g/po-3"}}, System: "g/system"}
 	cfg.defaults()
 	return dir, f, cfg
 }
 
 func TestAggregateSignalsByComponentNeverByPerson(t *testing.T) {
-	dir, f, cfg := aggregateFixture(t)
+	trackertest.Each(t, testAggregateSignalsByComponentNeverByPerson)
+}
+
+func testAggregateSignalsByComponentNeverByPerson(t *testing.T, p trackertest.Program) {
+	dir, f, cfg := aggregateFixture(t, p)
 	a, err := Aggregate(f, AggregateInput{Dir: dir, Config: cfg, Policy: program.Defaults(), From: "2026-W41", To: "2026-W42"})
 	if err != nil {
 		t.Fatal(err)
@@ -94,16 +96,30 @@ func TestAggregateSignalsByComponentNeverByPerson(t *testing.T) {
 }
 
 func TestActionableSignalIsPushedAsIssue(t *testing.T) {
-	f := gitlabtest.New()
+	trackertest.Each(t, testActionableSignalIsPushedAsIssue)
+}
+
+// systemIssues lists g/system's issues, open or closed.
+func systemIssues(t *testing.T, f gitlab.Tracker) []gitlab.Issue {
+	t.Helper()
+	all, err := f.ListIssues("g/system", gitlab.IssueQuery{State: "all"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return all
+}
+
+func testActionableSignalIsPushedAsIssue(t *testing.T, p trackertest.Program) {
+	f := p.Tracker()
 	signals := []Signal{
 		{SignalSharedBlocker, "scoring-api", "scoring-api", "2026-W42", "scoring-api blocks fleet, grader in 2 reports", true},
 		{SignalMissingReport, "g/po-3", "g/po-3", "2026-W42", "no status report for g/po-3 in 2026-W42", false},
 	}
 	res, err := PushSignals(f, "g/system", signals, program.Defaults(), false)
-	if err != nil || len(res) != 1 || res[0].Action != "filed" || len(f.Issues["g/system"]) != 1 {
+	if err != nil || len(res) != 1 || res[0].Action != "filed" || len(systemIssues(t, f)) != 1 {
 		t.Fatalf("res=%+v err=%v", res, err)
 	}
-	i := f.Issues["g/system"][0]
+	i := systemIssues(t, f)[0]
 	for _, want := range []string{"## Requirements", "## Acceptance Criteria", "(test: tpm_reports_aggregate; environment: local)", "tpm reports signal=shared-blocker/scoring-api/scoring-api"} {
 		if !strings.Contains(i.Description, want) {
 			t.Errorf("issue lacks %q:\n%s", want, i.Description)
@@ -113,16 +129,20 @@ func TestActionableSignalIsPushedAsIssue(t *testing.T) {
 		t.Fatalf("labels %v", i.Labels)
 	}
 	again, err := PushSignals(f, "g/system", signals, program.Defaults(), false)
-	if err != nil || again[0].Action != "exists" || len(f.Issues["g/system"]) != 1 {
+	if err != nil || again[0].Action != "exists" || len(systemIssues(t, f)) != 1 {
 		t.Fatalf("second push: %+v %v", again, err)
 	}
 }
 
 func TestAggregateHonoursJSONAndDryRun(t *testing.T) {
-	dir, f, cfg := aggregateFixture(t)
+	trackertest.Each(t, testAggregateHonoursJSONAndDryRun)
+}
+
+func testAggregateHonoursJSONAndDryRun(t *testing.T, p trackertest.Program) {
+	dir, f, cfg := aggregateFixture(t, p)
 	b, _ := configDocument(cfg)
 	writeReport(t, dir, ConfigFile, b)
-	writes := f.Writes
+	writes := p.Writes()
 	var out bytes.Buffer
 	err := cli.Default.Run([]string{"reports", "aggregate", "--json", "--dry-run", "--push", "--dir", dir, "--from", "2026-W41", "--to", "2026-W42"},
 		&out, func() (gitlab.Tracker, error) { return f, nil })
@@ -133,8 +153,8 @@ func TestAggregateHonoursJSONAndDryRun(t *testing.T) {
 	if err := json.Unmarshal(out.Bytes(), &a); err != nil {
 		t.Fatalf("not JSON: %v\n%s", err, out.String())
 	}
-	if len(a.Signals) == 0 || len(a.Pushed) == 0 || f.Writes != writes || len(f.Issues["g/system"]) != 0 {
-		t.Fatalf("dry run: %d signals, %d pushed, writes %d -> %d", len(a.Signals), len(a.Pushed), writes, f.Writes)
+	if len(a.Signals) == 0 || len(a.Pushed) == 0 || p.Writes() != writes || len(systemIssues(t, f)) != 0 {
+		t.Fatalf("dry run: %d signals, %d pushed, writes %d -> %d", len(a.Signals), len(a.Pushed), writes, p.Writes())
 	}
 }
 

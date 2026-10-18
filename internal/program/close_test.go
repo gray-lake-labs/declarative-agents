@@ -1,6 +1,7 @@
 package program
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -108,5 +109,49 @@ func TestCloseNeedsTheBeadsTracker(t *testing.T) {
 	i := admitted(f, "Score one agent")
 	if _, err := Close(f, ExecGit{}, "g/po-1", i.IID, ".", false); err == nil || !strings.Contains(err.Error(), "merge request") {
 		t.Fatalf("close on GitLab = %v, want a refusal naming the merge request", err)
+	}
+}
+
+// TestCloseAnIssueTheMergeCites closes an issue that was never popped, such
+// as an objective a sprint-end merge closes: with no pop branch of its own,
+// it closes on the first merge commit on the default branch that cites it.
+func TestCloseAnIssueTheMergeCites(t *testing.T) {
+	tr, checkout := newBeadsTracker(t, "alice")
+	objective, _ := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Objective R1", Labels: []string{"plane::management"}})
+	end, _ := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Sprint end", Milestone: "m", Description: goodBody,
+		Labels: []string{"plane::data", "kind::build", "component::po-1"}})
+
+	if _, err := Close(tr, ExecGit{}, "g/po-1", objective.IID, checkout, false); err == nil || !strings.Contains(err.Error(), "no merge") {
+		t.Fatalf("close before any merge cites it = %v, want a refusal", err)
+	}
+	beadstest.Git(t, checkout, "checkout", "-q", "-b", "other", "main")
+	beadstest.Git(t, checkout, "commit", "-q", "--allow-empty", "-m", "other work")
+	beadstest.Git(t, checkout, "checkout", "-q", "main")
+	beadstest.Git(t, checkout, "merge", "-q", "--no-ff", "other", "-m", fmt.Sprintf("Merge other (g/po-1#%d0)", objective.IID))
+	if _, err := Close(tr, ExecGit{}, "g/po-1", objective.IID, checkout, false); err == nil {
+		t.Fatalf("a merge citing #%d0 closed #%d", objective.IID, objective.IID)
+	}
+
+	p, err := Pop(tr, ExecGit{}, "g/po-1", end.IID, checkout, Defaults(), false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(p.Worktree, "summary.md"), []byte("# Sprint end\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	beadstest.Git(t, p.Worktree, "add", "-A")
+	beadstest.Git(t, p.Worktree, "commit", "-q", "-m", "Sprint end summary")
+	beadstest.Git(t, checkout, "merge", "-q", "--no-ff", p.Branch, "-m",
+		fmt.Sprintf("Merge %s (g/po-1#%d, closes g/po-1#%d)", p.Branch, end.IID, objective.IID))
+	merge := beadstest.Git(t, checkout, "rev-parse", "HEAD")
+
+	for _, iid := range []int{end.IID, objective.IID} {
+		c, err := Close(tr, ExecGit{}, "g/po-1", iid, checkout, false)
+		if err != nil || !c.Closed || c.Commit != merge {
+			t.Fatalf("close #%d = %+v, %v, want closed on %s", iid, c, err, merge)
+		}
+	}
+	if got, _ := tr.GetIssue("g/po-1", objective.IID); got.State != "closed" {
+		t.Fatalf("objective = %s, want closed", got.State)
 	}
 }

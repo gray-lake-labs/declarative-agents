@@ -83,7 +83,7 @@ var Table = []Row{
 	{From: []string{Taken, InProgress}, To: "+" + Blocked, Actor: ActorPerson, Assignee: EffectNone},
 	{From: []string{Taken, InProgress}, To: "-" + Blocked, Actor: ActorPerson, Assignee: EffectNone},
 	{From: anyOpen, To: "+" + NeedsRun, Actor: ActorHandoff, Assignee: EffectNone, Requires: "type::recurring"},
-	{From: []string{InProgress}, To: Closed, Actor: ActorMerge, Assignee: EffectNone},
+	{From: anyOpen, To: Closed, Actor: ActorMerge, Assignee: EffectNone},
 	{From: anyOpen, To: Closed, Actor: ActorTrackGoals, Assignee: EffectNone, Kind: KindObjective},
 	{From: anyOpen, To: Closed, Actor: ActorPerson, Assignee: EffectNone},
 	{From: []string{Closed}, To: Open, Actor: ActorPerson, Assignee: EffectNone},

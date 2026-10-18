@@ -141,19 +141,13 @@ func (s *Store) Pop(id string) (PopResult, error) {
 	return r, nil
 }
 
-// Close closes an issue on its observed merge, recording the merge commit
-// as the closing comment (srd042 R2.3). An issue its assignee merged
-// without first marking it started is started on their behalf, so the
-// close is still the table's in-progress to closed by merge.
+// Close closes an issue on the merge that delivered it, recording the
+// merge commit as the closing comment (srd042 R2.3): a merge closes any open
+// issue it cites (srd041 R7.1).
 func (s *Store) Close(id, commit string) (CloseResult, error) {
 	fr, written, _, err := s.mutate(id, "close", func(i *Issue) (bool, error) {
 		if i.State == Closed && i.CloseReason == commit {
 			return false, nil
-		}
-		if i.State == Taken {
-			if err := transition(i, ActorPerson, InProgress, s.User); err != nil {
-				return false, err
-			}
 		}
 		if err := transition(i, ActorMerge, Closed, s.User); err != nil {
 			return false, err

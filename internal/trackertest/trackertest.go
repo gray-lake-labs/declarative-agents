@@ -35,6 +35,17 @@ type Program interface {
 	// As is the program's tracker acting as another person, for a step
 	// someone other than User takes, such as a peer read.
 	As(user string) gitlab.Tracker
+	// AddMerge declares a merged merge request of project: on beads a
+	// --no-ff merge commit on its default branch, numbered mr.IID, by
+	// mr.Author on mr.MergedAt, with mr.Title and mr.Description as its
+	// message.
+	AddMerge(project string, mr gitlab.MergeRequest)
+	// AddRepository declares a project's repository with nothing in it, for
+	// a test that works in its checkout.
+	AddRepository(project string)
+	// Checkout is a project's local checkout once Tracker has built it; the
+	// GitLab fake has none and returns the empty string.
+	Checkout(project string) string
 }
 
 // Each runs test once per tracker, as subtests named gitlab and beads.
@@ -47,6 +58,14 @@ type fakeProgram struct{ *gitlabtest.Fake }
 
 func (f fakeProgram) Tracker() gitlab.Tracker { return f.Fake }
 func (f fakeProgram) Writes() int             { return f.Fake.Writes }
+func (f fakeProgram) AddMerge(project string, mr gitlab.MergeRequest) {
+	mr.State = "merged"
+	f.Fake.MRs[project] = append(f.Fake.MRs[project], &mr)
+}
+
+func (f fakeProgram) AddRepository(string)   {}
+func (f fakeProgram) Checkout(string) string { return "" }
+
 func (f fakeProgram) As(user string) gitlab.Tracker {
 	return fakeAs{f.Fake, user}
 }
@@ -76,6 +95,8 @@ type beadsProgram struct {
 	remote  string
 	files   map[string]map[string]map[string][]byte // project, ref, path
 	tags    map[string][]string
+	merges  map[string][]gitlab.MergeRequest
+	repos   map[string]bool
 	tracker *beads.Tracker
 	work    string
 	as      map[string]*beads.Tracker
@@ -84,7 +105,27 @@ type beadsProgram struct {
 func newBeadsProgram(t *testing.T) *beadsProgram {
 	root := t.TempDir()
 	return &beadsProgram{t: t, root: root, remote: beadstest.TrackerRepository(t, root),
-		files: map[string]map[string]map[string][]byte{}, tags: map[string][]string{}}
+		files: map[string]map[string]map[string][]byte{}, tags: map[string][]string{},
+		merges: map[string][]gitlab.MergeRequest{}, repos: map[string]bool{}}
+}
+
+func (b *beadsProgram) AddMerge(project string, mr gitlab.MergeRequest) {
+	if b.tracker != nil {
+		b.t.Fatal("trackertest: AddMerge after Tracker")
+	}
+	b.merges[project] = append(b.merges[project], mr)
+}
+
+func (b *beadsProgram) AddRepository(project string) {
+	if b.tracker != nil {
+		b.t.Fatal("trackertest: AddRepository after Tracker")
+	}
+	b.repos[project] = true
+}
+
+func (b *beadsProgram) Checkout(project string) string {
+	b.Tracker()
+	return filepath.Join(b.root, path.Base(project))
 }
 
 func (b *beadsProgram) AddFile(project, ref, p string, content []byte) {
@@ -118,6 +159,12 @@ func (b *beadsProgram) Tracker() gitlab.Tracker {
 		projects[p] = true
 	}
 	for p := range b.tags {
+		projects[p] = true
+	}
+	for p := range b.merges {
+		projects[p] = true
+	}
+	for p := range b.repos {
 		projects[p] = true
 	}
 	work := beadstest.CodeRepository(t, b.root, "work", User)
@@ -166,8 +213,9 @@ func (b *beadsProgram) build(project string) {
 	}
 	if files := b.files[project]["main"]; len(files) > 0 {
 		commit(files, "main files")
-		beadstest.Git(t, dir, "push", "-q", "origin", "main")
 	}
+	b.merge(dir, b.merges[project])
+	beadstest.Git(t, dir, "push", "-q", "origin", "main")
 	var refs []string
 	for ref := range b.files[project] {
 		if ref != "main" {
@@ -202,4 +250,38 @@ func (b *beadsProgram) Writes() int {
 	}
 	n, _ := strconv.Atoi(strings.TrimSpace(string(out)))
 	return n - 1
+}
+
+// merge lands each declared merge request as a --no-ff merge on main, in
+// IID order, with filler merges dated long before any test's window so
+// that each lands at its declared number: on beads a merge's number is its
+// place in the default branch's first-parent history.
+func (b *beadsProgram) merge(dir string, mrs []gitlab.MergeRequest) {
+	t := b.t
+	slices.SortFunc(mrs, func(a, c gitlab.MergeRequest) int { return a.IID - c.IID })
+	n := 0
+	land := func(title, body, author, date string) {
+		n++
+		branch := "merge-" + strconv.Itoa(n)
+		beadstest.Git(t, dir, "checkout", "-q", "-b", branch, "main")
+		beadstest.Git(t, dir, "commit", "-q", "--allow-empty", "-m", "work for "+branch)
+		beadstest.Git(t, dir, "checkout", "-q", "main")
+		msg := title
+		if body != "" {
+			msg += "\n\n" + body
+		}
+		cmd := exec.Command("git", "merge", "-q", "--no-ff", branch, "-m", msg)
+		cmd.Dir = dir
+		cmd.Env = append(os.Environ(), "GIT_AUTHOR_NAME="+author, "GIT_AUTHOR_EMAIL="+author+"@example.com",
+			"GIT_AUTHOR_DATE="+date+"T12:00:00Z", "GIT_COMMITTER_DATE="+date+"T12:00:00Z")
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("merge %s: %v: %s", branch, err, out)
+		}
+	}
+	for _, mr := range mrs {
+		for n+1 < mr.IID {
+			land("Earlier merge", "", "earlier", "2000-01-01")
+		}
+		land(mr.Title, mr.Description, mr.Author, mr.MergedAt)
+	}
 }
