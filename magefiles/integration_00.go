@@ -14,14 +14,14 @@ func init() {
 	)
 }
 
-// Labels runs tpm program labels on the rig group twice: the first run adds what Terraform did not create and keeps what it did; the second changes nothing (test-rel00.0-push).
+// Labels runs tpm program labels on the rig group twice: the first run creates the schema; the second changes nothing (test-rel00.0-push).
 func (Integration) Labels() error {
 	r, err := newRigEnv()
 	if err != nil {
 		return err
 	}
 	c := &check{}
-	group := r.out.Group.FullPath
+	group := r.group
 	var first, second []program.LabelResult
 	if err := r.tpmJSON(&first, "program", "labels", "--group", group); err != nil {
 		return err
@@ -42,7 +42,7 @@ func (Integration) Labels() error {
 	}
 	c.expect(count(second, "created") == 0 && count(second, "updated") == 0, "second run changed labels: %+v", second)
 
-	labels, _, err := r.api.GroupLabels.ListGroupLabels(group, nil)
+	labels, err := r.tr.GroupLabels(group)
 	if err != nil {
 		return err
 	}
@@ -78,11 +78,11 @@ func (Integration) Push() error {
 	if err := r.milestone(rigMilestone, rigDue); err != nil {
 		return err
 	}
-	if _, err := r.runTPM("program", "labels", "--group", r.out.Group.FullPath); err != nil {
+	if _, err := r.runTPM("program", "labels", "--group", r.group); err != nil {
 		return err
 	}
 	c := &check{}
-	dir := filepath.Join(r.root, ".regression", r.out.RunID)
+	dir := r.run.Dir
 	body := "## Requirements\n\n1. Score one agent's trajectories.\n\n## Acceptance Criteria\n\n- One agent is scored (test: grader_scores_agent; environment: dev)\n"
 	writeFileTo(filepath.Join(dir, "push.md"), body)
 	file := func(title string, extra ...string) (program.FileResult, error) {
@@ -107,7 +107,7 @@ func (Integration) Push() error {
 		c.expect(res.Lint.Admitted, "#%d not admitted: %v", res.IID, res.Lint.Reasons)
 		c.expect(res.Component == "po-1", "#%d reports component %q, want po-1", res.IID, res.Component)
 		c.expect(res.Milestone == rigMilestone, "#%d milestone %q (%s), want the active sprint %s", res.IID, res.Milestone, res.MilestoneReason, rigMilestone)
-		i, _, err := r.api.Issues.GetIssue(po1, int64(res.IID))
+		i, err := r.issue(po1, res.IID)
 		if err != nil {
 			return err
 		}

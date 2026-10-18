@@ -10,7 +10,6 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 	"github.com/gray-lake-labs/scrum-master/internal/release"
-	"github.com/gray-lake-labs/scrum-master/magefiles/gitlabrig"
 )
 
 // notMarkdown are the files design.md D2 keeps out of Markdown, each because
@@ -57,21 +56,10 @@ func TestNoYAMLOutsideTheAllowedFiles(t *testing.T) {
 }
 
 // TestConfigDocumentsRead reads every config document this repository
-// holds (design.md D11, srd040 R2.2): the gates file, the rig template, and each config
+// holds (design.md D11, srd040 R2.2): the gates file and each config
 // format's example.
 func TestConfigDocumentsRead(t *testing.T) {
 	if _, err := release.LoadGates(filepath.Join("..", release.DefaultGatesFile)); err != nil {
-		t.Error(err)
-	}
-	dir := t.TempDir()
-	b, err := os.ReadFile(filepath.Join("..", "regression.example.md"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(dir, gitlabrig.ConfigFile), b, 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := gitlabrig.LoadConfig(dir); err != nil {
 		t.Error(err)
 	}
 	formats, err := filepath.Glob(filepath.Join("..", "docs", "specs", "config-formats", "*.md"))

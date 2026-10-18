@@ -9,8 +9,8 @@ status: implemented
 ## Overview
 
 Each run starts with mage regression:up creating the repositories below in
-a fresh rig subgroup and ends with mage regression:down removing them.
-The sprint-end stage works a sprint-end issue in the rig subgroup to a
+a fresh rig run on local disk and ends with mage regression:down removing them.
+The sprint-end stage works a sprint-end issue in the rig to a
 confirmed release behind a passing gate, and proves reported-complete
 objectives close without a met event. The planning stage runs plan-release
 for the next period. The tag-triggered stages are release 01.3's
@@ -25,10 +25,10 @@ for the next period. The tag-triggered stages are release 01.3's
 <!-- field: preconditions -->
 ## Preconditions
 
-- mage regression:up creates a rig-<run-id> subgroup with a system repository, a reports repository, and one Product Owner repository, with a period of fixture reports and objective issues, and writes their paths as JSON for the integration targets (eng01).
-- mage regression:down destroys the subgroup after the targets run, including when they fail.
+- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository, a reports repository, and one Product Owner repository, with a period of fixture reports and objective issues, and writes their paths as JSON for the integration targets (eng01).
+- mage regression:down removes the run after the targets run, including when they fail.
 - The system repository is the documents-only fixture: policy declares its corpus check as the gate of the corpus artifact (in the rig, the rig audit), and the grader gate of a Product Owner repository.
-- CI in the rig subgroup holds a group-scoped token.
+- The tag pipeline reaches the rig's tracker repository.
 
 <!-- field: test_cases -->
 ## Test cases
@@ -56,7 +56,7 @@ go test ./internal/sprintend -run '^TestSprintEndReleasesOnlyAfterConfirmation$'
 
 - due_date: the milestone end date
 - questions: what to change, then confirmation of the release and its version
-- summary: committed at docs/sprint-ends/RELEASE.md by the merge request that closes the issue
+- summary: committed at docs/sprint-ends/RELEASE.md by the merge that closes the issue
 - declined: issue closed by that merge with no tag
 - confirmed: tag created on main at the confirmed version, after the merge
 
@@ -122,7 +122,7 @@ go test ./internal/sprintend -run '^TestReportedCompleteClosesWithoutMet$'
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- closed_objectives: the ones reported complete, by the sprint-end merge request
+- closed_objectives: the ones reported complete, by the sprint-end merge
 - met_events: none
 - rollup_state: reported complete
 

@@ -9,7 +9,7 @@ status: implemented
 ## Overview
 
 Each run starts with mage regression:up creating the repositories below in
-a fresh rig subgroup and ends with mage regression:down removing them. The
+a fresh rig run on local disk and ends with mage regression:down removing them. The
 suite works a kind::spec design change and a plane::management planning
 change through the same audit gate, and proves who may file each.
 
@@ -22,8 +22,8 @@ change through the same audit gate, and proves who may file each.
 <!-- field: preconditions -->
 ## Preconditions
 
-- mage regression:up creates a rig-<run-id> subgroup with a system repository and one Product Owner repository, and writes their paths as JSON for the integration targets (eng01).
-- mage regression:down destroys the subgroup after the targets run, including when they fail.
+- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository and one Product Owner repository, and writes their paths as JSON for the integration targets (eng01).
+- mage regression:down removes the run after the targets run, including when they fail.
 - The system repository carries a docs/ corpus that passes mage audit, and a malformed fixture that fails it.
 
 <!-- field: test_cases -->
@@ -80,8 +80,8 @@ go test ./internal/program -run '^TestOpenMergeRequest(NamesAuditForDocsChange|R
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- failing_audit: findings reported, no merge request
-- passing_audit: merge request with mage audit in its reviewer focus; merge closes the issue
+- failing_audit: findings reported, nothing delivered
+- passing_audit: the delivery names or runs mage audit; the merge closes the issue
 
 <!-- field: traces -->
 #### Traces

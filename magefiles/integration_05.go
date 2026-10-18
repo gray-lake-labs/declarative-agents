@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
 	"time"
 
-	gl "gitlab.com/gitlab-org/api/client-go"
-
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
 )
@@ -30,7 +30,7 @@ func newWeeklyEnv(cloneName string) (*weeklyEnv, error) {
 	if err != nil {
 		return nil, err
 	}
-	e := &weeklyEnv{rigEnv: r}
+	e := &weeklyEnv{rigEnv: r, user: r.user}
 	for key, into := range map[string]*string{"system": &e.system, "reports": &e.reports, "product-owners/po-1": &e.po1} {
 		if *into, err = r.project(key); err != nil {
 			return nil, err
@@ -43,14 +43,9 @@ func newWeeklyEnv(cloneName string) (*weeklyEnv, error) {
 	if err := r.seedSystem(e.system, e.po1, po2); err != nil {
 		return nil, err
 	}
-	if _, err := r.runTPM("program", "labels", "--group", r.out.Group.FullPath); err != nil {
+	if _, err := r.runTPM("program", "labels", "--group", r.group); err != nil {
 		return nil, err
 	}
-	me, _, err := r.api.Users.CurrentUser()
-	if err != nil {
-		return nil, err
-	}
-	e.user = me.Username
 	if e.clone, err = r.clone(e.reports, cloneName); err != nil {
 		return nil, err
 	}
@@ -60,17 +55,17 @@ func newWeeklyEnv(cloneName string) (*weeklyEnv, error) {
 
 // objectiveIssue files an open objective issue in project, as create-goals
 // would, and returns its reference.
-func (e *weeklyEnv) objectiveIssue(project, title string) (string, int64, error) {
-	i, _, err := e.api.Issues.CreateIssue(project, &gl.CreateIssueOptions{Title: gl.Ptr(title),
-		Description: gl.Ptr("An objective.\n\n<!-- tpm goals objective=obj001-reliable-agents:R1 release=" + rigRelease + " -->"),
-		DueDate:     ptr(gl.ISOTime(time.Now().AddDate(0, 0, 21)))})
+func (e *weeklyEnv) objectiveIssue(project, title string) (string, int, error) {
+	i, err := e.tr.CreateIssue(project, gitlab.NewIssue{Title: title,
+		Description: "An objective.\n\n<!-- tpm goals objective=obj001-reliable-agents:R1 release=" + rigRelease + " -->",
+		DueDate:     time.Now().AddDate(0, 0, 21).Format(time.DateOnly)})
 	if err != nil {
 		return "", 0, err
 	}
 	return fmt.Sprintf("%s#%d", project, i.IID), i.IID, nil
 }
 
-// WeeklyStatus files a status issue for the rig user, works it into a validated report merged in the reports repository, and proves the merge closes it and the next week's run recurs it with the next due date (test-rel01.1-weekly-status).
+// WeeklyStatus files a status issue for the rig user, works it into a validated report merged in the reports repository with tpm program merge, and proves the merge closes it and the next week's run recurs it with the next due date (test-rel01.1-weekly-status).
 func (Integration) WeeklyStatus() error {
 	e, err := newWeeklyEnv("reports-weekly")
 	if err != nil {
@@ -91,11 +86,11 @@ func (Integration) WeeklyStatus() error {
 		return c.err("weeklyStatus")
 	}
 	status := filed[0]
-	issue, _, err := e.api.Issues.GetIssue(e.po1, int64(status.IID))
+	issue, err := e.issue(e.po1, status.IID)
 	if err != nil {
 		return err
 	}
-	c.expect(issue.DueDate != nil && issue.DueDate.String() == status.DueDate, "due date %v, want %s", issue.DueDate, status.DueDate)
+	c.expect(issue.DueDate == status.DueDate, "due date %s, want %s", issue.DueDate, status.DueDate)
 	c.expect(len(issue.Assignees) == 0 && strings.Contains(issue.Description, "@"+e.user), "assignees %d; mention present %v", len(issue.Assignees), strings.Contains(issue.Description, "@"+e.user))
 	c.expect(strings.Contains(issue.Description, "## Recurrence") && slices.Contains(issue.Labels, "type::recurring"), "recurrence section or label missing")
 	var again []reports.StatusResult
@@ -131,21 +126,16 @@ func (Integration) WeeklyStatus() error {
 	if _, err := e.runTPM("reports", "validate", "--dir", e.clone, path); err != nil {
 		return err
 	}
-	for _, args := range [][]string{{"add", path}, {"commit", "--quiet", "-m", "Weekly status " + status.Week}, {"push", "--quiet", "-u", "origin", branch}} {
-		if err := e.git(e.clone, args...); err != nil {
-			return err
-		}
+	if err := e.commitPush(e.clone, "Weekly status "+status.Week, path); err != nil {
+		return err
 	}
-	var opened program.OpenMergeRequestResult
-	if err := e.tpmJSON(&opened, "program", "open-merge-request", "--project", e.reports, "--issue-project", e.po1,
+	var merged program.MergeResult
+	if err := e.tpmJSON(&merged, "program", "merge", "--project", e.reports, "--issue-project", e.po1,
 		"--issue", fmt.Sprint(status.IID), "--branch", branch, "--dir", e.clone); err != nil {
 		return err
 	}
-	c.expect(opened.Created && opened.MR > 0, "open-merge-request: %+v", opened)
-	if err := e.merge(e.reports, opened.MR); err != nil {
-		return err
-	}
-	c.expect(e.waitClosed(e.po1, status.IID), "status issue #%d still open after the report merged", status.IID)
+	c.expect(merged.Merged, "merge: %+v", merged)
+	c.expect(e.closed(e.po1, status.IID), "status issue #%d still open after the report merged", status.IID)
 
 	var next []reports.StatusResult
 	nextDay := start.AddDate(0, 0, 7).Format("2006-01-02")
@@ -154,12 +144,12 @@ func (Integration) WeeklyStatus() error {
 	}
 	c.expect(len(next) == 1 && next[0].Action == "recurred", "next week: %+v", next)
 	if len(next) == 1 {
-		n, _, err := e.api.Issues.GetIssue(e.po1, int64(next[0].IID))
+		n, err := e.issue(e.po1, next[0].IID)
 		if err != nil {
 			return err
 		}
 		want := start.AddDate(0, 0, 7)
-		c.expect(n.DueDate != nil && n.DueDate.String() == next[0].DueDate && next[0].Week == reports.ISOWeek(want), "next instance due %v week %s", n.DueDate, next[0].Week)
+		c.expect(n.DueDate == next[0].DueDate && next[0].Week == reports.ISOWeek(want), "next instance due %s week %s", n.DueDate, next[0].Week)
 		c.expect(strings.Contains(n.Description, fmt.Sprintf("%s#%d (due %s): closed by its merge request.", e.po1, status.IID, status.DueDate)), "next instance lacks the run in Previous Runs")
 	}
 	return c.err("weeklyStatus")
@@ -185,7 +175,7 @@ func (Integration) Reports() error {
 	if err != nil {
 		return err
 	}
-	if _, _, err := e.api.Notes.CreateIssueNote(po2, metIID, &gl.CreateIssueNoteOptions{Body: gl.Ptr("Met.\n\n<!-- tpm program event=met objective=obj001 -->")}); err != nil {
+	if err := e.tr.CreateNote(po2, metIID, "Met.\n\n<!-- tpm program event=met objective=obj001 -->"); err != nil {
 		return err
 	}
 	if err := e.mergedWork(e.po1, "Unreported cache fix", "Closes #999"); err != nil {
@@ -248,18 +238,21 @@ func (Integration) Reports() error {
 	return c.err("reports")
 }
 
-// mergedWork merges a one-file change into project through a merge request
-// whose description is closes.
+// mergedWork merges a one-file change into project's main with a merge
+// commit whose message carries closes, as work merged without a status
+// report would land.
 func (e *weeklyEnv) mergedWork(project, title, closes string) error {
-	branch := "work-" + strings.ToLower(strings.ReplaceAll(title, " ", "-"))
-	if _, _, err := e.api.Commits.CreateCommit(project, &gl.CreateCommitOptions{Branch: gl.Ptr(branch), StartBranch: gl.Ptr("main"),
-		CommitMessage: gl.Ptr(title), Actions: []*gl.CommitActionOptions{{Action: gl.Ptr(gl.FileCreate), FilePath: gl.Ptr(branch + ".md"), Content: gl.Ptr(title + "\n")}}}); err != nil {
-		return err
-	}
-	mr, _, err := e.api.MergeRequests.CreateMergeRequest(project, &gl.CreateMergeRequestOptions{Title: gl.Ptr(title), Description: gl.Ptr(closes),
-		SourceBranch: gl.Ptr(branch), TargetBranch: gl.Ptr("main")})
+	clone, err := e.rigEnv.clone(project, path.Base(project)+"-work")
 	if err != nil {
 		return err
 	}
-	return e.merge(project, int(mr.IID))
+	branch := "work-" + strings.ToLower(strings.ReplaceAll(title, " ", "-"))
+	writeFileTo(filepath.Join(clone, branch+".md"), title+"\n")
+	for _, args := range [][]string{{"fetch", "-q", "origin"}, {"checkout", "-q", "-B", branch, "origin/main"}, {"add", "-A"}, {"commit", "-q", "-m", title},
+		{"checkout", "-q", "-B", "main", "origin/main"}, {"merge", "-q", "--no-ff", branch, "-m", title + "\n\n" + closes}, {"push", "-q", "origin", "main"}} {
+		if err := e.git(clone, args...); err != nil {
+			return err
+		}
+	}
+	return nil
 }

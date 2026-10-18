@@ -9,7 +9,7 @@ status: implemented
 ## Overview
 
 Each run starts with mage regression:up creating the repositories below in
-a fresh rig subgroup and ends with mage regression:down removing them.
+a fresh rig run on local disk and ends with mage regression:down removing them.
 The audit stage proves that mage audit runs the specification-critic
 corpus-audit agent from the pinned parent release and fails on a malformed
 objective document. The push stage runs create-goals against the rig's
@@ -26,8 +26,8 @@ events, and that a second run changes nothing.
 ## Preconditions
 
 - The parent release docs/external-pins.yaml pins is in the clone cache, and the agent builds from it.
-- mage regression:up creates a rig-<run-id> subgroup with a system repository and two Product Owner repositories, each declared by a subsystem SRD fixture, and writes their paths as JSON for the integration targets (eng01).
-- mage regression:down destroys the subgroup after the targets run, including when they fail; no production group is touched.
+- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository and two Product Owner repositories, each declared by a subsystem SRD fixture, and writes their paths as JSON for the integration targets (eng01).
+- mage regression:down removes the run after the targets run, including when they fail; nothing outside the run directory is touched.
 
 <!-- field: test_cases -->
 ## Test cases

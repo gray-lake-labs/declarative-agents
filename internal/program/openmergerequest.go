@@ -66,19 +66,8 @@ func OpenMergeRequestFor(t gitlab.Tracker, project, issueProject string, iid int
 // objectives the owner reports complete (srd038 R2.1). Each must be open.
 func OpenMergeRequestClosing(t gitlab.Tracker, project, issueProject string, iid int, branch string, gate AuditGate, closes []string, dryRun bool) (OpenMergeRequestResult, error) {
 	r := OpenMergeRequestResult{Project: project, IID: iid, DryRun: dryRun}
-	for _, ref := range closes {
-		p, n, ok := strings.Cut(ref, "#")
-		other, err := strconv.Atoi(n)
-		if !ok || p == "" || err != nil || other <= 0 {
-			return r, fmt.Errorf("--closes %q is not project#iid", ref)
-		}
-		c, err := t.GetIssue(p, other)
-		if err != nil {
-			return r, fmt.Errorf("--closes %s: %w", ref, err)
-		}
-		if c.State == "closed" {
-			return r, fmt.Errorf("--closes %s is already closed", ref)
-		}
+	if _, err := checkCloses(t, closes); err != nil {
+		return r, err
 	}
 	if issueProject != project {
 		r.IssueProject = issueProject
@@ -132,9 +121,34 @@ func OpenMergeRequestClosing(t gitlab.Tracker, project, issueProject string, iid
 	return r, nil
 }
 
+// checkCloses parses each --closes reference, project#iid, and refuses one
+// that is malformed, missing, or already closed.
+func checkCloses(t gitlab.Tracker, closes []string) ([][2]any, error) {
+	var out [][2]any
+	for _, ref := range closes {
+		p, n, ok := strings.Cut(ref, "#")
+		other, err := strconv.Atoi(n)
+		if !ok || p == "" || err != nil || other <= 0 {
+			return nil, fmt.Errorf("--closes %q is not project#iid", ref)
+		}
+		c, err := t.GetIssue(p, other)
+		if err != nil {
+			return nil, fmt.Errorf("--closes %s: %w", ref, err)
+		}
+		if c.State == "closed" {
+			return nil, fmt.Errorf("--closes %s is already closed", ref)
+		}
+		out = append(out, [2]any{p, other})
+	}
+	return out, nil
+}
+
 // check runs the gate and reports its findings when it fails, so no merge
 // request opens for a docs/ change the corpus audit rejects (srd036 R3.2).
-func (g AuditGate) check() error {
+func (g AuditGate) check() error { return g.checkBefore("no merge request opened") }
+
+// checkBefore runs the gate, naming what was withheld when it fails.
+func (g AuditGate) checkBefore(withheld string) error {
 	if g.Command == "" {
 		return fmt.Errorf("the branch changes docs/ and no audit command is configured")
 	}
@@ -150,7 +164,7 @@ func (g AuditGate) check() error {
 	if len(lines) > 20 {
 		lines = lines[len(lines)-20:]
 	}
-	return fmt.Errorf("%s failed in %s; no merge request opened:\n%s", g.Command, g.Dir, strings.Join(lines, "\n"))
+	return fmt.Errorf("%s failed in %s; %s:\n%s", g.Command, g.Dir, withheld, strings.Join(lines, "\n"))
 }
 
 // MRDescription tells the reviewer what to look at, lists the issue's

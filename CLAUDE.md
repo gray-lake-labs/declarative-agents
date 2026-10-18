@@ -21,4 +21,4 @@ The repository is published by the organization, not a person. Nothing committed
 ## Local conventions
 
 - `.claude` is a gitignored symlink to shared local tooling; keep it out of tracking (`.git/info/exclude`).
-- `regression.md`, `regression.yaml`, and `.regression/` are local rig configuration and stay untracked.
+- `.regression/` holds the regression rig's runs and stays untracked.

@@ -286,7 +286,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
     1. purpose
   - purpose: Defines rules for agents and contributors working in this repository; this constitution holds the schema of every document type.
 - config_document:
-  - location: control/labels.md and control/policy.md in a program repository, reports.md in the reports repository, person.md in the person's configuration directory, release-gates.md and regression.md in this repository
+  - location: control/labels.md and control/policy.md in a program repository, reports.md in the reports repository, person.md in the person's configuration directory, release-gates.md in this repository
   - required_fields:
     1. id
     1. title

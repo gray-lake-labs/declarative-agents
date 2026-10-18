@@ -9,7 +9,7 @@ status: specified
 ## Overview
 
 Each run starts with mage regression:up creating the repositories below in
-a fresh rig subgroup and ends with mage regression:down removing them.
+a fresh rig run on local disk and ends with mage regression:down removing them.
 The tag stages push a downstream tag and a system tag and prove the
 reference-update issue and the summary merge request, each idempotent.
 
@@ -22,9 +22,9 @@ reference-update issue and the summary merge request, each idempotent.
 <!-- field: preconditions -->
 ## Preconditions
 
-- mage regression:up creates a rig-<run-id> subgroup with a system repository, a reports repository, and the Product Owner repositories, with a period of fixture reports and objective issues, and writes their paths as JSON for the integration targets (eng01).
-- mage regression:down destroys the subgroup after the targets run, including when they fail.
-- CI in the rig subgroup holds a group-scoped token.
+- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository, a reports repository, and the Product Owner repositories, with a period of fixture reports and objective issues, and writes their paths as JSON for the integration targets (eng01).
+- mage regression:down removes the run after the targets run, including when they fail.
+- The tag pipeline reaches the rig's tracker repository.
 
 <!-- field: test_cases -->
 ## Test cases

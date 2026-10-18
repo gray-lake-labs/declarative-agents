@@ -176,8 +176,10 @@ func TestTagCreatesAndPushesTheNextTag(t *testing.T) {
 		t.Fatal(err)
 	}
 	git("tag", "-d", "v0.20261015.0")
+	// The gates of a stage run together, so the recorder takes a lock.
+	var mu sync.Mutex
 	var dirs []string
-	run := func(d, _ string, _ io.Writer) error { dirs = append(dirs, d); return nil }
+	run := func(d, _ string, _ io.Writer) error { mu.Lock(); dirs = append(dirs, d); mu.Unlock(); return nil }
 	var out bytes.Buffer
 	if err := release(dir, git, run, &out).Tag(); err != nil {
 		t.Fatalf("%v\n%s", err, out.String())

@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	gl "gitlab.com/gitlab-org/api/client-go"
 )
 
 // seedSystem commits the release 01.0 fixtures to the rig's system
@@ -124,12 +122,6 @@ func writeFileTo(path, content string) {
 func writeJSONTo(path string, v any) {
 	b, _ := json.MarshalIndent(v, "", "  ")
 	writeFileTo(path, string(b))
-}
-
-type glUpdateDescription struct{ description string }
-
-func (u glUpdateDescription) opts() gl.UpdateIssueOptions {
-	return gl.UpdateIssueOptions{Description: gl.Ptr(u.description)}
 }
 
 func ptr[T any](v T) *T { return &v }

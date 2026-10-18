@@ -29,10 +29,9 @@ Input: the project path of this repository and the issue number.
 
 On the beads tracker (pop's `web_url` starts with `beads:`) there is no
 merge request; delivery is a local merge (srd042 R2.3). Replace steps 4
-and 5: from the checkout pop returned, run
-`git merge --no-ff <branch> -m "Merge <branch> (<project>#<iid>)"`, adding
-`, closes <project#iid>` inside the parentheses for each issue the
-Requirements say the merge also closes. Then run
-`tpm program close --project <project> --issue <iid> --json` for the issue
-and for each issue it closes. On a refusal, show its reason and stop;
-otherwise show the closing commit.
+and 5: run `tpm program merge --project <project> --issue <iid> --json`
+from the worktree, adding `--closes <project#iid>` for each issue the
+Requirements say the merge also closes. It runs the corpus audit for a
+change under docs/, merges, pushes, and closes each issue. On a refusal,
+show its reason and the audit's findings, and stop; otherwise show the
+merge commit and the issues it closed.
