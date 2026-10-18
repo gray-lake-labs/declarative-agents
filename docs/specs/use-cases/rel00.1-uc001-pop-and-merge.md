@@ -34,7 +34,7 @@ An admitted issue the Developer chooses to work.
 
 - F1: The Developer runs issue-pop on the issue; tpm program pop assigns only them and creates the branch <iid>-<slug> and its worktree, or refuses an issue someone else holds, a closed issue, or a data issue admission did not admit.
 - F2: The work is done and committed in the worktree and pushed; it is the Developer's or their agent's, not the skill's.
-- F3: tpm program open-merge-request opens the merge request that closes the issue, listing its acceptance criteria; a reviewer merges it and the issue closes.
+- F3: tpm program merge merges the branch with a merge commit citing the issue, pushes it, and closes the issue.
 
 <!-- field: touchpoints -->
 ## Touchpoints

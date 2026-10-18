@@ -1,6 +1,7 @@
-// Package gitlab is tpm's access to the tracker. Every package that reads or
-// writes issues goes through the Tracker interface, so tests use the fake in
-// gitlabtest and production uses the official Go client.
+// Package gitlab is tpm's tracker boundary, named for the tracker tpm first
+// served. Every package that reads or writes issues goes through the
+// Tracker interface: production uses the beads tracker (internal/beads),
+// and tests use it or the fake in gitlabtest.
 package gitlab
 
 import "errors"
@@ -93,7 +94,8 @@ type Award struct {
 	User string `json:"user"`
 }
 
-// MergeRequest is the part of a merge request tpm reads.
+// MergeRequest is one merged delivery in a project's history, as reports
+// read it; on beads a merge commit (srd042 R2.3).
 type MergeRequest struct {
 	IID          int    `json:"iid"`
 	Title        string `json:"title"`
@@ -183,10 +185,4 @@ type Tracker interface {
 	DefaultBranch(project string) (string, error)
 	BranchExists(project, branch string) (bool, error)
 	CreateBranch(project, branch, ref string) error
-	// Compare returns how many commits head has that base lacks, and the
-	// paths those commits change.
-	Compare(project, base, head string) (ahead int, paths []string, err error)
-	// OpenMergeRequest returns the open merge request from branch, if any.
-	OpenMergeRequest(project, branch string) (*MergeRequest, error)
-	CreateMergeRequest(project string, mr MergeRequest) (MergeRequest, error)
 }

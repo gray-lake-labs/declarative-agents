@@ -11,8 +11,7 @@ status: implemented
 Each run starts with mage regression:up creating the repositories below in
 a fresh rig run on local disk and ends with mage regression:down removing them. The
 suite pops an admitted issue into its worktree, proves the refusals,
-commits, delivers it (a merge request on GitLab; tpm program merge on the
-rig's beads tracker), and proves the issue closed.
+commits, delivers it with tpm program merge, and proves the issue closed.
 
 <!-- field: traces -->
 ## Traces
@@ -62,8 +61,8 @@ go test ./internal/program -run '^TestPop(AssignsOnlyTheCaller|RefusesHeldOrUnad
 - [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC1](../software-requirements/srd036-issue-pop.md#ac1)
 - [srd041-states](../software-requirements/srd041-states.md) [AC5](../software-requirements/srd041-states.md#ac5)
 
-<!-- case: The merge request closes the issue | status: implemented -->
-### The merge request closes the issue
+<!-- case: The merge closes the issue | status: implemented -->
+### The merge closes the issue
 
 <!-- field: use_case -->
 #### Use case
@@ -78,12 +77,12 @@ mage integration:pop
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/program -run '^TestOpenMergeRequestClosesTheIssue$'
+go test ./internal/program -run '^TestMergeDeliversOnBeads$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- merge_request: one, closing the issue, listing its acceptance criteria
+- merge: one --no-ff merge commit on the default branch, citing the issue, pushed
 - after_merge: issue closed
 - skill: asks nothing, closes nothing itself, at most 50 lines
 

@@ -59,7 +59,7 @@ docs/road-map.md.
 | "01.2" | Sprint end closes the loop | 2 | 2 | implemented |
 | "01.3" | Tags trigger handoff and the summary | 0 | 2 | specified |
 | "02.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
-| "03.0" | The tracker becomes beads | 2 | 2 | specified |
+| "03.0" | The tracker becomes beads | 2 | 2 | implemented |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -181,5 +181,5 @@ docs/road-map.md.
 | GAP7 | The corpus's own SRDs omit test and environment on acceptance criteria (design.md srd acceptance_criteria_note) until the test subsystem's environment SRDs exist. |
 | GAP8 | The parent corpus audit does not read docs/specs/objectives/, so a magefiles gate test validates objective documents against srd034 R1 inside mage audit (srd034 R2.1). An objective document is scrum-master's type written as an SRD in the parent's format, so the gate is scrum-master's own, not a gap the parent closes. |
 | GAP9 | tpm program lint does not yet run in CI on issue creation or on a schedule (srd013 R1.3); that needs a released tpm binary the program's pipelines can run. |
-| GAP10 | Release 03.0 is near complete. internal/beads serves the tracker over beads, selected by TPM_TRACKER (eng04-beads-sync), and every tpm command runs on it, its tests running on both trackers through internal/trackertest; on beads, tpm program merge is the delivery. The regression rig is a program on local disk (eng01) and every integration target passes on it with no network. The GitLab client, open-merge-request, and the Terraform module remain until GitLab is removed (srd042 R1.3, R4.1). |
 | GAP11 | Open decision. srd041 has lint rows only out of open and needs-triage, so an issue already past admission that later fails a re-lint has no transition. On GitLab and on beads lint sets or clears the needs-triage label alone and leaves the state; whether such an issue should leave the backlog is undecided. |
+| GAP12 | Open decision. With GitLab gone there is no merge request, so nothing requires a second person to read a change before tpm program merge lands it; the release gate's peer read (srd015 R1.2) is the only review the process holds. Whether a merge needs a reviewer's approval comment, as a release does, is undecided (srd008 R1.4). |

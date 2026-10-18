@@ -183,60 +183,6 @@ func init() {
 		},
 	})
 
-	var mrArgs struct {
-		project, issueProject, branch, audit, dir, control, ref string
-		iid                                                     int
-		closes                                                  cli.Strings
-	}
-	cli.Default.Register(&cli.Command{
-		Group: "program", Name: "open-merge-request", Summary: "open the merge request that closes an issue",
-		Flags: func(fs *flag.FlagSet) {
-			fs.StringVar(&mrArgs.project, "project", "", "project path (required)")
-			fs.IntVar(&mrArgs.iid, "issue", 0, "issue IID (required)")
-			fs.StringVar(&mrArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
-			fs.StringVar(&mrArgs.branch, "branch", "", "source branch; empty uses the current branch of the working directory")
-			fs.StringVar(&mrArgs.audit, "audit", "", "corpus gate command for a docs/ change; empty uses the policy's audit_command (mage audit)")
-			fs.StringVar(&mrArgs.dir, "dir", ".", "the worktree holding the branch, where the audit runs")
-			fs.StringVar(&mrArgs.control, "control", "", "program repository holding control/ files; empty uses the defaults")
-			fs.StringVar(&mrArgs.ref, "ref", "main", "ref of the control files")
-			fs.Var(&mrArgs.closes, "closes", "another issue the merge closes, project#iid; repeat for each (srd038 R2.1)")
-		},
-		Run: func(ctx *cli.Context) error {
-			if mrArgs.project == "" || mrArgs.iid == 0 {
-				return fmt.Errorf("%w: open-merge-request needs --project and --issue", cli.ErrUsage)
-			}
-			branch := mrArgs.branch
-			if branch == "" {
-				out, err := ExecGit{}.Run(mrArgs.dir, "rev-parse", "--abbrev-ref", "HEAD")
-				if err != nil {
-					return err
-				}
-				branch = strings.TrimSpace(out)
-			}
-			t, err := ctx.Tracker()
-			if err != nil {
-				return err
-			}
-			p, err := LoadPolicy(t, mrArgs.control, mrArgs.ref)
-			if err != nil {
-				return err
-			}
-			gate := AuditGate{Command: p.AuditCommand, Dir: mrArgs.dir}
-			if mrArgs.audit != "" {
-				gate.Command = mrArgs.audit
-			}
-			issueProject := mrArgs.issueProject
-			if issueProject == "" {
-				issueProject = mrArgs.project
-			}
-			r, err := OpenMergeRequestClosing(t, mrArgs.project, issueProject, mrArgs.iid, branch, gate, mrArgs.closes, ctx.DryRun)
-			if err != nil {
-				return err
-			}
-			return ctx.Emit(r, fmt.Sprintf("%s!%d %s (closes #%d)", r.Project, r.MR, r.WebURL, r.IID))
-		},
-	})
-
 	var lintArgs struct {
 		project, control, ref, since string
 		iid                          int

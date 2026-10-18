@@ -58,7 +58,7 @@ The worktree carries the skills of every agent installed in the checkout pop ran
 <!-- req: R3.1 -->
 ### R3.1
 
-When the work is committed and pushed, runs tpm program open-merge-request (srd013 R5), which opens the merge request that closes the issue, with its acceptance criteria and reviewer focus.
+When the work is committed, runs tpm program merge (srd013 R5), which runs the corpus gate for a docs/ change, merges the branch, and closes the issue.
 
 <!-- req: R3.2 -->
 ### R3.2

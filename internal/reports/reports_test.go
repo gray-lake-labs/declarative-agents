@@ -30,7 +30,7 @@ func TestInitScaffoldsOnceAndNeverOverwrites(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"reports.md", "reports/2026-Q4/.gitkeep", "schema/report.md", "summaries/.gitkeep", ".gitlab-ci.yml", "deck/template.md"}
+	want := []string{"reports.md", "reports/2026-Q4/.gitkeep", "schema/report.md", "summaries/.gitkeep", "deck/template.md"}
 	for i, r := range res {
 		if filepath.ToSlash(r.Path) != want[i] || r.Action != "created" {
 			t.Fatalf("result %d: %+v", i, r)
@@ -39,10 +39,6 @@ func TestInitScaffoldsOnceAndNeverOverwrites(t *testing.T) {
 	got, err := LoadConfig(dir)
 	if err != nil || got.ReminderWeekday != "wednesday" || got.Team[0].Project != "g/po-1" || got.Title("2026-W42") != "Recurring: weekly status 2026-W42" {
 		t.Fatalf("config %+v %v", got, err)
-	}
-	ci, _ := os.ReadFile(filepath.Join(dir, ".gitlab-ci.yml"))
-	if !strings.Contains(string(ci), "tpm reports validate") || !strings.Contains(string(ci), "tpm reports status-issues") {
-		t.Fatalf("CI jobs:\n%s", ci)
 	}
 	if _, findings, _ := Validate(dir, []string{"schema/report.md"}); len(findings) != 1 || !strings.Contains(findings[0].Problems[0], "file name") {
 		t.Fatalf("the schema example validates except for its name: %+v", findings)

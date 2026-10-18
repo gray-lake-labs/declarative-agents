@@ -15,27 +15,6 @@ type InitResult struct {
 	Action string `json:"action"` // created, kept
 }
 
-const ciJobs = `# tpm reports init (srd018 R1.1). The runner image provides tpm and a
-# GITLAB_TOKEN that can file issues in the team's projects.
-stages: [check, schedule]
-
-validate:
-  stage: check
-  image: $TPM_IMAGE
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  script:
-    - tpm reports validate --dir .
-
-status-issues:
-  stage: schedule
-  image: $TPM_IMAGE
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-  script:
-    - tpm reports status-issues --dir . --reports $CI_PROJECT_PATH
-`
-
 const deckTemplate = `# {title}
 
 <!-- tpm reports deck renders one slide per outline section of an approved
@@ -44,7 +23,7 @@ summary, up to the slide limit (srd018 R4). -->
 
 // Init scaffolds a reports repository in a local checkout (srd018 R1): the
 // configuration, the current quarter's reports directory, the report
-// schema, a summaries directory, the CI jobs, and a deck template. It
+// schema, a summaries directory, and a deck template. It
 // never overwrites a file that exists; a dry run writes nothing.
 func Init(dir string, cfg Config, now time.Time, dryRun bool) ([]InitResult, error) {
 	cfg.defaults()
@@ -62,7 +41,6 @@ func Init(dir string, cfg Config, now time.Time, dryRun bool) ([]InitResult, err
 		{filepath.Join("reports", Quarter(now), ".gitkeep"), ""},
 		{filepath.Join("schema", "report.md"), example + "\n<!-- The report format (config format report): one file per person per ISO week at\nreports/<YYYY-Qn>/<YYYY-Www>-<username>.md; tpm reports validate checks it. -->\n"},
 		{filepath.Join("summaries", ".gitkeep"), ""},
-		{".gitlab-ci.yml", ciJobs},
 		{filepath.Join("deck", "template.md"), deckTemplate},
 	}
 	var out []InitResult

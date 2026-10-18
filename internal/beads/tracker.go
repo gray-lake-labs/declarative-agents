@@ -10,16 +10,11 @@ import (
 	"path"
 	"path/filepath"
 	"slices"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 )
-
-// ErrNotServed is returned by the tracker methods the beads backend does not
-// serve yet; the commands that need them still run on GitLab (GAP10).
-var ErrNotServed = errors.New("not served by the beads tracker yet (GAP10)")
 
 // statusInProgress is the label the GitLab tracker uses for in-progress; the
 // beads tracker shows it from the state and fires the transition when a
@@ -59,8 +54,7 @@ func NewTracker(clone, user, code string) *Tracker {
 	return &Tracker{Store: NewStore(clone, user), code: code}
 }
 
-// Configured reports whether TPM_TRACKER names a tracker repository, which
-// selects the beads backend over GitLab.
+// Configured reports whether TPM_TRACKER names a tracker repository.
 func Configured() bool { return strings.TrimSpace(os.Getenv("TPM_TRACKER")) != "" }
 
 // FromEnv opens the beads tracker TPM_TRACKER names. Its clone is
@@ -409,24 +403,6 @@ func (t *Tracker) TagExists(project, tag string) (bool, error) {
 	return out != "", err
 }
 
-func (t *Tracker) Compare(project, base, head string) (int, []string, error) {
-	if _, err := t.git(project, "fetch", "-q", "origin"); err != nil {
-		return 0, nil, err
-	}
-	b, h := t.rev(project, base), t.rev(project, head)
-	count, err := t.git(project, "rev-list", "--count", b+".."+h)
-	if err != nil {
-		return 0, nil, err
-	}
-	ahead, _ := strconv.Atoi(count)
-	paths, err := t.git(project, "diff", "--name-only", b+"..."+h)
-	if err != nil || paths == "" {
-		return ahead, nil, err
-	}
-	return ahead, strings.Split(paths, "\n"), nil
-}
-
-// Not served: opening merge requests, which a local merge replaces
 // belong to commands that still run on GitLab (GAP10).
 
 // FindMilestone looks in the project, then in its ancestor groups.
@@ -503,12 +479,4 @@ func (t *Tracker) UpdateGroupLabel(group string, l gitlab.Label) error {
 		return fmt.Errorf("%w: %v", gitlab.ErrNotFound, err)
 	}
 	return err
-}
-
-func (t *Tracker) OpenMergeRequest(string, string) (*gitlab.MergeRequest, error) {
-	return nil, ErrNotServed
-}
-
-func (t *Tracker) CreateMergeRequest(string, gitlab.MergeRequest) (gitlab.MergeRequest, error) {
-	return gitlab.MergeRequest{}, ErrNotServed
 }

@@ -20,12 +20,9 @@ type Fake struct {
 	Awards     map[string][]gitlab.Award // "project#iid"
 	Labels     map[string][]gitlab.Label // group -> labels
 	Me         gitlab.User
-	Branches   map[string]string // "project@branch" -> ref it was created from
-	Default    string            // default branch of every project
-	// Ahead maps "project@branch" to the commits it has over the default
-	// branch and the paths they change.
-	Ahead map[string]Commits
-	MRs   map[string][]*gitlab.MergeRequest // project -> merge requests
+	Branches   map[string]string                 // "project@branch" -> ref it was created from
+	Default    string                            // default branch of every project
+	MRs        map[string][]*gitlab.MergeRequest // project -> merged deliveries
 	// Writes counts every mutating call, so a dry run can prove it wrote nothing.
 	Writes int
 }
@@ -37,7 +34,7 @@ func New() *Fake {
 	return &Fake{Files: map[string][]byte{}, Tags: map[string]bool{}, Issues: map[string][]*gitlab.Issue{},
 		Notes: map[string][]gitlab.Note{}, Milestones: map[string]gitlab.Milestone{}, Awards: map[string][]gitlab.Award{}, Labels: map[string][]gitlab.Label{},
 		Me: gitlab.User{ID: 1, Username: "me"}, Branches: map[string]string{}, Default: "main",
-		Ahead: map[string]Commits{}, MRs: map[string][]*gitlab.MergeRequest{}}
+		MRs: map[string][]*gitlab.MergeRequest{}}
 }
 
 // AddFile stores content at project, ref, path.
@@ -214,39 +211,6 @@ func (f *Fake) CreateBranch(project, branch, ref string) error {
 	return nil
 }
 
-// Commits is what a branch has over the default branch.
-type Commits struct {
-	Count int
-	Paths []string
-}
-
-func (f *Fake) Compare(project, base, head string) (int, []string, error) {
-	c := f.Ahead[project+"@"+head]
-	return c.Count, c.Paths, nil
-}
-
-func (f *Fake) OpenMergeRequest(project, branch string) (*gitlab.MergeRequest, error) {
-	for _, m := range f.MRs[project] {
-		if m.SourceBranch == branch && m.State == "opened" {
-			c := *m
-			return &c, nil
-		}
-	}
-	return nil, nil
-}
-
-func (f *Fake) CreateMergeRequest(project string, mr gitlab.MergeRequest) (gitlab.MergeRequest, error) {
-	f.Writes++
-	mr.IID = len(f.MRs[project]) + 1
-	mr.State = "opened"
-	mr.WebURL = fmt.Sprintf("https://gitlab.example.com/%s/-/merge_requests/%d", project, mr.IID)
-	c := mr
-	f.MRs[project] = append(f.MRs[project], &c)
-	return mr, nil
-}
-
-// MergedMergeRequests returns the fake's merge requests in the project
-// that are merged, by author (any when empty), on or after since.
 func (f *Fake) MergedMergeRequests(project, author, since string) ([]gitlab.MergeRequest, error) {
 	var out []gitlab.MergeRequest
 	for _, m := range f.MRs[project] {

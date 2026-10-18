@@ -118,8 +118,12 @@ func init() {
 			if group == "" {
 				group = path.Dir(program.ProjectPath(a.system))
 			}
+			web, err := goals.WebBase()
+			if err != nil {
+				return err
+			}
 			res, err := Push(t, PushInput{Dir: a.dir, System: a.system, Group: group, Version: pu.version, End: pu.end,
-				WebBase: goals.WebBase(), Policy: p, Ref: a.ref, DryRun: ctx.DryRun})
+				WebBase: web, Policy: p, Ref: a.ref, DryRun: ctx.DryRun})
 			if err != nil {
 				return err
 			}
