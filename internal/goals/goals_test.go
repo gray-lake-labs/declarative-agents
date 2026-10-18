@@ -6,8 +6,9 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
 const (
@@ -27,13 +28,13 @@ func read(t *testing.T, p string) []byte {
 
 // fixture is the system repository: its road map, subsystem SRD, and
 // objective document.
-func fixture(t *testing.T) (*gitlabtest.Fake, Sources) {
+func fixture(t *testing.T, p trackertest.Program) (gitlab.Tracker, Sources) {
 	t.Helper()
-	f := gitlabtest.New()
-	f.AddFile(system, "main", "docs/road-map.md", read(t, "../../testdata/system/road-map.md"))
-	f.AddTag(system, "v0.1.0")
-	f.AddFile(system, "v0.1.0", "docs/specs/objectives/obj001-reliable-agents.md", read(t, "../../testdata/objectives/valid/obj001-reliable-agents.md"))
-	f.AddFile(system, "v0.1.0", "docs/specs/software-requirements/srd010-delivery.md", read(t, "../../testdata/system/srd010-delivery.md"))
+	p.AddFile(system, "main", "docs/road-map.md", read(t, "../../testdata/system/road-map.md"))
+	p.AddTag(system, "v0.1.0")
+	p.AddFile(system, "v0.1.0", "docs/specs/objectives/obj001-reliable-agents.md", read(t, "../../testdata/objectives/valid/obj001-reliable-agents.md"))
+	p.AddFile(system, "v0.1.0", "docs/specs/software-requirements/srd010-delivery.md", read(t, "../../testdata/system/srd010-delivery.md"))
+	f := p.Tracker()
 	s, err := Load(f, system, "01.0", "main")
 	if err != nil {
 		t.Fatal(err)
@@ -41,8 +42,22 @@ func fixture(t *testing.T) (*gitlabtest.Fake, Sources) {
 	return f, s
 }
 
+// fleetIssues lists every fleet issue, open or closed.
+func fleetIssues(t *testing.T, f gitlab.Tracker) []gitlab.Issue {
+	t.Helper()
+	issues, err := f.ListIssues(fleet, gitlab.IssueQuery{State: "all"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return issues
+}
+
 func TestReadsTheDeclaredCorpus(t *testing.T) {
-	_, s := fixture(t)
+	trackertest.Each(t, testReadsTheDeclaredCorpus)
+}
+
+func testReadsTheDeclaredCorpus(t *testing.T, tp trackertest.Program) {
+	_, s := fixture(t, tp)
 	if s.Release.Tag != "v0.1.0" || s.Release.Milestone != "2026-W43..W45" || len(s.Release.Objectives) != 3 {
 		t.Fatalf("release = %+v", s.Release)
 	}
@@ -52,7 +67,11 @@ func TestReadsTheDeclaredCorpus(t *testing.T) {
 }
 
 func TestPlanRecommendsOwnerAndEnvironment(t *testing.T) {
-	f, s := fixture(t)
+	trackertest.Each(t, testPlanRecommendsOwnerAndEnvironment)
+}
+
+func testPlanRecommendsOwnerAndEnvironment(t *testing.T, tp trackertest.Program) {
+	f, s := fixture(t, tp)
 	p, err := MakePlan(f, s)
 	if err != nil {
 		t.Fatal(err)
@@ -67,13 +86,17 @@ func TestPlanRecommendsOwnerAndEnvironment(t *testing.T) {
 	if r2.Repository != "" || len(r2.Candidates) != 1 || r2.Candidates[0] != fleet {
 		t.Fatalf("R2 = %+v", r2)
 	}
-	if f.Writes != 0 {
+	if tp.Writes() != 0 {
 		t.Fatal("plan wrote to the tracker")
 	}
 }
 
 func TestPushFilesOneDatedPinnedObjectiveIssue(t *testing.T) {
-	f, s := fixture(t)
+	trackertest.Each(t, testPushFilesOneDatedPinnedObjectiveIssue)
+}
+
+func testPushFilesOneDatedPinnedObjectiveIssue(t *testing.T, tp trackertest.Program) {
+	f, s := fixture(t, tp)
 	p, _ := MakePlan(f, s)
 	res, err := Push(f, s, p, web, program.Defaults(), false)
 	if err != nil {
@@ -114,28 +137,40 @@ func TestPushFilesOneDatedPinnedObjectiveIssue(t *testing.T) {
 }
 
 func TestSecondPushChangesNothingAndKeepsOwnerNotes(t *testing.T) {
-	f, s := fixture(t)
+	trackertest.Each(t, testSecondPushChangesNothingAndKeepsOwnerNotes)
+}
+
+func testSecondPushChangesNothingAndKeepsOwnerNotes(t *testing.T, tp trackertest.Program) {
+	f, s := fixture(t, tp)
 	p, _ := MakePlan(f, s)
 	if _, err := Push(f, s, p, web, program.Defaults(), false); err != nil {
 		t.Fatal(err)
 	}
-	i := f.Issues[fleet][0]
-	i.Description += "Owner: rubric drafted, waiting on trajectories.\n"
-	writes := f.Writes
-	res, err := Push(f, s, p, web, program.Defaults(), false)
-	if err != nil || res[0].Action != "unchanged" || res[0].Planned || f.Writes != writes {
-		t.Fatalf("res=%+v err=%v writes=%d", res, err, f.Writes-writes)
+	i := fleetIssues(t, f)[0]
+	owned := i.Description + "Owner: rubric drafted, waiting on trajectories.\n"
+	if _, err := f.UpdateIssue(fleet, i.IID, gitlab.IssueUpdate{Description: &owned}); err != nil {
+		t.Fatal(err)
 	}
-	if !strings.Contains(f.Issues[fleet][0].Description, "rubric drafted") {
+	writes := tp.Writes()
+	res, err := Push(f, s, p, web, program.Defaults(), false)
+	if err != nil || res[0].Action != "unchanged" || res[0].Planned || tp.Writes() != writes {
+		t.Fatalf("res=%+v err=%v writes=%d", res, err, tp.Writes()-writes)
+	}
+	issues := fleetIssues(t, f)
+	if !strings.Contains(issues[0].Description, "rubric drafted") {
 		t.Fatal("owner notes lost")
 	}
-	if len(f.Issues[fleet]) != 1 {
+	if len(issues) != 1 {
 		t.Fatal("duplicate issue")
 	}
 }
 
 func TestUnpinnedCitationAndMissingEnvironmentAreRefused(t *testing.T) {
-	f, s := fixture(t)
+	trackertest.Each(t, testUnpinnedCitationAndMissingEnvironmentAreRefused)
+}
+
+func testUnpinnedCitationAndMissingEnvironmentAreRefused(t *testing.T, tp trackertest.Program) {
+	f, s := fixture(t, tp)
 	p, _ := MakePlan(f, s)
 	p.Tag = "main"
 	p.Objectives[1].Repository = fleet
@@ -150,35 +185,43 @@ func TestUnpinnedCitationAndMissingEnvironmentAreRefused(t *testing.T) {
 	if res[1].Action != "refused" || !strings.Contains(strings.Join(res[1].Reasons, ";"), "no environment confirmed") {
 		t.Fatalf("R2 = %+v", res[1])
 	}
-	if f.Writes != 0 {
+	if tp.Writes() != 0 {
 		t.Fatal("refused objectives wrote to the tracker")
 	}
 }
 
 func TestDueFallsBackToMilestoneAndDryRunWritesNothing(t *testing.T) {
-	f, s := fixture(t)
-	f.Milestones["2026-W43..W45"] = gitlabMilestone("2026-11-06")
+	trackertest.Each(t, testDueFallsBackToMilestoneAndDryRunWritesNothing)
+}
+
+func testDueFallsBackToMilestoneAndDryRunWritesNothing(t *testing.T, tp trackertest.Program) {
+	f, s := fixture(t, tp)
+	if _, err := f.EnsureMilestone("program", gitlabMilestone("2026-11-06")); err != nil {
+		t.Fatal(err)
+	}
+	writes := tp.Writes()
 	p, _ := MakePlan(f, s)
 	p.Objectives = p.Objectives[:1]
 	p.Objectives[0].Due = ""
 	res, err := Push(f, s, p, web, program.Defaults(), true)
-	if err != nil || res[0].Action != "created" || f.Writes != 0 {
-		t.Fatalf("dry run: res=%+v err=%v writes=%d", res, err, f.Writes)
+	if err != nil || res[0].Action != "created" || tp.Writes() != writes {
+		t.Fatalf("dry run: res=%+v err=%v writes=%d", res, err, tp.Writes()-writes)
 	}
 	if _, err := Push(f, s, p, web, program.Defaults(), false); err != nil {
 		t.Fatal(err)
 	}
-	if got := f.Issues[fleet][0].DueDate; got != "2026-11-06" {
+	if got := fleetIssues(t, f)[0].DueDate; got != "2026-11-06" {
 		t.Fatalf("due = %q", got)
 	}
 }
 
 func TestLoadRefusesADocumentThatIsNotAgreed(t *testing.T) {
-	f := gitlabtest.New()
-	f.AddFile(system, "main", "docs/road-map.md", read(t, "../../testdata/system/road-map.md"))
-	doc := strings.Replace(string(read(t, "../../testdata/objectives/valid/obj001-reliable-agents.md")), "status: agreed", "status: to_be_agreed", 1)
-	f.AddFile(system, "v0.1.0", "docs/specs/objectives/obj001-reliable-agents.md", []byte(doc))
-	if _, err := Load(f, system, "01.0", "main"); err == nil || !strings.Contains(err.Error(), "only an agreed document") {
-		t.Fatalf("err = %v", err)
-	}
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		p.AddFile(system, "main", "docs/road-map.md", read(t, "../../testdata/system/road-map.md"))
+		doc := strings.Replace(string(read(t, "../../testdata/objectives/valid/obj001-reliable-agents.md")), "status: agreed", "status: to_be_agreed", 1)
+		p.AddFile(system, "v0.1.0", "docs/specs/objectives/obj001-reliable-agents.md", []byte(doc))
+		if _, err := Load(p.Tracker(), system, "01.0", "main"); err == nil || !strings.Contains(err.Error(), "only an agreed document") {
+			t.Fatalf("err = %v", err)
+		}
+	})
 }

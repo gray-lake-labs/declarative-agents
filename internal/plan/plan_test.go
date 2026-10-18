@@ -1,6 +1,7 @@
 package plan
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -10,10 +11,10 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
+	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
 // obj002 is a second agreed objective document: R1 is due before obj001's
@@ -142,10 +143,17 @@ func system(t *testing.T) string {
 	return dir
 }
 
-func input(t *testing.T, dir string) (Input, *gitlabtest.Fake) {
-	f := gitlabtest.New()
-	f.Issues["g/po-1"] = []*gitlab.Issue{{IID: 4, Description: "Objective\n\n<!-- tpm goals objective=obj001-reliable-agents#R2 release=01.0 -->"}}
-	agg := &reports.Aggregation{Signals: []reports.Signal{{Kind: reports.SignalSlipped, Subject: "g/po-1#4"}}}
+// input is the planning input over p's tracker: one objective issue in
+// g/po-1 for obj001's R2, which the aggregate reports slipped.
+func input(t *testing.T, dir string, p trackertest.Program) (Input, gitlab.Tracker) {
+	t.Helper()
+	f := p.Tracker()
+	i, err := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Objective R2",
+		Description: "Objective\n\n<!-- tpm goals objective=obj001-reliable-agents#R2 release=01.0 -->"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	agg := &reports.Aggregation{Signals: []reports.Signal{{Kind: reports.SignalSlipped, Subject: fmt.Sprintf("g/po-1#%d", i.IID)}}}
 	return Input{Dir: dir, System: "g/system", Tracker: f, Aggregate: agg, Releases: program.Defaults().Releases, Artifact: "corpus", Now: now}, f
 }
 
@@ -158,7 +166,11 @@ func ids(items []Item) []string {
 }
 
 func TestPlanReleaseRanksSlippedFirst(t *testing.T) {
-	in, _ := input(t, system(t))
+	trackertest.Each(t, testPlanReleaseRanksSlippedFirst)
+}
+
+func testPlanReleaseRanksSlippedFirst(t *testing.T, p trackertest.Program) {
+	in, _ := input(t, system(t), p)
 	c, err := MakeCandidates(in)
 	if err != nil {
 		t.Fatal(err)
@@ -178,8 +190,12 @@ func TestPlanReleaseRanksSlippedFirst(t *testing.T) {
 }
 
 func TestPlanReleaseReturnsItemsWithoutEvidence(t *testing.T) {
+	trackertest.Each(t, testPlanReleaseReturnsItemsWithoutEvidence)
+}
+
+func testPlanReleaseReturnsItemsWithoutEvidence(t *testing.T, p trackertest.Program) {
 	dir := system(t)
-	in, f := input(t, dir)
+	in, f := input(t, dir, p)
 	c, err := MakeCandidates(in)
 	if err != nil {
 		t.Fatal(err)
@@ -187,16 +203,19 @@ func TestPlanReleaseReturnsItemsWithoutEvidence(t *testing.T) {
 	if len(c.WithoutEvidence) != 1 || c.WithoutEvidence[0].ID != "obj002-fast-scoring#R2.1" || !slices.Equal(c.WithoutEvidence[0].Missing, []string{"environment"}) {
 		t.Fatalf("without evidence = %+v", c.WithoutEvidence)
 	}
-	f.Issues["g/system"] = []*gitlab.Issue{{IID: 9}}
+	planning, err := f.CreateIssue("g/system", gitlab.NewIssue{Title: "Plan release 01.1"})
+	if err != nil {
+		t.Fatal(err)
+	}
 	w, err := WriteRelease(dir, Release{Version: "01.1", Milestone: "01.1", Tag: "corpus/v0.1.0",
-		Items: []string{"obj002-fast-scoring#R1.1", "obj002-fast-scoring#R2.1"}}, c, f, "g/system", 9)
+		Items: []string{"obj002-fast-scoring#R1.1", "obj002-fast-scoring#R2.1"}}, c, f, "g/system", planning.IID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !slices.Equal(w.Release.Items, []string{"obj002-fast-scoring#R1.1"}) || len(w.Returned) != 1 {
 		t.Fatalf("written = %+v", w)
 	}
-	notes := f.Notes["g/system#9"]
+	notes, _ := f.ListNotes("g/system", planning.IID)
 	if len(notes) != 1 || !strings.Contains(notes[0].Body, "obj002-fast-scoring#R2.1: missing environment") {
 		t.Fatalf("notes = %+v", notes)
 	}
@@ -206,8 +225,12 @@ func TestPlanReleaseReturnsItemsWithoutEvidence(t *testing.T) {
 }
 
 func TestPlanReleaseWritesTheRoadMapRelease(t *testing.T) {
+	trackertest.Each(t, testPlanReleaseWritesTheRoadMapRelease)
+}
+
+func testPlanReleaseWritesTheRoadMapRelease(t *testing.T, p trackertest.Program) {
 	dir := system(t)
-	in, _ := input(t, dir)
+	in, _ := input(t, dir, p)
 	c, err := MakeCandidates(in)
 	if err != nil {
 		t.Fatal(err)

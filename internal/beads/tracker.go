@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -308,80 +309,96 @@ func (t *Tracker) CloseOnMerge(project string, iid int, commit string) (bool, er
 	return r.Changed, err
 }
 
-// The code half: the checkout's own git and its origin.
+// The code half: each project's checkout and its origin. A project's
+// checkout is the sibling of the command's checkout named for the project's
+// last path segment, as repositories sit side by side under their owner;
+// a project with no such sibling is the command's own checkout.
 
-func (t *Tracker) git(args ...string) (string, error) {
-	cmd := exec.Command("git", args...)
-	cmd.Dir = t.code
-	out, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
+func (t *Tracker) checkout(project string) string {
+	if project != "" {
+		sib := filepath.Join(filepath.Dir(t.code), path.Base(project))
+		if _, err := os.Stat(filepath.Join(sib, ".git")); err == nil {
+			return sib
+		}
 	}
-	return strings.TrimSpace(string(out)), nil
+	return t.code
 }
 
-func (t *Tracker) DefaultBranch(string) (string, error) {
-	ref, err := t.git("symbolic-ref", "--short", "refs/remotes/origin/HEAD")
+func (t *Tracker) git(project string, args ...string) (string, error) {
+	out, err := t.raw(project, args...)
+	return strings.TrimSpace(string(out)), err
+}
+
+func (t *Tracker) raw(project string, args ...string) ([]byte, error) {
+	cmd := exec.Command("git", args...)
+	cmd.Dir = t.checkout(project)
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
+	}
+	return out, nil
+}
+
+func (t *Tracker) DefaultBranch(project string) (string, error) {
+	ref, err := t.git(project, "symbolic-ref", "--short", "refs/remotes/origin/HEAD")
 	if err != nil {
 		return "main", nil
 	}
 	return strings.TrimPrefix(ref, "origin/"), nil
 }
 
-func (t *Tracker) BranchExists(_, branch string) (bool, error) {
-	out, err := t.git("ls-remote", "--heads", "origin", "refs/heads/"+branch)
+func (t *Tracker) BranchExists(project, branch string) (bool, error) {
+	out, err := t.git(project, "ls-remote", "--heads", "origin", "refs/heads/"+branch)
 	return out != "", err
 }
 
-func (t *Tracker) CreateBranch(_, branch, ref string) error {
-	if _, err := t.git("fetch", "-q", "origin", ref); err != nil {
+func (t *Tracker) CreateBranch(project, branch, ref string) error {
+	if _, err := t.git(project, "fetch", "-q", "origin", ref); err != nil {
 		return err
 	}
-	_, err := t.git("push", "-q", "origin", "refs/remotes/origin/"+ref+":refs/heads/"+branch)
+	_, err := t.git(project, "push", "-q", "origin", "refs/remotes/origin/"+ref+":refs/heads/"+branch)
 	return err
 }
 
-func (t *Tracker) rev(ref string) string {
-	if _, err := t.git("rev-parse", "--verify", "-q", "refs/remotes/origin/"+ref); err == nil {
+func (t *Tracker) rev(project, ref string) string {
+	if _, err := t.git(project, "rev-parse", "--verify", "-q", "refs/remotes/origin/"+ref); err == nil {
 		return "origin/" + ref
 	}
 	return ref
 }
 
-func (t *Tracker) GetFile(_, path, ref string) ([]byte, error) {
-	cmd := exec.Command("git", "show", t.rev(ref)+":"+path)
-	cmd.Dir = t.code
-	out, err := cmd.Output()
+func (t *Tracker) GetFile(project, p, ref string) ([]byte, error) {
+	out, err := t.raw(project, "show", t.rev(project, ref)+":"+p)
 	if err != nil {
-		return nil, fmt.Errorf("%s at %s: %w", path, ref, gitlab.ErrNotFound)
+		return nil, fmt.Errorf("%s at %s: %w", p, ref, gitlab.ErrNotFound)
 	}
 	return out, nil
 }
 
-func (t *Tracker) ListDir(_, dir, ref string) ([]string, error) {
-	out, err := t.git("ls-tree", "--name-only", t.rev(ref), strings.TrimSuffix(dir, "/")+"/")
+func (t *Tracker) ListDir(project, dir, ref string) ([]string, error) {
+	out, err := t.git(project, "ls-tree", "--name-only", t.rev(project, ref), strings.TrimSuffix(dir, "/")+"/")
 	if err != nil || out == "" {
 		return nil, fmt.Errorf("%s at %s: %w", dir, ref, gitlab.ErrNotFound)
 	}
 	return strings.Split(out, "\n"), nil
 }
 
-func (t *Tracker) TagExists(_, tag string) (bool, error) {
-	out, err := t.git("ls-remote", "--tags", "origin", "refs/tags/"+tag)
+func (t *Tracker) TagExists(project, tag string) (bool, error) {
+	out, err := t.git(project, "ls-remote", "--tags", "origin", "refs/tags/"+tag)
 	return out != "", err
 }
 
-func (t *Tracker) Compare(_, base, head string) (int, []string, error) {
-	if _, err := t.git("fetch", "-q", "origin"); err != nil {
+func (t *Tracker) Compare(project, base, head string) (int, []string, error) {
+	if _, err := t.git(project, "fetch", "-q", "origin"); err != nil {
 		return 0, nil, err
 	}
-	b, h := t.rev(base), t.rev(head)
-	count, err := t.git("rev-list", "--count", b+".."+h)
+	b, h := t.rev(project, base), t.rev(project, head)
+	count, err := t.git(project, "rev-list", "--count", b+".."+h)
 	if err != nil {
 		return 0, nil, err
 	}
 	ahead, _ := strconv.Atoi(count)
-	paths, err := t.git("diff", "--name-only", b+"..."+h)
+	paths, err := t.git(project, "diff", "--name-only", b+"..."+h)
 	if err != nil || paths == "" {
 		return ahead, nil, err
 	}
