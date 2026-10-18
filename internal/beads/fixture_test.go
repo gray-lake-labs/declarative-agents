@@ -1,0 +1,111 @@
+package beads
+
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+)
+
+// fixture is a tracker repository (bare, on local disk) and the clones the
+// test opens against it. No network is involved: the remote is a path.
+type fixture struct {
+	t      *testing.T
+	root   string
+	remote string
+	clock  time.Time
+}
+
+// newFixture creates the tracker repository holding issues as its first
+// commit.
+func newFixture(t *testing.T, issues ...Issue) *fixture {
+	t.Helper()
+	root := t.TempDir()
+	f := &fixture{t: t, root: root, remote: filepath.Join(root, "tracker.git"),
+		clock: time.Date(2026, 11, 2, 9, 0, 0, 0, time.UTC)}
+	f.git(root, "init", "-q", "--bare", "-b", "main", f.remote)
+	seed := filepath.Join(root, "seed")
+	f.git(root, "clone", "-q", f.remote, seed)
+	f.identity(seed, "seed")
+	if err := os.MkdirAll(filepath.Join(seed, ".beads"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeIssues(filepath.Join(seed, IssuesFile), issues); err != nil {
+		t.Fatal(err)
+	}
+	f.git(seed, "add", "-A")
+	f.git(seed, "commit", "-q", "-m", "seed")
+	f.git(seed, "push", "-q", "origin", "HEAD:main")
+	return f
+}
+
+// clone opens a new working clone of the tracker repository for user.
+func (f *fixture) clone(user string) *Store {
+	f.t.Helper()
+	dir := filepath.Join(f.root, user)
+	f.git(f.root, "clone", "-q", f.remote, dir)
+	f.identity(dir, user)
+	s := NewStore(dir, user)
+	s.Now = f.now
+	return s
+}
+
+// now advances the shared clock a minute per call, so every write has its
+// own time and last-writer-wins is decidable.
+func (f *fixture) now() time.Time {
+	f.clock = f.clock.Add(time.Minute)
+	return f.clock
+}
+
+// remoteIssue reads one issue as the tracker repository holds it, without
+// any clone's cache.
+func (f *fixture) remoteIssue(id string) Issue {
+	f.t.Helper()
+	out, err := exec.Command("git", "--git-dir", f.remote, "show", "main:"+IssuesFile).Output()
+	if err != nil {
+		f.t.Fatalf("read tracker repository: %v", err)
+	}
+	issues, err := parseIssues(out)
+	if err != nil {
+		f.t.Fatal(err)
+	}
+	for _, i := range issues {
+		if i.ID == id {
+			return i
+		}
+	}
+	f.t.Fatalf("tracker repository has no issue %s", id)
+	return Issue{}
+}
+
+// offline points a clone's origin at a path that does not exist; online
+// restores it.
+func (f *fixture) offline(s *Store) {
+	f.git(s.Dir, "remote", "set-url", "origin", filepath.Join(f.root, "unreachable.git"))
+}
+
+func (f *fixture) online(s *Store) {
+	f.git(s.Dir, "remote", "set-url", "origin", f.remote)
+}
+
+func (f *fixture) identity(dir, user string) {
+	f.git(dir, "config", "user.name", user)
+	f.git(dir, "config", "user.email", user+"@example.com")
+}
+
+func (f *fixture) git(dir string, args ...string) {
+	f.t.Helper()
+	cmd := exec.Command("git", args...)
+	cmd.Dir = dir
+	if out, err := cmd.CombinedOutput(); err != nil {
+		f.t.Fatalf("git %s: %v: %s", strings.Join(args, " "), err, out)
+	}
+}
+
+// ready is an admitted, unassigned data issue in the backlog.
+func ready(id string) Issue {
+	return Issue{ID: id, Title: "work " + id, Status: StatusOpen, State: Ready,
+		Labels: []string{"plane::data"}, CreatedAt: "2026-11-01T09:00:00Z", UpdatedAt: "2026-11-01T09:00:00Z"}
+}
