@@ -395,7 +395,7 @@ fixture tracker repositories. srd042 holds the direction.
 
 | id | summary | status |
 | --- | --- | --- |
-| [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | One issue's life, two clones, a contended pop, and an offline session against fixture tracker repositories. | specified |
+| [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | One issue's life, two clones, a contended pop, and an offline session against fixture tracker repositories. | implemented |
 
 <!-- field: proof -->
 ### Proof

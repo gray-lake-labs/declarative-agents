@@ -2,7 +2,7 @@
 id: test-rel03.0-beads-tracker
 title: Test Suite for Release 03.0 The Tracker Becomes Beads
 release: "03.0"
-status: specified
+status: implemented
 ---
 
 <!-- field: overview -->
@@ -13,8 +13,8 @@ no GitLab and no network — which is itself part of what the release
 proves (srd042 R4.2). The pop-and-close stage proves one issue's whole
 life against beads; the synchronization stage proves two clones, a
 contended pop, and an offline session against one tracker repository.
-Test and target names below are intentions; they bind when the suite is
-implemented.
+The tests live in internal/beads and each target runs its test against
+fresh fixtures.
 
 <!-- field: traces -->
 ## Traces
@@ -32,7 +32,7 @@ implemented.
 <!-- field: test_cases -->
 ## Test cases
 
-<!-- case: A popped issue closes with its merge commit cited | status: specified -->
+<!-- case: A popped issue closes with its merge commit cited | status: implemented -->
 ### A popped issue closes with its merge commit cited
 
 <!-- field: use_case -->
@@ -63,7 +63,7 @@ go test ./internal/beads -run '^TestPopAndCloseCitesTheMergeCommit$'
 
 - [srd042-beads-tracker](../software-requirements/srd042-beads-tracker.md) [AC2](../software-requirements/srd042-beads-tracker.md#ac2)
 
-<!-- case: The state machine replays identically on beads | status: specified -->
+<!-- case: The state machine replays identically on beads | status: implemented -->
 ### The state machine replays identically on beads
 
 <!-- field: use_case -->
@@ -92,7 +92,7 @@ go test ./internal/beads -run '^TestStateTableReplaysOnBeads$'
 
 - [srd042-beads-tracker](../software-requirements/srd042-beads-tracker.md) [AC1](../software-requirements/srd042-beads-tracker.md#ac1)
 
-<!-- case: Disjoint writes merge and a contended pop keeps the earlier taker | status: specified -->
+<!-- case: Disjoint writes merge and a contended pop keeps the earlier taker | status: implemented -->
 ### Disjoint writes merge and a contended pop keeps the earlier taker
 
 <!-- field: use_case -->
@@ -122,7 +122,7 @@ go test ./internal/beads -run '^TestContendedPopKeepsTheEarlierTaker$'
 
 - [srd042-beads-tracker](../software-requirements/srd042-beads-tracker.md) [AC3](../software-requirements/srd042-beads-tracker.md#ac3)
 
-<!-- case: An offline clone reads its cache, says so, and reconciles | status: specified -->
+<!-- case: An offline clone reads its cache, says so, and reconciles | status: implemented -->
 ### An offline clone reads its cache, says so, and reconciles
 
 <!-- field: use_case -->
