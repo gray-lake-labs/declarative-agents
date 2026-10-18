@@ -148,6 +148,16 @@ type LintResult struct {
 func Apply(t gitlab.Tracker, i gitlab.Issue, reasons []string, p Policy, dryRun bool) (LintResult, error) {
 	r := LintResult{Project: i.Project, IID: i.IID, Admitted: len(reasons) == 0, Reasons: reasons}
 	triaged := i.HasLabel(p.TriageLabel)
+	triager, byState := t.(gitlab.Triager)
+	if r.Admitted && byState {
+		if dryRun {
+			r.Changed = triaged
+			return r, nil
+		}
+		var err error
+		r.Changed, err = triager.Triage(i.Project, i.IID, true)
+		return r, err
+	}
 	if r.Admitted {
 		if triaged {
 			r.Changed = true
@@ -176,7 +186,11 @@ func Apply(t gitlab.Tracker, i gitlab.Issue, reasons []string, p Policy, dryRun 
 	if dryRun {
 		return r, nil
 	}
-	if !triaged {
+	if !triaged && byState {
+		if _, err := triager.Triage(i.Project, i.IID, false); err != nil {
+			return r, err
+		}
+	} else if !triaged {
 		if _, err := t.UpdateIssue(i.Project, i.IID, gitlab.IssueUpdate{AddLabels: []string{p.TriageLabel}}); err != nil {
 			return r, err
 		}

@@ -37,6 +37,7 @@ type Tracker struct {
 var (
 	_ gitlab.Tracker = (*Tracker)(nil)
 	_ gitlab.Reader  = (*Tracker)(nil)
+	_ gitlab.Triager = (*Tracker)(nil)
 )
 
 // LastRead names the tracker commit the last read reflected.
@@ -263,6 +264,37 @@ func (t *Tracker) AssignIssue(project string, iid int, user gitlab.User) error {
 		return fmt.Errorf("%s#%d was taken by %s first", project, iid, r.LostTo)
 	}
 	return nil
+}
+
+// Triage is admission as srd041's lint rows: an admitted open issue becomes
+// ready, an admitted issue in needs-triage becomes ready or, already taken
+// by its author, taken; a failing open issue goes to needs-triage. srd041
+// has no row for an issue already past admission that later fails, so
+// there lint sets or clears only the label, as it does on GitLab.
+func (t *Tracker) Triage(project string, iid int, admitted bool) (bool, error) {
+	found, err := t.find(project, iid)
+	if err != nil {
+		return false, err
+	}
+	me := t.Store.User
+	_, written, _, err := t.Store.mutate(found.ID, "lint", func(i *Issue) (bool, error) {
+		switch {
+		case admitted && (i.State == Open || i.State == NeedsTriage) && i.Assignee == "":
+			return true, transition(i, ActorLint, Ready, me)
+		case admitted && i.State == NeedsTriage:
+			return true, transition(i, ActorLint, Taken, me)
+		case admitted && i.HasLabel(NeedsTriage):
+			i.Labels = slices.DeleteFunc(i.Labels, func(l string) bool { return l == NeedsTriage })
+			return true, nil
+		case !admitted && i.State == Open:
+			return true, transition(i, ActorLint, NeedsTriage, me)
+		case !admitted && !i.HasLabel(NeedsTriage):
+			i.Labels = append(i.Labels, NeedsTriage)
+			return true, nil
+		}
+		return false, nil
+	})
+	return written, err
 }
 
 // CloseOnMerge closes an issue on the local merge that delivered it, citing
