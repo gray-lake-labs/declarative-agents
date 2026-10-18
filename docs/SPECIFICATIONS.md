@@ -59,6 +59,7 @@ docs/road-map.md.
 | "01.2" | Sprint end closes the loop | 2 | 2 | implemented |
 | "01.3" | Tags trigger handoff and the summary | 0 | 2 | specified |
 | "02.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
+| "03.0" | The tracker becomes beads | 0 | 0 | specified |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -72,6 +73,7 @@ docs/road-map.md.
 | docs/engineering/eng01-gitlab-regression-rig.md | [eng01-gitlab-regression-rig](engineering/eng01-gitlab-regression-rig.md) |
 | docs/engineering/eng02-tpm-and-skills.md | [eng02-tpm-and-skills](engineering/eng02-tpm-and-skills.md) |
 | docs/engineering/eng03-releasing-scrum-master.md | [eng03-releasing-scrum-master](engineering/eng03-releasing-scrum-master.md) |
+| docs/engineering/eng04-beads-sync.md | [eng04-beads-sync](engineering/eng04-beads-sync.md) |
 | docs/guides/ai-native-sdlc.md | ai-native-sdlc |
 | docs/guides/corpus-audit.md | corpus-audit |
 | docs/guides/parent-upgrade.md | parent-upgrade |
@@ -105,6 +107,7 @@ docs/road-map.md.
 | [srd039-corpus](specs/software-requirements/srd039-corpus.md) | docs/specs/software-requirements/srd039-corpus.md | Shared: corpus and config documents (internal/corpus) | 01.0 |
 | [srd040-format-tools](specs/software-requirements/srd040-format-tools.md) | docs/specs/software-requirements/srd040-format-tools.md | Tooling: mage convert, fmt, specCheck, and the format gates | 01.2 |
 | [srd041-states](specs/software-requirements/srd041-states.md) | docs/specs/software-requirements/srd041-states.md | States and transitions of an issue | 00.1 |
+| [srd042-beads-tracker](specs/software-requirements/srd042-beads-tracker.md) | docs/specs/software-requirements/srd042-beads-tracker.md | Beads tracker: the program's facts live in a repository | 03.0 |
 
 <!-- field: config_format_index -->
 ## Config format index

@@ -366,3 +366,19 @@ cases are written when the release is planned.
 - srd032-sprint-review
 - srd033-sprint-retrospective
 - srd041-states
+
+<!-- release: 03.0 | status: specified -->
+## 03.0 - The tracker becomes beads
+
+The program's facts move from the hosted GitLab instance to beads in a
+dedicated tracker repository, synchronized through git: pull before
+read, push after write, conflicts resolved by rule (eng04-beads-sync).
+tpm gains a beads backend behind the tracker boundary, the platform
+Terraform and the GitLab client leave, and the regression rig provisions
+fixture tracker repositories. srd042 holds the direction; use cases are
+written when the release is planned.
+
+<!-- field: srds -->
+### SRDs
+
+- srd042-beads-tracker
