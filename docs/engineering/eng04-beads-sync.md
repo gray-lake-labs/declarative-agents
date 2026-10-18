@@ -76,9 +76,11 @@ TPM_TRACKER, set to the tracker repository's URL, selects the beads
 backend; unset, tpm talks to GitLab as before. The tracker clone lives at
 TPM_TRACKER_CLONE, or under the user cache directory, cloned on first use.
 The person is TPM_USER, or git's user.name. Issues come from the tracker
-repository; files, branches, tags, and comparisons come from the git
-checkout the command runs in and its origin, so a command runs from inside
-the repository it works on. Delivery is a merge commit on the default
+repository; files, branches, tags, and comparisons come from git: a
+project's checkout is the sibling of the command's checkout named for the
+project's last path segment, as repositories sit side by side under their
+owner, and a project with no such sibling is served by the command's own
+checkout and its origin. Delivery is a merge commit on the default
 branch citing project#iid, made with git merge --no-ff; tpm program close
 finds it and closes the issue on it, and refuses a fast-forward or an empty
 branch, because neither is a delivery a reviewer can point to.
