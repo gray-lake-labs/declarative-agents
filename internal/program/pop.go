@@ -59,10 +59,13 @@ type PopResult struct {
 	Branch   string `json:"branch"`
 	Worktree string `json:"worktree"`
 	Checkout string `json:"checkout"`
-	Assigned bool   `json:"assigned"`       // pop assigned the caller now
-	Created  bool   `json:"branch_created"` // pop created the branch now
-	Added    bool   `json:"worktree_added"` // pop added the worktree now
-	DryRun   bool   `json:"dry_run"`
+	Assigned bool   `json:"assigned"` // pop assigned the caller now
+	// Provisional is an assignment taken while the tracker repository was
+	// unreachable; tpm tracker reconcile confirms it or reports it lost.
+	Provisional bool `json:"provisional,omitempty"`
+	Created     bool `json:"branch_created"` // pop created the branch now
+	Added       bool `json:"worktree_added"` // pop added the worktree now
+	DryRun      bool `json:"dry_run"`
 	// Installed are the agents whose skills were installed into the worktree
 	// (srd036 R2.3); InstallError says why that failed, without undoing pop.
 	Installed    []string `json:"installed,omitempty"`
@@ -102,6 +105,10 @@ func Pop(t gitlab.Tracker, git Git, project string, iid int, dir string, p Polic
 		if !dryRun {
 			if err := t.AssignIssue(project, iid, me); err != nil {
 				return r, err
+			}
+			if reader, ok := t.(gitlab.Reader); ok {
+				read, _ := reader.LastRead()
+				r.Provisional = read.Offline
 			}
 		}
 	}

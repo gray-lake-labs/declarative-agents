@@ -34,17 +34,63 @@ type Context struct {
 	Flags   *flag.FlagSet
 	Out     io.Writer
 	Tracker func() (gitlab.Tracker, error)
+	// used is the tracker the command opened, so Emit can name what it read.
+	used gitlab.Tracker
 }
 
-// Emit writes v as JSON with --json, else the human text.
+// Emit writes v as JSON with --json, else the human text. When the command's
+// tracker knows the tracker commit it read, the output names it: as
+// tracker_read in a JSON object, and as a last line of the human text.
 func (c *Context) Emit(v any, human string) error {
+	read, ok := c.read()
 	if c.JSON {
+		if ok {
+			v = withRead(v, read)
+		}
 		enc := json.NewEncoder(c.Out)
 		enc.SetIndent("", "  ")
 		return enc.Encode(v)
 	}
-	_, err := fmt.Fprintln(c.Out, strings.TrimRight(human, "\n"))
+	human = strings.TrimRight(human, "\n")
+	if ok {
+		human += "\n" + readLine(read)
+	}
+	_, err := fmt.Fprintln(c.Out, human)
 	return err
+}
+
+func (c *Context) read() (gitlab.Read, bool) {
+	if r, isReader := c.used.(gitlab.Reader); isReader {
+		return r.LastRead()
+	}
+	return gitlab.Read{}, false
+}
+
+// withRead adds tracker_read to v when v encodes as a JSON object; any
+// other shape is left as it is, so no output changes type.
+func withRead(v any, read gitlab.Read) any {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return v
+	}
+	var obj map[string]json.RawMessage
+	if json.Unmarshal(b, &obj) != nil || obj == nil {
+		return v
+	}
+	rb, _ := json.Marshal(read)
+	obj["tracker_read"] = rb
+	return obj
+}
+
+func readLine(r gitlab.Read) string {
+	commit := r.Commit
+	if len(commit) > 12 {
+		commit = commit[:12]
+	}
+	if r.Offline {
+		return fmt.Sprintf("tracker %s, offline: read the cache last pulled at %s", commit, r.At)
+	}
+	return "tracker " + commit
 }
 
 // Registry holds the groups and their commands.
@@ -101,7 +147,17 @@ func (r *Registry) Run(args []string, out io.Writer, tracker func() (gitlab.Trac
 	}
 	fs := flag.NewFlagSet(strings.TrimSpace("tpm "+cmd.Group+" "+cmd.Name), flag.ContinueOnError)
 	fs.SetOutput(out)
-	ctx := &Context{Flags: fs, Out: out, Tracker: tracker}
+	ctx := &Context{Flags: fs, Out: out}
+	ctx.Tracker = func() (gitlab.Tracker, error) {
+		if ctx.used != nil {
+			return ctx.used, nil
+		}
+		t, err := tracker()
+		if err == nil {
+			ctx.used = t
+		}
+		return t, err
+	}
 	fs.BoolVar(&ctx.JSON, "json", false, "write machine-readable JSON to stdout")
 	fs.BoolVar(&ctx.DryRun, "dry-run", false, "report what would change and change nothing")
 	if cmd.Flags != nil {
