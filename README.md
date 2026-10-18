@@ -26,3 +26,7 @@ mage -d magefiles -l
 Releases are cut by `mage -d magefiles tag`, which runs the gates in `release-gates.md` and tags `v0.YYYYMMDD.N`. The corpus audit requires a clone cache of the parent specification repository; `docs/guides/corpus-audit.md` describes it.
 
 Issue tracking lives in the repository via [beads](https://github.com/steveyegge/beads); the GitHub tracker is unused.
+
+## License
+
+[MIT No Attribution (MIT-0)](LICENSE).
