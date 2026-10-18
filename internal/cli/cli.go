@@ -1,0 +1,159 @@
+// Package cli is tpm's command line: subcommand groups registered by
+// packages, each subcommand with --json and --dry-run, none reading stdin or
+// prompting (srd010 R1, srd013 R2.1).
+package cli
+
+import (
+	"encoding/json"
+	"errors"
+	"flag"
+	"fmt"
+	"io"
+	"sort"
+	"strings"
+
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+)
+
+// Command is one subcommand of one group. A command with an empty Name is
+// the group's own command: it runs when no subcommand follows the group.
+type Command struct {
+	Group   string
+	Name    string
+	Summary string
+	// Flags declares the subcommand's own flags; --json and --dry-run are
+	// added for every subcommand.
+	Flags func(fs *flag.FlagSet)
+	Run   func(ctx *Context) error
+}
+
+// Context is what a subcommand runs with.
+type Context struct {
+	JSON    bool
+	DryRun  bool
+	Flags   *flag.FlagSet
+	Out     io.Writer
+	Tracker func() (gitlab.Tracker, error)
+}
+
+// Emit writes v as JSON with --json, else the human text.
+func (c *Context) Emit(v any, human string) error {
+	if c.JSON {
+		enc := json.NewEncoder(c.Out)
+		enc.SetIndent("", "  ")
+		return enc.Encode(v)
+	}
+	_, err := fmt.Fprintln(c.Out, strings.TrimRight(human, "\n"))
+	return err
+}
+
+// Registry holds the groups and their commands.
+type Registry struct {
+	commands map[string]map[string]*Command
+}
+
+// Default is the registry cmd/tpm runs; packages register into it in init.
+var Default = &Registry{}
+
+// Register adds a command. A duplicate group and name panics at start-up.
+func (r *Registry) Register(c *Command) {
+	if r.commands == nil {
+		r.commands = map[string]map[string]*Command{}
+	}
+	if r.commands[c.Group] == nil {
+		r.commands[c.Group] = map[string]*Command{}
+	}
+	if _, dup := r.commands[c.Group][c.Name]; dup {
+		panic("tpm: duplicate command " + c.Group + " " + c.Name)
+	}
+	r.commands[c.Group][c.Name] = c
+}
+
+// ErrUsage marks a usage error; cmd/tpm exits 2 for it.
+var ErrUsage = errors.New("usage")
+
+// Run parses args (without the program name) and runs one subcommand.
+func (r *Registry) Run(args []string, out io.Writer, tracker func() (gitlab.Tracker, error)) error {
+	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" || args[0] == "help" {
+		fmt.Fprint(out, r.usage())
+		if len(args) == 0 {
+			return ErrUsage
+		}
+		return nil
+	}
+	group, ok := r.commands[args[0]]
+	if !ok {
+		return fmt.Errorf("%w: unknown group %q\n\n%s", ErrUsage, args[0], r.usage())
+	}
+	cmd, rest := group[""], args[1:]
+	if cmd == nil || (len(rest) > 0 && !strings.HasPrefix(rest[0], "-")) {
+		if len(args) == 1 || args[1] == "-h" || args[1] == "--help" {
+			fmt.Fprint(out, r.groupUsage(args[0]))
+			if len(args) == 1 {
+				return ErrUsage
+			}
+			return nil
+		}
+		if cmd, ok = group[args[1]]; !ok {
+			return fmt.Errorf("%w: unknown subcommand %q\n\n%s", ErrUsage, args[1], r.groupUsage(args[0]))
+		}
+		rest = args[2:]
+	}
+	fs := flag.NewFlagSet(strings.TrimSpace("tpm "+cmd.Group+" "+cmd.Name), flag.ContinueOnError)
+	fs.SetOutput(out)
+	ctx := &Context{Flags: fs, Out: out, Tracker: tracker}
+	fs.BoolVar(&ctx.JSON, "json", false, "write machine-readable JSON to stdout")
+	fs.BoolVar(&ctx.DryRun, "dry-run", false, "report what would change and change nothing")
+	if cmd.Flags != nil {
+		cmd.Flags(fs)
+	}
+	if err := fs.Parse(rest); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
+		return fmt.Errorf("%w: %v", ErrUsage, err)
+	}
+	return cmd.Run(ctx)
+}
+
+func (r *Registry) usage() string {
+	var b strings.Builder
+	b.WriteString("usage: tpm <group> <subcommand> [--json] [--dry-run] [flags]\n\ngroups:\n")
+	for _, g := range sortedKeys(r.commands) {
+		if c := r.commands[g][""]; c != nil && len(r.commands[g]) == 1 {
+			fmt.Fprintf(&b, "  %-20s %s\n", g, c.Summary)
+			continue
+		}
+		fmt.Fprintf(&b, "  %s\n", g)
+	}
+	return b.String()
+}
+
+func (r *Registry) groupUsage(group string) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "usage: tpm %s <subcommand> [--json] [--dry-run] [flags]\n\nsubcommands:\n", group)
+	for _, n := range sortedKeys(r.commands[group]) {
+		fmt.Fprintf(&b, "  %-20s %s\n", n, r.commands[group][n].Summary)
+	}
+	return b.String()
+}
+
+func sortedKeys[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// Strings is a flag that repeats: each use adds one value.
+type Strings []string
+
+func (s *Strings) String() string { return strings.Join(*s, ",") }
+
+// Set adds a value.
+func (s *Strings) Set(v string) error {
+	*s = append(*s, v)
+	return nil
+}

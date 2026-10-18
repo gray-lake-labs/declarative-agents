@@ -1,0 +1,334 @@
+---
+id: design
+title: Documentation Design Constitution
+---
+
+<!-- field: purpose -->
+## Purpose
+
+We use this constitution when creating or changing VISION, ARCHITECTURE, SRDs, use cases, test suites, semantic models, config-format specs, and the other documents of this repository. The repository specifies a project-agnostic AI-native scrum process and the skills that implement it; the goal is a corpus that people can read and tools can validate.
+
+<!-- field: articles -->
+## Articles
+
+<!-- article: D1 -->
+### D1 - Specification-driven development
+
+Specifications lead implementation. A new skill or a change to one starts with an SRD, a use case, or an explicit documentation issue before any script changes. A script change points back to the requirement it implements.
+
+<!-- article: D2 -->
+### D2 - Every file is Markdown with tags
+
+Every file is Markdown with marker tags. Structured artifacts use the format the pinned Nokia declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's objective documents, which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides. Seven files are not Markdown because a consumer outside this repository requires their format: docs/external-pins.yaml and docs/external-checkouts.yaml, which the parent's audit reads by path; docs/corpus-charter.yaml, which the parent's audit executes; the GitLab CI files (*.gitlab-ci.yml), which GitLab reads; plugin/plugin.json, which the Agent Plugins 1.0 standard names; and .beads/config.yaml and .beads/metadata.json, which the beads tracker reads.
+
+<!-- article: D3 -->
+### D3 - Traceability
+
+Vision states goals and boundaries. Architecture states components and flows. SRDs define numbered requirements, one SRD per skill. Use cases exercise SRDs through touchpoints that cite requirement groups. Test suites validate use cases and acceptance criteria. A change keeps that chain intact.
+
+<!-- article: D4 -->
+### D4 - Issue-first process
+
+The process has one unit of work, the issue. Documents describe every object (sprint, epic, task, recurring issue, comment event, link) by how it relates to an issue and by the labels an issue carries. A document that introduces a second unit of work is wrong.
+
+<!-- article: D5 -->
+### D5 - Facts are fetched, judgment is asked
+
+Every SRD separates what a script derives from the tracker from what a skill asks a person. A requirement that has a script assign, rank, or estimate a person is refused. Scripts are deterministic and idempotent; skills hold the questions.
+
+<!-- article: D6 -->
+### D6 - Project agnostic
+
+No document names a person, an organization, a product, or a project. Examples use placeholder components and repositories. Anything a consuming project supplies (its subsystems, its components, its environments) is declared in that project's own SRDs, never as content of this corpus.
+
+<!-- article: D7 -->
+### D7 - Same corpus at every level
+
+Every repository of a program, at system, subsystem, component, or test-subsystem level, carries the same docs/ corpus: SRDs, a road-map, and this constitution, checked by the same audit. Levels differ only by which SRDs their owner writes. Repository layout is declared, not inferred: a subsystem SRD names its components by repository URL and path, and an environment is an SRD in the test-subsystem repository.
+
+<!-- article: D8 -->
+### D8 - Acceptance criteria name their evidence
+
+Every acceptance criterion names the test that proves it and the environment where that proof counts (local, dev, staging, production PoC, or a customer R&D environment, each defined by an environment SRD). A criterion without a named test and environment cannot be met and is reported by the audit. Done means the named test passed in the named environment on a recorded version, not that an issue closed.
+
+<!-- article: D9 -->
+### D9 - Cross-repository references are pinned
+
+A reference to a requirement, interface, or SRD in another repository is a URL pinned to a release tag, for example https://host/group/repo/-/blob/v1.4.0/docs/specs/software-requirements/srd003-ingest.md#R2.1. An unpinned reference, or one whose tag or anchor does not resolve, is an audit failure. References inside one repository use the srdNNN Rn form.
+
+<!-- article: D10 -->
+### D10 - Code does the workflow; the model does language
+
+Every step a program can do is a tpm subcommand: fetching facts, deriving state, filing and linking issues, validating files, computing aggregates, tagging, and posting events. A skill is a thin script, at most 50 lines, that calls tpm subcommands with --json and relays the person's choices among the options tpm computes. The model does three kinds of work only: turning loose conversation into a structured file, combining several files into one summary, and iterating on that content with the person. A specification that gives the model any other step is refused, and the step moves into tpm. This extends D5: facts are fetched by code, judgment is asked, and language is the only thing the model writes.
+
+<!-- article: D11 -->
+### D11 - Configuration is Markdown with tags
+
+A configuration file scrum-master reads is a config document: Markdown with frontmatter (id, title) and marker tags, read by internal/corpus and decoded into the settings it holds. Each setting is a field, a field marker above a heading; a level 2 field is a top-level setting, and a field one level below another is a setting inside it. A field whose children are fields holds a mapping. A field whose children are records, a kind marker with an id above a heading, holds a list: each record is a mapping of its child fields with its id as name. A field with no children holds a value: a table is a list of mappings, one per row keyed by the header; a bullet list is a list of values; any other text is one value. Values read as integers, true or false, or text, and None is empty. The parent declares no type for these files, so a gate test in mage audit reads every config document in the repository, and each config format names its fields (schema.config_document).
+
+<!-- article: D12 -->
+### D12 - Future releases hold direction
+
+An SRD whose release is not the next one holds its problem, goals, non-goals, and one requirement group of direction; its detailed requirement items are written when its release is planned, as its use cases are. Items written earlier and never built retire in place (D6) rather than wait to mislead the planning of the release before them. A requirement that depends on behavior an unbuilt SRD specifies states its interim rule, the behavior that holds until that SRD is built, as srd038 R2 does for objectives closing before track-goals runs. An SRD that is partly built keeps its built items live and reduces only the rest.
+
+<!-- field: schema | form: "tree" -->
+## Schema
+
+- vision:
+  - location: docs/VISION.md
+  - required_fields:
+    1. id
+    1. title
+    1. executive_summary
+    1. problem
+    1. what_this_does
+    1. why_we_build_this
+    1. success_criteria
+    1. not
+  - purpose: Defines what the process is, why it exists, and what it excludes.
+- architecture:
+  - location: docs/ARCHITECTURE.md
+  - required_fields:
+    1. id
+    1. title
+    1. overview
+    1. interfaces
+    1. components
+    1. design_decisions
+    1. technology_choices
+    1. project_structure
+    1. implementation_status
+    1. related_documents
+  - purpose: Defines planes, components, flows, decisions, and repository layout.
+- specifications:
+  - location: docs/SPECIFICATIONS.md
+  - required_fields:
+    1. id
+    1. title
+    1. overview
+    1. roadmap_summary
+    1. foundation_document_index
+    1. srd_index
+    1. config_format_index
+    1. semantic_model_index
+    1. use_case_index
+    1. test_suite_index
+    1. coverage_gaps
+  - purpose: Indexes the corpus and records known coverage gaps.
+- roadmap:
+  - location: docs/road-map.md
+  - required_fields:
+    1. id
+    1. title
+    1. releases
+  - program_release_fields:
+    - deliverables: the objective items the release proves, objNNN-short-name#Rn.m, listed before release
+    - release.publication: tag (the release tag Cites lines pin) and milestone, as tree items
+  - purpose: Assigns SRDs and use cases to releases and status values. In a program's system repository a release also names the objective items it proves and its tag and milestone, in program_release_fields (srd034 R3.1).
+- srd:
+  - location: docs/specs/software-requirements/srdNNN-short-name.md
+  - required_fields:
+    1. id
+    1. title
+    1. problem
+    1. goals
+    1. requirements
+    1. non_goals
+    1. acceptance_criteria
+  - numbering:
+    - goals: G1, G2, G3
+    - requirement_groups: R1, R2, R3
+    - requirement_items: R1.1, R1.2, R2.1
+    - acceptance_criteria: AC1, AC2, AC3
+  - acceptance_criteria_fields:
+    1. id
+    1. criterion
+    1. traces
+    1. tests
+    1. applicability
+  - acceptance_criteria_note: tests and an environment are required in SRDs of consuming programs (D8); the criterion's applicability names its environment. This corpus specifies the process itself and has no environments yet, so its own SRDs omit them until the test subsystem's environment SRDs exist.
+  - purpose: Defines one skill's requirements with checkable criteria.
+- subsystem_srd:
+  - location: docs/specs/software-requirements/srdNNN-short-name.md in the system (TPM) repository
+  - required_fields:
+    1. id
+    1. title
+    1. problem
+    1. goals
+    1. requirements
+    1. non_goals
+    1. acceptance_criteria
+    1. context
+    1. implementation_targets
+  - context_items:
+    1. owner
+  - implementation_targets_columns:
+    1. name
+    1. repository
+    1. path
+  - numbering: same as srd
+  - purpose: Declares one subsystem, its owner (a Product Owner, the owner item of context), and its components, each a row of implementation_targets by repository URL and path. Component label values (component::<name>) come from these rows.
+- environment_srd:
+  - location: docs/specs/software-requirements/srdNNN-env-name.md in the test-subsystem repository
+  - required_fields:
+    1. id
+    1. title
+    1. problem
+    1. goals
+    1. requirements
+    1. non_goals
+    1. acceptance_criteria
+    1. context
+    1. test_suite_traces
+  - context_items:
+    1. owner
+    1. trigger
+  - trigger_values:
+    1. each_subsystem_release
+    1. nightly_latest
+    1. both
+    1. human_approval
+  - numbering: same as srd
+  - purpose: "Declares one environment of the chain (local, dev, staging, production PoC, customer R\u0026D): who owns it and what triggers promotion into it (context items), and which test suites run there (test_suite_traces). Promotion is CI/CD in the test subsystem; handoff into a customer R\u0026D environment is a human approval."
+- objective:
+  - location: docs/specs/objectives/objNNN-short-name.md in the system (TPM) repository
+  - format: an SRD in the pinned release's Markdown format (D2); scrum-master's format tools read it with the release's SRD declaration
+  - required_fields:
+    1. id
+    1. title
+    1. status
+    1. context
+    1. problem
+    1. goals
+    1. requirements
+    1. non_goals
+    1. acceptance_criteria
+  - status_values:
+    1. to_be_agreed
+    1. agreed
+    1. retired
+  - context_items:
+    1. owner
+    1. horizon
+  - requirement_group_fields:
+    1. title
+    1. applicability
+    1. items
+  - requirement_group_applicability_items:
+    1. due
+    1. delivered_by
+  - numbering: same as srd; each requirement group is one objective
+  - acceptance_criteria_fields: same as srd
+  - acceptance_criteria_note: tests and applicability are required (D8); applicability names the environment. Until the program's environment SRDs exist, it names a chain stage D8 lists and the audit cannot resolve it (srd034 R1.5).
+  - purpose: States what the program commits to for a horizon of periods, owned by the technical program manager. plan-release places its items in a release and create-goals cites them, pinned, on the objective issues it files (srd034).
+- use_case:
+  - location: docs/specs/use-cases/relNN.N-ucNNN-short-name.md
+  - required_fields:
+    1. id
+    1. title
+    1. summary
+    1. actor
+    1. trigger
+    1. flow
+    1. touchpoints
+    1. success_criteria
+    1. out_of_scope
+  - numbering:
+    - flow_steps: F1, F2, F3
+    - touchpoints: T1, T2, T3
+    - success_criteria: S1, S2, S3
+    - assumptions: A1, A2, A3
+    - edge_cases: E1, E2, E3
+  - optional_fields:
+    1. status
+    1. retired_in
+    1. replaced_by
+    1. needs_clarification
+    1. assumptions
+    1. edge_cases
+    1. priority
+  - priority: P1 must ship for the use case's release, P2 should, P3 could. An absent priority means unranked. No other value is valid. A use case is the unit of scheduling here, so priority lives on it rather than on a separate user-story type.
+  - purpose: Describes one end-to-end path through the process.
+- test_suite:
+  - location: docs/specs/test-suites/test-relNN.N-short-name.md
+  - required_fields:
+    1. id
+    1. title
+    1. release
+    1. traces
+    1. preconditions
+    1. test_cases
+  - optional_fields:
+    1. status
+    1. retired_in
+    1. replaced_by
+    1. needs_clarification
+  - purpose: Maps release use cases and SRD criteria to named tests.
+- semantic_model:
+  - location: docs/specs/semantic-models/name.md
+  - required_fields:
+    1. id
+    1. title
+    1. purpose
+  - purpose: Defines vocabulary, ownership, or cross-cutting concepts.
+- config_format:
+  - location: docs/specs/config-formats/name.md
+  - required_fields:
+    1. id
+    1. title
+    1. purpose
+  - purpose: Defines a machine-readable format the scripts read or write.
+- constitution:
+  - location: docs/constitutions/name.md
+  - required_fields:
+    1. id
+    1. title
+    1. purpose
+  - purpose: Defines rules for agents and contributors working in this repository; this constitution holds the schema of every document type.
+- config_document:
+  - location: control/labels.md and control/policy.md in a program repository, reports.md in the reports repository, person.md in the person's configuration directory, release-gates.md and regression.md in this repository
+  - required_fields:
+    1. id
+    1. title
+  - purpose: A configuration file scrum-master reads, in the form D11 states; each config format names its settings.
+- corpus_charter:
+  - location: docs/corpus-charter.yaml
+  - required_fields:
+    1. id
+    1. title
+    1. checks
+  - purpose: Names the specification-corpus checks the parent's corpus audit gates on in this repository (docs/guides/corpus-audit.md).
+- external_pins:
+  - location: docs/external-pins.yaml
+  - required_fields:
+    1. pins
+  - purpose: Maps each parent repository to the release this corpus tracks; every derived_from entry is validated against a release of its parent.
+- external_checkouts:
+  - location: docs/external-checkouts.yaml
+  - required_fields:
+    1. checkouts
+  - purpose: Overrides the clone-cache location per parent repository, relative to the repository root.
+- engineering_guideline:
+  - location: docs/engineering/engNN-short-name.md
+  - required_fields:
+    1. id
+    1. title
+    1. introduction
+    1. sections
+    1. references
+  - purpose: Defines repository-wide engineering practices shared by modules.
+- guide:
+  - location: docs/guides/name.md
+  - format: markdown
+  - required_fields: []
+  - purpose: Prose a person reads start to finish.
+
+<!-- field: review_checklist -->
+## Review checklist
+
+- Style: Short, exact sentences. Active voice. No filler. Exact paths, commands, labels, and field names over broad claims.
+- Voice: "We" for process behavior and obligations. Present tense for current behavior. Planned status only where implementation or tests are missing.
+- Diction: No hype, vague intensifiers, stock transitions, or claims that do not name a behavior, file, command, label, or contract.
+- Formatting, prose: Paragraphs for explanation. Lists for fields, steps, and checklists. Short table cells.
+- Formatting, fields: Lowercase snake_case field names. IDs stable once referenced. mage fmt writes the canonical form.
+- Formatting, diagrams: Mermaid in fenced code blocks. No generated image files in docs/.

@@ -1,0 +1,188 @@
+package program
+
+import (
+	"errors"
+	"fmt"
+
+	"github.com/gray-lake-labs/scrum-master/internal/corpus"
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+)
+
+// Policy is what admission reads from control/policy.md and
+// control/labels.md (config formats policy and labels). Without control
+// files, Defaults applies.
+type Policy struct {
+	Planes     []string
+	Types      []string
+	Kinds      []string
+	Components []string // empty: any component:: value is accepted
+	// RequireAC lists the kinds whose issues must carry Requirements and
+	// Acceptance Criteria; any issue with a Cites line must carry them too.
+	RequireAC        []string
+	RequireMilestone bool
+	ManagementFilers []string // usernames; empty or ["leads"]: not checked
+	TriageLabel      string
+	// AuditCommand is the corpus gate open-merge-request runs, in the worktree, on a
+	// branch that changes docs/ (srd036 R3.2).
+	AuditCommand string
+	// Releases and DefinitionOfDone drive tpm release (srd015, srd008 R2).
+	Releases         Releases
+	DefinitionOfDone map[string][]Check
+	Escalation       Escalation
+}
+
+// Escalation is policy.escalation: the thresholds past which aggregation
+// reports a signal (srd018 R3.2).
+type Escalation struct {
+	BlockerAgeDays     int `yaml:"blocker_age_days" json:"blocker_age_days"`
+	WaitingChainLength int `yaml:"waiting_chain_length" json:"waiting_chain_length"`
+	SlipReleases       int `yaml:"slip_releases" json:"slip_releases"`
+	EvidenceAgeDays    int `yaml:"evidence_age_days" json:"evidence_age_days"`
+}
+
+// Releases is policy.releases: the version scheme, which bumps are
+// breaking, and the tag format with {artifact} and {version}.
+type Releases struct {
+	Scheme    string `yaml:"scheme" json:"scheme"`
+	Breaking  string `yaml:"breaking" json:"breaking"`
+	TagFormat string `yaml:"tag_format" json:"tag_format"`
+}
+
+// Check is one entry of a definition_of_done gate (srd008 R2.2). Command is
+// what a local tests or custom check runs from the repository root.
+type Check struct {
+	Kind        string `yaml:"kind" json:"kind"`
+	Environment string `yaml:"environment" json:"environment,omitempty"`
+	Suite       string `yaml:"suite" json:"suite,omitempty"`
+	Command     string `yaml:"command" json:"command,omitempty"`
+	Consumers   string `yaml:"consumers" json:"consumers,omitempty"`
+	Against     string `yaml:"against" json:"against,omitempty"`
+	Threshold   string `yaml:"threshold" json:"threshold,omitempty"`
+}
+
+// Gate is the checks declared for artifact, or the default gate.
+func (p Policy) Gate(artifact string) []Check {
+	if g, ok := p.DefinitionOfDone[artifact]; ok {
+		return g
+	}
+	return p.DefinitionOfDone["default"]
+}
+
+// Defaults are the values srd001 fixes and the example policy uses.
+func Defaults() Policy {
+	return Policy{
+		Planes:           []string{"management", "control", "data"},
+		Types:            []string{"epic", "sprint", "recurring"},
+		Kinds:            []string{"build", "experiment", "research", "spec", "review", "consume", "handoff", "release", "defect", "request", "question"},
+		RequireAC:        []string{"build", "experiment", "research", "spec"},
+		RequireMilestone: true,
+		TriageLabel:      "needs-triage",
+		AuditCommand:     "mage audit",
+		Releases:         Releases{Scheme: "semver", Breaking: "major-and-minor-before-1.0", TagFormat: "{artifact}/v{version}"},
+		DefinitionOfDone: map[string][]Check{"default": {{Kind: "tests", Environment: "local", Suite: "unit", Command: "go test ./..."}}},
+		Escalation:       Escalation{BlockerAgeDays: 14, WaitingChainLength: 3, SlipReleases: 2, EvidenceAgeDays: 7},
+	}
+}
+
+// The control files of a program repository, config documents (design D11;
+// config formats policy and labels).
+const (
+	PolicyFile = "control/policy.md"
+	LabelsFile = "control/labels.md"
+)
+
+type policyFile struct {
+	Admission struct {
+		RequireMilestone          *bool  `yaml:"require_milestone"`
+		RequireAcceptanceCriteria *bool  `yaml:"require_acceptance_criteria"`
+		ManagementFilers          any    `yaml:"management_filers"`
+		AuditCommand              string `yaml:"audit_command"`
+	} `yaml:"admission"`
+	Releases         Releases           `yaml:"releases"`
+	Escalation       Escalation         `yaml:"escalation"`
+	DefinitionOfDone map[string][]Check `yaml:"definition_of_done"`
+}
+
+type labelsFile struct {
+	Axes map[string]struct {
+		Values []struct {
+			Name string `yaml:"name"`
+		} `yaml:"values"`
+	} `yaml:"axes"`
+}
+
+// LoadPolicy reads the control files of the program repository at ref and
+// falls back to Defaults for each file that is absent.
+func LoadPolicy(t gitlab.Tracker, project, ref string) (Policy, error) {
+	p := Defaults()
+	if project == "" {
+		return p, nil
+	}
+	if b, err := t.GetFile(project, PolicyFile, ref); err == nil {
+		var f policyFile
+		if err := corpus.DecodeConfig(b, &f); err != nil {
+			return p, fmt.Errorf("%s %s: %w", project, PolicyFile, err)
+		}
+		if f.Admission.RequireMilestone != nil {
+			p.RequireMilestone = *f.Admission.RequireMilestone
+		}
+		if f.Admission.RequireAcceptanceCriteria != nil && !*f.Admission.RequireAcceptanceCriteria {
+			p.RequireAC = nil
+		}
+		if f.Admission.AuditCommand != "" {
+			p.AuditCommand = f.Admission.AuditCommand
+		}
+		if f.Releases.Scheme != "" {
+			p.Releases.Scheme = f.Releases.Scheme
+		}
+		if f.Releases.Breaking != "" {
+			p.Releases.Breaking = f.Releases.Breaking
+		}
+		if f.Releases.TagFormat != "" {
+			p.Releases.TagFormat = f.Releases.TagFormat
+		}
+		for _, v := range []struct{ from, to *int }{
+			{&f.Escalation.BlockerAgeDays, &p.Escalation.BlockerAgeDays},
+			{&f.Escalation.WaitingChainLength, &p.Escalation.WaitingChainLength},
+			{&f.Escalation.SlipReleases, &p.Escalation.SlipReleases},
+			{&f.Escalation.EvidenceAgeDays, &p.Escalation.EvidenceAgeDays},
+		} {
+			if *v.from > 0 {
+				*v.to = *v.from
+			}
+		}
+		if len(f.DefinitionOfDone) > 0 {
+			p.DefinitionOfDone = f.DefinitionOfDone
+		}
+		switch v := f.Admission.ManagementFilers.(type) {
+		case []any:
+			for _, u := range v {
+				p.ManagementFilers = append(p.ManagementFilers, fmt.Sprint(u))
+			}
+		case string:
+			p.ManagementFilers = []string{v}
+		}
+	} else if !errors.Is(err, gitlab.ErrNotFound) {
+		return p, err
+	}
+	if b, err := t.GetFile(project, LabelsFile, ref); err == nil {
+		var f labelsFile
+		if err := corpus.DecodeConfig(b, &f); err != nil {
+			return p, fmt.Errorf("%s %s: %w", project, LabelsFile, err)
+		}
+		pick := func(axis string, into *[]string) {
+			if a, ok := f.Axes[axis]; ok && len(a.Values) > 0 {
+				*into = nil
+				for _, v := range a.Values {
+					*into = append(*into, v.Name)
+				}
+			}
+		}
+		pick("plane", &p.Planes)
+		pick("type", &p.Types)
+		pick("kind", &p.Kinds)
+	} else if !errors.Is(err, gitlab.ErrNotFound) {
+		return p, err
+	}
+	return p, nil
+}

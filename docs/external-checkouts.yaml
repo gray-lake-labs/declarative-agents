@@ -1,0 +1,13 @@
+# Clone-cache location per parent repository, overriding the default sibling
+# checkout named after the repository (../declarative-agents).
+#
+# The default sibling is a working clone whose origin is a fork of the
+# parent and which also carries the Nokia tags. Fork and
+# parent cut tags in the same v0.YYYYMMDD.N scheme, so in a shared tag
+# namespace the resolver's "latest release" (highest v0.* tag) and mage
+# upgrade's tag fetch (git fetch --tags origin) would follow the fork. The
+# cache named here holds only Nokia's main and the release tags reachable from
+# it, and its origin is the Nokia repository, so latest release and upgrades
+# follow the parent this corpus pins. Paths are relative to the repository root.
+checkouts:
+  github.com/Nokia-Bell-Labs/declarative-agents: ../declarative-agents-nokia

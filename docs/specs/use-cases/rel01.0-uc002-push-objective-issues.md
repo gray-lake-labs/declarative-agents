@@ -1,0 +1,171 @@
+---
+id: rel01.0-uc002-push-objective-issues
+title: Create-Goals Files Dated Objective Issues for the Product Owners
+status: implemented
+priority: P1
+test_suite: test-rel01.0-objectives
+---
+
+<!-- field: summary -->
+## Summary
+
+After the system release is planned, the technical program manager runs
+create-goals, which is the decision to file the release's objectives. tpm
+reads the agreed objective document and the release, recommends the
+Product Owner and the environment for each objective, and files one
+objective issue in each owner's repository. The technical program manager
+is asked only for the owner of an objective tpm cannot place. The model
+generates nothing here. Each
+issue cites its objective items pinned to the release tag, carries the
+steps as its Requirements, a due date, and an empty Notes section, and
+passes admission. The Product Owner receives it in their own repository
+and learns nothing new to take it.
+
+<!-- field: actor -->
+## Actor
+
+The technical program manager.
+
+<!-- field: trigger -->
+## Trigger
+
+The system release is recorded in docs/road-map.md with its tag.
+
+<!-- field: preconditions -->
+## Preconditions
+
+- rel01.0-uc001-author-objectives merged an agreed objective document.
+- The road-map release names the objective items it proves and the tracker milestone carries its end date.
+- Subsystem SRDs declare each Product Owner's repository (design.md subsystem_srd).
+
+<!-- field: flow -->
+## Flow
+
+- F1: The technical program manager starts create-goals in the system repository.
+- F2: tpm reads the planned release and its tag, the agreed objective document, the subsystem SRDs, and the objective issues already filed for the release, and returns as JSON each objective item with a recommended owner (the Product Owner whose subsystem SRD declares the component) and environment.
+- F3: The skill takes every recommendation and asks the technical program manager only for the repository of an objective with no recommended owner, offering the candidates; it asks for no confirmation.
+- F4: tpm renders each objective issue from the document, with one Cites line per item pinned to the release tag, the Environment line, the document's Requirements as ordered steps and its Acceptance Criteria, a due date, and an empty Notes section.
+- F5: tpm program file files each issue in the owner's repository, unassigned; tpm program lint admits it or sets needs-triage with the reasons.
+- F6: tpm posts a planned event on each objective issue it created or updated; a second run creates no duplicate.
+- F7: The Product Owner receives a dated issue in their own repository whose body states what to do.
+
+<!-- field: touchpoints -->
+## Touchpoints
+
+| id | target | reason |
+| --- | --- | --- |
+| T1 | [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.2](../software-requirements/srd034-objectives.md#r32), [R3.3](../software-requirements/srd034-objectives.md#r33), [R3.4](../software-requirements/srd034-objectives.md#r34), [R9.1](../software-requirements/srd034-objectives.md#r91) | S1 and S6 trace how an objective issue is rendered and what the owner does with it. |
+| T2 | [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R1.1](../software-requirements/srd022-create-goals.md#r11), [R2.1](../software-requirements/srd022-create-goals.md#r21), [R2.2](../software-requirements/srd022-create-goals.md#r22), [R2.3](../software-requirements/srd022-create-goals.md#r23), [R3.1](../software-requirements/srd022-create-goals.md#r31), [R3.2](../software-requirements/srd022-create-goals.md#r32), [R3.3](../software-requirements/srd022-create-goals.md#r33), [R4.1](../software-requirements/srd022-create-goals.md#r41), [R4.3](../software-requirements/srd022-create-goals.md#r43), [R5.1](../software-requirements/srd022-create-goals.md#r51), [R5.2](../software-requirements/srd022-create-goals.md#r52), [R5.3](../software-requirements/srd022-create-goals.md#r53) | S1, S2, and S5 trace create-goals' reads, questions, pushes, and refusals. |
+| T3 | [srd013-program](../software-requirements/srd013-program.md) [R1.1](../software-requirements/srd013-program.md#r11), [R1.2](../software-requirements/srd013-program.md#r12), [R1.3](../software-requirements/srd013-program.md#r13), [R2.1](../software-requirements/srd013-program.md#r21), [R3.1](../software-requirements/srd013-program.md#r31) | S3 traces filing and admission. |
+| T4 | [srd007-links](../software-requirements/srd007-links.md) [R5.1](../software-requirements/srd007-links.md#r51), [R5.2](../software-requirements/srd007-links.md#r52), [R5.3](../software-requirements/srd007-links.md#r53) | S4 traces pinned citations. |
+| T5 | [srd006-events](../software-requirements/srd006-events.md) [R8.1](../software-requirements/srd006-events.md#r81), [R8.2](../software-requirements/srd006-events.md#r82) | S5 traces the planned event. |
+| T6 | [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3), [AC9](../software-requirements/srd034-objectives.md#ac9) | S1 and S6 trace these acceptance criteria. |
+| T7 | [srd022-create-goals](../software-requirements/srd022-create-goals.md) [AC1](../software-requirements/srd022-create-goals.md#ac1), [AC2](../software-requirements/srd022-create-goals.md#ac2), [AC3](../software-requirements/srd022-create-goals.md#ac3) | S1, S2, and S5 trace these acceptance criteria. |
+| T8 | [srd013-program](../software-requirements/srd013-program.md) [AC1](../software-requirements/srd013-program.md#ac1), [AC2](../software-requirements/srd013-program.md#ac2), [AC3](../software-requirements/srd013-program.md#ac3) | S3 traces these acceptance criteria. |
+| T9 | [srd007-links](../software-requirements/srd007-links.md) [AC5](../software-requirements/srd007-links.md#ac5) | S4 traces this acceptance criterion. |
+| T10 | [srd006-events](../software-requirements/srd006-events.md) [AC7](../software-requirements/srd006-events.md#ac7) | S5 traces this acceptance criterion. |
+
+<!-- field: success_criteria -->
+## Success criteria
+
+<!-- sc: S1 -->
+### S1
+
+Each owner receives one objective issue per release with pinned Cites lines, an Environment line, the document's Requirements and Acceptance Criteria, a due date, and an empty Notes section.
+
+<!-- field: traces -->
+#### Traces
+
+- [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.2](../software-requirements/srd034-objectives.md#r32)
+- [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.3](../software-requirements/srd034-objectives.md#r33)
+- [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.4](../software-requirements/srd034-objectives.md#r34)
+- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R4.1](../software-requirements/srd022-create-goals.md#r41)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [AC2](../software-requirements/srd022-create-goals.md#ac2)
+
+<!-- sc: S2 -->
+### S2
+
+create-goals reads its facts from the release, the documents, and existing objectives, takes the recommended owner and the environment, asks only for a missing owner, asks no confirmation, and refuses an unpinned citation or a missing environment.
+
+<!-- field: traces -->
+#### Traces
+
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R1.1](../software-requirements/srd022-create-goals.md#r11)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R2.1](../software-requirements/srd022-create-goals.md#r21)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R2.2](../software-requirements/srd022-create-goals.md#r22)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R2.3](../software-requirements/srd022-create-goals.md#r23)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R3.1](../software-requirements/srd022-create-goals.md#r31)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R3.2](../software-requirements/srd022-create-goals.md#r32)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R3.3](../software-requirements/srd022-create-goals.md#r33)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [AC1](../software-requirements/srd022-create-goals.md#ac1)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R5.1](../software-requirements/srd022-create-goals.md#r51)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R5.2](../software-requirements/srd022-create-goals.md#r52)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R5.3](../software-requirements/srd022-create-goals.md#r53)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [AC3](../software-requirements/srd022-create-goals.md#ac3)
+
+<!-- sc: S3 -->
+### S3
+
+Every objective issue is filed unassigned through tpm program file and admitted by tpm program lint, which flags an unpinned Cites line or a criterion without test and environment.
+
+<!-- field: traces -->
+#### Traces
+
+- [srd013-program](../software-requirements/srd013-program.md) [R1.1](../software-requirements/srd013-program.md#r11)
+- [srd013-program](../software-requirements/srd013-program.md) [R1.2](../software-requirements/srd013-program.md#r12)
+- [srd013-program](../software-requirements/srd013-program.md) [R1.3](../software-requirements/srd013-program.md#r13)
+- [srd013-program](../software-requirements/srd013-program.md) [AC1](../software-requirements/srd013-program.md#ac1)
+- [srd013-program](../software-requirements/srd013-program.md) [R2.1](../software-requirements/srd013-program.md#r21)
+- [srd013-program](../software-requirements/srd013-program.md) [AC2](../software-requirements/srd013-program.md#ac2)
+- [srd013-program](../software-requirements/srd013-program.md) [R3.1](../software-requirements/srd013-program.md#r31)
+- [srd013-program](../software-requirements/srd013-program.md) [AC3](../software-requirements/srd013-program.md#ac3)
+
+<!-- sc: S4 -->
+### S4
+
+Each Cites line is a URL pinned to a release tag that resolves to an item of the objective document.
+
+<!-- field: traces -->
+#### Traces
+
+- [srd007-links](../software-requirements/srd007-links.md) [R5.1](../software-requirements/srd007-links.md#r51)
+- [srd007-links](../software-requirements/srd007-links.md) [R5.2](../software-requirements/srd007-links.md#r52)
+- [srd007-links](../software-requirements/srd007-links.md) [R5.3](../software-requirements/srd007-links.md#r53)
+- [srd007-links](../software-requirements/srd007-links.md) [AC5](../software-requirements/srd007-links.md#ac5)
+
+<!-- sc: S5 -->
+### S5
+
+Each created or updated objective issue carries one planned event naming its release, requirements, and environment.
+
+<!-- field: traces -->
+#### Traces
+
+- [srd006-events](../software-requirements/srd006-events.md) [R8.1](../software-requirements/srd006-events.md#r81)
+- [srd006-events](../software-requirements/srd006-events.md) [R8.2](../software-requirements/srd006-events.md#r82)
+- [srd006-events](../software-requirements/srd006-events.md) [AC7](../software-requirements/srd006-events.md#ac7)
+- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R4.3](../software-requirements/srd022-create-goals.md#r43)
+
+<!-- sc: S6 -->
+### S6
+
+The Product Owner takes the issue with issue-pop and needs no other tool, channel, or step.
+
+<!-- field: traces -->
+#### Traces
+
+- [srd034-objectives](../software-requirements/srd034-objectives.md) [R9.1](../software-requirements/srd034-objectives.md#r91)
+- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC9](../software-requirements/srd034-objectives.md#ac9)
+
+<!-- field: out_of_scope -->
+## Out of scope
+
+- The objective issue for the test subsystem (srd022 R4.2); stage one has no test subsystem.
+- Deciding that an objective is met; objectives close at the sprint end (rel01.2-uc001-sprint-end-release).
+- Assigning the issue to anyone.
+
+<!-- field: assumptions -->
+## Assumptions
+
+- A1: Steps not marked as model steps are tpm subcommands, CI, or the inner loop, and spend no model tokens (design.md D10). This use case has no model step.

@@ -1,0 +1,156 @@
+// Package standup holds the person's daily and recurring tracker steps
+// (srd010). It implements tpm standup recur.
+package standup
+
+import (
+	"fmt"
+	"regexp"
+	"strings"
+	"time"
+
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+)
+
+// RecurOptions shape the next instance; zero values keep the issue's own.
+type RecurOptions struct {
+	Title   string // the next instance's title
+	DueDate string // YYYY-MM-DD; empty is the issue's due date plus seven days
+	// Body replaces the issue's body above its Previous Runs section.
+	Body   string
+	Now    time.Time
+	DryRun bool
+}
+
+// RecurResult is what recur reports.
+type RecurResult struct {
+	Project  string `json:"project"`
+	Previous int    `json:"previous"`
+	Closed   bool   `json:"closed"`   // recur closed the previous instance itself
+	Existing bool   `json:"existing"` // the next instance already existed
+	Next     int    `json:"next,omitempty"`
+	NextURL  string `json:"next_url,omitempty"`
+	Title    string `json:"title"`
+	DueDate  string `json:"due_date"`
+	DryRun   bool   `json:"dry_run"`
+}
+
+var recursPattern = regexp.MustCompile(`\n*<!-- tpm standup recurs \S+ -->\n?`)
+
+func recursMarker(project string, iid int) string {
+	return fmt.Sprintf("<!-- tpm standup recurs %s#%d -->", project, iid)
+}
+
+// Recur opens the next instance of a recurring issue (srd010 R8.2, srd001
+// R8.3): same labels and milestone, the next due date, and the run
+// appended to Previous Runs. An open issue is closed first with a run
+// summary; one a merge request closed is left as it is. When the next
+// instance already exists, nothing is written.
+func Recur(t gitlab.Tracker, project string, iid int, o RecurOptions) (RecurResult, error) {
+	r := RecurResult{Project: project, Previous: iid, DryRun: o.DryRun}
+	i, err := t.GetIssue(project, iid)
+	if err != nil {
+		return r, err
+	}
+	r.Title = o.Title
+	if r.Title == "" {
+		r.Title = i.Title
+	}
+	r.DueDate = o.DueDate
+	if r.DueDate == "" {
+		if i.DueDate == "" {
+			return r, fmt.Errorf("%s#%d has no due date; name the next one", project, iid)
+		}
+		d, err := time.Parse("2006-01-02", i.DueDate)
+		if err != nil {
+			return r, err
+		}
+		r.DueDate = d.AddDate(0, 0, 7).Format("2006-01-02")
+	}
+
+	marker := recursMarker(project, iid)
+	all, err := t.ListIssues(project, gitlab.IssueQuery{State: "all"})
+	if err != nil {
+		return r, err
+	}
+	for _, other := range all {
+		if strings.Contains(other.Description, marker) {
+			r.Existing, r.Next, r.NextURL = true, other.IID, other.WebURL
+			return r, nil
+		}
+	}
+
+	now := o.Now
+	if now.IsZero() {
+		now = time.Now()
+	}
+	outcome := "closed by its merge request"
+	if i.State != "closed" {
+		r.Closed = true
+		outcome = "closed by tpm standup recur without its work"
+	}
+	run := fmt.Sprintf("- %s#%d (due %s): %s.", project, iid, orNone(i.DueDate), outcome)
+	body := nextBody(i.Description, o.Body, run) + "\n\n" + marker + "\n"
+	if o.DryRun {
+		return r, nil
+	}
+	if r.Closed {
+		if err := t.CreateNote(project, iid, fmt.Sprintf("Run summary: closed on %s without a merge request; the next instance is due %s.", now.Format("2006-01-02"), r.DueDate)); err != nil {
+			return r, err
+		}
+		if _, err := t.UpdateIssue(project, iid, gitlab.IssueUpdate{State: ptr("close")}); err != nil {
+			return r, err
+		}
+	}
+	next, err := t.CreateIssue(project, gitlab.NewIssue{Title: r.Title, Description: body, Labels: i.Labels, DueDate: r.DueDate, Milestone: i.Milestone})
+	if err != nil {
+		return r, err
+	}
+	r.Next, r.NextURL = next.IID, next.WebURL
+	return r, nil
+}
+
+func ptr[T any](v T) *T { return &v }
+
+func orNone(s string) string {
+	if s == "" {
+		return "none"
+	}
+	return s
+}
+
+// nextBody is the base body (the replacement, or the old body above its
+// Previous Runs) with the old runs and the new one under Previous Runs.
+func nextBody(old, replacement, run string) string {
+	old = recursPattern.ReplaceAllString(old, "\n")
+	base, runs := splitRuns(old)
+	if replacement != "" {
+		base, _ = splitRuns(recursPattern.ReplaceAllString(replacement, "\n"))
+	}
+	var kept []string
+	for _, l := range runs {
+		if t := strings.TrimSpace(l); t != "" && t != "- none" && !strings.HasPrefix(t, "<!--") {
+			kept = append(kept, t)
+		}
+	}
+	kept = append(kept, run)
+	return strings.TrimRight(base, "\n") + "\n\n## Previous Runs\n\n" + strings.Join(kept, "\n")
+}
+
+// splitRuns cuts a body at its Previous Runs heading: the text above and
+// the lines of the section, which ends at the next heading.
+func splitRuns(body string) (string, []string) {
+	lines := strings.Split(body, "\n")
+	for n, l := range lines {
+		if strings.TrimSpace(l) != "## Previous Runs" {
+			continue
+		}
+		var runs []string
+		rest := n + 1
+		for ; rest < len(lines) && !strings.HasPrefix(lines[rest], "## "); rest++ {
+			runs = append(runs, lines[rest])
+		}
+		above := append(lines[:n:n], lines[rest:]...)
+		return strings.Join(above, "\n"), runs
+	}
+	return body, nil
+}

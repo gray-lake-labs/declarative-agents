@@ -1,0 +1,104 @@
+package program
+
+import (
+	"bytes"
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/gray-lake-labs/scrum-master/internal/cli"
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+)
+
+func day(offset int) string { return time.Now().AddDate(0, 0, offset).Format("2006-01-02") }
+
+// fileWith runs tpm program file for a data issue against f and returns
+// the result and the filed issue.
+func fileWith(t *testing.T, f *gitlabtest.Fake, extra ...string) (FileResult, gitlab.Issue) {
+	t.Helper()
+	body := filepath.Join(t.TempDir(), "issue.md")
+	os.WriteFile(body, []byte(goodBody), 0o644)
+	args := append([]string{"program", "file", "--json", "--project", "g/po-1", "--title", "Score one agent",
+		"--body-file", body, "--plane", "data", "--kind", "build", "--component", "po-1"}, extra...)
+	var out bytes.Buffer
+	if err := cli.Default.Run(args, &out, func() (gitlab.Tracker, error) { return f, nil }); err != nil {
+		t.Fatalf("file: %v", err)
+	}
+	var r FileResult
+	if err := json.Unmarshal(out.Bytes(), &r); err != nil {
+		t.Fatalf("%v: %s", err, out.String())
+	}
+	i, err := f.GetIssue("g/po-1", r.IID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return r, i
+}
+
+func TestFileSetsActiveSprintMilestone(t *testing.T) {
+	f := gitlabtest.New()
+	f.Milestones["sprint-41"] = gitlab.Milestone{Title: "sprint-41", StartDate: day(-20), DueDate: day(-6)}
+	f.Milestones["sprint-42"] = gitlab.Milestone{Title: "sprint-42", StartDate: day(-5), DueDate: day(9)}
+	f.Milestones["no-dates"] = gitlab.Milestone{Title: "no-dates"}
+	r, i := fileWith(t, f)
+	if r.Milestone != "sprint-42" || i.Milestone != "sprint-42" || r.MilestoneReason != "" {
+		t.Fatalf("result %+v, issue milestone %q", r, i.Milestone)
+	}
+	if !r.Lint.Admitted {
+		t.Fatalf("not admitted: %v", r.Lint.Reasons)
+	}
+}
+
+func TestFileLeavesMilestoneWhenNoneOrSeveralActive(t *testing.T) {
+	f := gitlabtest.New()
+	r, i := fileWith(t, f)
+	if r.Milestone != "" || i.Milestone != "" || !strings.Contains(r.MilestoneReason, "no active milestone") {
+		t.Fatalf("none: %+v", r)
+	}
+	if r.Lint.Admitted {
+		t.Fatal("admitted a data issue without a sprint")
+	}
+
+	f.Milestones["a"] = gitlab.Milestone{Title: "a", StartDate: day(-3), DueDate: day(3)}
+	f.Milestones["b"] = gitlab.Milestone{Title: "b", StartDate: day(-1), DueDate: day(10)}
+	r, i = fileWith(t, f)
+	if r.Milestone != "" || i.Milestone != "" || !strings.Contains(r.MilestoneReason, "several active milestones cover") || !strings.Contains(r.MilestoneReason, "a, b") {
+		t.Fatalf("several: %+v", r)
+	}
+}
+
+func TestFileExplicitMilestoneWins(t *testing.T) {
+	f := gitlabtest.New()
+	f.Milestones["sprint-42"] = gitlab.Milestone{Title: "sprint-42", StartDate: day(-5), DueDate: day(9)}
+	f.Milestones["later"] = gitlab.Milestone{Title: "later"}
+	r, i := fileWith(t, f, "--milestone", "later")
+	if r.Milestone != "later" || i.Milestone != "later" || r.MilestoneReason != "" {
+		t.Fatalf("result %+v, issue milestone %q", r, i.Milestone)
+	}
+}
+
+func TestFileReportsComponent(t *testing.T) {
+	f := gitlabtest.New()
+	r, i := fileWith(t, f)
+	if r.Component != "po-1" || !i.HasLabel("component::po-1") {
+		t.Fatalf("given: component %q, labels %v", r.Component, i.Labels)
+	}
+
+	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd010-po-1.md", []byte(subsystemFixture))
+	body := filepath.Join(t.TempDir(), "issue.md")
+	os.WriteFile(body, []byte(goodBody), 0o644)
+	var out bytes.Buffer
+	err := cli.Default.Run([]string{"program", "file", "--json", "--project", "g/product-owners/po-1", "--system", "g/system",
+		"--title", "Score one agent", "--body-file", body, "--plane", "data", "--kind", "build"},
+		&out, func() (gitlab.Tracker, error) { return f, nil })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(out.Bytes(), &r); err != nil || r.Component != "po-1" {
+		t.Fatalf("derived: %+v %v", r, err)
+	}
+}

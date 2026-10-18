@@ -1,0 +1,35 @@
+// Command tpm is the process's deterministic half: every step a program can
+// do (design.md D10). Skills call it with --json.
+package main
+
+import (
+	"errors"
+	"fmt"
+	"os"
+
+	"github.com/gray-lake-labs/scrum-master/internal/cli"
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+
+	_ "github.com/gray-lake-labs/scrum-master/internal/goals"
+	_ "github.com/gray-lake-labs/scrum-master/internal/install"
+	_ "github.com/gray-lake-labs/scrum-master/internal/plan"
+	_ "github.com/gray-lake-labs/scrum-master/internal/program"
+	_ "github.com/gray-lake-labs/scrum-master/internal/release"
+	_ "github.com/gray-lake-labs/scrum-master/internal/reports"
+	_ "github.com/gray-lake-labs/scrum-master/internal/sprintend"
+	_ "github.com/gray-lake-labs/scrum-master/internal/standup"
+)
+
+func main() {
+	tracker := func() (gitlab.Tracker, error) { return gitlab.New() }
+	err := cli.Default.Run(os.Args[1:], os.Stdout, tracker)
+	switch {
+	case err == nil:
+	case errors.Is(err, cli.ErrUsage):
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	default:
+		fmt.Fprintln(os.Stderr, "tpm:", err)
+		os.Exit(1)
+	}
+}

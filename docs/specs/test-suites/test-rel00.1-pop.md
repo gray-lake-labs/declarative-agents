@@ -1,0 +1,126 @@
+---
+id: test-rel00.1-pop
+title: Test Suite for Release 00.1 Pop and Merge
+release: "00.1"
+status: implemented
+---
+
+<!-- field: overview -->
+## Overview
+
+Each run starts with mage regression:up creating the repositories below in
+a fresh rig subgroup and ends with mage regression:down removing them. The
+suite pops an admitted issue into its worktree, proves the refusals,
+commits, opens the merge request, merges it, and proves the issue closed.
+
+<!-- field: traces -->
+## Traces
+
+- [rel00.1-uc001-pop-and-merge](../use-cases/rel00.1-uc001-pop-and-merge.md)
+
+<!-- field: preconditions -->
+## Preconditions
+
+- mage regression:up creates a rig-<run-id> subgroup with a system repository and one Product Owner repository, and writes their paths as JSON for the integration targets (eng01).
+- mage regression:down destroys the subgroup after the targets run, including when they fail.
+- The rig's default branches accept merges from merge requests; pushes go to issue branches only.
+
+<!-- field: test_cases -->
+## Test cases
+
+<!-- case: Pop claims the issue into its own worktree | status: implemented -->
+### Pop claims the issue into its own worktree
+
+<!-- field: use_case -->
+#### Use case
+
+[rel00.1-uc001-pop-and-merge](../use-cases/rel00.1-uc001-pop-and-merge.md)
+
+<!-- field: integration_target -->
+#### Integration target
+
+mage integration:pop
+
+<!-- field: go_test -->
+#### Go test
+
+go test ./internal/program -run '^TestPop(AssignsOnlyTheCaller|RefusesHeldOrUnadmitted|CreatesBranchAndWorktree)$'
+
+<!-- field: expected_outputs | form: "tree" -->
+#### Expected outputs
+
+- assignees: the caller only
+- branch: <iid>-<slug> from the default branch
+- worktree: created beside the checkout, reused on a second pop
+- refused: an issue assigned to someone else, a closed issue, a non-admitted data issue
+
+<!-- field: traces -->
+#### Traces
+
+- [srd013-program](../software-requirements/srd013-program.md) [AC7](../software-requirements/srd013-program.md#ac7)
+- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC1](../software-requirements/srd036-issue-pop.md#ac1)
+- [srd041-states](../software-requirements/srd041-states.md) [AC5](../software-requirements/srd041-states.md#ac5)
+
+<!-- case: The merge request closes the issue | status: implemented -->
+### The merge request closes the issue
+
+<!-- field: use_case -->
+#### Use case
+
+[rel00.1-uc001-pop-and-merge](../use-cases/rel00.1-uc001-pop-and-merge.md)
+
+<!-- field: integration_target -->
+#### Integration target
+
+mage integration:pop
+
+<!-- field: go_test -->
+#### Go test
+
+go test ./internal/program -run '^TestOpenMergeRequestClosesTheIssue$'
+
+<!-- field: expected_outputs | form: "tree" -->
+#### Expected outputs
+
+- merge_request: one, closing the issue, listing its acceptance criteria
+- after_merge: issue closed
+- skill: asks nothing, closes nothing itself, at most 50 lines
+
+<!-- field: traces -->
+#### Traces
+
+- [srd013-program](../software-requirements/srd013-program.md) [AC4](../software-requirements/srd013-program.md#ac4)
+- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC2](../software-requirements/srd036-issue-pop.md#ac2)
+- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC3](../software-requirements/srd036-issue-pop.md#ac3)
+- [srd041-states](../software-requirements/srd041-states.md) [AC4](../software-requirements/srd041-states.md#ac4)
+
+<!-- case: The worktree carries the checkout's skills | status: implemented -->
+### The worktree carries the checkout's skills
+
+<!-- field: use_case -->
+#### Use case
+
+[rel00.1-uc001-pop-and-merge](../use-cases/rel00.1-uc001-pop-and-merge.md)
+
+<!-- field: integration_target -->
+#### Integration target
+
+mage integration:pop
+
+<!-- field: go_test -->
+#### Go test
+
+go test ./internal/program -run '^TestPop(InstallsSkillsIntoWorktree|WithoutInstalledSkillsInstallsNothing)$'
+
+<!-- field: expected_outputs | form: "tree" -->
+#### Expected outputs
+
+- installed: the agents installed in the checkout, stamped, in the worktree
+- git_status: clean in the worktree after the install
+- none_installed: a checkout without skills installs none
+
+<!-- field: traces -->
+#### Traces
+
+- [srd013-program](../software-requirements/srd013-program.md) [AC7](../software-requirements/srd013-program.md#ac7)
+- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC4](../software-requirements/srd036-issue-pop.md#ac4)

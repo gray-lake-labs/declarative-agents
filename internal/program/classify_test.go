@@ -1,0 +1,176 @@
+package program
+
+import (
+	"strings"
+	"testing"
+
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+)
+
+func TestPlaneAndKindFollowTheChangedPaths(t *testing.T) {
+	cases := []struct {
+		name     string
+		paths    []string
+		kind     string
+		inSystem bool
+		plane    string
+		wantKind string
+	}{
+		{"road-map anywhere", []string{"docs/road-map.md"}, "", false, "management", ""},
+		{"objective document", []string{"docs/specs/objectives/obj001-a.md"}, "", false, "management", ""},
+		{"system SRD", []string{"docs/specs/software-requirements/srd010-po-1.md"}, "", true, "management", ""},
+		{"component SRD", []string{"docs/specs/software-requirements/srd003-reader.md"}, "", false, "data", "spec"},
+		{"use case", []string{"./docs/specs/use-cases/rel01.0-uc001-x.md"}, "", false, "data", "spec"},
+		{"architecture", []string{"docs/ARCHITECTURE.md"}, "", false, "data", "spec"},
+		{"policy file", []string{"control/policy.md"}, "", false, "control", ""},
+		{"code with stated kind", []string{"internal/reader/reader.go"}, "build", false, "data", "build"},
+		{"planning beats design", []string{"docs/ARCHITECTURE.md", "docs/road-map.md"}, "", false, "management", ""},
+		{"control beats design", []string{"docs/ARCHITECTURE.md", "control/labels.md"}, "", false, "control", ""},
+		{"design beats code", []string{"internal/x.go", "docs/specs/test-suites/test-rel01.0-x.md"}, "build", false, "data", "spec"},
+	}
+	for _, c := range cases {
+		got, err := Classify(c.paths, c.kind, c.inSystem)
+		if err != nil || got.Plane != c.plane || got.Kind != c.wantKind || got.Reason == "" {
+			t.Errorf("%s: got %+v err %v, want plane %s kind %q", c.name, got, err, c.plane, c.wantKind)
+		}
+	}
+}
+
+func TestProjectWorkWithoutAKindIsReported(t *testing.T) {
+	if _, err := Classify([]string{"internal/x.go"}, "", false); err == nil || !strings.Contains(err.Error(), "needs a kind") {
+		t.Fatalf("err = %v", err)
+	}
+}
+
+const subsystemFixture = `---
+id: srd010-po-1
+title: "Subsystem: po-1"
+---
+
+<!-- field: context | form: "tree" -->
+## Context
+
+- owner: Product Owner, po-1
+
+<!-- req: R1 -->
+## R1 - Receive
+
+<!-- req: R1.1 -->
+### R1.1
+
+Objective issues arrive.
+
+<!-- field: implementation_targets -->
+## Implementation targets
+
+| name | repository | path |
+| --- | --- | --- |
+| po-1 | https://gitlab.example.com/g/product-owners/po-1 | / |
+`
+
+func TestDeriveFillsWhatIsNotGivenAndExplicitWins(t *testing.T) {
+	f := gitlabtest.New()
+	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd010-po-1.md", []byte(subsystemFixture))
+
+	l, err := Derive(f, "g/product-owners/po-1", "g/system", "main", []string{"docs/specs/use-cases/rel01.0-uc001-x.md"}, Labelling{})
+	if err != nil || l.Plane != "data" || l.Kind != "spec" || l.Component != "po-1" || l.Derived == nil {
+		t.Fatalf("derived: %+v %v", l, err)
+	}
+	l, err = Derive(f, "g/product-owners/po-1", "g/system", "main", []string{"docs/ARCHITECTURE.md"}, Labelling{Plane: "data", Kind: "research", Component: "other"})
+	if err != nil || l.Plane != "data" || l.Kind != "research" || l.Component != "other" || l.Derived != nil {
+		t.Fatalf("explicit: %+v %v", l, err)
+	}
+	l, err = Derive(f, "g/system", "g/system", "main", []string{"docs/specs/software-requirements/srd010-po-1.md"}, Labelling{})
+	if err != nil || l.Plane != "management" || l.Kind != "" {
+		t.Fatalf("system SRD: %+v %v", l, err)
+	}
+}
+
+const subsystemMarkdown = `---
+id: srd011-po-2
+title: "Subsystem: po-2"
+---
+
+<!-- field: context | form: "tree" -->
+## Context
+
+- owner: Product Owner, po-2
+
+<!-- req: R1 -->
+## R1 - Receive
+
+<!-- req: R1.1 -->
+### R1.1
+
+Objective issues arrive.
+
+<!-- field: implementation_targets -->
+## Implementation targets
+
+| name | repository | path |
+| --- | --- | --- |
+| po-2 | https://gitlab.example.com/g/product-owners/po-2 | / |
+`
+
+func TestLoadSubsystemsReadsMarkdown(t *testing.T) {
+	f := gitlabtest.New()
+	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd010-po-1.md", []byte(subsystemFixture))
+	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd011-po-2.md", []byte(subsystemMarkdown))
+	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd012-po-3.yaml", []byte("id: srd012-po-3\nowner: ignored\ncomponents: [{name: po-3}]\n"))
+	subs, err := LoadSubsystems(f, "g/system", "main")
+	if err != nil || len(subs) != 2 {
+		t.Fatalf("subsystems = %+v, %v", subs, err)
+	}
+	c, sub, ok := subs.ComponentFor("g/product-owners/po-2")
+	if !ok || c.Name != "po-2" || c.Path != "/" || sub.ID != "srd011-po-2" || sub.Owner != "Product Owner, po-2" {
+		t.Fatalf("po-2 = %+v %+v %v", c, sub, ok)
+	}
+	if c, _, ok := subs.ComponentFor("g/product-owners/po-1"); !ok || c.Name != "po-1" {
+		t.Fatalf("po-1 = %+v %v", c, ok)
+	}
+}
+
+func TestSpecIssueNeedsAcceptanceCriteria(t *testing.T) {
+	p := Defaults()
+	issue := gitlab.Issue{Milestone: "m", Labels: []string{"plane::data", "kind::spec", "component::po-1"}, Description: "Rewrite the use case\n"}
+	if r := strings.Join(Lint(issue, p), ";"); !strings.Contains(r, "Acceptance Criteria") || !strings.Contains(r, "Requirements") {
+		t.Fatalf("reasons: %s", r)
+	}
+	issue.Description = "Rewrite\n\n## Requirements\n\n1. Split F3.\n\n## Acceptance Criteria\n\n- mage audit passes (test: mage_audit; environment: local)\n"
+	if r := Lint(issue, p); len(r) != 0 {
+		t.Fatalf("reasons: %v", r)
+	}
+}
+
+func TestSpecIssueIsAdmittedForAnyMember(t *testing.T) {
+	f := gitlabtest.New()
+	f.Me = gitlab.User{ID: 9, Username: "developer"}
+	p := Defaults()
+	p.ManagementFilers = []string{"tpm-lead"}
+	in := gitlab.NewIssue{Title: "Split the use case", Milestone: "m",
+		Description: "## Requirements\n\n1. Split F3.\n\n## Acceptance Criteria\n\n- mage audit passes (test: mage_audit; environment: local)\n",
+		Labels:      Labels("data", "", "spec", "po-1")}
+	r, err := File(f, "g/po-1", in, p, false)
+	if err != nil || !r.Lint.Admitted {
+		t.Fatalf("r=%+v err=%v", r, err)
+	}
+}
+
+func TestManagementIssueRefusedForNonLead(t *testing.T) {
+	f := gitlabtest.New()
+	f.Me = gitlab.User{ID: 9, Username: "developer"}
+	p := Defaults()
+	p.ManagementFilers = []string{"tpm-lead"}
+	in := gitlab.NewIssue{Title: "Move release 01.1", Labels: Labels("management", "", "", "system")}
+	if _, err := File(f, "g/system", in, p, false); err == nil || !strings.Contains(err.Error(), "may not file a plane::management issue") {
+		t.Fatalf("err = %v", err)
+	}
+	if f.Writes != 0 {
+		t.Fatal("a refused issue was filed")
+	}
+	f.Me = gitlab.User{ID: 1, Username: "tpm-lead"}
+	if _, err := File(f, "g/system", in, p, false); err != nil {
+		t.Fatalf("lead refused: %v", err)
+	}
+}

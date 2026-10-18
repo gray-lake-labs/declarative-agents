@@ -1,0 +1,368 @@
+---
+id: ai-native-scrum-roadmap
+title: AI-Native Scrum Release Road Map
+---
+
+<!-- field: overview -->
+## Overview
+
+Release 00 is the inner loop on GitLab in four dot releases: 00.0 labels
+and push, 00.1 pop and merge, 00.2 changes under docs/ through the audit
+gate, and 00.3 tpm install for Cursor, Claude Code, and GitHub Copilot.
+Every issue, project work, a design change, or a planning change, has one
+path to a merged change. Release 01 builds the interaction between the technical program manager
+and the Product Owners (srd034) in three dot releases: 01.0 objectives
+reach the Product Owner as dated issues, 01.1 status comes back weekly,
+and 01.2 the sprint end releases and plans the next period. Each use case cites only the
+requirement items its release delivers, so the SRDs it touches are partly
+delivered; the rest waits for 02.0. Every release proves itself with mage
+audit, which runs the parent's specification-critic corpus-audit agent
+(docs/guides/corpus-audit.md), and with its test suite.
+
+<!-- release: 00.0 | status: implemented -->
+## 00.0 - Labels and push
+
+tpm program labels creates the program's labels, kind::spec among
+them, and issue-push turns a request into one admitted, unassigned
+issue whose plane and kind say what it is. The model writes the body;
+tpm picks the labels, files, and lints.
+
+<!-- field: srds -->
+### SRDs
+
+- srd001-labels
+- srd013-program
+- srd035-issue-push
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel00.0-uc001-push-project-work](specs/use-cases/rel00.0-uc001-push-project-work.md) | A Developer's request becomes one admitted, unassigned data issue; the labels exist first. | implemented | P1 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel00.0-push](specs/test-suites/test-rel00.0-push.md) | Labels created once; a request becomes an admitted data issue with no confirmation step. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:labels
+- mage integration:push
+
+<!-- release: 00.1 | status: implemented -->
+## 00.1 - Pop and merge
+
+issue-pop claims an issue for the person who works it, on its own
+branch in its own worktree, and the merge request tpm opens closes it.
+Sub-issues and do-work arrive with epics later.
+
+<!-- field: srds -->
+### SRDs
+
+- srd036-issue-pop
+- srd041-states
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel00.1-uc001-pop-and-merge](specs/use-cases/rel00.1-uc001-pop-and-merge.md) | A Developer pops an admitted issue into a worktree and its merge request closes it. | implemented | P1 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel00.1-pop](specs/test-suites/test-rel00.1-pop.md) | Pop assigns only the caller, opens the branch and worktree, refuses held or unadmitted issues, and the merge closes the issue. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:pop
+
+<!-- release: 00.2 | status: implemented -->
+## 00.2 - Changes under docs/
+
+Any merge request that changes docs/ merges only through mage audit: a
+kind::spec design change anyone files, and a plane::management planning
+change a lead files. Objective issues are worked this way.
+
+<!-- field: srds | form: "empty list" -->
+### SRDs
+
+None
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel00.2-uc001-spec-change](specs/use-cases/rel00.2-uc001-spec-change.md) | A Developer changes a requirement during design through a kind::spec issue and the audit gate. | implemented | P1 |
+| [rel00.2-uc002-planning-change](specs/use-cases/rel00.2-uc002-planning-change.md) | A lead changes a planning document through a management issue and the same gate. | implemented | P2 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel00.2-docs-change](specs/test-suites/test-rel00.2-docs-change.md) | kind::spec is anyone's and in the backlog, planning is lead-only, and both merge only through mage audit. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:docsChange
+
+<!-- release: 00.3 | status: implemented -->
+## 00.3 - Install the skills
+
+tpm install writes the skills of the Agent Plugins 1.0 package plugin/,
+embedded in the tpm binary, where Cursor, Claude Code, or GitHub
+Copilot reads them, stamped with the tpm
+version, kept out of the repository by .git/info/exclude, and tpm install
+--check reports drift locally.
+
+<!-- field: srds -->
+### SRDs
+
+- srd037-install
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel00.3-uc001-install-skills](specs/use-cases/rel00.3-uc001-install-skills.md) | A Developer installs the skills for their agent and --check guards them after a tpm upgrade. | implemented | P1 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel00.3-install](specs/test-suites/test-rel00.3-install.md) | Paths and headers per agent, stamps, re-install, --force, stale skills, and --check, offline. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:install
+
+<!-- release: 01.0 | status: implemented -->
+## 01.0 - Objectives reach the Product Owner
+
+The technical program manager writes the program's objectives as an
+objective document that mage audit checks through the
+specification-critic agent, and create-goals files one dated, pinned,
+admitted objective issue in each Product Owner's repository. The
+release also builds what that path needs: the magefile that runs the
+agent audit, tpm program file and lint, the planned event, and the
+regression rig: the Terraform split into infra/modules/program with
+the production and disposable roots, and gitlabrig (eng01). Its
+objective issues are plane::management issues the receiving Product
+Owner works through release 00.1's issue-pop and 00.2's audit gate.
+
+<!-- field: srds -->
+### SRDs
+
+- srd006-events
+- srd007-links
+- srd022-create-goals
+- srd034-objectives
+- srd039-corpus
+
+<!-- field: semantic_models -->
+### Semantic models
+
+- planes
+- roles
+- objects
+- agents
+
+<!-- field: config_formats -->
+### Config formats
+
+- labels
+- policy
+- person-config
+- issue-body
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel01.0-uc001-author-objectives](specs/use-cases/rel01.0-uc001-author-objectives.md) | The technical program manager merges an objective document that the specification-critic agent audit passes. | implemented | P1 |
+| [rel01.0-uc002-push-objective-issues](specs/use-cases/rel01.0-uc002-push-objective-issues.md) | create-goals files one dated, pinned, admitted objective issue per Product Owner. | implemented | P1 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel01.0-objectives](specs/test-suites/test-rel01.0-objectives.md) | The agent audit passes a well-formed objective document and fails a malformed one; create-goals files dated objective issues once. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:objectivesAudit
+- mage integration:createGoals
+- mage integration:program
+
+<!-- release: 01.1 | status: implemented -->
+## 01.1 - Status comes back weekly
+
+A dated weekly status issue in each Product Owner's repository walks
+the owner through every open objective and yields a validated report;
+the next week's issue follows with its new due date. The technical
+program manager aggregates the reports by component and by objective,
+never by person.
+
+<!-- field: srds -->
+### SRDs
+
+- srd010-standup
+- srd018-reports
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel01.1-uc001-weekly-status](specs/use-cases/rel01.1-uc001-weekly-status.md) | A Product Owner works a dated status issue into a validated per-objective report. | implemented | P1 |
+| [rel01.1-uc002-period-rollup](specs/use-cases/rel01.1-uc002-period-rollup.md) | The technical program manager aggregates a week or period of reports into signals by component. | implemented | P2 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel01.1-weekly-status](specs/test-suites/test-rel01.1-weekly-status.md) | Reports repository scaffold, the dated status issue, validation, recurrence, and aggregate signals. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:weeklyStatus
+- mage integration:reports
+
+<!-- release: 01.2 | status: implemented -->
+## 01.2 - Sprint end closes the loop
+
+A sprint-end issue summarizes the period, asks the owner what to
+change, and releases behind the gate once its merge request merges;
+objectives reported complete close by that merge without a met event.
+plan-release records the next period's objective items, publishes the
+plan as a documents-only system tag, dates the milestone and the sprint
+issue, and files the next period's sprint-end issues.
+
+<!-- field: srds -->
+### SRDs
+
+- srd001-labels
+- srd015-release
+- srd018-reports
+- srd031-plan-release
+- srd034-objectives
+- srd038-sprint-end
+- srd040-format-tools
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel01.2-uc001-sprint-end-release](specs/use-cases/rel01.2-uc001-sprint-end-release.md) | A sprint-end issue summarizes the period, asks, and releases on confirmation. | implemented | P1 |
+| [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md) | The technical program manager plans the next period's objective items with plan-release. | implemented | P1 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel01.2-sprint-end](specs/test-suites/test-rel01.2-sprint-end.md) | Confirmed release after the sprint-end merge, reported-complete close, and next-period planning with its plan tag. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:release
+- mage integration:sprintEnd
+- mage integration:planRelease
+
+<!-- release: 01.3 | status: specified -->
+## 01.3 - Tags trigger handoff and the summary
+
+A downstream release tag files one reference-update issue upstream, and
+a system release tag opens the computed aggregate for the lead's review.
+Moved from 01.2 on 2026-10-18 so the period loop ships first. Open before
+planning: the deck renders from an approved summary (srd018 R4.1, R6.2)
+but the tag pipeline renders it from the raw aggregate; the pipeline and
+the lead each open a merge request for the stakeholder update; the
+reports configuration has no slide limit; and aggregation runs over ISO
+weeks, not a tag range.
+
+<!-- field: srds -->
+### SRDs
+
+- srd007-links
+- srd014-handoff
+- srd018-reports
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel01.3-uc001-reference-update](specs/use-cases/rel01.3-uc001-reference-update.md) | A downstream release tag files one reference-update issue upstream. | specified | P2 |
+| [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md) | A system release tag opens one merge request with the computed aggregate and deck; the model drafts the prose during the lead's review. | specified | P2 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | Idempotent tag-triggered reference-update issues and summary merge requests. | specified |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:referenceUpdate
+- mage integration:releaseSummary
+
+<!-- release: 02.0 | status: specified -->
+## 02.0 - Evidence, handoff, and cadence
+
+What the TPM-to-Product-Owner loop does not need yet: done as evidence
+in a named environment and track-goals closing objectives on it, the
+full handoff and release fan-out, the daily standup and Daily Scrum,
+the sprint review and retrospective as skills, and the requirement
+items of earlier releases' SRDs that their use cases do not cite. Use
+cases are written when the release is planned.
+
+<!-- field: srds -->
+### SRDs
+
+- srd008-gates
+- srd019-track-goals
+- srd020-daily-scrum
+- srd032-sprint-review
+- srd033-sprint-retrospective
+- srd041-states
