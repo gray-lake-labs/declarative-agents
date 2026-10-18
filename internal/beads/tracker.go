@@ -405,7 +405,8 @@ func (t *Tracker) Compare(project, base, head string) (int, []string, error) {
 	return ahead, strings.Split(paths, "\n"), nil
 }
 
-// Not served yet: merge requests and awards
+// Not served yet: awards, and opening merge requests, which a local merge
+// replaces
 // belong to commands that still run on GitLab (GAP10).
 
 // FindMilestone looks in the project, then in its ancestor groups.
@@ -451,10 +452,6 @@ func (t *Tracker) EnsureMilestone(group string, m gitlab.Milestone) (string, err
 
 func toGitlab(m Milestone) gitlab.Milestone {
 	return gitlab.Milestone{Title: m.Title, Description: m.Description, StartDate: m.StartDate, DueDate: m.DueDate}
-}
-
-func (t *Tracker) MergedMergeRequests(string, string, string) ([]gitlab.MergeRequest, error) {
-	return nil, ErrNotServed
 }
 
 func (t *Tracker) IssueAwards(string, int) ([]gitlab.Award, error) { return nil, ErrNotServed }
