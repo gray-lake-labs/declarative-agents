@@ -55,6 +55,7 @@ type Issue struct {
 	IssueType   string    `json:"issue_type,omitempty"`
 	Assignee    string    `json:"assignee,omitempty"`
 	CreatedAt   string    `json:"created_at,omitempty"`
+	CreatedBy   string    `json:"created_by,omitempty"`
 	UpdatedAt   string    `json:"updated_at,omitempty"`
 	ClosedAt    string    `json:"closed_at,omitempty"`
 	CloseReason string    `json:"close_reason,omitempty"`
@@ -64,11 +65,14 @@ type Issue struct {
 	State      string `json:"state,omitempty"`
 	StateActor string `json:"state_actor,omitempty"`
 	// Repository is the code repository the issue belongs to, the field a
-	// GitLab project path maps to (srd042 R2.4).
+	// GitLab project path maps to (srd042 R2.4), and IID its number there,
+	// unique within the repository.
 	Repository string `json:"repository,omitempty"`
+	IID        int    `json:"iid,omitempty"`
 	// Release is the release or sprint identifier a milestone maps to
 	// (srd042 R2.2).
 	Release string `json:"release,omitempty"`
+	DueDate string `json:"due_date,omitempty"`
 }
 
 // HasLabel reports whether the issue carries the label.

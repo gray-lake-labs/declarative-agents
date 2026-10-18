@@ -1,7 +1,7 @@
 ---
 id: rel03.0-uc001-pop-and-close-on-beads
 title: An Issue Is Popped, Delivered, and Closed Against Beads
-status: specified
+status: implemented
 priority: P2
 test_suite: test-rel03.0-beads-tracker
 ---

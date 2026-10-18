@@ -387,7 +387,7 @@ fixture tracker repositories. srd042 holds the direction.
 
 | id | summary | status | priority |
 | --- | --- | --- | --- |
-| [rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md) | An issue is popped, delivered by a local merge, and closed on beads with the merge commit cited. | specified | P2 |
+| [rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md) | An issue is popped, delivered by a local merge, and closed on beads with the merge commit cited. | implemented | P2 |
 | [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md) | Two clones pull before reading and push after writing; a contended pop keeps the earlier taker; an offline clone says so and reconciles. | specified | P2 |
 
 <!-- field: test_suites -->

@@ -66,6 +66,20 @@ sessions believe they both hold an assignment: an assignment taken
 offline is provisional, is marked so in the pop's own output, and
 confirms or reports as lost on the next synchronization.
 
+<!-- section: choosing-the-backend -->
+## Choosing the backend
+
+TPM_TRACKER, set to the tracker repository's URL, selects the beads
+backend; unset, tpm talks to GitLab as before. The tracker clone lives at
+TPM_TRACKER_CLONE, or under the user cache directory, cloned on first use.
+The person is TPM_USER, or git's user.name. Issues come from the tracker
+repository; files, branches, tags, and comparisons come from the git
+checkout the command runs in and its origin, so a command runs from inside
+the repository it works on. Delivery is a merge commit on the default
+branch citing project#iid, made with git merge --no-ff; tpm program close
+finds it and closes the issue on it, and refuses a fast-forward or an empty
+branch, because neither is a delivery a reviewer can point to.
+
 <!-- section: what-this-replaces -->
 ## What this replaces
 

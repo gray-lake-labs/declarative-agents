@@ -26,3 +26,10 @@ Input: the project path of this repository and the issue number.
    failing), show its reason and the audit's findings, and stop.
 5. Show the merge request URL. A reviewer merges it; the merge closes the
    issue.
+
+On the beads tracker (pop's `web_url` starts with `beads:`) there is no
+merge request; delivery is a local merge (srd042 R2.3). Replace steps 4
+and 5: from the checkout pop returned, run
+`git merge --no-ff <branch> -m "Merge <branch> (<project>#<iid>)"`, then
+`tpm program close --project <project> --issue <iid> --json`. On a refusal,
+show its reason and stop; otherwise show the closing commit.

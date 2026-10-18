@@ -43,7 +43,45 @@ func mergeIssues(base, ours, theirs []Issue, now string) []Issue {
 			merged = append(merged, mergeIssue(b[id], oi, ti, now))
 		}
 	}
+	renumber(merged, func(id string) bool {
+		_, inTheirs := t[id]
+		_, inBase := b[id]
+		return !inTheirs && !inBase
+	})
 	return merged
+}
+
+// renumber gives every issue ours created that collides with another
+// issue's IID in the same repository the next free IID there: two clones
+// that create between pulls both pick the next number, and the earlier push
+// keeps it.
+func renumber(issues []Issue, oursNew func(id string) bool) {
+	type key struct {
+		repo string
+		iid  int
+	}
+	taken := map[key]bool{}
+	top := map[string]int{}
+	for _, i := range issues {
+		if i.IID == 0 {
+			continue
+		}
+		if !oursNew(i.ID) {
+			taken[key{i.Repository, i.IID}] = true
+		}
+		top[i.Repository] = max(top[i.Repository], i.IID)
+	}
+	for n := range issues {
+		i := &issues[n]
+		if i.IID == 0 || !oursNew(i.ID) {
+			continue
+		}
+		if taken[key{i.Repository, i.IID}] {
+			top[i.Repository]++
+			i.IID = top[i.Repository]
+		}
+		taken[key{i.Repository, i.IID}] = true
+	}
 }
 
 // mergeIssue merges one issue both sides changed. Plain fields: last writer
@@ -60,6 +98,7 @@ func mergeIssue(b, o, t Issue, now string) Issue {
 	m.IssueType = lww(b.IssueType, o.IssueType, t.IssueType, oursLater)
 	m.Repository = lww(b.Repository, o.Repository, t.Repository, oursLater)
 	m.Release = lww(b.Release, o.Release, t.Release, oursLater)
+	m.DueDate = lww(b.DueDate, o.DueDate, t.DueDate, oursLater)
 	m.UpdatedAt = max(o.UpdatedAt, t.UpdatedAt)
 
 	if o.Assignee != b.Assignee && t.Assignee == b.Assignee {

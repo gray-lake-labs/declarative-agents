@@ -132,11 +132,18 @@ func (s *Store) Pop(id string) (PopResult, error) {
 }
 
 // Close closes an issue on its observed merge, recording the merge commit
-// as the closing comment (srd042 R2.3).
+// as the closing comment (srd042 R2.3). An issue its assignee merged
+// without first marking it started is started on their behalf, so the
+// close is still the table's in-progress to closed by merge.
 func (s *Store) Close(id, commit string) (CloseResult, error) {
 	fr, written, _, err := s.mutate(id, "close", func(i *Issue) (bool, error) {
 		if i.State == Closed && i.CloseReason == commit {
 			return false, nil
+		}
+		if i.State == Taken {
+			if err := transition(i, ActorPerson, InProgress, s.User); err != nil {
+				return false, err
+			}
 		}
 		if err := transition(i, ActorMerge, Closed, s.User); err != nil {
 			return false, err
@@ -273,9 +280,51 @@ func (s *Store) merge(base, remote string) error {
 	return err
 }
 
-// mutate is every write: pull, apply fn to one issue, commit, push. A write
-// made offline is committed and queued for the next synchronization.
+// Create files a new issue in repository with the next IID there, and
+// returns it as the tracker repository holds it after the push: a create
+// that raced another clone's has been renumbered by the merge.
+func (s *Store) Create(i Issue) (Issue, error) {
+	i.ID = "tpm-" + newID()[:8]
+	_, _, _, err := s.write("create "+i.ID, func(issues *[]Issue) (bool, error) {
+		for _, x := range *issues {
+			if x.Repository == i.Repository {
+				i.IID = max(i.IID, x.IID)
+			}
+		}
+		i.IID++
+		now := s.stamp()
+		i.CreatedAt, i.UpdatedAt, i.CreatedBy = now, now, s.User
+		if i.State == "" {
+			i.State, i.Status = Open, StatusOpen
+		}
+		*issues = append(*issues, i)
+		return true, nil
+	})
+	if err != nil {
+		return Issue{}, err
+	}
+	return s.issue(i.ID)
+}
+
+// mutate is every write to one issue: pull, apply fn, commit, push.
 func (s *Store) mutate(id, what string, fn func(*Issue) (bool, error)) (fr Freshness, written, queued bool, err error) {
+	return s.write(what+" "+id, func(issues *[]Issue) (bool, error) {
+		for k := range *issues {
+			if (*issues)[k].ID == id {
+				changed, err := fn(&(*issues)[k])
+				if changed && err == nil {
+					(*issues)[k].UpdatedAt = s.stamp()
+				}
+				return changed, err
+			}
+		}
+		return false, fmt.Errorf("issue %s: %w", id, ErrNotFound)
+	})
+}
+
+// write is every write: pull, apply fn to the issues, commit, push. A write
+// made offline is committed and queued for the next synchronization.
+func (s *Store) write(what string, fn func(*[]Issue) (bool, error)) (fr Freshness, written, queued bool, err error) {
 	if fr, err = s.Sync(); err != nil {
 		return fr, false, false, err
 	}
@@ -283,30 +332,20 @@ func (s *Store) mutate(id, what string, fn func(*Issue) (bool, error)) (fr Fresh
 	if err != nil {
 		return fr, false, false, err
 	}
-	n := -1
-	for k := range issues {
-		if issues[k].ID == id {
-			n = k
-		}
-	}
-	if n < 0 {
-		return fr, false, false, fmt.Errorf("issue %s: %w", id, ErrNotFound)
-	}
 	if s.beforeWrite != nil {
 		s.beforeWrite()
 	}
-	changed, err := fn(&issues[n])
+	changed, err := fn(&issues)
 	if err != nil || !changed {
 		return fr, false, false, err
 	}
-	issues[n].UpdatedAt = s.stamp()
 	if err := writeIssues(filepath.Join(s.Dir, IssuesFile), issues); err != nil {
 		return fr, false, false, err
 	}
 	if _, err := s.git("add", IssuesFile); err != nil {
 		return fr, false, false, err
 	}
-	if _, err := s.git("commit", "-q", "-m", fmt.Sprintf("tpm: %s %s (%s)", what, id, s.User)); err != nil {
+	if _, err := s.git("commit", "-q", "-m", fmt.Sprintf("tpm: %s (%s)", what, s.User)); err != nil {
 		return fr, false, false, err
 	}
 	if fr.Offline {

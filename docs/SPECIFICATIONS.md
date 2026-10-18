@@ -59,7 +59,7 @@ docs/road-map.md.
 | "01.2" | Sprint end closes the loop | 2 | 2 | implemented |
 | "01.3" | Tags trigger handoff and the summary | 0 | 2 | specified |
 | "02.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
-| "03.0" | The tracker becomes beads | 0 | 2 | specified |
+| "03.0" | The tracker becomes beads | 1 | 2 | specified |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -149,7 +149,7 @@ docs/road-map.md.
 | [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md) | The Technical Program Manager Plans the Next Period's Objectives | 01.2 | implemented | [test-rel01.2-sprint-end](specs/test-suites/test-rel01.2-sprint-end.md) | docs/specs/use-cases/rel01.2-uc002-plan-next-period.md |
 | [rel01.3-uc001-reference-update](specs/use-cases/rel01.3-uc001-reference-update.md) | A Downstream Release Files a Reference-Update Issue Upstream | 01.3 | specified | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | docs/specs/use-cases/rel01.3-uc001-reference-update.md |
 | [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md) | A System Release Drafts the Summary for Review | 01.3 | specified | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | docs/specs/use-cases/rel01.3-uc002-release-summary.md |
-| [rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md) | An Issue Is Popped, Delivered, and Closed Against Beads | 03.0 | specified | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md |
+| [rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md) | An Issue Is Popped, Delivered, and Closed Against Beads | 03.0 | implemented | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md |
 | [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md) | Two Clones Synchronize Through the Tracker Repository | 03.0 | specified | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc002-two-clones-synchronize.md |
 
 <!-- field: test_suite_index | form: "typed table" -->
@@ -181,4 +181,4 @@ docs/road-map.md.
 | GAP7 | The corpus's own SRDs omit test and environment on acceptance criteria (design.md srd acceptance_criteria_note) until the test subsystem's environment SRDs exist. |
 | GAP8 | The parent corpus audit does not read docs/specs/objectives/, so a magefiles gate test validates objective documents against srd034 R1 inside mage audit (srd034 R2.1). An objective document is scrum-master's type written as an SRD in the parent's format, so the gate is scrum-master's own, not a gap the parent closes. |
 | GAP9 | tpm program lint does not yet run in CI on issue creation or on a schedule (srd013 R1.3); that needs a released tpm binary the program's pipelines can run. |
-| GAP10 | Release 03.0 is half built. internal/beads implements the tracker over beads and test-rel03.0-beads-tracker passes against it, but no tpm command reads or writes through it yet (srd042 R1.1, R1.3), so its use cases stay specified; the GitLab client, the platform Terraform, and the GitLab rig remain until the commands move (srd042 R4). |
+| GAP10 | Release 03.0 is part built. internal/beads serves the tracker over beads, selected by TPM_TRACKER (eng04-beads-sync), and test-rel03.0-beads-tracker passes. tpm program pop and tpm program close run on it end to end, with the issue-pop skill finishing by local merge; every other command still needs GitLab, and the beads tracker refuses milestones, merge requests, awards, and group labels as not served (srd042 R1.1, R1.3). No command output yet names the tracker commit it read, so rel03.0-uc002 stays specified. The GitLab client, the platform Terraform, and the GitLab rig remain until every command moves (srd042 R4). |
