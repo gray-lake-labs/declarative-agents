@@ -375,10 +375,33 @@ dedicated tracker repository, synchronized through git: pull before
 read, push after write, conflicts resolved by rule (eng04-beads-sync).
 tpm gains a beads backend behind the tracker boundary, the platform
 Terraform and the GitLab client leave, and the regression rig provisions
-fixture tracker repositories. srd042 holds the direction; use cases are
-written when the release is planned.
+fixture tracker repositories. srd042 holds the direction.
 
 <!-- field: srds -->
 ### SRDs
 
 - srd042-beads-tracker
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md) | An issue is popped, delivered by a local merge, and closed on beads with the merge commit cited. | specified | P2 |
+| [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md) | Two clones pull before reading and push after writing; a contended pop keeps the earlier taker; an offline clone says so and reconciles. | specified | P2 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | One issue's life, two clones, a contended pop, and an offline session against fixture tracker repositories. | specified |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage integration:beadsPopClose
+- mage integration:beadsStates
+- mage integration:beadsSync
+- mage integration:beadsOffline

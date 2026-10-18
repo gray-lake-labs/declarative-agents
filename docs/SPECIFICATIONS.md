@@ -59,7 +59,7 @@ docs/road-map.md.
 | "01.2" | Sprint end closes the loop | 2 | 2 | implemented |
 | "01.3" | Tags trigger handoff and the summary | 0 | 2 | specified |
 | "02.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
-| "03.0" | The tracker becomes beads | 0 | 0 | specified |
+| "03.0" | The tracker becomes beads | 0 | 2 | specified |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -149,6 +149,8 @@ docs/road-map.md.
 | [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md) | The Technical Program Manager Plans the Next Period's Objectives | 01.2 | implemented | [test-rel01.2-sprint-end](specs/test-suites/test-rel01.2-sprint-end.md) | docs/specs/use-cases/rel01.2-uc002-plan-next-period.md |
 | [rel01.3-uc001-reference-update](specs/use-cases/rel01.3-uc001-reference-update.md) | A Downstream Release Files a Reference-Update Issue Upstream | 01.3 | specified | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | docs/specs/use-cases/rel01.3-uc001-reference-update.md |
 | [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md) | A System Release Drafts the Summary for Review | 01.3 | specified | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | docs/specs/use-cases/rel01.3-uc002-release-summary.md |
+| [rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md) | An Issue Is Popped, Delivered, and Closed Against Beads | 03.0 | specified | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md |
+| [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md) | Two Clones Synchronize Through the Tracker Repository | 03.0 | specified | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc002-two-clones-synchronize.md |
 
 <!-- field: test_suite_index | form: "typed table" -->
 ## Test suite index
@@ -163,6 +165,7 @@ docs/road-map.md.
 | [test-rel01.1-weekly-status](specs/test-suites/test-rel01.1-weekly-status.md) | Test Suite for Release 01.1 Status Comes Back Weekly | "01.1" | 6 | [[rel01.1-uc001-weekly-status](specs/use-cases/rel01.1-uc001-weekly-status.md), [rel01.1-uc002-period-rollup](specs/use-cases/rel01.1-uc002-period-rollup.md)] | docs/specs/test-suites/test-rel01.1-weekly-status.md |
 | [test-rel01.2-sprint-end](specs/test-suites/test-rel01.2-sprint-end.md) | Test Suite for Release 01.2 Sprint End Closes the Loop | "01.2" | 5 | [[rel01.2-uc001-sprint-end-release](specs/use-cases/rel01.2-uc001-sprint-end-release.md), [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md)] | docs/specs/test-suites/test-rel01.2-sprint-end.md |
 | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | Test Suite for Release 01.3 Tags Trigger Handoff and the Summary | "01.3" | 2 | [[rel01.3-uc001-reference-update](specs/use-cases/rel01.3-uc001-reference-update.md), [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md)] | docs/specs/test-suites/test-rel01.3-tag-triggered.md |
+| [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | Test Suite for Release 03.0 The Tracker Becomes Beads | "03.0" | 4 | [[rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md), [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md)] | docs/specs/test-suites/test-rel03.0-beads-tracker.md |
 
 <!-- field: coverage_gaps -->
 ## Coverage gaps
