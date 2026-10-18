@@ -76,6 +76,31 @@ func TestPopAndCloseRunOnBeads(t *testing.T) {
 	}
 }
 
+// TestPopOfflineIsProvisional: a pop taken while the tracker repository is
+// unreachable reports the assignment as provisional (eng04-beads-sync).
+func TestPopOfflineIsProvisional(t *testing.T) {
+	root := t.TempDir()
+	remote := beadstest.TrackerRepository(t, root)
+	trackerClone := filepath.Join(root, "alice-tracker")
+	beadstest.Clone(t, remote, trackerClone, "alice")
+	checkout := beadstest.CodeRepository(t, root, "po-1", "alice")
+	tr := beads.NewTracker(trackerClone, "alice", checkout)
+	i, err := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Score one agent", Milestone: "m", Description: goodBody,
+		Labels: []string{"plane::data", "kind::build", "component::po-1"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	beadstest.Git(t, trackerClone, "remote", "set-url", "origin", filepath.Join(root, "unreachable.git"))
+
+	p, err := Pop(tr, ExecGit{}, "g/po-1", i.IID, checkout, Defaults(), false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !p.Assigned || !p.Provisional {
+		t.Fatalf("offline pop = %+v, want assigned and provisional", p)
+	}
+}
+
 // TestCloseNeedsTheBeadsTracker: on GitLab the merge request's merge closes
 // the issue (srd041 R9.3), so close refuses rather than closing by hand.
 func TestCloseNeedsTheBeadsTracker(t *testing.T) {

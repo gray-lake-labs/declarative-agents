@@ -119,6 +119,21 @@ type Label struct {
 	Description string `json:"description"`
 }
 
+// Read names the tracker state a command read: the tracker repository
+// commit, when it was pulled, and whether the command read the clone's cache
+// because the repository was unreachable (srd042 R3.3).
+type Read struct {
+	Commit  string `json:"commit"`
+	At      string `json:"at"`
+	Offline bool   `json:"offline,omitempty"`
+}
+
+// Reader is a tracker that knows what it last read. The beads tracker is
+// one; GitLab, a single server, has nothing to report.
+type Reader interface {
+	LastRead() (Read, bool)
+}
+
 // Tracker is everything tpm asks of the tracker; a new need is a new method here.
 type Tracker interface {
 	GetFile(project, path, ref string) ([]byte, error)

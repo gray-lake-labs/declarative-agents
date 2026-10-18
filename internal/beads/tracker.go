@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 )
@@ -33,7 +34,19 @@ type Tracker struct {
 	code  string
 }
 
-var _ gitlab.Tracker = (*Tracker)(nil)
+var (
+	_ gitlab.Tracker = (*Tracker)(nil)
+	_ gitlab.Reader  = (*Tracker)(nil)
+)
+
+// LastRead names the tracker commit the last read reflected.
+func (t *Tracker) LastRead() (gitlab.Read, bool) {
+	fr, ok := t.Store.Last()
+	if !ok {
+		return gitlab.Read{}, false
+	}
+	return gitlab.Read{Commit: fr.Commit, At: fr.At.UTC().Format(time.RFC3339), Offline: fr.Offline}, true
+}
 
 // NewTracker serves the tracker repository cloned at clone, as user, with
 // the code half answered by the checkout at code.

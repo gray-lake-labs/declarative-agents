@@ -1,7 +1,7 @@
 ---
 id: rel03.0-uc002-two-clones-synchronize
 title: Two Clones Synchronize Through the Tracker Repository
-status: specified
+status: implemented
 priority: P2
 test_suite: test-rel03.0-beads-tracker
 ---

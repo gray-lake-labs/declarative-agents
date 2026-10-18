@@ -28,6 +28,16 @@ type Store struct {
 	// beforeWrite runs between a write's synchronization and its commit, so
 	// a test can land another clone's write inside that window.
 	beforeWrite func()
+	// last is the most recent synchronization, what the last read reflects.
+	last *Freshness
+}
+
+// Last is the most recent synchronization, if any.
+func (s *Store) Last() (Freshness, bool) {
+	if s.last == nil {
+		return Freshness{}, false
+	}
+	return *s.last, true
 }
 
 // NewStore returns the store for the clone at dir, acting as user.
@@ -219,7 +229,9 @@ func (s *Store) Sync() (Freshness, error) {
 		return Freshness{}, err
 	}
 	if _, err := s.git("fetch", "-q", "origin"); err != nil {
-		return Freshness{Commit: st.Commit, At: st.At, Offline: true}, nil
+		fr := Freshness{Commit: st.Commit, At: st.At, Offline: true}
+		s.last = &fr
+		return fr, nil
 	}
 	remote, err := s.git("rev-parse", "--verify", "-q", "origin/main")
 	if err != nil {
@@ -248,7 +260,9 @@ func (s *Store) Sync() (Freshness, error) {
 	if err := s.update(func(st *syncState) { st.Commit, st.At = remote, at }); err != nil {
 		return Freshness{}, err
 	}
-	return Freshness{Commit: remote, At: at}, nil
+	fr := Freshness{Commit: remote, At: at}
+	s.last = &fr
+	return fr, nil
 }
 
 // merge records a merge with the tracker repository whose content is the
