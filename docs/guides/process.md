@@ -493,7 +493,7 @@ sequenceDiagram
     P->>S: major
     S->>T: tpm release gate runs the declared checks in their environments
     T-->>P: unit tests pass locally, contract tests pass in dev, peer read pending
-    Note over P,T: the run stops until another person gives the release issue a thumbs-up
+    Note over P,T: the run stops until another person approves the release issue
     S->>T: gate again, all evidence passes; tpm release tag 2.0.0, breaking
     T->>CI: new tag
     CI->>S: tpm handoff on-release

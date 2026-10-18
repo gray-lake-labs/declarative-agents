@@ -77,7 +77,8 @@ func testName(c program.Check) string {
 // RunGate runs the checks the policy declares for the artifact at the
 // checkout's HEAD and posts one evidence event per check on the release
 // issue (srd015 R1, srd008 R2). Local tests and custom checks run their
-// command; peer-read passes on another person's thumbs-up; any other
+// command; peer-read passes on another person's thumbs-up or approval
+// comment; any other
 // check fails as not runnable (R2.5). A dry run runs nothing and posts
 // nothing.
 func RunGate(t gitlab.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) {
@@ -135,16 +136,14 @@ func RunGate(t gitlab.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) {
 func runCheck(t gitlab.Tracker, in ReleaseGateInput, issue gitlab.Issue, c program.Check) (string, string) {
 	switch {
 	case c.Kind == "peer-read":
-		awards, err := t.IssueAwards(in.Project, in.Issue)
+		by, err := peerRead(t, in.Project, in.Issue, issue.Author)
 		if err != nil {
-			return ResultFail, "could not read the release issue's awards: " + err.Error()
+			return ResultFail, err.Error()
 		}
-		for _, a := range awards {
-			if a.Name == "thumbsup" && a.User != issue.Author {
-				return ResultPass, "approved by " + a.User + "."
-			}
+		if by != "" {
+			return ResultPass, "approved by " + by + "."
 		}
-		return ResultPending, "waiting for a thumbs-up from someone other than " + issue.Author + "."
+		return ResultPending, "waiting for a thumbs-up or tpm release approve from someone other than " + issue.Author + "."
 	case c.Kind != "tests" && c.Kind != "custom":
 		return ResultFail, "a " + c.Kind + " check is not runnable by this tpm (srd015 R2.5)."
 	case c.Environment != "local":
