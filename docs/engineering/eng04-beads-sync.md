@@ -19,9 +19,10 @@ resolves, and what offline operation promises.
 
 The tracker repository holds the beads database and nothing else: no
 code, no documents, no CI. Issues are .beads/issues.jsonl, bd's own
-interchange file; milestones are .beads/milestones.jsonl beside it, each
-belonging to a group or project path, merged a milestone at a time with
-the later writer winning when both clones changed one. Every program repository's configuration
+interchange file; milestones are .beads/milestones.jsonl and the label
+schema .beads/labels.jsonl beside it, each record belonging to a group or
+project path, merged a record at a time with the later writer winning
+when both clones changed one. Every program repository's configuration
 document names it by URL. Access to it is access to the program's facts,
 so it carries the same visibility as the most restricted repository it
 tracks. A working clone keeps its local beads state as a cache under the

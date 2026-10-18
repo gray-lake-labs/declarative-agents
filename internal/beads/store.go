@@ -281,28 +281,17 @@ func (s *Store) merge(base, remote string) error {
 		return err
 	}
 	merged := mergeIssues(b, o, t, s.stamp())
-	bm, err := s.showMilestones(base)
-	if err != nil {
-		return err
-	}
-	om, err := s.showMilestones("HEAD")
-	if err != nil {
-		return err
-	}
-	tm, err := s.showMilestones(remote)
-	if err != nil {
-		return err
-	}
 	if _, err := s.git("merge", "-q", "--no-ff", "--no-commit", "-s", "ours", remote); err != nil {
 		return err
 	}
 	if err := writeIssues(filepath.Join(s.Dir, IssuesFile), merged); err != nil {
 		return err
 	}
-	if ms := mergeMilestones(bm, om, tm); len(ms) > 0 {
-		if err := writeMilestones(filepath.Join(s.Dir, MilestonesFile), ms); err != nil {
-			return err
-		}
+	if err := mergeRecordFile[Milestone](s, MilestonesFile, base, remote); err != nil {
+		return err
+	}
+	if err := mergeRecordFile[Label](s, LabelsFile, base, remote); err != nil {
+		return err
 	}
 	if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
 		return err
