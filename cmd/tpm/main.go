@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 
@@ -21,7 +22,12 @@ import (
 )
 
 func main() {
-	tracker := func() (gitlab.Tracker, error) { return gitlab.New() }
+	tracker := func() (gitlab.Tracker, error) {
+		if beads.Configured() {
+			return beads.FromEnv()
+		}
+		return gitlab.New()
+	}
 	err := cli.Default.Run(os.Args[1:], os.Stdout, tracker)
 	switch {
 	case err == nil:

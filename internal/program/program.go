@@ -94,6 +94,37 @@ func init() {
 		},
 	})
 
+	var closeArgs struct {
+		project, dir string
+		iid          int
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "program", Name: "close", Summary: "close an issue on the local merge that delivered it (beads tracker)",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&closeArgs.project, "project", "", "project path (required)")
+			fs.IntVar(&closeArgs.iid, "issue", 0, "issue IID (required)")
+			fs.StringVar(&closeArgs.dir, "dir", ".", "a directory in the local checkout holding the merge")
+		},
+		Run: func(ctx *cli.Context) error {
+			if closeArgs.project == "" || closeArgs.iid == 0 {
+				return fmt.Errorf("%w: close needs --project and --issue", cli.ErrUsage)
+			}
+			t, err := ctx.Tracker()
+			if err != nil {
+				return err
+			}
+			r, err := Close(t, ExecGit{}, closeArgs.project, closeArgs.iid, closeArgs.dir, ctx.DryRun)
+			if err != nil {
+				return err
+			}
+			human := fmt.Sprintf("%s#%d closed on %s", r.Project, r.IID, r.Commit)
+			if !r.Closed && !r.DryRun {
+				human = fmt.Sprintf("%s#%d was already closed on %s", r.Project, r.IID, r.Commit)
+			}
+			return ctx.Emit(r, human)
+		},
+	})
+
 	var mrArgs struct {
 		project, issueProject, branch, audit, dir, control, ref string
 		iid                                                     int
