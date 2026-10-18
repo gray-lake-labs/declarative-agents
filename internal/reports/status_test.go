@@ -7,15 +7,14 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
 const po1 = "g/product-owners/po-1"
 
-func statusFixture() (*gitlabtest.Fake, StatusInput) {
-	f := gitlabtest.New()
-	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd010-po-1.md", []byte(`---
+func statusFixture(p trackertest.Program) (gitlab.Tracker, StatusInput) {
+	p.AddFile("g/system", "main", "docs/specs/software-requirements/srd010-po-1.md", []byte(`---
 id: srd010-po-1
 title: "Subsystem: po-1"
 ---
@@ -42,11 +41,25 @@ Objective issues arrive.
 `))
 	doc, _ := configDocument(Config{Team: []Member{{Username: "po-1", Project: po1}}, System: "g/system"})
 	cfg, _ := ParseConfig([]byte(doc))
-	return f, StatusInput{Config: cfg, Reports: "g/reports", Policy: program.Defaults(), Ref: "main", Now: monday}
+	return p.Tracker(), StatusInput{Config: cfg, Reports: "g/reports", Policy: program.Defaults(), Ref: "main", Now: monday}
+}
+
+// issueCount counts project's issues, open or closed.
+func issueCount(t *testing.T, f gitlab.Tracker, project string) int {
+	t.Helper()
+	all, err := f.ListIssues(project, gitlab.IssueQuery{State: "all"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return len(all)
 }
 
 func TestStatusIssueDueAfterReminderWeekdayMentionsOwner(t *testing.T) {
-	f, in := statusFixture()
+	trackertest.Each(t, testStatusIssueDueAfterReminderWeekdayMentionsOwner)
+}
+
+func testStatusIssueDueAfterReminderWeekdayMentionsOwner(t *testing.T, p trackertest.Program) {
+	f, in := statusFixture(p)
 	res, err := StatusIssues(f, in)
 	if err != nil || len(res) != 1 {
 		t.Fatalf("res=%+v err=%v", res, err)
@@ -81,11 +94,15 @@ func TestStatusIssueDueAfterReminderWeekdayMentionsOwner(t *testing.T) {
 }
 
 func TestStatusIssuesIdempotentPerWeek(t *testing.T) {
-	f, in := statusFixture()
+	trackertest.Each(t, testStatusIssuesIdempotentPerWeek)
+}
+
+func testStatusIssuesIdempotentPerWeek(t *testing.T, p trackertest.Program) {
+	f, in := statusFixture(p)
 	first, _ := StatusIssues(f, in)
 	again, err := StatusIssues(f, in)
-	if err != nil || again[0].Action != "exists" || again[0].IID != first[0].IID || len(f.Issues[po1]) != 1 {
-		t.Fatalf("second run: %+v err=%v issues=%d", again, err, len(f.Issues[po1]))
+	if err != nil || again[0].Action != "exists" || again[0].IID != first[0].IID || issueCount(t, f, po1) != 1 {
+		t.Fatalf("second run: %+v err=%v issues=%d", again, err, issueCount(t, f, po1))
 	}
 
 	f.UpdateIssue(po1, first[0].IID, gitlab.IssueUpdate{State: ptr("close")})
@@ -104,7 +121,7 @@ func TestStatusIssuesIdempotentPerWeek(t *testing.T) {
 	if old.State != "closed" {
 		t.Fatal("the closed instance changed state")
 	}
-	if again, _ := StatusIssues(f, in); again[0].Action != "exists" || len(f.Issues[po1]) != 2 {
+	if again, _ := StatusIssues(f, in); again[0].Action != "exists" || issueCount(t, f, po1) != 2 {
 		t.Fatalf("second run next week: %+v", again)
 	}
 }
@@ -112,18 +129,26 @@ func TestStatusIssuesIdempotentPerWeek(t *testing.T) {
 func ptr[T any](v T) *T { return &v }
 
 func TestWeekListsOpenObjectivesAndActivity(t *testing.T) {
-	f := gitlabtest.New()
+	trackertest.Each(t, testWeekListsOpenObjectivesAndActivity)
+}
+
+func testWeekListsOpenObjectivesAndActivity(t *testing.T, p trackertest.Program) {
+	for _, mr := range []gitlab.MergeRequest{
+		{IID: 1, Title: "Add grader notes", Author: "po-1", MergedAt: "2026-10-13"},
+		{IID: 2, Title: "Earlier work", Author: "po-1", MergedAt: "2026-10-09"},
+		{IID: 3, Title: "Someone else", Author: "po-2", MergedAt: "2026-10-13"},
+	} {
+		p.AddMerge(po1, mr)
+	}
+	f := p.Tracker()
 	obj, _ := f.CreateIssue(po1, gitlab.NewIssue{Title: "Score one agent", DueDate: "2026-11-06",
 		Description: "Body\n\n<!-- tpm goals objective=obj001-a:R1 release=01.0 -->"})
 	f.CreateIssue(po1, gitlab.NewIssue{Title: "Ad hoc", Description: "not an objective"})
 	done, _ := f.CreateIssue(po1, gitlab.NewIssue{Title: "Grader notes"})
-	f.AssignIssue(po1, done.IID, gitlab.User{Username: "po-1"})
-	f.UpdateIssue(po1, done.IID, gitlab.IssueUpdate{State: ptr("close")})
-	f.MRs[po1] = []*gitlab.MergeRequest{
-		{IID: 1, Title: "Add grader notes", State: "merged", Author: "po-1", MergedAt: "2026-10-13"},
-		{IID: 2, Title: "Earlier work", State: "merged", Author: "po-1", MergedAt: "2026-10-09"},
-		{IID: 3, Title: "Someone else", State: "merged", Author: "po-2", MergedAt: "2026-10-13"},
+	if err := p.As("po-1").AssignIssue(po1, done.IID, gitlab.User{Username: "po-1"}); err != nil {
+		t.Fatal(err)
 	}
+	f.UpdateIssue(po1, done.IID, gitlab.IssueUpdate{State: ptr("close")})
 	r, err := Week(f, po1, "po-1", monday.AddDate(0, 0, 2))
 	if err != nil {
 		t.Fatal(err)

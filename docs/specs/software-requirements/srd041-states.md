@@ -22,7 +22,7 @@ title: "States: where an issue is and who may move it"
 | taken or in-progress | +blocked | person | none | the assignee states a blocker in a comment |
 | +blocked | -blocked | person | none | the assignee clears it |
 | open recurring | +needs-run | handoff | none | a breaking release of its artifact is tagged |
-| in-progress | closed | merge | none | a merge request that closes the issue is merged |
+| any open | closed | merge | none | a merge that closes the issue lands, whatever state the issue is in (R7.1) |
 | open objective | closed | track-goals | none | its ledger replays to met and the met event is posted |
 | any open | closed | person | none | declined, duplicate, or answered, with the reason as the last comment |
 | closed | open | person | none | reopened; admission runs again |

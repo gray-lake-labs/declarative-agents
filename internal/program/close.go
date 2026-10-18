@@ -2,6 +2,7 @@ package program
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
@@ -26,9 +27,11 @@ type CloseResult struct {
 
 // Close closes an issue on the local merge that delivered it (srd042 R2.3):
 // a merge commit on the default branch of the checkout around dir that
-// brings in the issue's pop branch and cites project#iid. A fast-forward or
-// a branch with nothing of its own is not a delivery. The commit cited is
-// the first such merge; a second close changes nothing.
+// cites project#iid. When the issue has a pop branch, the merge must bring
+// that branch in, so a fast-forward or a branch with nothing of its own is
+// not a delivery; an issue never popped, such as an objective a sprint-end
+// merge closes, closes on the first merge that cites it. A second close
+// changes nothing.
 func Close(t gitlab.Tracker, git Git, project string, iid int, dir string, dryRun bool) (CloseResult, error) {
 	r := CloseResult{Project: project, IID: iid, DryRun: dryRun}
 	c, ok := t.(MergeCloser)
@@ -44,20 +47,28 @@ func Close(t gitlab.Tracker, git Git, project string, iid int, dir string, dryRu
 	if err != nil {
 		return r, err
 	}
-	tip, err := git.Run(dir, "rev-parse", "--verify", "-q", "refs/heads/"+r.Branch)
-	if err != nil {
-		return r, fmt.Errorf("no local branch %s for %s#%d", r.Branch, project, iid)
-	}
-	tip = strings.TrimSpace(tip)
 	cite := fmt.Sprintf("%s#%d", project, iid)
-	merges, err := git.Run(dir, "rev-list", "--ancestry-path", "--merges", "--reverse", "--fixed-strings",
-		"--grep="+cite, tip+"..refs/heads/"+base)
+	path := "refs/heads/" + base
+	if tip, err := git.Run(dir, "rev-parse", "--verify", "-q", "refs/heads/"+r.Branch); err == nil {
+		path = strings.TrimSpace(tip) + ".." + path
+	} else {
+		r.Branch = ""
+	}
+	// project#1 must not match project#12.
+	grep := "--grep=" + regexp.QuoteMeta(cite) + "([^0-9]|$)"
+	merges, err := git.Run(dir, "rev-list", "--ancestry-path", "--merges", "--reverse", "-E", grep, path)
+	if r.Branch == "" {
+		merges, err = git.Run(dir, "rev-list", "--first-parent", "--merges", "--reverse", "-E", grep, path)
+	}
 	if err != nil {
 		return r, err
 	}
 	first, _, _ := strings.Cut(strings.TrimSpace(merges), "\n")
-	if first == "" {
+	switch {
+	case first == "" && r.Branch != "":
 		return r, fmt.Errorf("%s is not merged into %s by a merge commit citing %s (git merge --no-ff)", r.Branch, base, cite)
+	case first == "":
+		return r, fmt.Errorf("no merge commit on %s cites %s, and it has no pop branch", base, cite)
 	}
 	r.Commit = first
 	if dryRun {

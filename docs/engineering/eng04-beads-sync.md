@@ -84,7 +84,11 @@ owner, and a project with no such sibling is served by the command's own
 checkout and its origin. Delivery is a merge commit on the default
 branch citing project#iid, made with git merge --no-ff; tpm program close
 finds it and closes the issue on it, and refuses a fast-forward or an empty
-branch, because neither is a delivery a reviewer can point to. A project's merged history, what reports read as merged merge requests,
+branch, because neither is a delivery a reviewer can point to. A merge
+also closes every other issue its message cites, such as the objective a
+sprint-end merge closes; tpm program close closes such an issue, which has
+no pop branch, on the first merge commit that cites it, matching the
+number exactly. A project's merged history, what reports read as merged merge requests,
 is the merge commits on its default branch: each numbered by its place in
 the branch's first-parent history, by its author on its commit date, and
 closing every project#iid its message cites.
