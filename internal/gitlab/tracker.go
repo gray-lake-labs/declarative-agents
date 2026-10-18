@@ -134,6 +134,14 @@ type Reader interface {
 	LastRead() (Read, bool)
 }
 
+// Triager is a tracker that holds admission as srd041 state transitions
+// fired by lint, not as a bare label: Triage admits or flags one issue and
+// reports whether its state changed. GitLab is not one; there admission is
+// the needs-triage label alone.
+type Triager interface {
+	Triage(project string, iid int, admitted bool) (bool, error)
+}
+
 // Tracker is everything tpm asks of the tracker; a new need is a new method here.
 type Tracker interface {
 	GetFile(project, path, ref string) ([]byte, error)
