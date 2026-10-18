@@ -9,6 +9,12 @@ title: AI-Native Scrum Architecture
 <!-- field: summary -->
 ### Summary
 
+tpm and its skills implement AI-native Scrum, the process docs/VISION.md
+describes: Scrum whose administrative work is done by scripts and
+agents, so people keep only intent and judgment. The design is aligned
+with the AI-Native SDLC Playbook; docs/guides/sdlc-playbook.md compares
+the two and cites it.
+
 The process is three planes over one tracker, repeated at every level of
 a program. The management plane sets intent once per three-week period:
 the next release at each level and the objectives each level pushes to
@@ -449,6 +455,13 @@ Unit tests passing on a branch say little about a fresh install or an upgrade on
 Every step a program can do is a tpm subcommand. A skill is at most 50 lines and only calls tpm with --json, relays the person's choices among options tpm computed, and names its model steps. The model turns loose conversation into structured files, combines several files into one summary, and iterates on that content with the person; nothing else (design.md D10, eng02).
 
 The process runs every week in every repository, so a step the model does costs tokens on every run and can come out differently each time. A step in tpm costs nothing to repeat, gives the same answer, and can be tested. Language is the one thing a program cannot do, so it is the one thing the model is paid for.
+
+<!-- decision: 14 -->
+### 14 - A document's type is its directory and prefix
+
+Goals, intents, and objectives are one concept. A program's intent for a release period is an objective document, docs/specs/objectives/objNNN-short-name.md (srd034). The requirements that satisfy it are SRDs, docs/specs/software-requirements/srdNNN-short-name.md. Use cases and test suites keep their relNN.N-ucNNN- and test-relNN.N- names. An idea or an incident between periods is an issue, not a document. The path alone says which kind a document is, and the parent's declarations already select a file's type by its whole path.
+
+Two alternatives were rejected. An intent- prefix would add a document type that no reader needs: intent at the grain of a period is already an objective, and at a smaller grain it is already an issue. A type field in the frontmatter would depend on the parent format, whose SRD frontmatter allows a fixed set of keys (id, title, status, retired_in, replaced_by, depends_on, derived_from) and no type, so an objective document could not carry one and still be an SRD (srd034 R1.1). Renaming existing files is ruled out either way: their paths are pinned in citation URLs across repositories (design.md D9).
 
 <!-- field: technology_choices -->
 ## Technology choices

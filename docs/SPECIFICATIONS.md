@@ -66,7 +66,7 @@ docs/road-map.md.
 
 | path | id |
 | --- | --- |
-| docs/VISION.md | ai-native-scrum |
+| docs/VISION.md | [ai-native-scrum](VISION.md) |
 | docs/ARCHITECTURE.md | [architecture-ai-native-scrum](ARCHITECTURE.md) |
 | docs/constitutions/design.md | [design](constitutions/design.md) |
 | docs/road-map.md | [ai-native-scrum-roadmap](road-map.md) |
@@ -78,6 +78,8 @@ docs/road-map.md.
 | docs/guides/corpus-audit.md | corpus-audit |
 | docs/guides/parent-upgrade.md | parent-upgrade |
 | docs/guides/process.md | process |
+| docs/guides/sdlc-playbook.md | sdlc-playbook |
+| docs/guides/spec-kit.md | spec-kit |
 
 <!-- field: srd_index -->
 ## SRD index
