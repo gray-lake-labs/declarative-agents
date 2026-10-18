@@ -129,6 +129,9 @@ func (Integration) WeeklyStatus() error {
 	if err := e.commitPush(e.clone, "Weekly status "+status.Week, path); err != nil {
 		return err
 	}
+	if err := e.approve(e.reports, e.po1, status.IID, branch); err != nil {
+		return err
+	}
 	var merged program.MergeResult
 	if err := e.tpmJSON(&merged, "program", "merge", "--project", e.reports, "--issue-project", e.po1,
 		"--issue", fmt.Sprint(status.IID), "--branch", branch, "--dir", e.clone); err != nil {

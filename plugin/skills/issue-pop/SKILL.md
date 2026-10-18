@@ -17,12 +17,16 @@ Input: the project path of this repository and the issue number.
    the instructions: its Requirements are the steps and its Acceptance
    Criteria are what must hold. A question the Requirements ask, such as a
    sprint-end issue's confirmation, is part of the work (srd036 R4.1).
-3. Commit in the worktree.
-4. Run `tpm program merge --project <project> --issue <iid> --json` from
+3. Commit in the worktree and push the branch (`git push -u origin HEAD`).
+4. Ask a reviewer, someone other than you, to read the branch against the
+   Acceptance Criteria and run
+   `tpm program approve --project <project> --issue <iid>` in their
+   checkout. The approval names the commit they read.
+5. Run `tpm program merge --project <project> --issue <iid> --json` from
    the worktree, adding `--closes <project#iid>` for each issue the
-   Requirements say the merge also closes. For a change under docs/ it
-   runs the corpus audit first; then it merges the branch into the default
-   branch, pushes, and closes each issue (srd042 R2.3). On a refusal (no
-   commits yet, the issue closed, or the audit failing), show its reason
-   and the audit's findings, and stop.
-5. Show the merge commit and the issues it closed.
+   Requirements say the merge also closes. It runs the corpus audit for a
+   change under docs/, then merges only a branch approved at its tip,
+   pushes, and closes each issue (srd042 R2.3, srd013 R5.5). On a refusal
+   (no commits, the issue closed, the audit failing, or no approval of the
+   tip), show its reason and stop; after a new commit, ask again.
+6. Show the merge commit and the issues it closed.

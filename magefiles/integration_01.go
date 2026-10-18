@@ -100,11 +100,16 @@ func (Integration) Pop() error {
 	if err := r.commitPush(popped.Worktree, "Add grader notes", "GRADER.md"); err != nil {
 		return err
 	}
+	_, err = r.runTPM("program", "merge", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", popped.Worktree)
+	c.expect(err != nil && strings.Contains(err.Error(), "no approval"), "merge with no approval: %v", err)
+	if err := r.approve(po1, po1, work.IID, ""); err != nil {
+		return err
+	}
 	var merged program.MergeResult
 	if err := r.tpmJSON(&merged, "program", "merge", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", popped.Worktree); err != nil {
 		return err
 	}
-	c.expect(merged.Merged && merged.Commit != "", "merge: %+v", merged)
+	c.expect(merged.Merged && merged.Commit != "" && merged.ApprovedBy == rigReviewer, "merge: %+v", merged)
 	c.expect(r.closed(po1, work.IID), "issue #%d still open after its merge", work.IID)
 	return c.err("pop")
 }

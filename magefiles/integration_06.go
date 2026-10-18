@@ -190,6 +190,9 @@ func (Integration) PlanRelease() error {
 	if err := r.git(clone, "push", "--quiet", "--force", "-u", "origin", branch); err != nil {
 		return err
 	}
+	if err := r.approve(system, system, filed.IID, branch); err != nil {
+		return err
+	}
 	var merged program.MergeResult
 	if err := r.tpmJSON(&merged, "program", "merge", "--project", system, "--issue", fmt.Sprint(filed.IID),
 		"--branch", branch, "--dir", clone, "--audit", rigAudit); err != nil {
@@ -296,6 +299,9 @@ func (Integration) SprintEnd() error {
 	}
 	writeFileTo(filepath.Join(popped.Worktree, "docs/sprint-ends/01.0.md"), "# Sprint end 01.0\n\nThe objective is reported complete.\n")
 	if err := r.commitPush(popped.Worktree, "Summarize release 01.0's period", "docs/sprint-ends/01.0.md"); err != nil {
+		return err
+	}
+	if err := r.approve(po1, po1, filed.IID, popped.Branch); err != nil {
 		return err
 	}
 	var merged program.MergeResult

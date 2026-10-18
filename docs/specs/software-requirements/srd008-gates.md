@@ -50,7 +50,7 @@ Retired in 01.2 (design.md D12).
 <!-- req: R1.4 -->
 ### R1.4
 
-The reviewer looks for what passes the checks and is still wrong: scaling, security, drift from the architecture, a shortcut the acceptance criteria did not forbid. The merge request description lists what the reviewer was asked to look at.
+The reviewer looks for what passes the checks and is still wrong: scaling, security, drift from the architecture, a shortcut the acceptance criteria did not forbid. The reviewer reads the branch against the issue's Acceptance Criteria, and approves its tip with tpm program approve, without which tpm program merge refuses (srd013 R5.5, R5.6).
 
 <!-- req: R2 -->
 ## R2 - Release gate
