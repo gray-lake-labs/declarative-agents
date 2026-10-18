@@ -9,8 +9,8 @@ status: implemented
 ## Overview
 
 Each run starts with mage regression:up creating the repositories below in
-a fresh rig subgroup and ends with mage regression:down removing them.
-The weekly stage scaffolds a reports repository in the rig subgroup,
+a fresh rig run on local disk and ends with mage regression:down removing them.
+The weekly stage scaffolds a reports repository in the rig,
 files a status issue for a listed Product Owner, works it to a validated
 report, and proves the next instance with the next due date. The roll-up
 stage aggregates fixture reports and proves every signal, its phrasing by
@@ -25,8 +25,8 @@ component, and that an actionable signal becomes an issue.
 <!-- field: preconditions -->
 ## Preconditions
 
-- mage regression:up creates a rig-<run-id> subgroup with a system repository, a reports repository, and one Product Owner repository with open objective issue fixtures, and writes their paths as JSON for the integration targets (eng01).
-- mage regression:down destroys the subgroup after the targets run, including when they fail.
+- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository, a reports repository, and one Product Owner repository with open objective issue fixtures, and writes their paths as JSON for the integration targets (eng01).
+- mage regression:down removes the run after the targets run, including when they fail.
 - Fixture reports cover a week and a period, including a shared blocker, an aging blocker, a slipped commitment, a missing report, and a reported-complete objective with no met event.
 
 <!-- field: test_cases -->
@@ -149,7 +149,7 @@ go test ./internal/standup -run '^TestRecurReopensWithNextDueDateAndPreviousRuns
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- closed_issue: closed by the merge request
+- closed_issue: closed by the merge
 - next_instance: same title and labels, due one week later, run appended to Previous Runs
 
 <!-- field: traces -->

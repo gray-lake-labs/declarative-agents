@@ -91,3 +91,22 @@ func TestFileAndLintOnBeads(t *testing.T) {
 		t.Fatalf("fixed issue = %s %v, want ready", got.State, got.Labels)
 	}
 }
+
+// TestNonDataIssueKeepsItsStateThroughAdmission: only a data issue enters
+// the backlog (srd041 R3.1), so a management issue that fails admission
+// carries the needs-triage label but stays open, and its author can still
+// pop it, as on GitLab.
+func TestNonDataIssueKeepsItsStateThroughAdmission(t *testing.T) {
+	tr, checkout := newBeadsTracker(t, "alice")
+	filed, err := File(tr, "g/po-1", gitlab.NewIssue{Title: "Move release 01.1", Labels: Labels("management", "", "", "")}, Defaults(), false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := beadsState(t, tr, "g/po-1", filed.IID)
+	if filed.Lint.Admitted || got.State != beads.Open || !got.HasLabel("needs-triage") {
+		t.Fatalf("management issue = %+v, state %s %v, want open carrying needs-triage", filed.Lint, got.State, got.Labels)
+	}
+	if _, err := Pop(tr, ExecGit{}, "g/po-1", filed.IID, checkout, Defaults(), false); err != nil {
+		t.Fatalf("pop of the management issue = %v", err)
+	}
+}

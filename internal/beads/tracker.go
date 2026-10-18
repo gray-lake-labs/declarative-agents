@@ -33,6 +33,9 @@ const statusInProgress = "status::in-progress"
 type Tracker struct {
 	Store *Store
 	code  string
+	// fetched records the projects whose origin this command has fetched,
+	// so files read reflect what other clones pushed, at one fetch each.
+	fetched map[string]bool
 }
 
 var (
@@ -269,9 +272,11 @@ func (t *Tracker) AssignIssue(project string, iid int, user gitlab.User) error {
 
 // Triage is admission as srd041's lint rows: an admitted open issue becomes
 // ready, an admitted issue in needs-triage becomes ready or, already taken
-// by its author, taken; a failing open issue goes to needs-triage. srd041
-// has no row for an issue already past admission that later fails, so
-// there lint sets or clears only the label, as it does on GitLab.
+// by its author, taken; a failing open issue goes to needs-triage. Only a
+// data issue enters the backlog (srd041 R3.1), so admission moves only a
+// data issue's state; for any other issue, and for an issue already past
+// admission that later fails, for which srd041 has no row, lint sets or
+// clears only the label, as it does on GitLab.
 func (t *Tracker) Triage(project string, iid int, admitted bool) (bool, error) {
 	found, err := t.find(project, iid)
 	if err != nil {
@@ -279,7 +284,16 @@ func (t *Tracker) Triage(project string, iid int, admitted bool) (bool, error) {
 	}
 	me := t.Store.User
 	_, written, _, err := t.Store.mutate(found.ID, "lint", func(i *Issue) (bool, error) {
+		data := i.HasLabel("plane::data")
 		switch {
+		case !data && admitted && i.HasLabel(NeedsTriage):
+			i.Labels = slices.DeleteFunc(i.Labels, func(l string) bool { return l == NeedsTriage })
+			return true, nil
+		case !data && !admitted && !i.HasLabel(NeedsTriage):
+			i.Labels = append(i.Labels, NeedsTriage)
+			return true, nil
+		case !data:
+			return false, nil
 		case admitted && (i.State == Open || i.State == NeedsTriage) && i.Assignee == "":
 			return true, transition(i, ActorLint, Ready, me)
 		case admitted && i.State == NeedsTriage:
@@ -361,6 +375,13 @@ func (t *Tracker) CreateBranch(project, branch, ref string) error {
 }
 
 func (t *Tracker) rev(project, ref string) string {
+	if !t.fetched[project] {
+		if t.fetched == nil {
+			t.fetched = map[string]bool{}
+		}
+		t.fetched[project] = true
+		t.git(project, "fetch", "-q", "origin")
+	}
 	if _, err := t.git(project, "rev-parse", "--verify", "-q", "refs/remotes/origin/"+ref); err == nil {
 		return "origin/" + ref
 	}

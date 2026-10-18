@@ -9,9 +9,10 @@ status: implemented
 ## Overview
 
 Each run starts with mage regression:up creating the repositories below in
-a fresh rig subgroup and ends with mage regression:down removing them. The
+a fresh rig run on local disk and ends with mage regression:down removing them. The
 suite pops an admitted issue into its worktree, proves the refusals,
-commits, opens the merge request, merges it, and proves the issue closed.
+commits, delivers it (a merge request on GitLab; tpm program merge on the
+rig's beads tracker), and proves the issue closed.
 
 <!-- field: traces -->
 ## Traces
@@ -21,9 +22,9 @@ commits, opens the merge request, merges it, and proves the issue closed.
 <!-- field: preconditions -->
 ## Preconditions
 
-- mage regression:up creates a rig-<run-id> subgroup with a system repository and one Product Owner repository, and writes their paths as JSON for the integration targets (eng01).
-- mage regression:down destroys the subgroup after the targets run, including when they fail.
-- The rig's default branches accept merges from merge requests; pushes go to issue branches only.
+- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository and one Product Owner repository, and writes their paths as JSON for the integration targets (eng01).
+- mage regression:down removes the run after the targets run, including when they fail.
+- Work reaches the rig's default branches only through tpm program merge; pushes go to issue branches.
 
 <!-- field: test_cases -->
 ## Test cases

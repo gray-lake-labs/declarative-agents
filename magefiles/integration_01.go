@@ -7,10 +7,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-	"time"
 
-	gl "gitlab.com/gitlab-org/api/client-go"
-
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 )
 
@@ -18,7 +16,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Pop)
 }
 
-// Pop files an admitted issue in po-1, pops it into a worktree of a local clone, proves the refusals, commits and pushes, opens the merge request, merges it, and proves the issue closed (test-rel00.1-pop).
+// Pop files an admitted issue in po-1, pops it into a worktree of a local clone, proves the refusals, commits, delivers it with tpm program merge, and proves the issue closed on the merge (test-rel00.1-pop).
 func (Integration) Pop() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -31,11 +29,11 @@ func (Integration) Pop() error {
 	if err := r.milestone(rigMilestone, rigDue); err != nil {
 		return err
 	}
-	if _, err := r.runTPM("program", "labels", "--group", r.out.Group.FullPath); err != nil {
+	if _, err := r.runTPM("program", "labels", "--group", r.group); err != nil {
 		return err
 	}
 	c := &check{}
-	run := filepath.Join(r.root, ".regression", r.out.RunID)
+	run := r.run.Dir
 	good := "## Requirements\n\n1. Add the grader notes.\n\n## Acceptance Criteria\n\n- The notes exist (test: notes_exist; environment: local)\n"
 	bad := "## Requirements\n\n1. Something.\n"
 	file := func(title, body string) (program.FileResult, error) {
@@ -62,17 +60,12 @@ func (Integration) Pop() error {
 	if err := r.tpmJSON(&popped, "program", "pop", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", clone); err != nil {
 		return err
 	}
-	me, _, err := r.api.Users.CurrentUser()
+	i, err := r.issue(po1, work.IID)
 	if err != nil {
 		return err
 	}
-	i, _, err := r.api.Issues.GetIssue(po1, int64(work.IID))
-	if err != nil {
-		return err
-	}
-	c.expect(len(i.Assignees) == 1 && i.Assignees[0].Username == me.Username, "assignees after pop: %d", len(i.Assignees))
-	_, _, berr := r.api.Branches.GetBranch(po1, popped.Branch)
-	c.expect(berr == nil, "branch %s not on the remote: %v", popped.Branch, berr)
+	c.expect(len(i.Assignees) == 1 && i.Assignees[0] == r.user, "assignees after pop: %v", i.Assignees)
+	c.expect(r.remoteBranch(po1, popped.Branch), "branch %s not on the remote", popped.Branch)
 	_, serr := os.Stat(popped.Worktree)
 	c.expect(serr == nil && strings.HasPrefix(popped.Worktree, run), "worktree %s missing or outside the run directory", popped.Worktree)
 	_, ierr := os.Stat(filepath.Join(popped.Worktree, ".claude/skills/issue-pop/SKILL.md"))
@@ -90,7 +83,8 @@ func (Integration) Pop() error {
 	if err != nil {
 		return err
 	}
-	if _, _, err := r.api.Issues.UpdateIssue(po1, int64(closed.IID), &gl.UpdateIssueOptions{StateEvent: gl.Ptr("close")}); err != nil {
+	closeState := "close"
+	if _, err := r.tr.UpdateIssue(po1, closed.IID, gitlab.IssueUpdate{State: &closeState}); err != nil {
 		return err
 	}
 	_, err = r.runTPM("program", "pop", "--project", po1, "--issue", fmt.Sprint(closed.IID), "--dir", clone)
@@ -103,76 +97,14 @@ func (Integration) Pop() error {
 	c.expect(err != nil && strings.Contains(err.Error(), "not admitted"), "pop of a needs-triage issue: %v", err)
 
 	writeFileTo(filepath.Join(popped.Worktree, "GRADER.md"), "# Grader notes\n")
-	for _, args := range [][]string{{"add", "GRADER.md"}, {"commit", "--quiet", "-m", "Add grader notes"}, {"push", "--quiet"}} {
-		if err := r.git(popped.Worktree, args...); err != nil {
-			return err
-		}
-	}
-	var opened program.OpenMergeRequestResult
-	if err := r.tpmJSON(&opened, "program", "open-merge-request", "--project", po1, "--issue", fmt.Sprint(work.IID), "--branch", popped.Branch); err != nil {
+	if err := r.commitPush(popped.Worktree, "Add grader notes", "GRADER.md"); err != nil {
 		return err
 	}
-	c.expect(opened.Created && opened.MR > 0, "open-merge-request: %+v", opened)
-	if err := r.merge(po1, opened.MR); err != nil {
+	var merged program.MergeResult
+	if err := r.tpmJSON(&merged, "program", "merge", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", popped.Worktree); err != nil {
 		return err
 	}
-	c.expect(r.waitClosed(po1, work.IID), "issue #%d still open after its merge request merged", work.IID)
+	c.expect(merged.Merged && merged.Commit != "", "merge: %+v", merged)
+	c.expect(r.closed(po1, work.IID), "issue #%d still open after its merge", work.IID)
 	return c.err("pop")
-}
-
-// clone clones a rig repository into the run directory, with a committer
-// identity set, and returns its path.
-func (r *rigEnv) clone(project, name string) (string, error) {
-	run := filepath.Join(r.root, ".regression", r.out.RunID)
-	dir := filepath.Join(run, name)
-	if _, err := os.Stat(dir); err == nil {
-		return dir, nil
-	}
-	remote := strings.Replace(r.webBase, "https://", "https://oauth2:"+r.token+"@", 1) + "/" + project + ".git"
-	if err := r.git(run, "clone", "--quiet", remote, dir); err != nil {
-		return "", fmt.Errorf("clone %s: %w", project, err)
-	}
-	for _, kv := range [][2]string{{"user.name", "Regression Rig"}, {"user.email", "rig@example.invalid"}} {
-		if err := r.git(dir, "config", kv[0], kv[1]); err != nil {
-			return "", err
-		}
-	}
-	return dir, nil
-}
-
-// git runs git for the rig; the token in a clone URL never reaches an
-// error message.
-func (r *rigEnv) git(dir string, args ...string) error {
-	_, err := program.ExecGit{}.Run(dir, args...)
-	if err != nil && r.token != "" {
-		return fmt.Errorf("%s", strings.ReplaceAll(err.Error(), r.token, "<token>"))
-	}
-	return err
-}
-
-// merge accepts a merge request, retrying while GitLab still checks it.
-func (r *rigEnv) merge(project string, iid int) error {
-	var last error
-	for attempt := 0; attempt < 20; attempt++ {
-		_, _, err := r.api.MergeRequests.AcceptMergeRequest(project, int64(iid), nil)
-		if err == nil {
-			return nil
-		}
-		last = err
-		time.Sleep(3 * time.Second)
-	}
-	return fmt.Errorf("merge !%d in %s: %w", iid, project, last)
-}
-
-// waitClosed polls the issue until GitLab closes it from the merged
-// merge request's Closes line.
-func (r *rigEnv) waitClosed(project string, iid int) bool {
-	for attempt := 0; attempt < 20; attempt++ {
-		i, _, err := r.api.Issues.GetIssue(project, int64(iid))
-		if err == nil && i.State == "closed" {
-			return true
-		}
-		time.Sleep(3 * time.Second)
-	}
-	return false
 }

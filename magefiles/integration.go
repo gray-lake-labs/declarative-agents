@@ -10,6 +10,7 @@ import (
 	"github.com/magefile/mage/mg"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
@@ -127,7 +128,7 @@ func (Integration) CreateGoals() error {
 
 	// The person confirms R1 and names po-2 for R2, as the skill relays.
 	plan.Objectives[1].Repository = po2
-	planFile := filepath.Join(r.root, ".regression", r.out.RunID, "plan.json")
+	planFile := filepath.Join(r.run.Dir, "plan.json")
 	writeJSONTo(planFile, plan)
 	push := append([]string{"goals", "push", "--plan", planFile}, base...)
 
@@ -153,10 +154,7 @@ func (Integration) CreateGoals() error {
 			continue
 		}
 		i := is[0]
-		due := ""
-		if i.DueDate != nil {
-			due = i.DueDate.String()
-		}
+		due := i.DueDate
 		c.expect(len(i.Assignees) == 0, "%s#%d is assigned", p, i.IID)
 		c.expect(slices.Contains(i.Labels, "plane::management") && !slices.Contains(i.Labels, "needs-triage"), "%s#%d labels %v", p, i.IID, i.Labels)
 		c.expect(due != "", "%s#%d has no due date", p, i.IID)
@@ -204,7 +202,7 @@ func (Integration) Program() error {
 		return err
 	}
 	c := &check{}
-	dir := filepath.Join(r.root, ".regression", r.out.RunID)
+	dir := r.run.Dir
 	bad := "Unpinned work\n\nCites: " + r.webBase + "/" + po1 + "/-/blob/main/README.md#R1.1\n\n## Requirements\n\n1. Do it.\n\n## Acceptance Criteria\n\n- It is done\n"
 	good := strings.Replace(strings.Replace(bad, "/-/blob/main/", "/-/blob/v0.0.1/", 1), "- It is done", "- It is done (test: it_is_done; environment: dev)", 1)
 	writeFileTo(filepath.Join(dir, "bad.md"), bad)
@@ -225,7 +223,7 @@ func (Integration) Program() error {
 	c.expect(!filed.Lint.Admitted, "bad issue admitted")
 	reasons := strings.Join(filed.Lint.Reasons, "\n")
 	c.expect(strings.Contains(reasons, "not pinned") && strings.Contains(reasons, "names no (test: T; environment: E)"), "reasons: %s", reasons)
-	i, _, err := r.api.Issues.GetIssue(po1, int64(filed.IID))
+	i, err := r.issue(po1, filed.IID)
 	if err != nil {
 		return err
 	}
@@ -233,7 +231,7 @@ func (Integration) Program() error {
 	ns, _ := r.notes(po1, i.IID)
 	c.expect(len(ns) == 1 && strings.Contains(ns[0].Body, "Admission failed"), "lint comments: %d", len(ns))
 
-	if _, _, err := r.api.Issues.UpdateIssue(po1, i.IID, ptr(glUpdateDescription{good}.opts())); err != nil {
+	if _, err := r.tr.UpdateIssue(po1, i.IID, gitlab.IssueUpdate{Description: &good}); err != nil {
 		return err
 	}
 	var linted []program.LintResult
@@ -241,7 +239,7 @@ func (Integration) Program() error {
 		return err
 	}
 	c.expect(len(linted) == 1 && linted[0].Admitted, "fixed issue not admitted: %+v", linted)
-	i, _, _ = r.api.Issues.GetIssue(po1, i.IID)
+	i, _ = r.issue(po1, i.IID)
 	c.expect(!slices.Contains(i.Labels, "needs-triage"), "needs-triage not cleared: %v", i.Labels)
 	return c.err("program")
 }

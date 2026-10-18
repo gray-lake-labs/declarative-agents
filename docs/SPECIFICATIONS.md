@@ -70,7 +70,7 @@ docs/road-map.md.
 | docs/ARCHITECTURE.md | [architecture-ai-native-scrum](ARCHITECTURE.md) |
 | docs/constitutions/design.md | [design](constitutions/design.md) |
 | docs/road-map.md | [ai-native-scrum-roadmap](road-map.md) |
-| docs/engineering/eng01-gitlab-regression-rig.md | [eng01-gitlab-regression-rig](engineering/eng01-gitlab-regression-rig.md) |
+| docs/engineering/eng01-regression-rig.md | [eng01-regression-rig](engineering/eng01-regression-rig.md) |
 | docs/engineering/eng02-tpm-and-skills.md | [eng02-tpm-and-skills](engineering/eng02-tpm-and-skills.md) |
 | docs/engineering/eng03-releasing-scrum-master.md | [eng03-releasing-scrum-master](engineering/eng03-releasing-scrum-master.md) |
 | docs/engineering/eng04-beads-sync.md | [eng04-beads-sync](engineering/eng04-beads-sync.md) |
@@ -181,5 +181,5 @@ docs/road-map.md.
 | GAP7 | The corpus's own SRDs omit test and environment on acceptance criteria (design.md srd acceptance_criteria_note) until the test subsystem's environment SRDs exist. |
 | GAP8 | The parent corpus audit does not read docs/specs/objectives/, so a magefiles gate test validates objective documents against srd034 R1 inside mage audit (srd034 R2.1). An objective document is scrum-master's type written as an SRD in the parent's format, so the gate is scrum-master's own, not a gap the parent closes. |
 | GAP9 | tpm program lint does not yet run in CI on issue creation or on a schedule (srd013 R1.3); that needs a released tpm binary the program's pipelines can run. |
-| GAP10 | Release 03.0 is near complete. internal/beads serves the tracker over beads, selected by TPM_TRACKER (eng04-beads-sync), and every tpm command runs on it, its tests running on both trackers through internal/trackertest. Delivery is a local merge; the beads tracker serves merged history from merge commits, has no awards (a peer read is an approval comment), and refuses opening merge requests. The GitLab client, the GitLab regression rig, and the Terraform module remain until the rig moves to fixture tracker repositories and GitLab is removed (srd042 R4). |
+| GAP10 | Release 03.0 is near complete. internal/beads serves the tracker over beads, selected by TPM_TRACKER (eng04-beads-sync), and every tpm command runs on it, its tests running on both trackers through internal/trackertest; on beads, tpm program merge is the delivery. The regression rig is a program on local disk (eng01) and every integration target passes on it with no network. The GitLab client, open-merge-request, and the Terraform module remain until GitLab is removed (srd042 R1.3, R4.1). |
 | GAP11 | Open decision. srd041 has lint rows only out of open and needs-triage, so an issue already past admission that later fails a re-lint has no transition. On GitLab and on beads lint sets or clears the needs-triage label alone and leaves the state; whether such an issue should leave the backlog is undecided. |

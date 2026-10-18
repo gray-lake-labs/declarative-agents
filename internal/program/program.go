@@ -125,6 +125,64 @@ func init() {
 		},
 	})
 
+	var mergeArgs struct {
+		project, issueProject, branch, audit, dir, control, ref string
+		iid                                                     int
+		closes                                                  cli.Strings
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "program", Name: "merge", Summary: "deliver an issue by a local merge that closes it (beads tracker)",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&mergeArgs.project, "project", "", "project path (required)")
+			fs.IntVar(&mergeArgs.iid, "issue", 0, "issue IID (required)")
+			fs.StringVar(&mergeArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
+			fs.StringVar(&mergeArgs.branch, "branch", "", "branch to merge; empty uses the current branch of the working directory")
+			fs.StringVar(&mergeArgs.audit, "audit", "", "corpus gate command for a docs/ change; empty uses the policy's audit_command (mage audit)")
+			fs.StringVar(&mergeArgs.dir, "dir", ".", "the worktree holding the branch, where the audit runs")
+			fs.StringVar(&mergeArgs.control, "control", "", "program repository holding control/ files; empty uses the defaults")
+			fs.StringVar(&mergeArgs.ref, "ref", "main", "ref of the control files")
+			fs.Var(&mergeArgs.closes, "closes", "another issue the merge closes, project#iid; repeat for each (srd038 R2.1)")
+		},
+		Run: func(ctx *cli.Context) error {
+			if mergeArgs.project == "" || mergeArgs.iid == 0 {
+				return fmt.Errorf("%w: merge needs --project and --issue", cli.ErrUsage)
+			}
+			branch := mergeArgs.branch
+			if branch == "" {
+				out, err := ExecGit{}.Run(mergeArgs.dir, "rev-parse", "--abbrev-ref", "HEAD")
+				if err != nil {
+					return err
+				}
+				branch = strings.TrimSpace(out)
+			}
+			t, err := ctx.Tracker()
+			if err != nil {
+				return err
+			}
+			p, err := LoadPolicy(t, mergeArgs.control, mergeArgs.ref)
+			if err != nil {
+				return err
+			}
+			gate := AuditGate{Command: p.AuditCommand, Dir: mergeArgs.dir}
+			if mergeArgs.audit != "" {
+				gate.Command = mergeArgs.audit
+			}
+			issueProject := mergeArgs.issueProject
+			if issueProject == "" {
+				issueProject = mergeArgs.project
+			}
+			r, err := Merge(t, ExecGit{}, mergeArgs.project, issueProject, mergeArgs.iid, branch, mergeArgs.dir, gate, mergeArgs.closes, ctx.DryRun)
+			if err != nil {
+				return err
+			}
+			human := fmt.Sprintf("%s merged into %s on %s; closed %s", r.Branch, r.Project, r.Commit, strings.Join(r.Closed, ", "))
+			if !r.Merged && !r.DryRun {
+				human = fmt.Sprintf("%s was already merged on %s; closed %s", r.Branch, r.Commit, strings.Join(r.Closed, ", "))
+			}
+			return ctx.Emit(r, human)
+		},
+	})
+
 	var mrArgs struct {
 		project, issueProject, branch, audit, dir, control, ref string
 		iid                                                     int

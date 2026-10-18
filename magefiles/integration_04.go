@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"strings"
 
-	gl "gitlab.com/gitlab-org/api/client-go"
-
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/release"
 )
 
@@ -14,7 +13,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Release)
 }
 
-// Release runs tpm release next, gate, and tag on a clone of po-1 with the policy seeded in the system repository: no tag before a gate, evidence events on the release issue, peer-read pending on the author's own thumbs-up, a pushed tag after a passing gate, and no second tag at the same version (test-rel01.2-sprint-end).
+// Release runs tpm release next, gate, and tag on a clone of po-1 with the policy seeded in the system repository: no tag before a gate, evidence events on the release issue, peer-read pending while only the author could approve, a pushed tag after a passing gate, no second tag at the same version, and the peer read passing on a reviewer's tpm release approve (test-rel01.2-sprint-end).
 func (Integration) Release() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -80,7 +79,7 @@ major-and-minor-before-1.0
 	if err != nil {
 		return err
 	}
-	issue, _, err := r.api.Issues.CreateIssue(po1, &gl.CreateIssueOptions{Title: gl.Ptr("Release grader 0.1.0")})
+	issue, err := r.tr.CreateIssue(po1, gitlab.NewIssue{Title: "Release grader 0.1.0"})
 	if err != nil {
 		return err
 	}
@@ -103,19 +102,18 @@ major-and-minor-before-1.0
 	}
 	c.expect(gate.Passed && len(gate.Checks) == 1, "grader gate: %+v", gate)
 
-	if _, _, err := r.api.AwardEmoji.CreateIssueAwardEmoji(po1, issue.IID, &gl.CreateAwardEmojiOptions{Name: "thumbsup"}); err != nil {
-		return err
-	}
+	_, err = r.runTPM("release", "approve", "--project", po1, "--issue", fmt.Sprint(issue.IID))
+	c.expect(err != nil && strings.Contains(err.Error(), "author"), "the author approved their own release: %v", err)
 	_, err = r.runTPM(append([]string{"release", "gate", "--artifact", "reviewed", "--version", "0.1.0", "--issue", ref}, common...)...)
-	c.expect(err != nil && strings.Contains(err.Error(), "did not pass"), "peer-read with only the author's thumbs-up: %v", err)
+	c.expect(err != nil && strings.Contains(err.Error(), "did not pass"), "peer-read with no approval from anyone else: %v", err)
 
 	var tagged release.TagResult
 	if err := r.tpmJSON(&tagged, append([]string{"release", "tag", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...); err != nil {
 		return err
 	}
 	c.expect(tagged.Pushed && tagged.Tag == "grader/v0.1.0" && tagged.Class == "breaking", "tag: %+v", tagged)
-	_, _, terr := r.api.Tags.GetTag(po1, "grader/v0.1.0")
-	c.expect(terr == nil, "grader/v0.1.0 not on GitLab: %v", terr)
+	_, terr := r.remoteTag(po1, "grader/v0.1.0")
+	c.expect(terr == nil, "grader/v0.1.0 not at the origin: %v", terr)
 
 	notes, err := r.notes(po1, issue.IID)
 	if err != nil {
@@ -137,5 +135,15 @@ major-and-minor-before-1.0
 
 	_, err = r.runTPM(append([]string{"release", "tag", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...)
 	c.expect(err != nil && strings.Contains(err.Error(), "not greater"), "a second tag at 0.1.0: %v", err)
+
+	// Another person's approval is the peer read (srd015 R1.2).
+	if _, err := r.runTPMAs(rigReviewer, "release", "approve", "--project", po1, "--issue", fmt.Sprint(issue.IID)); err != nil {
+		return err
+	}
+	var reviewed release.ReleaseGateResult
+	if err := r.tpmJSON(&reviewed, append([]string{"release", "gate", "--artifact", "reviewed", "--version", "0.1.0", "--issue", ref}, common...)...); err != nil {
+		return err
+	}
+	c.expect(reviewed.Passed, "peer-read after the reviewer's approval: %+v", reviewed)
 	return c.err("release")
 }

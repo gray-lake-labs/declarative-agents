@@ -34,11 +34,7 @@ func (Integration) DocsChange() error {
 	if err := r.milestone(rigMilestone, rigDue); err != nil {
 		return err
 	}
-	if _, err := r.runTPM("program", "labels", "--group", r.out.Group.FullPath); err != nil {
-		return err
-	}
-	me, _, err := r.api.Users.CurrentUser()
-	if err != nil {
+	if _, err := r.runTPM("program", "labels", "--group", r.group); err != nil {
 		return err
 	}
 	policy := func(filer string) error {
@@ -53,7 +49,7 @@ func (Integration) DocsChange() error {
 		return err
 	}
 	c := &check{}
-	run := filepath.Join(r.root, ".regression", r.out.RunID)
+	run := r.run.Dir
 	body := "## Requirements\n\n1. Change the document.\n\n## Acceptance Criteria\n\n- mage audit passes (test: mage_audit; environment: local)\n"
 	writeFileTo(filepath.Join(run, "docs-change.md"), body)
 	file := func(project, title, path string, extra ...string) (program.FileResult, error) {
@@ -76,7 +72,7 @@ func (Integration) DocsChange() error {
 	// A planning change: refused while the policy names another filer.
 	_, err = file(system, "Move release 01.1", "docs/road-map.md")
 	c.expect(err != nil && strings.Contains(err.Error(), "may not file a plane::management issue"), "non-lead planning issue: %v", err)
-	if err := policy(me.Username); err != nil {
+	if err := policy(r.user); err != nil {
 		return err
 	}
 	plan, err := file(system, "Move release 01.1", "docs/road-map.md")
@@ -84,7 +80,7 @@ func (Integration) DocsChange() error {
 		return err
 	}
 	c.expect(plan.Plane == "management" && plan.Kind == "", "planning issue: %+v", plan)
-	i, _, err := r.api.Issues.GetIssue(system, int64(plan.IID))
+	i, err := r.issue(system, plan.IID)
 	if err != nil {
 		return err
 	}
@@ -96,8 +92,9 @@ func (Integration) DocsChange() error {
 }
 
 // workDocsChange pops an issue, changes path under docs/ in its worktree,
-// and merges it through the audit gate. With failFirst, the first push
-// carries the marker that fails the audit, and open-merge-request must refuse it.
+// and delivers it through the audit gate with tpm program merge. With
+// failFirst, the first commit carries the marker that fails the audit, and
+// merge must refuse it with nothing merged.
 func (r *rigEnv) workDocsChange(c *check, project, name string, iid int, path string, failFirst bool) error {
 	clone, err := r.clone(project, name)
 	if err != nil {
@@ -117,14 +114,14 @@ func (r *rigEnv) workDocsChange(c *check, project, name string, iid int, path st
 	if err := r.commitPush(wt, "Change "+path, files...); err != nil {
 		return err
 	}
-	openMR := func() (program.OpenMergeRequestResult, error) {
-		var res program.OpenMergeRequestResult
-		return res, r.tpmJSON(&res, "program", "open-merge-request", "--project", project, "--issue", fmt.Sprint(iid),
+	merge := func() (program.MergeResult, error) {
+		var res program.MergeResult
+		return res, r.tpmJSON(&res, "program", "merge", "--project", project, "--issue", fmt.Sprint(iid),
 			"--branch", popped.Branch, "--dir", wt, "--audit", rigAudit)
 	}
 	if failFirst {
-		_, err := openMR()
-		c.expect(err != nil && strings.Contains(err.Error(), "no merge request opened"), "%s#%d: failing audit opened a merge request: %v", project, iid, err)
+		_, err := merge()
+		c.expect(err != nil && strings.Contains(err.Error(), "nothing merged"), "%s#%d: failing audit merged: %v", project, iid, err)
 		if err := r.git(wt, "rm", "--quiet", "docs/BROKEN"); err != nil {
 			return err
 		}
@@ -132,34 +129,11 @@ func (r *rigEnv) workDocsChange(c *check, project, name string, iid int, path st
 			return err
 		}
 	}
-	opened, err := openMR()
+	merged, err := merge()
 	if err != nil {
 		return err
 	}
-	c.expect(opened.Created && opened.Audit, "%s#%d open-merge-request: %+v", project, iid, opened)
-	mr, _, err := r.api.MergeRequests.GetMergeRequest(project, int64(opened.MR), nil)
-	if err != nil {
-		return err
-	}
-	c.expect(strings.Contains(mr.Description, "mage audit must pass"), "%s!%d does not name mage audit", project, opened.MR)
-	if err := r.merge(project, opened.MR); err != nil {
-		return err
-	}
-	c.expect(r.waitClosed(project, iid), "%s#%d still open after its merge request merged", project, iid)
-	return nil
-}
-
-// commitPush stages files (all changes when none are named), commits, and
-// pushes the worktree's branch.
-func (r *rigEnv) commitPush(wt, message string, files ...string) error {
-	add := append([]string{"add"}, files...)
-	if len(files) == 0 {
-		add = []string{"add", "-A"}
-	}
-	for _, args := range [][]string{add, {"commit", "--quiet", "-m", message}, {"push", "--quiet"}} {
-		if err := r.git(wt, args...); err != nil {
-			return err
-		}
-	}
+	c.expect(merged.Merged && merged.Audit, "%s#%d merge: %+v", project, iid, merged)
+	c.expect(r.closed(project, iid), "%s#%d still open after its merge", project, iid)
 	return nil
 }

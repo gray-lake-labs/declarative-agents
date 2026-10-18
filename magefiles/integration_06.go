@@ -120,7 +120,7 @@ A score is ready within an hour.
 dev
 `
 
-// PlanRelease plans release 01.1 in the system repository: candidates, the road-map write merged through a planning issue, the plan tagged behind the documents-only gate, the period pushed (milestone, sprint issue, sprint-end issues) once, and create-goals reading the plan at its tag (test-rel01.2-sprint-end).
+// PlanRelease plans release 01.1 in the system repository: candidates, the road-map write merged through a planning issue with tpm program merge, the plan tagged behind the documents-only gate, the period pushed (milestone, sprint issue, sprint-end issues) once, and create-goals reading the plan at its tag (test-rel01.2-sprint-end).
 func (Integration) PlanRelease() error {
 	e, err := newWeeklyEnv("reports-plan")
 	if err != nil {
@@ -166,7 +166,7 @@ func (Integration) PlanRelease() error {
 	c.expect(cand.Version == "01.1" && cand.Tag == "corpus/v0.1.0" && len(cand.Items) > 0 && cand.Items[0].ID == "obj002-fast-scoring#R1.1",
 		"candidates: %+v", cand)
 
-	body := filepath.Join(r.root, ".regression", r.out.RunID, "plan.md")
+	body := filepath.Join(r.run.Dir, "plan.md")
 	writeFileTo(body, "## Requirements\n\n1. Plan release 01.1.\n\n## Acceptance Criteria\n\n- mage audit passes (test: mage_audit; environment: local)\n")
 	var filed program.FileResult
 	if err := r.tpmJSON(&filed, "program", "file", "--project", system, "--system", system, "--ref", seedBranch,
@@ -190,15 +190,13 @@ func (Integration) PlanRelease() error {
 	if err := r.git(clone, "push", "--quiet", "--force", "-u", "origin", branch); err != nil {
 		return err
 	}
-	var mr program.OpenMergeRequestResult
-	if err := r.tpmJSON(&mr, "program", "open-merge-request", "--project", system, "--issue", fmt.Sprint(filed.IID),
+	var merged program.MergeResult
+	if err := r.tpmJSON(&merged, "program", "merge", "--project", system, "--issue", fmt.Sprint(filed.IID),
 		"--branch", branch, "--dir", clone, "--audit", rigAudit); err != nil {
 		return err
 	}
-	if err := r.merge(system, mr.MR); err != nil {
-		return err
-	}
-	c.expect(r.waitClosed(system, filed.IID), "%s still open after the plan merged", issue)
+	c.expect(merged.Merged && merged.Audit, "plan merge: %+v", merged)
+	c.expect(r.closed(system, filed.IID), "%s still open after the plan merged", issue)
 
 	// The plan is published at its tag, gated by the documents-only check.
 	if err := r.git(clone, "checkout", "--quiet", "-B", "main", "origin/main"); err != nil {
@@ -219,7 +217,7 @@ func (Integration) PlanRelease() error {
 	c.expect(gate.Passed && tagged.Pushed && tagged.Tag == cand.Tag, "plan tag: gate %+v tag %+v", gate, tagged)
 
 	end := time.Now().AddDate(0, 0, 21).Format(time.DateOnly)
-	push := append([]string{"plan", "push", "--version", "01.1", "--end", end, "--group", r.out.Group.FullPath}, control...)
+	push := append([]string{"plan", "push", "--version", "01.1", "--end", end, "--group", r.group}, control...)
 	var pushed plan.PushResult
 	if err := r.tpmJSON(&pushed, push...); err != nil {
 		return err
@@ -246,7 +244,7 @@ func (Integration) PlanRelease() error {
 	return c.err("planRelease")
 }
 
-// SprintEnd works po-1's sprint-end issue: facts with the objective reported complete, a summary merge request that closes the issue and the objective with no met event and no contradiction signal, and a release gated and tagged on main after the merge (test-rel01.2-sprint-end).
+// SprintEnd works po-1's sprint-end issue: facts with the objective reported complete, a summary merged with tpm program merge that closes the issue and the objective with no met event and no contradiction signal, and a release gated and tagged on main after the merge (test-rel01.2-sprint-end).
 func (Integration) SprintEnd() error {
 	e, err := newWeeklyEnv("reports-sprint-end")
 	if err != nil {
@@ -266,7 +264,7 @@ func (Integration) SprintEnd() error {
 	writeFileTo(filepath.Join(e.clone, reports.ReportPath(reports.WeekStart(now), e.user)), reports.Render(e.user, week,
 		[]reports.Entry{{"objective": objRef, "component": "po-1", "status": "done", "complete": "yes", "problems": "none"}}, nil))
 
-	body := filepath.Join(r.root, ".regression", r.out.RunID, "sprint-end.md")
+	body := filepath.Join(r.run.Dir, "sprint-end.md")
 	writeFileTo(body, plan.SprintEndBody("01.0", rigDue))
 	var filed program.FileResult
 	if err := r.tpmJSON(&filed, "program", "file", "--project", po1, "--system", system, "--ref", seedBranch, "--control", system,
@@ -300,21 +298,14 @@ func (Integration) SprintEnd() error {
 	if err := r.commitPush(popped.Worktree, "Summarize release 01.0's period", "docs/sprint-ends/01.0.md"); err != nil {
 		return err
 	}
-	var mr program.OpenMergeRequestResult
-	if err := r.tpmJSON(&mr, "program", "open-merge-request", "--project", po1, "--issue", fmt.Sprint(filed.IID),
+	var merged program.MergeResult
+	if err := r.tpmJSON(&merged, "program", "merge", "--project", po1, "--issue", fmt.Sprint(filed.IID),
 		"--branch", popped.Branch, "--dir", popped.Worktree, "--audit", rigAudit, "--closes", objRef); err != nil {
 		return err
 	}
-	got, _, err := r.api.MergeRequests.GetMergeRequest(po1, int64(mr.MR), nil)
-	if err != nil {
-		return err
-	}
-	c.expect(strings.Contains(got.Description, "Closes "+objRef), "merge request does not close %s:\n%s", objRef, got.Description)
-	if err := r.merge(po1, mr.MR); err != nil {
-		return err
-	}
-	c.expect(r.waitClosed(po1, filed.IID), "sprint-end issue still open after its merge")
-	c.expect(r.waitClosed(po1, int(objIID)), "%s still open after the sprint-end merge", objRef)
+	c.expect(merged.Merged && slices.Contains(merged.Closed, objRef), "sprint-end merge does not close %s: %+v", objRef, merged)
+	c.expect(r.closed(po1, filed.IID), "sprint-end issue still open after its merge")
+	c.expect(r.closed(po1, objIID), "%s still open after the sprint-end merge", objRef)
 	notes, err := r.notes(po1, objIID)
 	if err != nil {
 		return err
@@ -353,8 +344,8 @@ func (Integration) SprintEnd() error {
 	if err != nil {
 		return err
 	}
-	tag, _, err := r.api.Tags.GetTag(po1, tagged.Tag)
-	c.expect(err == nil && gate.Passed && tagged.Pushed && tag.Commit != nil && tag.Commit.ID == strings.TrimSpace(head),
+	tag, err := r.remoteTag(po1, tagged.Tag)
+	c.expect(err == nil && gate.Passed && tagged.Pushed && tag == strings.TrimSpace(head),
 		"release after the merge: gate %+v tag %+v on %v", gate, tagged, err)
 	return c.err("sprintEnd")
 }
