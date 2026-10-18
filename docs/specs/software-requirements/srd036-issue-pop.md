@@ -58,17 +58,17 @@ The worktree carries the skills of every agent installed in the checkout pop ran
 <!-- req: R3.1 -->
 ### R3.1
 
-When the work is committed, runs tpm program merge (srd013 R5), which runs the corpus gate for a docs/ change, merges the branch, and closes the issue.
+When the work is committed and pushed and a reviewer has approved its tip with tpm program approve, runs tpm program merge (srd013 R5), which runs the corpus gate for a docs/ change, merges the branch, and closes the issue; without the approval it refuses, and the skill asks for one.
 
 <!-- req: R3.2 -->
 ### R3.2
 
-For any issue whose branch changes docs/, a kind::spec design change or a plane::management planning change alike, runs mage audit before opening the merge request and reports its findings instead of opening it when it fails.
+For any issue whose branch changes docs/, a kind::spec design change or a plane::management planning change alike, runs mage audit before merging and reports its findings instead of merging when it fails.
 
 <!-- req: R3.3 -->
 ### R3.3
 
-The issue closes when the merge request merges (srd041 R7.1); the skill closes nothing itself.
+The issue closes when its branch merges (srd041 R7.1); the skill closes nothing itself.
 
 <!-- req: R4 -->
 ## R4 - Asks and refusals
@@ -88,7 +88,7 @@ As a skill, is at most 50 lines and has no model step; the work in the worktree 
 
 - Splitting an issue into sub-issues and working them one by one; that arrives with epics and do-work in a later release.
 - Re-creating a recurring issue after its run; that is release 01.1 (tpm standup recur).
-- Merging; a reviewer merges.
+- Approving; a reviewer reads the branch and approves it (srd013 R5.6).
 
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria

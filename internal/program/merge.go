@@ -17,7 +17,8 @@ type MergeResult struct {
 	Branch       string   `json:"branch"`
 	Commit       string   `json:"commit"`
 	Audit        bool     `json:"audit_run"` // the branch changes docs/, so the audit ran
-	Merged       bool     `json:"merged"`    // merge made the merge commit now
+	ApprovedBy   string   `json:"approved_by,omitempty"`
+	Merged       bool     `json:"merged"` // merge made the merge commit now
 	Closed       []string `json:"closed,omitempty"`
 	DryRun       bool     `json:"dry_run"`
 }
@@ -25,7 +26,8 @@ type MergeResult struct {
 // Merge is delivery on the beads tracker, which has no merge requests
 // (srd042 R2.3): it holds the branch to what open-merge-request holds it to
 // on GitLab, the issue open, each closes open, commits of its own, and the
-// corpus audit passing when docs/ changes, then merges the branch --no-ff
+// corpus audit passing when docs/ changes, and another person's approval
+// of the commit it merges (srd013 R5.5), then merges the branch --no-ff
 // into the default branch of the repository's main checkout with a message
 // citing the issue and each issue it closes, pushes it, and closes each on
 // that merge. A branch already merged is not merged again; its issues
@@ -92,6 +94,17 @@ func Merge(t gitlab.Tracker, git Git, project, issueProject string, iid int, bra
 			if err := gate.checkBefore("nothing merged"); err != nil {
 				return r, err
 			}
+		}
+		me, err := t.CurrentUser()
+		if err != nil {
+			return r, err
+		}
+		tip, err := inMain("rev-parse", "refs/heads/"+branch)
+		if err != nil {
+			return r, err
+		}
+		if r.ApprovedBy, err = approval(t, issueProject, iid, branch, tip, me.Username); err != nil {
+			return r, err
 		}
 		if dryRun {
 			return r, nil

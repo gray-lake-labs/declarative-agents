@@ -422,6 +422,24 @@ func (r *rigEnv) commitPush(wt, message string, files ...string) error {
 	return nil
 }
 
+// approve has the reviewer approve a branch for merge from a clone of
+// their own (srd013 R5.6); branch empty is the issue's pop branch.
+func (r *rigEnv) approve(project, issueProject string, iid int, branch string) error {
+	clone, err := r.clone(project, "reviewer-"+path.Base(project))
+	if err != nil {
+		return err
+	}
+	args := []string{"program", "approve", "--project", project, "--issue", fmt.Sprint(iid), "--dir", clone}
+	if issueProject != project {
+		args = append(args, "--issue-project", issueProject)
+	}
+	if branch != "" {
+		args = append(args, "--branch", branch)
+	}
+	_, err = r.runTPMAs(rigReviewer, args...)
+	return err
+}
+
 // closed reports whether the tracker holds the issue closed.
 func (r *rigEnv) closed(project string, iid int) bool {
 	i, err := r.issue(project, iid)

@@ -103,6 +103,16 @@ For a branch that changes docs/, runs the corpus gate, mage audit or the policy'
 
 With --issue-project, merges in the given project and closes the issue in the other by its full reference; the weekly status report merges in the reports repository and closes the status issue in the owner's repository (srd018 R6.1).
 
+<!-- req: R5.5 -->
+### R5.5
+
+Refuses unless the issue carries an approval of the exact commit it would merge, from a person other than the issue's assignee, or, for an issue nobody took, other than the person merging (srd008 R1.4). An approval names the commit its reviewer read, so a commit made after it needs a new one.
+
+<!-- req: R5.6 -->
+### R5.6
+
+tpm program approve posts the approval as the person running it: a comment on the issue naming the tip of the branch at its origin. It refuses the issue's assignee, and posts nothing twice for the same commit.
+
 <!-- req: R6 -->
 ## R6 - tpm program labels
 
@@ -230,3 +240,14 @@ pop assigns only the caller, refuses an issue assigned to someone else, a closed
 - [R7.2](#r72)
 - [R7.3](#r73)
 - [R7.4](#r74)
+
+<!-- ac: AC8 -->
+### AC8
+
+merge refuses with no approval, with only the assignee's, and with an approval of an earlier commit, and merges with another person's approval of the tip; approve refuses the assignee and posts once per commit.
+
+<!-- field: traces -->
+#### Traces
+
+- [R5.5](#r55)
+- [R5.6](#r56)

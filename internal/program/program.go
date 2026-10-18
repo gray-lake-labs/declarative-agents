@@ -125,6 +125,46 @@ func init() {
 		},
 	})
 
+	var approveArgs struct {
+		project, issueProject, branch, dir string
+		iid                                int
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "program", Name: "approve", Summary: "approve an issue's branch for merge, as a reviewer other than its assignee",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&approveArgs.project, "project", "", "project holding the branch (required)")
+			fs.IntVar(&approveArgs.iid, "issue", 0, "issue IID (required)")
+			fs.StringVar(&approveArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
+			fs.StringVar(&approveArgs.branch, "branch", "", "branch to approve; empty uses the issue's pop branch")
+			fs.StringVar(&approveArgs.dir, "dir", ".", "a checkout of the project")
+		},
+		Run: func(ctx *cli.Context) error {
+			if approveArgs.project == "" || approveArgs.iid == 0 {
+				return fmt.Errorf("%w: approve needs --project and --issue", cli.ErrUsage)
+			}
+			if ctx.DryRun {
+				return fmt.Errorf("%w: approve is one comment and has no dry run", cli.ErrUsage)
+			}
+			t, err := ctx.Tracker()
+			if err != nil {
+				return err
+			}
+			issueProject := approveArgs.issueProject
+			if issueProject == "" {
+				issueProject = approveArgs.project
+			}
+			r, err := Approve(t, ExecGit{}, approveArgs.project, issueProject, approveArgs.iid, approveArgs.branch, approveArgs.dir)
+			if err != nil {
+				return err
+			}
+			human := fmt.Sprintf("%s approved at %s by %s", r.Branch, r.Commit, r.By)
+			if !r.Posted {
+				human = fmt.Sprintf("%s was already approved at %s by %s", r.Branch, r.Commit, r.By)
+			}
+			return ctx.Emit(r, human)
+		},
+	})
+
 	var mergeArgs struct {
 		project, issueProject, branch, audit, dir, control, ref string
 		iid                                                     int

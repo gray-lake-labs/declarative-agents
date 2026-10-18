@@ -83,7 +83,8 @@ project's last path segment, as repositories sit side by side under their
 owner, and a project with no such sibling is served by the command's own
 checkout and its origin. Delivery is a merge commit on the default
 branch citing project#iid, made by tpm program merge after the audit gate
-for a docs/ change; tpm program close finds it and closes the issue on it, and refuses a fast-forward or an empty
+for a docs/ change and only on another person's approval of that very
+commit, posted with tpm program approve (srd013 R5.5); tpm program close finds it and closes the issue on it, and refuses a fast-forward or an empty
 branch, because neither is a delivery a reviewer can point to. A merge
 also closes every other issue its message cites, such as the objective a
 sprint-end merge closes; tpm program close closes such an issue, which has

@@ -129,6 +129,9 @@ func (r *rigEnv) workDocsChange(c *check, project, name string, iid int, path st
 			return err
 		}
 	}
+	if err := r.approve(project, project, iid, popped.Branch); err != nil {
+		return err
+	}
 	merged, err := merge()
 	if err != nil {
 		return err
