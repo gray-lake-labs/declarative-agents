@@ -34,7 +34,7 @@ For an artifact and a candidate revision, runs every check the policy declares f
 <!-- req: R1.2 -->
 ### R1.2
 
-A peer-read check passes when a person other than the release issue's author has given the release issue a thumbs-up award emoji; the subcommand reports it pending otherwise and does not wait.
+A peer-read check passes when a person other than the release issue's author has approved the release issue, either with a thumbs-up award emoji, on a tracker that has awards, or with an approval comment carrying the marker `<!-- tpm release peer-read -->`, which tpm release approve posts as the person who runs it and refuses to post for the issue's author. On the beads tracker, which has no awards, the comment is the approval (srd042). The subcommand reports the check pending otherwise and does not wait.
 
 <!-- req: R1.3 -->
 ### R1.3
@@ -106,7 +106,7 @@ Subcommands are in the tpm group release, honour --json and --dry-run, and never
 <!-- ac: AC1 -->
 ### AC1
 
-gate runs exactly the declared checks in their environments, local ones through their command, posts each as an evidence event on the release issue, reports peer-read pending until another person's thumbs-up, fails a check it cannot run, and exits zero only when all pass.
+gate runs exactly the declared checks in their environments, local ones through their command, posts each as an evidence event on the release issue, reports peer-read pending until another person's thumbs-up or approval comment, fails a check it cannot run, and exits zero only when all pass.
 
 <!-- field: traces -->
 #### Traces

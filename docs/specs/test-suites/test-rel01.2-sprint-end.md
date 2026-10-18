@@ -91,7 +91,7 @@ go test ./internal/release -run '^Test(GateRunsDeclaredChecks|TagRequiresPassing
 - tag_after_gate: tpm release tag creates and pushes the tag at the gated revision, with its class in the message and on the release issue
 - non_increasing_version: refused
 - not_runnable: a contract-tests or scorecard check, or an environment other than local, fails the gate
-- peer_read: pending until a thumbs-up from someone other than the release issue's author
+- peer_read: pending until a thumbs-up or approval comment from someone other than the release issue's author
 - documents_only_gate: mage audit
 
 <!-- field: traces -->

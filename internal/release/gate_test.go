@@ -11,27 +11,31 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
-// gateFixture is a release issue on a fake tracker, a clean checkout at
+// gateFixture is a release issue on a tracker, a clean checkout at
 // revision abc123, and a recorder of the commands local checks run.
 type gateFixture struct {
-	f     *gitlabtest.Fake
+	tr    gitlab.Tracker
 	issue gitlab.Issue
 	ran   []string
 	fail  map[string]bool
 	dirty bool
 }
 
-func newGateFixture() *gateFixture {
-	f := gitlabtest.New()
-	i, _ := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Release a 0.3.0"})
-	return &gateFixture{f: f, issue: i, fail: map[string]bool{}}
+func newGateFixture(t *testing.T, tr gitlab.Tracker) *gateFixture {
+	t.Helper()
+	i, err := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Release a 0.3.0"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return &gateFixture{tr: tr, issue: i, fail: map[string]bool{}}
 }
 
 func (g *gateFixture) run(p program.Policy, artifact string, at time.Time) (ReleaseGateResult, error) {
 	v, _ := ParseVersion("0.3.0")
-	return RunGate(g.f, ReleaseGateInput{Project: "g/po-1", Issue: g.issue.IID, Artifact: artifact, Version: v, Dir: "/repo",
+	return RunGate(g.tr, ReleaseGateInput{Project: "g/po-1", Issue: g.issue.IID, Artifact: artifact, Version: v, Dir: "/repo",
 		Policy: p, Out: io.Discard, Now: at,
 		Git: func(args ...string) (string, error) {
 			switch args[0] {
@@ -56,7 +60,8 @@ func (g *gateFixture) run(p program.Policy, artifact string, at time.Time) (Rele
 
 func (g *gateFixture) evidence() []events.Event {
 	var out []events.Event
-	for _, n := range g.f.Notes["g/po-1#1"] {
+	notes, _ := g.tr.ListNotes("g/po-1", g.issue.IID)
+	for _, n := range notes {
 		if e, ok := events.Parse(n.Body); ok && e.Name == "evidence" {
 			out = append(out, e)
 		}
@@ -73,7 +78,11 @@ func policyWith(artifact string, checks ...program.Check) program.Policy {
 var t0 = time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC)
 
 func TestGateRunsDeclaredChecks(t *testing.T) {
-	g := newGateFixture()
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) { testGateRunsDeclaredChecks(t, tp) })
+}
+
+func testGateRunsDeclaredChecks(t *testing.T, tp trackertest.Program) {
+	g := newGateFixture(t, tp.Tracker())
 	p := policyWith("a",
 		program.Check{Kind: "tests", Environment: "local", Suite: "unit", Command: "go test ./..."},
 		program.Check{Kind: "custom", Environment: "local", Command: "make lint"})
@@ -111,7 +120,11 @@ func TestGateRunsDeclaredChecks(t *testing.T) {
 }
 
 func TestDocumentsOnlyGateIsMageAudit(t *testing.T) {
-	g := newGateFixture()
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) { testDocumentsOnlyGateIsMageAudit(t, tp) })
+}
+
+func testDocumentsOnlyGateIsMageAudit(t *testing.T, tp trackertest.Program) {
+	g := newGateFixture(t, tp.Tracker())
 	r, err := g.run(policyWith("corpus", program.Check{Kind: "custom", Environment: "local", Command: "mage audit"}), "corpus", t0)
 	if err != nil || !r.Passed || strings.Join(g.ran, "|") != "mage audit" || r.Checks[0].Test != "custom:mage-audit" {
 		t.Fatalf("r=%+v ran=%v err=%v", r, g.ran, err)
@@ -119,15 +132,16 @@ func TestDocumentsOnlyGateIsMageAudit(t *testing.T) {
 }
 
 func TestGatePeerReadNeedsAnotherPersonsThumbsUp(t *testing.T) {
-	g := newGateFixture()
+	f := gitlabtest.New()
+	g := newGateFixture(t, f)
 	p := policyWith("a", program.Check{Kind: "peer-read"})
 	key := "g/po-1#1"
-	g.f.Awards[key] = []gitlab.Award{{Name: "thumbsup", User: g.issue.Author}, {Name: "heart", User: "reviewer"}}
+	f.Awards[key] = []gitlab.Award{{Name: "thumbsup", User: g.issue.Author}, {Name: "heart", User: "reviewer"}}
 	r, err := g.run(p, "a", t0)
 	if err != nil || r.Passed || r.Checks[0].Result != ResultPending || r.Checks[0].Environment != "none" {
 		t.Fatalf("own thumbs-up: %+v %v", r, err)
 	}
-	g.f.Awards[key] = append(g.f.Awards[key], gitlab.Award{Name: "thumbsup", User: "reviewer"})
+	f.Awards[key] = append(f.Awards[key], gitlab.Award{Name: "thumbsup", User: "reviewer"})
 	r, err = g.run(p, "a", t0.Add(time.Minute))
 	if err != nil || !r.Passed || !strings.Contains(r.Checks[0].Reason, "reviewer") {
 		t.Fatalf("reviewer thumbs-up: %+v %v", r, err)
@@ -135,7 +149,11 @@ func TestGatePeerReadNeedsAnotherPersonsThumbsUp(t *testing.T) {
 }
 
 func TestGateFailsChecksItCannotRun(t *testing.T) {
-	g := newGateFixture()
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) { testGateFailsChecksItCannotRun(t, tp) })
+}
+
+func testGateFailsChecksItCannotRun(t *testing.T, tp trackertest.Program) {
+	g := newGateFixture(t, tp.Tracker())
 	p := policyWith("a",
 		program.Check{Kind: "scorecard", Environment: "dev", Against: "current", Threshold: "no-regression"},
 		program.Check{Kind: "contract-tests", Environment: "dev", Consumers: "all"},
@@ -156,7 +174,11 @@ func TestGateFailsChecksItCannotRun(t *testing.T) {
 }
 
 func TestGateRefusesNoChecksOrADirtyCheckout(t *testing.T) {
-	g := newGateFixture()
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) { testGateRefusesNoChecksOrADirtyCheckout(t, tp) })
+}
+
+func testGateRefusesNoChecksOrADirtyCheckout(t *testing.T, tp trackertest.Program) {
+	g := newGateFixture(t, tp.Tracker())
 	p := program.Defaults()
 	p.DefinitionOfDone = map[string][]program.Check{"other": {{Kind: "custom", Environment: "local", Command: "true"}}}
 	if _, err := g.run(p, "a", t0); err == nil || !strings.Contains(err.Error(), "no checks") {
@@ -169,4 +191,37 @@ func TestGateRefusesNoChecksOrADirtyCheckout(t *testing.T) {
 	if len(g.evidence()) != 0 {
 		t.Fatal("a refused gate posted evidence")
 	}
+}
+
+// TestGatePeerReadAcceptsAnotherPersonsApproval: on every tracker, a peer
+// read is also an approval comment that tpm release approve posts as the
+// person running it (srd015 R1.2). The author cannot approve their own
+// release, the gate stays pending until someone else does, and a second
+// approval by the same person posts nothing.
+func TestGatePeerReadAcceptsAnotherPersonsApproval(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
+		g := newGateFixture(t, tp.Tracker())
+		p := policyWith("a", program.Check{Kind: "peer-read"})
+
+		if _, err := Approve(g.tr, "g/po-1", g.issue.IID); err == nil || !strings.Contains(err.Error(), "author") {
+			t.Fatalf("author's approval = %v, want a refusal naming the author", err)
+		}
+		r, err := g.run(p, "a", t0)
+		if err != nil || r.Passed || r.Checks[0].Result != ResultPending {
+			t.Fatalf("before approval: %+v %v", r, err)
+		}
+
+		reviewer := tp.As("reviewer")
+		a, err := Approve(reviewer, "g/po-1", g.issue.IID)
+		if err != nil || !a.Posted {
+			t.Fatalf("reviewer's approval = %+v, %v", a, err)
+		}
+		if again, err := Approve(reviewer, "g/po-1", g.issue.IID); err != nil || again.Posted {
+			t.Fatalf("second approval = %+v, %v, want nothing posted", again, err)
+		}
+		r, err = g.run(p, "a", t0.Add(time.Minute))
+		if err != nil || !r.Passed || !strings.Contains(r.Checks[0].Reason, "reviewer") {
+			t.Fatalf("after approval: %+v %v", r, err)
+		}
+	})
 }

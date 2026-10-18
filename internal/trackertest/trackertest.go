@@ -32,6 +32,9 @@ type Program interface {
 	// Writes counts the writes the tracker has made, so a test can prove a
 	// dry run or a second run changed nothing.
 	Writes() int
+	// As is the program's tracker acting as another person, for a step
+	// someone other than User takes, such as a peer read.
+	As(user string) gitlab.Tracker
 }
 
 // Each runs test once per tracker, as subtests named gitlab and beads.
@@ -44,6 +47,25 @@ type fakeProgram struct{ *gitlabtest.Fake }
 
 func (f fakeProgram) Tracker() gitlab.Tracker { return f.Fake }
 func (f fakeProgram) Writes() int             { return f.Fake.Writes }
+func (f fakeProgram) As(user string) gitlab.Tracker {
+	return fakeAs{f.Fake, user}
+}
+
+// fakeAs is the fake acting as another person: it is who CurrentUser
+// names and who authors the notes it posts.
+type fakeAs struct {
+	*gitlabtest.Fake
+	user string
+}
+
+func (f fakeAs) CurrentUser() (gitlab.User, error) { return gitlab.User{Username: f.user}, nil }
+
+func (f fakeAs) CreateNote(project string, iid int, body string) error {
+	me := f.Fake.Me
+	f.Fake.Me = gitlab.User{Username: f.user}
+	defer func() { f.Fake.Me = me }()
+	return f.Fake.CreateNote(project, iid, body)
+}
 
 // beadsProgram builds each project as a code repository named for the
 // project's last path segment, siblings in one directory, which is how the
@@ -55,6 +77,8 @@ type beadsProgram struct {
 	files   map[string]map[string]map[string][]byte // project, ref, path
 	tags    map[string][]string
 	tracker *beads.Tracker
+	work    string
+	as      map[string]*beads.Tracker
 }
 
 func newBeadsProgram(t *testing.T) *beadsProgram {
@@ -102,8 +126,23 @@ func (b *beadsProgram) Tracker() gitlab.Tracker {
 	}
 	clone := filepath.Join(b.root, User+"-tracker")
 	beadstest.Clone(t, b.remote, clone, User)
-	b.tracker = beads.NewTracker(clone, User, work)
+	b.tracker, b.work = beads.NewTracker(clone, User, work), work
 	return b.tracker
+}
+
+// As gives another person their own clone of the tracker repository.
+func (b *beadsProgram) As(user string) gitlab.Tracker {
+	b.Tracker()
+	if tr, ok := b.as[user]; ok {
+		return tr
+	}
+	clone := filepath.Join(b.root, user+"-tracker")
+	beadstest.Clone(b.t, b.remote, clone, user)
+	if b.as == nil {
+		b.as = map[string]*beads.Tracker{}
+	}
+	b.as[user] = beads.NewTracker(clone, user, b.work)
+	return b.as[user]
 }
 
 // build makes one project's repository: main holds the files declared at

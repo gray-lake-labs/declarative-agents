@@ -156,7 +156,7 @@ func (f *Fake) ListNotes(project string, iid int) ([]gitlab.Note, error) {
 func (f *Fake) CreateNote(project string, iid int, body string) error {
 	f.Writes++
 	key := fmt.Sprintf("%s#%d", project, iid)
-	f.Notes[key] = append(f.Notes[key], gitlab.Note{ID: len(f.Notes[key]) + 1, Body: body})
+	f.Notes[key] = append(f.Notes[key], gitlab.Note{ID: len(f.Notes[key]) + 1, Body: body, Author: f.Me.Username})
 	return nil
 }
 
