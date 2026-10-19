@@ -36,11 +36,11 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
     1. - skill: implement
        - does: takes the issue
        - "assigning only the person who runs it": null
-       - "and opens its own branch and worktree (srd036); splitting it into sub-issues arrives with epics": null
+       - "and opens its own branch and worktree (srd036); splitting it into sub-issues arrives with tracking issues": null
     1. - skill: do-work
        - does: works each unit against its Requirements and Acceptance Criteria
        - "commits with the unit's record embedded": null
-       - "and logs actual against estimated size; on GitLab it arrives with epics after release 00.0": null
+       - "and logs actual against estimated size; on GitLab it arrives with tracking issues after release 00.0": null
     1. - skill: implement (finish)
        - does: merges the branch, which closes the issue
        - "gated by mage audit for a change under docs/; a reviewer merges it": null

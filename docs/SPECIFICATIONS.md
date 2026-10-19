@@ -7,7 +7,7 @@ title: AI-Native Scrum Specification Index
 ## Overview
 
 Specification index for the AI-native scrum process. The requirements are
-complete: 23 SRDs, six config formats, and four semantic models. srd001 to
+complete: 27 SRDs, six config formats, and four semantic models. srd001 to
 srd008 define the control plane, the objective ledger, pinned references,
 and done as evidence in a named environment; srd010 to srd019 define one
 script each as a tpm subcommand group and contain no question to a person,
@@ -27,7 +27,7 @@ GitHub Copilot. srd039 is the shared reader of corpus and config
 documents (internal/corpus), srd040 the format tools and format gates in
 magefiles, and srd041 the states and transitions of an issue. srd043 is
 tpm init and tpm onboard, which lay down a program's corpus, and srd044
-tpm help, which teaches the process from the binary. srd039 and
+tpm help, which teaches the process from the binary. srd045 makes an epic document the Product Backlog for multi-sprint work, from which plan derives objectives at a velocity read from the ledger, and holds direction only until 02.0 is planned. srd039 and
 srd040 specify shared code and tooling no use case cites, so the road map
 lists them under the release that built them. An SRD whose release is
 not yet planned holds its direction only (design.md D12): its items are
@@ -117,6 +117,7 @@ docs/road-map.md.
 | [srd042-beads-tracker](specs/software-requirements/srd042-beads-tracker.md) | docs/specs/software-requirements/srd042-beads-tracker.md | Beads tracker: the program's facts live in a repository | 03.0 |
 | [srd043-init-onboard](specs/software-requirements/srd043-init-onboard.md) | docs/specs/software-requirements/srd043-init-onboard.md | Script: init and onboard (tpm init, tpm onboard) | 01.4 |
 | [srd044-help](specs/software-requirements/srd044-help.md) | docs/specs/software-requirements/srd044-help.md | Script: help (tpm help) | 01.4 |
+| [srd045-epics](specs/software-requirements/srd045-epics.md) | docs/specs/software-requirements/srd045-epics.md | Epics: the Product Backlog, velocity, and forecasts | 02.0 |
 
 <!-- field: config_format_index -->
 ## Config format index
@@ -194,3 +195,4 @@ docs/road-map.md.
 | GAP8 | The parent corpus audit does not read docs/specs/objectives/, so a magefiles gate test validates objective documents against srd034 R1 inside mage audit (srd034 R2.1). An objective document is scrum-master's type written as an SRD in the parent's format, so the gate is scrum-master's own, not a gap the parent closes. |
 | GAP9 | tpm issue lint does not yet run in CI on issue creation or on a schedule (srd013 R1.3); that needs a released tpm binary the program's pipelines can run. |
 | GAP11 | Open decision. srd041 has lint rows only out of open and needs-triage, so an issue already past admission that later fails a re-lint has no transition. On GitLab and on beads lint sets or clears the needs-triage label alone and leaves the state; whether such an issue should leave the backlog is undecided. |
+| GAP12 | Neither the parent corpus audit nor a magefiles gate reads docs/specs/epics/ yet, so epic documents are unchecked until release 02.0 plans srd045 and its gate (srd045 R1.6, R1.7); until then tpm and the audit ignore them. |

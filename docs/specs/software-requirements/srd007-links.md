@@ -42,7 +42,7 @@ A line of the form Upstream: PROJECT#IID in an issue's description names the iss
 <!-- req: R1.2 -->
 ### R1.2
 
-Upstream points at the producing issue, not at an epic or a sprint. Handoff writes it on every issue it creates.
+Upstream points at the producing issue, not at a tracking issue or a sprint. Handoff writes it on every issue it creates.
 
 <!-- req: R1.3 -->
 ### R1.3

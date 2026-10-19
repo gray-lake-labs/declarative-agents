@@ -188,6 +188,19 @@ The pipeline pushes a branch to the reports repository with the computed aggrega
 
 Run twice on the same tag, the pipeline pushes no second branch and files no second issue.
 
+<!-- req: R11 -->
+## R11 - Direction: forecasts
+
+<!-- req: R11.1 -->
+### R11.1
+
+Once a release plans srd045, the system release's aggregate also renders a roadmap forecast, the remaining epic items spread over future periods at velocity in dependency order, and a burn-up per epic, points drawn down against total points, from the epics and the ledger alone (srd045 R1.5). Both are committed beside the dashboard, regenerated each run, never edited, and labelled as forecasts, not baselines.
+
+<!-- req: R11.2 -->
+### R11.2
+
+Until that release, reports render no forecast and no burn-up.
+
 <!-- field: non_goals -->
 ## Non-goals
 
@@ -294,3 +307,14 @@ A system release tag runs aggregate and deck in CI and pushes one branch with th
 - [R10.1](#r101)
 - [R10.2](#r102)
 - [R10.3](#r103)
+
+<!-- ac: AC9 -->
+### AC9
+
+The release that plans srd045 writes the forecast requirement items from R11.1; until then the interim rule of R11.2 holds.
+
+<!-- field: traces -->
+#### Traces
+
+- [R11.1](#r111)
+- [R11.2](#r112)

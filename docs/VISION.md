@@ -166,7 +166,7 @@ The process defines, and tpm and the skills implement:
   a comment notifies the upstream issue.
 - Dependencies as links: an issue waits on another issue or on a release
   tag, and the morning script reports what became unblocked.
-- Epics as issues with a task list of member issues, closed when the last
+- Tracking issues with a task list of member issues, closed when the last
   member closes; issues decomposed into tasks for one worktree and one
   merge.
 - A dashboard rendered from the tracker into the program's repository,
@@ -230,7 +230,7 @@ practices taken from the playbook, are in
 - Assigning people to work. Issues are ready; the person pops.
 - Estimating or ranking people. Scripts report cycle time per component, never per person.
 - Role-specific agents. Every role runs the same inner loop; the scrum master's administrative work is audits and scripts, and the team view is what they wrote.
-- Tracker features beyond issues, labels, comments, links, and milestones: no epics as objects, no blocking links, no custom fields. Everything maps onto a plain tracker, which is how the beads tracker (srd042) serves it.
+- Tracker features beyond issues, labels, comments, links, and milestones: no tracker-native epic objects, no blocking links, no custom fields. Everything maps onto a plain tracker, which is how the beads tracker (srd042) serves it.
 - Any one project's content: subsystems, components, environments, repositories, and names are inputs supplied by the consuming program.
 - A platform, runtime, or codebase that the process builds. The process is indifferent to what the issues produce.
 - Holding status in a program repository. The tracker repository is the source of truth; every other repository holds specifications and work, never status.

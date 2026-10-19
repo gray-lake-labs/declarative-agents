@@ -18,7 +18,7 @@ func init() {
 	cli.Default.Retire("program", "issue")
 	var labelArgs struct {
 		group, control, ref string
-		update              bool
+		update, migrate     bool
 	}
 	cli.Default.Register(&cli.Command{
 		Group: "issue", Name: "labels", Summary: "create the program's labels from control/labels.md or the defaults",
@@ -27,10 +27,14 @@ func init() {
 			fs.StringVar(&labelArgs.control, "control", "", "program repository holding control/labels.md; empty uses the defaults")
 			fs.StringVar(&labelArgs.ref, "ref", "main", "ref of control/labels.md")
 			fs.BoolVar(&labelArgs.update, "update", false, "also rewrite the color and description of labels that differ")
+			fs.BoolVar(&labelArgs.migrate, "migrate", false, "also relabel issues carrying a renamed type value (type::epic to type::tracking) in --control and its subsystems' repositories")
 		},
 		Run: func(ctx *cli.Context) error {
 			if labelArgs.group == "" {
 				return fmt.Errorf("%w: labels needs --group", cli.ErrUsage)
+			}
+			if labelArgs.migrate && labelArgs.control == "" {
+				return fmt.Errorf("%w: labels --migrate needs --control, the system repository", cli.ErrUsage)
 			}
 			t, err := ctx.Tracker()
 			if err != nil {
@@ -50,7 +54,22 @@ func init() {
 			}
 			human := fmt.Sprintf("%s: %d created, %d updated, %d unchanged, %d differ", labelArgs.group,
 				counts["created"], counts["updated"], counts["unchanged"], counts["differs"])
-			return ctx.Emit(res, human)
+			if !labelArgs.migrate {
+				return ctx.Emit(res, human)
+			}
+			m, err := migrate(t, labelArgs.control, labelArgs.ref, ctx.DryRun)
+			if err != nil {
+				return err
+			}
+			m.Labels = res
+			human += fmt.Sprintf("\n%d issues relabelled", len(m.Relabelled))
+			for _, r := range m.Relabelled {
+				human += fmt.Sprintf("\n  %s#%d %s -> %s", r.Project, r.IID, r.From, r.To)
+			}
+			if len(m.StaleTypes) > 0 {
+				human += fmt.Sprintf("\n%s %s still lists %s; change it with a plane::control issue", labelArgs.control, LabelsFile, strings.Join(m.StaleTypes, ", "))
+			}
+			return ctx.Emit(m, human)
 		},
 	})
 
@@ -291,7 +310,7 @@ func init() {
 			})
 			fs.StringVar(&fileArgs.system, "system", "", "system repository whose subsystem SRDs give the component; also the default --control")
 			fs.StringVar(&fileArgs.kind, "kind", "", "kind, on data issues")
-			fs.StringVar(&fileArgs.typ, "type", "", "type: epic, sprint, or recurring")
+			fs.StringVar(&fileArgs.typ, "type", "", "type: tracking, sprint, or recurring")
 			fs.StringVar(&fileArgs.component, "component", "", "component")
 			fs.StringVar(&fileArgs.milestone, "milestone", "", "milestone title")
 			fs.StringVar(&fileArgs.due, "due", "", "due date YYYY-MM-DD")

@@ -206,8 +206,8 @@ section
 
 A "## Recurrence" heading on a recurring issue (srd001 R8), saying when the next copy is filed and by what: for a weekly status issue the reports repository's schedule (srd018 R9), for a sprint-end issue tpm plan push for the next period (srd038 R1.1).
 
-<!-- schema_entry: epic_task_list -->
-### epic_task_list
+<!-- schema_entry: tracking_task_list -->
+### tracking_task_list
 
 <!-- field: type -->
 #### Type
@@ -217,7 +217,7 @@ section
 <!-- field: description -->
 #### Description
 
-A "## Members" heading on an epic followed by task-list lines, "- [ ] PROJECT#IID title" (srd001 R6.1). Handoff appends to it; the tracker renders closed members as done.
+A "## Members" heading on a tracking issue followed by task-list lines, "- [ ] PROJECT#IID title" (srd001 R6.1). Handoff appends to it; the tracker renders closed members as done.
 
 <!-- field: config_files -->
 ## Config files

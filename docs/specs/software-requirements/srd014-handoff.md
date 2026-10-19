@@ -77,12 +77,12 @@ For each open consume issue for an earlier version, also posts a superseded even
 For a citing repository whose citation asks for a review or a handoff decision (a Cites line ending in | review or | handoff, config format issue-body), creates one issue of that kind in it, unassigned, with an Upstream line to the release issue.
 
 <!-- req: R3 -->
-## R3 - Epic membership
+## R3 - Tracking-issue membership
 
 <!-- req: R3.1 -->
 ### R3.1
 
-When the issue that caused a handoff is a member of an epic, every issue handoff creates is appended to that epic's Members section (issue-body epic task list).
+When the issue that caused a handoff is a member of a tracking issue, every issue handoff creates is appended to that tracking issue's Members section (issue-body tracking_task_list).
 
 <!-- req: R4 -->
 ## R4 - tpm handoff sweep
@@ -184,7 +184,7 @@ A breaking tag marks every subscription needs-run, creates one unassigned consum
 <!-- ac: AC3 -->
 ### AC3
 
-Issues created because of an epic member are appended to the epic's Members section.
+Issues created because of a tracking-issue member are appended to the tracking issue's Members section.
 
 <!-- field: traces -->
 #### Traces

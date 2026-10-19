@@ -30,10 +30,11 @@ type FileResult struct {
 }
 
 // Labels builds the axis labels for a new issue from its plane, type, kind,
-// and component; empty values are left out.
+// and component; empty values are left out, and a type's earlier name is
+// written as its current one.
 func Labels(plane, typ, kind, component string) []string {
 	var l []string
-	for _, a := range [][2]string{{"plane::", plane}, {"type::", typ}, {"kind::", kind}, {"component::", component}} {
+	for _, a := range [][2]string{{"plane::", plane}, {"type::", CanonicalType(typ)}, {"kind::", kind}, {"component::", component}} {
 		if a[1] != "" {
 			l = append(l, a[0]+a[1])
 		}

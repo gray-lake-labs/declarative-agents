@@ -62,7 +62,7 @@ tpm picks the labels, files, and lints.
 
 implement claims an issue for the person who works it, on its own
 branch in its own worktree, and the merge request tpm opens closes it.
-Sub-issues and do-work arrive with epics later.
+Sub-issues and do-work arrive with tracking issues later.
 
 <!-- field: srds -->
 ### SRDs
@@ -397,7 +397,8 @@ renamed commands, and the help is written once against them.
 What the TPM-to-Product-Owner loop does not need yet: done as evidence
 in a named environment and track-goals closing objectives on it, the
 full handoff and release fan-out, the daily standup and Daily Scrum,
-the sprint review and retrospective as skills, and the requirement
+the sprint review and retrospective as skills, epic documents as the
+Product Backlog with velocity and forecasts, and the requirement
 items of earlier releases' SRDs that their use cases do not cite. Use
 cases are written when the release is planned.
 
@@ -410,6 +411,7 @@ cases are written when the release is planned.
 - srd032-sprint-review
 - srd033-sprint-retrospective
 - srd041-states
+- srd045-epics
 
 <!-- release: 03.0 | status: implemented -->
 ## 03.0 - The tracker becomes beads

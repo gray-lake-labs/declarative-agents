@@ -100,7 +100,7 @@ As a skill, is at most 50 lines (design.md D10).
 <!-- field: non_goals -->
 ## Non-goals
 
-- Splitting a request into several issues; one request is one issue, and sub-issues arrive with epics.
+- Splitting a request into several issues; one request is one issue, and sub-issues arrive with tracking issues.
 - Working the issue; that is implement (srd036).
 
 <!-- field: acceptance_criteria -->
