@@ -20,11 +20,11 @@ import (
 // releaseURL is where the parent publishes each tag's binaries and source.
 const releaseURL = "https://github.com/gray-lake-labs/declarative-agents"
 
-// parentRelease is the pinned parent release on this host: its source tree, a git
-// repository holding that tree at the tag (the clone cache derived_from
-// entries resolve against), and its agent and spec tool.
+// parentRelease is the pinned parent release on this host: its source tree,
+// a git repository holding that tree at the tag (the clone cache
+// derived_from entries resolve against), and its agent.
 type parentRelease struct {
-	Tag, Dir, Src, Agent, SpecTool string
+	Tag, Dir, Src, Agent string
 }
 
 // releaseDir is where a release is downloaded and verified, once per tag,
@@ -76,7 +76,7 @@ func download(url string) ([]byte, error) {
 	return io.ReadAll(resp.Body)
 }
 
-// fetchRelease downloads the release's agent and spec tool for this host,
+// fetchRelease downloads the release's agent for this host,
 // verifies them against SHA256SUMS, and lays out its source as a git
 // repository at the tag. Each part is fetched once per tag; a cached binary
 // is used only while it still matches SHA256SUMS.
@@ -85,8 +85,7 @@ func fetchRelease(tag string) (parentRelease, error) {
 	if err != nil {
 		return parentRelease{}, err
 	}
-	r := parentRelease{Tag: tag, Dir: dir, Src: filepath.Join(dir, "src"),
-		Agent: filepath.Join(dir, "agent"), SpecTool: filepath.Join(dir, "spectool")}
+	r := parentRelease{Tag: tag, Dir: dir, Src: filepath.Join(dir, "src"), Agent: filepath.Join(dir, "agent")}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return r, err
 	}
@@ -94,7 +93,7 @@ func fetchRelease(tag string) (parentRelease, error) {
 	if err != nil {
 		return r, fmt.Errorf("the checksums of %s: %w", tag, err)
 	}
-	for name, path := range map[string]string{"agent": r.Agent, "spectool": r.SpecTool} {
+	for name, path := range map[string]string{"agent": r.Agent} {
 		asset, err := hostAsset(name, runtime.GOOS, runtime.GOARCH)
 		if err != nil {
 			return r, err

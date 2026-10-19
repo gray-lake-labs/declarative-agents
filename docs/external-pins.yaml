@@ -5,9 +5,10 @@
 # formats the corpus with the new release, and has a person re-pin the
 # entries whose cited text changed (docs/guides/parent-upgrade.md).
 #
-# The parent is the gray-lake-labs fork, which publishes each tag's agent and
-# spec tool as release binaries with SHA256SUMS; mage audit and mage fmt
-# download the pinned release's binaries and source (GH-28). v0.20261016.1 is
+# The parent is the gray-lake-labs fork, which publishes each tag's agent as
+# release binaries with SHA256SUMS; mage audit downloads the pinned release's
+# agent and source, and mage fmt builds this repository's spec tool against
+# that source (GH-28, GH-52). v0.20261016.1 is
 # the first release whose corpus is Markdown (its eng10); this corpus
 # converted with it (GH-211). v0.20261017.1 declares every field a document
 # may hold, and this corpus moved onto those fields (GH-219).

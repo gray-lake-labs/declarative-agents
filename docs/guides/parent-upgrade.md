@@ -13,10 +13,10 @@ is that workflow, invoked by name as **parent-upgrade**.
 | What | Where |
 |---|---|
 | Tracked pin | `docs/external-pins.yaml`, key `github.com/gray-lake-labs/declarative-agents` |
-| Release cache | the user cache directory, `scrum-master/release/<tag>`: each release's agent, spec tool, and source, downloaded and checksum-verified on first use |
+| Release cache | the user cache directory, `scrum-master/release/<tag>`: each release's agent and source, downloaded and checksum-verified on first use, and the spec tool built from that source |
 | Provenance entries | the `derived_from` attribute of an SRD's `req` marker, a JSON list of `repo`, `release`, `srd`, `item`, `reason` |
 | Corpus format | the parent's Markdown format (its eng10), checked by the audit's `markdown-format` and `not-canonical` checks |
-| Format tools | `mage convert`, `mage fmt`, `mage specCheck` (`magefiles/spec.go`), running the pinned release's published spec tool |
+| Format tools | `mage convert`, `mage fmt`, `mage specCheck` (`magefiles/spec.go`), this repository's spec tool, built once per pin against the pinned release's Markdown library |
 | Audit that reports staleness | the parent corpus audit, `docs/guides/corpus-audit.md` |
 | Next bump | the open issue `Recurring: bump the declarative-agents pin` |
 
@@ -38,7 +38,7 @@ corpus claiming a provenance nobody checked.
 
 2. **Move the pin.** Set the key in `docs/external-pins.yaml` to the new tag.
 
-3. **Convert and format.** The format tools download the new pin's spec tool on
+3. **Convert and format.** The format tools rebuild against the new pin on
    first use. `mage convert all` converts any corpus document still in YAML
    to Markdown in place and prints what the conversion reported; it has
    work only when this corpus gained a YAML document or the release
