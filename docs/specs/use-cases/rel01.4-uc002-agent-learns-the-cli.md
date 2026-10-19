@@ -1,7 +1,7 @@
 ---
 id: rel01.4-uc002-agent-learns-the-cli
 title: An Agent Learns the Process from tpm and Works an Issue
-status: specified
+status: implemented
 priority: P1
 test_suite: test-rel01.4-agent-legible-cli
 ---

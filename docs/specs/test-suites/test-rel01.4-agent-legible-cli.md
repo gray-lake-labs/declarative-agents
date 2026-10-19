@@ -2,7 +2,7 @@
 id: test-rel01.4-agent-legible-cli
 title: Test Suite for Release 01.4 The Agent-Legible CLI
 release: "01.4"
-status: specified
+status: implemented
 ---
 
 <!-- field: overview -->
@@ -32,7 +32,7 @@ instance carries the marker of an earlier tpm.
 <!-- field: test_cases -->
 ## Test cases
 
-<!-- case: init writes a system repository the audit passes | status: specified -->
+<!-- case: init writes a system repository the audit passes | status: implemented -->
 ### init writes a system repository the audit passes
 
 <!-- field: use_case -->
@@ -48,7 +48,7 @@ mage integration:init
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/... -run '^TestInit(WritesSkeleton|WritesControlFiles|InstallsSkills)$'
+go test ./internal/scaffold -run '^TestInit(WritesSkeleton|WritesControlFiles|InstallsSkills)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
@@ -63,7 +63,7 @@ go test ./internal/... -run '^TestInit(WritesSkeleton|WritesControlFiles|Install
 
 - [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC1](../software-requirements/srd043-init-onboard.md#ac1)
 
-<!-- case: init seeds an empty tracker once | status: specified -->
+<!-- case: init seeds an empty tracker once | status: implemented -->
 ### init seeds an empty tracker once
 
 <!-- field: use_case -->
@@ -79,7 +79,7 @@ mage integration:init
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/... -run '^TestInit(SeedsEmptyTracker|LeavesTrackerWithCommits)$'
+go test ./internal/scaffold -run '^TestInit(SeedsEmptyTracker|LeavesTrackerWithCommits)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
@@ -92,7 +92,7 @@ go test ./internal/... -run '^TestInit(SeedsEmptyTracker|LeavesTrackerWithCommit
 
 - [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC2](../software-requirements/srd043-init-onboard.md#ac2)
 
-<!-- case: onboard files one registration and commits nothing upstream | status: specified -->
+<!-- case: onboard files one registration and commits nothing upstream | status: implemented -->
 ### onboard files one registration and commits nothing upstream
 
 <!-- field: use_case -->
@@ -108,7 +108,7 @@ mage integration:onboard
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/... -run '^TestOnboard(WritesMemberSkeleton|FilesOneRegistration|FilesNoSecondRegistration)$'
+go test ./internal/scaffold -run '^TestOnboard(WritesMemberSkeleton|FilesOneRegistration|FilesNoSecondRegistration)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
@@ -123,7 +123,7 @@ go test ./internal/... -run '^TestOnboard(WritesMemberSkeleton|FilesOneRegistrat
 
 - [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC3](../software-requirements/srd043-init-onboard.md#ac3)
 
-<!-- case: init and onboard change nothing on a second run | status: specified -->
+<!-- case: init and onboard change nothing on a second run | status: implemented -->
 ### init and onboard change nothing on a second run
 
 <!-- field: use_case -->
@@ -139,7 +139,7 @@ mage integration:init
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/... -run '^Test(Scaffold(RerunChangesNothing|KeepsEditedFile|ForceReplaces|RefusesNonRepository|DryRunWritesNothing)|ScaffoldWritesParentPin|TemplatesNameNoProject)$'
+go test ./internal/scaffold -run '^Test(Scaffold(RerunChangesNothing|KeepsEditedFile|ForceReplaces|RefusesNonRepository|DryRunWritesNothing)|ScaffoldWritesParentPin|TemplatesNameNoProject)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
@@ -155,7 +155,7 @@ go test ./internal/... -run '^Test(Scaffold(RerunChangesNothing|KeepsEditedFile|
 
 - [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC4](../software-requirements/srd043-init-onboard.md#ac4)
 
-<!-- case: help pages teach the process | status: specified -->
+<!-- case: help pages teach the process | status: implemented -->
 ### help pages teach the process
 
 <!-- field: use_case -->
@@ -171,7 +171,7 @@ mage integration:issueGroup
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/... -run '^TestHelp(ProcessPage|GroupPages|ConceptPages|ListAndUnknown|JSON|PageLength)$'
+go test ./internal/help -run '^TestHelp(ProcessPage|GroupPages|ConceptPages|ListAndUnknown|JSON|PageLength)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
@@ -188,7 +188,7 @@ go test ./internal/... -run '^TestHelp(ProcessPage|GroupPages|ConceptPages|ListA
 - [srd044-help](../software-requirements/srd044-help.md) [AC1](../software-requirements/srd044-help.md#ac1)
 - [srd044-help](../software-requirements/srd044-help.md) [AC2](../software-requirements/srd044-help.md#ac2)
 
-<!-- case: help cannot drift from the binary or the corpus | status: specified -->
+<!-- case: help cannot drift from the binary or the corpus | status: implemented -->
 ### help cannot drift from the binary or the corpus
 
 <!-- field: use_case -->
@@ -218,7 +218,7 @@ go test ./magefiles -run '^TestHelpPages(NameRealCommandsAndSRDs|CoverEveryGroup
 
 - [srd044-help](../software-requirements/srd044-help.md) [AC3](../software-requirements/srd044-help.md#ac3)
 
-<!-- case: the issue group serves every subcommand and the old name refuses | status: specified -->
+<!-- case: the issue group serves every subcommand and the old name refuses | status: implemented -->
 ### the issue group serves every subcommand and the old name refuses
 
 <!-- field: use_case -->
@@ -247,7 +247,7 @@ go test ./cmd/tpm -run '^Test(IssueGroupServesSubcommands|ProgramGroupRefusesWit
 
 - [srd013-program](../software-requirements/srd013-program.md) [AC2](../software-requirements/srd013-program.md#ac2)
 
-<!-- case: recur opens the next instance once across the move | status: specified -->
+<!-- case: recur opens the next instance once across the move | status: implemented -->
 ### recur opens the next instance once across the move
 
 <!-- field: use_case -->
@@ -263,7 +263,7 @@ mage integration:issueGroup
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/... -run '^TestRecur(OpensNextInstanceOnce|FindsEarlierMarker)$'
+go test ./internal/standup -run '^TestRecur(OpensNextInstanceOnce|FindsEarlierMarker)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs

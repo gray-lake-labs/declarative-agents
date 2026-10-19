@@ -34,7 +34,7 @@ not yet planned holds its direction only (design.md D12): its items are
 retired, and an interim rule says what tpm does until they are rewritten.
 make-work, do-work, and release-push are still referenced as the existing
 skills. Every repository of a consuming program carries the same
-corpus shape (design.md D7). Release 00 (00.0 to 00.3) and releases 01.0 to 01.2 are implemented.
+corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, and 03.0 are implemented.
 
 Releases are planned by use case, and a use case cites only the
 requirement items its release delivers. Release 00 is the inner loop
@@ -62,7 +62,7 @@ docs/road-map.md.
 | "01.1" | Status comes back weekly | 2 | 2 | implemented |
 | "01.2" | Sprint end closes the loop | 2 | 2 | implemented |
 | "01.3" | Tags trigger handoff and the summary | 0 | 2 | specified |
-| "01.4" | The agent-legible CLI | 0 | 2 | specified |
+| "01.4" | The agent-legible CLI | 2 | 2 | implemented |
 | "02.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
 | "03.0" | The tracker becomes beads | 2 | 2 | implemented |
 
@@ -158,8 +158,8 @@ docs/road-map.md.
 | [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md) | The Technical Program Manager Plans the Next Period's Objectives | 01.2 | implemented | [test-rel01.2-sprint-end](specs/test-suites/test-rel01.2-sprint-end.md) | docs/specs/use-cases/rel01.2-uc002-plan-next-period.md |
 | [rel01.3-uc001-reference-update](specs/use-cases/rel01.3-uc001-reference-update.md) | A Downstream Release Files a Reference-Update Issue Upstream | 01.3 | specified | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | docs/specs/use-cases/rel01.3-uc001-reference-update.md |
 | [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md) | A System Release Drafts the Summary for Review | 01.3 | specified | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | docs/specs/use-cases/rel01.3-uc002-release-summary.md |
-| [rel01.4-uc001-bootstrap-a-program](specs/use-cases/rel01.4-uc001-bootstrap-a-program.md) | The Technical Program Manager Starts a Program and a Repository Joins It | 01.4 | specified | [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | docs/specs/use-cases/rel01.4-uc001-bootstrap-a-program.md |
-| [rel01.4-uc002-agent-learns-the-cli](specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md) | An Agent Learns the Process from tpm and Works an Issue | 01.4 | specified | [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | docs/specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md |
+| [rel01.4-uc001-bootstrap-a-program](specs/use-cases/rel01.4-uc001-bootstrap-a-program.md) | The Technical Program Manager Starts a Program and a Repository Joins It | 01.4 | implemented | [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | docs/specs/use-cases/rel01.4-uc001-bootstrap-a-program.md |
+| [rel01.4-uc002-agent-learns-the-cli](specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md) | An Agent Learns the Process from tpm and Works an Issue | 01.4 | implemented | [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | docs/specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md |
 | [rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md) | An Issue Is Popped, Delivered, and Closed Against Beads | 03.0 | implemented | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md |
 | [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md) | Two Clones Synchronize Through the Tracker Repository | 03.0 | implemented | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc002-two-clones-synchronize.md |
 
@@ -185,7 +185,7 @@ docs/road-map.md.
 | id | gap |
 | --- | --- |
 | GAP1 | Use cases exist for releases 00 (00.0 to 00.3) and 01 (01.0 to 01.4) only. Release 02.0 has none: srd008, srd019, srd020, srd032, and srd033 hold its direction only (design.md D12), and their items and use cases are written when 02.0 is planned. |
-| GAP2 | Test suites exist for releases 00 (00.0 to 00.3) and 01 (01.0 to 01.4) only. test-rel00.0-push, test-rel00.1-pop, test-rel00.2-docs-change, test-rel00.3-install, test-rel01.0-objectives, test-rel01.1-weekly-status, and test-rel01.2-sprint-end are implemented; test-rel01.3-tag-triggered and test-rel01.4-agent-legible-cli are specified, and acceptance criteria outside them have no test case yet. |
+| GAP2 | Test suites exist for releases 00 (00.0 to 00.3) and 01 (01.0 to 01.4) only. test-rel00.0-push, test-rel00.1-pop, test-rel00.2-docs-change, test-rel00.3-install, test-rel01.0-objectives, test-rel01.1-weekly-status, test-rel01.2-sprint-end, and test-rel01.4-agent-legible-cli are implemented; test-rel01.3-tag-triggered is specified, and acceptance criteria outside them have no test case yet. |
 | GAP3 | The audit is the parent's specification-critic corpus-audit agent, run by mage audit after the repository gate tests. It does not yet run in CI on merge requests that change docs/ (srd034 R2.2); this repository has no pipeline. |
 | GAP4 | Open decision. The promotion trigger for each environment (each subsystem release, nightly from the latest releases, or both) is declared per environment SRD; no default is chosen yet. |
 | GAP5 | Open decision. The channel by which evidence from customer R&D environments returns to the objective ledger is not specified (srd008, srd019 non-goals). |

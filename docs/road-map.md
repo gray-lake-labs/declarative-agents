@@ -348,7 +348,7 @@ weeks, not a tag range.
 - mage integration:referenceUpdate
 - mage integration:releaseSummary
 
-<!-- release: 01.4 | status: specified -->
+<!-- release: 01.4 | status: implemented -->
 ## 01.4 - The agent-legible CLI
 
 An agent with only tpm on PATH learns the process from it, and a program
@@ -372,15 +372,15 @@ renamed commands, and the help is written once against them.
 
 | id | summary | status | priority |
 | --- | --- | --- | --- |
-| [rel01.4-uc001-bootstrap-a-program](specs/use-cases/rel01.4-uc001-bootstrap-a-program.md) | tpm init starts a program the audit passes as written; tpm onboard adds a repository and files its registration. | specified | P1 |
-| [rel01.4-uc002-agent-learns-the-cli](specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md) | An agent learns the process from tpm help and works an issue under tpm issue; the old group name names its fix. | specified | P1 |
+| [rel01.4-uc001-bootstrap-a-program](specs/use-cases/rel01.4-uc001-bootstrap-a-program.md) | tpm init starts a program the audit passes as written; tpm onboard adds a repository and files its registration. | implemented | P1 |
+| [rel01.4-uc002-agent-learns-the-cli](specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md) | An agent learns the process from tpm help and works an issue under tpm issue; the old group name names its fix. | implemented | P1 |
 
 <!-- field: test_suites -->
 ### Test suites
 
 | id | summary | status |
 | --- | --- | --- |
-| [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | init and onboard over empty repositories and the audit, help pages and their drift gate, the issue group, and recur across the move. | specified |
+| [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | init and onboard over empty repositories and the audit, help pages and their drift gate, the issue group, and recur across the move. | implemented |
 
 <!-- field: proof -->
 ### Proof

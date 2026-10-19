@@ -1,7 +1,7 @@
 ---
 id: rel01.4-uc001-bootstrap-a-program
 title: The Technical Program Manager Starts a Program and a Repository Joins It
-status: specified
+status: implemented
 priority: P1
 test_suite: test-rel01.4-agent-legible-cli
 ---
