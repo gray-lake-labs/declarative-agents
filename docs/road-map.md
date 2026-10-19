@@ -16,7 +16,9 @@ reach the Product Owner as dated issues, 01.1 status comes back weekly,
 and 01.2 the sprint end releases and plans the next period. 01.4, the
 agent-legible CLI, ships before 01.3. Each use case cites only the
 requirement items its release delivers, so the SRDs it touches are partly
-delivered; the rest waits for 02.0. Every release proves itself with mage
+delivered; the rest waits for 02.0. Release 04.0 aligns the planning
+documents with the agile hierarchy (theme, initiative, epic, feature,
+user story) and renames the objective issue the Sprint Goal. Every release proves itself with mage
 audit, which runs the parent's specification-critic corpus-audit agent
 (docs/guides/corpus-audit.md), and with its test suite.
 
@@ -397,8 +399,8 @@ renamed commands, and the help is written once against them.
 What the TPM-to-Product-Owner loop does not need yet: done as evidence
 in a named environment and track-goals closing objectives on it, the
 full handoff and release fan-out, the daily standup and Daily Scrum,
-the sprint review and retrospective as skills, epic documents as the
-Product Backlog with velocity and forecasts, and the requirement
+the sprint review and retrospective as skills, forecasts and
+burn-ups rolled up from story evidence, and the requirement
 items of earlier releases' SRDs that their use cases do not cite. Use
 cases are written when the release is planned.
 
@@ -451,3 +453,56 @@ fixture tracker repositories. srd042 holds the direction.
 - mage integration:beadsStates
 - mage integration:beadsSync
 - mage integration:beadsOffline
+
+<!-- release: 04.0 | status: specified -->
+## 04.0 - The agile hierarchy
+
+A program's planning documents take the names, structure, and
+relationships of the standard agile hierarchy. Theme, initiative, epic,
+an optional feature, and user story are document types the corpus gate
+checks, each with at most one parent, and the issue that executes a
+story and its tasks stay in the tracker. Links between them are the
+agile set: parent, blocks and blocked by, depends on, relates to,
+duplicates, and implements. The objective document becomes the
+initiative and the per-period objective issue becomes the team's Sprint
+Goal, which lists the stories its Sprint Planning selected and carries
+the ledger, with evidence anchored to the story criterion it proves.
+Story points and velocity live on stories. Released behaviour stays
+readable: objective documents, issues, and markers are read as their
+new names. Until track-goals runs (02.0), a Sprint Goal closes at the
+sprint end as reported complete (srd038 R2). Its use cases, authoring
+the hierarchy, planning a sprint from stories, and the Sprint Goal
+ledger, are written with the requirement items they touch.
+
+<!-- field: srds -->
+### SRDs
+
+- srd001-labels
+- srd006-events
+- srd007-links
+- srd013-program
+- srd022-tasks
+- srd031-plan
+- srd034-objectives
+- srd038-sprint-end
+- srd041-states
+- srd045-epics
+
+<!-- field: semantic_models -->
+### Semantic models
+
+- objects
+- roles
+- planes
+- agents
+
+<!-- field: config_formats -->
+### Config formats
+
+- issue-body
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all

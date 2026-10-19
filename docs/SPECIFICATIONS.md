@@ -34,7 +34,7 @@ not yet planned holds its direction only (design.md D12): its items are
 retired, and an interim rule says what tpm does until they are rewritten.
 make-work, do-work, and release-push are still referenced as the existing
 skills. Every repository of a consuming program carries the same
-corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, and 03.0 are implemented.
+corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, and 03.0 are implemented. Release 04.0 is planned: it aligns the planning documents with the agile hierarchy and renames the objective issue the Sprint Goal.
 
 Releases are planned by use case, and a use case cites only the
 requirement items its release delivers. Release 00 is the inner loop
@@ -65,6 +65,7 @@ docs/road-map.md.
 | "01.4" | The agent-legible CLI | 2 | 2 | implemented |
 | "02.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
 | "03.0" | The tracker becomes beads | 2 | 2 | implemented |
+| "04.0" | The agile hierarchy | 0 | 0 | specified |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
