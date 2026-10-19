@@ -34,7 +34,7 @@ not yet planned holds its direction only (design.md D12): its items are
 retired, and an interim rule says what tpm does until they are rewritten.
 make-work, do-work, and release-push are still referenced as the existing
 skills. Every repository of a consuming program carries the same
-corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, and 03.0 are implemented. Release 04.0 is planned: it aligns the planning documents with the agile hierarchy and renames the Sprint Goal the Sprint Goal.
+corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, and 04.0 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the Sprint Goal the Sprint Goal.
 
 Releases are planned by use case, and a use case cites only the
 requirement items its release delivers. Release 00 is the inner loop
@@ -65,7 +65,7 @@ docs/road-map.md.
 | "01.4" | The agent-legible CLI | 2 | 2 | implemented |
 | "02.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
 | "03.0" | The tracker becomes beads | 2 | 2 | implemented |
-| "04.0" | The agile hierarchy | 0 | 3 | specified |
+| "04.0" | The agile hierarchy | 3 | 3 | implemented |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -165,9 +165,9 @@ docs/road-map.md.
 | [rel01.4-uc002-agent-learns-the-cli](specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md) | An Agent Learns the Process from tpm and Works an Issue | 01.4 | implemented | [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | docs/specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md |
 | [rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md) | An Issue Is Popped, Delivered, and Closed Against Beads | 03.0 | implemented | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md |
 | [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md) | Two Clones Synchronize Through the Tracker Repository | 03.0 | implemented | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc002-two-clones-synchronize.md |
-| [rel04.0-uc001-author-the-hierarchy](specs/use-cases/rel04.0-uc001-author-the-hierarchy.md) | The Technical Program Manager and a Product Owner Write the Backlog Hierarchy Through the Gate | 04.0 | specified | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc001-author-the-hierarchy.md |
-| [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md) | A Product Owner Plans a Sprint From the Ranked Stories and the Sprint Goal Lists Them | 04.0 | specified | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md |
-| [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md) | A Sprint Goal Closes at Sprint End With Its Stories Reported, and Old Objective Issues Read as Sprint Goals | 04.0 | specified | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md |
+| [rel04.0-uc001-author-the-hierarchy](specs/use-cases/rel04.0-uc001-author-the-hierarchy.md) | The Technical Program Manager and a Product Owner Write the Backlog Hierarchy Through the Gate | 04.0 | implemented | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc001-author-the-hierarchy.md |
+| [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md) | A Product Owner Plans a Sprint From the Ranked Stories and the Sprint Goal Lists Them | 04.0 | implemented | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md |
+| [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md) | A Sprint Goal Closes at Sprint End With Its Stories Reported, and Old Objective Issues Read as Sprint Goals | 04.0 | implemented | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md |
 
 <!-- field: test_suite_index | form: "typed table" -->
 ## Test suite index

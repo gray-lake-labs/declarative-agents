@@ -454,7 +454,7 @@ fixture tracker repositories. srd042 holds the direction.
 - mage integration:beadsSync
 - mage integration:beadsOffline
 
-<!-- release: 04.0 | status: specified -->
+<!-- release: 04.0 | status: implemented -->
 ## 04.0 - The agile hierarchy
 
 A program's planning documents take the names, structure, and
@@ -506,16 +506,16 @@ ledger, cite the requirement items they touch.
 
 | id | summary | status | priority |
 | --- | --- | --- | --- |
-| [rel04.0-uc001-author-the-hierarchy](specs/use-cases/rel04.0-uc001-author-the-hierarchy.md) | The technical program manager and a Product Owner write a theme, initiative, epic, feature, and stories that the hierarchy gate checks. | specified | P1 |
-| [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md) | tasks files the team's Sprint Goal; Sprint Planning chooses ranked stories to velocity and lists them on it. | specified | P1 |
-| [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md) | The sprint-end merge closes a Sprint Goal with its stories reported, and objective issues read as Sprint Goals. | specified | P1 |
+| [rel04.0-uc001-author-the-hierarchy](specs/use-cases/rel04.0-uc001-author-the-hierarchy.md) | The technical program manager and a Product Owner write a theme, initiative, epic, feature, and stories that the hierarchy gate checks. | implemented | P1 |
+| [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md) | tasks files the team's Sprint Goal; Sprint Planning chooses ranked stories to velocity and lists them on it. | implemented | P1 |
+| [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md) | The sprint-end merge closes a Sprint Goal with its stories reported, and objective issues read as Sprint Goals. | implemented | P1 |
 
 <!-- field: test_suites -->
 ### Test suites
 
 | id | summary | status |
 | --- | --- | --- |
-| [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | The gate passes a hierarchy and fails each malformed document; Sprint Planning lists ranked stories on the Sprint Goal; the sprint end closes it with its stories reported; objective issues read as Sprint Goals. | specified |
+| [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | The gate passes a hierarchy and fails each malformed document; Sprint Planning lists ranked stories on the Sprint Goal; the sprint end closes it with its stories reported; objective issues read as Sprint Goals. | implemented |
 
 <!-- field: proof -->
 ### Proof

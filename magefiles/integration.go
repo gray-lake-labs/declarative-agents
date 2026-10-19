@@ -85,7 +85,7 @@ func (Integration) ObjectivesAudit() error {
 	return c.err("objectivesAudit")
 }
 
-// Tasks seeds the rig's system repository and proves tasks files one dated, pinned objective issue per owner, once (test-rel01.0-objectives).
+// Tasks seeds the rig's system repository and proves tasks files one dated, pinned Sprint Goal per team, once (test-rel01.0-objectives, test-rel04.0-agile-hierarchy).
 func (Integration) Tasks() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -145,7 +145,7 @@ func (Integration) Tasks() error {
 	for _, p := range []string{po1, po2} {
 		is, err := r.issues(p)
 		if err != nil || len(is) != 1 {
-			c.expect(false, "%s has %d objective issues (err %v), want 1", p, len(is), err)
+			c.expect(false, "%s has %d Sprint Goals (err %v), want 1", p, len(is), err)
 			continue
 		}
 		i := is[0]
@@ -155,6 +155,8 @@ func (Integration) Tasks() error {
 		c.expect(due != "", "%s#%d has no due date", p, i.IID)
 		c.expect(strings.Contains(i.Description, "/-/blob/"+rigTag+"/docs/specs/objectives/obj001-reliable-agents.md#R"), "%s#%d Cites not pinned to %s", p, i.IID, rigTag)
 		c.expect(strings.Contains(i.Description, "Environment: dev") && strings.Contains(i.Description, "## Notes"), "%s#%d body lacks Environment or Notes", p, i.IID)
+		c.expect(strings.HasPrefix(i.Title, "Sprint Goal: ") && strings.Contains(i.Description, "## Sprint Backlog") && strings.Contains(i.Description, "<!-- tpm goals sprint-goal release="+rigRelease),
+			"%s#%d is not a Sprint Goal: %q", p, i.IID, i.Title)
 		ns, _ := r.notes(p, i.IID)
 		planned := 0
 		for _, n := range ns {

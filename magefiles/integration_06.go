@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -247,7 +248,7 @@ func (Integration) Plan() error {
 	return c.err("plan")
 }
 
-// SprintEnd works po-1's sprint-end issue: facts with the objective reported complete, a summary merged with tpm issue merge that closes the issue and the objective with no met event and no contradiction signal, and a release gated and tagged on main after the merge (test-rel01.2-sprint-end).
+// SprintEnd works po-1's sprint-end issue: facts with the objective issue read as a Sprint Goal and reported complete, the stories done recorded in the summary, a summary merged with tpm issue merge that closes the issue and the objective with no met event and no contradiction signal, and a release gated and tagged on main after the merge (test-rel01.2-sprint-end).
 func (Integration) SprintEnd() error {
 	e, err := newWeeklyEnv("reports-sprint-end")
 	if err != nil {
@@ -291,13 +292,21 @@ func (Integration) SprintEnd() error {
 			obj = &facts.SprintGoals[i]
 		}
 	}
-	c.expect(obj != nil && obj.ReportedComplete && !obj.Met && facts.Recommended != "", "facts: %+v", facts)
+	c.expect(obj != nil && obj.ReportedComplete && !obj.Met && obj.Legacy && facts.Recommended != "", "facts: %+v", facts)
 
 	var popped program.PopResult
 	if err := r.tpmJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(filed.IID), "--dir", clone); err != nil {
 		return err
 	}
-	writeFileTo(filepath.Join(popped.Worktree, "docs/sprint-ends/01.0.md"), "# Sprint end 01.0\n\nThe objective is reported complete.\n")
+	writeFileTo(filepath.Join(popped.Worktree, "docs/sprint-ends/01.0.md"), "# Sprint end 01.0\n\nThe Sprint Goal is reported complete.\n")
+	var recorded struct {
+		Changed bool `json:"changed"`
+	}
+	if err := r.tpmJSON(&recorded, "sprint-end", "stories", "--dir", popped.Worktree, "--release", "01.0", "--done", "st001-score-trajectories"); err != nil {
+		return err
+	}
+	summary, _ := os.ReadFile(filepath.Join(popped.Worktree, "docs/sprint-ends/01.0.md"))
+	c.expect(recorded.Changed && strings.Contains(string(summary), "## Stories done\n\n- st001-score-trajectories\n"), "stories done not recorded:\n%s", summary)
 	if err := r.commitPush(popped.Worktree, "Summarize release 01.0's period", "docs/sprint-ends/01.0.md"); err != nil {
 		return err
 	}

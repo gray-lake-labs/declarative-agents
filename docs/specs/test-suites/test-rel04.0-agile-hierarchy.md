@@ -2,7 +2,7 @@
 id: test-rel04.0-agile-hierarchy
 title: Test Suite for Release 04.0 The Agile Hierarchy
 release: "04.0"
-status: specified
+status: implemented
 ---
 
 <!-- field: overview -->
@@ -32,7 +32,7 @@ reads an objective issue from before release 04.0 as a Sprint Goal.
 <!-- field: test_cases -->
 ## Test cases
 
-<!-- case: The gate checks every hierarchy document | status: specified -->
+<!-- case: The gate checks every hierarchy document | status: implemented -->
 ### The gate checks every hierarchy document
 
 <!-- field: use_case -->
@@ -68,7 +68,7 @@ go test ./internal/hierarchy -run '^Test(ValidHierarchyPasses|GateReportsEachMal
 - [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC1](../software-requirements/srd034-initiatives.md#ac1)
 - [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
-<!-- case: Roll-up counts done story points | status: specified -->
+<!-- case: Roll-up counts done story points | status: implemented -->
 ### Roll-up counts done story points
 
 <!-- field: use_case -->
@@ -97,7 +97,7 @@ go test ./internal/hierarchy -run '^TestRollUpCountsDoneStoryPoints$'
 
 - [srd045-backlog](../software-requirements/srd045-backlog.md) [AC3](../software-requirements/srd045-backlog.md#ac3)
 
-<!-- case: tasks files one Sprint Goal per team | status: specified -->
+<!-- case: tasks files one Sprint Goal per team | status: implemented -->
 ### tasks files one Sprint Goal per team
 
 <!-- field: use_case -->
@@ -128,7 +128,7 @@ go test ./internal/goals -run '^TestSprintGoalPerTeam$'
 - [srd022-tasks](../software-requirements/srd022-tasks.md) [AC2](../software-requirements/srd022-tasks.md#ac2)
 - [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC3](../software-requirements/srd034-initiatives.md#ac3)
 
-<!-- case: Sprint Planning lists stories on the Sprint Goal | status: specified -->
+<!-- case: Sprint Planning lists stories on the Sprint Goal | status: implemented -->
 ### Sprint Planning lists stories on the Sprint Goal
 
 <!-- field: use_case -->
@@ -162,7 +162,7 @@ go test ./internal/plan -run '^Test(BacklogRanksStoriesWithinVelocity|PushWrites
 - [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC11](../software-requirements/srd034-initiatives.md#ac11)
 - [srd006-events](../software-requirements/srd006-events.md) [AC7](../software-requirements/srd006-events.md#ac7)
 
-<!-- case: Link lines are read and linted | status: specified -->
+<!-- case: Link lines are read and linted | status: implemented -->
 ### Link lines are read and linted
 
 <!-- field: use_case -->
@@ -193,7 +193,7 @@ go test ./internal/links ./internal/program -run '^Test(AgileLinkLines|BlocksAnd
 - [srd007-links](../software-requirements/srd007-links.md) [AC6](../software-requirements/srd007-links.md#ac6)
 - [srd007-links](../software-requirements/srd007-links.md) [AC8](../software-requirements/srd007-links.md#ac8)
 
-<!-- case: A Sprint Goal closes at sprint end with its stories reported | status: specified -->
+<!-- case: A Sprint Goal closes at sprint end with its stories reported | status: implemented -->
 ### A Sprint Goal closes at sprint end with its stories reported
 
 <!-- field: use_case -->
@@ -224,7 +224,7 @@ go test ./internal/sprintend -run '^Test(ReportedCompleteClosesWithoutMet|Sprint
 - [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC11](../software-requirements/srd034-initiatives.md#ac11)
 - [srd045-backlog](../software-requirements/srd045-backlog.md) [AC3](../software-requirements/srd045-backlog.md#ac3)
 
-<!-- case: An objective issue is read as a Sprint Goal | status: specified -->
+<!-- case: An objective issue is read as a Sprint Goal | status: implemented -->
 ### An objective issue is read as a Sprint Goal
 
 <!-- field: use_case -->

@@ -1,13 +1,11 @@
-objective: the program's intent for a period, and its ledger
+objective: the earlier name of the initiative and the Sprint Goal
 
-Goals, intents, and objectives are one concept here. An objective is written
-once, as an objective document in the system repository, by the technical
-program manager: what is wanted, why, and how its owner knows it is met. Its
-items cite requirements by URL pinned to a release tag. Each owner then
-receives a dated objective issue, and that issue is the ledger: planned
-events from planning, evidence events from tests in a named environment, and
-met. An objective is met by evidence, not by its issues closing.
+Before release 04.0 a program's outcome document was an objective document
+and each owner's per-period issue an objective issue. Both keep working:
+an objective document under docs/specs/objectives/ is read as an
+initiative, and an objective issue, its marker, and its ledger are read as
+a Sprint Goal's. See tpm help sprint-goal and tpm help backlog.
 
-Commands: tpm goals plan, tpm goals push, tpm plan push, tpm sprint-end facts
+Commands: tpm goals plan, tpm goals push, tpm sprint-end facts
 
-See: srd034, srd006, srd022, srd019
+See: srd034, srd045

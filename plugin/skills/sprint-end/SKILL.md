@@ -17,13 +17,15 @@ releases.
 2. Run `tpm sprint-end facts --project <project> --reports <checkout> --from <week> --to <week> --artifact <artifact> --json`.
 3. Model step (combine): draft the period's summary from the reports and
    those facts.
-4. Ask the owner what to change in the summary, the objectives, or the
-   release, and which objectives are complete. Apply the answers in the
-   worktree.
-5. Commit the summary at docs/sprint-ends/<release>.md and run
+4. Ask the owner what to change in the summary, the Sprint Goals, or the
+   release, which Sprint Goals are complete, and which stories each Sprint
+   Goal lists (facts names them) are done. Apply the answers in the worktree.
+5. Write the summary at docs/sprint-ends/<release>.md, run
+   `tpm sprint-end stories --dir . --release <release> --done <ids> --json`,
+   commit it, and run
    `tpm issue merge --project <project> --issue <iid> --closes <project#iid> --json`
-   with one --closes per objective the owner reports complete; the merge
-   closes the issue and those objectives.
+   with one --closes per Sprint Goal the owner reports complete; the merge
+   closes the issue and those Sprint Goals.
 6. Ask the owner to confirm the release and its version (facts recommends
    one). With no confirmation, or nothing to release, stop here.
 7. Once the summary merges, on main: `tpm release gate --artifact <artifact> --version <version> --issue <project#iid>`,

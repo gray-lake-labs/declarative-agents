@@ -1,7 +1,7 @@
 ---
 id: rel04.0-uc001-author-the-hierarchy
 title: The Technical Program Manager and a Product Owner Write the Backlog Hierarchy Through the Gate
-status: specified
+status: implemented
 priority: P1
 test_suite: test-rel04.0-agile-hierarchy
 ---

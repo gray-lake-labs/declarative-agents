@@ -1,14 +1,14 @@
-goals: objectives, from the objective document to dated issues per owner
+goals: Sprint Goals, from the initiatives to one dated issue per team
 
-An objective is the program's intent for a release period, written once by
-the technical program manager as an objective document in the system
-repository. This group turns a release's objective items into one dated
-objective issue per downstream owner, citing the requirements by URL pinned
-to the release tag and naming the environment where they count. The
+An initiative is the program's outcome for several quarters, written by the
+technical program manager in the system repository. This group turns a
+release's initiative items into one dated Sprint Goal per team, serving
+every outcome confirmed for that team's repository, citing the items by URL
+pinned to the release tag and naming the environment where they count. The
 tasks skill runs it.
 
 Subcommands:
-  tpm goals plan      the release's objectives, recommended owner and environment (srd034)
-  tpm goals push      file the confirmed objective issues, post planned events (srd034)
+  tpm goals plan      the release's outcomes, recommended team and environment (srd034)
+  tpm goals push      file one Sprint Goal per team, post planned events (srd034)
 
 See: srd022, srd034

@@ -1,7 +1,7 @@
 ---
 id: rel04.0-uc003-sprint-goal-ledger
 title: A Sprint Goal Closes at Sprint End With Its Stories Reported, and Old Objective Issues Read as Sprint Goals
-status: specified
+status: implemented
 priority: P1
 test_suite: test-rel04.0-agile-hierarchy
 ---

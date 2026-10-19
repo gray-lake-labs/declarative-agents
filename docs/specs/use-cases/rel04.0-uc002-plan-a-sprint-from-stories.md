@@ -1,7 +1,7 @@
 ---
 id: rel04.0-uc002-plan-a-sprint-from-stories
 title: A Product Owner Plans a Sprint From the Ranked Stories and the Sprint Goal Lists Them
-status: specified
+status: implemented
 priority: P1
 test_suite: test-rel04.0-agile-hierarchy
 ---

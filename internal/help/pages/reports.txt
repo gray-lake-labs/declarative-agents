@@ -2,14 +2,14 @@ reports: weekly status, gathered from the tracker and asked only for judgment
 
 Each person's weekly status is a report in the reports repository: the
 facts come from the tracker, and the person adds only what it cannot know,
-such as whether an objective is on track. This group scaffolds that
+such as whether a Sprint Goal is on track. This group scaffolds that
 repository, opens the weekly status issues, gathers a person's week,
 validates reports, and aggregates them into signals by component.
 
 Subcommands:
   tpm reports init            scaffold a reports repository (srd018 R1)
   tpm reports status-issues   open next week's status issue per person (srd018)
-  tpm reports week            a person's open objectives and activity (srd018)
+  tpm reports week            a person's open Sprint Goals and activity (srd018)
   tpm reports validate        check reports against the format (srd018)
   tpm reports aggregate       aggregate reports into signals (srd018)
 
