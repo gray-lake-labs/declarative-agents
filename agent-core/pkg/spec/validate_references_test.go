@@ -325,6 +325,8 @@ func TestValidate_DocumentIndexPaths_Broken(t *testing.T) {
 	root := t.TempDir()
 	require.NoError(t, os.MkdirAll(filepath.Join(root, "docs"), 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(root, "docs", "ARCHITECTURE.md"), []byte("x"), 0o644))
+	require.NoError(t, os.MkdirAll(filepath.Join(root, "sibling", "docs"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "sibling", "docs", "VISION.md"), []byte("x"), 0o644))
 
 	corpus := &Corpus{
 		RootDir: root,
@@ -332,6 +334,8 @@ func TestValidate_DocumentIndexPaths_Broken(t *testing.T) {
 			FoundationIndex: []DocumentIndexEntry{
 				{ID: "agent-core", Path: "docs/VISION.md"},
 				{ID: "architecture-agent-core", Path: "docs/ARCHITECTURE.md"},
+				{ID: "doc-relative", Path: "ARCHITECTURE.md"},
+				{ID: "doc-relative-outside", Path: "../sibling/docs/VISION.md"},
 			},
 			ConfigFormatIndex:  []DocumentIndexEntry{{ID: "cfg-gone", Path: "docs/specs/config-formats/gone.md"}},
 			SemanticModelIndex: []DocumentIndexEntry{{ID: "sm-gone", Path: "docs/specs/semantic-models/gone.md"}},

@@ -185,12 +185,22 @@ func (si *SpecIndex) pathIndexes() []pathIndex {
 	}
 }
 
+// resolvesInCorpus reports whether path names an existing file under either
+// convention corpora use: relative to the corpus root, or relative to the
+// directory of the document that carries it (docFile, itself relative to the
+// corpus root). A deleted or never-written document fails both, which is the
+// GH-2 guarantee (GH-4, GH-6).
+func resolvesInCorpus(corpus *Corpus, docFile, path string) bool {
+	return fileExists(filepath.Join(corpus.RootDir, path)) ||
+		fileExists(filepath.Join(filepath.Dir(filepath.Join(corpus.RootDir, docFile)), path))
+}
+
 // documentIndexBrokenPaths reports the entries of one document index table
 // whose path does not resolve, whether or not the entry is written as a link.
 func documentIndexBrokenPaths(corpus *Corpus, index string, entries []DocumentIndexEntry) []Finding {
 	var findings []Finding
 	for _, entry := range entries {
-		if entry.Path == "" || fileExists(filepath.Join(corpus.RootDir, entry.Path)) {
+		if entry.Path == "" || resolvesInCorpus(corpus, SpecFile, entry.Path) {
 			continue
 		}
 		findings = append(findings, Finding{
@@ -203,21 +213,15 @@ func documentIndexBrokenPaths(corpus *Corpus, index string, entries []DocumentIn
 }
 
 // checkArchitectureRelatedDocuments verifies that every related_documents
-// entry in ARCHITECTURE.md names a file that exists. Corpora write the doc
-// column in two conventions: relative to the corpus root, or relative to the
-// document's own directory (<RootDir>/docs). An entry passes when it resolves
-// under either base; a deleted or never-written document fails both, which is
-// the GH-2 guarantee (GH-4).
+// entry in ARCHITECTURE.md names a file that exists under either path
+// convention (see resolvesInCorpus).
 func checkArchitectureRelatedDocuments(corpus *Corpus) []Finding {
 	if corpus.RootDir == "" {
 		return nil
 	}
-	docDir := filepath.Dir(filepath.Join(corpus.RootDir, ArchFile))
 	var findings []Finding
 	for _, ref := range corpus.Architecture.RelatedDocuments {
-		if ref.Doc == "" ||
-			fileExists(filepath.Join(corpus.RootDir, ref.Doc)) ||
-			fileExists(filepath.Join(docDir, ref.Doc)) {
+		if ref.Doc == "" || resolvesInCorpus(corpus, ArchFile, ref.Doc) {
 			continue
 		}
 		findings = append(findings, Finding{
