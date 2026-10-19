@@ -1,5 +1,5 @@
 ---
-id: srd035-issue-push
+id: srd035-specify
 title: "Skill: specify"
 ---
 

@@ -17,7 +17,7 @@ import (
 )
 
 func init() {
-	integrationTargets = append(integrationTargets, Integration{}.PlanRelease, Integration{}.SprintEnd)
+	integrationTargets = append(integrationTargets, Integration{}.Plan, Integration{}.SprintEnd)
 }
 
 // planPolicy is the system repository's policy for release 01.2's targets:
@@ -120,8 +120,8 @@ A score is ready within an hour.
 dev
 `
 
-// PlanRelease plans release 01.1 in the system repository: candidates, the road-map write merged through a planning issue with tpm issue merge, the plan tagged behind the documents-only gate, the period pushed (milestone, sprint issue, sprint-end issues) once, and tasks reading the plan at its tag (test-rel01.2-sprint-end).
-func (Integration) PlanRelease() error {
+// Plan plans release 01.1 in the system repository: candidates, the road-map write merged through a planning issue with tpm issue merge, the plan tagged behind the documents-only gate, the period pushed (milestone, sprint issue, sprint-end issues) once, and tasks reading the plan at its tag (test-rel01.2-sprint-end).
+func (Integration) Plan() error {
 	e, err := newWeeklyEnv("reports-plan")
 	if err != nil {
 		return err
@@ -244,7 +244,7 @@ func (Integration) PlanRelease() error {
 		return err
 	}
 	c.expect(p.Tag == cand.Tag && len(p.Objectives) == 1 && p.Objectives[0].Key == "obj002-fast-scoring#R1", "tasks plan: %+v", p)
-	return c.err("planRelease")
+	return c.err("plan")
 }
 
 // SprintEnd works po-1's sprint-end issue: facts with the objective reported complete, a summary merged with tpm issue merge that closes the issue and the objective with no met event and no contradiction signal, and a release gated and tagged on main after the merge (test-rel01.2-sprint-end).

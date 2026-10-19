@@ -57,7 +57,7 @@ go test ./internal/program -run '^TestSpecIssueIsAdmittedForAnyMember$'
 #### Traces
 
 - [srd001-labels](../software-requirements/srd001-labels.md) [AC24](../software-requirements/srd001-labels.md#ac24)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC1](../software-requirements/srd035-issue-push.md#ac1)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC1](../software-requirements/srd035-specify.md#ac1)
 
 <!-- case: The audit gates the docs/ change | status: implemented -->
 ### The audit gates the docs/ change
@@ -86,7 +86,7 @@ go test ./internal/program -run '^TestMergeDeliversOnBeads$'
 <!-- field: traces -->
 #### Traces
 
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC2](../software-requirements/srd036-issue-pop.md#ac2)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC2](../software-requirements/srd036-implement.md#ac2)
 - [srd013-program](../software-requirements/srd013-program.md) [AC5](../software-requirements/srd013-program.md#ac5)
 - [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2)
 
@@ -117,7 +117,7 @@ go test ./internal/program -run '^TestManagementIssueRefusedForNonLead$'
 <!-- field: traces -->
 #### Traces
 
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC4](../software-requirements/srd035-issue-push.md#ac4)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC4](../software-requirements/srd035-specify.md#ac4)
 - [srd001-labels](../software-requirements/srd001-labels.md) [AC1](../software-requirements/srd001-labels.md#ac1)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC1](../software-requirements/srd036-issue-pop.md#ac1)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC1](../software-requirements/srd036-implement.md#ac1)
 - [srd013-program](../software-requirements/srd013-program.md) [AC7](../software-requirements/srd013-program.md#ac7)

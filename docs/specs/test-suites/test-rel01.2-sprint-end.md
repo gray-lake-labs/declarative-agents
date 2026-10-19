@@ -142,7 +142,7 @@ go test ./internal/sprintend -run '^TestReportedCompleteClosesWithoutMet$'
 <!-- field: integration_target -->
 #### Integration target
 
-mage integration:planRelease
+mage integration:plan
 
 <!-- field: go_test -->
 #### Go test
@@ -163,9 +163,9 @@ go test ./internal/plan -run '^Test(PlanReleaseRanksSlippedFirst|PlanReleaseWrit
 <!-- field: traces -->
 #### Traces
 
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [AC1](../software-requirements/srd031-plan-release.md#ac1)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [AC2](../software-requirements/srd031-plan-release.md#ac2)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [AC3](../software-requirements/srd031-plan-release.md#ac3)
+- [srd031-plan](../software-requirements/srd031-plan.md) [AC1](../software-requirements/srd031-plan.md#ac1)
+- [srd031-plan](../software-requirements/srd031-plan.md) [AC2](../software-requirements/srd031-plan.md#ac2)
+- [srd031-plan](../software-requirements/srd031-plan.md) [AC3](../software-requirements/srd031-plan.md#ac3)
 - [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3)
 
 <!-- case: The sprint milestone and sprint issue are updated, not duplicated | status: implemented -->
@@ -179,7 +179,7 @@ go test ./internal/plan -run '^Test(PlanReleaseRanksSlippedFirst|PlanReleaseWrit
 <!-- field: integration_target -->
 #### Integration target
 
-mage integration:planRelease
+mage integration:plan
 
 <!-- field: go_test -->
 #### Go test

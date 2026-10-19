@@ -46,11 +46,11 @@ A repository without the skills, or a tpm upgrade.
 | id | target | reason |
 | --- | --- | --- |
 | T1 | [srd037-install](../software-requirements/srd037-install.md) [R1.1](../software-requirements/srd037-install.md#r11), [R1.2](../software-requirements/srd037-install.md#r12), [R1.3](../software-requirements/srd037-install.md#r13), [R2.1](../software-requirements/srd037-install.md#r21), [R2.2](../software-requirements/srd037-install.md#r22), [R3.1](../software-requirements/srd037-install.md#r31), [R3.2](../software-requirements/srd037-install.md#r32), [R3.3](../software-requirements/srd037-install.md#r33), [R4.1](../software-requirements/srd037-install.md#r41), [R5.1](../software-requirements/srd037-install.md#r51), [R5.2](../software-requirements/srd037-install.md#r52), [R6.1](../software-requirements/srd037-install.md#r61), [R6.2](../software-requirements/srd037-install.md#r62) | S1 to S3 and S5 trace install. |
-| T2 | [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R5.3](../software-requirements/srd035-issue-push.md#r53) | S4 traces the push command's size. |
-| T3 | [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R4.2](../software-requirements/srd036-issue-pop.md#r42) | S4 traces the pop command's size. |
+| T2 | [srd035-specify](../software-requirements/srd035-specify.md) [R5.3](../software-requirements/srd035-specify.md#r53) | S4 traces the push command's size. |
+| T3 | [srd036-implement](../software-requirements/srd036-implement.md) [R4.2](../software-requirements/srd036-implement.md#r42) | S4 traces the pop command's size. |
 | T4 | [srd037-install](../software-requirements/srd037-install.md) [AC1](../software-requirements/srd037-install.md#ac1), [AC2](../software-requirements/srd037-install.md#ac2), [AC3](../software-requirements/srd037-install.md#ac3), [AC4](../software-requirements/srd037-install.md#ac4), [AC5](../software-requirements/srd037-install.md#ac5), [AC6](../software-requirements/srd037-install.md#ac6) | S1 to S3 and S5 trace these acceptance criteria. |
-| T5 | [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC4](../software-requirements/srd035-issue-push.md#ac4) | S4 traces this acceptance criterion. |
-| T6 | [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC3](../software-requirements/srd036-issue-pop.md#ac3) | S4 traces this acceptance criterion. |
+| T5 | [srd035-specify](../software-requirements/srd035-specify.md) [AC4](../software-requirements/srd035-specify.md#ac4) | S4 traces this acceptance criterion. |
+| T6 | [srd036-implement](../software-requirements/srd036-implement.md) [AC3](../software-requirements/srd036-implement.md#ac3) | S4 traces this acceptance criterion. |
 
 <!-- field: success_criteria -->
 ## Success criteria
@@ -119,10 +119,10 @@ The installed push and pop skills are the 50-line SKILL.md files of the conformi
 <!-- field: traces -->
 #### Traces
 
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R5.3](../software-requirements/srd035-issue-push.md#r53)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC4](../software-requirements/srd035-issue-push.md#ac4)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R4.2](../software-requirements/srd036-issue-pop.md#r42)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC3](../software-requirements/srd036-issue-pop.md#ac3)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R5.3](../software-requirements/srd035-specify.md#r53)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC4](../software-requirements/srd035-specify.md#ac4)
+- [srd036-implement](../software-requirements/srd036-implement.md) [R4.2](../software-requirements/srd036-implement.md#r42)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC3](../software-requirements/srd036-implement.md#ac3)
 
 <!-- field: out_of_scope -->
 ## Out of scope

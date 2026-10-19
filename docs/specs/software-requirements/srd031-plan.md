@@ -1,5 +1,5 @@
 ---
-id: srd031-plan-release
+id: srd031-plan
 title: "Skill: plan"
 ---
 
