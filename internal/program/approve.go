@@ -108,9 +108,9 @@ func approval(t gitlab.Tracker, issueProject string, iid int, branch, tip, merge
 	}
 	short := func(c string) string { return c[:min(12, len(c))] }
 	if stale != "" {
-		return "", fmt.Errorf("the approval of %s#%d is for %s, and %s is now at %s; ask for a new approval with tpm program approve (srd013 R5.5)",
+		return "", fmt.Errorf("the approval of %s#%d is for %s, and %s is now at %s; ask for a new approval with tpm issue approve (srd013 R5.5)",
 			issueProject, iid, short(stale), branch, short(tip))
 	}
-	return "", fmt.Errorf("no approval of %s at %s from someone other than %s; ask a reviewer to run tpm program approve (srd013 R5.5)",
+	return "", fmt.Errorf("no approval of %s at %s from someone other than %s; ask a reviewer to run tpm issue approve (srd013 R5.5)",
 		branch, short(tip), strings.Join(excluded, ", "))
 }

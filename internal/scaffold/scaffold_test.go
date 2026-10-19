@@ -1,0 +1,271 @@
+package scaffold
+
+import (
+	"io/fs"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/gray-lake-labs/scrum-master/internal/beads"
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/program"
+)
+
+func identity(t *testing.T) {
+	t.Helper()
+	for _, k := range []string{"GIT_AUTHOR_NAME", "GIT_COMMITTER_NAME"} {
+		t.Setenv(k, "operator")
+	}
+	for _, k := range []string{"GIT_AUTHOR_EMAIL", "GIT_COMMITTER_EMAIL"} {
+		t.Setenv(k, "operator@example.invalid")
+	}
+}
+
+func run(t *testing.T, dir string, args ...string) string {
+	t.Helper()
+	cmd := exec.Command("git", args...)
+	cmd.Dir = dir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git %s: %v: %s", strings.Join(args, " "), err, out)
+	}
+	return strings.TrimSpace(string(out))
+}
+
+// repo is an empty git repository.
+func repo(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	run(t, dir, "init", "-q", "-b", "main")
+	return dir
+}
+
+// skeleton is every file init writes, less the skills.
+var skeleton = []string{
+	"control/labels.md", "control/policy.md",
+	"docs/ARCHITECTURE.md", "docs/SPECIFICATIONS.md", "docs/VISION.md", "docs/constitutions/design.md",
+	"docs/corpus-charter.yaml", "docs/external-pins.yaml", "docs/road-map.md",
+	"docs/specs/software-requirements/srd001-system.md",
+}
+
+func actions(rs []Result) map[string]string {
+	m := map[string]string{}
+	for _, r := range rs {
+		m[r.Path] = r.Action
+	}
+	return m
+}
+
+func TestInitWritesSkeleton(t *testing.T) {
+	dir := repo(t)
+	r, err := Init(InitOptions{Dir: dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := actions(r.Files)
+	for _, f := range skeleton {
+		if got[f] != "created" {
+			t.Errorf("%s: %q, want created", f, got[f])
+		}
+		if _, err := os.Stat(filepath.Join(dir, f)); err != nil {
+			t.Errorf("%s not written: %v", f, err)
+		}
+	}
+	if len(got) != len(skeleton) {
+		t.Errorf("init wrote %d files, want %d: %v", len(got), len(skeleton), got)
+	}
+}
+
+func TestInitWritesControlFiles(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	f := gitlabtest.New()
+	for _, n := range []string{program.LabelsFile, program.PolicyFile} {
+		b, err := os.ReadFile(filepath.Join(dir, n))
+		if err != nil {
+			t.Fatal(err)
+		}
+		f.AddFile("g/system", "main", n, b)
+	}
+	labels, err := program.LoadLabels(f, "g/system", "main")
+	if err != nil || !reflect.DeepEqual(labels, program.DefaultLabels()) {
+		t.Fatalf("control/labels.md reads back as %v, %v; want the defaults", labels, err)
+	}
+	policy, err := program.LoadPolicy(f, "g/system", "main")
+	if err != nil || !reflect.DeepEqual(policy, program.Defaults()) {
+		t.Fatalf("control/policy.md reads back as %+v, %v; want %+v", policy, err, program.Defaults())
+	}
+}
+
+func TestInitInstallsSkills(t *testing.T) {
+	dir := repo(t)
+	r, err := Init(InitOptions{Dir: dir, Agents: []string{"claude"}, Version: "test"})
+	if err != nil || len(r.Skills) == 0 {
+		t.Fatalf("init with --agent claude: %d skill results, %v", len(r.Skills), err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".claude", "skills", "implement", "SKILL.md")); err != nil {
+		t.Fatalf("implement not installed for claude: %v", err)
+	}
+}
+
+// bare is a bare repository, empty or holding one commit on main.
+func bare(t *testing.T, withCommit bool) string {
+	t.Helper()
+	identity(t)
+	remote := filepath.Join(t.TempDir(), "tracker.git")
+	run(t, filepath.Dir(remote), "init", "-q", "--bare", "-b", "main", remote)
+	if withCommit {
+		seed := filepath.Join(t.TempDir(), "seed")
+		run(t, filepath.Dir(seed), "clone", "-q", remote, seed)
+		run(t, seed, "commit", "-q", "--allow-empty", "-m", "first")
+		run(t, seed, "push", "-q", "origin", "HEAD:main")
+	}
+	return remote
+}
+
+func TestInitSeedsEmptyTracker(t *testing.T) {
+	remote, dir := bare(t, false), repo(t)
+	r, err := Init(InitOptions{Dir: dir, Tracker: remote, Group: "g", User: "operator"})
+	if err != nil || r.Tracker == nil || !r.Tracker.Seeded {
+		t.Fatalf("init --tracker on an empty tracker: %+v, %v", r.Tracker, err)
+	}
+	clone := filepath.Join(t.TempDir(), "check")
+	run(t, filepath.Dir(clone), "clone", "-q", remote, clone)
+	if _, err := os.Stat(filepath.Join(clone, beads.IssuesFile)); err != nil {
+		t.Fatalf("the first commit holds no %s: %v", beads.IssuesFile, err)
+	}
+	labels, err := beads.NewTracker(clone, "operator", dir).GroupLabels("g")
+	if err != nil || len(labels) != len(program.DefaultLabels()) {
+		t.Fatalf("tracker labels: %d, %v; want %d", len(labels), err, len(program.DefaultLabels()))
+	}
+}
+
+func TestInitLeavesTrackerWithCommits(t *testing.T) {
+	remote, dir := bare(t, true), repo(t)
+	before := run(t, ".", "--git-dir", remote, "rev-parse", "main")
+	r, err := Init(InitOptions{Dir: dir, Tracker: remote, Group: "g", User: "operator"})
+	if err != nil || r.Tracker == nil || r.Tracker.Seeded {
+		t.Fatalf("init --tracker on a tracker with commits: %+v, %v", r.Tracker, err)
+	}
+	if after := run(t, ".", "--git-dir", remote, "rev-parse", "main"); after != before {
+		t.Fatalf("the tracker moved from %s to %s", before, after)
+	}
+}
+
+func TestScaffoldRerunChangesNothing(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	r, err := Init(InitOptions{Dir: dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range r.Files {
+		if f.Action != "kept" {
+			t.Errorf("second run: %s %s, want kept", f.Path, f.Action)
+		}
+	}
+}
+
+func TestScaffoldKeepsEditedFile(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	vision := filepath.Join(dir, "docs", "VISION.md")
+	os.WriteFile(vision, []byte("the owner's vision\n"), 0o644)
+	r, err := Init(InitOptions{Dir: dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(vision)
+	if actions(r.Files)["docs/VISION.md"] != "kept" || string(b) != "the owner's vision\n" {
+		t.Fatalf("edited VISION: %s, content %q", actions(r.Files)["docs/VISION.md"], b)
+	}
+}
+
+func TestScaffoldForceReplaces(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	os.WriteFile(filepath.Join(dir, "docs", "VISION.md"), []byte("edited\n"), 0o644)
+	r, err := Init(InitOptions{Dir: dir, Force: true})
+	if err != nil || actions(r.Files)["docs/VISION.md"] != "overwritten" {
+		t.Fatalf("--force: %v, %v", actions(r.Files)["docs/VISION.md"], err)
+	}
+}
+
+func TestScaffoldRefusesNonRepository(t *testing.T) {
+	dir := t.TempDir()
+	if _, err := Init(InitOptions{Dir: dir}); err == nil || !strings.Contains(err.Error(), "not a git repository") {
+		t.Fatalf("init outside a repository: %v", err)
+	}
+	if entries, _ := os.ReadDir(dir); len(entries) != 0 {
+		t.Fatalf("init wrote into a non-repository: %v", entries)
+	}
+}
+
+func TestScaffoldDryRunWritesNothing(t *testing.T) {
+	dir := repo(t)
+	r, err := Init(InitOptions{Dir: dir, Agents: []string{"claude"}, DryRun: true})
+	if err != nil || len(r.Files) != len(skeleton) {
+		t.Fatalf("dry run: %d files reported, %v", len(r.Files), err)
+	}
+	entries, _ := os.ReadDir(dir)
+	for _, e := range entries {
+		if e.Name() != ".git" {
+			t.Fatalf("dry run wrote %s", e.Name())
+		}
+	}
+}
+
+func TestScaffoldWritesParentPin(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	release, err := ParentRelease()
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(filepath.Join(dir, "docs", "external-pins.yaml"))
+	if !strings.Contains(string(b), parentRepository+": "+release+"\n") {
+		t.Fatalf("pins:\n%s\nwant %s at %s", b, parentRepository, release)
+	}
+}
+
+// The design constitution is the process's own, copied as it is; the
+// templates are what a program fills in, so they name nobody (design.md D6).
+func TestTemplatesNameNoProject(t *testing.T) {
+	forbidden := []string{"scrum-master", "gray-lake", "nokia", "github", "gitlab", "anthropic", "homeostat"}
+	check := func(name string, b []byte) {
+		lower := strings.ToLower(string(b))
+		for _, w := range forbidden {
+			if strings.Contains(lower, w) {
+				t.Errorf("%s names %q", name, w)
+			}
+		}
+	}
+	fs.WalkDir(templates, "templates", func(p string, d fs.DirEntry, err error) error {
+		if err == nil && !d.IsDir() {
+			b, _ := templates.ReadFile(p)
+			check(p, b)
+		}
+		return err
+	})
+	for n, b := range controlFiles() {
+		check(n, b)
+	}
+	charter, err := charterFile()
+	if err != nil {
+		t.Fatal(err)
+	}
+	check("docs/corpus-charter.yaml", charter)
+}

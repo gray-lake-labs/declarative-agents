@@ -9,6 +9,12 @@ title: AI-Native Scrum Architecture
 <!-- field: summary -->
 ### Summary
 
+tpm and its skills implement AI-native Scrum, the process docs/VISION.md
+describes: Scrum whose administrative work is done by scripts and
+agents, so people keep only intent and judgment. The design is aligned
+with the AI-Native SDLC Playbook; docs/guides/sdlc-playbook.md compares
+the two and cites it.
+
 The process is three planes over one tracker, repeated at every level of
 a program. The management plane sets intent once per three-week period:
 the next release at each level and the objectives each level pushes to
@@ -51,7 +57,7 @@ for every role and every kind of work: make-work turns a plan into
 issues, specify files an issue in do-work's input format with the
 plane that says whether it is project work or a requirements change,
 implement takes it into its own branch and worktree, do-work builds it
-against its Requirements and Acceptance Criteria, tpm program merge
+against its Requirements and Acceptance Criteria, tpm issue merge
 delivers it and closes it, and tpm release tag tags a release once its gate passed. specify and
 implement are commands in this repository over tpm (srd035, srd036,
 release 00.0); do-work and sub-issues arrive with epics later. The outer loops are the five Scrum
@@ -450,6 +456,13 @@ Every step a program can do is a tpm subcommand. A skill is at most 50 lines and
 
 The process runs every week in every repository, so a step the model does costs tokens on every run and can come out differently each time. A step in tpm costs nothing to repeat, gives the same answer, and can be tested. Language is the one thing a program cannot do, so it is the one thing the model is paid for.
 
+<!-- decision: 14 -->
+### 14 - A document's type is its directory and prefix
+
+Goals, intents, and objectives are one concept. A program's intent for a release period is an objective document, docs/specs/objectives/objNNN-short-name.md (srd034). The requirements that satisfy it are SRDs, docs/specs/software-requirements/srdNNN-short-name.md. Use cases and test suites keep their relNN.N-ucNNN- and test-relNN.N- names. An idea or an incident between periods is an issue, not a document. The path alone says which kind a document is, and the parent's declarations already select a file's type by its whole path.
+
+Two alternatives were rejected. An intent- prefix would add a document type that no reader needs: intent at the grain of a period is already an objective, and at a smaller grain it is already an issue. A type field in the frontmatter would depend on the parent format, whose SRD frontmatter allows a fixed set of keys (id, title, status, retired_in, replaced_by, depends_on, derived_from) and no type, so an objective document could not carry one and still be an SRD (srd034 R1.1). Renaming existing files is ruled out either way: their paths are pinned in citation URLs across repositories (design.md D9).
+
 <!-- field: technology_choices -->
 ## Technology choices
 
@@ -475,7 +488,7 @@ The process runs every week in every repository, so a step the model does costs 
 | docs/SPECIFICATIONS.md | index of the corpus and its coverage gaps |
 | docs/road-map.md | releases of this corpus, each listing its SRDs, config formats, and semantic models |
 | docs/constitutions/ | design.md, the document registry and writing rules |
-| docs/specs/software-requirements/ | srd001-srd008 control plane and gates; srd010-srd019 one per script (tpm subcommand group), srd019 the track-goals audit; srd020-srd033 one per outer-loop skill (command); srd034 objective documents and the dated objective issues; srd035-srd036 the specify and implement skills (the inner loop on GitLab); srd037 tpm install; srd038 the sprint-end skill; srd039 the corpus and config document reader (internal/corpus); srd040 the format tools and format gates (magefiles); srd041 issue states and transitions. An SRD of an unplanned release holds its direction only (design.md D12) |
+| docs/specs/software-requirements/ | srd001-srd008 control plane and gates; srd010-srd019 one per script (tpm subcommand group), srd019 the track-goals audit; srd020-srd033 one per outer-loop skill (command); srd034 objective documents and the dated objective issues; srd035-srd036 the specify and implement skills (the inner loop on GitLab); srd037 tpm install; srd038 the sprint-end skill; srd039 the corpus and config document reader (internal/corpus); srd040 the format tools and format gates (magefiles); srd041 issue states and transitions; srd042 the beads tracker; srd043 tpm init and onboard; srd044 tpm help. An SRD of an unplanned release holds its direction only (design.md D12) |
 | docs/specs/config-formats/ | labels, policy, person-config, issue-body, report, reports-config |
 | docs/specs/objectives/ | objective documents (srd034), in a consuming program's system repository; none in this corpus |
 | docs/specs/semantic-models/ | planes, roles, objects, agents |
@@ -484,10 +497,10 @@ The process runs every week in every repository, so a step the model does costs 
 | docs/engineering/ | engineering guidelines (eng01 the regression rig, eng02 tpm and skills, eng03 releasing scrum-master, eng04 beads sync) |
 | docs/guides/ | prose a person reads start to finish (process.md for the outer loops, ai-native-sdlc.md for the inner loop) |
 | go.mod | the Go module the tpm binary and the magefiles build from |
-| internal/<script>/ | one package per script SRD (program, goals in 01.0; reports, standup in 01.1; plan for plan and sprintend for the sprint-end issue in 01.2), tracker access through the tracker interface in internal/gitlab, served by internal/beads; objectives, links, events, cli, and corpus (which reads a Markdown corpus document or config document) are shared; internal/release runs a gates file and cuts v0.YYYYMMDD.N tags (eng03), and tpm release (srd015) builds on it |
+| internal/<script>/ | one package per script SRD (program, goals in 01.0; reports, standup in 01.1; plan for plan and sprintend for the sprint-end issue in 01.2; scaffold for tpm init and onboard in 01.4), tracker access through the tracker interface in internal/gitlab, served by internal/beads; objectives, links, events, cli, and corpus (which reads a Markdown corpus document or config document) are shared; internal/release runs a gates file and cuts v0.YYYYMMDD.N tags (eng03), and tpm release (srd015) builds on it |
 | magefiles/ | mage audit (gate tests, including the skill size limit, then the specification-critic corpus-audit agent), the regression rig and the mage regression targets, the integration targets the test suites name, and mage tag and mage tagDryRun, which run release-gates.md through internal/release (eng03) |
 | release-gates.md | the gates a scrum-master release passes (mage audit, go test ./..., mage integration:install), in the declarative-agents gates-file format (eng03) |
-| cmd/tpm/ | the tpm CLI entry point, one subcommand group per script (program, goals, install, release, reports, standup, plan, and sprint-end built; handoff planned) |
+| cmd/tpm/ | the tpm CLI entry point, one subcommand group per script (issue, named program before 01.4, goals, init, install, release, reports, standup, plan, and sprint-end built; handoff planned) |
 | d2/ and figures/ | diagram sources and their renderings (scrum-today, scrum-ai-native, scrum-planes, scrum-roles-today, levels, release-cycle, environments) |
 | plugin/ | the Agent Plugins 1.0 package and the single source of the skills: plugin.json and skills/<name>/SKILL.md, one per skill SRD (specify, implement, and the outer-loop skills), each an Agent Skills directory at most 50 lines, embedded in the tpm binary and installed per agent by tpm install (tasks, specify, implement, plan, and sprint-end built; the rest planned) |
 
@@ -502,12 +515,13 @@ The requirements are complete and release 00 (00.0 to 00.3) and releases 01.0 to
 <!-- field: progress -->
 ### Progress
 
-- Implemented: 01.1 status comes back weekly: tpm reports init, validate, status-issues, week, and aggregate with --push; tpm standup recur; open-merge-request --issue-project for the report's merge request; config formats report and reports-config (2 use cases, test-rel01.1-weekly-status)
+- Implemented: 01.4 the agent-legible CLI: tpm help (process, group, and concept pages embedded in the binary, held to the dispatch table and the corpus by a gate in mage audit), the issue group named for its object with tpm program refusing with a pointer and recur moved in, tpm init laying down a system repository the parent's corpus audit passes as written, and tpm onboard filing a repository's registration (2 use cases, test-rel01.4-agent-legible-cli)
+- Implemented: 01.1 status comes back weekly: tpm reports init, validate, status-issues, week, and aggregate with --push; tpm standup recur, tpm issue recur since 01.4; open-merge-request --issue-project for the report's merge request; config formats report and reports-config (2 use cases, test-rel01.1-weekly-status)
 - Implemented: 00.3 install the skills: the skills form the Agent Plugins 1.0 package plugin/, and tpm install writes each embedded skill as an Agent Skills directory for Cursor, Claude Code, and GitHub Copilot, stamped with the tpm version and a checksum and ignored by git through a managed block in .git/info/exclude; re-install keeps edited files, --check reports drift (1 use case, test-rel00.3-install)
-- Implemented: 00.2 changes under docs/: tpm program open-merge-request runs the corpus gate (audit_command, mage audit by default) in the worktree before opening a merge request for a docs/ change; tpm program file refuses a plane::management issue from a caller the policy does not list (2 use cases, test-rel00.2-docs-change)
-- Implemented: 00.1 pop and merge: tpm program pop (claim, branch <iid>-<slug>, worktree beside the checkout, refusals), tpm program open-merge-request (review focus, acceptance criteria, Closes), the implement skill (1 use case, test-rel00.1-pop)
-- Implemented: 00.0 labels and push: tpm program labels (creates missing labels, --update rewrites differing ones), tpm program file --path deriving plane, kind, and component, the specify skill (1 use case, test-rel00.0-push)
-- Implemented: 01.0 objectives reach the Product Owner: mage audit (gate tests, objective-document gate, specification-critic agent); the Terraform split and gitlabrig with mage regression; tpm program file and lint; tpm goals plan and push; the tasks skill (2 use cases, test-rel01.0-objectives)
+- Implemented: 00.2 changes under docs/: tpm program open-merge-request runs the corpus gate (audit_command, mage audit by default) in the worktree before opening a merge request for a docs/ change; tpm issue file refuses a plane::management issue from a caller the policy does not list (2 use cases, test-rel00.2-docs-change)
+- Implemented: 00.1 pop and merge: tpm issue pop (claim, branch <iid>-<slug>, worktree beside the checkout, refusals), tpm program open-merge-request (review focus, acceptance criteria, Closes), the implement skill (1 use case, test-rel00.1-pop)
+- Implemented: 00.0 labels and push: tpm issue labels (creates missing labels, --update rewrites differing ones), tpm issue file --path deriving plane, kind, and component, the specify skill (1 use case, test-rel00.0-push)
+- Implemented: 01.0 objectives reach the Product Owner: mage audit (gate tests, objective-document gate, specification-critic agent); the Terraform split and gitlabrig with mage regression; tpm issue file and lint; tpm goals plan and push; the tasks skill (2 use cases, test-rel01.0-objectives)
 - Planned: 01.2 sprint end closes the loop: sprint-end release, plan, reference update, release summary (4 use cases)
 - Planned: 02.0 evidence, handoff, and cadence: gates, track-goals, daily-scrum, sprint-review, sprint-retrospective (no use cases yet)
 

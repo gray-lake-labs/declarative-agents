@@ -36,7 +36,7 @@ func Close(t gitlab.Tracker, git Git, project string, iid int, dir string, dryRu
 	r := CloseResult{Project: project, IID: iid, DryRun: dryRun}
 	c, ok := t.(MergeCloser)
 	if !ok {
-		return r, fmt.Errorf("%s#%d closes when its merge request merges; tpm program close serves the beads tracker", project, iid)
+		return r, fmt.Errorf("%s#%d closes when its merge request merges; tpm issue close serves the beads tracker", project, iid)
 	}
 	i, err := t.GetIssue(project, iid)
 	if err != nil {

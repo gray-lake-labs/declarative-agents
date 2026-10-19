@@ -24,7 +24,7 @@ Table 1: Playbook practices and their counterparts here.
 
 | Playbook | This process |
 |---|---|
-| `intent.md`, then `spec.md`, then `plan.md`, each committed and each triggering the next stage | SRDs, then objective issues citing pinned requirements, then issues in do-work's input format; the pop marker commit embeds the plan verbatim |
+| `intent.md`, then `spec.md`, then `plan.md`, each committed and each triggering the next stage | Objective documents (srd034), which are this process's intent, then SRDs, the requirements an objective cites by pinned URL, then issues in do-work's input format; the pop marker commit embeds the plan verbatim. Goals, intents, and objectives are one concept here (VISION, ARCHITECTURE decision 14) |
 | Plan mode by default; nothing is implemented without an accepted plan | `gh-issue-pop` decomposes an item into sub-issues before `do-work` builds anything |
 | The product owner reviews and approves the agent's spec rather than writing it | The Product Owner writes requirements with an agent through push, pop, and do-work |
 | Story points and refinement meetings retired | Estimates in size and review complexity, with estimated against actual lines of code logged |

@@ -11,7 +11,7 @@ status: implemented
 Each run starts with mage regression:up creating the repositories below in
 a fresh rig run on local disk and ends with mage regression:down removing them. The
 suite pops an admitted issue into its worktree, proves the refusals,
-commits, delivers it with tpm program merge, and proves the issue closed.
+commits, delivers it with tpm issue merge, and proves the issue closed.
 
 <!-- field: traces -->
 ## Traces
@@ -23,7 +23,7 @@ commits, delivers it with tpm program merge, and proves the issue closed.
 
 - mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository and one Product Owner repository, and writes their paths as JSON for the integration targets (eng01).
 - mage regression:down removes the run after the targets run, including when they fail.
-- Work reaches the rig's default branches only through tpm program merge; pushes go to issue branches.
+- Work reaches the rig's default branches only through tpm issue merge; pushes go to issue branches.
 
 <!-- field: test_cases -->
 ## Test cases

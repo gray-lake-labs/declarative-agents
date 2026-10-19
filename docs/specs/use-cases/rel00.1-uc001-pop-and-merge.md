@@ -32,9 +32,9 @@ An admitted issue the Developer chooses to work.
 <!-- field: flow -->
 ## Flow
 
-- F1: The Developer runs implement on the issue; tpm program pop assigns only them and creates the branch <iid>-<slug> and its worktree, or refuses an issue someone else holds, a closed issue, or a data issue admission did not admit.
+- F1: The Developer runs implement on the issue; tpm issue pop assigns only them and creates the branch <iid>-<slug> and its worktree, or refuses an issue someone else holds, a closed issue, or a data issue admission did not admit.
 - F2: The work is done and committed in the worktree and pushed; it is the Developer's or their agent's, not the skill's.
-- F3: tpm program merge merges the branch with a merge commit citing the issue, pushes it, and closes the issue.
+- F3: tpm issue merge merges the branch with a merge commit citing the issue, pushes it, and closes the issue.
 
 <!-- field: touchpoints -->
 ## Touchpoints

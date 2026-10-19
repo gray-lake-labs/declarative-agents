@@ -1,0 +1,21 @@
+issue: the issue lifecycle, from filed through admitted, popped, and merged
+
+The issue is the one unit of work, and this group is how every repository
+moves one (formerly named program). An issue is filed unassigned and linted;
+admission decides whether it is ready. Nobody assigns work: the person who
+takes an issue pops it, which claims it and opens its branch and worktree.
+A merge needs another person's approval of the exact commit it merges, and
+it closes the issue. Developers, Product Owners, and the technical program
+manager all run the same loop, through the specify and implement skills.
+
+Subcommands:
+  tpm issue file      file an unassigned issue and lint it (srd013 R3)
+  tpm issue lint      admit or triage issues against policy (srd013 R1)
+  tpm issue labels    create the label schema in the tracker (srd013 R6)
+  tpm issue pop       claim an issue, open its branch and worktree (srd013 R7)
+  tpm issue approve   approve a branch as a reviewer (srd013 R5.6)
+  tpm issue merge     merge a branch, close its issues (srd013 R5)
+  tpm issue close     close an issue on the merge that delivered it (srd013)
+  tpm issue recur     open a recurring issue's next instance (srd013 R8)
+
+See: srd013, srd035, srd036, srd041

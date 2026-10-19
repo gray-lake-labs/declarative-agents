@@ -55,7 +55,7 @@ through yet another clone.
 <!-- section: delivery -->
 ## Delivery
 
-Work reaches a default branch only through tpm program merge, as on any
+Work reaches a default branch only through tpm issue merge, as on any
 beads program: the audit gate for a docs/ change, a --no-ff merge citing
 the issue and what it closes, a push, and the closes. The rig's
 repositories carry no magefile, so a marker file, docs/BROKEN, stands in

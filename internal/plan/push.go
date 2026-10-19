@@ -219,7 +219,7 @@ func SprintEndBody(version, end string) string {
 1. Run `+"`tpm sprint-end facts --json`"+` in this repository's checkout for the period's aggregate, each objective issue's ledger and reported status, and the recommended version.
 2. Model step (combine): draft the period's summary from the period's reports and that output.
 3. Ask the owner whether anything in the summary, the objectives, or the release should change, and apply what the owner names in the worktree.
-4. Commit the summary at docs/sprint-ends/%[1]s.md and merge it with `+"`tpm program merge`"+`, adding `+"`--closes`"+` for each objective the owner reports complete; the merge closes this issue.
+4. Commit the summary at docs/sprint-ends/%[1]s.md and merge it with `+"`tpm issue merge`"+`, adding `+"`--closes`"+` for each objective the owner reports complete; the merge closes this issue.
 5. Ask the owner to confirm the release and its version. With no confirmation, or nothing to release, stop: the merge alone closes this issue.
 6. Once the summary merges, run `+"`tpm release gate`"+` and `+"`tpm release tag`"+` on main with this issue as the release issue.
 

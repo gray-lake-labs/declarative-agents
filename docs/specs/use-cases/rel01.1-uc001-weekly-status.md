@@ -41,8 +41,8 @@ The tracker's due-date notification for the week's status issue.
 - F3: The owner runs implement on the status issue; its Requirements list the steps.
 - F4: tpm reports week returns as JSON every open objective issue in the repository with its due date and the owner's tracker activity for the week.
 - F5: Model step (structure): the model asks the owner about each objective and turns the answers into the report in the fixed shape: status, problems, and complete or not complete per objective.
-- F6: tpm reports validate checks the report; tpm program merge merges it in the reports repository and closes the status issue in the owner's repository.
-- F7: The merge request merges and closes the status issue; the reports repository's scheduled tpm reports status-issues run recurs it (tpm standup recur), opening the next week's instance with the next due date and the run appended to Previous Runs.
+- F6: tpm reports validate checks the report; tpm issue merge merges it in the reports repository and closes the status issue in the owner's repository.
+- F7: The merge request merges and closes the status issue; the reports repository's scheduled tpm reports status-issues run recurs it (tpm issue recur), opening the next week's instance with the next due date and the run appended to Previous Runs.
 
 <!-- field: touchpoints -->
 ## Touchpoints
@@ -51,7 +51,7 @@ The tracker's due-date notification for the week's status issue.
 | --- | --- | --- |
 | T1 | [srd018-reports](../software-requirements/srd018-reports.md) [R9.1](../software-requirements/srd018-reports.md#r91), [R9.2](../software-requirements/srd018-reports.md#r92), [R9.3](../software-requirements/srd018-reports.md#r93), [R9.4](../software-requirements/srd018-reports.md#r94) | S1 to S3 trace the weekly status issue. |
 | T2 | [srd018-reports](../software-requirements/srd018-reports.md) [R1.1](../software-requirements/srd018-reports.md#r11), [R1.2](../software-requirements/srd018-reports.md#r12), [R1.3](../software-requirements/srd018-reports.md#r13), [R2.1](../software-requirements/srd018-reports.md#r21), [R2.2](../software-requirements/srd018-reports.md#r22), [R6.1](../software-requirements/srd018-reports.md#r61), [R7.1](../software-requirements/srd018-reports.md#r71), [R7.2](../software-requirements/srd018-reports.md#r72), [R8.1](../software-requirements/srd018-reports.md#r81) | S1, S2, and S4 trace the reports repository, validation, and the sprint update audit. |
-| T3 | [srd010-standup](../software-requirements/srd010-standup.md) [R8.2](../software-requirements/srd010-standup.md#r82) | S3 traces re-creating the recurring issue. |
+| T3 | [srd013-program](../software-requirements/srd013-program.md) [R8.1](../software-requirements/srd013-program.md#r81) | S3 traces re-creating the recurring issue. |
 | T4 | [srd018-reports](../software-requirements/srd018-reports.md) [AC7](../software-requirements/srd018-reports.md#ac7) | S1 to S3 trace this acceptance criterion. |
 | T5 | [srd018-reports](../software-requirements/srd018-reports.md) [AC1](../software-requirements/srd018-reports.md#ac1), [AC2](../software-requirements/srd018-reports.md#ac2), [AC5](../software-requirements/srd018-reports.md#ac5), [AC6](../software-requirements/srd018-reports.md#ac6) | S1, S2, and S4 trace these acceptance criteria. |
 | T6 | [srd010-standup](../software-requirements/srd010-standup.md) [AC6](../software-requirements/srd010-standup.md#ac6) | S3 traces this acceptance criterion. |
@@ -102,7 +102,7 @@ The status issue closes by merge request and the next instance exists with the n
 
 - [srd018-reports](../software-requirements/srd018-reports.md) [R9.4](../software-requirements/srd018-reports.md#r94)
 - [srd018-reports](../software-requirements/srd018-reports.md) [AC7](../software-requirements/srd018-reports.md#ac7)
-- [srd010-standup](../software-requirements/srd010-standup.md) [R8.2](../software-requirements/srd010-standup.md#r82)
+- [srd013-program](../software-requirements/srd013-program.md) [R8.1](../software-requirements/srd013-program.md#r81)
 - [srd010-standup](../software-requirements/srd010-standup.md) [AC6](../software-requirements/srd010-standup.md#ac6)
 
 <!-- sc: S4 -->

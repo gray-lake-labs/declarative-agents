@@ -120,7 +120,7 @@ A score is ready within an hour.
 dev
 `
 
-// PlanRelease plans release 01.1 in the system repository: candidates, the road-map write merged through a planning issue with tpm program merge, the plan tagged behind the documents-only gate, the period pushed (milestone, sprint issue, sprint-end issues) once, and tasks reading the plan at its tag (test-rel01.2-sprint-end).
+// PlanRelease plans release 01.1 in the system repository: candidates, the road-map write merged through a planning issue with tpm issue merge, the plan tagged behind the documents-only gate, the period pushed (milestone, sprint issue, sprint-end issues) once, and tasks reading the plan at its tag (test-rel01.2-sprint-end).
 func (Integration) PlanRelease() error {
 	e, err := newWeeklyEnv("reports-plan")
 	if err != nil {
@@ -169,7 +169,7 @@ func (Integration) PlanRelease() error {
 	body := filepath.Join(r.run.Dir, "plan.md")
 	writeFileTo(body, "## Requirements\n\n1. Plan release 01.1.\n\n## Acceptance Criteria\n\n- mage audit passes (test: mage_audit; environment: local)\n")
 	var filed program.FileResult
-	if err := r.tpmJSON(&filed, "program", "file", "--project", system, "--system", system, "--ref", seedBranch,
+	if err := r.tpmJSON(&filed, "issue", "file", "--project", system, "--system", system, "--ref", seedBranch,
 		"--title", "Plan release 01.1", "--body-file", body, "--path", "docs/road-map.md"); err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ func (Integration) PlanRelease() error {
 		return err
 	}
 	var merged program.MergeResult
-	if err := r.tpmJSON(&merged, "program", "merge", "--project", system, "--issue", fmt.Sprint(filed.IID),
+	if err := r.tpmJSON(&merged, "issue", "merge", "--project", system, "--issue", fmt.Sprint(filed.IID),
 		"--branch", branch, "--dir", clone, "--audit", rigAudit); err != nil {
 		return err
 	}
@@ -247,7 +247,7 @@ func (Integration) PlanRelease() error {
 	return c.err("planRelease")
 }
 
-// SprintEnd works po-1's sprint-end issue: facts with the objective reported complete, a summary merged with tpm program merge that closes the issue and the objective with no met event and no contradiction signal, and a release gated and tagged on main after the merge (test-rel01.2-sprint-end).
+// SprintEnd works po-1's sprint-end issue: facts with the objective reported complete, a summary merged with tpm issue merge that closes the issue and the objective with no met event and no contradiction signal, and a release gated and tagged on main after the merge (test-rel01.2-sprint-end).
 func (Integration) SprintEnd() error {
 	e, err := newWeeklyEnv("reports-sprint-end")
 	if err != nil {
@@ -270,7 +270,7 @@ func (Integration) SprintEnd() error {
 	body := filepath.Join(r.run.Dir, "sprint-end.md")
 	writeFileTo(body, plan.SprintEndBody("01.0", rigDue))
 	var filed program.FileResult
-	if err := r.tpmJSON(&filed, "program", "file", "--project", po1, "--system", system, "--ref", seedBranch, "--control", system,
+	if err := r.tpmJSON(&filed, "issue", "file", "--project", po1, "--system", system, "--ref", seedBranch, "--control", system,
 		"--title", "Recurring: sprint end 01.0", "--body-file", body, "--kind", "release", "--type", "recurring", "--milestone", rigMilestone, "--due", rigDue); err != nil {
 		return err
 	}
@@ -294,7 +294,7 @@ func (Integration) SprintEnd() error {
 	c.expect(obj != nil && obj.ReportedComplete && !obj.Met && facts.Recommended != "", "facts: %+v", facts)
 
 	var popped program.PopResult
-	if err := r.tpmJSON(&popped, "program", "pop", "--project", po1, "--issue", fmt.Sprint(filed.IID), "--dir", clone); err != nil {
+	if err := r.tpmJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(filed.IID), "--dir", clone); err != nil {
 		return err
 	}
 	writeFileTo(filepath.Join(popped.Worktree, "docs/sprint-ends/01.0.md"), "# Sprint end 01.0\n\nThe objective is reported complete.\n")
@@ -305,7 +305,7 @@ func (Integration) SprintEnd() error {
 		return err
 	}
 	var merged program.MergeResult
-	if err := r.tpmJSON(&merged, "program", "merge", "--project", po1, "--issue", fmt.Sprint(filed.IID),
+	if err := r.tpmJSON(&merged, "issue", "merge", "--project", po1, "--issue", fmt.Sprint(filed.IID),
 		"--branch", popped.Branch, "--dir", popped.Worktree, "--audit", rigAudit, "--closes", objRef); err != nil {
 		return err
 	}

@@ -31,7 +31,7 @@ func TestRecurReopensWithNextDueDateAndPreviousRuns(t *testing.T) {
 		if next.Title != first.Title || !slices.Equal(next.Labels, labels) || next.DueDate != "2026-10-22" || next.Milestone != "rig-01.0" {
 			t.Fatalf("next instance %+v", next)
 		}
-		if !strings.Contains(next.Description, "## Recurrence") || !strings.Contains(next.Description, "- g/po-1#1 (due 2026-10-15): closed by tpm standup recur without its work.") || strings.Contains(next.Description, "- none") {
+		if !strings.Contains(next.Description, "## Recurrence") || !strings.Contains(next.Description, "- g/po-1#1 (due 2026-10-15): closed by tpm issue recur without its work.") || strings.Contains(next.Description, "- none") {
 			t.Fatalf("next body:\n%s", next.Description)
 		}
 
@@ -55,3 +55,38 @@ func TestRecurReopensWithNextDueDateAndPreviousRuns(t *testing.T) {
 }
 
 func ptrTo[T any](v T) *T { return &v }
+
+func TestRecurOpensNextInstanceOnce(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		f := p.Tracker()
+		first, _ := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Recurring: audit", Labels: []string{"type::recurring"}, DueDate: "2026-10-15",
+			Description: "Audit.\n\n## Previous Runs\n\n- none\n"})
+		now := time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC)
+		r, err := Recur(f, "g/po-1", first.IID, RecurOptions{Now: now})
+		if err != nil || r.Existing || r.Next == 0 {
+			t.Fatalf("first recur: %+v %v", r, err)
+		}
+		again, err := Recur(f, "g/po-1", first.IID, RecurOptions{Now: now})
+		all, _ := f.ListIssues("g/po-1", gitlab.IssueQuery{State: "all"})
+		if err != nil || !again.Existing || again.Next != r.Next || len(all) != 2 {
+			t.Fatalf("second recur opened another instance: %+v %v, %d issues", again, err, len(all))
+		}
+	})
+}
+
+// An instance opened before recur moved to the issue group carries the
+// marker tpm standup recur wrote; recur must find it and open none.
+func TestRecurFindsEarlierMarker(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		f := p.Tracker()
+		first, _ := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Recurring: audit", Labels: []string{"type::recurring"}, DueDate: "2026-10-15",
+			Description: "Audit.\n\n## Previous Runs\n\n- none\n"})
+		earlier, _ := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Recurring: audit", Labels: []string{"type::recurring"}, DueDate: "2026-10-22",
+			Description: "Audit.\n\n## Previous Runs\n\n- g/po-1#1 (due 2026-10-15): closed by tpm standup recur without its work.\n\n<!-- tpm standup recurs g/po-1#1 -->\n"})
+		r, err := Recur(f, "g/po-1", first.IID, RecurOptions{Now: time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC)})
+		all, _ := f.ListIssues("g/po-1", gitlab.IssueQuery{State: "all"})
+		if err != nil || !r.Existing || r.Next != earlier.IID || len(all) != 2 {
+			t.Fatalf("recur missed the earlier instance: %+v %v, %d issues", r, err, len(all))
+		}
+	})
+}

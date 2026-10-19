@@ -1,5 +1,6 @@
-// Package program is the tpm program group: the issue operations every
-// repository shares, admission and filing (srd013).
+// Package program is the tpm issue group: the issue operations every
+// repository shares, admission and filing (srd013). Its former name,
+// program, runs nothing and names the group (srd013 R2.2).
 package program
 
 import (
@@ -14,12 +15,13 @@ import (
 )
 
 func init() {
+	cli.Default.Retire("program", "issue")
 	var labelArgs struct {
 		group, control, ref string
 		update              bool
 	}
 	cli.Default.Register(&cli.Command{
-		Group: "program", Name: "labels", Summary: "create the program's labels from control/labels.md or the defaults",
+		Group: "issue", Name: "labels", Summary: "create the program's labels from control/labels.md or the defaults",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&labelArgs.group, "group", "", "program group path (required)")
 			fs.StringVar(&labelArgs.control, "control", "", "program repository holding control/labels.md; empty uses the defaults")
@@ -57,7 +59,7 @@ func init() {
 		iid                        int
 	}
 	cli.Default.Register(&cli.Command{
-		Group: "program", Name: "pop", Summary: "claim an issue and open its own branch and worktree",
+		Group: "issue", Name: "pop", Summary: "claim an issue and open its own branch and worktree",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&popArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&popArgs.iid, "issue", 0, "issue IID (required)")
@@ -99,7 +101,7 @@ func init() {
 		iid          int
 	}
 	cli.Default.Register(&cli.Command{
-		Group: "program", Name: "close", Summary: "close an issue on the local merge that delivered it (beads tracker)",
+		Group: "issue", Name: "close", Summary: "close an issue on the local merge that delivered it (beads tracker)",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&closeArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&closeArgs.iid, "issue", 0, "issue IID (required)")
@@ -130,7 +132,7 @@ func init() {
 		iid                                int
 	}
 	cli.Default.Register(&cli.Command{
-		Group: "program", Name: "approve", Summary: "approve an issue's branch for merge, as a reviewer other than its assignee",
+		Group: "issue", Name: "approve", Summary: "approve an issue's branch for merge, as a reviewer other than its assignee",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&approveArgs.project, "project", "", "project holding the branch (required)")
 			fs.IntVar(&approveArgs.iid, "issue", 0, "issue IID (required)")
@@ -171,7 +173,7 @@ func init() {
 		closes                                                  cli.Strings
 	}
 	cli.Default.Register(&cli.Command{
-		Group: "program", Name: "merge", Summary: "deliver an issue by a local merge that closes it (beads tracker)",
+		Group: "issue", Name: "merge", Summary: "deliver an issue by a local merge that closes it (beads tracker)",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&mergeArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&mergeArgs.iid, "issue", 0, "issue IID (required)")
@@ -228,7 +230,7 @@ func init() {
 		iid                          int
 	}
 	cli.Default.Register(&cli.Command{
-		Group: "program", Name: "lint", Summary: "check issues against the label schema and admission policy",
+		Group: "issue", Name: "lint", Summary: "check issues against the label schema and admission policy",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&lintArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&lintArgs.iid, "issue", 0, "issue IID; or use --since")
@@ -277,7 +279,7 @@ func init() {
 		paths                                                                                       []string
 	}
 	cli.Default.Register(&cli.Command{
-		Group: "program", Name: "file", Summary: "file an unassigned issue and lint it",
+		Group: "issue", Name: "file", Summary: "file an unassigned issue and lint it",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&fileArgs.project, "project", "", "project path (required)")
 			fs.StringVar(&fileArgs.title, "title", "", "issue title (required)")

@@ -1,0 +1,38 @@
+process: AI-native Scrum, the process this binary implements
+
+AI-native Scrum is Scrum whose administrative work is done by scripts and
+agents: the tracker holds the facts, scripts read and write them, and people
+keep only intent and judgment. Every step a program can do is a subcommand
+here; a skill is a thin script over it (design.md D10). docs/VISION.md is the
+whole story; this page is the map.
+
+Three planes. Management sets intent once per three-week period: the next
+release at each level and the objectives pushed to the level below.
+Control holds the rules an issue moves by: labels, states, admission, gates.
+Data is the work: issues filed, popped, built, merged, released.
+
+One release cycle, and what serves each step:
+   1 plan, the system release               skill plan; tpm plan
+   2 tasks, objectives per owner            skill tasks; tpm goals
+   3 write requirements, SRDs under docs/   tpm issue file, pop, merge
+   4 plan, the subsystem release            tpm plan push posts planned
+   5 make-work, the release becomes issues  skill make-work; tpm issue file
+   6 push, pop, do-work, a reviewed merge   tpm issue pop, approve, merge
+   7 release-push, a tag behind its gate    tpm release next, gate, tag
+   8 promotion through the environments     CI/CD in the test subsystem
+   9 track-goals, evidence on objectives    specified (srd019), not built
+  10 sprint-review against the ledger       skill sprint-end; tpm sprint-end
+The objective issue is the ledger: planned, evidence, met (srd006).
+
+Where things live in every repository of a program: docs/ holds the corpus
+(VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test
+suites); the system repository also holds control/labels.md and
+control/policy.md and the objective documents (srd034). The tracker is a
+repository of its own, served by beads (srd042).
+
+Start a program with tpm init; add a repository with tpm onboard.
+Run tpm help --list for every page, tpm help <group> for one group, and
+tpm help <concept> for objective, admission, approval, milestone, tracker,
+evidence, release, or recurring.
+
+See: srd006, srd034, srd042, srd044

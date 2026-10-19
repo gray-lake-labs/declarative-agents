@@ -34,10 +34,10 @@ A request for project work in a component's repository.
 <!-- field: flow -->
 ## Flow
 
-- F1: tpm program labels creates or updates the program's group labels from control/labels.md or the defaults; a second run changes nothing.
+- F1: tpm issue labels creates or updates the program's group labels from control/labels.md or the defaults; a second run changes nothing.
 - F2: The Developer runs specify with the request.
 - F3: Model step (structure): the model turns the request into a title and the Requirements and Acceptance Criteria sections, each criterion naming its test and environment.
-- F4: tpm sets plane::data because the request names no docs/ or control/ path, the kind the request states or the person names when asked, and the component from the subsystem SRD; tpm program file files the issue unassigned and lints it, and it enters the backlog.
+- F4: tpm sets plane::data because the request names no docs/ or control/ path, the kind the request states or the person names when asked, and the component from the subsystem SRD; tpm issue file files the issue unassigned and lints it, and it enters the backlog.
 
 <!-- field: touchpoints -->
 ## Touchpoints

@@ -120,17 +120,17 @@ tpm standup block sets blocked with the given note as a comment; tpm standup unb
 tpm standup done closes an issue only when its assignee has no merge request open for it and the issue's kind has no merge finishing condition (question, handoff with a recorded decision); every other close is by merge (srd041 R9.3).
 
 <!-- req: R8 -->
-## R8 - tpm standup adhoc and tpm standup recur
+## R8 - tpm standup adhoc
 
 <!-- req: R8.1 -->
 ### R8.1
 
-tpm standup adhoc creates an issue in the caller's tracker project with the next ad-hoc identifier, the given title, due date, estimate, source, and urgency, through tpm program file (srd019). It sets no assignee; the caller pops it with implement (srd041 R9.1).
+tpm standup adhoc creates an issue in the caller's tracker project with the next ad-hoc identifier, the given title, due date, estimate, source, and urgency, through tpm issue file (srd019). It sets no assignee; the caller pops it with implement (srd041 R9.1).
 
-<!-- req: R8.2 -->
+<!-- req: R8.2 | status: retired | retired_in: 1.4 | replaced_by: ["srd013-program R8.1"] -->
 ### R8.2
 
-tpm standup recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). An issue a merge request already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists.
+Retired in 01.4: recur moved to the issue group as tpm issue recur (srd013 R8).
 
 <!-- req: R9 -->
 ## R9 - Last run
@@ -213,11 +213,20 @@ log, start, stop, block, unblock, and done perform exactly their srd041 R8 trans
 <!-- ac: AC6 -->
 ### AC6
 
-adhoc creates an unassigned, linted issue with the next identifier; recur closes and reopens a recurring issue with its run logged and Requires updated; finish records last run and later calls use it.
+adhoc creates an unassigned, linted issue with the next identifier; finish records last run and later calls use it.
 
 <!-- field: traces -->
 #### Traces
 
 - [R8.1](#r81)
-- [R8.2](#r82)
 - [R9.1](#r91)
+
+<!-- ac: AC7 | status: retired | retired_in: 1.4 | replaced_by: ["srd013-program AC9"] -->
+### AC7
+
+Retired in 01.4: recur moved to the issue group (srd013 AC9).
+
+<!-- field: traces -->
+#### Traces
+
+- [R8.2](#r82)

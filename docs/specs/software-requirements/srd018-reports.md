@@ -132,7 +132,7 @@ A signal from aggregate that needs action is pushed as an issue in do-work's inp
 <!-- req: R7.1 -->
 ### R7.1
 
-For each person the configuration lists, ensures one status issue (the sprint update of R6.1) exists in their project for the coming ISO week. When the person's latest status issue is closed, it recurs that issue (srd010 R8.2); when there is none, it files a fresh one through tpm program file.
+For each person the configuration lists, ensures one status issue (the sprint update of R6.1) exists in their project for the coming ISO week. When the person's latest status issue is closed, it recurs that issue (srd010 R8.2); when there is none, it files a fresh one through tpm issue file.
 
 <!-- req: R7.2 -->
 ### R7.2

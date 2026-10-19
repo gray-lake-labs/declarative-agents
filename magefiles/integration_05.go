@@ -43,7 +43,7 @@ func newWeeklyEnv(cloneName string) (*weeklyEnv, error) {
 	if err := r.seedSystem(e.system, e.po1, po2); err != nil {
 		return nil, err
 	}
-	if _, err := r.runTPM("program", "labels", "--group", r.group); err != nil {
+	if _, err := r.runTPM("issue", "labels", "--group", r.group); err != nil {
 		return nil, err
 	}
 	if e.clone, err = r.clone(e.reports, cloneName); err != nil {
@@ -65,7 +65,7 @@ func (e *weeklyEnv) objectiveIssue(project, title string) (string, int, error) {
 	return fmt.Sprintf("%s#%d", project, i.IID), i.IID, nil
 }
 
-// WeeklyStatus files a status issue for the rig user, works it into a validated report merged in the reports repository with tpm program merge, and proves the merge closes it and the next week's run recurs it with the next due date (test-rel01.1-weekly-status).
+// WeeklyStatus files a status issue for the rig user, works it into a validated report merged in the reports repository with tpm issue merge, and proves the merge closes it and the next week's run recurs it with the next due date (test-rel01.1-weekly-status).
 func (Integration) WeeklyStatus() error {
 	e, err := newWeeklyEnv("reports-weekly")
 	if err != nil {
@@ -133,7 +133,7 @@ func (Integration) WeeklyStatus() error {
 		return err
 	}
 	var merged program.MergeResult
-	if err := e.tpmJSON(&merged, "program", "merge", "--project", e.reports, "--issue-project", e.po1,
+	if err := e.tpmJSON(&merged, "issue", "merge", "--project", e.reports, "--issue-project", e.po1,
 		"--issue", fmt.Sprint(status.IID), "--branch", branch, "--dir", e.clone); err != nil {
 		return err
 	}

@@ -1,0 +1,12 @@
+tracker: where the program's facts live, and keeping a clone current
+
+The tracker is a git repository of its own holding the program's issues,
+labels, milestones, and comments, served by beads (srd042). Every command
+reads and writes it through a local clone and names the tracker commit it
+read. A clone that is offline queues its writes and makes its pops
+provisional; reconcile pushes them once the tracker is reachable.
+
+Subcommands:
+  tpm tracker reconcile   push queued writes, confirm or lose provisional pops (srd042)
+
+See: srd042

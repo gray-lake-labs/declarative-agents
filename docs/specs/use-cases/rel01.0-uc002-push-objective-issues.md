@@ -45,7 +45,7 @@ The system release is recorded in docs/road-map.md with its tag.
 - F2: tpm reads the planned release and its tag, the agreed objective document, the subsystem SRDs, and the objective issues already filed for the release, and returns as JSON each objective item with a recommended owner (the Product Owner whose subsystem SRD declares the component) and environment.
 - F3: The skill takes every recommendation and asks the technical program manager only for the repository of an objective with no recommended owner, offering the candidates; it asks for no confirmation.
 - F4: tpm renders each objective issue from the document, with one Cites line per item pinned to the release tag, the Environment line, the document's Requirements as ordered steps and its Acceptance Criteria, a due date, and an empty Notes section.
-- F5: tpm program file files each issue in the owner's repository, unassigned; tpm program lint admits it or sets needs-triage with the reasons.
+- F5: tpm issue file files each issue in the owner's repository, unassigned; tpm issue lint admits it or sets needs-triage with the reasons.
 - F6: tpm posts a planned event on each objective issue it created or updated; a second run creates no duplicate.
 - F7: The Product Owner receives a dated issue in their own repository whose body states what to do.
 
@@ -107,7 +107,7 @@ tasks reads its facts from the release, the documents, and existing objectives, 
 <!-- sc: S3 -->
 ### S3
 
-Every objective issue is filed unassigned through tpm program file and admitted by tpm program lint, which flags an unpinned Cites line or a criterion without test and environment.
+Every objective issue is filed unassigned through tpm issue file and admitted by tpm issue lint, which flags an unpinned Cites line or a criterion without test and environment.
 
 <!-- field: traces -->
 #### Traces

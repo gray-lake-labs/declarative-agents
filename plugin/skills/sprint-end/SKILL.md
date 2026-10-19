@@ -21,7 +21,7 @@ releases.
    release, and which objectives are complete. Apply the answers in the
    worktree.
 5. Commit the summary at docs/sprint-ends/<release>.md and run
-   `tpm program merge --project <project> --issue <iid> --closes <project#iid> --json`
+   `tpm issue merge --project <project> --issue <iid> --closes <project#iid> --json`
    with one --closes per objective the owner reports complete; the merge
    closes the issue and those objectives.
 6. Ask the owner to confirm the release and its version (facts recommends

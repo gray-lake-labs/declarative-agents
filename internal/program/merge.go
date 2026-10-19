@@ -24,9 +24,8 @@ type MergeResult struct {
 }
 
 // Merge is delivery on the beads tracker, which has no merge requests
-// (srd042 R2.3): it holds the branch to what open-merge-request holds it to
-// on GitLab, the issue open, each closes open, commits of its own, and the
-// corpus audit passing when docs/ changes, and another person's approval
+// (srd042 R2.3): it requires the issue open, each closes open, commits of
+// its own, the corpus audit passing when docs/ changes, and another person's approval
 // of the commit it merges (srd013 R5.5), then merges the branch --no-ff
 // into the default branch of the repository's main checkout with a message
 // citing the issue and each issue it closes, pushes it, and closes each on
@@ -35,7 +34,7 @@ type MergeResult struct {
 func Merge(t gitlab.Tracker, git Git, project, issueProject string, iid int, branch, dir string, gate AuditGate, closes []string, dryRun bool) (MergeResult, error) {
 	r := MergeResult{Project: project, IID: iid, Branch: branch, DryRun: dryRun}
 	if _, ok := t.(MergeCloser); !ok {
-		return r, fmt.Errorf("on GitLab the merge request is the delivery; use tpm program open-merge-request")
+		return r, fmt.Errorf("this tracker does not close issues on a local merge; tpm issue merge serves the beads tracker")
 	}
 	if issueProject != project {
 		r.IssueProject = issueProject

@@ -206,7 +206,7 @@ func (Integration) Program() error {
 	bad := "Unpinned work\n\nCites: " + r.webBase + "/" + po1 + "/-/blob/main/README.md#R1.1\n\n## Requirements\n\n1. Do it.\n\n## Acceptance Criteria\n\n- It is done\n"
 	good := strings.Replace(strings.Replace(bad, "/-/blob/main/", "/-/blob/v0.0.1/", 1), "- It is done", "- It is done (test: it_is_done; environment: dev)", 1)
 	writeFileTo(filepath.Join(dir, "bad.md"), bad)
-	file := []string{"program", "file", "--project", po1, "--title", "Lint probe", "--body-file", filepath.Join(dir, "bad.md"),
+	file := []string{"issue", "file", "--project", po1, "--title", "Lint probe", "--body-file", filepath.Join(dir, "bad.md"),
 		"--plane", "data", "--kind", "build", "--component", "po-1", "--milestone", rigMilestone}
 
 	before, _ := r.issues(po1)
@@ -235,7 +235,7 @@ func (Integration) Program() error {
 		return err
 	}
 	var linted []program.LintResult
-	if err := r.tpmJSON(&linted, "program", "lint", "--project", po1, "--issue", fmt.Sprint(i.IID)); err != nil {
+	if err := r.tpmJSON(&linted, "issue", "lint", "--project", po1, "--issue", fmt.Sprint(i.IID)); err != nil {
 		return err
 	}
 	c.expect(len(linted) == 1 && linted[0].Admitted, "fixed issue not admitted: %+v", linted)

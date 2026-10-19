@@ -1,0 +1,16 @@
+release: a version behind its gate, and the release as a concept
+
+A release is a tag on a repository, cut only after the checks its
+definition of done declares have passed at that commit, with their evidence
+posted on the release issue (srd008). A release ends each three-week period
+at every level, and it is what other repositories pin their references to.
+A release of the system needs a peer read: someone other than the person
+running it approves.
+
+Subcommands:
+  tpm release next      the latest version and the next candidates (srd015)
+  tpm release gate      run the declared checks, post their evidence (srd015)
+  tpm release tag       tag and push a candidate whose gate passed (srd015)
+  tpm release approve   approve a release issue as its peer read (srd015)
+
+See: srd008, srd015

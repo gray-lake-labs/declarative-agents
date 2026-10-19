@@ -37,10 +37,10 @@ A design change to a component SRD, use case, test suite, or the architecture.
 
 - F1: The Developer runs specify with a request that names a docs/ path other than a planning document.
 - F2: Model step (structure): the model turns the request into the issue body.
-- F3: tpm sets plane::data and kind::spec and files the issue unassigned through tpm program file; it is admitted into the backlog.
+- F3: tpm sets plane::data and kind::spec and files the issue unassigned through tpm issue file; it is admitted into the backlog.
 - F4: The Developer pops it into its worktree and changes the documents there.
 - F5: implement runs mage audit; a failure is reported with its findings and no merge request is opened.
-- F6: tpm program merge runs mage audit in the worktree; with the audit passing it merges the branch, and the merge closes the issue.
+- F6: tpm issue merge runs mage audit in the worktree; with the audit passing it merges the branch, and the merge closes the issue.
 
 <!-- field: touchpoints -->
 ## Touchpoints

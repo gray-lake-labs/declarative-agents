@@ -96,6 +96,8 @@ func readLine(r gitlab.Read) string {
 // Registry holds the groups and their commands.
 type Registry struct {
 	commands map[string]map[string]*Command
+	// retired maps a group's former name to its current one.
+	retired map[string]string
 }
 
 // Default is the registry cmd/tpm runs; packages register into it in init.
@@ -115,17 +117,48 @@ func (r *Registry) Register(c *Command) {
 	r.commands[c.Group][c.Name] = c
 }
 
+// Retire makes old a former name of the group now: running it runs nothing
+// and fails naming the group that replaced it, so a skill written for an
+// earlier tpm says how to fix itself (srd013 R2.2).
+func (r *Registry) Retire(old, now string) {
+	if r.retired == nil {
+		r.retired = map[string]string{}
+	}
+	r.retired[old] = now
+}
+
+// Groups names every registered group, sorted; former names are not groups.
+func (r *Registry) Groups() []string { return sortedKeys(r.commands) }
+
+// Commands returns a group's commands sorted by name, the group's own
+// command, if it has one, first.
+func (r *Registry) Commands(group string) []*Command {
+	var cs []*Command
+	for _, n := range sortedKeys(r.commands[group]) {
+		cs = append(cs, r.commands[group][n])
+	}
+	return cs
+}
+
 // ErrUsage marks a usage error; cmd/tpm exits 2 for it.
 var ErrUsage = errors.New("usage")
 
 // Run parses args (without the program name) and runs one subcommand.
 func (r *Registry) Run(args []string, out io.Writer, tracker func() (gitlab.Tracker, error)) error {
-	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" || args[0] == "help" {
+	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" {
 		fmt.Fprint(out, r.usage())
 		if len(args) == 0 {
 			return ErrUsage
 		}
 		return nil
+	}
+	if now, ok := r.retired[args[0]]; ok {
+		sub := ""
+		if len(args) > 1 && !strings.HasPrefix(args[1], "-") {
+			sub = " " + args[1]
+		}
+		return fmt.Errorf("tpm %s is now tpm %s: run tpm %s%s; a skill that called tpm %s was installed from an earlier tpm, so run tpm install to update it",
+			args[0], now, now, sub, args[0])
 	}
 	group, ok := r.commands[args[0]]
 	if !ok {
@@ -182,6 +215,9 @@ func (r *Registry) usage() string {
 		}
 		fmt.Fprintf(&b, "  %s\n", g)
 	}
+	if _, ok := r.commands["help"]; ok {
+		b.WriteString("\nrun tpm help for the process, tpm help <group> for one group\n")
+	}
 	return b.String()
 }
 
@@ -189,6 +225,9 @@ func (r *Registry) groupUsage(group string) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "usage: tpm %s <subcommand> [--json] [--dry-run] [flags]\n\nsubcommands:\n", group)
 	for _, n := range sortedKeys(r.commands[group]) {
+		if n == "" {
+			continue
+		}
 		fmt.Fprintf(&b, "  %-20s %s\n", n, r.commands[group][n].Summary)
 	}
 	return b.String()

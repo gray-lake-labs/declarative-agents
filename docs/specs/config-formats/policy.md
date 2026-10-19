@@ -35,7 +35,7 @@ mapping
 <!-- field: description -->
 #### Description
 
-require_milestone (boolean, data issues must carry a sprint milestone), require_acceptance_criteria (boolean, build, experiment, research, and spec issues must have an Acceptance Criteria section), management_filers (list of usernames or the word leads, who may file plane::management issues; tpm program file refuses anyone else), audit_command (the corpus gate tpm program merge runs in the worktree before merging a docs/ change; mage audit by default), control_reviewers (count of lead approvals a plane::control merge request needs).
+require_milestone (boolean, data issues must carry a sprint milestone), require_acceptance_criteria (boolean, build, experiment, research, and spec issues must have an Acceptance Criteria section), management_filers (list of usernames or the word leads, who may file plane::management issues; tpm issue file refuses anyone else), audit_command (the corpus gate tpm issue merge runs in the worktree before merging a docs/ change; mage audit by default), control_reviewers (count of lead approvals a plane::control merge request needs).
 
 <!-- schema_entry: scoring -->
 ### scoring

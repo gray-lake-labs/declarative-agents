@@ -1,0 +1,12 @@
+onboard: add a repository to a program
+
+A Product Owner runs this in a repository joining the program. It writes the
+same corpus at the subsystem's level and files one issue in the system
+repository asking that the subsystem SRD list the repository; it never
+commits there. Running it again files nothing while the registration is open
+or once the SRD lists the repository.
+
+Command:
+  tpm onboard   write the corpus here, file the registration upstream (srd043 R2)
+
+See: srd043

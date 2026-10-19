@@ -72,7 +72,7 @@ Asks for no confirmation before filing.
 <!-- req: R4.1 -->
 ### R4.1
 
-Files the issue with tpm program file (srd013 R3.1): unassigned, with its plane, kind on a data issue, component, and the sprint milestone on a data issue, and linted before it returns.
+Files the issue with tpm issue file (srd013 R3.1): unassigned, with its plane, kind on a data issue, component, and the sprint milestone on a data issue, and linted before it returns.
 
 <!-- req: R4.2 -->
 ### R4.2
@@ -133,7 +133,7 @@ The skill asks only for a missing plane, kind, or test, and never for confirmati
 <!-- ac: AC3 -->
 ### AC3
 
-The issue is filed unassigned through tpm program file and linted; the skill reports its URL, its plane, kind, and component, and its admission, with reasons.
+The issue is filed unassigned through tpm issue file and linted; the skill reports its URL, its plane, kind, and component, and its admission, with reasons.
 
 <!-- field: traces -->
 #### Traces
