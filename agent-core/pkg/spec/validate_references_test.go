@@ -393,3 +393,23 @@ related_documents:
 	require.Len(t, a.RelatedDocuments, 2)
 	assert.Equal(t, "docs/VISION.md", a.RelatedDocuments[0].Doc)
 }
+
+// A consumer corpus canonically writes related_documents as a plain list of
+// path strings; both shapes parse (GH-8).
+func TestParseArchitectureBytes_RelatedDocumentStrings(t *testing.T) {
+	data := []byte(`
+id: architecture-test
+title: Test Architecture
+related_documents:
+  - docs/VISION.md
+  - doc: docs/SPECIFICATIONS.md
+    purpose: Canonical index
+`)
+	a, err := parseArchitectureBytes(data, "docs/ARCHITECTURE.md")
+	require.NoError(t, err)
+	require.Len(t, a.RelatedDocuments, 2)
+	assert.Equal(t, "docs/VISION.md", a.RelatedDocuments[0].Doc)
+	assert.Empty(t, a.RelatedDocuments[0].Purpose)
+	assert.Equal(t, "docs/SPECIFICATIONS.md", a.RelatedDocuments[1].Doc)
+	assert.Equal(t, "Canonical index", a.RelatedDocuments[1].Purpose)
+}
