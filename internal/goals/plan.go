@@ -7,6 +7,7 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/links"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
@@ -20,8 +21,10 @@ type Plan struct {
 	Objectives []PlannedObjective `json:"objectives"`
 }
 
-// PlannedObjective is one objective (a requirement group) with the release
-// items it carries, its recommendations, and any issue already filed.
+// PlannedObjective is one initiative outcome (a requirement group) with the
+// release items it carries, its recommendations, and the Sprint Goal or
+// objective issue already filed for it. Push files one Sprint Goal per team
+// serving every outcome confirmed for the team's repository.
 type PlannedObjective struct {
 	Key         string   `json:"key"` // objNNN-name#Rn
 	Document    string   `json:"document"`
@@ -35,8 +38,8 @@ type PlannedObjective struct {
 	Existing    string   `json:"existing,omitempty"` // web URL of an issue already filed for the release
 }
 
-// MakePlan computes the facts and recommendations for every objective of
-// the release (srd022 R2, R3.1, R3.2). It asks nothing.
+// MakePlan computes the facts and recommendations for every initiative
+// outcome of the release (srd022 R2, R3.1, R3.2). It asks nothing.
 func MakePlan(t tracker.Tracker, s Sources) (Plan, error) {
 	p := Plan{System: s.System, Release: s.Release.Version, Tag: s.Release.Tag, Milestone: s.Release.Milestone}
 	candidates := s.Subsystems.Repositories()
@@ -58,12 +61,14 @@ func MakePlan(t tracker.Tracker, s Sources) (Plan, error) {
 		po.Repository = recommendRepository(s, obj)
 		po.Environment = recommendEnvironment(d, group)
 		if po.Repository != "" {
-			existing, err := findExisting(t, po.Repository, key, p.Release)
+			goal, legacy, err := findExisting(t, po.Repository, p.Release)
 			if err != nil {
 				return p, err
 			}
-			if existing != nil {
-				po.Existing = existing.WebURL
+			if old, ok := legacy[key]; ok {
+				po.Existing = old.WebURL
+			} else if goal != nil {
+				po.Existing = goal.WebURL
 			}
 		}
 		index[key] = len(p.Objectives)
@@ -105,25 +110,29 @@ func recommendEnvironment(d *objectives.Document, group string) string {
 	return "dev"
 }
 
-// marker identifies the objective issue for one objective and release, so
-// a second push updates instead of duplicating (srd022 R2.3).
-func marker(key, release string) string {
-	return fmt.Sprintf("<!-- tpm goals objective=%s release=%s -->", key, release)
-}
-
-func findExisting(t tracker.Tracker, repo, key, release string) (*tracker.Issue, error) {
+// findExisting returns the team's Sprint Goal for the release in repo, and
+// the objective issues filed there for the release before 04.0, keyed by the
+// outcome each serves (srd022 R2.3, srd034 R3.7).
+func findExisting(t tracker.Tracker, repo, release string) (*tracker.Issue, map[string]tracker.Issue, error) {
 	issues, err := t.ListIssues(repo, tracker.IssueQuery{State: "opened", Labels: []string{"plane::management"}})
 	if err != nil {
 		if errors.Is(err, tracker.ErrNotFound) {
-			return nil, fmt.Errorf("repository %s does not exist or is not readable", repo)
+			return nil, nil, fmt.Errorf("repository %s does not exist or is not readable", repo)
 		}
-		return nil, err
+		return nil, nil, err
 	}
-	m := marker(key, release)
+	var goal *tracker.Issue
+	legacy := map[string]tracker.Issue{}
 	for i := range issues {
-		if strings.Contains(issues[i].Description, m) {
-			return &issues[i], nil
+		r, ok := sprintgoal.Parse(issues[i].Description)
+		if !ok || r.Release != release {
+			continue
+		}
+		if r.Legacy {
+			legacy[r.Serves[0]] = issues[i]
+		} else if goal == nil {
+			goal = &issues[i]
 		}
 	}
-	return nil, nil
+	return goal, legacy, nil
 }

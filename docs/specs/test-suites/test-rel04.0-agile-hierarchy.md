@@ -240,7 +240,7 @@ mage integration:sprintEnd
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/beads ./internal/sprintend ./internal/goals -run '^Test(ObjectiveIssueIsSprintGoal|ObjectiveMarkerIsRead)$'
+go test ./internal/beads ./internal/goals ./internal/sprintgoal -run '^Test(ObjectiveIssueIsSprintGoal|ObjectiveMarkerIsRead)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs

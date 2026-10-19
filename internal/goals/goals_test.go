@@ -117,7 +117,7 @@ func testPushFilesOneDatedPinnedObjectiveIssue(t *testing.T, tp trackertest.Prog
 		"Environment: dev",
 		"## Requirements\n\n1. A grader scores one agent's trajectories against a written rubric. (R1.1)\n2. ",
 		"(test: grader_scores_fixture_agent; environment: dev)",
-		"## Notes\n\n<!-- tpm goals objective=obj001-reliable-agents#R1 release=01.0 -->",
+		"## Notes\n\n## Sprint Backlog\n\n<!-- tpm goals sprint-goal release=01.0 serves=obj001-reliable-agents#R1 -->",
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("body lacks %q:\n%s", want, body)
@@ -163,6 +163,69 @@ func testSecondPushChangesNothingAndKeepsOwnerNotes(t *testing.T, tp trackertest
 	if len(issues) != 1 {
 		t.Fatal("duplicate issue")
 	}
+}
+
+// TestSprintGoalPerTeam files one Sprint Goal for a team that serves two
+// outcomes, citing the items of both, with one planned event (srd022 R4.1,
+// srd034 R3.2).
+func TestSprintGoalPerTeam(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
+		f, s := fixture(t, tp)
+		p, _ := MakePlan(f, s)
+		p.Objectives[1].Repository = fleet
+		res, err := Push(f, s, p, web, program.Defaults(), false)
+		if err != nil || res[0].Action != "created" || res[1].Action != "created" || res[0].IID != res[1].IID {
+			t.Fatalf("res=%+v err=%v", res, err)
+		}
+		issues := fleetIssues(t, f)
+		if len(issues) != 1 {
+			t.Fatalf("issues = %d, want one Sprint Goal for the team", len(issues))
+		}
+		body := issues[0].Description
+		for _, want := range []string{"#R1.1", "#R1.2", "#R2.1", "## Sprint Backlog", "serves=obj001-reliable-agents#R1,obj001-reliable-agents#R2"} {
+			if !strings.Contains(body, want) {
+				t.Errorf("body lacks %q:\n%s", want, body)
+			}
+		}
+		if !strings.HasPrefix(issues[0].Title, "Sprint Goal: ") || issues[0].DueDate != "2026-11-06" {
+			t.Errorf("title %q due %q", issues[0].Title, issues[0].DueDate)
+		}
+		notes, _ := f.ListNotes(fleet, issues[0].IID)
+		e, ok := events.Parse(notes[0].Body)
+		if len(notes) != 1 || !ok || len(e.Values("requirement")) != 3 {
+			t.Fatalf("planned events %+v", notes)
+		}
+		writes := tp.Writes()
+		if res, err := Push(f, s, p, web, program.Defaults(), false); err != nil || res[0].Action != "unchanged" || tp.Writes() != writes {
+			t.Fatalf("second push res=%+v err=%v writes=%d", res, err, tp.Writes()-writes)
+		}
+	})
+}
+
+// TestObjectiveIssueIsSprintGoal keeps a release pushed before 04.0 as it
+// is: its objective issue is found as the Sprint Goal for its outcome, and
+// a second push files nothing (srd034 R3.7).
+func TestObjectiveIssueIsSprintGoal(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
+		f, s := fixture(t, tp)
+		old, err := f.CreateIssue(fleet, tracker.NewIssue{Title: "Objective obj001-reliable-agents#R1: Evaluation of one agent (release 01.0)",
+			Description: "body\n\n## Notes\n\n<!-- tpm goals objective=obj001-reliable-agents#R1 release=01.0 -->\n", Labels: []string{"plane::management", "component::fleet"}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		p, _ := MakePlan(f, s)
+		if p.Objectives[0].Existing == "" {
+			t.Errorf("plan does not name the objective issue: %+v", p.Objectives[0])
+		}
+		writes := tp.Writes()
+		res, err := Push(f, s, p, web, program.Defaults(), false)
+		if err != nil || res[0].Action != "unchanged" || !res[0].Legacy || res[0].IID != old.IID || tp.Writes() != writes {
+			t.Fatalf("res=%+v err=%v writes=%d", res, err, tp.Writes()-writes)
+		}
+		if n := len(fleetIssues(t, f)); n != 1 {
+			t.Fatalf("issues = %d, want the objective issue alone", n)
+		}
+	})
 }
 
 func TestUnpinnedCitationAndMissingEnvironmentAreRefused(t *testing.T) {

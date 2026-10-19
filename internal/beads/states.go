@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 )
 
 // The srd041 states.
@@ -42,12 +44,9 @@ const (
 	EffectClear = "clear"
 )
 
-// KindObjective restricts a row to objective issues.
-const KindObjective = "objective"
-
-// objectiveMarker opens the marker tpm goals writes into every objective
-// issue it files (srd022 R2.3).
-const objectiveMarker = "<!-- tpm goals "
+// KindSprintGoal restricts a row to Sprint Goal issues, objective issues
+// filed before release 04.0 among them (srd034 R3.7).
+const KindSprintGoal = "sprint-goal"
 
 // ErrRefused is wrapped by every transition the table does not list.
 var ErrRefused = errors.New("refused")
@@ -84,13 +83,13 @@ var Table = []Row{
 	{From: []string{Taken, InProgress}, To: "-" + Blocked, Actor: ActorPerson, Assignee: EffectNone},
 	{From: anyOpen, To: "+" + NeedsRun, Actor: ActorHandoff, Assignee: EffectNone, Requires: "type::recurring"},
 	{From: anyOpen, To: Closed, Actor: ActorMerge, Assignee: EffectNone},
-	{From: anyOpen, To: Closed, Actor: ActorTrackGoals, Assignee: EffectNone, Kind: KindObjective},
+	{From: anyOpen, To: Closed, Actor: ActorTrackGoals, Assignee: EffectNone, Kind: KindSprintGoal},
 	{From: anyOpen, To: Closed, Actor: ActorPerson, Assignee: EffectNone},
 	{From: []string{Closed}, To: Open, Actor: ActorPerson, Assignee: EffectNone},
 }
 
-func isObjective(i Issue) bool {
-	return i.HasLabel("plane::management") && strings.Contains(i.Description, objectiveMarker)
+func isSprintGoal(i Issue) bool {
+	return i.HasLabel("plane::management") && sprintgoal.Is(i.Description)
 }
 
 // row finds the table row that lets actor move i to to.
@@ -102,7 +101,7 @@ func row(i Issue, actor, to string) (Row, bool) {
 		if r.Requires != "" && !i.HasLabel(r.Requires) {
 			continue
 		}
-		if r.Kind == KindObjective && !isObjective(i) {
+		if r.Kind == KindSprintGoal && !isSprintGoal(i) {
 			continue
 		}
 		if overlay, ok := strings.CutPrefix(to, "-"); ok && !i.HasLabel(overlay) {

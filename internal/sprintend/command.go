@@ -14,7 +14,7 @@ import (
 func init() {
 	var a struct{ project, reportsDir, from, to, dir, artifact, control, ref string }
 	cli.Default.Register(&cli.Command{
-		Group: "sprint-end", Name: "facts", Summary: "the period's aggregate, each objective issue's ledger and reported status, and the recommended version",
+		Group: "sprint-end", Name: "facts", Summary: "the period's aggregate, each Sprint Goal's ledger and reported status, and the recommended version",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&a.project, "project", "", "the repository the sprint-end issue is in (required)")
 			fs.StringVar(&a.reportsDir, "reports", "", "a checkout of the reports repository (required)")
@@ -57,8 +57,8 @@ func init() {
 			}
 			var h strings.Builder
 			fmt.Fprintf(&h, "%s, %s to %s: %d reports, %d signals; recommended version %s\n", f.Project, a.from, a.to, agg.Reports, len(agg.Signals), f.Recommended)
-			for _, o := range f.Objectives {
-				fmt.Fprintf(&h, "  %s %s (%s): %s, reported %q, complete=%v, met=%v\n", o.Issue, o.Objective, o.Release, o.State, o.Reported, o.ReportedComplete, o.Met)
+			for _, o := range f.SprintGoals {
+				fmt.Fprintf(&h, "  %s %s (%s): %s, reported %q, complete=%v, met=%v\n", o.Issue, strings.Join(o.Serves, ","), o.Release, o.State, o.Reported, o.ReportedComplete, o.Met)
 			}
 			return ctx.Emit(f, h.String())
 		},

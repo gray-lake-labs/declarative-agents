@@ -29,7 +29,7 @@ const (
 )
 
 // Signal is one finding that no single report shows. It names components,
-// blockers, objectives, and repositories, never a person (srd018 R3.4).
+// blockers, Sprint Goals, and repositories, never a person (srd018 R3.4).
 type Signal struct {
 	Kind       string `json:"kind"`
 	Component  string `json:"component"`
@@ -46,15 +46,15 @@ func (s Signal) Key() string {
 
 var nonKey = regexp.MustCompile(`[^A-Za-z0-9._/#-]+`)
 
-// Progress is one objective's state for the range: its latest reported
+// Progress is one Sprint Goal's state for the range: its latest reported
 // status and whether its ledger holds a met event (srd018 R3.5).
 type Progress struct {
-	Objective string `json:"objective"`
-	Component string `json:"component"`
-	Reported  string `json:"reported"`
-	Complete  bool   `json:"reported_complete"`
-	Met       bool   `json:"met"`
-	State     string `json:"state"` // met, reported complete, or the reported status
+	SprintGoal string `json:"sprint_goal"`
+	Component  string `json:"component"`
+	Reported   string `json:"reported"`
+	Complete   bool   `json:"reported_complete"`
+	Met        bool   `json:"met"`
+	State      string `json:"state"` // met, reported complete, or the reported status
 }
 
 // Aggregation is what tpm reports aggregate returns.
@@ -62,7 +62,7 @@ type Aggregation struct {
 	From        string              `json:"from"`
 	To          string              `json:"to"`
 	Reports     int                 `json:"reports"`
-	ByComponent map[string][]string `json:"by_component"` // component -> objectives and blockers
+	ByComponent map[string][]string `json:"by_component"` // component -> Sprint Goals and blockers
 	Signals     []Signal            `json:"signals"`
 	Progress    []Progress          `json:"progress"`
 	Pushed      []PushResult        `json:"pushed,omitempty"`
@@ -91,7 +91,7 @@ type weekly struct {
 }
 
 // Aggregate reads every report in the range, groups their items by
-// component, computes the signals, and states each objective's progress
+// component, computes the signals, and states each Sprint Goal's progress
 // (srd018 R3.1, R3.2, R3.4, R3.5).
 func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 	from, err := ParseWeek(in.From)
@@ -144,15 +144,15 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 		complete  bool
 		latest    string
 	}
-	objectives := map[string]*history{}
+	goals := map[string]*history{}
 	blockedBy := map[string]map[string]bool{} // week/waiting-on -> components
 	for _, wr := range reports {
 		for _, e := range wr.r.Work {
-			add(e["component"], e["objective"])
-			h := objectives[e["objective"]]
+			add(e["component"], e["sprint_goal"])
+			h := goals[e["sprint_goal"]]
 			if h == nil {
 				h = &history{component: e["component"], statuses: make([]string, len(weeks))}
-				objectives[e["objective"]] = h
+				goals[e["sprint_goal"]] = h
 			}
 			h.statuses[slices.Index(weeks, wr.week)] = e["status"]
 			h.latest, h.complete = e["status"], e["complete"] == "yes"
@@ -183,8 +183,8 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 			fmt.Sprintf("%s blocks %s in %d reports", waiting, strings.Join(names, ", "), countReports(reports, week, waiting)), true})
 	}
 
-	for _, ref := range sortedKeys(objectives) {
-		h := objectives[ref]
+	for _, ref := range sortedKeys(goals) {
+		h := goals[ref]
 		run := 0
 		for _, s := range h.statuses {
 			if s == "at-risk" || s == "blocked" {
@@ -195,19 +195,19 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 		}
 		if limit := in.Policy.Escalation.SlipReleases; limit > 0 && run >= limit {
 			a.Signals = append(a.Signals, Signal{SignalSlipped, h.component, ref, in.To,
-				fmt.Sprintf("objective %s (%s) has been at risk or blocked in %d consecutive reports", ref, h.component, run), true})
+				fmt.Sprintf("Sprint Goal %s (%s) has been at risk or blocked in %d consecutive reports", ref, h.component, run), true})
 		}
 		met, err := hasMet(t, ref)
 		if err != nil {
 			return a, err
 		}
-		p := Progress{Objective: ref, Component: h.component, Reported: h.latest, Complete: h.complete, Met: met, State: h.latest}
+		p := Progress{SprintGoal: ref, Component: h.component, Reported: h.latest, Complete: h.complete, Met: met, State: h.latest}
 		switch {
 		case met:
 			p.State = "met"
 		case h.complete || h.latest == "done":
 			p.State = "reported complete"
-			// Closed without met, the objective closed as reported complete
+			// Closed without met, the Sprint Goal closed as reported complete
 			// by its repository's sprint-end merge (srd038 R2); still open,
 			// the report contradicts the tracker.
 			closed, err := isClosed(t, ref)
@@ -216,7 +216,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 			}
 			if !closed {
 				a.Signals = append(a.Signals, Signal{SignalContradiction, h.component, ref, in.To,
-					fmt.Sprintf("objective %s (%s) is reported complete but its ledger has no met event", ref, h.component), true})
+					fmt.Sprintf("Sprint Goal %s (%s) is reported complete but its ledger has no met event", ref, h.component), true})
 			}
 		}
 		a.Progress = append(a.Progress, p)
@@ -236,7 +236,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 	}
 
 	mentioned := map[string]bool{}
-	for ref := range objectives {
+	for ref := range goals {
 		mentioned[ref] = true
 	}
 	end := to.AddDate(0, 0, 6).Format("2006-01-02")
@@ -250,7 +250,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 				continue
 			}
 			a.Signals = append(a.Signals, Signal{SignalUnreportedWork, m.Project, fmt.Sprintf("%s!%d", m.Project, mr.IID), ISOWeek(mustDate(mr.MergedAt)),
-				fmt.Sprintf("%s!%d %q merged on %s and closes no reported objective", m.Project, mr.IID, mr.Title, mr.MergedAt), false})
+				fmt.Sprintf("%s!%d %q merged on %s and closes no reported Sprint Goal", m.Project, mr.IID, mr.Title, mr.MergedAt), false})
 		}
 	}
 	for c := range a.ByComponent {
@@ -283,7 +283,7 @@ func countReports(reports []weekly, week, waiting string) int {
 
 var closesPattern = regexp.MustCompile(`(?i)closes\s+(\S*#\d+)`)
 
-// closesMentioned reports whether the merge closes an objective a
+// closesMentioned reports whether the merge closes a Sprint Goal a
 // report names.
 func closesMentioned(project, description string, mentioned map[string]bool) bool {
 	for _, m := range closesPattern.FindAllStringSubmatch(description, -1) {
@@ -298,9 +298,9 @@ func closesMentioned(project, description string, mentioned map[string]bool) boo
 	return false
 }
 
-// hasMet reports whether the objective issue's ledger holds a met event
+// hasMet reports whether the Sprint Goal's ledger holds a met event
 // (srd006 R10).
-// isClosed reports whether the objective issue ref is closed; an issue the
+// isClosed reports whether the Sprint Goal ref is closed; an issue the
 // tracker cannot find is not.
 func isClosed(t tracker.Tracker, ref string) (bool, error) {
 	project, n, ok := strings.Cut(ref, "#")

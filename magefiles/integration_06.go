@@ -285,10 +285,10 @@ func (Integration) SprintEnd() error {
 		"--artifact", "grader", "--control", system, "--ref", seedBranch, "--dir", clone); err != nil {
 		return err
 	}
-	var obj *sprintend.Objective
-	for i := range facts.Objectives {
-		if facts.Objectives[i].Issue == objRef {
-			obj = &facts.Objectives[i]
+	var obj *sprintend.SprintGoal
+	for i := range facts.SprintGoals {
+		if facts.SprintGoals[i].Issue == objRef {
+			obj = &facts.SprintGoals[i]
 		}
 	}
 	c.expect(obj != nil && obj.ReportedComplete && !obj.Met && facts.Recommended != "", "facts: %+v", facts)

@@ -5,6 +5,7 @@ package reports
 
 import (
 	"fmt"
+	"maps"
 	"path"
 	"regexp"
 	"slices"
@@ -38,7 +39,7 @@ type Report struct {
 
 // Keys each entry must carry, and the values some keys allow.
 var (
-	WorkKeys    = []string{"objective", "component", "status", "complete", "problems"}
+	WorkKeys    = []string{"sprint_goal", "component", "status", "complete", "problems"}
 	BlockerKeys = []string{"blocker", "component", "since", "waiting-on"}
 	Statuses    = []string{"on-track", "at-risk", "blocked", "done"}
 )
@@ -114,9 +115,25 @@ func ParseReport(p string, src []byte) (Report, error) {
 		if strings.TrimSpace(m[1]) == "none" {
 			continue
 		}
-		*section = append(*section, parseEntry(m[1]))
+		e := parseEntry(m[1])
+		if section == &r.Work {
+			e = sprintGoalKey(e)
+		}
+		*section = append(*section, e)
 	}
 	return r, nil
+}
+
+// sprintGoalKey reads a work entry's objective key, its name in reports
+// written before release 04.0, as sprint_goal (config format report).
+func sprintGoalKey(e Entry) Entry {
+	if v, ok := e["objective"]; ok {
+		if _, has := e["sprint_goal"]; !has {
+			e["sprint_goal"] = v
+		}
+		delete(e, "objective")
+	}
+	return e
 }
 
 func parseEntry(s string) Entry {
@@ -213,6 +230,11 @@ func missing(where string, e Entry, keys []string) []string {
 // Render writes a report in the format, its front matter derived from the
 // body, so what tpm writes always validates.
 func Render(author, sprint string, work, blockers []Entry) string {
+	named := make([]Entry, len(work))
+	for i, e := range work {
+		named[i] = sprintGoalKey(maps.Clone(e))
+	}
+	work = named
 	r := Report{FrontMatter: FrontMatter{Author: author, Sprint: sprint}, Work: work, Blockers: blockers}
 	fm := r.Derive()
 	head, _ := yaml.Marshal(fm)

@@ -58,15 +58,15 @@ func StatusBody(cfg Config, m Member, reportsProject string, weekStart time.Time
 
 ## Requirements
 
-1. Run `+"`tpm reports week --project %[4]s --user %[1]s --json`"+` for this repository's open objective issues and your activity this week.
-2. Model step (structure): for each open objective issue, ask and record its status (on-track, at-risk, blocked, or done), its problems, and whether it is complete; record what blocks the work.
+1. Run `+"`tpm reports week --project %[4]s --user %[1]s --json`"+` for this repository's open Sprint Goals and your activity this week.
+2. Model step (structure): for each open Sprint Goal, ask and record its status (on-track, at-risk, blocked, or done), its problems, and whether it is complete; record what blocks the work.
 3. In a checkout of %[5]s, on branch %[6]s, write %[7]s in the report format (schema/report.md).
 4. Run `+"`tpm reports validate --dir <reports checkout> %[7]s`"+` and fix what it reports.
 5. Commit, push the branch, and ask a reviewer to run `+"`tpm issue approve --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s`"+`; then run `+"`tpm issue merge --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s --dir <reports checkout>`"+`; the merge closes this issue.
 
 ## Acceptance Criteria
 
-- %[7]s in %[5]s covers every open objective issue of %[4]s and passes tpm reports validate (test: tpm_reports_validate; environment: local)
+- %[7]s in %[5]s covers every open Sprint Goal of %[4]s and passes tpm reports validate (test: tpm_reports_validate; environment: local)
 
 ## Recurrence
 
