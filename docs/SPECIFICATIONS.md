@@ -108,7 +108,7 @@ docs/road-map.md.
 | [srd031-plan](specs/software-requirements/srd031-plan.md) | docs/specs/software-requirements/srd031-plan.md | Skill: plan | 01.2 |
 | [srd032-sprint-review](specs/software-requirements/srd032-sprint-review.md) | docs/specs/software-requirements/srd032-sprint-review.md | Skill: sprint-review | 02.0 |
 | [srd033-sprint-retrospective](specs/software-requirements/srd033-sprint-retrospective.md) | docs/specs/software-requirements/srd033-sprint-retrospective.md | Skill: sprint-retrospective | 02.0 |
-| [srd034-objectives](specs/software-requirements/srd034-objectives.md) | docs/specs/software-requirements/srd034-objectives.md | Objective documents and the dated objective loop | 01.0 |
+| [srd034-initiatives](specs/software-requirements/srd034-initiatives.md) | docs/specs/software-requirements/srd034-initiatives.md | Initiatives and the Sprint Goal loop | 01.0 |
 | [srd035-specify](specs/software-requirements/srd035-specify.md) | docs/specs/software-requirements/srd035-specify.md | Skill: specify | 00.0 |
 | [srd036-implement](specs/software-requirements/srd036-implement.md) | docs/specs/software-requirements/srd036-implement.md | Skill: implement | 00.1 |
 | [srd037-install](specs/software-requirements/srd037-install.md) | docs/specs/software-requirements/srd037-install.md | Script: install (tpm install) | 00.3 |
@@ -119,7 +119,7 @@ docs/road-map.md.
 | [srd042-beads-tracker](specs/software-requirements/srd042-beads-tracker.md) | docs/specs/software-requirements/srd042-beads-tracker.md | Beads tracker: the program's facts live in a repository | 03.0 |
 | [srd043-init-onboard](specs/software-requirements/srd043-init-onboard.md) | docs/specs/software-requirements/srd043-init-onboard.md | Script: init and onboard (tpm init, tpm onboard) | 01.4 |
 | [srd044-help](specs/software-requirements/srd044-help.md) | docs/specs/software-requirements/srd044-help.md | Script: help (tpm help) | 01.4 |
-| [srd045-epics](specs/software-requirements/srd045-epics.md) | docs/specs/software-requirements/srd045-epics.md | Epics: the Product Backlog, velocity, and forecasts | 02.0 |
+| [srd045-backlog](specs/software-requirements/srd045-backlog.md) | docs/specs/software-requirements/srd045-backlog.md | The backlog hierarchy: themes, initiatives, epics, features, and stories | 04.0 |
 
 <!-- field: config_format_index -->
 ## Config format index

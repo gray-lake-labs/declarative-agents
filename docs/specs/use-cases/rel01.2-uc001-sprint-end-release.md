@@ -50,9 +50,9 @@ The tracker's due-date notification for the period's sprint-end issue.
 
 | id | target | reason |
 | --- | --- | --- |
-| T1 | [srd034-objectives](../software-requirements/srd034-objectives.md) [R2.3](../software-requirements/srd034-objectives.md#r23) | S1, S3, and S4 trace the sprint-end issue, the documents-only gate, and the stage-one close. |
+| T1 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R2.3](../software-requirements/srd034-initiatives.md#r23) | S1, S3, and S4 trace the sprint-end issue, the documents-only gate, and the stage-one close. |
 | T2 | [srd015-release](../software-requirements/srd015-release.md) [R1.1](../software-requirements/srd015-release.md#r11), [R1.3](../software-requirements/srd015-release.md#r13), [R2.1](../software-requirements/srd015-release.md#r21), [R2.2](../software-requirements/srd015-release.md#r22), [R2.3](../software-requirements/srd015-release.md#r23) | S2 traces the gate and tagging. |
-| T3 | [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2) | S1, S3, and S4 trace these acceptance criteria. |
+| T3 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2) | S1, S3, and S4 trace these acceptance criteria. |
 | T4 | [srd015-release](../software-requirements/srd015-release.md) [AC1](../software-requirements/srd015-release.md#ac1), [AC2](../software-requirements/srd015-release.md#ac2) | S2 traces these acceptance criteria. |
 | T5 | [srd038-sprint-end](../software-requirements/srd038-sprint-end.md) [R1.1](../software-requirements/srd038-sprint-end.md#r11), [R1.2](../software-requirements/srd038-sprint-end.md#r12), [R1.3](../software-requirements/srd038-sprint-end.md#r13), [R2.1](../software-requirements/srd038-sprint-end.md#r21), [R2.2](../software-requirements/srd038-sprint-end.md#r22), [R2.3](../software-requirements/srd038-sprint-end.md#r23) | S1, S3, and S4 trace the sprint-end issue, the documents-only gate, and the stage-one close. |
 | T6 | [srd038-sprint-end](../software-requirements/srd038-sprint-end.md) [AC1](../software-requirements/srd038-sprint-end.md#ac1), [AC2](../software-requirements/srd038-sprint-end.md#ac2) | S1, S3, and S4 trace these acceptance criteria. |
@@ -97,8 +97,8 @@ A documents-only repository releases only a corpus that mage audit passes.
 <!-- field: traces -->
 #### Traces
 
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R2.3](../software-requirements/srd034-objectives.md#r23)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R2.3](../software-requirements/srd034-initiatives.md#r23)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
 <!-- sc: S4 -->
 ### S4

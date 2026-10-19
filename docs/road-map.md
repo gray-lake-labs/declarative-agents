@@ -182,7 +182,7 @@ Owner works through release 00.1's implement and 00.2's audit gate.
 - srd006-events
 - srd007-links
 - srd022-tasks
-- srd034-objectives
+- srd034-initiatives
 - srd039-corpus
 
 <!-- field: semantic_models -->
@@ -280,7 +280,7 @@ issue, and files the next period's sprint-end issues.
 - srd015-release
 - srd018-reports
 - srd031-plan
-- srd034-objectives
+- srd034-initiatives
 - srd038-sprint-end
 - srd040-format-tools
 
@@ -413,7 +413,7 @@ cases are written when the release is planned.
 - srd032-sprint-review
 - srd033-sprint-retrospective
 - srd041-states
-- srd045-epics
+- srd045-backlog
 
 <!-- release: 03.0 | status: implemented -->
 ## 03.0 - The tracker becomes beads
@@ -483,10 +483,10 @@ ledger, are written with the requirement items they touch.
 - srd013-program
 - srd022-tasks
 - srd031-plan
-- srd034-objectives
+- srd034-initiatives
 - srd038-sprint-end
 - srd041-states
-- srd045-epics
+- srd045-backlog
 
 <!-- field: semantic_models -->
 ### Semantic models

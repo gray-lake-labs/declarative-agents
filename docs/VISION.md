@@ -242,7 +242,7 @@ practices taken from the playbook, are in
 - docs/SPECIFICATIONS.md
 - docs/road-map.md
 - docs/constitutions/design.md
-- docs/specs/software-requirements/srd034-objectives.md
+- docs/specs/software-requirements/srd034-initiatives.md
 - docs/guides/process.md
 - docs/guides/ai-native-sdlc.md
 - docs/guides/sdlc-playbook.md

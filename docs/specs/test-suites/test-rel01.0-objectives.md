@@ -60,8 +60,8 @@ go test ./magefiles -run '^TestObjectiveGateRejectsMalformedFixtures$'
 <!-- field: traces -->
 #### Traces
 
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC1](../software-requirements/srd034-objectives.md#ac1)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC1](../software-requirements/srd034-initiatives.md#ac1)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
 <!-- case: A malformed objective document fails the audit and blocks the merge | status: implemented -->
 ### A malformed objective document fails the audit and blocks the merge
@@ -92,8 +92,8 @@ go test ./internal/objectives -run '^TestEachMalformedDocumentYieldsExactlyItsFi
 <!-- field: traces -->
 #### Traces
 
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC1](../software-requirements/srd034-objectives.md#ac1)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC1](../software-requirements/srd034-initiatives.md#ac1)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
 <!-- case: tasks files one dated objective issue per owner | status: implemented -->
 ### tasks files one dated objective issue per owner
@@ -127,7 +127,7 @@ go test ./internal/goals -run '^Test(PushFilesOneDatedPinnedObjectiveIssue|DueFa
 <!-- field: traces -->
 #### Traces
 
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC3](../software-requirements/srd034-initiatives.md#ac3)
 - [srd022-tasks](../software-requirements/srd022-tasks.md) [AC2](../software-requirements/srd022-tasks.md#ac2)
 - [srd006-events](../software-requirements/srd006-events.md) [AC7](../software-requirements/srd006-events.md#ac7)
 - [srd007-links](../software-requirements/srd007-links.md) [AC5](../software-requirements/srd007-links.md#ac5)
@@ -224,4 +224,4 @@ go test ./internal/goals ./magefiles -run '^Test(PushFilesOneDatedPinnedObjectiv
 <!-- field: traces -->
 #### Traces
 
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC9](../software-requirements/srd034-objectives.md#ac9)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC9](../software-requirements/srd034-initiatives.md#ac9)

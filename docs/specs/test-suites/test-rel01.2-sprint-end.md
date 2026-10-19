@@ -99,7 +99,7 @@ go test ./internal/release -run '^Test(GateRunsDeclaredChecks|TagRequiresPassing
 
 - [srd015-release](../software-requirements/srd015-release.md) [AC1](../software-requirements/srd015-release.md#ac1)
 - [srd015-release](../software-requirements/srd015-release.md) [AC2](../software-requirements/srd015-release.md#ac2)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
 <!-- case: Reported-complete objectives close without a met event | status: implemented -->
 ### Reported-complete objectives close without a met event
@@ -166,7 +166,7 @@ go test ./internal/plan -run '^Test(PlanReleaseRanksSlippedFirst|PlanReleaseWrit
 - [srd031-plan](../software-requirements/srd031-plan.md) [AC1](../software-requirements/srd031-plan.md#ac1)
 - [srd031-plan](../software-requirements/srd031-plan.md) [AC2](../software-requirements/srd031-plan.md#ac2)
 - [srd031-plan](../software-requirements/srd031-plan.md) [AC3](../software-requirements/srd031-plan.md#ac3)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC3](../software-requirements/srd034-initiatives.md#ac3)
 
 <!-- case: The sprint milestone and sprint issue are updated, not duplicated | status: implemented -->
 ### The sprint milestone and sprint issue are updated, not duplicated

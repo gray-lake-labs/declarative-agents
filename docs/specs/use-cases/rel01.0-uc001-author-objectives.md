@@ -48,9 +48,9 @@ The program agrees what it commits to for the next horizon of periods.
 
 | id | target | reason |
 | --- | --- | --- |
-| T1 | [srd034-objectives](../software-requirements/srd034-objectives.md) [R1.1](../software-requirements/srd034-objectives.md#r11), [R1.2](../software-requirements/srd034-objectives.md#r12), [R1.3](../software-requirements/srd034-objectives.md#r13), [R1.4](../software-requirements/srd034-objectives.md#r14), [R1.5](../software-requirements/srd034-objectives.md#r15), [R1.6](../software-requirements/srd034-objectives.md#r16) | S1 and S2 trace the objective document's location, shape, fields, and stable ids. |
-| T2 | [srd034-objectives](../software-requirements/srd034-objectives.md) [R2.1](../software-requirements/srd034-objectives.md#r21), [R2.2](../software-requirements/srd034-objectives.md#r22) | S3 traces the agent-based audit and its CI gate. |
-| T3 | [srd034-objectives](../software-requirements/srd034-objectives.md) [AC1](../software-requirements/srd034-objectives.md#ac1), [AC2](../software-requirements/srd034-objectives.md#ac2) | S1 to S3 trace these acceptance criteria. |
+| T1 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R1.1](../software-requirements/srd034-initiatives.md#r11), [R1.2](../software-requirements/srd034-initiatives.md#r12), [R1.3](../software-requirements/srd034-initiatives.md#r13), [R1.4](../software-requirements/srd034-initiatives.md#r14), [R1.5](../software-requirements/srd034-initiatives.md#r15), [R1.6](../software-requirements/srd034-initiatives.md#r16) | S1 and S2 trace the objective document's location, shape, fields, and stable ids. |
+| T2 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R2.1](../software-requirements/srd034-initiatives.md#r21), [R2.2](../software-requirements/srd034-initiatives.md#r22) | S3 traces the agent-based audit and its CI gate. |
+| T3 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC1](../software-requirements/srd034-initiatives.md#ac1), [AC2](../software-requirements/srd034-initiatives.md#ac2) | S1 to S3 trace these acceptance criteria. |
 
 <!-- field: success_criteria -->
 ## Success criteria
@@ -63,12 +63,12 @@ The objective document carries every field the objective document type requires,
 <!-- field: traces -->
 #### Traces
 
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R1.1](../software-requirements/srd034-objectives.md#r11)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R1.2](../software-requirements/srd034-objectives.md#r12)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R1.3](../software-requirements/srd034-objectives.md#r13)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R1.4](../software-requirements/srd034-objectives.md#r14)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R1.5](../software-requirements/srd034-objectives.md#r15)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC1](../software-requirements/srd034-objectives.md#ac1)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R1.1](../software-requirements/srd034-initiatives.md#r11)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R1.2](../software-requirements/srd034-initiatives.md#r12)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R1.3](../software-requirements/srd034-initiatives.md#r13)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R1.4](../software-requirements/srd034-initiatives.md#r14)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R1.5](../software-requirements/srd034-initiatives.md#r15)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC1](../software-requirements/srd034-initiatives.md#ac1)
 
 <!-- sc: S2 -->
 ### S2
@@ -78,8 +78,8 @@ A changed objective is added as a new item or document and the old one retired; 
 <!-- field: traces -->
 #### Traces
 
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R1.6](../software-requirements/srd034-objectives.md#r16)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC1](../software-requirements/srd034-objectives.md#ac1)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R1.6](../software-requirements/srd034-initiatives.md#r16)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC1](../software-requirements/srd034-initiatives.md#ac1)
 
 <!-- sc: S3 -->
 ### S3
@@ -89,9 +89,9 @@ mage audit runs the specification-critic agent before every merge that changes d
 <!-- field: traces -->
 #### Traces
 
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R2.1](../software-requirements/srd034-objectives.md#r21)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R2.2](../software-requirements/srd034-objectives.md#r22)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R2.1](../software-requirements/srd034-initiatives.md#r21)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R2.2](../software-requirements/srd034-initiatives.md#r22)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
 <!-- field: out_of_scope -->
 ## Out of scope

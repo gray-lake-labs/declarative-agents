@@ -51,12 +51,12 @@ A design change to a component SRD, use case, test suite, or the architecture.
 | T2 | [srd035-specify](../software-requirements/srd035-specify.md) [R2.2](../software-requirements/srd035-specify.md#r22) | S1 traces how push picks the kind. |
 | T3 | [srd036-implement](../software-requirements/srd036-implement.md) [R3.2](../software-requirements/srd036-implement.md#r32) | S2 traces the audit gate. |
 | T4 | [srd013-program](../software-requirements/srd013-program.md) [R5.3](../software-requirements/srd013-program.md#r53) | S2 traces the corpus gate before the merge. |
-| T5 | [srd034-objectives](../software-requirements/srd034-objectives.md) [R2.1](../software-requirements/srd034-objectives.md#r21), [R2.2](../software-requirements/srd034-objectives.md#r22) | S2 traces the corpus gate. |
+| T5 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R2.1](../software-requirements/srd034-initiatives.md#r21), [R2.2](../software-requirements/srd034-initiatives.md#r22) | S2 traces the corpus gate. |
 | T6 | [srd001-labels](../software-requirements/srd001-labels.md) [AC24](../software-requirements/srd001-labels.md#ac24) | S1 traces this acceptance criterion. |
 | T7 | [srd035-specify](../software-requirements/srd035-specify.md) [AC1](../software-requirements/srd035-specify.md#ac1) | S1 traces this acceptance criterion. |
 | T8 | [srd036-implement](../software-requirements/srd036-implement.md) [AC2](../software-requirements/srd036-implement.md#ac2) | S2 traces this acceptance criterion. |
 | T9 | [srd013-program](../software-requirements/srd013-program.md) [AC5](../software-requirements/srd013-program.md#ac5) | S2 traces this acceptance criterion. |
-| T10 | [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2) | S2 traces this acceptance criterion. |
+| T10 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2) | S2 traces this acceptance criterion. |
 
 <!-- field: success_criteria -->
 ## Success criteria
@@ -88,9 +88,9 @@ The merge happens only when mage audit passes, and it closes the issue.
 - [srd036-implement](../software-requirements/srd036-implement.md) [AC2](../software-requirements/srd036-implement.md#ac2)
 - [srd013-program](../software-requirements/srd013-program.md) [R5.3](../software-requirements/srd013-program.md#r53)
 - [srd013-program](../software-requirements/srd013-program.md) [AC5](../software-requirements/srd013-program.md#ac5)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R2.1](../software-requirements/srd034-objectives.md#r21)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R2.2](../software-requirements/srd034-objectives.md#r22)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R2.1](../software-requirements/srd034-initiatives.md#r21)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R2.2](../software-requirements/srd034-initiatives.md#r22)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
 <!-- field: out_of_scope -->
 ## Out of scope

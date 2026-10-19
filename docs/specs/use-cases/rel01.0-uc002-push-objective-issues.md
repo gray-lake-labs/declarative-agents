@@ -54,12 +54,12 @@ The system release is recorded in docs/road-map.md with its tag.
 
 | id | target | reason |
 | --- | --- | --- |
-| T1 | [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.2](../software-requirements/srd034-objectives.md#r32), [R3.3](../software-requirements/srd034-objectives.md#r33), [R3.4](../software-requirements/srd034-objectives.md#r34), [R9.1](../software-requirements/srd034-objectives.md#r91) | S1 and S6 trace how an objective issue is rendered and what the owner does with it. |
+| T1 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R3.2](../software-requirements/srd034-initiatives.md#r32), [R3.3](../software-requirements/srd034-initiatives.md#r33), [R3.4](../software-requirements/srd034-initiatives.md#r34), [R9.1](../software-requirements/srd034-initiatives.md#r91) | S1 and S6 trace how an objective issue is rendered and what the owner does with it. |
 | T2 | [srd022-tasks](../software-requirements/srd022-tasks.md) [R1.1](../software-requirements/srd022-tasks.md#r11), [R2.1](../software-requirements/srd022-tasks.md#r21), [R2.2](../software-requirements/srd022-tasks.md#r22), [R2.3](../software-requirements/srd022-tasks.md#r23), [R3.1](../software-requirements/srd022-tasks.md#r31), [R3.2](../software-requirements/srd022-tasks.md#r32), [R3.3](../software-requirements/srd022-tasks.md#r33), [R4.1](../software-requirements/srd022-tasks.md#r41), [R4.3](../software-requirements/srd022-tasks.md#r43), [R5.1](../software-requirements/srd022-tasks.md#r51), [R5.2](../software-requirements/srd022-tasks.md#r52), [R5.3](../software-requirements/srd022-tasks.md#r53) | S1, S2, and S5 trace tasks' reads, questions, pushes, and refusals. |
 | T3 | [srd013-program](../software-requirements/srd013-program.md) [R1.1](../software-requirements/srd013-program.md#r11), [R1.2](../software-requirements/srd013-program.md#r12), [R1.3](../software-requirements/srd013-program.md#r13), [R2.1](../software-requirements/srd013-program.md#r21), [R3.1](../software-requirements/srd013-program.md#r31) | S3 traces filing and admission. |
 | T4 | [srd007-links](../software-requirements/srd007-links.md) [R5.1](../software-requirements/srd007-links.md#r51), [R5.2](../software-requirements/srd007-links.md#r52), [R5.3](../software-requirements/srd007-links.md#r53) | S4 traces pinned citations. |
 | T5 | [srd006-events](../software-requirements/srd006-events.md) [R8.1](../software-requirements/srd006-events.md#r81), [R8.2](../software-requirements/srd006-events.md#r82) | S5 traces the planned event. |
-| T6 | [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3), [AC9](../software-requirements/srd034-objectives.md#ac9) | S1 and S6 trace these acceptance criteria. |
+| T6 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC3](../software-requirements/srd034-initiatives.md#ac3), [AC9](../software-requirements/srd034-initiatives.md#ac9) | S1 and S6 trace these acceptance criteria. |
 | T7 | [srd022-tasks](../software-requirements/srd022-tasks.md) [AC1](../software-requirements/srd022-tasks.md#ac1), [AC2](../software-requirements/srd022-tasks.md#ac2), [AC3](../software-requirements/srd022-tasks.md#ac3) | S1, S2, and S5 trace these acceptance criteria. |
 | T8 | [srd013-program](../software-requirements/srd013-program.md) [AC1](../software-requirements/srd013-program.md#ac1), [AC2](../software-requirements/srd013-program.md#ac2), [AC3](../software-requirements/srd013-program.md#ac3) | S3 traces these acceptance criteria. |
 | T9 | [srd007-links](../software-requirements/srd007-links.md) [AC5](../software-requirements/srd007-links.md#ac5) | S4 traces this acceptance criterion. |
@@ -76,10 +76,10 @@ Each owner receives one objective issue per release with pinned Cites lines, an 
 <!-- field: traces -->
 #### Traces
 
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.2](../software-requirements/srd034-objectives.md#r32)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.3](../software-requirements/srd034-objectives.md#r33)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.4](../software-requirements/srd034-objectives.md#r34)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R3.2](../software-requirements/srd034-initiatives.md#r32)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R3.3](../software-requirements/srd034-initiatives.md#r33)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R3.4](../software-requirements/srd034-initiatives.md#r34)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC3](../software-requirements/srd034-initiatives.md#ac3)
 - [srd022-tasks](../software-requirements/srd022-tasks.md) [R4.1](../software-requirements/srd022-tasks.md#r41)
 - [srd022-tasks](../software-requirements/srd022-tasks.md) [AC2](../software-requirements/srd022-tasks.md#ac2)
 
@@ -155,8 +155,8 @@ The Product Owner takes the issue with implement and needs no other tool, channe
 <!-- field: traces -->
 #### Traces
 
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [R9.1](../software-requirements/srd034-objectives.md#r91)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC9](../software-requirements/srd034-objectives.md#ac9)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R9.1](../software-requirements/srd034-initiatives.md#r91)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC9](../software-requirements/srd034-initiatives.md#ac9)
 
 <!-- field: out_of_scope -->
 ## Out of scope

@@ -337,12 +337,13 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
     1. i_want
     1. so_that
     1. points
+    1. rank
     1. cites
     1. blocked_by
     1. depends_on
     1. relates_to
     1. duplicates
-  - context_note: as_a, i_want, and so_that are the user story's statement, written from the user's view. points is a relative estimate of the story's work, never of a person (D5). cites lists the SRD requirement items the story's criteria prove, each a URL pinned to a release tag (D9); it may be empty.
+  - context_note: as_a, i_want, and so_that are the user story's statement, written from the user's view. points is a relative estimate of the story's work, never of a person (D5). rank orders the team's Product Backlog, lowest first, and the Product Owner sets it (srd045 R5.1). cites lists the SRD requirement items the story's criteria prove, each a URL pinned to a release tag (D9); it may be empty.
   - numbering: same as srd; one requirement group holds the story's detail, and its acceptance criteria are the story's own
   - acceptance_criteria_fields: same as srd
   - acceptance_criteria_note: tests and applicability are required (D8). An evidence event proves one criterion; it is posted on the team's Sprint Goal and names the criterion by pinned URL (srd006).
