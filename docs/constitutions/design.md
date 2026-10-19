@@ -190,9 +190,17 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
     1. human_approval
   - numbering: same as srd
   - purpose: "Declares one environment of the chain (local, dev, staging, production PoC, customer R\u0026D): who owns it and what triggers promotion into it (context items), and which test suites run there (test_suite_traces). Promotion is CI/CD in the test subsystem; handoff into a customer R\u0026D environment is a human approval."
-- objective:
-  - location: docs/specs/objectives/objNNN-short-name.md in the system (TPM) repository
-  - format: an SRD in the pinned release's Markdown format (D2); scrum-master's format tools read it with the release's SRD declaration
+- hierarchy_links:
+  - parent: at most one, naming the level above by kind; theme, then initiative, then epic, then feature, then story; a story may name an epic directly, and only a feature must have a parent
+  - blocked_by: the documents that must finish before this one can; waiting derives from it (srd007)
+  - depends_on: the documents whose output this one needs, which may proceed at the same time; reported, never blocking
+  - relates_to: documents that share context; reported, never blocking
+  - duplicates: the document this one repeats; the duplicate is retired
+  - targets: a same-repository document id, or a URL pinned to a release tag (D9) for a document in another repository
+  - purpose: The vertical and horizontal links of the planning hierarchy, written as context items of each hierarchy document; an issue carries the same links as body lines (srd007). Progress rolls up through parent, never through anchors.
+- theme:
+  - location: docs/specs/themes/thNNN-short-name.md in the system (TPM) repository
+  - format: an SRD in the pinned release's Markdown format (D2), as every hierarchy document is; scrum-master's format tools read it with the release's SRD declaration
   - required_fields:
     1. id
     1. title
@@ -210,6 +218,35 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - context_items:
     1. owner
     1. horizon
+    1. relates_to
+  - numbering: same as srd; each requirement group is one strategic goal
+  - acceptance_criteria_fields: same as srd
+  - purpose: A strategic goal area for months to years, owned by the technical program manager. Initiatives name it as their parent, and reports group the initiatives and epics beneath it.
+- initiative:
+  - location: docs/specs/initiatives/inNNN-short-name.md in the system (TPM) repository; an objective document at docs/specs/objectives/objNNN-short-name.md is read as an initiative without change
+  - format: an SRD in the pinned release's Markdown format (D2)
+  - required_fields:
+    1. id
+    1. title
+    1. status
+    1. context
+    1. problem
+    1. goals
+    1. requirements
+    1. non_goals
+    1. acceptance_criteria
+  - status_values:
+    1. to_be_agreed
+    1. agreed
+    1. retired
+  - context_items:
+    1. owner
+    1. horizon
+    1. parent
+    1. blocked_by
+    1. depends_on
+    1. relates_to
+    1. duplicates
   - requirement_group_fields:
     1. title
     1. applicability
@@ -217,13 +254,13 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - requirement_group_applicability_items:
     1. due
     1. delivered_by
-  - numbering: same as srd; each requirement group is one objective
+  - numbering: same as srd; each requirement group is one outcome
   - acceptance_criteria_fields: same as srd
   - acceptance_criteria_note: tests and applicability are required (D8); applicability names the environment. Until the program's environment SRDs exist, it names a chain stage D8 lists and the audit cannot resolve it (srd034 R1.5).
-  - purpose: States what the program commits to for a horizon of periods, owned by the technical program manager. plan places its items in a release and tasks cites them, pinned, on the objective issues it files (srd034).
+  - purpose: A multi-team outcome over several quarters, the program's Product Goal, owned by the technical program manager. Its parent is a theme; epics name it as theirs. plan places its outcomes in a release and tasks cites them, pinned, on each team's Sprint Goal (srd034).
 - epic:
-  - location: docs/specs/epics/epNNN-short-name.md in the system (TPM) repository
-  - format: an SRD in the pinned release's Markdown format (D2), as an objective is; scrum-master's format tools read it with the release's SRD declaration
+  - location: docs/specs/epics/epNNN-short-name.md, in the system (TPM) repository when it spans teams or in a subsystem repository when one team owns it
+  - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id
     1. title
@@ -241,18 +278,79 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - context_items:
     1. owner
     1. horizon
-  - requirement_group_fields:
-    1. title
-    1. applicability
-    1. items
-  - requirement_group_applicability_items:
-    1. points
+    1. parent
+    1. blocked_by
     1. depends_on
-    1. anchor
-  - applicability_note: points is a relative story-point estimate of the backlog item's work, never of a person (D5). depends_on lists the items it waits on, as Rn within the epic or as URLs pinned to items of another epic (D9); it may be empty. anchor is optional, an earliest start date or a release tag the item cannot start before.
-  - numbering: same as srd; each requirement group is one backlog item, in the order the owner ranks them, and each item one checkable part of it
+    1. relates_to
+    1. duplicates
+  - numbering: same as srd; each requirement group is one capability
   - acceptance_criteria_fields: same as srd
-  - purpose: Holds the Product Backlog for a body of work spanning several sprints, ordered by its owner. Objective items cite its backlog items, pinned, to draw them down; each period plan derives objectives from the items no met objective has drawn down, at the program's velocity (srd045). Not a unit of work (D4) and not a tracker object.
+  - purpose: A large body of work spanning several sprints, typically one to three months, owned by a Product Owner. Its parent is an initiative; features and stories name it as theirs, and its progress is the share of its descendants' story points done (srd045). Not a unit of work (D4) and not a tracker object.
+- feature:
+  - location: docs/specs/features/ftNNN-short-name.md in the owning team's repository
+  - format: an SRD in the pinned release's Markdown format (D2)
+  - required_fields:
+    1. id
+    1. title
+    1. status
+    1. context
+    1. problem
+    1. goals
+    1. requirements
+    1. non_goals
+    1. acceptance_criteria
+  - status_values:
+    1. to_be_agreed
+    1. agreed
+    1. retired
+  - context_items:
+    1. owner
+    1. parent
+    1. blocked_by
+    1. depends_on
+    1. relates_to
+    1. duplicates
+  - numbering: same as srd; each requirement group is one part of the capability
+  - acceptance_criteria_fields: same as srd
+  - purpose: An optional layer, a distinct capability within an epic spanning two to four sprints, used when an epic is too large to break straight into stories. Its parent, an epic, is required; stories name it as theirs.
+- story:
+  - location: docs/specs/stories/stNNN-short-name.md in the owning team's repository
+  - format: an SRD in the pinned release's Markdown format (D2)
+  - required_fields:
+    1. id
+    1. title
+    1. status
+    1. context
+    1. problem
+    1. goals
+    1. requirements
+    1. non_goals
+    1. acceptance_criteria
+  - status_values:
+    1. to_be_agreed
+    1. agreed
+    1. retired
+  - context_items:
+    1. owner
+    1. parent
+    1. as_a
+    1. i_want
+    1. so_that
+    1. points
+    1. cites
+    1. blocked_by
+    1. depends_on
+    1. relates_to
+    1. duplicates
+  - context_note: as_a, i_want, and so_that are the user story's statement, written from the user's view. points is a relative estimate of the story's work, never of a person (D5). cites lists the SRD requirement items the story's criteria prove, each a URL pinned to a release tag (D9); it may be empty.
+  - numbering: same as srd; one requirement group holds the story's detail, and its acceptance criteria are the story's own
+  - acceptance_criteria_fields: same as srd
+  - acceptance_criteria_note: tests and applicability are required (D8). An evidence event proves one criterion; it is posted on the team's Sprint Goal and names the criterion by pinned URL (srd006).
+  - purpose: The unit of value in the Product Backlog, sized to fit one sprint and owned by the team's Product Owner. Its parent is a feature or an epic. Sprint Planning selects stories onto the team's Sprint Goal, and make-work turns each into the issues that execute it, each with an Implements line (srd045). It is not a unit of work (D4); the issue that executes it is.
+- objective:
+  - status: retired
+  - replaced_by: initiative
+  - purpose: The former name of the initiative. An objective document at docs/specs/objectives/ is read as an initiative without change, and the objective issue is the Sprint Goal (srd034).
 - use_case:
   - location: docs/specs/use-cases/relNN.N-ucNNN-short-name.md
   - required_fields:
@@ -279,7 +377,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
     1. assumptions
     1. edge_cases
     1. priority
-  - priority: P1 must ship for the use case's release, P2 should, P3 could. An absent priority means unranked. No other value is valid. A use case is the unit of scheduling here, so priority lives on it rather than on a separate user-story type.
+  - priority: P1 must ship for the use case's release, P2 should, P3 could. An absent priority means unranked. No other value is valid. A use case schedules this corpus's own releases; in a program's Product Backlog the order of its stories is the priority (story, srd045).
   - purpose: Describes one end-to-end path through the process.
 - test_suite:
   - location: docs/specs/test-suites/test-relNN.N-short-name.md

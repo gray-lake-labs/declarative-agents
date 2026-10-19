@@ -56,7 +56,7 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
   - examples:
     1. regression tests and benchmarks against the default branch
     1. contract checks at every artifact boundary (srd008)
-    1. - track-goals: follows pinned references, collects evidence, posts ledger events, and closes met objectives (srd019)
+    1. - track-goals: follows pinned references, collects evidence, posts ledger events, and closes met Sprint Goals (srd019)
     1. the program dashboard (tpm goals status, srd019)
     1. the weekly sprint update and the stakeholder update (srd018 R6)
 - outer_loops:
@@ -71,7 +71,7 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
        - srd: srd022
        - started_by: technical program manager or a product owner with downstream repositories
        - when: after plan
-       - pushes: objective issues citing pinned requirements and naming their environment
+       - pushes: Sprint Goal issues citing pinned initiative and epic items
     1. - skill: daily-scrum
        - srd: srd020
        - started_by: each developer
