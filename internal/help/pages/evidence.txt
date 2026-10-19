@@ -1,0 +1,13 @@
+evidence: what done means
+
+Done is a named test passing in a named environment on a recorded version,
+not an issue closing. Every acceptance criterion names both. The
+environments form one chain, local, dev, staging, production PoC, and
+customer R&D, each an SRD in the test subsystem. Release gates post evidence
+on the release issue; evidence on objectives is posted by track-goals,
+specified in srd019 and not yet built, and until then the sprint-end summary
+closes the objectives an owner reports complete.
+
+Commands: tpm release gate, tpm sprint-end facts
+
+See: srd008, srd019, srd038

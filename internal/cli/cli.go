@@ -145,7 +145,7 @@ var ErrUsage = errors.New("usage")
 
 // Run parses args (without the program name) and runs one subcommand.
 func (r *Registry) Run(args []string, out io.Writer, tracker func() (gitlab.Tracker, error)) error {
-	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" || args[0] == "help" {
+	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" {
 		fmt.Fprint(out, r.usage())
 		if len(args) == 0 {
 			return ErrUsage
@@ -215,6 +215,9 @@ func (r *Registry) usage() string {
 		}
 		fmt.Fprintf(&b, "  %s\n", g)
 	}
+	if _, ok := r.commands["help"]; ok {
+		b.WriteString("\nrun tpm help for the process, tpm help <group> for one group\n")
+	}
 	return b.String()
 }
 
@@ -222,6 +225,9 @@ func (r *Registry) groupUsage(group string) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "usage: tpm %s <subcommand> [--json] [--dry-run] [flags]\n\nsubcommands:\n", group)
 	for _, n := range sortedKeys(r.commands[group]) {
+		if n == "" {
+			continue
+		}
 		fmt.Fprintf(&b, "  %-20s %s\n", n, r.commands[group][n].Summary)
 	}
 	return b.String()

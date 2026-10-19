@@ -1,0 +1,14 @@
+plan: release planning, from candidates to a dated period
+
+Before a period the technical program manager, or a Product Owner for a
+subsystem, picks what the next release proves. This group ranks the
+candidates, writes the chosen release into docs/road-map.md, and pushes the
+period: the milestone, the sprint issue, the sprint-end issues, and the
+planned events on each objective. The plan-release skill runs it.
+
+Subcommands:
+  tpm plan candidates   rank the objective items the next release could prove (srd031)
+  tpm plan write        write the chosen release into docs/road-map.md (srd031)
+  tpm plan push         date the milestone and sprint issue, post planned (srd031)
+
+See: srd031, srd038

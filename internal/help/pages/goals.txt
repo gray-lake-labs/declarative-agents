@@ -1,0 +1,14 @@
+goals: objectives, from the objective document to dated issues per owner
+
+An objective is the program's intent for a release period, written once by
+the technical program manager as an objective document in the system
+repository. This group turns a release's objective items into one dated
+objective issue per downstream owner, citing the requirements by URL pinned
+to the release tag and naming the environment where they count. The
+create-goals skill runs it.
+
+Subcommands:
+  tpm goals plan      the release's objectives, recommended owner and environment (srd034)
+  tpm goals push      file the confirmed objective issues, post planned events (srd034)
+
+See: srd022, srd034

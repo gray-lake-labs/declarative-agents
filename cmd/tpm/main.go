@@ -11,15 +11,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 
-	_ "github.com/gray-lake-labs/scrum-master/internal/goals"
-	_ "github.com/gray-lake-labs/scrum-master/internal/install"
-	_ "github.com/gray-lake-labs/scrum-master/internal/plan"
-	_ "github.com/gray-lake-labs/scrum-master/internal/program"
-	_ "github.com/gray-lake-labs/scrum-master/internal/release"
-	_ "github.com/gray-lake-labs/scrum-master/internal/reports"
-	_ "github.com/gray-lake-labs/scrum-master/internal/scaffold"
-	_ "github.com/gray-lake-labs/scrum-master/internal/sprintend"
-	_ "github.com/gray-lake-labs/scrum-master/internal/standup"
+	_ "github.com/gray-lake-labs/scrum-master/internal/commands"
 )
 
 func main() {

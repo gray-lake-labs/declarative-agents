@@ -1,0 +1,11 @@
+install: the skills, where each agent reads them
+
+The skills are thin scripts over this binary, embedded in it so they always
+match it. This writes them where Cursor, Claude Code, or GitHub Copilot reads
+skills, stamped with the version, and keeps them out of git. After an
+upgrade, --check names the skills that no longer match.
+
+Command:
+  tpm install   write the embedded skills for an agent (srd037)
+
+See: srd037
