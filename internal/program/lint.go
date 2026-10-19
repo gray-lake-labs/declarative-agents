@@ -20,8 +20,9 @@ var (
 	numberedEntry   = regexp.MustCompile(`^\d+\. `)
 )
 
-// Lint checks one issue against the label schema and admission policy
-// (srd013 R1.1) and returns every reason it fails; none means admitted.
+// Lint checks one issue against the label schema, admission policy, and its
+// link lines (srd013 R1.1, srd007 R8.1) and returns every reason it fails;
+// none means admitted.
 func Lint(i tracker.Issue, p Policy) []string {
 	var reasons []string
 	axis := func(prefix string) []string {
@@ -95,6 +96,18 @@ func Lint(i tracker.Issue, p Policy) []string {
 	for _, c := range cites {
 		if err := links.CheckPinned(c.URL); err != nil {
 			reasons = append(reasons, "Cites line is not pinned: "+err.Error())
+		}
+	}
+	count := map[string]int{}
+	for _, l := range links.ParseLinks(i.Description) {
+		count[l.Kind]++
+		if err := links.CheckTarget(l); err != nil {
+			reasons = append(reasons, l.Kind+" line: "+err.Error())
+		}
+	}
+	for _, k := range []string{links.Duplicates, links.Implements} {
+		if count[k] > 1 {
+			reasons = append(reasons, fmt.Sprintf("has %d %s lines, at most one", count[k], k))
 		}
 	}
 

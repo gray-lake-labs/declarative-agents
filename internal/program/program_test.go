@@ -48,6 +48,30 @@ func TestLintReportsEveryFailure(t *testing.T) {
 	}
 }
 
+// TestLintFlagsMalformedLinks admits well-formed agile link lines and flags
+// a malformed or unpinned target and a second Duplicates or Implements line
+// (srd007 R8.1).
+func TestLintFlagsMalformedLinks(t *testing.T) {
+	good := goodBody + "\nBlocked-by: g/po-1#3\nRelates-to: ep001-agent-evaluation\nImplements: st001-score-trajectories\n"
+	if r := Lint(objective(good), Defaults()); len(r) != 0 {
+		t.Fatalf("well-formed links refused: %v", r)
+	}
+	bad := goodBody + strings.Join([]string{"",
+		"Depends-on: somewhere",
+		"Blocks: https://gitlab.example.com/g/po-2/-/blob/main/docs/specs/stories/st002-a.md#R1",
+		"Duplicates: g/po-1#1",
+		"Duplicates: g/po-1#2",
+		"Implements: st001-score-trajectories",
+		"Implements: ep001-agent-evaluation",
+	}, "\n")
+	got := strings.Join(Lint(objective(bad), Defaults()), "\n")
+	for _, want := range []string{`Depends-on target "somewhere"`, `branch "main"`, "has 2 Duplicates lines", "has 2 Implements lines", "Implements names ep001-agent-evaluation, not a story"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q in:\n%s", want, got)
+		}
+	}
+}
+
 func TestSprintIssueNeedsNoComponent(t *testing.T) {
 	i := tracker.Issue{Labels: []string{"plane::management", "type::sprint"}}
 	if r := Lint(i, Defaults()); len(r) != 0 {
