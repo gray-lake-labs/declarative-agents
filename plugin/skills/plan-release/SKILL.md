@@ -20,7 +20,7 @@ Input: the system repository path, and the period's `tpm reports aggregate
    recommended version, end date, and tag. Ask nothing else.
 4. Run `tpm plan write --dir . --system <system> --version <version> --tag <tag> --items <a,b> --issue <planning issue> --json`.
    Show the items it returned for a missing test or environment.
-5. Commit docs/road-map.md and run `tpm program merge` as issue-pop does.
+5. Commit docs/road-map.md and run `tpm issue merge` as issue-pop does.
 6. Once it merges, on main: `tpm release gate --artifact corpus --version <the tag's version> --issue <planning issue>`,
    then `tpm release tag` with the same flags. That tag publishes the plan.
 7. Run `tpm plan push --dir . --system <system> --version <version> --end <end date> --json`.

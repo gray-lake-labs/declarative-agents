@@ -118,7 +118,7 @@ Each install rewrites the block from the files tpm owns after the run, drops a r
 <!-- req: R6.3 -->
 ### R6.3
 
-The installed files are untracked, so a new worktree of the clone has none; tpm program pop installs the checkout's agents into each worktree it creates (srd013 R7.4), and the shared exclude block already lists their paths.
+The installed files are untracked, so a new worktree of the clone has none; tpm issue pop installs the checkout's agents into each worktree it creates (srd013 R7.4), and the shared exclude block already lists their paths.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -189,7 +189,7 @@ install honours --json and --dry-run, never prompts, and writes nothing outside 
 <!-- ac: AC6 -->
 ### AC6
 
-After an install, git ignores every installed file and nothing else: git status shows no change, in the main checkout and in a linked worktree; a command without the stamp in the same directory is not ignored; lines outside the block are unchanged; a directory that is not a git repository is refused; a worktree tpm program pop creates receives the checkout's installed agents and stays clean.
+After an install, git ignores every installed file and nothing else: git status shows no change, in the main checkout and in a linked worktree; a command without the stamp in the same directory is not ignored; lines outside the block are unchanged; a directory that is not a git repository is refused; a worktree tpm issue pop creates receives the checkout's installed agents and stays clean.
 
 <!-- field: traces -->
 #### Traces

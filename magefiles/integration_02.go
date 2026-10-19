@@ -34,7 +34,7 @@ func (Integration) DocsChange() error {
 	if err := r.milestone(rigMilestone, rigDue); err != nil {
 		return err
 	}
-	if _, err := r.runTPM("program", "labels", "--group", r.group); err != nil {
+	if _, err := r.runTPM("issue", "labels", "--group", r.group); err != nil {
 		return err
 	}
 	policy := func(filer string) error {
@@ -54,7 +54,7 @@ func (Integration) DocsChange() error {
 	writeFileTo(filepath.Join(run, "docs-change.md"), body)
 	file := func(project, title, path string, extra ...string) (program.FileResult, error) {
 		var res program.FileResult
-		args := append([]string{"program", "file", "--project", project, "--system", system, "--ref", seedBranch,
+		args := append([]string{"issue", "file", "--project", project, "--system", system, "--ref", seedBranch,
 			"--title", title, "--body-file", filepath.Join(run, "docs-change.md"), "--path", path}, extra...)
 		return res, r.tpmJSON(&res, args...)
 	}
@@ -92,7 +92,7 @@ func (Integration) DocsChange() error {
 }
 
 // workDocsChange pops an issue, changes path under docs/ in its worktree,
-// and delivers it through the audit gate with tpm program merge. With
+// and delivers it through the audit gate with tpm issue merge. With
 // failFirst, the first commit carries the marker that fails the audit, and
 // merge must refuse it with nothing merged.
 func (r *rigEnv) workDocsChange(c *check, project, name string, iid int, path string, failFirst bool) error {
@@ -101,7 +101,7 @@ func (r *rigEnv) workDocsChange(c *check, project, name string, iid int, path st
 		return err
 	}
 	var popped program.PopResult
-	if err := r.tpmJSON(&popped, "program", "pop", "--project", project, "--issue", fmt.Sprint(iid), "--dir", clone); err != nil {
+	if err := r.tpmJSON(&popped, "issue", "pop", "--project", project, "--issue", fmt.Sprint(iid), "--dir", clone); err != nil {
 		return err
 	}
 	wt := popped.Worktree
@@ -116,7 +116,7 @@ func (r *rigEnv) workDocsChange(c *check, project, name string, iid int, path st
 	}
 	merge := func() (program.MergeResult, error) {
 		var res program.MergeResult
-		return res, r.tpmJSON(&res, "program", "merge", "--project", project, "--issue", fmt.Sprint(iid),
+		return res, r.tpmJSON(&res, "issue", "merge", "--project", project, "--issue", fmt.Sprint(iid),
 			"--branch", popped.Branch, "--dir", wt, "--audit", rigAudit)
 	}
 	if failFirst {

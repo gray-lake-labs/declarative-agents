@@ -148,7 +148,7 @@ func localMergeCloses(t *testing.T, f gitlab.Tracker, checkout string) {
 
 func TestSprintEndReleasesOnlyAfterConfirmation(t *testing.T) {
 	body := plan.SprintEndBody("01.1", "2026-11-27")
-	steps := []string{"tpm sprint-end facts", "docs/sprint-ends/01.1.md", "tpm program merge", "--closes", "confirm the release and its version", "the merge alone closes this issue", "Once the summary merges", "tpm release gate"}
+	steps := []string{"tpm sprint-end facts", "docs/sprint-ends/01.1.md", "tpm issue merge", "--closes", "confirm the release and its version", "the merge alone closes this issue", "Once the summary merges", "tpm release gate"}
 	at := -1
 	for _, s := range steps {
 		i := strings.Index(body, s)

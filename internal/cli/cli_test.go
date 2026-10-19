@@ -90,3 +90,18 @@ func TestGroupCommandRunsWithoutSubcommand(t *testing.T) {
 		t.Fatalf("err=%v out=%q", err, out.String())
 	}
 }
+
+func TestRetiredGroupRunsNothingAndNamesItsReplacement(t *testing.T) {
+	var ctx Context
+	var title string
+	r := registry(&ctx, &title)
+	r.Retire("old", "program")
+	var out bytes.Buffer
+	err := r.Run([]string{"old", "file", "--title", "x"}, &out, noTracker)
+	if err == nil || !strings.Contains(err.Error(), "tpm old is now tpm program: run tpm program file") || title != "" {
+		t.Fatalf("retired group: err %v, ran with title %q", err, title)
+	}
+	if strings.Contains(r.usage(), "old") {
+		t.Fatalf("usage lists a retired group:\n%s", r.usage())
+	}
+}

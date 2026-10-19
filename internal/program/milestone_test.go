@@ -16,13 +16,13 @@ import (
 
 func day(offset int) string { return time.Now().AddDate(0, 0, offset).Format("2006-01-02") }
 
-// fileWith runs tpm program file for a data issue against f and returns
+// fileWith runs tpm issue file for a data issue against f and returns
 // the result and the filed issue.
 func fileWith(t *testing.T, f *gitlabtest.Fake, extra ...string) (FileResult, gitlab.Issue) {
 	t.Helper()
 	body := filepath.Join(t.TempDir(), "issue.md")
 	os.WriteFile(body, []byte(goodBody), 0o644)
-	args := append([]string{"program", "file", "--json", "--project", "g/po-1", "--title", "Score one agent",
+	args := append([]string{"issue", "file", "--json", "--project", "g/po-1", "--title", "Score one agent",
 		"--body-file", body, "--plane", "data", "--kind", "build", "--component", "po-1"}, extra...)
 	var out bytes.Buffer
 	if err := cli.Default.Run(args, &out, func() (gitlab.Tracker, error) { return f, nil }); err != nil {
@@ -92,7 +92,7 @@ func TestFileReportsComponent(t *testing.T) {
 	body := filepath.Join(t.TempDir(), "issue.md")
 	os.WriteFile(body, []byte(goodBody), 0o644)
 	var out bytes.Buffer
-	err := cli.Default.Run([]string{"program", "file", "--json", "--project", "g/product-owners/po-1", "--system", "g/system",
+	err := cli.Default.Run([]string{"issue", "file", "--json", "--project", "g/product-owners/po-1", "--system", "g/system",
 		"--title", "Score one agent", "--body-file", body, "--plane", "data", "--kind", "build"},
 		&out, func() (gitlab.Tracker, error) { return f, nil })
 	if err != nil {

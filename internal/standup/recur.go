@@ -1,5 +1,6 @@
 // Package standup holds the person's daily and recurring tracker steps
-// (srd010). It implements tpm standup recur.
+// (srd010). It implements tpm issue recur (srd013 R8), formerly tpm
+// standup recur.
 package standup
 
 import (
@@ -34,13 +35,15 @@ type RecurResult struct {
 	DryRun   bool   `json:"dry_run"`
 }
 
+// The marker keeps the text tpm standup recur wrote: it is tracker data that
+// finds the next instance, including one an earlier tpm opened (srd013 R8.2).
 var recursPattern = regexp.MustCompile(`\n*<!-- tpm standup recurs \S+ -->\n?`)
 
 func recursMarker(project string, iid int) string {
 	return fmt.Sprintf("<!-- tpm standup recurs %s#%d -->", project, iid)
 }
 
-// Recur opens the next instance of a recurring issue (srd010 R8.2, srd001
+// Recur opens the next instance of a recurring issue (srd013 R8.1, srd001
 // R8.3): same labels and milestone, the next due date, and the run
 // appended to Previous Runs. An open issue is closed first with a run
 // summary; one a merge request closed is left as it is. When the next
@@ -86,7 +89,7 @@ func Recur(t gitlab.Tracker, project string, iid int, o RecurOptions) (RecurResu
 	outcome := "closed by its merge request"
 	if i.State != "closed" {
 		r.Closed = true
-		outcome = "closed by tpm standup recur without its work"
+		outcome = "closed by tpm issue recur without its work"
 	}
 	run := fmt.Sprintf("- %s#%d (due %s): %s.", project, iid, orNone(i.DueDate), outcome)
 	body := nextBody(i.Description, o.Body, run) + "\n\n" + marker + "\n"

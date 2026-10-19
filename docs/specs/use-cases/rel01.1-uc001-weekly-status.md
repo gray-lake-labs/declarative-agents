@@ -41,8 +41,8 @@ The tracker's due-date notification for the week's status issue.
 - F3: The owner runs issue-pop on the status issue; its Requirements list the steps.
 - F4: tpm reports week returns as JSON every open objective issue in the repository with its due date and the owner's tracker activity for the week.
 - F5: Model step (structure): the model asks the owner about each objective and turns the answers into the report in the fixed shape: status, problems, and complete or not complete per objective.
-- F6: tpm reports validate checks the report; tpm program merge merges it in the reports repository and closes the status issue in the owner's repository.
-- F7: The merge request merges and closes the status issue; the reports repository's scheduled tpm reports status-issues run recurs it (tpm standup recur), opening the next week's instance with the next due date and the run appended to Previous Runs.
+- F6: tpm reports validate checks the report; tpm issue merge merges it in the reports repository and closes the status issue in the owner's repository.
+- F7: The merge request merges and closes the status issue; the reports repository's scheduled tpm reports status-issues run recurs it (tpm issue recur), opening the next week's instance with the next due date and the run appended to Previous Runs.
 
 <!-- field: touchpoints -->
 ## Touchpoints

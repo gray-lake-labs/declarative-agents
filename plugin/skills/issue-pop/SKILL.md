@@ -11,7 +11,7 @@ nothing itself (design.md D10, srd036).
 
 Input: the project path of this repository and the issue number.
 
-1. Run `tpm program pop --project <project> --issue <iid> --json`.
+1. Run `tpm issue pop --project <project> --issue <iid> --json`.
    On a refusal, show its reason and stop.
 2. Work in the worktree pop returned, and nowhere else. The issue body is
    the instructions: its Requirements are the steps and its Acceptance
@@ -20,9 +20,9 @@ Input: the project path of this repository and the issue number.
 3. Commit in the worktree and push the branch (`git push -u origin HEAD`).
 4. Ask a reviewer, someone other than you, to read the branch against the
    Acceptance Criteria and run
-   `tpm program approve --project <project> --issue <iid>` in their
+   `tpm issue approve --project <project> --issue <iid>` in their
    checkout. The approval names the commit they read.
-5. Run `tpm program merge --project <project> --issue <iid> --json` from
+5. Run `tpm issue merge --project <project> --issue <iid> --json` from
    the worktree, adding `--closes <project#iid>` for each issue the
    Requirements say the merge also closes. It runs the corpus audit for a
    change under docs/, then merges only a branch approved at its tip,

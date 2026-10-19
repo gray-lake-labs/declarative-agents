@@ -57,7 +57,7 @@ for every role and every kind of work: make-work turns a plan into
 issues, issue-push files an issue in do-work's input format with the
 plane that says whether it is project work or a requirements change,
 issue-pop takes it into its own branch and worktree, do-work builds it
-against its Requirements and Acceptance Criteria, tpm program merge
+against its Requirements and Acceptance Criteria, tpm issue merge
 delivers it and closes it, and tpm release tag tags a release once its gate passed. issue-push and
 issue-pop are commands in this repository over tpm (srd035, srd036,
 release 00.0); do-work and sub-issues arrive with epics later. The outer loops are the five Scrum
@@ -515,12 +515,12 @@ The requirements are complete and release 00 (00.0 to 00.3) and releases 01.0 to
 <!-- field: progress -->
 ### Progress
 
-- Implemented: 01.1 status comes back weekly: tpm reports init, validate, status-issues, week, and aggregate with --push; tpm standup recur; open-merge-request --issue-project for the report's merge request; config formats report and reports-config (2 use cases, test-rel01.1-weekly-status)
+- Implemented: 01.1 status comes back weekly: tpm reports init, validate, status-issues, week, and aggregate with --push; tpm standup recur, tpm issue recur since 01.4; open-merge-request --issue-project for the report's merge request; config formats report and reports-config (2 use cases, test-rel01.1-weekly-status)
 - Implemented: 00.3 install the skills: the skills form the Agent Plugins 1.0 package plugin/, and tpm install writes each embedded skill as an Agent Skills directory for Cursor, Claude Code, and GitHub Copilot, stamped with the tpm version and a checksum and ignored by git through a managed block in .git/info/exclude; re-install keeps edited files, --check reports drift (1 use case, test-rel00.3-install)
-- Implemented: 00.2 changes under docs/: tpm program open-merge-request runs the corpus gate (audit_command, mage audit by default) in the worktree before opening a merge request for a docs/ change; tpm program file refuses a plane::management issue from a caller the policy does not list (2 use cases, test-rel00.2-docs-change)
-- Implemented: 00.1 pop and merge: tpm program pop (claim, branch <iid>-<slug>, worktree beside the checkout, refusals), tpm program open-merge-request (review focus, acceptance criteria, Closes), the issue-pop skill (1 use case, test-rel00.1-pop)
-- Implemented: 00.0 labels and push: tpm program labels (creates missing labels, --update rewrites differing ones), tpm program file --path deriving plane, kind, and component, the issue-push skill (1 use case, test-rel00.0-push)
-- Implemented: 01.0 objectives reach the Product Owner: mage audit (gate tests, objective-document gate, specification-critic agent); the Terraform split and gitlabrig with mage regression; tpm program file and lint; tpm goals plan and push; the create-goals skill (2 use cases, test-rel01.0-objectives)
+- Implemented: 00.2 changes under docs/: tpm program open-merge-request runs the corpus gate (audit_command, mage audit by default) in the worktree before opening a merge request for a docs/ change; tpm issue file refuses a plane::management issue from a caller the policy does not list (2 use cases, test-rel00.2-docs-change)
+- Implemented: 00.1 pop and merge: tpm issue pop (claim, branch <iid>-<slug>, worktree beside the checkout, refusals), tpm program open-merge-request (review focus, acceptance criteria, Closes), the issue-pop skill (1 use case, test-rel00.1-pop)
+- Implemented: 00.0 labels and push: tpm issue labels (creates missing labels, --update rewrites differing ones), tpm issue file --path deriving plane, kind, and component, the issue-push skill (1 use case, test-rel00.0-push)
+- Implemented: 01.0 objectives reach the Product Owner: mage audit (gate tests, objective-document gate, specification-critic agent); the Terraform split and gitlabrig with mage regression; tpm issue file and lint; tpm goals plan and push; the create-goals skill (2 use cases, test-rel01.0-objectives)
 - Planned: 01.2 sprint end closes the loop: sprint-end release, plan-release, reference update, release summary (4 use cases)
 - Planned: 02.0 evidence, handoff, and cadence: gates, track-goals, daily-scrum, sprint-review, sprint-retrospective (no use cases yet)
 

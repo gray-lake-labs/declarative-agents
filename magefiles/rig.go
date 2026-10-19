@@ -373,7 +373,7 @@ func (r *rigEnv) remoteBranch(project, branch string) bool {
 }
 
 // milestone ensures a group milestone on the rig group, started yesterday,
-// so it is the active sprint tpm program file defaults to.
+// so it is the active sprint tpm issue file defaults to.
 func (r *rigEnv) milestone(title, due string) error {
 	_, err := r.tr.EnsureMilestone(r.group, gitlab.Milestone{Title: title,
 		StartDate: time.Now().AddDate(0, 0, -1).Format(time.DateOnly), DueDate: due})
@@ -429,7 +429,7 @@ func (r *rigEnv) approve(project, issueProject string, iid int, branch string) e
 	if err != nil {
 		return err
 	}
-	args := []string{"program", "approve", "--project", project, "--issue", fmt.Sprint(iid), "--dir", clone}
+	args := []string{"issue", "approve", "--project", project, "--issue", fmt.Sprint(iid), "--dir", clone}
 	if issueProject != project {
 		args = append(args, "--issue-project", issueProject)
 	}

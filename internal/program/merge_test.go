@@ -74,12 +74,13 @@ func TestMergeDeliversOnBeads(t *testing.T) {
 	}
 }
 
-// TestMergeNeedsTheBeadsTracker: on GitLab a merge request is the delivery.
+// TestMergeNeedsTheBeadsTracker: a tracker that does not close issues on a
+// local merge is refused.
 func TestMergeNeedsTheBeadsTracker(t *testing.T) {
 	f := gitlabtest.New()
 	i := admitted(f, "Score one agent")
-	if _, err := Merge(f, ExecGit{}, "g/po-1", "g/po-1", i.IID, "1-score-one-agent", ".", AuditGate{}, nil, false); err == nil || !strings.Contains(err.Error(), "merge request") {
-		t.Fatalf("merge on GitLab = %v, want a refusal naming the merge request", err)
+	if _, err := Merge(f, ExecGit{}, "g/po-1", "g/po-1", i.IID, "1-score-one-agent", ".", AuditGate{}, nil, false); err == nil || !strings.Contains(err.Error(), "tpm issue merge serves the beads tracker") {
+		t.Fatalf("merge on a tracker without local merges = %v, want a refusal naming the beads tracker", err)
 	}
 }
 

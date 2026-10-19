@@ -41,7 +41,7 @@ The tracker's due-date notification for the period's sprint-end issue.
 - F3: tpm sprint-end facts returns as JSON the period's aggregate, each objective issue's ledger and reported status, and the version tpm release next recommends.
 - F4: Model step (combine): the model drafts the period summary from the period's reports and tpm's output.
 - F5: Model step (iterate): the model revises the summary with the owner and applies, in the worktree, the changes the owner names to objectives or the release.
-- F6: The summary is committed at docs/sprint-ends/RELEASE.md, and tpm program merge merges it with --closes for each objective the owner reported complete; the merge closes the sprint-end issue and those objectives.
+- F6: The summary is committed at docs/sprint-ends/RELEASE.md, and tpm issue merge merges it with --closes for each objective the owner reported complete; the merge closes the sprint-end issue and those objectives.
 - F7: The issue's Requirements ask the owner to confirm the release and its version; with no confirmation, or nothing to release, the merge alone closes the issue and no tag is made.
 - F8: Once the merge request merges, tpm release gate runs the declared checks on main, the default gate unless the repository releases a declared artifact, with the sprint-end issue as the release issue; tpm release tag creates the tag at the confirmed version only after the gate passes, and a version that does not increase is refused.
 

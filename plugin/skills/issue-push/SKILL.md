@@ -20,9 +20,9 @@ repository path.
 3. Ask the person only for what is missing: the kind of project work when
    no path is under docs/ or control/, and the test of a criterion that
    names none. Ask nothing else and no confirmation.
-4. Run `tpm program file --project <project> --system <system> --title "<title>"
+4. Run `tpm issue file --project <project> --system <system> --title "<title>"
    --body-file issue.md --path <path> ... [--kind <kind>] --json`.
    tpm sets the plane, kind, and component from the paths.
 5. Show the issue URL, its plane, kind, and component, and whether
    admission admitted it. When it did not, show the reasons; fix the body and run
-   `tpm program lint --project <project> --issue <iid>`.
+   `tpm issue lint --project <project> --issue <iid>`.

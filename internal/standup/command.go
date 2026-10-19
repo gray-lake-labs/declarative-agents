@@ -14,7 +14,7 @@ func init() {
 		iid                 int
 	}
 	cli.Default.Register(&cli.Command{
-		Group: "standup", Name: "recur", Summary: "open the next instance of a recurring issue",
+		Group: "issue", Name: "recur", Summary: "open the next instance of a recurring issue",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&args.project, "project", "", "project path (required)")
 			fs.IntVar(&args.iid, "issue", 0, "the recurring issue's IID (required)")

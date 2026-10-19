@@ -23,7 +23,7 @@ audit, which runs the parent's specification-critic corpus-audit agent
 <!-- release: 00.0 | status: implemented -->
 ## 00.0 - Labels and push
 
-tpm program labels creates the program's labels, kind::spec among
+tpm issue labels creates the program's labels, kind::spec among
 them, and issue-push turns a request into one admitted, unassigned
 issue whose plane and kind say what it is. The model writes the body;
 tpm picks the labels, files, and lints.
@@ -168,7 +168,7 @@ objective document that mage audit checks through the
 specification-critic agent, and create-goals files one dated, pinned,
 admitted objective issue in each Product Owner's repository. The
 release also builds what that path needs: the magefile that runs the
-agent audit, tpm program file and lint, the planned event, and the
+agent audit, tpm issue file and lint, the planned event, and the
 regression rig: the Terraform split into infra/modules/program with
 the production and disposable roots, and gitlabrig (eng01). Its
 objective issues are plane::management issues the receiving Product

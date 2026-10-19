@@ -22,8 +22,8 @@ type Policy struct {
 	RequireMilestone bool
 	ManagementFilers []string // usernames; empty or ["leads"]: not checked
 	TriageLabel      string
-	// AuditCommand is the corpus gate open-merge-request runs, in the worktree, on a
-	// branch that changes docs/ (srd036 R3.2).
+	// AuditCommand is the corpus gate tpm issue merge runs, in the worktree, on a
+	// branch that changes docs/ (srd013 R5.3).
 	AuditCommand string
 	// Releases and DefinitionOfDone drive tpm release (srd015, srd008 R2).
 	Releases         Releases

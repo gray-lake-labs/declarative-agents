@@ -373,7 +373,7 @@ last release and policy when nobody manages it.
 ### Scrum Master (control plane): promotion and the evidence audit
 
 At this time scale the control plane is automation applying the rules
-continuously: `tpm program lint` admits new issues or marks them
+continuously: `tpm issue lint` admits new issues or marks them
 needs-triage, the test subsystem's pipelines promote pinned sets along the
 environment chain, and track-goals follows pinned references, posts
 evidence, closes met objectives, and keeps every issue's waiting flag true
@@ -455,12 +455,12 @@ sequenceDiagram
 
     A->>S: issue-push
     S-->>A: plane, kind, component, requirements, criteria with test and environment
-    S->>T: tpm program file, unassigned
-    S->>T: tpm program lint
+    S->>T: tpm issue file, unassigned
+    S->>T: tpm issue lint
     alt a label, section, test, or environment is missing
         T-->>A: needs-triage with the failures listed
         A->>T: fixes the issue
-        S->>T: tpm program lint clears needs-triage
+        S->>T: tpm issue lint clears needs-triage
     end
     Note over T: open, unassigned, admitted: the issue is ready
     P->>S: issue-pop
@@ -524,8 +524,8 @@ sequenceDiagram
         P->>T: answer event comment, mentions C
     else the artifact is wrong
         C->>S: issue-push in alpha, kind defect, Upstream to the producing issue
-        S->>T: tpm program file in the alpha repository
-        S->>T: tpm program lint admits it
+        S->>T: tpm issue file in the alpha repository
+        S->>T: tpm issue lint admits it
         P->>S: daily-scrum shows the defect
         alt alpha accepts
             P->>S: issue-pop, then do-work

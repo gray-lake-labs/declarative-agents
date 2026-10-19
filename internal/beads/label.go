@@ -10,7 +10,7 @@ import (
 // the issues; bd does not read it.
 const LabelsFile = ".beads/labels.jsonl"
 
-// Label is a label defined on a group, as tpm program labels manages it.
+// Label is a label defined on a group, as tpm issue labels manages it.
 type Label struct {
 	Scope       string `json:"scope"`
 	Name        string `json:"name"`
