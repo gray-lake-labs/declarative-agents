@@ -27,6 +27,17 @@ type RelatedDocument struct {
 	Purpose string `yaml:"purpose"`
 }
 
+// UnmarshalYAML accepts both shapes corpora write a related_documents entry
+// in: a plain path string, and the {doc, purpose} mapping (GH-8).
+func (r *RelatedDocument) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.ScalarNode {
+		r.Purpose = ""
+		return value.Decode(&r.Doc)
+	}
+	type plain RelatedDocument
+	return value.Decode((*plain)(r))
+}
+
 // loadArchitecture parses the architecture document. A corpus without one
 // yields an empty model: the document is not required here, only read when
 // present so its related_documents entries can be checked (GH-2). A present
