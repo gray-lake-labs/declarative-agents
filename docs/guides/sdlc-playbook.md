@@ -27,7 +27,7 @@ Table 1: Playbook practices and their counterparts here.
 | `intent.md`, then `spec.md`, then `plan.md`, each committed and each triggering the next stage | Objective documents (srd034), which are this process's intent, then SRDs, the requirements an objective cites by pinned URL, then issues in do-work's input format; the pop marker commit embeds the plan verbatim. Goals, intents, and objectives are one concept here (VISION, ARCHITECTURE decision 14) |
 | Plan mode by default; nothing is implemented without an accepted plan | `gh-issue-pop` decomposes an item into sub-issues before `do-work` builds anything |
 | The product owner reviews and approves the agent's spec rather than writing it | The Product Owner writes requirements with an agent through push, pop, and do-work |
-| Story points and refinement meetings retired | Estimates in size and review complexity, with estimated against actual lines of code logged |
+| Story points and refinement meetings retired | Issues are estimated in size and review complexity, with estimated against actual lines of code logged; story points stay only on epic backlog items, for velocity and forecasts (srd045), and refinement is a reviewed change to an epic rather than a meeting ([agile-mapping.md](agile-mapping.md)) |
 | Parallel sessions, each in its own git worktree | A worktree per issue |
 | A mistake made twice goes into `CLAUDE.md` | The retrospective files policy-change issues; rules and memory files carry corrections |
 | Roles keep their names and change their activities | Scrum's accountabilities kept, their activities reassigned between people and agents |

@@ -246,3 +246,4 @@ practices taken from the playbook, are in
 - docs/guides/process.md
 - docs/guides/ai-native-sdlc.md
 - docs/guides/sdlc-playbook.md
+- docs/guides/agile-mapping.md
