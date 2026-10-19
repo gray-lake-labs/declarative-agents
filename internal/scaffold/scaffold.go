@@ -75,7 +75,7 @@ func corpusFiles(level string) (map[string][]byte, error) {
 			return err
 		}
 		b, err := templates.ReadFile(p)
-		files[fill.Replace(strings.TrimPrefix(p, root+"/"))] = []byte(fill.Replace(string(b)))
+		files[fill.Replace(strings.TrimSuffix(strings.TrimPrefix(p, root+"/"), ".tmpl"))] = []byte(fill.Replace(string(b)))
 		return err
 	})
 	if err != nil {

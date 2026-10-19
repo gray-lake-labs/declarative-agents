@@ -86,6 +86,7 @@ func (Integration) Init() error {
 		return err
 	}
 	c.expect(runCorpusAudit(repo, runStreaming) == nil, "the parent's corpus audit fails on the corpus tpm init wrote")
+	c.expect(specCheckAt(repo) == nil, "the spec tool's check fails on the corpus tpm init wrote")
 	docs, err := objectives.LoadDir(filepath.Join(repo, objectives.Dir))
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err

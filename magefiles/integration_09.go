@@ -68,6 +68,7 @@ func (Integration) Onboard() error {
 		return err
 	}
 	c.expect(runCorpusAudit(store, runStreaming) == nil, "the parent's corpus audit fails on the corpus tpm onboard wrote")
+	c.expect(specCheckAt(store) == nil, "the spec tool's check fails on the corpus tpm onboard wrote")
 
 	second, err := onboard()
 	if err != nil {

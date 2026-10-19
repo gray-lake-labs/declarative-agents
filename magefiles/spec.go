@@ -32,3 +32,17 @@ func runSpecTool(command, scope string) error {
 	}
 	return runStreaming(root, rel.SpecTool, command, scope)
 }
+
+// specCheckAt runs the pinned release's spec tool check over every corpus
+// document of the repository at dir.
+func specCheckAt(dir string) error {
+	tag, err := pinnedRelease(dir)
+	if err != nil {
+		return err
+	}
+	rel, err := fetchRelease(tag)
+	if err != nil {
+		return err
+	}
+	return runStreaming(dir, rel.SpecTool, "check", "all")
+}
