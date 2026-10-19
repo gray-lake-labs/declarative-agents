@@ -13,7 +13,8 @@ Every issue, project work, a design change, or a planning change, has one
 path to a merged change. Release 01 builds the interaction between the technical program manager
 and the Product Owners (srd034) in three dot releases: 01.0 objectives
 reach the Product Owner as dated issues, 01.1 status comes back weekly,
-and 01.2 the sprint end releases and plans the next period. Each use case cites only the
+and 01.2 the sprint end releases and plans the next period. 01.4, the
+agent-legible CLI, ships before 01.3. Each use case cites only the
 requirement items its release delivers, so the SRDs it touches are partly
 delivered; the rest waits for 02.0. Every release proves itself with mage
 audit, which runs the parent's specification-critic corpus-audit agent
@@ -346,6 +347,49 @@ weeks, not a tag range.
 - mage regression:all
 - mage integration:referenceUpdate
 - mage integration:releaseSummary
+
+<!-- release: 01.4 | status: specified -->
+## 01.4 - The agent-legible CLI
+
+An agent with only tpm on PATH learns the process from it, and a program
+starts from one command. tpm help explains the process, each group, and
+each load-bearing concept; the program group becomes the issue group,
+named for what every subcommand acts on, with recur moved in from
+standup; tpm init lays down a system repository's corpus, control files,
+and skills, and tpm onboard adds a repository to the program and files
+its registration. Planned on 2026-10-18 to ship before 01.3, so it is the
+next release (design.md D12): every later release's skills then call the
+renamed commands, and the help is written once against them.
+
+<!-- field: srds -->
+### SRDs
+
+- srd043-init-onboard
+- srd044-help
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel01.4-uc001-bootstrap-a-program](specs/use-cases/rel01.4-uc001-bootstrap-a-program.md) | tpm init starts a program the audit passes as written; tpm onboard adds a repository and files its registration. | specified | P1 |
+| [rel01.4-uc002-agent-learns-the-cli](specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md) | An agent learns the process from tpm help and works an issue under tpm issue; the old group name names its fix. | specified | P1 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | init and onboard over empty repositories and the audit, help pages and their drift gate, the issue group, and recur across the move. | specified |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:init
+- mage integration:onboard
+- mage integration:issueGroup
 
 <!-- release: 02.0 | status: specified -->
 ## 02.0 - Evidence, handoff, and cadence

@@ -1,7 +1,15 @@
 ---
 id: srd013-program
-title: "Script: program (tpm program ...)"
+title: "Script: issue (tpm issue ...)"
 ---
+
+<!-- field: design_notes -->
+## Design notes
+
+- The group is named for its object. Every subcommand acts on an issue, and the group was named program before release 01.4, which said nothing about any of them.
+- pop keeps its name. Pull, never push, is the process's rule, and popping an issue is its verb in the skills (issue-pop), the vision, and the states (srd041); under the issue group the command reads as what it does.
+- The old name breaks cleanly. Every caller is a skill embedded in the same tpm (srd037), so an alias would only keep stale skills running; instead tpm program runs nothing and names the fix.
+- recur moves here from standup (srd010 R8.2, retired). It closes and reopens a recurring issue, wherever the issue lives and whoever runs it, which is the issue lifecycle, not a person's morning. The marker it writes into an issue body is tracker data, so its text does not change.
 
 <!-- field: problem -->
 ## Problem
@@ -12,7 +20,7 @@ look at. Done by hand, admission means something different in each
 repository, and an issue missing its acceptance criteria reaches do-work
 with nothing to build against.
 
-The program subcommands are the small set of issue operations every
+The issue subcommands are the small set of issue operations every
 repository shares: the labels admission reads, admission, filing, showing,
 taking an issue into a worktree, and opening a merge request. Together with
 the issue-push and issue-pop skills (srd035, srd036) they are the inner
@@ -29,7 +37,7 @@ recording a release plan belongs to plan-release.
 - G3: Every issue is taken the same way, claimed by the person who works it, on its own branch, in its own worktree.
 
 <!-- req: R1 -->
-## R1 - tpm program lint
+## R1 - tpm issue lint
 
 <!-- req: R1.1 -->
 ### R1.1
@@ -52,10 +60,15 @@ Runs in CI on issue creation and edit where the tracker allows, and on a schedul
 <!-- req: R2.1 -->
 ### R2.1
 
-Subcommands are in the tpm group program, honour --json and --dry-run, and never prompt (srd010 R1).
+Subcommands are in the tpm group issue, honour --json and --dry-run, and never prompt (srd010 R1).
+
+<!-- req: R2.2 -->
+### R2.2
+
+tpm program, the group's name before release 01.4, runs no subcommand: it exits non-zero naming tpm issue and tpm install, so a skill installed from an earlier tpm fails with its fix in the message.
 
 <!-- req: R3 -->
-## R3 - tpm program file
+## R3 - tpm issue file
 
 <!-- req: R3.1 -->
 ### R3.1
@@ -73,7 +86,7 @@ With a parent epic given, appends the new issue to the epic's Members section; w
 A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins.
 
 <!-- req: R4 -->
-## R4 - tpm program show
+## R4 - tpm issue show
 
 <!-- req: R4.1 -->
 ### R4.1
@@ -81,7 +94,7 @@ A data issue filed without a milestone and without a type gets the sprint: the a
 Returns one issue with its labels, its state per srd041 R1–R32, its sub-issues and their states, its Upstream, Requires, and Cites lines with track-goals' explanation of each (srd019), its epic if any, and its event comments, including its ledger events for an objective.
 
 <!-- req: R5 -->
-## R5 - tpm program merge
+## R5 - tpm issue merge
 
 <!-- req: R5.1 -->
 ### R5.1
@@ -111,10 +124,10 @@ Refuses unless the issue carries an approval of the exact commit it would merge,
 <!-- req: R5.6 -->
 ### R5.6
 
-tpm program approve posts the approval as the person running it: a comment on the issue naming the tip of the branch at its origin. It refuses the issue's assignee, and posts nothing twice for the same commit.
+tpm issue approve posts the approval as the person running it: a comment on the issue naming the tip of the branch at its origin. It refuses the issue's assignee, and posts nothing twice for the same commit.
 
 <!-- req: R6 -->
-## R6 - tpm program labels
+## R6 - tpm issue labels
 
 <!-- req: R6.1 -->
 ### R6.1
@@ -127,7 +140,7 @@ Creates or updates the program's group labels from control/labels.md in the prog
 Is idempotent: a second run changes nothing. It never deletes or renames a label, so issues keep the labels they carry.
 
 <!-- req: R7 -->
-## R7 - tpm program pop
+## R7 - tpm issue pop
 
 <!-- req: R7.1 -->
 ### R7.1
@@ -148,6 +161,19 @@ Returns the issue, its branch, and its worktree path, so the skill and the perso
 ### R7.4
 
 Installs into the worktree the skills of every agent installed in the checkout (srd037), and reports which; a failed install is reported without undoing the pop, and --dry-run installs nothing.
+
+<!-- req: R8 -->
+## R8 - tpm issue recur
+
+<!-- req: R8.1 -->
+### R8.1
+
+tpm issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists.
+
+<!-- req: R8.2 -->
+### R8.2
+
+The marker recur writes into the next instance's body, naming the issue it recurs, keeps the text it had as tpm standup recur, so an instance opened before release 01.4 is still found and never opened twice.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -175,12 +201,13 @@ lint sets needs-triage with a listed reason on each failing issue, including a c
 <!-- ac: AC2 -->
 ### AC2
 
-Every program subcommand honours --json and --dry-run and never prompts.
+Every issue subcommand honours --json and --dry-run and never prompts; tpm program runs nothing, exits non-zero, and names tpm issue and tpm install.
 
 <!-- field: traces -->
 #### Traces
 
 - [R2.1](#r21)
+- [R2.2](#r22)
 
 <!-- ac: AC3 -->
 ### AC3
@@ -251,3 +278,14 @@ merge refuses with no approval, with only the assignee's, and with an approval o
 
 - [R5.5](#r55)
 - [R5.6](#r56)
+
+<!-- ac: AC9 -->
+### AC9
+
+recur closes a recurring issue with its run logged and Requires updated and opens the next instance once, closes again nothing a merge closed, and finds an instance whose marker an earlier tpm standup recur wrote.
+
+<!-- field: traces -->
+#### Traces
+
+- [R8.1](#r81)
+- [R8.2](#r82)

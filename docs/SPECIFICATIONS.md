@@ -25,7 +25,9 @@ srd037 is the Agent Plugins 1.0 package of the skills and tpm install,
 which writes the skills embedded in tpm for Cursor, Claude Code, or
 GitHub Copilot. srd039 is the shared reader of corpus and config
 documents (internal/corpus), srd040 the format tools and format gates in
-magefiles, and srd041 the states and transitions of an issue. srd039 and
+magefiles, and srd041 the states and transitions of an issue. srd043 is
+tpm init and tpm onboard, which lay down a program's corpus, and srd044
+tpm help, which teaches the process from the binary. srd039 and
 srd040 specify shared code and tooling no use case cites, so the road map
 lists them under the release that built them. An SRD whose release is
 not yet planned holds its direction only (design.md D12): its items are
@@ -40,7 +42,9 @@ on GitLab in four dot releases: 00.0 labels and push, 00.1 pop and merge,
 00.2 changes under docs/ through the audit gate, 00.3 tpm install. Release 01 builds the
 interaction between the technical program manager and the Product
 Owners in three dot releases: 01.0 objectives reach the Product Owner, 01.1 status comes back
-weekly, 01.2 the sprint end releases and plans the next period. 02.0 holds
+weekly, 01.2 the sprint end releases and plans the next period. 01.4, the
+agent-legible CLI, ships before 01.3: tpm help, the issue group, and tpm
+init and onboard. 02.0 holds
 evidence, handoff, and cadence, without use cases yet. Every SRD is listed
 under the first release whose use case touches it. See
 docs/road-map.md.
@@ -58,6 +62,7 @@ docs/road-map.md.
 | "01.1" | Status comes back weekly | 2 | 2 | implemented |
 | "01.2" | Sprint end closes the loop | 2 | 2 | implemented |
 | "01.3" | Tags trigger handoff and the summary | 0 | 2 | specified |
+| "01.4" | The agent-legible CLI | 0 | 2 | specified |
 | "02.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
 | "03.0" | The tracker becomes beads | 2 | 2 | implemented |
 
@@ -91,7 +96,7 @@ docs/road-map.md.
 | [srd007-links](specs/software-requirements/srd007-links.md) | docs/specs/software-requirements/srd007-links.md | Dependency links | 01.0 |
 | [srd008-gates](specs/software-requirements/srd008-gates.md) | docs/specs/software-requirements/srd008-gates.md | Definition of done: evidence in a named environment | 02.0 |
 | [srd010-standup](specs/software-requirements/srd010-standup.md) | docs/specs/software-requirements/srd010-standup.md | Script: standup (tpm standup ...) | 01.1 |
-| [srd013-program](specs/software-requirements/srd013-program.md) | docs/specs/software-requirements/srd013-program.md | Script: program (tpm program ...) | 00.0 |
+| [srd013-program](specs/software-requirements/srd013-program.md) | docs/specs/software-requirements/srd013-program.md | Script: issue (tpm issue ...) | 00.0 |
 | [srd014-handoff](specs/software-requirements/srd014-handoff.md) | docs/specs/software-requirements/srd014-handoff.md | Script: handoff (tpm handoff ...) | 01.3 |
 | [srd015-release](specs/software-requirements/srd015-release.md) | docs/specs/software-requirements/srd015-release.md | Script: release (tpm release ...) | 01.2 |
 | [srd018-reports](specs/software-requirements/srd018-reports.md) | docs/specs/software-requirements/srd018-reports.md | Script: reports (tpm reports ...) | 01.1 |
@@ -110,6 +115,8 @@ docs/road-map.md.
 | [srd040-format-tools](specs/software-requirements/srd040-format-tools.md) | docs/specs/software-requirements/srd040-format-tools.md | Tooling: mage convert, fmt, specCheck, and the format gates | 01.2 |
 | [srd041-states](specs/software-requirements/srd041-states.md) | docs/specs/software-requirements/srd041-states.md | States and transitions of an issue | 00.1 |
 | [srd042-beads-tracker](specs/software-requirements/srd042-beads-tracker.md) | docs/specs/software-requirements/srd042-beads-tracker.md | Beads tracker: the program's facts live in a repository | 03.0 |
+| [srd043-init-onboard](specs/software-requirements/srd043-init-onboard.md) | docs/specs/software-requirements/srd043-init-onboard.md | Script: init and onboard (tpm init, tpm onboard) | 01.4 |
+| [srd044-help](specs/software-requirements/srd044-help.md) | docs/specs/software-requirements/srd044-help.md | Script: help (tpm help) | 01.4 |
 
 <!-- field: config_format_index -->
 ## Config format index
@@ -151,6 +158,8 @@ docs/road-map.md.
 | [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md) | The Technical Program Manager Plans the Next Period's Objectives | 01.2 | implemented | [test-rel01.2-sprint-end](specs/test-suites/test-rel01.2-sprint-end.md) | docs/specs/use-cases/rel01.2-uc002-plan-next-period.md |
 | [rel01.3-uc001-reference-update](specs/use-cases/rel01.3-uc001-reference-update.md) | A Downstream Release Files a Reference-Update Issue Upstream | 01.3 | specified | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | docs/specs/use-cases/rel01.3-uc001-reference-update.md |
 | [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md) | A System Release Drafts the Summary for Review | 01.3 | specified | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | docs/specs/use-cases/rel01.3-uc002-release-summary.md |
+| [rel01.4-uc001-bootstrap-a-program](specs/use-cases/rel01.4-uc001-bootstrap-a-program.md) | The Technical Program Manager Starts a Program and a Repository Joins It | 01.4 | specified | [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | docs/specs/use-cases/rel01.4-uc001-bootstrap-a-program.md |
+| [rel01.4-uc002-agent-learns-the-cli](specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md) | An Agent Learns the Process from tpm and Works an Issue | 01.4 | specified | [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | docs/specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md |
 | [rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md) | An Issue Is Popped, Delivered, and Closed Against Beads | 03.0 | implemented | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md |
 | [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md) | Two Clones Synchronize Through the Tracker Repository | 03.0 | implemented | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc002-two-clones-synchronize.md |
 
@@ -167,6 +176,7 @@ docs/road-map.md.
 | [test-rel01.1-weekly-status](specs/test-suites/test-rel01.1-weekly-status.md) | Test Suite for Release 01.1 Status Comes Back Weekly | "01.1" | 6 | [[rel01.1-uc001-weekly-status](specs/use-cases/rel01.1-uc001-weekly-status.md), [rel01.1-uc002-period-rollup](specs/use-cases/rel01.1-uc002-period-rollup.md)] | docs/specs/test-suites/test-rel01.1-weekly-status.md |
 | [test-rel01.2-sprint-end](specs/test-suites/test-rel01.2-sprint-end.md) | Test Suite for Release 01.2 Sprint End Closes the Loop | "01.2" | 5 | [[rel01.2-uc001-sprint-end-release](specs/use-cases/rel01.2-uc001-sprint-end-release.md), [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md)] | docs/specs/test-suites/test-rel01.2-sprint-end.md |
 | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | Test Suite for Release 01.3 Tags Trigger Handoff and the Summary | "01.3" | 2 | [[rel01.3-uc001-reference-update](specs/use-cases/rel01.3-uc001-reference-update.md), [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md)] | docs/specs/test-suites/test-rel01.3-tag-triggered.md |
+| [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | Test Suite for Release 01.4 The Agent-Legible CLI | "01.4" | 8 | [[rel01.4-uc001-bootstrap-a-program](specs/use-cases/rel01.4-uc001-bootstrap-a-program.md), [rel01.4-uc002-agent-learns-the-cli](specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md)] | docs/specs/test-suites/test-rel01.4-agent-legible-cli.md |
 | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | Test Suite for Release 03.0 The Tracker Becomes Beads | "03.0" | 4 | [[rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md), [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md)] | docs/specs/test-suites/test-rel03.0-beads-tracker.md |
 
 <!-- field: coverage_gaps -->
@@ -174,12 +184,12 @@ docs/road-map.md.
 
 | id | gap |
 | --- | --- |
-| GAP1 | Use cases exist for releases 00 (00.0 to 00.3) and 01 (01.0 to 01.3) only. Release 02.0 has none: srd008, srd019, srd020, srd032, and srd033 hold its direction only (design.md D12), and their items and use cases are written when 02.0 is planned. |
-| GAP2 | Test suites exist for releases 00 (00.0 to 00.3) and 01 (01.0 to 01.3) only. test-rel00.0-push, test-rel00.1-pop, test-rel00.2-docs-change, test-rel00.3-install, test-rel01.0-objectives, test-rel01.1-weekly-status, and test-rel01.2-sprint-end are implemented; test-rel01.3-tag-triggered is specified, and acceptance criteria outside them have no test case yet. |
+| GAP1 | Use cases exist for releases 00 (00.0 to 00.3) and 01 (01.0 to 01.4) only. Release 02.0 has none: srd008, srd019, srd020, srd032, and srd033 hold its direction only (design.md D12), and their items and use cases are written when 02.0 is planned. |
+| GAP2 | Test suites exist for releases 00 (00.0 to 00.3) and 01 (01.0 to 01.4) only. test-rel00.0-push, test-rel00.1-pop, test-rel00.2-docs-change, test-rel00.3-install, test-rel01.0-objectives, test-rel01.1-weekly-status, and test-rel01.2-sprint-end are implemented; test-rel01.3-tag-triggered and test-rel01.4-agent-legible-cli are specified, and acceptance criteria outside them have no test case yet. |
 | GAP3 | The audit is the parent's specification-critic corpus-audit agent, run by mage audit after the repository gate tests. It does not yet run in CI on merge requests that change docs/ (srd034 R2.2); this repository has no pipeline. |
 | GAP4 | Open decision. The promotion trigger for each environment (each subsystem release, nightly from the latest releases, or both) is declared per environment SRD; no default is chosen yet. |
 | GAP5 | Open decision. The channel by which evidence from customer R&D environments returns to the objective ledger is not specified (srd008, srd019 non-goals). |
-| GAP6 | Open decision. The tpm CLI's subcommand groups (standup, program, goals, handoff, release, reports, plan, sprint-end) are to be rationalized when 02.0 rewrites track-goals (srd019). |
+| GAP6 | Open decision. Release 01.4 renames the program group to issue, moves recur into it from standup, and adds init, onboard, and help (srd013, srd043, srd044). The other subcommand groups (standup, goals, handoff, release, reports, plan, sprint-end) are rationalized when 02.0 rewrites track-goals (srd019). |
 | GAP7 | The corpus's own SRDs omit test and environment on acceptance criteria (design.md srd acceptance_criteria_note) until the test subsystem's environment SRDs exist. |
 | GAP8 | The parent corpus audit does not read docs/specs/objectives/, so a magefiles gate test validates objective documents against srd034 R1 inside mage audit (srd034 R2.1). An objective document is scrum-master's type written as an SRD in the parent's format, so the gate is scrum-master's own, not a gap the parent closes. |
 | GAP9 | tpm program lint does not yet run in CI on issue creation or on a schedule (srd013 R1.3); that needs a released tpm binary the program's pipelines can run. |
