@@ -3,6 +3,7 @@ package program
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
@@ -17,7 +18,7 @@ func DefaultLabels() []tracker.Label {
 		{Name: "plane::management", Color: "#5843ad", Description: "Changes intent - road-map release, system or subsystem SRD, objective document, sprint"},
 		{Name: "plane::control", Color: "#8e44ad", Description: "Changes a rule - policy files, label schema, state machine"},
 		{Name: "plane::data", Color: "#1f75cb", Description: "Work"},
-		{Name: "type::epic", Color: "#6699cc", Description: "Task list of member issues; never popped"},
+		{Name: "type::tracking", Color: "#6699cc", Description: "Task list of member issues; never popped"},
 		{Name: "type::sprint", Color: "#009966", Description: "The sprint's exit checklist"},
 		{Name: "type::recurring", Color: "#00b140", Description: "Subscription to one artifact"},
 		{Name: "kind::build", Color: "#428bca", Description: "Builds or changes software"},
@@ -128,4 +129,93 @@ func SyncLabels(t tracker.Tracker, group string, want []tracker.Label, update, d
 		}
 	}
 	return out, nil
+}
+
+// TypeMigration is one issue --migrate relabelled, or would on a dry run.
+type TypeMigration struct {
+	Project string `json:"project"`
+	IID     int    `json:"iid"`
+	From    string `json:"from"`
+	To      string `json:"to"`
+}
+
+// MigrateTypes relabels every issue, open or closed, in the projects that
+// carries a type value's earlier name, so it carries the current one
+// instead (srd013 R6.3). It is idempotent, a dry run writes nothing, and no
+// group label is deleted or renamed.
+func MigrateTypes(t tracker.Tracker, projects []string, dryRun bool) ([]TypeMigration, error) {
+	var out []TypeMigration
+	for _, r := range typeRenames {
+		from, to := "type::"+r[0], "type::"+r[1]
+		for _, p := range projects {
+			issues, err := t.ListIssues(p, tracker.IssueQuery{State: "all", Labels: []string{from}})
+			if err != nil {
+				return out, err
+			}
+			for _, i := range issues {
+				if !dryRun {
+					if _, err := t.UpdateIssue(p, i.IID, tracker.IssueUpdate{AddLabels: []string{to}, RemoveLabels: []string{from}}); err != nil {
+						return out, fmt.Errorf("relabel %s#%d: %w", p, i.IID, err)
+					}
+				}
+				out = append(out, TypeMigration{Project: p, IID: i.IID, From: from, To: to})
+			}
+		}
+	}
+	return out, nil
+}
+
+// StaleTypes lists the earlier type names control/labels.md in the program
+// repository at ref still lists. tpm never edits a control file; a
+// plane::control issue changes it (srd013 R6.3).
+func StaleTypes(t tracker.Tracker, project, ref string) ([]string, error) {
+	b, err := t.GetFile(project, LabelsFile, ref)
+	if errors.Is(err, tracker.ErrNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var f labelsFile
+	if err := corpus.DecodeConfig(b, &f); err != nil {
+		return nil, fmt.Errorf("%s %s: %w", project, LabelsFile, err)
+	}
+	var stale []string
+	for _, v := range f.Axes["type"].Values {
+		if CanonicalType(v.Name) != v.Name {
+			stale = append(stale, v.Name)
+		}
+	}
+	return stale, nil
+}
+
+// MigrateResult is what labels --migrate reports.
+type MigrateResult struct {
+	Labels     []LabelResult   `json:"labels"`
+	Relabelled []TypeMigration `json:"relabelled"`
+	// StaleTypes are earlier type names the program's control/labels.md
+	// still lists.
+	StaleTypes []string `json:"stale_types,omitempty"`
+}
+
+// migrate relabels issues in the system repository and every repository its
+// subsystem SRDs declare, and reports what its control/labels.md still
+// lists (srd013 R6.3).
+func migrate(t tracker.Tracker, system, ref string, dryRun bool) (MigrateResult, error) {
+	subs, err := LoadSubsystems(t, system, ref)
+	if err != nil && !errors.Is(err, tracker.ErrNotFound) {
+		return MigrateResult{}, err
+	}
+	projects := []string{ProjectPath(system)}
+	for _, r := range subs.Repositories() {
+		if !slices.Contains(projects, r) {
+			projects = append(projects, r)
+		}
+	}
+	relabelled, err := MigrateTypes(t, projects, dryRun)
+	if err != nil {
+		return MigrateResult{Relabelled: relabelled}, err
+	}
+	stale, err := StaleTypes(t, system, ref)
+	return MigrateResult{Relabelled: relabelled, StaleTypes: stale}, err
 }

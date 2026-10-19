@@ -142,7 +142,7 @@ Is idempotent: a second run changes nothing. It never deletes or renames a label
 <!-- req: R6.3 -->
 ### R6.3
 
-With --migrate, also relabels issues for a value srd001 renamed: every issue in the program's group labelled type::epic gains type::tracking and loses type::epic (srd001 R6.6). It is opt-in, writes nothing with --dry-run, and is idempotent. It never deletes or renames the group label itself and never edits the program's control files; it reports when control/labels.md or control/policy.md still names epic, for a plane::control issue to change.
+With --migrate and --control naming the system repository, also relabels issues for a value srd001 renamed: every issue, open or closed, labelled type::epic in the system repository and in every repository its subsystem SRDs declare gains type::tracking and loses type::epic (srd001 R6.6). It is opt-in, writes nothing with --dry-run, and is idempotent. It never deletes or renames the group label itself and never edits the program's control files; it reports when control/labels.md still lists epic, for a plane::control issue to change.
 
 <!-- req: R7 -->
 ## R7 - tpm issue pop
@@ -252,7 +252,7 @@ A merge of a branch that changes docs/ runs mage audit first and merges nothing 
 <!-- ac: AC6 -->
 ### AC6
 
-labels creates every listed label once, from control/labels.md or the defaults; a second run changes nothing; no label is deleted or renamed; with --migrate, issues labelled type::epic are relabelled type::tracking once, nothing is written on a dry run, and control files that still name epic are reported, not edited.
+labels creates every listed label once, from control/labels.md or the defaults; a second run changes nothing; no label is deleted or renamed; with --migrate, issues labelled type::epic in the system repository and its subsystems' repositories are relabelled type::tracking once, nothing is written on a dry run, and a control/labels.md that still lists epic is reported, not edited.
 
 <!-- field: traces -->
 #### Traces

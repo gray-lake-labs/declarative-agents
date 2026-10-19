@@ -3,6 +3,7 @@ package program
 import (
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
@@ -68,11 +69,36 @@ func (p Policy) Gate(artifact string) []Check {
 	return p.DefinitionOfDone["default"]
 }
 
+// typeRenames pairs a type value's earlier name with its current one. The
+// earlier name is read as an alias, so issues and control files written
+// before the rename keep their meaning (srd001 R6.6).
+var typeRenames = [][2]string{{"epic", "tracking"}}
+
+// CanonicalType is the current name of a type value.
+func CanonicalType(v string) string {
+	for _, r := range typeRenames {
+		if v == r[0] {
+			return r[1]
+		}
+	}
+	return v
+}
+
+func canonicalTypes(vals []string) []string {
+	var out []string
+	for _, v := range vals {
+		if c := CanonicalType(v); !slices.Contains(out, c) {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
 // Defaults are the values srd001 fixes and the example policy uses.
 func Defaults() Policy {
 	return Policy{
 		Planes:           []string{"management", "control", "data"},
-		Types:            []string{"epic", "sprint", "recurring"},
+		Types:            []string{"tracking", "sprint", "recurring"},
 		Kinds:            []string{"build", "experiment", "research", "spec", "review", "consume", "handoff", "release", "defect", "request", "question"},
 		RequireAC:        []string{"build", "experiment", "research", "spec"},
 		RequireMilestone: true,
@@ -180,6 +206,7 @@ func LoadPolicy(t tracker.Tracker, project, ref string) (Policy, error) {
 		}
 		pick("plane", &p.Planes)
 		pick("type", &p.Types)
+		p.Types = canonicalTypes(p.Types)
 		pick("kind", &p.Kinds)
 	} else if !errors.Is(err, tracker.ErrNotFound) {
 		return p, err

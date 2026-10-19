@@ -47,7 +47,7 @@ func Lint(i tracker.Issue, p Policy) []string {
 	}
 	listed("plane", planes, p.Planes)
 
-	types := axis("type::")
+	types := canonicalTypes(axis("type::"))
 	if len(types) > 1 {
 		reasons = append(reasons, fmt.Sprintf("has %d type:: labels, at most one", len(types)))
 	}
