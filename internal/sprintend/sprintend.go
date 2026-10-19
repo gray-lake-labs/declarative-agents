@@ -28,6 +28,8 @@ type SprintGoal struct {
 	ReportedComplete bool     `json:"reported_complete"`
 	Met              bool     `json:"met"`
 	Ledger           []string `json:"ledger"` // the event names posted on it, in order
+	// Stories lists the story ids its Sprint Backlog section names.
+	Stories []string `json:"stories"`
 }
 
 // Facts is what tpm sprint-end facts returns.
@@ -69,7 +71,8 @@ func MakeFacts(in Input) (Facts, error) {
 			continue
 		}
 		ref := fmt.Sprintf("%s#%d", in.Project, i.IID)
-		o := SprintGoal{Issue: ref, Serves: m.Serves, Legacy: m.Legacy, Release: m.Release, Title: i.Title, State: i.State, Ledger: []string{}}
+		o := SprintGoal{Issue: ref, Serves: m.Serves, Legacy: m.Legacy, Release: m.Release, Title: i.Title, State: i.State,
+			Ledger: []string{}, Stories: sprintgoal.SprintBacklog(i.Description)}
 		notes, err := in.Tracker.ListNotes(in.Project, i.IID)
 		if err != nil {
 			return f, err

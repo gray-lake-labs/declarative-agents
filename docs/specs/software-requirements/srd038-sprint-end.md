@@ -60,7 +60,7 @@ Once track-goals runs in the program, R2.1 no longer applies and Sprint Goals cl
 <!-- req: R2.4 -->
 ### R2.4
 
-The sprint-end summary records, for each Sprint Goal it closes, which of the stories listed in its Sprint Backlog the owner reports done. Until track-goals runs, those stories are done for roll-up and velocity (srd045 R3.2, R5.3), and the rest return to the Product Backlog.
+The sprint-end summary records, for each Sprint Goal it closes, which of the stories listed in its Sprint Backlog the owner reports done, in a Stories done section tpm sprint-end stories writes. Until track-goals runs, those stories are done for roll-up and velocity (srd045 R3.2, R5.3), and the rest return to the Product Backlog.
 
 <!-- field: non_goals -->
 ## Non-goals

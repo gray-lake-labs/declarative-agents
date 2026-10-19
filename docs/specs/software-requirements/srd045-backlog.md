@@ -141,7 +141,7 @@ A team's Product Backlog is its agreed stories that are not done, ordered by the
 <!-- req: R5.2 -->
 ### R5.2
 
-At Sprint Planning, plan in the team's repository (srd031) lists the Product Backlog with the team's velocity and recommends the stories, in rank order, whose points fit it; the Product Owner decides. plan push writes the chosen stories into the Sprint Goal's Sprint Backlog section and posts a planned event naming them (srd034 R3.5, srd006 R8).
+At Sprint Planning, plan in the team's repository (srd031) lists the Product Backlog with the team's velocity and recommends the stories, in rank order, whose points fit it; the Product Owner decides. tpm plan backlog writes the chosen stories into the Sprint Goal's Sprint Backlog section and posts a planned event naming them (srd034 R3.5, srd006 R8).
 
 <!-- req: R5.3 -->
 ### R5.3

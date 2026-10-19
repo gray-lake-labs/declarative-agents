@@ -151,7 +151,7 @@ Asks the Product Owner which stories enter the sprint, recommending those of R6.
 <!-- req: R6.6 -->
 ### R6.6
 
-tpm plan push writes the chosen stories, with their points, into the Sprint Backlog section of the team's Sprint Goal and posts a planned event naming them (srd034 R3.5); a second run with the same stories changes nothing.
+tpm plan backlog writes the chosen stories, with their points, into the Sprint Backlog section of the team's Sprint Goal and posts a planned event naming them (srd034 R3.5); a second run with the same stories changes nothing.
 
 <!-- field: non_goals -->
 ## Non-goals

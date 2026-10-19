@@ -49,6 +49,9 @@ type Candidates struct {
 	Tag             string `json:"recommended_tag"`
 	Items           []Item `json:"items"`
 	WithoutEvidence []Item `json:"without_evidence,omitempty"`
+	// Backlog is the team's Product Backlog, when the checkout holds stories
+	// (srd031 R6.4).
+	Backlog *Backlog `json:"backlog,omitempty"`
 
 	agreed map[string]bool // every item of an agreed objective document
 }

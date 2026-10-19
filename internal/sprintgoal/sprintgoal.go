@@ -1,7 +1,9 @@
 // Package sprintgoal writes and reads the marker tasks puts in every Sprint
 // Goal issue (srd034 R3), and reads the marker of an objective issue, a
 // Sprint Goal filed before release 04.0, as a Sprint Goal's (srd034 R3.7).
-// A Sprint Goal is known by its marker, not by a label.
+// A Sprint Goal is known by its marker, not by a label. It also reads a
+// Sprint Goal's Sprint Backlog and keeps the record of the stories each
+// sprint-end summary reports done (srd038 R2.4).
 package sprintgoal
 
 import (

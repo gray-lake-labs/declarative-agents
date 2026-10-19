@@ -40,7 +40,7 @@ tasks filed the team's Sprint Goal for the release.
 - F2: The Product Owner starts plan in the team's repository.
 - F3: tpm plan candidates returns the Product Backlog: the agreed stories not yet done, by rank, with points, the team's velocity, and the stories in rank order whose points fit it.
 - F4: The skill takes the recommendation or the Product Owner's choice, and asks for an assumed velocity only when the team has finished no sprint.
-- F5: tpm plan push writes the chosen stories with their points into the Sprint Goal's Sprint Backlog section and posts a planned event naming each story; a second push with the same stories changes nothing.
+- F5: tpm plan backlog writes the chosen stories with their points into the Sprint Goal's Sprint Backlog section and posts a planned event naming each story; a second push with the same stories changes nothing.
 - F6: make-work turns each chosen story into issues, each with an Implements line naming the story.
 
 <!-- field: touchpoints -->

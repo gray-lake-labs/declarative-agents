@@ -19,6 +19,7 @@ import (
 
 func init() {
 	var a struct{ dir, system, aggregate, artifact, control, ref string }
+	var velocity int
 	common := func(fs *flag.FlagSet) {
 		fs.StringVar(&a.dir, "dir", ".", "the system repository's checkout")
 		fs.StringVar(&a.system, "system", "", "system repository path, for slipped objectives and the last milestone")
@@ -62,12 +63,22 @@ func init() {
 		}
 		in.Tags = tags
 		c, err := MakeCandidates(in)
+		if err == nil && hasStories(a.dir) {
+			b, berr := MakeBacklog(a.dir, velocity)
+			if berr != nil {
+				return c, in.Tracker, berr
+			}
+			c.Backlog = &b
+		}
 		return c, in.Tracker, err
 	}
 
 	cli.Default.Register(&cli.Command{
-		Group: "plan", Name: "candidates", Summary: "rank the objective items the next release could prove, with the recommended version, end date, and tag",
-		Flags: common,
+		Group: "plan", Name: "candidates", Summary: "rank the initiative items or requirements the next release could prove, and in a team's repository its Product Backlog, with the recommended version, end date, and tag",
+		Flags: func(fs *flag.FlagSet) {
+			common(fs)
+			fs.IntVar(&velocity, "velocity", 0, "the team's assumed velocity in story points, when no sprint-end summary records done stories")
+		},
 		Run: func(ctx *cli.Context) error {
 			c, _, err := candidates(ctx)
 			if err != nil {
@@ -84,6 +95,12 @@ func init() {
 			}
 			for _, it := range c.WithoutEvidence {
 				fmt.Fprintf(&h, "  held back %s: missing %s\n", it.ID, strings.Join(it.Missing, " and "))
+			}
+			if b := c.Backlog; b != nil {
+				fmt.Fprintf(&h, "Product Backlog, velocity %d (measured %v), recommended %s\n", b.Velocity, b.Measured, strings.Join(b.Recommended, ", "))
+				for _, st := range b.Stories {
+					fmt.Fprintf(&h, "  %s (%d points, rank %s): %s\n", st.ID, st.Points, st.Rank, st.Title)
+				}
 			}
 			return ctx.Emit(c, h.String())
 		},
@@ -189,6 +206,37 @@ func init() {
 				h += fmt.Sprintf("returned %s: missing %s\n", x.ID, strings.Join(x.Missing, " and "))
 			}
 			return ctx.Emit(res, h)
+		},
+	})
+
+	var bl struct{ project, release, stories string }
+	cli.Default.Register(&cli.Command{
+		Group: "plan", Name: "backlog", Summary: "write the stories chosen at Sprint Planning onto the team's Sprint Goal and post a planned event naming them",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&a.dir, "dir", ".", "the team repository's checkout, holding its stories")
+			fs.StringVar(&bl.project, "project", "", "the team's repository, where tasks filed its Sprint Goal (required)")
+			fs.StringVar(&bl.release, "release", "", "the release the Sprint Goal counts toward (required)")
+			fs.StringVar(&bl.stories, "stories", "", "the chosen stories' ids, comma-separated (required)")
+		},
+		Run: func(ctx *cli.Context) error {
+			if bl.project == "" || bl.release == "" || bl.stories == "" {
+				return fmt.Errorf("%w: backlog needs --project, --release, and --stories", cli.ErrUsage)
+			}
+			t, err := ctx.Tracker()
+			if err != nil {
+				return err
+			}
+			var chosen []string
+			for _, id := range strings.Split(bl.stories, ",") {
+				if id = strings.TrimSpace(id); id != "" {
+					chosen = append(chosen, id)
+				}
+			}
+			r, err := PushBacklog(t, bl.project, bl.release, a.dir, chosen, ctx.DryRun)
+			if err != nil {
+				return err
+			}
+			return ctx.Emit(r, fmt.Sprintf("%s: %s, %d stories, planned event posted=%v", r.Issue, r.Action, len(r.Stories), r.Planned))
 		},
 	})
 }
