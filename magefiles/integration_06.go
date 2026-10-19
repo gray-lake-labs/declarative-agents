@@ -120,7 +120,7 @@ A score is ready within an hour.
 dev
 `
 
-// PlanRelease plans release 01.1 in the system repository: candidates, the road-map write merged through a planning issue with tpm issue merge, the plan tagged behind the documents-only gate, the period pushed (milestone, sprint issue, sprint-end issues) once, and create-goals reading the plan at its tag (test-rel01.2-sprint-end).
+// PlanRelease plans release 01.1 in the system repository: candidates, the road-map write merged through a planning issue with tpm issue merge, the plan tagged behind the documents-only gate, the period pushed (milestone, sprint issue, sprint-end issues) once, and tasks reading the plan at its tag (test-rel01.2-sprint-end).
 func (Integration) PlanRelease() error {
 	e, err := newWeeklyEnv("reports-plan")
 	if err != nil {
@@ -238,12 +238,12 @@ func (Integration) PlanRelease() error {
 	c.expect(pushed.Milestone == "unchanged" && pushed.Sprint.Action == "unchanged" && pushed.SprintEnds[0].Action == "unchanged",
 		"second push changed something: %+v", pushed)
 
-	// create-goals reads the plan at its tag.
+	// tasks reads the plan at its tag.
 	var p goals.Plan
 	if err := r.tpmJSON(&p, "goals", "plan", "--system", system, "--release", "01.1", "--ref", "main"); err != nil {
 		return err
 	}
-	c.expect(p.Tag == cand.Tag && len(p.Objectives) == 1 && p.Objectives[0].Key == "obj002-fast-scoring#R1", "create-goals plan: %+v", p)
+	c.expect(p.Tag == cand.Tag && len(p.Objectives) == 1 && p.Objectives[0].Key == "obj002-fast-scoring#R1", "tasks plan: %+v", p)
 	return c.err("planRelease")
 }
 

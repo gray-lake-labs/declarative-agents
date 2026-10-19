@@ -68,7 +68,7 @@ people and the tracker, which already holds them. Two rules move it to
 scripts. Facts are fetched, judgment is asked: a script never asks a person
 for something the tracker records, and a skill asks only what it cannot read.
 Pull, never push: nobody assigns work to anyone, and the only way an item
-gets an assignee is that person's own `issue-pop`.
+gets an assignee is that person's own `implement`.
 
 A program has levels, and each level has one owner and the same corpus: a
 docs/ directory with SRDs and a road-map, checked by the same audit.
@@ -101,8 +101,8 @@ customer can run it.
 
 What is left for people runs in two loops. The inner loop is how any one
 item gets done, the same for every role and every kind of work: `make-work`
-turns a plan into issues, `issue-push` files an issue with its
-Requirements, Acceptance Criteria, and Design Decisions, `issue-pop`
+turns a plan into issues, `specify` files an issue with its
+Requirements, Acceptance Criteria, and Design Decisions, `implement`
 takes it into a worktree, `do-work` builds it, a merge request reviewed by
 another person closes it, and `tpm release tag` tags a release once its
 gate passed. The inner
@@ -116,8 +116,8 @@ together.
 
 | Skill | Who | Reads | Asks | Pushes or posts |
 |---|---|---|---|---|
-| `plan-release` | Technical program manager (system), Product Owner (subsystem), before each three-week period | Road-map, SRDs, open objectives, track-goals status | Which requirements the next release proves | The road-map release entry, its milestone, planned events |
-| `create-goals` | Technical program manager, or a Product Owner with downstream repositories | The planned release, subsystem and environment SRDs | Which owner satisfies an objective, only where none is recommended | Objective issues citing pinned requirement URLs, one to the test subsystem |
+| `plan` | Technical program manager (system), Product Owner (subsystem), before each three-week period | Road-map, SRDs, open objectives, track-goals status | Which requirements the next release proves | The road-map release entry, its milestone, planned events |
+| `tasks` | Technical program manager, or a Product Owner with downstream repositories | The planned release, subsystem and environment SRDs | Which owner satisfies an objective, only where none is recommended | Objective issues citing pinned requirement URLs, one to the test subsystem |
 | `daily-scrum` | Each Developer, daily | In-progress issues, overnight evidence findings, waiting issues | Blockers, interrupts | Blocker and interrupt issues |
 | `sprint-review` | Product Owner, end of each period | Each objective's ledger and evidence | Is the Increment accepted? | Follow-up issues |
 | `sprint-retrospective` | Scrum Master with the team, end of each period | Audit metrics, current policy | Which improvements? | Policy-change issues |
@@ -162,7 +162,7 @@ rules. The one relationship between roles that is not mediated by the
 tracker is the push of intent: the owner of each level pushes objectives to the level below,
 citing the requirements they must satisfy at a release tag.
 
-![One three-week release cycle, read left to right, one row per role. Technical program manager: 1, plan-release picks the system requirements the next release will hold; 2, create-goals pushes one objective issue per subsystem and to the test subsystem, citing requirements pinned to the tag. Product Owner: 3, writes requirements with an agent through push, pop, and do-work, each criterion naming its test and environment; 4, plan-release places them in a release of the subsystem's road-map and posts planned on the objective. Developers: 5, make-work turns the planned release into issues; 6, push, pop, and do-work build each issue, a person reviews every merge request, and local tests are the first evidence; 7, release-push tags the component release. Scrum Master: 8, promotion by CI/CD installs the pinned set in dev, upgrades it in staging and production PoC, and runs the suites; 9, track-goals nightly posts evidence on each objective. The objective issue is the ledger of planned, evidence, and met; 10, sprint-review judges the Increment against it at the end of the period, and unmet objectives move to the next release.](../../figures/release-cycle.png)
+![One three-week release cycle, read left to right, one row per role. Technical program manager: 1, plan picks the system requirements the next release will hold; 2, tasks pushes one objective issue per subsystem and to the test subsystem, citing requirements pinned to the tag. Product Owner: 3, writes requirements with an agent through push, pop, and do-work, each criterion naming its test and environment; 4, plan places them in a release of the subsystem's road-map and posts planned on the objective. Developers: 5, make-work turns the planned release into issues; 6, push, pop, and do-work build each issue, a person reviews every merge request, and local tests are the first evidence; 7, release-push tags the component release. Scrum Master: 8, promotion by CI/CD installs the pinned set in dev, upgrades it in staging and production PoC, and runs the suites; 9, track-goals nightly posts evidence on each objective. The objective issue is the ledger of planned, evidence, and met; 10, sprint-review judges the Increment against it at the end of the period, and unmet objectives move to the next release.](../../figures/release-cycle.png)
 
 The rest of this page takes one column at a time, from the slowest to the
 fastest, and one accountability at a time within it, with a diagram wherever
@@ -178,7 +178,7 @@ Three conventions hold in every diagram on this page. An arrow from a person
 to the scripts is a skill the person runs; it asks only what the tracker
 cannot know. An arrow from the scripts to the tracker is a tpm subcommand; it
 fetches facts or writes changes and never asks anything. And the only arrow
-that assigns work is `issue-pop`, run by the person taking it. Subsystems
+that assigns work is `implement`, run by the person taking it. Subsystems
 are placeholders: alpha produces a shared schema, beta consumes it, and both
 belong to one system.
 
@@ -188,8 +188,8 @@ belong to one system.
 
 Each repository's road-map is its intent over several releases: the
 releases, the requirements each proves, and their status. Before each
-three-week period, the owner of a level runs `plan-release` to choose the
-requirements the next release proves, and `create-goals` to push one
+three-week period, the owner of a level runs `plan` to choose the
+requirements the next release proves, and `tasks` to push one
 objective to each owner below. At system level that is the technical
 program manager pushing to each subsystem's Product Owner and to the Scrum
 Master; at subsystem level it is a Product Owner pushing to downstream
@@ -203,12 +203,12 @@ sequenceDiagram
     participant S as Scripts
     participant T as Tracker
 
-    TPM->>S: plan-release in the system repository
+    TPM->>S: plan in the system repository
     S->>T: road-map, system SRDs, tpm goals status
     S-->>TPM: recommended requirements for system release 1.4
     TPM->>S: confirmed
     S->>T: road-map entry merged through the inner loop, milestone 1.4
-    TPM->>S: create-goals for release 1.4
+    TPM->>S: tasks for release 1.4
     S->>T: subsystem SRDs and environment SRDs
     S-->>TPM: owner and environment taken for each objective
     TPM->>S: owner for an objective with none recommended
@@ -216,7 +216,7 @@ sequenceDiagram
     S->>T: objective in the test subsystem: suites for 1.4
     S->>T: planned event on each objective
     PO->>S: do-work on alpha's requirements against the objective
-    PO->>S: plan-release in alpha
+    PO->>S: plan in alpha
     S->>T: alpha road-map entry, milestone, planned event moved
 ```
 
@@ -295,7 +295,7 @@ sequenceDiagram
         PO->>S: accepted or not
     end
     PO->>S: two gaps become follow-ups
-    S->>T: issue-push, follow-ups with test and environment named
+    S->>T: specify, follow-ups with test and environment named
     S->>T: verdicts commented on the objectives
 ```
 
@@ -323,9 +323,9 @@ sequenceDiagram
     Team->>S: what hurt: upgrade tests ran only nightly
     S-->>Team: recommend staging trigger on each subsystem release
     Team->>S: keep it
-    S->>T: issue-push, one plane::control issue with current and proposed values
+    S->>T: specify, one plane::control issue with current and proposed values
     Note over Team,T: the policy changes only through the inner loop
-    Team->>S: issue-pop and do-work on the issue
+    Team->>S: implement and do-work on the issue
     S->>T: merge request changing the staging environment SRD
     Rev->>T: approves and merges
 ```
@@ -350,12 +350,12 @@ sequenceDiagram
     S->>T: alpha road-map entry and its requirements
     S-->>Dev: proposed issues, one per component change
     Dev->>S: accepted
-    S->>T: issue-push for each, unassigned, lint passes
-    Dev->>S: issue-pop on this week's sprint update item
+    S->>T: specify for each, unassigned, lint passes
+    Dev->>S: implement on this week's sprint update item
     S->>T: tpm standup activity, fetch, and inbox for the week
     S->>S: do-work drafts the report, tpm reports validate passes
     S->>T: merge request with the report, next week's item re-created
-    Lead->>S: issue-pop on the stakeholder update item
+    Lead->>S: implement on the stakeholder update item
     S->>T: tpm reports aggregate over the ledger
     S->>T: summary, risks, and deck merged after the outline is approved
 ```
@@ -434,12 +434,12 @@ sequenceDiagram
     S-->>P: scored plan
     S-->>P: anything blocking, recommended none
     P->>S: alpha has not answered on the schema field
-    S->>T: issue-push, kind question in alpha, Upstream from my issue
+    S->>T: specify, kind question in alpha, Upstream from my issue
     S-->>P: any interrupts since yesterday
     P->>S: two hours on a production incident
     S->>T: tpm standup adhoc, unassigned, and tpm standup log
     S->>T: tpm standup finish records last run
-    P->>S: issue-pop on the next ready issue
+    P->>S: implement on the next ready issue
 ```
 
 **An issue's life.**
@@ -453,7 +453,7 @@ sequenceDiagram
     participant S as Scripts
     participant T as Tracker
 
-    A->>S: issue-push
+    A->>S: specify
     S-->>A: plane, kind, component, requirements, criteria with test and environment
     S->>T: tpm issue file, unassigned
     S->>T: tpm issue lint
@@ -463,7 +463,7 @@ sequenceDiagram
         S->>T: tpm issue lint clears needs-triage
     end
     Note over T: open, unassigned, admitted: the issue is ready
-    P->>S: issue-pop
+    P->>S: implement
     S->>T: assignee is P, sub-issues when larger than one pass
     S->>S: fresh worktree from the default branch, marker commit
     P->>S: do-work
@@ -501,7 +501,7 @@ sequenceDiagram
     S->>T: consume issue in beta with Requires 2.0.0 and Cites schema@v2.0.0
     CI->>S: tpm goals run
     C->>S: daily-scrum shows the consume issue
-    C->>S: issue-pop, then do-work
+    C->>S: implement, then do-work
     S->>T: merge closes it; the citation moves to v2.0.0 by reviewed merge request
     CI->>S: tpm handoff on-merge
     S->>T: downstream-done event on the release issue, mentions P
@@ -523,12 +523,12 @@ sequenceDiagram
         T-->>P: to-do
         P->>T: answer event comment, mentions C
     else the artifact is wrong
-        C->>S: issue-push in alpha, kind defect, Upstream to the producing issue
+        C->>S: specify in alpha, kind defect, Upstream to the producing issue
         S->>T: tpm issue file in the alpha repository
         S->>T: tpm issue lint admits it
         P->>S: daily-scrum shows the defect
         alt alpha accepts
-            P->>S: issue-pop, then do-work
+            P->>S: implement, then do-work
             S->>T: merge closes the defect
             CI->>S: tpm handoff on-merge, downstream-done event to C
         else alpha declines

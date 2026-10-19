@@ -37,7 +37,7 @@ The tracker's due-date notification for the period's sprint-end issue.
 ## Flow
 
 - F1: tpm plan push filed the sprint-end issue when the period was planned, with a Recurrence section and a due date on the milestone end date; in the system repository it references the sprint issue and leaves its checklist to the program lead.
-- F2: The owner runs issue-pop on it.
+- F2: The owner runs implement on it.
 - F3: tpm sprint-end facts returns as JSON the period's aggregate, each objective issue's ledger and reported status, and the version tpm release next recommends.
 - F4: Model step (combine): the model drafts the period summary from the period's reports and tpm's output.
 - F5: Model step (iterate): the model revises the summary with the owner and applies, in the worktree, the changes the owner names to objectives or the release.

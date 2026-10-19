@@ -1,9 +1,9 @@
 ---
-name: create-goals
+name: tasks
 description: File the next release's objective issues in each Product Owner's repository (srd022, srd034 R3). Use when the technical program manager has an agreed objective document for the next release and asks to push its objectives downstream.
 ---
 
-# create-goals
+# tasks
 
 Invoking this skill is the decision to file the release's objective issues.
 Every step is a tpm command; this skill writes nothing itself and asks only

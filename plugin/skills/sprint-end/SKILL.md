@@ -13,7 +13,7 @@ Input: the project path, the sprint-end issue, a reports checkout, the
 period's first and last ISO weeks, and the artifact the repository
 releases.
 
-1. Take the issue with issue-pop and work in its worktree.
+1. Take the issue with implement and work in its worktree.
 2. Run `tpm sprint-end facts --project <project> --reports <checkout> --from <week> --to <week> --artifact <artifact> --json`.
 3. Model step (combine): draft the period's summary from the reports and
    those facts.

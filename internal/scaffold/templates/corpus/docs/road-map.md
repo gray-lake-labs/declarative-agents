@@ -11,7 +11,7 @@ title: Program Road Map
 <!-- release: 01.0 | status: specified -->
 ## 01.0 - First release
 
-{{Owner}} writes here what the first release proves, after planning it with plan-release.
+{{Owner}} writes here what the first release proves, after planning it with plan.
 
 <!-- field: srds -->
 ### SRDs

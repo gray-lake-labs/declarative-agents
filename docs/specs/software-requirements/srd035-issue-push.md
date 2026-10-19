@@ -1,6 +1,6 @@
 ---
 id: srd035-issue-push
-title: "Skill: issue-push"
+title: "Skill: specify"
 ---
 
 <!-- field: problem -->
@@ -12,7 +12,7 @@ carries whatever labels and sections its author remembered, so admission
 sends it back, or it reaches the person who pops it with nothing to build
 against.
 
-issue-push turns one request into one admitted issue in do-work's input
+specify turns one request into one admitted issue in do-work's input
 format. The model does the one thing a program cannot: it structures the
 request into the issue body. tpm does the rest: it picks the plane, kind,
 and component, files the issue unassigned, and lints it. The plane decides
@@ -101,7 +101,7 @@ As a skill, is at most 50 lines (design.md D10).
 ## Non-goals
 
 - Splitting a request into several issues; one request is one issue, and sub-issues arrive with epics.
-- Working the issue; that is issue-pop (srd036).
+- Working the issue; that is implement (srd036).
 
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria

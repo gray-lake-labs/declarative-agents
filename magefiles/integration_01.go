@@ -68,7 +68,7 @@ func (Integration) Pop() error {
 	c.expect(r.remoteBranch(po1, popped.Branch), "branch %s not on the remote", popped.Branch)
 	_, serr := os.Stat(popped.Worktree)
 	c.expect(serr == nil && strings.HasPrefix(popped.Worktree, run), "worktree %s missing or outside the run directory", popped.Worktree)
-	_, ierr := os.Stat(filepath.Join(popped.Worktree, ".claude/skills/issue-pop/SKILL.md"))
+	_, ierr := os.Stat(filepath.Join(popped.Worktree, ".claude/skills/implement/SKILL.md"))
 	c.expect(slices.Equal(popped.Installed, []string{"claude"}) && ierr == nil, "skills not installed in the worktree: %v %q %v", popped.Installed, popped.InstallError, ierr)
 	status, _ := exec.Command("git", "-C", popped.Worktree, "status", "--porcelain", "--untracked-files=all").Output()
 	c.expect(len(status) == 0, "worktree not clean after the install: %q", status)

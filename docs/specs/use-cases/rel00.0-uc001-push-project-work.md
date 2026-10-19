@@ -10,7 +10,7 @@ test_suite: test-rel00.0-push
 ## Summary
 
 The program's labels exist first, created from control/labels.md. A
-Developer asks for a piece of project work; issue-push turns the request
+Developer asks for a piece of project work; specify turns the request
 into one admitted, unassigned plane::data issue in do-work's input format,
 with its kind and component, in the backlog. The model writes the body and
 nothing else; tpm picks the labels, files, and lints.
@@ -35,7 +35,7 @@ A request for project work in a component's repository.
 ## Flow
 
 - F1: tpm issue labels creates or updates the program's group labels from control/labels.md or the defaults; a second run changes nothing.
-- F2: The Developer runs issue-push with the request.
+- F2: The Developer runs specify with the request.
 - F3: Model step (structure): the model turns the request into a title and the Requirements and Acceptance Criteria sections, each criterion naming its test and environment.
 - F4: tpm sets plane::data because the request names no docs/ or control/ path, the kind the request states or the person names when asked, and the component from the subsystem SRD; tpm issue file files the issue unassigned and lints it, and it enters the backlog.
 
@@ -97,7 +97,7 @@ A request that names no docs/ or control/ path becomes one admitted, unassigned 
 <!-- sc: S3 -->
 ### S3
 
-No issue is assigned by push, and the issue-push skill is at most 50 lines.
+No issue is assigned by push, and the specify skill is at most 50 lines.
 
 <!-- field: traces -->
 #### Traces

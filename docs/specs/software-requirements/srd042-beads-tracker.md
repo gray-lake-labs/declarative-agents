@@ -81,7 +81,7 @@ that field.
 
 A merge request maps to nothing: delivery is a local merge to main whose
 closing commit cites the issue id, and the closing actor of srd041 R7
-becomes the merge commit observed by the issue-pop skill, which closes
+becomes the merge commit observed by the implement skill, which closes
 the issue and records the commit hash as the closing comment.
 
 <!-- req: R2.4 -->

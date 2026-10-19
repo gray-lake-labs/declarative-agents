@@ -36,7 +36,7 @@ The program agrees what it commits to for the next horizon of periods.
 <!-- field: flow -->
 ## Flow
 
-- F1: The technical program manager files an issue for the objectives and pops it with issue-pop.
+- F1: The technical program manager files an issue for the objectives and pops it with implement.
 - F2: Model step (structure): the model turns the technical program manager's objectives conversation into docs/specs/objectives/objNNN-short-name.md, an SRD in the parent's format, with a problem, goals, one requirement group per objective with a due item in its applicability, numbered items, non_goals, acceptance criteria naming tests and an environment, the owner role and the horizon in its context, and status to_be_agreed.
 - F3: Model step (iterate): the model revises the document with the technical program manager until they accept it; the status moves to agreed when the program agrees it.
 - F4: mage audit runs the gate tests and the specification-critic corpus-audit agent of the pinned parent release, locally and in CI on the merge request; the agent runs deterministic checks and spends no model tokens.

@@ -87,10 +87,10 @@ objective's ledger, which the sprint review judges.
 ```mermaid
 flowchart LR
   subgraph MGMT[Management plane: intent, once per release period]
-    S1["1 plan-release: the system release"]
-    S2["2 create-goals: one objective per owner, citing pinned requirements"]
+    S1["1 plan: the system release"]
+    S2["2 tasks: one objective per owner, citing pinned requirements"]
     S3["3 write requirements: SRDs whose criteria name a test and an environment"]
-    S4["4 plan-release: the subsystem release, posted as planned"]
+    S4["4 plan: the subsystem release, posted as planned"]
   end
   subgraph CTRL[Control plane: versioned policy]
     RULES["labels, states, admission, gates"]
@@ -136,8 +136,8 @@ The process defines, and tpm and the skills implement:
   (Product Owner), component (Developers), and the test subsystem (Scrum
   Master), each with its own SRDs, road-map, and definition of done, in
   the same corpus shape in every repository.
-- A three-week period ending in a release at each level. plan-release
-  picks the requirements the release proves; create-goals pushes one
+- A three-week period ending in a release at each level. plan
+  picks the requirements the release proves; tasks pushes one
   objective per downstream owner, citing the requirements by URL pinned
   to the release tag and naming the environment where it counts.
 - The objective issue as ledger: planned, evidence, and met events from
@@ -149,8 +149,8 @@ The process defines, and tpm and the skills implement:
 - A label schema on five axes (plane, type, kind, component, state) that
   makes every issue self-describing, and a state machine over it that says
   which transitions are legal and who may make them.
-- An inner loop every role uses for every kind of work: issue-push,
-  issue-pop, do-work, the reviewed merge, and tpm release. Audits
+- An inner loop every role uses for every kind of work: specify,
+  implement, do-work, the reviewed merge, and tpm release. Audits
   (regression tests, contract checks, the sprint and stakeholder updates)
   are recurring issues worked by the same loop.
 - Outer-loop skills for the decisions people make together: plan a
@@ -158,7 +158,7 @@ The process defines, and tpm and the skills implement:
   Increment against evidence, and change the rules at the Retrospective.
   Each pushes issues in do-work's input format.
 - Pull, not assignment: open, unassigned, admitted issues are ready, and
-  only a person's own issue-pop assigns anything.
+  only a person's own implement assigns anything.
 - Handoff: when an artifact is released, a script creates the downstream
   work its consumers owe, in their repositories; consumers are the
   repositories that cite the artifact's interface by pinned URL and the
@@ -219,7 +219,7 @@ practices taken from the playbook, are in
 - pinned_references_resolve: Every cross-repository reference is pinned to a release tag and resolves; the audit fails otherwise.
 - cycle_time_from_ledger: Cycle time from objective planned to met, and rework, are read from the ledger for every release; nobody types them.
 - generated_dashboard: The program's dashboard is regenerated from the tracker and is never edited by hand; deleting it loses nothing.
-- no_person_ranked: No script assigns, ranks, or estimates a person; the only assignment is a person's own issue-pop.
+- no_person_ranked: No script assigns, ranks, or estimates a person; the only assignment is a person's own implement.
 - flows_without_management: A program keeps flowing for a full sprint with no management-plane action, on its last milestone, release, and policy.
 - one_unit_of_work: Every object the process uses is reachable from an issue by a label, a comment, a link, or a tag; there is no second unit of work.
 - clean_corpus_audit: The corpus audits clean: every SRD in a release, every use-case touchpoint names a requirement group, every acceptance criterion traced by a test.

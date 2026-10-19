@@ -6,7 +6,7 @@ title: "Objective documents and the dated objective loop"
 <!-- field: problem -->
 ## Problem
 
-Objectives exist only as issues: create-goals (srd022) pushes them and
+Objectives exist only as issues: tasks (srd022) pushes them and
 track-goals (srd019) audits them. What a program commits to for the
 coming periods is decided in a meeting and lives in slides, so nothing
 versions it, nothing checks its shape, and the issues downstream cite
@@ -31,7 +31,7 @@ the reference update with handoff (srd014).
 
 - G1: Every objective is a versioned document that the corpus audit checks before any issue cites it.
 - G2: Every objective reaches its owner as a dated issue in the owner's repository whose body says what to do.
-- G3: An owner below the system repository needs no step beyond the dated issues in their repository and issue-pop.
+- G3: An owner below the system repository needs no step beyond the dated issues in their repository and implement.
 
 <!-- req: R1 -->
 ## R1 - Objective documents
@@ -49,7 +49,7 @@ It has the shape of an SRD: a problem, goals, requirement groups (R1, R2) with n
 <!-- req: R1.3 -->
 ### R1.3
 
-Its context names its owner by role and the horizon of periods it covers, as the items owner and horizon, and its frontmatter status is to_be_agreed, agreed, or retired. Only an agreed document is read by plan-release and create-goals.
+Its context names its owner by role and the horizon of periods it covers, as the items owner and horizon, and its frontmatter status is to_be_agreed, agreed, or retired. Only an agreed document is read by plan and tasks.
 
 <!-- req: R1.4 -->
 ### R1.4
@@ -90,12 +90,12 @@ A repository whose releases carry only documents declares the corpus audit as it
 <!-- req: R3.1 -->
 ### R3.1
 
-plan-release (srd031) reads the agreed objective documents with the system SRDs when the technical program manager chooses what the next system release proves, and records the chosen objective items by id in the road-map release, as its deliverables: a list of objNNN-short-name#Rn.m, beside the release's tag and milestone under release.publication (design.md roadmap program_release_fields).
+plan (srd031) reads the agreed objective documents with the system SRDs when the technical program manager chooses what the next system release proves, and records the chosen objective items by id in the road-map release, as its deliverables: a list of objNNN-short-name#Rn.m, beside the release's tag and milestone under release.publication (design.md roadmap program_release_fields).
 
 <!-- req: R3.2 -->
 ### R3.2
 
-create-goals (srd022) renders each objective issue from the objective document: one Cites line per objective item pinned to the system release tag, the Environment line, Requirements and Acceptance Criteria copied from the document, and the due date set to the requirement group's due field or, without one, the milestone end date plan-release recorded (srd031 R4.2).
+tasks (srd022) renders each objective issue from the objective document: one Cites line per objective item pinned to the system release tag, the Environment line, Requirements and Acceptance Criteria copied from the document, and the due date set to the requirement group's due field or, without one, the milestone end date plan recorded (srd031 R4.2).
 
 <!-- req: R3.3 -->
 ### R3.3
@@ -208,12 +208,12 @@ Retired in 01.2 (design.md D12).
 <!-- req: R9.1 -->
 ### R9.1
 
-The whole interaction surface for an owner below the system repository is: issues with due dates in their own repository, the tracker's due-date notifications, the steps inside each issue's body, and issue-pop. No requirement of this SRD adds a tool, a notification channel, or a step outside an issue.
+The whole interaction surface for an owner below the system repository is: issues with due dates in their own repository, the tracker's due-date notifications, the steps inside each issue's body, and implement. No requirement of this SRD adds a tool, a notification channel, or a step outside an issue.
 
 <!-- field: non_goals -->
 ## Non-goals
 
-- Choosing what goes in a release; that is plan-release (srd031).
+- Choosing what goes in a release; that is plan (srd031).
 - Deciding that an objective is met on evidence; that is track-goals (srd019).
 - Ranking or comparing people in any status or summary (srd018 G3).
 - A notification service of its own; reminders are the tracker's due-date notifications.
@@ -253,7 +253,7 @@ The corpus audit fails on a malformed objective document, runs in CI on every me
 <!-- ac: AC3 -->
 ### AC3
 
-plan-release places objective items by id; create-goals files each objective issue with pinned Cites lines, an Environment line, the document's Requirements and Acceptance Criteria as ordered steps, a due date from the document or the milestone, and an empty Notes section; admission refuses one without Requirements and Acceptance Criteria.
+plan places objective items by id; tasks files each objective issue with pinned Cites lines, an Environment line, the document's Requirements and Acceptance Criteria as ordered steps, a due date from the document or the milestone, and an empty Notes section; admission refuses one without Requirements and Acceptance Criteria.
 
 <!-- field: traces -->
 #### Traces
@@ -327,7 +327,7 @@ Retired in 01.2 (design.md D12).
 <!-- ac: AC9 -->
 ### AC9
 
-Nothing this SRD specifies asks a downstream owner to use a tool, channel, or step other than dated issues in their repository, due-date notifications, steps in issue bodies, and issue-pop.
+Nothing this SRD specifies asks a downstream owner to use a tool, channel, or step other than dated issues in their repository, due-date notifications, steps in issue bodies, and implement.
 
 <!-- field: traces -->
 #### Traces

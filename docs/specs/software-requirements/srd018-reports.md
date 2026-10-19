@@ -16,7 +16,7 @@ running.
 The reports subcommands keep each report in a fixed, checkable shape and
 aggregate a week or a sprint of them against the tracker. The weekly
 sprint update and the stakeholder update are recurring audit issues worked
-by the inner loop (issue-pop, do-work, merge request); these
+by the inner loop (implement, do-work, merge request); these
 subcommands are what those issues read and what their acceptance criteria
 check, so a roll-up starts from computed candidates instead of a pile of
 prose.
@@ -114,7 +114,7 @@ Subcommands are in the tpm group reports, honour --json and --dry-run, and never
 <!-- req: R6.1 -->
 ### R6.1
 
-The sprint update is a recurring issue (srd001 R8) per member per week. Its Requirements name tpm standup activity, fetch, and inbox (srd010) as the facts to draft from; its Acceptance Criteria are a report in the fixed shape that passes tpm reports validate, written by the member about their own work only. It closes by merge request, and issue-pop re-creates it for the next week.
+The sprint update is a recurring issue (srd001 R8) per member per week. Its Requirements name tpm standup activity, fetch, and inbox (srd010) as the facts to draft from; its Acceptance Criteria are a report in the fixed shape that passes tpm reports validate, written by the member about their own work only. It closes by merge request, and implement re-creates it for the next week.
 
 <!-- req: R6.2 -->
 ### R6.2
@@ -163,7 +163,7 @@ Its due date is the day after the reminder weekday in the reports repository's c
 <!-- req: R9.3 -->
 ### R9.3
 
-Its Requirements section is the guided script the owner works with issue-pop: for each open objective issue in the repository, record its status, its problems, and complete or not complete. The output is a report in the srd018 shape that passes tpm reports validate.
+Its Requirements section is the guided script the owner works with implement: for each open objective issue in the repository, record its status, its problems, and complete or not complete. The output is a report in the srd018 shape that passes tpm reports validate.
 
 <!-- req: R9.4 -->
 ### R9.4
@@ -273,7 +273,7 @@ status-issues leaves exactly one status issue per listed person for the coming w
 <!-- ac: AC7 -->
 ### AC7
 
-Each listed person receives one weekly status issue due the day after the reminder weekday, which mentions them without assigning them; worked with issue-pop it produces a report with status, problems, and complete or not complete per open objective that passes tpm reports validate, and it is re-created with the next due date.
+Each listed person receives one weekly status issue due the day after the reminder weekday, which mentions them without assigning them; worked with implement it produces a report with status, problems, and complete or not complete per open objective that passes tpm reports validate, and it is re-created with the next due date.
 
 <!-- field: traces -->
 #### Traces

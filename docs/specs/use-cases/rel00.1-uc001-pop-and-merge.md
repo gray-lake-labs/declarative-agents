@@ -9,7 +9,7 @@ test_suite: test-rel00.1-pop
 <!-- field: summary -->
 ## Summary
 
-A Developer takes an admitted issue with issue-pop. tpm claims it for them
+A Developer takes an admitted issue with implement. tpm claims it for them
 alone and opens its own branch and worktree; the work is done and
 committed there; tpm opens the merge request that closes the issue, and a
 reviewer merges it. The skill asks nothing and closes nothing itself.
@@ -32,7 +32,7 @@ An admitted issue the Developer chooses to work.
 <!-- field: flow -->
 ## Flow
 
-- F1: The Developer runs issue-pop on the issue; tpm issue pop assigns only them and creates the branch <iid>-<slug> and its worktree, or refuses an issue someone else holds, a closed issue, or a data issue admission did not admit.
+- F1: The Developer runs implement on the issue; tpm issue pop assigns only them and creates the branch <iid>-<slug> and its worktree, or refuses an issue someone else holds, a closed issue, or a data issue admission did not admit.
 - F2: The work is done and committed in the worktree and pushed; it is the Developer's or their agent's, not the skill's.
 - F3: tpm issue merge merges the branch with a merge commit citing the issue, pushes it, and closes the issue.
 

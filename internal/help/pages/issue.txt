@@ -6,7 +6,7 @@ admission decides whether it is ready. Nobody assigns work: the person who
 takes an issue pops it, which claims it and opens its branch and worktree.
 A merge needs another person's approval of the exact commit it merges, and
 it closes the issue. Developers, Product Owners, and the technical program
-manager all run the same loop, through the issue-push and issue-pop skills.
+manager all run the same loop, through the specify and implement skills.
 
 Subcommands:
   tpm issue file      file an unassigned issue and lint it (srd013 R3)

@@ -12,7 +12,7 @@ Each run starts with mage regression:up creating the repositories below in
 a fresh rig run on local disk and ends with mage regression:down removing them.
 The sprint-end stage works a sprint-end issue in the rig to a
 confirmed release behind a passing gate, and proves reported-complete
-objectives close without a met event. The planning stage runs plan-release
+objectives close without a met event. The planning stage runs plan
 for the next period. The tag-triggered stages are release 01.3's
 (test-rel01.3-tag-triggered).
 
@@ -131,8 +131,8 @@ go test ./internal/sprintend -run '^TestReportedCompleteClosesWithoutMet$'
 
 - [srd038-sprint-end](../software-requirements/srd038-sprint-end.md) [AC2](../software-requirements/srd038-sprint-end.md#ac2)
 
-<!-- case: plan-release records the next period | status: implemented -->
-### plan-release records the next period
+<!-- case: plan records the next period | status: implemented -->
+### plan records the next period
 
 <!-- field: use_case -->
 #### Use case

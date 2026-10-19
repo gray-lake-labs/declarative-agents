@@ -4,7 +4,7 @@ Before a period the technical program manager, or a Product Owner for a
 subsystem, picks what the next release proves. This group ranks the
 candidates, writes the chosen release into docs/road-map.md, and pushes the
 period: the milestone, the sprint issue, the sprint-end issues, and the
-planned events on each objective. The plan-release skill runs it.
+planned events on each objective. The plan skill runs it.
 
 Subcommands:
   tpm plan candidates   rank the objective items the next release could prove (srd031)

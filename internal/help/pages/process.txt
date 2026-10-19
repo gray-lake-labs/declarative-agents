@@ -12,16 +12,16 @@ Control holds the rules an issue moves by: labels, states, admission, gates.
 Data is the work: issues filed, popped, built, merged, released.
 
 One release cycle, and what serves each step:
-   1 plan-release, the system release     skill plan-release; tpm plan
-   2 create-goals, objectives per owner    skill create-goals; tpm goals
-   3 write requirements, SRDs under docs/  tpm issue file, pop, merge
-   4 plan-release, the subsystem release   tpm plan push posts planned
-   5 make-work, the release becomes issues skill make-work; tpm issue file
-   6 push, pop, do-work, a reviewed merge  tpm issue pop, approve, merge
-   7 release-push, a tag behind its gate   tpm release next, gate, tag
-   8 promotion through the environments    CI/CD in the test subsystem
-   9 track-goals, evidence on objectives   specified (srd019), not built
-  10 sprint-review against the ledger      skill sprint-end; tpm sprint-end
+   1 plan, the system release               skill plan; tpm plan
+   2 tasks, objectives per owner            skill tasks; tpm goals
+   3 write requirements, SRDs under docs/   tpm issue file, pop, merge
+   4 plan, the subsystem release            tpm plan push posts planned
+   5 make-work, the release becomes issues  skill make-work; tpm issue file
+   6 push, pop, do-work, a reviewed merge   tpm issue pop, approve, merge
+   7 release-push, a tag behind its gate    tpm release next, gate, tag
+   8 promotion through the environments     CI/CD in the test subsystem
+   9 track-goals, evidence on objectives    specified (srd019), not built
+  10 sprint-review against the ledger       skill sprint-end; tpm sprint-end
 The objective issue is the ledger: planned, evidence, met (srd006).
 
 Where things live in every repository of a program: docs/ holds the corpus

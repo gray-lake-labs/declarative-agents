@@ -53,4 +53,4 @@ None
 
 | id | gap |
 | --- | --- |
-| GAP1 | No release is planned yet; {{owner}} plans the first one with plan-release. |
+| GAP1 | No release is planned yet; {{owner}} plans the first one with plan. |

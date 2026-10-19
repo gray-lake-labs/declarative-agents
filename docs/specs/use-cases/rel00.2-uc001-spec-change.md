@@ -10,9 +10,9 @@ test_suite: test-rel00.2-docs-change
 ## Summary
 
 Requirements change during design: a Developer adds a component SRD,
-rewrites a use case, or adjusts a test suite. issue-push files the request
+rewrites a use case, or adjusts a test suite. specify files the request
 as a kind::spec data issue, anyone's and in the backlog. The Developer pops
-it and changes docs/ in the worktree; issue-pop runs mage audit and opens
+it and changes docs/ in the worktree; implement runs mage audit and opens
 no merge request while it fails; once it passes, the merge request names
 mage audit and its merge closes the issue.
 
@@ -35,11 +35,11 @@ A design change to a component SRD, use case, test suite, or the architecture.
 <!-- field: flow -->
 ## Flow
 
-- F1: The Developer runs issue-push with a request that names a docs/ path other than a planning document.
+- F1: The Developer runs specify with a request that names a docs/ path other than a planning document.
 - F2: Model step (structure): the model turns the request into the issue body.
 - F3: tpm sets plane::data and kind::spec and files the issue unassigned through tpm issue file; it is admitted into the backlog.
 - F4: The Developer pops it into its worktree and changes the documents there.
-- F5: issue-pop runs mage audit; a failure is reported with its findings and no merge request is opened.
+- F5: implement runs mage audit; a failure is reported with its findings and no merge request is opened.
 - F6: tpm issue merge runs mage audit in the worktree; with the audit passing it merges the branch, and the merge closes the issue.
 
 <!-- field: touchpoints -->

@@ -105,7 +105,7 @@ Until it is written, the sprint-end issue (srd038 R1) summarizes the period and 
 <!-- field: non_goals -->
 ## Non-goals
 
-- Planning the next release; that is plan-release.
+- Planning the next release; that is plan.
 - Writing the stakeholder update; that is a recurring audit (srd018 R6.2).
 
 <!-- field: acceptance_criteria -->

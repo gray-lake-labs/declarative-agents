@@ -7,7 +7,7 @@ title: "Script: issue (tpm issue ...)"
 ## Design notes
 
 - The group is named for its object. Every subcommand acts on an issue, and the group was named program before release 01.4, which said nothing about any of them.
-- pop keeps its name. Pull, never push, is the process's rule, and popping an issue is its verb in the skills (issue-pop), the vision, and the states (srd041); under the issue group the command reads as what it does.
+- pop keeps its name. Pull, never push, is the process's rule, and popping an issue is its verb in the skills (implement), the vision, and the states (srd041); under the issue group the command reads as what it does.
 - The old name breaks cleanly. Every caller is a skill embedded in the same tpm (srd037), so an alias would only keep stale skills running; instead tpm program runs nothing and names the fix.
 - recur moves here from standup (srd010 R8.2, retired). It closes and reopens a recurring issue, wherever the issue lives and whoever runs it, which is the issue lifecycle, not a person's morning. The marker it writes into an issue body is tracker data, so its text does not change.
 
@@ -23,11 +23,11 @@ with nothing to build against.
 The issue subcommands are the small set of issue operations every
 repository shares: the labels admission reads, admission, filing, showing,
 taking an issue into a worktree, and opening a merge request. Together with
-the issue-push and issue-pop skills (srd035, srd036) they are the inner
+the specify and implement skills (srd035, srd036) they are the inner
 loop on GitLab.
 Tracking objectives against evidence, verifying what was built, closing
 drained epics, and rendering the dashboard belong to track-goals (srd019);
-recording a release plan belongs to plan-release.
+recording a release plan belongs to plan.
 
 <!-- field: goals -->
 ## Goals
@@ -73,7 +73,7 @@ tpm program, the group's name before release 01.4, runs no subcommand: it exits 
 <!-- req: R3.1 -->
 ### R3.1
 
-Creates an issue in a given project with the given title, body, plane, kind, component, and milestone, unassigned, and runs lint on it before returning (R1). It never sets an assignee; a person who wants the issue pops it with issue-pop (srd041 R9.1).
+Creates an issue in a given project with the given title, body, plane, kind, component, and milestone, unassigned, and runs lint on it before returning (R1). It never sets an assignee; a person who wants the issue pops it with implement (srd041 R9.1).
 
 <!-- req: R3.2 -->
 ### R3.2
@@ -179,7 +179,7 @@ The marker recur writes into the next instance's body, naming the issue it recur
 ## Non-goals
 
 - Splitting an issue into sub-issues and working them; that arrives with epics and do-work in a later release.
-- Choosing what goes in a release; that is plan-release.
+- Choosing what goes in a release; that is plan.
 - Tracking objectives, verifying merged work, closing epics, or rendering the dashboard; that is track-goals (srd019).
 - Offering or assigning work to a person.
 

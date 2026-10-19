@@ -143,7 +143,7 @@ The vocabulary is closed. A program adds an event name only through a plane::con
 <!-- req: R8.1 -->
 ### R8.1
 
-Posted on an objective issue when create-goals pushes it, and again whenever plan-release places it in a different road-map release.
+Posted on an objective issue when tasks pushes it, and again whenever plan places it in a different road-map release.
 
 <!-- req: R8.2 -->
 ### R8.2

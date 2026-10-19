@@ -53,7 +53,7 @@ func newWeeklyEnv(cloneName string) (*weeklyEnv, error) {
 	return e, err
 }
 
-// objectiveIssue files an open objective issue in project, as create-goals
+// objectiveIssue files an open objective issue in project, as tasks
 // would, and returns its reference.
 func (e *weeklyEnv) objectiveIssue(project, title string) (string, int, error) {
 	i, err := e.tr.CreateIssue(project, gitlab.NewIssue{Title: title,

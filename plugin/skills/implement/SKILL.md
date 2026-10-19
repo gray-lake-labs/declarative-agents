@@ -1,9 +1,9 @@
 ---
-name: issue-pop
+name: implement
 description: Take an issue into its own branch and worktree, and finish with the merge that closes it (srd036). Use when a person asks to work, take, or pop an issue in this repository, or to finish and merge the work.
 ---
 
-# issue-pop
+# implement
 
 Invoking this skill takes the issue. tpm decides whether it can be taken
 and does every step around the work; this skill asks nothing and closes

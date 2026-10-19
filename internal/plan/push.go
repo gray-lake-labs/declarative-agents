@@ -280,7 +280,7 @@ func upsert(t gitlab.Tracker, in PushInput, a IssueAction, existing *gitlab.Issu
 }
 
 // postPlanned posts a planned event on each open objective issue for one of
-// the release's objectives that create-goals filed for another release
+// the release's objectives that tasks filed for another release
 // (srd031 R4.3, srd006 R8).
 func postPlanned(t gitlab.Tracker, in PushInput, r Release, repos []string, docs []*objectives.Document, groups []group) ([]PlannedOnIssue, error) {
 	var out []PlannedOnIssue

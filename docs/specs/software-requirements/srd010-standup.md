@@ -125,7 +125,7 @@ tpm standup done closes an issue only when its assignee has no merge request ope
 <!-- req: R8.1 -->
 ### R8.1
 
-tpm standup adhoc creates an issue in the caller's tracker project with the next ad-hoc identifier, the given title, due date, estimate, source, and urgency, through tpm issue file (srd019). It sets no assignee; the caller pops it with issue-pop (srd041 R9.1).
+tpm standup adhoc creates an issue in the caller's tracker project with the next ad-hoc identifier, the given title, due date, estimate, source, and urgency, through tpm issue file (srd019). It sets no assignee; the caller pops it with implement (srd041 R9.1).
 
 <!-- req: R8.2 | status: retired | retired_in: 1.4 | replaced_by: ["srd013-program R8.1"] -->
 ### R8.2
@@ -143,7 +143,7 @@ tpm standup finish records the time of a completed morning run in the person con
 <!-- field: non_goals -->
 ## Non-goals
 
-- Offering or taking work; taking is issue-pop.
+- Offering or taking work; taking is implement.
 - Any per-person comparison or ranking across people.
 - Asking the person anything.
 

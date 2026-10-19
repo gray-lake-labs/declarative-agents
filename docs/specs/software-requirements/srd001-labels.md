@@ -65,7 +65,7 @@ A plane::management issue changes intent: a road-map release, a system or subsys
 <!-- req: R1.2 -->
 ### R1.2
 
-Only the program lead or a sub-project lead files a plane::management issue. Scripts file exactly two kinds of plane::management issue: the sprint issue (R7), and the objective issues create-goals files for a receiving Product Owner (srd022, srd034 R3), since a Product Owner answers an objective by writing requirements.
+Only the program lead or a sub-project lead files a plane::management issue. Scripts file exactly two kinds of plane::management issue: the sprint issue (R7), and the objective issues tasks files for a receiving Product Owner (srd022, srd034 R3), since a Product Owner answers an objective by writing requirements.
 
 <!-- req: R1.3 -->
 ### R1.3
@@ -198,7 +198,7 @@ A sprint is a group milestone named for the release it plans (srd031 R4.2), with
 <!-- req: R7.2 -->
 ### R7.2
 
-The sprint issue's description is the exit checklist, one item per objective of the release, copied from the road-map release when plan-release records it. Each item is ticked from that objective's ledger, never from its issues.
+The sprint issue's description is the exit checklist, one item per objective of the release, copied from the road-map release when plan records it. Each item is ticked from that objective's ledger, never from its issues.
 
 <!-- req: R7.3 -->
 ### R7.3
@@ -657,7 +657,7 @@ It carries Requirements and Acceptance Criteria, and its merge request changes d
 <!-- ac: AC1 -->
 ### AC1
 
-A management-plane issue filed by a non-lead, or a script-created management issue other than the sprint issue or a create-goals objective issue, is flagged by admission; no management-plane issue appears in the backlog; each is assigned only by the pop of the lead who works it; no management-plane action creates, labels, or assigns a data-plane issue.
+A management-plane issue filed by a non-lead, or a script-created management issue other than the sprint issue or a tasks objective issue, is flagged by admission; no management-plane issue appears in the backlog; each is assigned only by the pop of the lead who works it; no management-plane action creates, labels, or assigns a data-plane issue.
 
 <!-- field: traces -->
 #### Traces

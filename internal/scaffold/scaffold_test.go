@@ -108,8 +108,8 @@ func TestInitInstallsSkills(t *testing.T) {
 	if err != nil || len(r.Skills) == 0 {
 		t.Fatalf("init with --agent claude: %d skill results, %v", len(r.Skills), err)
 	}
-	if _, err := os.Stat(filepath.Join(dir, ".claude", "skills", "issue-pop", "SKILL.md")); err != nil {
-		t.Fatalf("issue-pop not installed for claude: %v", err)
+	if _, err := os.Stat(filepath.Join(dir, ".claude", "skills", "implement", "SKILL.md")); err != nil {
+		t.Fatalf("implement not installed for claude: %v", err)
 	}
 }
 
