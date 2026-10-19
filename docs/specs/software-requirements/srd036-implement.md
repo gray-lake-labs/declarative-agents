@@ -86,7 +86,7 @@ As a skill, is at most 50 lines and has no model step; the work in the worktree 
 <!-- field: non_goals -->
 ## Non-goals
 
-- Splitting an issue into sub-issues and working them one by one; that arrives with epics and do-work in a later release.
+- Splitting an issue into sub-issues and working them one by one; that arrives with tracking issues and do-work in a later release.
 - Re-creating a recurring issue after its run; that is release 01.1 (tpm issue recur).
 - Approving; a reviewer reads the branch and approves it (srd013 R5.6).
 

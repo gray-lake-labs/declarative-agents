@@ -29,7 +29,7 @@ Vision states goals and boundaries. Architecture states components and flows. SR
 <!-- article: D4 -->
 ### D4 - Issue-first process
 
-The process has one unit of work, the issue. Documents describe every object (sprint, epic, task, recurring issue, comment event, link) by how it relates to an issue and by the labels an issue carries. A document that introduces a second unit of work is wrong.
+The process has one unit of work, the issue. Documents describe every object (sprint, tracking issue, task, recurring issue, comment event, link) by how it relates to an issue and by the labels an issue carries. A document that introduces a second unit of work is wrong.
 
 <!-- article: D5 -->
 ### D5 - Facts are fetched, judgment is asked

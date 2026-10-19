@@ -80,7 +80,7 @@ Retired in 01.2 (design.md D12).
 Retired in 01.2 (design.md D12).
 
 <!-- req: R4 -->
-## R4 - Close objectives and drained epics
+## R4 - Close objectives and drained tracking issues
 
 <!-- req: R4.1 | status: retired | retired_in: 1.2 -->
 ### R4.1

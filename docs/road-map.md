@@ -62,7 +62,7 @@ tpm picks the labels, files, and lints.
 
 implement claims an issue for the person who works it, on its own
 branch in its own worktree, and the merge request tpm opens closes it.
-Sub-issues and do-work arrive with epics later.
+Sub-issues and do-work arrive with tracking issues later.
 
 <!-- field: srds -->
 ### SRDs

@@ -26,7 +26,7 @@ taking an issue into a worktree, and delivering it by a reviewed merge. Together
 the specify and implement skills (srd035, srd036) they are the inner
 loop on GitLab.
 Tracking objectives against evidence, verifying what was built, closing
-drained epics, and rendering the dashboard belong to track-goals (srd019);
+drained tracking issues, and rendering the dashboard belong to track-goals (srd019);
 recording a release plan belongs to plan.
 
 <!-- field: goals -->
@@ -78,7 +78,7 @@ Creates an issue in a given project with the given title, body, plane, kind, com
 <!-- req: R3.2 -->
 ### R3.2
 
-With a parent epic given, appends the new issue to the epic's Members section; with a parent issue given, attaches the new issue as its sub-issue.
+With a parent tracking issue given, appends the new issue to its Members section (srd001 R6); with a parent issue given, attaches the new issue as its sub-issue.
 
 <!-- req: R3.3 -->
 ### R3.3
@@ -91,7 +91,7 @@ A data issue filed without a milestone and without a type gets the sprint: the a
 <!-- req: R4.1 -->
 ### R4.1
 
-Returns one issue with its labels, its state per srd041 R1–R32, its sub-issues and their states, its Upstream, Requires, and Cites lines with track-goals' explanation of each (srd019), its epic if any, and its event comments, including its ledger events for an objective.
+Returns one issue with its labels, its state per srd041 R1–R32, its sub-issues and their states, its Upstream, Requires, and Cites lines with track-goals' explanation of each (srd019), its tracking issue if any, and its event comments, including its ledger events for an objective.
 
 <!-- req: R5 -->
 ## R5 - tpm issue merge
@@ -139,6 +139,11 @@ Creates or updates the program's group labels from control/labels.md in the prog
 
 Is idempotent: a second run changes nothing. It never deletes or renames a label, so issues keep the labels they carry.
 
+<!-- req: R6.3 -->
+### R6.3
+
+With --migrate, also relabels issues for a value srd001 renamed: every issue in the program's group labelled type::epic gains type::tracking and loses type::epic (srd001 R6.6). It is opt-in, writes nothing with --dry-run, and is idempotent. It never deletes or renames the group label itself and never edits the program's control files; it reports when control/labels.md or control/policy.md still names epic, for a plane::control issue to change.
+
 <!-- req: R7 -->
 ## R7 - tpm issue pop
 
@@ -178,9 +183,9 @@ The marker recur writes into the next instance's body, naming the issue it recur
 <!-- field: non_goals -->
 ## Non-goals
 
-- Splitting an issue into sub-issues and working them; that arrives with epics and do-work in a later release.
+- Splitting an issue into sub-issues and working them; that arrives with tracking issues and do-work in a later release.
 - Choosing what goes in a release; that is plan.
-- Tracking objectives, verifying merged work, closing epics, or rendering the dashboard; that is track-goals (srd019).
+- Tracking objectives, verifying merged work, closing tracking issues, or rendering the dashboard; that is track-goals (srd019).
 - Offering or assigning work to a person.
 
 <!-- field: acceptance_criteria -->
@@ -212,7 +217,7 @@ Every issue subcommand honours --json and --dry-run and never prompts; tpm progr
 <!-- ac: AC3 -->
 ### AC3
 
-file creates an unassigned, linted issue (or an epic member, or a sub-issue of a parent issue) and never sets an assignee; show returns the issue with state, sub-issues, explained links, epic, and events; a data issue filed without a milestone carries the one active sprint covering today, or none with the reason.
+file creates an unassigned, linted issue (or a tracking-issue member, or a sub-issue of a parent issue) and never sets an assignee; show returns the issue with state, sub-issues, explained links, tracking issue, and events; a data issue filed without a milestone carries the one active sprint covering today, or none with the reason.
 
 <!-- field: traces -->
 #### Traces
@@ -247,13 +252,14 @@ A merge of a branch that changes docs/ runs mage audit first and merges nothing 
 <!-- ac: AC6 -->
 ### AC6
 
-labels creates every listed label once, from control/labels.md or the defaults; a second run changes nothing; no label is deleted or renamed.
+labels creates every listed label once, from control/labels.md or the defaults; a second run changes nothing; no label is deleted or renamed; with --migrate, issues labelled type::epic are relabelled type::tracking once, nothing is written on a dry run, and control files that still name epic are reported, not edited.
 
 <!-- field: traces -->
 #### Traces
 
 - [R6.1](#r61)
 - [R6.2](#r62)
+- [R6.3](#r63)
 
 <!-- ac: AC7 -->
 ### AC7

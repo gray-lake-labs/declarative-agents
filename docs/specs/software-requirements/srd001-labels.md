@@ -47,7 +47,7 @@ artifact, and nobody can tell why an issue sits where it does.
 
 We define one label scheme with five axes. Plane says which kind of change
 an issue makes and how fast it may move. Type marks the few issues that are
-not plain work: epics, the sprint issue, and recurring subscriptions. Kind
+not plain work: tracking issues, the sprint issue, and recurring subscriptions. Kind
 says what the work is and what finishing means. Component names the part
 of the program the issue belongs to. State says where the issue is and
 which one actor may move it (srd041). Admission checks
@@ -160,32 +160,37 @@ An issue with no plane label or with more than one is labelled needs-triage by a
 The plane of an issue follows from what it changes, not from who filed it: an issue that edits a policy file is plane::control whoever files it.
 
 <!-- req: R6 -->
-## R6 - type::epic
+## R6 - type::tracking
 
 <!-- req: R6.1 -->
 ### R6.1
 
-An epic is an issue labelled type::epic whose description holds a task list of member issues, one line each, written as cross-project references so members may live in any repository of the program.
+A tracking issue is an issue labelled type::tracking whose description holds a task list of member issues, one line each, written as cross-project references so members may live in any repository of the program.
 
 <!-- req: R6.2 -->
 ### R6.2
 
-An epic is never popped into a worktree and never has a merge of its own. A pop request on an epic is refused and lists its open members.
+A tracking issue is never popped into a worktree and never has a merge of its own. A pop request on a tracking issue is refused and lists its open members.
 
 <!-- req: R6.3 -->
 ### R6.3
 
-An epic closes when it has at least one member and every member is closed. An epic with no members does not close automatically.
+A tracking issue closes when it has at least one member and every member is closed. A tracking issue with no members does not close automatically.
 
 <!-- req: R6.4 -->
 ### R6.4
 
-An epic may carry a later milestone than its members, so a body of work spanning several sprints shows under the sprint it is expected to finish in.
+A tracking issue may carry a later milestone than its members, so a body of work spanning several sprints shows under the sprint it is expected to finish in.
 
 <!-- req: R6.5 -->
 ### R6.5
 
-An epic that spans components lives in the program's own repository; an epic inside one component lives in that component's repository.
+A tracking issue that spans components lives in the program's own repository; a tracking issue inside one component lives in that component's repository.
+
+<!-- req: R6.6 -->
+### R6.6
+
+type::epic, the value's earlier name, is read as an alias of type::tracking: an issue labelled type::epic is a tracking issue, and a program's control files that list epic keep their meaning. tpm writes type::tracking on every issue it files, and tpm issue labels --migrate relabels issues that still carry type::epic (srd013 R6.3).
 
 <!-- req: R7 -->
 ## R7 - type::sprint
@@ -254,7 +259,7 @@ A plain issue is worked in one worktree and closed, with all its tasks, by one m
 <!-- req: R9.4 -->
 ### R9.4
 
-A plain issue may be a member of at most one epic.
+A plain issue may be a member of at most one tracking issue.
 
 <!-- req: R10 -->
 ## R10 - kind::build
@@ -628,7 +633,7 @@ It carries Requirements and Acceptance Criteria, and its branch changes docs/ an
 
 - G1: Every issue declares its plane, kind, and component with exactly one label each; type and state are set only where they apply.
 - G2: Each plane has its own filing and closing rules, and information crosses planes in one direction per kind.
-- G3: The objects that are not plain work are recognizable from one type label, and the hierarchy stays flat at epic, issue, and task.
+- G3: The objects that are not plain work are recognizable from one type label, and the hierarchy stays flat at tracking issue, issue, and task.
 - G4: Every kind of work travels the same inner loop (push, pop, do-work, merge); the kind decides who pulls it and what finishing means, not how it runs.
 - G5: The process reads component values without defining them.
 
@@ -638,9 +643,9 @@ It carries Requirements and Acceptance Criteria, and its branch changes docs/ an
 - Defining the content of any plane's files; road-maps and SRDs belong to each repository.
 - Permissions in the tracker itself; the plane rules are enforced by admission and review, not by tracker roles.
 - A fourth plane. Telemetry and dashboards are views over tracker state, not a plane.
-- Epics as a native tracker object; the process uses only features of the free tier.
+- Tracking issues as a native tracker object (a tracker's epics); the process uses only features of the free tier.
 - A goal type; an objective is an ordinary issue whose events are its ledger (srd006 R11).
-- Nesting epics or nesting worktrees.
+- Nesting tracking issues or nesting worktrees.
 - Estimating effort per kind.
 - A separate workflow per kind; every kind ends in one merge or one recorded answer on the same issue loop.
 - Sub-kinds; a program that needs finer distinctions uses its own labels outside the process axes.
@@ -720,7 +725,7 @@ An issue with zero or two plane labels is labelled needs-triage and is absent fr
 <!-- ac: AC6 -->
 ### AC6
 
-An epic with cross-project members shows their progress in its task list; popping it is refused with its open members listed; it closes when its last member closes and not before; an empty epic stays open; a cross-component epic lives in the program repository.
+A tracking issue with cross-project members shows their progress in its task list; popping it is refused with its open members listed; it closes when its last member closes and not before; an empty tracking issue stays open; a cross-component tracking issue lives in the program repository; an issue labelled type::epic is treated as a tracking issue.
 
 <!-- field: traces -->
 #### Traces
@@ -730,6 +735,7 @@ An epic with cross-project members shows their progress in its task list; poppin
 - [R6.3](#r63)
 - [R6.4](#r64)
 - [R6.5](#r65)
+- [R6.6](#r66)
 
 <!-- ac: AC7 -->
 ### AC7
@@ -760,7 +766,7 @@ A breaking release marks each subscribing recurring issue needs-run and a compat
 <!-- ac: AC9 -->
 ### AC9
 
-A plain issue carries one component, kind, plane, and milestone; its tasks are never in the backlog; one merge closes it with its tasks; no plain issue appears in two epics.
+A plain issue carries one component, kind, plane, and milestone; its tasks are never in the backlog; one merge closes it with its tasks; no plain issue appears in two tracking issues.
 
 <!-- field: traces -->
 #### Traces

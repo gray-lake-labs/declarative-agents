@@ -22,7 +22,7 @@ Defines every object the process uses by its relation to the issue, the only uni
 | pinned_set | One release of each subsystem and of the test subsystem, promoted together along the environment chain. | srd008 | the version an evidence event records |
 | evidence | An evidence event on an objective: a named test's result in a named environment on a pinned set, for one requirement. The only input to done. | srd006 R9, srd008 | a comment event on an objective issue |
 | task | A step inside one issue; a child work item. No labels of its own; never in the backlog. | srd001 R9 | belongs to exactly one issue |
-| epic | An issue labelled type::epic whose description lists member issues. Never worked directly. | srd001 R6 | an issue that contains references to issues |
+| tracking_issue | An issue labelled type::tracking (type::epic is read as its alias) whose description lists member issues. Never worked directly. | srd001 R6 | an issue that contains references to issues |
 | sprint | A three-week period ending in a road-map release; a group milestone and one type::sprint issue holding the exit checklist. | srd001 R7, srd031 | an issue plus the milestone every planned issue of the period carries |
 | recurring_issue | A consumer's standing subscription to one artifact; closed and reopened per run. | srd001 R8 | an issue labelled type::recurring |
 | audit | An issue with a Recurrence section, worked by the inner loop on a schedule or when a person triggers it; implement re-creates it after each run. Its findings are pushed as issues. | agents, srd018 R6 | an issue re-created per run |
@@ -36,4 +36,4 @@ Defines every object the process uses by its relation to the issue, the only uni
 <!-- field: taxonomy_rules -->
 ## Taxonomy rules
 
-Flat by design: epic, issue, task. Levels (system, subsystem, component) are repositories, not issue types; they connect through pinned Cites lines and objectives. Dependencies cross-cut the hierarchy through links; events attach to issues; sprints group issues by milestone.
+Flat by design: tracking issue, issue, task. Levels (system, subsystem, component) are repositories, not issue types; they connect through pinned Cites lines and objectives. Dependencies cross-cut the hierarchy through links; events attach to issues; sprints group issues by milestone.
