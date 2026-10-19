@@ -144,7 +144,7 @@ func Evidence(requirement, test, environment, version, result string, extra ...K
 // PlannedRequired are the planned event's required keys (srd006 R8.2).
 var PlannedRequired = []string{"release", "requirement", "environment"}
 
-// Planned is the event create-goals and plan-release post on an objective
+// Planned is the event tasks and plan post on an objective
 // issue: the release it counts toward, each requirement it satisfies as a
 // pinned URL, and the environment where its evidence counts (srd006 R8).
 func Planned(release string, requirements []string, environment string) (Event, string) {

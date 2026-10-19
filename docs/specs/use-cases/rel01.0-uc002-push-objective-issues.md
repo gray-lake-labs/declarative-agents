@@ -10,7 +10,7 @@ test_suite: test-rel01.0-objectives
 ## Summary
 
 After the system release is planned, the technical program manager runs
-create-goals, which is the decision to file the release's objectives. tpm
+tasks, which is the decision to file the release's objectives. tpm
 reads the agreed objective document and the release, recommends the
 Product Owner and the environment for each objective, and files one
 objective issue in each owner's repository. The technical program manager
@@ -41,7 +41,7 @@ The system release is recorded in docs/road-map.md with its tag.
 <!-- field: flow -->
 ## Flow
 
-- F1: The technical program manager starts create-goals in the system repository.
+- F1: The technical program manager starts tasks in the system repository.
 - F2: tpm reads the planned release and its tag, the agreed objective document, the subsystem SRDs, and the objective issues already filed for the release, and returns as JSON each objective item with a recommended owner (the Product Owner whose subsystem SRD declares the component) and environment.
 - F3: The skill takes every recommendation and asks the technical program manager only for the repository of an objective with no recommended owner, offering the candidates; it asks for no confirmation.
 - F4: tpm renders each objective issue from the document, with one Cites line per item pinned to the release tag, the Environment line, the document's Requirements as ordered steps and its Acceptance Criteria, a due date, and an empty Notes section.
@@ -55,7 +55,7 @@ The system release is recorded in docs/road-map.md with its tag.
 | id | target | reason |
 | --- | --- | --- |
 | T1 | [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.2](../software-requirements/srd034-objectives.md#r32), [R3.3](../software-requirements/srd034-objectives.md#r33), [R3.4](../software-requirements/srd034-objectives.md#r34), [R9.1](../software-requirements/srd034-objectives.md#r91) | S1 and S6 trace how an objective issue is rendered and what the owner does with it. |
-| T2 | [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R1.1](../software-requirements/srd022-create-goals.md#r11), [R2.1](../software-requirements/srd022-create-goals.md#r21), [R2.2](../software-requirements/srd022-create-goals.md#r22), [R2.3](../software-requirements/srd022-create-goals.md#r23), [R3.1](../software-requirements/srd022-create-goals.md#r31), [R3.2](../software-requirements/srd022-create-goals.md#r32), [R3.3](../software-requirements/srd022-create-goals.md#r33), [R4.1](../software-requirements/srd022-create-goals.md#r41), [R4.3](../software-requirements/srd022-create-goals.md#r43), [R5.1](../software-requirements/srd022-create-goals.md#r51), [R5.2](../software-requirements/srd022-create-goals.md#r52), [R5.3](../software-requirements/srd022-create-goals.md#r53) | S1, S2, and S5 trace create-goals' reads, questions, pushes, and refusals. |
+| T2 | [srd022-create-goals](../software-requirements/srd022-create-goals.md) [R1.1](../software-requirements/srd022-create-goals.md#r11), [R2.1](../software-requirements/srd022-create-goals.md#r21), [R2.2](../software-requirements/srd022-create-goals.md#r22), [R2.3](../software-requirements/srd022-create-goals.md#r23), [R3.1](../software-requirements/srd022-create-goals.md#r31), [R3.2](../software-requirements/srd022-create-goals.md#r32), [R3.3](../software-requirements/srd022-create-goals.md#r33), [R4.1](../software-requirements/srd022-create-goals.md#r41), [R4.3](../software-requirements/srd022-create-goals.md#r43), [R5.1](../software-requirements/srd022-create-goals.md#r51), [R5.2](../software-requirements/srd022-create-goals.md#r52), [R5.3](../software-requirements/srd022-create-goals.md#r53) | S1, S2, and S5 trace tasks' reads, questions, pushes, and refusals. |
 | T3 | [srd013-program](../software-requirements/srd013-program.md) [R1.1](../software-requirements/srd013-program.md#r11), [R1.2](../software-requirements/srd013-program.md#r12), [R1.3](../software-requirements/srd013-program.md#r13), [R2.1](../software-requirements/srd013-program.md#r21), [R3.1](../software-requirements/srd013-program.md#r31) | S3 traces filing and admission. |
 | T4 | [srd007-links](../software-requirements/srd007-links.md) [R5.1](../software-requirements/srd007-links.md#r51), [R5.2](../software-requirements/srd007-links.md#r52), [R5.3](../software-requirements/srd007-links.md#r53) | S4 traces pinned citations. |
 | T5 | [srd006-events](../software-requirements/srd006-events.md) [R8.1](../software-requirements/srd006-events.md#r81), [R8.2](../software-requirements/srd006-events.md#r82) | S5 traces the planned event. |
@@ -86,7 +86,7 @@ Each owner receives one objective issue per release with pinned Cites lines, an 
 <!-- sc: S2 -->
 ### S2
 
-create-goals reads its facts from the release, the documents, and existing objectives, takes the recommended owner and the environment, asks only for a missing owner, asks no confirmation, and refuses an unpinned citation or a missing environment.
+tasks reads its facts from the release, the documents, and existing objectives, takes the recommended owner and the environment, asks only for a missing owner, asks no confirmation, and refuses an unpinned citation or a missing environment.
 
 <!-- field: traces -->
 #### Traces
@@ -150,7 +150,7 @@ Each created or updated objective issue carries one planned event naming its rel
 <!-- sc: S6 -->
 ### S6
 
-The Product Owner takes the issue with issue-pop and needs no other tool, channel, or step.
+The Product Owner takes the issue with implement and needs no other tool, channel, or step.
 
 <!-- field: traces -->
 #### Traces

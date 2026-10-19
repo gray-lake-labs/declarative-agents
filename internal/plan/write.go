@@ -12,7 +12,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 )
 
-// Release is the release plan-release writes into the road map: its
+// Release is the release plan writes into the road map: its
 // objective items in deliverables and its milestone and tag in
 // release.publication (design.md schema.roadmap, srd031 R4.1).
 type Release struct {
@@ -22,7 +22,7 @@ type Release struct {
 	Tag       string   `json:"tag"`
 }
 
-// Returned is an item plan-release would not place, and why (srd031 R4.4).
+// Returned is an item plan would not place, and why (srd031 R4.4).
 type Returned struct {
 	ID      string   `json:"id"`
 	Missing []string `json:"missing"`
@@ -80,7 +80,7 @@ func WriteRelease(dir string, r Release, c Candidates, t gitlab.Tracker, issuePr
 	}
 	if len(w.Returned) > 0 && t != nil && issueProject != "" {
 		var body strings.Builder
-		body.WriteString("plan-release did not place these objective items; their acceptance criteria need a test and an environment (srd031 R4.4):\n\n")
+		body.WriteString("plan did not place these objective items; their acceptance criteria need a test and an environment (srd031 R4.4):\n\n")
 		for _, x := range w.Returned {
 			fmt.Fprintf(&body, "- %s: missing %s\n", x.ID, strings.Join(x.Missing, " and "))
 		}

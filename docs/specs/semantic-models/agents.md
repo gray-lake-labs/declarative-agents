@@ -31,9 +31,9 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
     1. - skill: make-work
        - does: turns a planned release into issues for its components
        - "each in do-work's input format": null
-    1. - skill: issue-push
+    1. - skill: specify
        - does: files an issue in do-work's input format (config format issue-body)
-    1. - skill: issue-pop
+    1. - skill: implement
        - does: takes the issue
        - "assigning only the person who runs it": null
        - "and opens its own branch and worktree (srd036); splitting it into sub-issues arrives with epics": null
@@ -41,10 +41,10 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
        - does: works each unit against its Requirements and Acceptance Criteria
        - "commits with the unit's record embedded": null
        - "and logs actual against estimated size; on GitLab it arrives with epics after release 00.0": null
-    1. - skill: issue-pop (finish)
+    1. - skill: implement (finish)
        - does: opens the merge request that closes the issue
        - "gated by mage audit for a change under docs/; a reviewer merges it": null
-    1. - skill: issue-pop (release issue)
+    1. - skill: implement (release issue)
        - does: runs tpm release next
        - gate: null
        - "and tag": null
@@ -52,7 +52,7 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
        - "srd015); handoff routes it downstream (srd014)": null
   - used_by: every role, for every kind of work, unchanged.
 - audits:
-  - definition: Recurring issues (a title starting "Recurring:" or a Recurrence section) popped and worked by the inner loop, on a schedule or when a person triggers one. Findings are pushed as issues; issue-pop (Phase 6) re-creates the recurring issue for the next run.
+  - definition: Recurring issues (a title starting "Recurring:" or a Recurrence section) popped and worked by the inner loop, on a schedule or when a person triggers one. Findings are pushed as issues; implement (Phase 6) re-creates the recurring issue for the next run.
   - examples:
     1. regression tests and benchmarks against the default branch
     1. contract checks at every artifact boundary (srd008)
@@ -62,15 +62,15 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
 - outer_loops:
   - definition: The Scrum skills, for the workflows where people decide together. Each reads the tracker, asks people bounded questions, and pushes issues in do-work's input format for the inner loop to work.
   - skills:
-    1. - skill: plan-release
+    1. - skill: plan
        - srd: srd031
        - started_by: technical program manager (system) or product owner (subsystem)
        - when: before each three-week period
        - pushes: the road-map release entry and planned events
-    1. - skill: create-goals
+    1. - skill: tasks
        - srd: srd022
        - started_by: technical program manager or a product owner with downstream repositories
-       - when: after plan-release
+       - when: after plan
        - pushes: objective issues citing pinned requirements and naming their environment
     1. - skill: daily-scrum
        - srd: srd020
@@ -96,5 +96,5 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
 | A1 | One inner loop for all work. Code, architecture documents, OpenAPI schemas, infrastructure (Terraform, Helm), papers, research, and reviews all run push, pop, do-work, merge request. The issue states the deliverable and its acceptance criteria; do-work needs no extension per kind of deliverable. |
 | A2 | Scripts (tpm subcommands) are tools the loops call, not agents. Event-driven scripts (lint, track-goals, handoff) run in CI on tracker events; they are tools the loops depend on, not agents either. |
 | A3 | People direct agents; agents never direct other agents. Work moves between sessions only through the tracker, as issues, comments, links, and tags, under the same rules as everyone else. |
-| A4 | An agent never assigns work to anyone but the person who ran issue-pop, never approves anything, and never changes a rule except by a merge request a person approves. Taking, approving, and rule changes are the three acts the process reserves for people. |
+| A4 | An agent never assigns work to anyone but the person who ran implement, never approves anything, and never changes a rule except by a merge request a person approves. Taking, approving, and rule changes are the three acts the process reserves for people. |
 | A5 | The kind label routes pull: it decides who takes an issue, whether it is offered, and how it is counted (srd001 R20.4). It does not change how the work runs. |

@@ -73,7 +73,7 @@ call of that subcommand. The SRD change comes first (D1).
 The owning SRD is the one the work belongs to, which is not always a
 script SRD. A package can be backed by a skill SRD when the skill is
 the only caller of its subcommands: internal/goals implements srd022
-create-goals, internal/plan srd031 plan-release, and internal/sprintend
+tasks, internal/plan srd031 plan, and internal/sprintend
 srd038 sprint-end. Shared code is backed by the SRD that states its
 contract, such as internal/corpus by srd039.
 

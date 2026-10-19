@@ -126,7 +126,7 @@ section
 <!-- field: description -->
 #### Description
 
-A "## Notes" heading on an objective issue, filed empty by create-goals and filled by the owner with the details of the work as it proceeds (srd034 R3.3). Free text; no script reads or writes it.
+A "## Notes" heading on an objective issue, filed empty by tasks and filled by the owner with the details of the work as it proceeds (srd034 R3.3). Free text; no script reads or writes it.
 
 <!-- schema_entry: estimate_line -->
 ### estimate_line

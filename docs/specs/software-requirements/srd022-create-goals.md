@@ -1,6 +1,6 @@
 ---
 id: srd022-create-goals
-title: "Skill: create-goals"
+title: "Skill: tasks"
 ---
 
 <!-- field: problem -->
@@ -14,11 +14,11 @@ and environments that will prove it. Passed down in meetings, these
 obligations lose the exact requirement and version they came from, and the
 owner below writes requirements against a moving target.
 
-create-goals reads the release just planned and pushes one objective issue
+tasks reads the release just planned and pushes one objective issue
 to each downstream owner, citing the upstream requirements by URL pinned to
 the release tag and naming the environment where the objective counts.
 Each objective issue is the ledger track-goals writes evidence to.
-Invoking create-goals is the decision to file them: it takes every owner
+Invoking tasks is the decision to file them: it takes every owner
 and environment tpm can compute, asks only for what it cannot, and pushes
 without a further confirmation.
 
@@ -35,7 +35,7 @@ without a further confirmation.
 <!-- req: R1.1 -->
 ### R1.1
 
-Started after plan-release (srd031) by the technical program manager for a system release, or by a Product Owner whose subsystem has downstream repositories.
+Started after plan (srd031) by the technical program manager for a system release, or by a Product Owner whose subsystem has downstream repositories.
 
 <!-- req: R2 -->
 ## R2 - Reads
@@ -79,7 +79,7 @@ Asks nothing the road-map, the SRDs, or the tracker already answers, and asks fo
 <!-- req: R4.1 -->
 ### R4.1
 
-One objective issue per downstream owner and release, filed with issue-push in the owner's repository, in do-work's input format, with one Cites line per upstream requirement pinned to the release tag (srd007 R5) and one Environment line.
+One objective issue per downstream owner and release, filed with specify in the owner's repository, in do-work's input format, with one Cites line per upstream requirement pinned to the release tag (srd007 R5) and one Environment line.
 
 <!-- req: R4.2 -->
 ### R4.2
@@ -102,7 +102,7 @@ Refuses to push an objective with an unpinned citation or without an environment
 <!-- req: R5.2 -->
 ### R5.2
 
-Refuses to write the downstream owner's requirements; the owner writes those with do-work and places them with plan-release.
+Refuses to write the downstream owner's requirements; the owner writes those with do-work and places them with plan.
 
 <!-- req: R5.3 -->
 ### R5.3
@@ -112,7 +112,7 @@ Refuses to copy names or confidential content from inputs.
 <!-- field: non_goals -->
 ## Non-goals
 
-- Choosing what goes in the release; that is plan-release (srd031).
+- Choosing what goes in the release; that is plan (srd031).
 - Deciding that an objective is met; that is track-goals (srd019).
 
 <!-- field: acceptance_criteria -->

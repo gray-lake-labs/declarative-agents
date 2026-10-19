@@ -1,6 +1,6 @@
 ---
 id: srd031-plan-release
-title: "Skill: plan-release"
+title: "Skill: plan"
 ---
 
 <!-- field: problem -->
@@ -14,7 +14,7 @@ subsystem's requirements, written to satisfy upstream objectives, the next
 subsystem release covers. Decided in a meeting, the choice lives in slides,
 and the road-map says something else.
 
-plan-release reads the road-map, the requirements or, in the system
+plan reads the road-map, the requirements or, in the system
 repository, the agreed objective documents, and what track-goals says is
 already met (before track-goals runs, what the period's reports say
 slipped), asks the owner which requirements go into the next
@@ -79,7 +79,7 @@ Asks for the release's version and end date, recommending the next minor version
 <!-- req: R4.1 -->
 ### R4.1
 
-The release entry in docs/road-map.md, listing its requirements by id, or in the system repository its objective items in deliverables and its milestone and tag in release.publication, written by tpm plan write in the worktree of a plane::management issue filed with issue-push, and merged through the inner loop, so the plan is a reviewed change.
+The release entry in docs/road-map.md, listing its requirements by id, or in the system repository its objective items in deliverables and its milestone and tag in release.publication, written by tpm plan write in the worktree of a plane::management issue filed with specify, and merged through the inner loop, so the plan is a reviewed change.
 
 <!-- req: R4.2 -->
 ### R4.2
@@ -99,7 +99,7 @@ Returns each requirement or objective item whose acceptance criteria lack a test
 <!-- req: R4.5 -->
 ### R4.5
 
-In the system repository, once the release entry merges, a documents-only release of the system repository, gated by mage audit and tagged by tpm release tag with the tag release.publication names (srd015 R2, srd034 R2.3), so create-goals pins its Cites lines to the agreed text.
+In the system repository, once the release entry merges, a documents-only release of the system repository, gated by mage audit and tagged by tpm release tag with the tag release.publication names (srd015 R2, srd034 R2.3), so tasks pins its Cites lines to the agreed text.
 
 <!-- req: R4.6 -->
 ### R4.6
@@ -123,7 +123,7 @@ Refuses to create work issues; Developers turn the plan into issues with make-wo
 ## Non-goals
 
 - Estimating capacity per person.
-- Pushing objectives downstream; that is create-goals (srd022).
+- Pushing objectives downstream; that is tasks (srd022).
 
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria

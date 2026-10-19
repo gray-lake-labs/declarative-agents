@@ -17,7 +17,7 @@ import (
 // Objective is one objective issue of the repository and its state.
 type Objective struct {
 	Issue            string   `json:"issue"`
-	Objective        string   `json:"objective"` // objNNN-short-name#Rn from create-goals' marker
+	Objective        string   `json:"objective"` // objNNN-short-name#Rn from tasks' marker
 	Release          string   `json:"release"`
 	Title            string   `json:"title"`
 	State            string   `json:"state"` // opened or closed
@@ -53,7 +53,7 @@ const goalsMarker = "<!-- tpm goals objective="
 // release next recommends.
 func MakeFacts(in Input) (Facts, error) {
 	f := Facts{Project: in.Project, Aggregate: in.Aggregate}
-	// An objective issue is known by create-goals' marker, not by a label.
+	// An objective issue is known by tasks' marker, not by a label.
 	issues, err := in.Tracker.ListIssues(in.Project, gitlab.IssueQuery{State: "all"})
 	if err != nil {
 		return f, err

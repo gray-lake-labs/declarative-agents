@@ -10,13 +10,13 @@ test_suite: test-rel01.2-sprint-end
 ## Summary
 
 Before the next period starts, the technical program manager runs
-plan-release in the system repository. It reads the road-map, the agreed
+plan in the system repository. It reads the road-map, the agreed
 objective documents, the system SRDs, and the objective issues with their
 reported status, and asks which objective items the next release proves
 and what its version and end date are. It records the answer as a
 reviewed change to the road-map, sets the milestone, updates the sprint
 issue's exit checklist, and posts planned events on objectives whose
-release moved. create-goals then files the next period's objective issues.
+release moved. tasks then files the next period's objective issues.
 
 <!-- field: actor -->
 ## Actor
@@ -37,21 +37,21 @@ The current period's sprint-end issues have closed.
 <!-- field: flow -->
 ## Flow
 
-- F1: The technical program manager files a plane::management planning issue with issue-push and pops it in the system repository before the period starts, then starts plan-release in its worktree.
+- F1: The technical program manager files a plane::management planning issue with specify and pops it in the system repository before the period starts, then starts plan in its worktree.
 - F2: tpm plan candidates reads docs/road-map.md, the SRDs, the agreed objective documents, the open objective issues, and the period aggregate's slipped-commitment signal, and returns as JSON the candidate objective items ranked slipped first, with the recommended version and end date.
 - F3: The skill shows the candidates and relays the technical program manager's choice of items, version, and end date back to tpm.
 - F4: tpm returns any chosen item whose acceptance criteria lack a test or an environment to its owner with a comment, instead of placing it.
 - F5: tpm plan write puts the release entry into docs/road-map.md in the worktree: its objective items in deliverables, and its milestone and tag in release.publication; the change merges through the inner loop.
 - F6: Once it merges, tpm release gate and tpm release tag release the system repository behind mage audit with the tag release.publication names, so the plan is published at a tag.
 - F7: tpm plan push creates or updates the milestone, named for the release with its ISO weeks in its description and its end date, and the sprint issue with one exit checklist item per objective, posts a planned event on each objective whose release changed, and files the period's sprint-end issues in each releasing repository.
-- F8: The technical program manager runs create-goals for the new release (rel01.0-uc002-push-objective-issues).
+- F8: The technical program manager runs tasks for the new release (rel01.0-uc002-push-objective-issues).
 
 <!-- field: touchpoints -->
 ## Touchpoints
 
 | id | target | reason |
 | --- | --- | --- |
-| T1 | [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R1.1](../software-requirements/srd031-plan-release.md#r11), [R2.1](../software-requirements/srd031-plan-release.md#r21), [R2.2](../software-requirements/srd031-plan-release.md#r22), [R3.1](../software-requirements/srd031-plan-release.md#r31), [R3.2](../software-requirements/srd031-plan-release.md#r32), [R4.1](../software-requirements/srd031-plan-release.md#r41), [R4.2](../software-requirements/srd031-plan-release.md#r42), [R4.3](../software-requirements/srd031-plan-release.md#r43), [R4.4](../software-requirements/srd031-plan-release.md#r44), [R4.5](../software-requirements/srd031-plan-release.md#r45), [R4.6](../software-requirements/srd031-plan-release.md#r46), [R5.1](../software-requirements/srd031-plan-release.md#r51), [R5.2](../software-requirements/srd031-plan-release.md#r52) | S1 to S3 trace plan-release's reads, questions, pushes, and refusals. |
+| T1 | [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R1.1](../software-requirements/srd031-plan-release.md#r11), [R2.1](../software-requirements/srd031-plan-release.md#r21), [R2.2](../software-requirements/srd031-plan-release.md#r22), [R3.1](../software-requirements/srd031-plan-release.md#r31), [R3.2](../software-requirements/srd031-plan-release.md#r32), [R4.1](../software-requirements/srd031-plan-release.md#r41), [R4.2](../software-requirements/srd031-plan-release.md#r42), [R4.3](../software-requirements/srd031-plan-release.md#r43), [R4.4](../software-requirements/srd031-plan-release.md#r44), [R4.5](../software-requirements/srd031-plan-release.md#r45), [R4.6](../software-requirements/srd031-plan-release.md#r46), [R5.1](../software-requirements/srd031-plan-release.md#r51), [R5.2](../software-requirements/srd031-plan-release.md#r52) | S1 to S3 trace plan's reads, questions, pushes, and refusals. |
 | T2 | [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.1](../software-requirements/srd034-objectives.md#r31) | S1 traces planning from objective documents. |
 | T3 | [srd001-labels](../software-requirements/srd001-labels.md) [R7.1](../software-requirements/srd001-labels.md#r71), [R7.2](../software-requirements/srd001-labels.md#r72), [R7.4](../software-requirements/srd001-labels.md#r74) | S4 traces the sprint milestone and sprint issue. |
 | T4 | [srd031-plan-release](../software-requirements/srd031-plan-release.md) [AC1](../software-requirements/srd031-plan-release.md#ac1), [AC2](../software-requirements/srd031-plan-release.md#ac2), [AC3](../software-requirements/srd031-plan-release.md#ac3) | S1 to S3 trace these acceptance criteria. |
@@ -64,7 +64,7 @@ The current period's sprint-end issues have closed.
 <!-- sc: S1 -->
 ### S1
 
-plan-release reads the road-map, SRDs, objective documents, open objectives, and the period's slipped commitments, and asks only the items, version, and end date with recommendations.
+plan reads the road-map, SRDs, objective documents, open objectives, and the period's slipped commitments, and asks only the items, version, and end date with recommendations.
 
 <!-- field: traces -->
 #### Traces

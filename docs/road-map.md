@@ -23,7 +23,7 @@ audit, which runs the parent's specification-critic corpus-audit agent
 ## 00.0 - Labels and push
 
 tpm program labels creates the program's labels, kind::spec among
-them, and issue-push turns a request into one admitted, unassigned
+them, and specify turns a request into one admitted, unassigned
 issue whose plane and kind say what it is. The model writes the body;
 tpm picks the labels, files, and lints.
 
@@ -59,7 +59,7 @@ tpm picks the labels, files, and lints.
 <!-- release: 00.1 | status: implemented -->
 ## 00.1 - Pop and merge
 
-issue-pop claims an issue for the person who works it, on its own
+implement claims an issue for the person who works it, on its own
 branch in its own worktree, and the merge request tpm opens closes it.
 Sub-issues and do-work arrive with epics later.
 
@@ -164,14 +164,14 @@ version, kept out of the repository by .git/info/exclude, and tpm install
 
 The technical program manager writes the program's objectives as an
 objective document that mage audit checks through the
-specification-critic agent, and create-goals files one dated, pinned,
+specification-critic agent, and tasks files one dated, pinned,
 admitted objective issue in each Product Owner's repository. The
 release also builds what that path needs: the magefile that runs the
 agent audit, tpm program file and lint, the planned event, and the
 regression rig: the Terraform split into infra/modules/program with
 the production and disposable roots, and gitlabrig (eng01). Its
 objective issues are plane::management issues the receiving Product
-Owner works through release 00.1's issue-pop and 00.2's audit gate.
+Owner works through release 00.1's implement and 00.2's audit gate.
 
 <!-- field: srds -->
 ### SRDs
@@ -204,14 +204,14 @@ Owner works through release 00.1's issue-pop and 00.2's audit gate.
 | id | summary | status | priority |
 | --- | --- | --- | --- |
 | [rel01.0-uc001-author-objectives](specs/use-cases/rel01.0-uc001-author-objectives.md) | The technical program manager merges an objective document that the specification-critic agent audit passes. | implemented | P1 |
-| [rel01.0-uc002-push-objective-issues](specs/use-cases/rel01.0-uc002-push-objective-issues.md) | create-goals files one dated, pinned, admitted objective issue per Product Owner. | implemented | P1 |
+| [rel01.0-uc002-push-objective-issues](specs/use-cases/rel01.0-uc002-push-objective-issues.md) | tasks files one dated, pinned, admitted objective issue per Product Owner. | implemented | P1 |
 
 <!-- field: test_suites -->
 ### Test suites
 
 | id | summary | status |
 | --- | --- | --- |
-| [test-rel01.0-objectives](specs/test-suites/test-rel01.0-objectives.md) | The agent audit passes a well-formed objective document and fails a malformed one; create-goals files dated objective issues once. | implemented |
+| [test-rel01.0-objectives](specs/test-suites/test-rel01.0-objectives.md) | The agent audit passes a well-formed objective document and fails a malformed one; tasks files dated objective issues once. | implemented |
 
 <!-- field: proof -->
 ### Proof
@@ -266,7 +266,7 @@ never by person.
 A sprint-end issue summarizes the period, asks the owner what to
 change, and releases behind the gate once its merge request merges;
 objectives reported complete close by that merge without a met event.
-plan-release records the next period's objective items, publishes the
+plan records the next period's objective items, publishes the
 plan as a documents-only system tag, dates the milestone and the sprint
 issue, and files the next period's sprint-end issues.
 
@@ -287,7 +287,7 @@ issue, and files the next period's sprint-end issues.
 | id | summary | status | priority |
 | --- | --- | --- | --- |
 | [rel01.2-uc001-sprint-end-release](specs/use-cases/rel01.2-uc001-sprint-end-release.md) | A sprint-end issue summarizes the period, asks, and releases on confirmation. | implemented | P1 |
-| [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md) | The technical program manager plans the next period's objective items with plan-release. | implemented | P1 |
+| [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md) | The technical program manager plans the next period's objective items with plan. | implemented | P1 |
 
 <!-- field: test_suites -->
 ### Test suites

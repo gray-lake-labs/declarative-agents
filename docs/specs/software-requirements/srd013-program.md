@@ -15,11 +15,11 @@ with nothing to build against.
 The program subcommands are the small set of issue operations every
 repository shares: the labels admission reads, admission, filing, showing,
 taking an issue into a worktree, and opening a merge request. Together with
-the issue-push and issue-pop skills (srd035, srd036) they are the inner
+the specify and implement skills (srd035, srd036) they are the inner
 loop on GitLab.
 Tracking objectives against evidence, verifying what was built, closing
 drained epics, and rendering the dashboard belong to track-goals (srd019);
-recording a release plan belongs to plan-release.
+recording a release plan belongs to plan.
 
 <!-- field: goals -->
 ## Goals
@@ -60,7 +60,7 @@ Subcommands are in the tpm group program, honour --json and --dry-run, and never
 <!-- req: R3.1 -->
 ### R3.1
 
-Creates an issue in a given project with the given title, body, plane, kind, component, and milestone, unassigned, and runs lint on it before returning (R1). It never sets an assignee; a person who wants the issue pops it with issue-pop (srd041 R9.1).
+Creates an issue in a given project with the given title, body, plane, kind, component, and milestone, unassigned, and runs lint on it before returning (R1). It never sets an assignee; a person who wants the issue pops it with implement (srd041 R9.1).
 
 <!-- req: R3.2 -->
 ### R3.2
@@ -153,7 +153,7 @@ Installs into the worktree the skills of every agent installed in the checkout (
 ## Non-goals
 
 - Splitting an issue into sub-issues and working them; that arrives with epics and do-work in a later release.
-- Choosing what goes in a release; that is plan-release.
+- Choosing what goes in a release; that is plan.
 - Tracking objectives, verifying merged work, closing epics, or rendering the dashboard; that is track-goals (srd019).
 - Offering or assigning work to a person.
 
