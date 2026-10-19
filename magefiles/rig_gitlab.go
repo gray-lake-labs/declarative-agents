@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
@@ -56,6 +57,9 @@ type gitlabEnv struct {
 	auth     []string // git environment carrying the token as a header, never in a file
 	tracker  string   // the tracker repository's clone URL
 	projects []string // code projects by key, sorted: system, reports, product-owners/po-N
+	// busy holds each worker's lock: a person at one machine runs one
+	// command at a time against their one clone of the tracker.
+	busy sync.Map
 }
 
 // Gitlab runs the opt-in GitLab rig: it provisions a disposable group, runs
@@ -186,7 +190,7 @@ func newGitlabEnv(root string, run gitlabRun, token string) (*gitlabEnv, error) 
 		return nil, fmt.Errorf("build tpm: %w", err)
 	}
 	seed := filepath.Join(run.Dir, "seed")
-	if err := env.git(run.Dir, "clone", "-q", env.tracker, seed); err != nil {
+	if err := env.clone(env.tracker, seed); err != nil {
 		return nil, err
 	}
 	writeFileTo(filepath.Join(seed, beads.IssuesFile), "")
@@ -228,6 +232,20 @@ func (e *gitlabEnv) git(dir string, args ...string) error {
 	return err
 }
 
+// clone clones a rig repository, retrying while a project the run just
+// created is not ready to serve yet.
+func (e *gitlabEnv) clone(url, dir string) error {
+	var err error
+	for attempt := 1; attempt <= 6; attempt++ {
+		if err = e.git(filepath.Dir(dir), "clone", "-q", url, dir); err == nil {
+			return nil
+		}
+		os.RemoveAll(dir)
+		time.Sleep(time.Duration(attempt) * 3 * time.Second)
+	}
+	return err
+}
+
 func (e *gitlabEnv) gitOut(dir string, args ...string) (string, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", err
@@ -263,7 +281,7 @@ func (e *gitlabEnv) worker(i int) (*gitlabWorker, error) {
 	}
 	for _, key := range e.projects {
 		dir := w.checkout(path.Base(key))
-		if err := e.git(filepath.Dir(dir), "clone", "-q", e.url(e.projectPath(key)), dir); err != nil {
+		if err := e.clone(e.url(e.projectPath(key)), dir); err != nil {
 			return nil, err
 		}
 		for _, kv := range [][2]string{{"user.name", w.user}, {"user.email", w.user + "@example.invalid"}} {
@@ -283,8 +301,11 @@ func (w *gitlabWorker) checkout(name string) string { return filepath.Join(w.dir
 func (w *gitlabWorker) trackerClone() string { return filepath.Join(w.dir, "tracker") }
 
 // tpm runs the built tpm as this worker, from its work checkout, against
-// its own clone of the tracker.
+// its own clone of the tracker, one command at a time.
 func (w *gitlabWorker) tpm(args ...string) ([]byte, error) {
+	lock, _ := w.env.busy.LoadOrStore(w.user, &sync.Mutex{})
+	lock.(*sync.Mutex).Lock()
+	defer lock.(*sync.Mutex).Unlock()
 	cmd := exec.Command(w.env.tpm, args...)
 	cmd.Dir = w.checkout("work")
 	cmd.Env = append(append(os.Environ(), w.env.auth...),

@@ -94,7 +94,8 @@ skills into each with tpm install.
 
 The workload runs at least four workers at once, each with its own clone
 of the tracker and its own checkouts, because a beads tracker is not safe
-to share: disjoint creates, contended pops of the same issues, closes by
+to share, and each runs one command at a time, as a person at one machine
+does: disjoint creates, contended pops of the same issues, closes by
 merge, and one worker that goes offline and reconciles late. After a final
 sync on every clone it asserts that every clone reads the same tracker
 state, every disjoint write landed, each contended issue has exactly one
