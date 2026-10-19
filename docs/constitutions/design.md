@@ -221,6 +221,38 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - acceptance_criteria_fields: same as srd
   - acceptance_criteria_note: tests and applicability are required (D8); applicability names the environment. Until the program's environment SRDs exist, it names a chain stage D8 lists and the audit cannot resolve it (srd034 R1.5).
   - purpose: States what the program commits to for a horizon of periods, owned by the technical program manager. plan places its items in a release and tasks cites them, pinned, on the objective issues it files (srd034).
+- epic:
+  - location: docs/specs/epics/epNNN-short-name.md in the system (TPM) repository
+  - format: an SRD in the pinned release's Markdown format (D2), as an objective is; scrum-master's format tools read it with the release's SRD declaration
+  - required_fields:
+    1. id
+    1. title
+    1. status
+    1. context
+    1. problem
+    1. goals
+    1. requirements
+    1. non_goals
+    1. acceptance_criteria
+  - status_values:
+    1. to_be_agreed
+    1. agreed
+    1. retired
+  - context_items:
+    1. owner
+    1. horizon
+  - requirement_group_fields:
+    1. title
+    1. applicability
+    1. items
+  - requirement_group_applicability_items:
+    1. points
+    1. depends_on
+    1. anchor
+  - applicability_note: points is a relative story-point estimate of the backlog item's work, never of a person (D5). depends_on lists the items it waits on, as Rn within the epic or as URLs pinned to items of another epic (D9); it may be empty. anchor is optional, an earliest start date or a release tag the item cannot start before.
+  - numbering: same as srd; each requirement group is one backlog item, in the order the owner ranks them, and each item one checkable part of it
+  - acceptance_criteria_fields: same as srd
+  - purpose: Holds the Product Backlog for a body of work spanning several sprints, ordered by its owner. Objective items cite its backlog items, pinned, to draw them down; each period plan derives objectives from the items no met objective has drawn down, at the program's velocity (srd045). Not a unit of work (D4) and not a tracker object.
 - use_case:
   - location: docs/specs/use-cases/relNN.N-ucNNN-short-name.md
   - required_fields:
