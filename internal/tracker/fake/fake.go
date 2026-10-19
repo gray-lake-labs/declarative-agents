@@ -1,5 +1,5 @@
-// Package gitlabtest is an in-memory Tracker for unit tests.
-package gitlabtest
+// Package fake is an in-memory Tracker for unit tests.
+package fake
 
 import (
 	"fmt"
@@ -7,34 +7,34 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Fake holds projects' files, tags, issues, notes, and milestones in memory.
 type Fake struct {
 	Files      map[string][]byte // "project@ref:path"
 	Tags       map[string]bool   // "project@tag"
-	Issues     map[string][]*gitlab.Issue
-	Notes      map[string][]gitlab.Note // "project#iid"
-	Milestones map[string]gitlab.Milestone
-	Awards     map[string][]gitlab.Award // "project#iid"
-	Labels     map[string][]gitlab.Label // group -> labels
-	Me         gitlab.User
-	Branches   map[string]string                 // "project@branch" -> ref it was created from
-	Default    string                            // default branch of every project
-	MRs        map[string][]*gitlab.MergeRequest // project -> merged deliveries
+	Issues     map[string][]*tracker.Issue
+	Notes      map[string][]tracker.Note // "project#iid"
+	Milestones map[string]tracker.Milestone
+	Awards     map[string][]tracker.Award // "project#iid"
+	Labels     map[string][]tracker.Label // group -> labels
+	Me         tracker.User
+	Branches   map[string]string           // "project@branch" -> ref it was created from
+	Default    string                      // default branch of every project
+	MRs        map[string][]*tracker.Merge // project -> merged deliveries
 	// Writes counts every mutating call, so a dry run can prove it wrote nothing.
 	Writes int
 }
 
-var _ gitlab.Tracker = (*Fake)(nil)
+var _ tracker.Tracker = (*Fake)(nil)
 
 // New returns an empty fake.
 func New() *Fake {
-	return &Fake{Files: map[string][]byte{}, Tags: map[string]bool{}, Issues: map[string][]*gitlab.Issue{},
-		Notes: map[string][]gitlab.Note{}, Milestones: map[string]gitlab.Milestone{}, Awards: map[string][]gitlab.Award{}, Labels: map[string][]gitlab.Label{},
-		Me: gitlab.User{ID: 1, Username: "me"}, Branches: map[string]string{}, Default: "main",
-		MRs: map[string][]*gitlab.MergeRequest{}}
+	return &Fake{Files: map[string][]byte{}, Tags: map[string]bool{}, Issues: map[string][]*tracker.Issue{},
+		Notes: map[string][]tracker.Note{}, Milestones: map[string]tracker.Milestone{}, Awards: map[string][]tracker.Award{}, Labels: map[string][]tracker.Label{},
+		Me: tracker.User{ID: 1, Username: "me"}, Branches: map[string]string{}, Default: "main",
+		MRs: map[string][]*tracker.Merge{}}
 }
 
 // AddFile stores content at project, ref, path.
@@ -48,7 +48,7 @@ func (f *Fake) AddTag(project, tag string) { f.Tags[project+"@"+tag] = true }
 func (f *Fake) GetFile(project, path, ref string) ([]byte, error) {
 	b, ok := f.Files[project+"@"+ref+":"+path]
 	if !ok {
-		return nil, gitlab.ErrNotFound
+		return nil, tracker.ErrNotFound
 	}
 	return b, nil
 }
@@ -67,25 +67,25 @@ func (f *Fake) ListDir(project, dir, ref string) ([]string, error) {
 
 func (f *Fake) TagExists(project, tag string) (bool, error) { return f.Tags[project+"@"+tag], nil }
 
-func (f *Fake) find(project string, iid int) (*gitlab.Issue, error) {
+func (f *Fake) find(project string, iid int) (*tracker.Issue, error) {
 	for _, i := range f.Issues[project] {
 		if i.IID == iid {
 			return i, nil
 		}
 	}
-	return nil, gitlab.ErrNotFound
+	return nil, tracker.ErrNotFound
 }
 
-func (f *Fake) GetIssue(project string, iid int) (gitlab.Issue, error) {
+func (f *Fake) GetIssue(project string, iid int) (tracker.Issue, error) {
 	i, err := f.find(project, iid)
 	if err != nil {
-		return gitlab.Issue{}, err
+		return tracker.Issue{}, err
 	}
 	return *i, nil
 }
 
-func (f *Fake) ListIssues(project string, q gitlab.IssueQuery) ([]gitlab.Issue, error) {
-	var out []gitlab.Issue
+func (f *Fake) ListIssues(project string, q tracker.IssueQuery) ([]tracker.Issue, error) {
+	var out []tracker.Issue
 	for _, i := range f.Issues[project] {
 		if q.State != "" && q.State != "all" && i.State != q.State {
 			continue
@@ -113,20 +113,20 @@ func hasAll(have, want []string) bool {
 	return true
 }
 
-func (f *Fake) CreateIssue(project string, in gitlab.NewIssue) (gitlab.Issue, error) {
+func (f *Fake) CreateIssue(project string, in tracker.NewIssue) (tracker.Issue, error) {
 	f.Writes++
-	i := &gitlab.Issue{Project: project, IID: len(f.Issues[project]) + 1, Title: in.Title, Description: in.Description,
+	i := &tracker.Issue{Project: project, IID: len(f.Issues[project]) + 1, Title: in.Title, Description: in.Description,
 		Labels: slices.Clone(in.Labels), State: "opened", DueDate: in.DueDate, Milestone: in.Milestone, Author: f.Me.Username}
 	i.WebURL = fmt.Sprintf("https://gitlab.example.com/%s/-/issues/%d", project, i.IID)
 	f.Issues[project] = append(f.Issues[project], i)
 	return *i, nil
 }
 
-func (f *Fake) UpdateIssue(project string, iid int, u gitlab.IssueUpdate) (gitlab.Issue, error) {
+func (f *Fake) UpdateIssue(project string, iid int, u tracker.IssueUpdate) (tracker.Issue, error) {
 	f.Writes++
 	i, err := f.find(project, iid)
 	if err != nil {
-		return gitlab.Issue{}, err
+		return tracker.Issue{}, err
 	}
 	if u.Description != nil {
 		i.Description = *u.Description
@@ -146,22 +146,22 @@ func (f *Fake) UpdateIssue(project string, iid int, u gitlab.IssueUpdate) (gitla
 	return *i, nil
 }
 
-func (f *Fake) ListNotes(project string, iid int) ([]gitlab.Note, error) {
+func (f *Fake) ListNotes(project string, iid int) ([]tracker.Note, error) {
 	return f.Notes[fmt.Sprintf("%s#%d", project, iid)], nil
 }
 
 func (f *Fake) CreateNote(project string, iid int, body string) error {
 	f.Writes++
 	key := fmt.Sprintf("%s#%d", project, iid)
-	f.Notes[key] = append(f.Notes[key], gitlab.Note{ID: len(f.Notes[key]) + 1, Body: body, Author: f.Me.Username})
+	f.Notes[key] = append(f.Notes[key], tracker.Note{ID: len(f.Notes[key]) + 1, Body: body, Author: f.Me.Username})
 	return nil
 }
 
-func (f *Fake) GroupLabels(group string) ([]gitlab.Label, error) {
+func (f *Fake) GroupLabels(group string) ([]tracker.Label, error) {
 	return slices.Clone(f.Labels[group]), nil
 }
 
-func (f *Fake) CreateGroupLabel(group string, l gitlab.Label) error {
+func (f *Fake) CreateGroupLabel(group string, l tracker.Label) error {
 	f.Writes++
 	for _, x := range f.Labels[group] {
 		if x.Name == l.Name {
@@ -172,7 +172,7 @@ func (f *Fake) CreateGroupLabel(group string, l gitlab.Label) error {
 	return nil
 }
 
-func (f *Fake) UpdateGroupLabel(group string, l gitlab.Label) error {
+func (f *Fake) UpdateGroupLabel(group string, l tracker.Label) error {
 	f.Writes++
 	for i, x := range f.Labels[group] {
 		if x.Name == l.Name {
@@ -180,12 +180,12 @@ func (f *Fake) UpdateGroupLabel(group string, l gitlab.Label) error {
 			return nil
 		}
 	}
-	return gitlab.ErrNotFound
+	return tracker.ErrNotFound
 }
 
-func (f *Fake) CurrentUser() (gitlab.User, error) { return f.Me, nil }
+func (f *Fake) CurrentUser() (tracker.User, error) { return f.Me, nil }
 
-func (f *Fake) AssignIssue(project string, iid int, user gitlab.User) error {
+func (f *Fake) AssignIssue(project string, iid int, user tracker.User) error {
 	f.Writes++
 	i, err := f.find(project, iid)
 	if err != nil {
@@ -211,8 +211,8 @@ func (f *Fake) CreateBranch(project, branch, ref string) error {
 	return nil
 }
 
-func (f *Fake) MergedMergeRequests(project, author, since string) ([]gitlab.MergeRequest, error) {
-	var out []gitlab.MergeRequest
+func (f *Fake) Merges(project, author, since string) ([]tracker.Merge, error) {
+	var out []tracker.Merge
 	for _, m := range f.MRs[project] {
 		if m.State == "merged" && (author == "" || m.Author == author) && m.MergedAt >= since {
 			out = append(out, *m)
@@ -221,13 +221,13 @@ func (f *Fake) MergedMergeRequests(project, author, since string) ([]gitlab.Merg
 	return out, nil
 }
 
-func (f *Fake) IssueAwards(project string, iid int) ([]gitlab.Award, error) {
+func (f *Fake) IssueAwards(project string, iid int) ([]tracker.Award, error) {
 	return f.Awards[fmt.Sprintf("%s#%d", project, iid)], nil
 }
 
 // ActiveMilestones returns every milestone the fake holds, by title.
-func (f *Fake) ActiveMilestones(project string) ([]gitlab.Milestone, error) {
-	var out []gitlab.Milestone
+func (f *Fake) ActiveMilestones(project string) ([]tracker.Milestone, error) {
+	var out []tracker.Milestone
 	for _, title := range slices.Sorted(maps.Keys(f.Milestones)) {
 		out = append(out, f.Milestones[title])
 	}
@@ -236,25 +236,25 @@ func (f *Fake) ActiveMilestones(project string) ([]gitlab.Milestone, error) {
 
 // EnsureMilestone keeps one milestone per title, as the client does for a
 // group, and counts a write only when it creates or changes one.
-func (f *Fake) EnsureMilestone(group string, m gitlab.Milestone) (string, error) {
+func (f *Fake) EnsureMilestone(group string, m tracker.Milestone) (string, error) {
 	cur, ok := f.Milestones[m.Title]
 	switch {
 	case !ok:
 		f.Milestones[m.Title] = m
 		f.Writes++
-		return gitlab.MilestoneCreated, nil
+		return tracker.MilestoneCreated, nil
 	case cur == m:
-		return gitlab.MilestoneUnchanged, nil
+		return tracker.MilestoneUnchanged, nil
 	}
 	f.Milestones[m.Title] = m
 	f.Writes++
-	return gitlab.MilestoneUpdated, nil
+	return tracker.MilestoneUpdated, nil
 }
 
-func (f *Fake) FindMilestone(project, title string) (gitlab.Milestone, error) {
+func (f *Fake) FindMilestone(project, title string) (tracker.Milestone, error) {
 	m, ok := f.Milestones[title]
 	if !ok {
-		return gitlab.Milestone{}, gitlab.ErrNotFound
+		return tracker.Milestone{}, tracker.ErrNotFound
 	}
 	return m, nil
 }

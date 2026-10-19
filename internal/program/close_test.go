@@ -9,8 +9,8 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 // TestPopAndCloseRunOnBeads drives the real Pop and Close against a beads
@@ -26,7 +26,7 @@ func TestPopAndCloseRunOnBeads(t *testing.T) {
 	checkout := beadstest.CodeRepository(t, root, "po-1", "alice")
 	tr := beads.NewTracker(trackerClone, "alice", checkout)
 
-	i, err := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Score one agent", Milestone: "m", Description: goodBody,
+	i, err := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Score one agent", Milestone: "m", Description: goodBody,
 		Labels: []string{"plane::data", "kind::build", "component::po-1"}})
 	if err != nil {
 		t.Fatal(err)
@@ -86,7 +86,7 @@ func TestPopOfflineIsProvisional(t *testing.T) {
 	beadstest.Clone(t, remote, trackerClone, "alice")
 	checkout := beadstest.CodeRepository(t, root, "po-1", "alice")
 	tr := beads.NewTracker(trackerClone, "alice", checkout)
-	i, err := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Score one agent", Milestone: "m", Description: goodBody,
+	i, err := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Score one agent", Milestone: "m", Description: goodBody,
 		Labels: []string{"plane::data", "kind::build", "component::po-1"}})
 	if err != nil {
 		t.Fatal(err)
@@ -102,13 +102,13 @@ func TestPopOfflineIsProvisional(t *testing.T) {
 	}
 }
 
-// TestCloseNeedsTheBeadsTracker: on GitLab the merge request's merge closes
-// the issue (srd041 R9.3), so close refuses rather than closing by hand.
+// TestCloseNeedsTheBeadsTracker: on a tracker that does not record merges,
+// close refuses rather than closing an issue by hand (srd041 R9.3).
 func TestCloseNeedsTheBeadsTracker(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	i := admitted(f, "Score one agent")
-	if _, err := Close(f, ExecGit{}, "g/po-1", i.IID, ".", false); err == nil || !strings.Contains(err.Error(), "merge request") {
-		t.Fatalf("close on GitLab = %v, want a refusal naming the merge request", err)
+	if _, err := Close(f, ExecGit{}, "g/po-1", i.IID, ".", false); err == nil || !strings.Contains(err.Error(), "tpm issue close serves the beads tracker") {
+		t.Fatalf("close on a tracker without merges = %v, want a refusal naming the beads tracker", err)
 	}
 }
 
@@ -117,8 +117,8 @@ func TestCloseNeedsTheBeadsTracker(t *testing.T) {
 // it closes on the first merge commit on the default branch that cites it.
 func TestCloseAnIssueTheMergeCites(t *testing.T) {
 	tr, checkout := newBeadsTracker(t, "alice")
-	objective, _ := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Objective R1", Labels: []string{"plane::management"}})
-	end, _ := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Sprint end", Milestone: "m", Description: goodBody,
+	objective, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Objective R1", Labels: []string{"plane::management"}})
+	end, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Sprint end", Milestone: "m", Description: goodBody,
 		Labels: []string{"plane::data", "kind::build", "component::po-1"}})
 
 	if _, err := Close(tr, ExecGit{}, "g/po-1", objective.IID, checkout, false); err == nil || !strings.Contains(err.Error(), "no merge") {

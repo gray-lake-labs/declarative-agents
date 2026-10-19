@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // FileResult is what file reports.
@@ -43,12 +43,12 @@ func Labels(plane, typ, kind, component string) []string {
 
 // File creates the issue unassigned and lints it before returning (srd013
 // R3.1). A dry run creates nothing and reports how the issue would lint.
-func File(t gitlab.Tracker, project string, in gitlab.NewIssue, p Policy, dryRun bool) (FileResult, error) {
+func File(t tracker.Tracker, project string, in tracker.NewIssue, p Policy, dryRun bool) (FileResult, error) {
 	if err := mayFile(t, in, p); err != nil {
 		return FileResult{}, err
 	}
 	if dryRun {
-		would := gitlab.Issue{Project: project, Title: in.Title, Description: in.Description, Labels: in.Labels, Milestone: in.Milestone, DueDate: in.DueDate}
+		would := tracker.Issue{Project: project, Title: in.Title, Description: in.Description, Labels: in.Labels, Milestone: in.Milestone, DueDate: in.DueDate}
 		reasons := Lint(would, p)
 		return FileResult{Project: project, DryRun: true, Lint: LintResult{Project: project, Admitted: len(reasons) == 0, Reasons: reasons}}, nil
 	}
@@ -67,7 +67,7 @@ func File(t gitlab.Tracker, project string, in gitlab.NewIssue, p Policy, dryRun
 // start date is on or before today and whose due date is on or after it
 // (srd013 R3.3). With none, or more than one, it returns no title and the
 // reason; tpm never guesses between sprints.
-func SprintMilestone(t gitlab.Tracker, project string, today time.Time) (string, string, error) {
+func SprintMilestone(t tracker.Tracker, project string, today time.Time) (string, string, error) {
 	ms, err := t.ActiveMilestones(project)
 	if err != nil {
 		return "", "", err
@@ -92,7 +92,7 @@ func SprintMilestone(t gitlab.Tracker, project string, today time.Time) (string,
 // mayFile refuses a plane::management issue from a caller the policy does
 // not list as a filer (srd001 R1.2, srd035 R5.2). With no usernames listed,
 // or the value leads, nothing is checked.
-func mayFile(t gitlab.Tracker, in gitlab.NewIssue, p Policy) error {
+func mayFile(t tracker.Tracker, in tracker.NewIssue, p Policy) error {
 	if len(p.ManagementFilers) == 0 || p.ManagementFilers[0] == "leads" {
 		return nil
 	}

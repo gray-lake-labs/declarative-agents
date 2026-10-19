@@ -51,7 +51,7 @@ func (s *Store) Milestones() ([]Milestone, Freshness, error) {
 
 // EnsureMilestone makes the milestone titled m.Title in m.Scope carry m's
 // description and dates, creating it when the scope has none, and reports
-// created, updated, or unchanged as GitLab's EnsureMilestone does.
+// created, updated, or unchanged (srd042 R2.2).
 func (s *Store) EnsureMilestone(m Milestone) (string, error) {
 	result := "unchanged"
 	_, _, _, err := s.writeFiles("milestone "+m.Scope+" "+m.Title, func() (bool, error) {

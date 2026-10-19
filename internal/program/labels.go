@@ -6,14 +6,14 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // DefaultLabels are the label values the labels config format lists, used
 // when the program repository has no control/labels.md. Component labels
 // are not here: they come from the subsystem SRDs (srd001 R21.1).
-func DefaultLabels() []gitlab.Label {
-	return []gitlab.Label{
+func DefaultLabels() []tracker.Label {
+	return []tracker.Label{
 		{Name: "plane::management", Color: "#5843ad", Description: "Changes intent - road-map release, system or subsystem SRD, objective document, sprint"},
 		{Name: "plane::control", Color: "#8e44ad", Description: "Changes a rule - policy files, label schema, state machine"},
 		{Name: "plane::data", Color: "#1f75cb", Description: "Work"},
@@ -52,12 +52,12 @@ type labelsFileValues struct {
 
 // LoadLabels reads control/labels.md, a config document (design D11), from
 // the program repository at ref, or returns DefaultLabels when it is absent.
-func LoadLabels(t gitlab.Tracker, project, ref string) ([]gitlab.Label, error) {
+func LoadLabels(t tracker.Tracker, project, ref string) ([]tracker.Label, error) {
 	if project == "" {
 		return DefaultLabels(), nil
 	}
 	b, err := t.GetFile(project, LabelsFile, ref)
-	if errors.Is(err, gitlab.ErrNotFound) {
+	if errors.Is(err, tracker.ErrNotFound) {
 		return DefaultLabels(), nil
 	}
 	if err != nil {
@@ -67,14 +67,14 @@ func LoadLabels(t gitlab.Tracker, project, ref string) ([]gitlab.Label, error) {
 	if err := corpus.DecodeConfig(b, &f); err != nil {
 		return nil, fmt.Errorf("%s %s: %w", project, LabelsFile, err)
 	}
-	var out []gitlab.Label
+	var out []tracker.Label
 	for _, axis := range []string{"plane", "type", "kind", "state"} {
 		a, ok := f.Axes[axis]
 		if !ok {
 			continue
 		}
 		for _, v := range a.Values {
-			out = append(out, gitlab.Label{Name: a.Prefix + v.Name, Color: v.Color, Description: v.Description})
+			out = append(out, tracker.Label{Name: a.Prefix + v.Name, Color: v.Color, Description: v.Description})
 		}
 	}
 	if len(out) == 0 {
@@ -94,12 +94,12 @@ type LabelResult struct {
 // left alone unless update is set, so a group whose labels another tool
 // manages is not fought over. No label is ever deleted or renamed, and a
 // dry run writes nothing.
-func SyncLabels(t gitlab.Tracker, group string, want []gitlab.Label, update, dryRun bool) ([]LabelResult, error) {
+func SyncLabels(t tracker.Tracker, group string, want []tracker.Label, update, dryRun bool) ([]LabelResult, error) {
 	have, err := t.GroupLabels(group)
 	if err != nil {
 		return nil, err
 	}
-	existing := map[string]gitlab.Label{}
+	existing := map[string]tracker.Label{}
 	for _, l := range have {
 		existing[l.Name] = l
 	}

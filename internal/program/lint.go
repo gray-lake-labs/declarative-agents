@@ -7,8 +7,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/links"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // lintMarker heads every admission comment, so a repeated failure with the
@@ -22,7 +22,7 @@ var (
 
 // Lint checks one issue against the label schema and admission policy
 // (srd013 R1.1) and returns every reason it fails; none means admitted.
-func Lint(i gitlab.Issue, p Policy) []string {
+func Lint(i tracker.Issue, p Policy) []string {
 	var reasons []string
 	axis := func(prefix string) []string {
 		var vals []string
@@ -145,10 +145,10 @@ type LintResult struct {
 // Apply sets needs-triage with a comment listing the reasons on a failing
 // issue and clears it on a passing one. It changes no other label and never
 // the assignee (srd013 R1.2, srd041 R9.4). A dry run writes nothing.
-func Apply(t gitlab.Tracker, i gitlab.Issue, reasons []string, p Policy, dryRun bool) (LintResult, error) {
+func Apply(t tracker.Tracker, i tracker.Issue, reasons []string, p Policy, dryRun bool) (LintResult, error) {
 	r := LintResult{Project: i.Project, IID: i.IID, Admitted: len(reasons) == 0, Reasons: reasons}
 	triaged := i.HasLabel(p.TriageLabel)
-	triager, byState := t.(gitlab.Triager)
+	triager, byState := t.(tracker.Triager)
 	if r.Admitted && byState {
 		if dryRun {
 			r.Changed = triaged
@@ -162,7 +162,7 @@ func Apply(t gitlab.Tracker, i gitlab.Issue, reasons []string, p Policy, dryRun 
 		if triaged {
 			r.Changed = true
 			if !dryRun {
-				_, err := t.UpdateIssue(i.Project, i.IID, gitlab.IssueUpdate{RemoveLabels: []string{p.TriageLabel}})
+				_, err := t.UpdateIssue(i.Project, i.IID, tracker.IssueUpdate{RemoveLabels: []string{p.TriageLabel}})
 				return r, err
 			}
 		}
@@ -191,7 +191,7 @@ func Apply(t gitlab.Tracker, i gitlab.Issue, reasons []string, p Policy, dryRun 
 			return r, err
 		}
 	} else if !triaged {
-		if _, err := t.UpdateIssue(i.Project, i.IID, gitlab.IssueUpdate{AddLabels: []string{p.TriageLabel}}); err != nil {
+		if _, err := t.UpdateIssue(i.Project, i.IID, tracker.IssueUpdate{AddLabels: []string{p.TriageLabel}}); err != nil {
 			return r, err
 		}
 	}

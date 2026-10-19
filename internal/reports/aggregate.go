@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Signal kinds aggregate reports (srd018 R3.2).
@@ -93,7 +93,7 @@ type weekly struct {
 // Aggregate reads every report in the range, groups their items by
 // component, computes the signals, and states each objective's progress
 // (srd018 R3.1, R3.2, R3.4, R3.5).
-func Aggregate(t gitlab.Tracker, in AggregateInput) (Aggregation, error) {
+func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 	from, err := ParseWeek(in.From)
 	if err != nil {
 		return Aggregation{}, err
@@ -241,7 +241,7 @@ func Aggregate(t gitlab.Tracker, in AggregateInput) (Aggregation, error) {
 	}
 	end := to.AddDate(0, 0, 6).Format("2006-01-02")
 	for _, m := range in.Config.Team {
-		merged, err := t.MergedMergeRequests(m.Project, "", from.Format("2006-01-02"))
+		merged, err := t.Merges(m.Project, "", from.Format("2006-01-02"))
 		if err != nil {
 			return a, err
 		}
@@ -283,7 +283,7 @@ func countReports(reports []weekly, week, waiting string) int {
 
 var closesPattern = regexp.MustCompile(`(?i)closes\s+(\S*#\d+)`)
 
-// closesMentioned reports whether the merge request closes an objective a
+// closesMentioned reports whether the merge closes an objective a
 // report names.
 func closesMentioned(project, description string, mentioned map[string]bool) bool {
 	for _, m := range closesPattern.FindAllStringSubmatch(description, -1) {
@@ -302,14 +302,14 @@ func closesMentioned(project, description string, mentioned map[string]bool) boo
 // (srd006 R10).
 // isClosed reports whether the objective issue ref is closed; an issue the
 // tracker cannot find is not.
-func isClosed(t gitlab.Tracker, ref string) (bool, error) {
+func isClosed(t tracker.Tracker, ref string) (bool, error) {
 	project, n, ok := strings.Cut(ref, "#")
 	iid, err := strconv.Atoi(n)
 	if !ok || err != nil {
 		return false, nil
 	}
 	i, err := t.GetIssue(project, iid)
-	if errors.Is(err, gitlab.ErrNotFound) {
+	if errors.Is(err, tracker.ErrNotFound) {
 		return false, nil
 	}
 	if err != nil {
@@ -318,14 +318,14 @@ func isClosed(t gitlab.Tracker, ref string) (bool, error) {
 	return i.State == "closed", nil
 }
 
-func hasMet(t gitlab.Tracker, ref string) (bool, error) {
+func hasMet(t tracker.Tracker, ref string) (bool, error) {
 	project, n, ok := strings.Cut(ref, "#")
 	iid, err := strconv.Atoi(n)
 	if !ok || err != nil {
 		return false, nil
 	}
 	notes, err := t.ListNotes(project, iid)
-	if errors.Is(err, gitlab.ErrNotFound) {
+	if errors.Is(err, tracker.ErrNotFound) {
 		return false, nil
 	}
 	if err != nil {

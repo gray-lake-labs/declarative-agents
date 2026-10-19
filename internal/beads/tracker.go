@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
-// statusInProgress is the label the GitLab tracker uses for in-progress; the
+// statusInProgress is the label commands use for in-progress; the
 // beads tracker shows it from the state and fires the transition when a
 // command adds or removes it.
 const statusInProgress = "status::in-progress"
@@ -34,18 +34,18 @@ type Tracker struct {
 }
 
 var (
-	_ gitlab.Tracker = (*Tracker)(nil)
-	_ gitlab.Reader  = (*Tracker)(nil)
-	_ gitlab.Triager = (*Tracker)(nil)
+	_ tracker.Tracker = (*Tracker)(nil)
+	_ tracker.Reader  = (*Tracker)(nil)
+	_ tracker.Triager = (*Tracker)(nil)
 )
 
 // LastRead names the tracker commit the last read reflected.
-func (t *Tracker) LastRead() (gitlab.Read, bool) {
+func (t *Tracker) LastRead() (tracker.Read, bool) {
 	fr, ok := t.Store.Last()
 	if !ok {
-		return gitlab.Read{}, false
+		return tracker.Read{}, false
 	}
-	return gitlab.Read{Commit: fr.Commit, At: fr.At.UTC().Format(time.RFC3339), Offline: fr.Offline}, true
+	return tracker.Read{Commit: fr.Commit, At: fr.At.UTC().Format(time.RFC3339), Offline: fr.Offline}, true
 }
 
 // NewTracker serves the tracker repository cloned at clone, as user, with
@@ -104,10 +104,10 @@ func (t *Tracker) find(project string, iid int) (Issue, error) {
 			return i, nil
 		}
 	}
-	return Issue{}, fmt.Errorf("%s#%d: %w", project, iid, gitlab.ErrNotFound)
+	return Issue{}, fmt.Errorf("%s#%d: %w", project, iid, tracker.ErrNotFound)
 }
 
-func (t *Tracker) view(i Issue) gitlab.Issue {
+func (t *Tracker) view(i Issue) tracker.Issue {
 	labels := slices.Clone(i.Labels)
 	if i.State == InProgress {
 		labels = append(labels, statusInProgress)
@@ -120,25 +120,25 @@ func (t *Tracker) view(i Issue) gitlab.Issue {
 	if i.Assignee != "" {
 		assignees = []string{i.Assignee}
 	}
-	return gitlab.Issue{Project: i.Repository, IID: i.IID, Title: i.Title, Description: i.Description, Labels: labels,
+	return tracker.Issue{Project: i.Repository, IID: i.IID, Title: i.Title, Description: i.Description, Labels: labels,
 		State: state, WebURL: "beads:" + i.ID, DueDate: i.DueDate, Milestone: i.Release, Assignees: assignees,
 		Author: i.CreatedBy, UpdatedAt: i.UpdatedAt}
 }
 
-func (t *Tracker) GetIssue(project string, iid int) (gitlab.Issue, error) {
+func (t *Tracker) GetIssue(project string, iid int) (tracker.Issue, error) {
 	i, err := t.find(project, iid)
 	if err != nil {
-		return gitlab.Issue{}, err
+		return tracker.Issue{}, err
 	}
 	return t.view(i), nil
 }
 
-func (t *Tracker) ListIssues(project string, q gitlab.IssueQuery) ([]gitlab.Issue, error) {
+func (t *Tracker) ListIssues(project string, q tracker.IssueQuery) ([]tracker.Issue, error) {
 	issues, _, err := t.Store.Issues()
 	if err != nil {
 		return nil, err
 	}
-	var out []gitlab.Issue
+	var out []tracker.Issue
 	for _, i := range issues {
 		v := t.view(i)
 		switch {
@@ -152,15 +152,15 @@ func (t *Tracker) ListIssues(project string, q gitlab.IssueQuery) ([]gitlab.Issu
 		}
 		out = append(out, v)
 	}
-	slices.SortFunc(out, func(a, b gitlab.Issue) int { return a.IID - b.IID })
+	slices.SortFunc(out, func(a, b tracker.Issue) int { return a.IID - b.IID })
 	return out, nil
 }
 
-func (t *Tracker) CreateIssue(project string, in gitlab.NewIssue) (gitlab.Issue, error) {
+func (t *Tracker) CreateIssue(project string, in tracker.NewIssue) (tracker.Issue, error) {
 	i, err := t.Store.Create(Issue{Repository: project, Title: in.Title, Description: in.Description,
 		Labels: slices.Clone(in.Labels), DueDate: in.DueDate, Release: in.Milestone})
 	if err != nil {
-		return gitlab.Issue{}, err
+		return tracker.Issue{}, err
 	}
 	return t.view(i), nil
 }
@@ -168,10 +168,10 @@ func (t *Tracker) CreateIssue(project string, in gitlab.NewIssue) (gitlab.Issue,
 // UpdateIssue applies an update. Closing is a person's decline and
 // reopening a person's reopen (srd041); the in-progress label fires the
 // assignee's start and stop.
-func (t *Tracker) UpdateIssue(project string, iid int, u gitlab.IssueUpdate) (gitlab.Issue, error) {
+func (t *Tracker) UpdateIssue(project string, iid int, u tracker.IssueUpdate) (tracker.Issue, error) {
 	found, err := t.find(project, iid)
 	if err != nil {
-		return gitlab.Issue{}, err
+		return tracker.Issue{}, err
 	}
 	me := t.Store.User
 	_, _, _, err = t.Store.mutate(found.ID, "update", func(i *Issue) (bool, error) {
@@ -215,19 +215,19 @@ func (t *Tracker) UpdateIssue(project string, iid int, u gitlab.IssueUpdate) (gi
 		return true, nil
 	})
 	if err != nil {
-		return gitlab.Issue{}, err
+		return tracker.Issue{}, err
 	}
 	return t.GetIssue(project, iid)
 }
 
-func (t *Tracker) ListNotes(project string, iid int) ([]gitlab.Note, error) {
+func (t *Tracker) ListNotes(project string, iid int) ([]tracker.Note, error) {
 	i, err := t.find(project, iid)
 	if err != nil {
 		return nil, err
 	}
-	notes := make([]gitlab.Note, 0, len(i.Comments))
+	notes := make([]tracker.Note, 0, len(i.Comments))
 	for k, c := range i.Comments {
-		notes = append(notes, gitlab.Note{ID: k + 1, Body: c.Text, Author: c.Author, System: c.Author == "tpm"})
+		notes = append(notes, tracker.Note{ID: k + 1, Body: c.Text, Author: c.Author, System: c.Author == "tpm"})
 	}
 	return notes, nil
 }
@@ -240,13 +240,13 @@ func (t *Tracker) CreateNote(project string, iid int, body string) error {
 	return t.Store.Comment(i.ID, body)
 }
 
-func (t *Tracker) CurrentUser() (gitlab.User, error) {
-	return gitlab.User{Username: t.Store.User}, nil
+func (t *Tracker) CurrentUser() (tracker.User, error) {
+	return tracker.User{Username: t.Store.User}, nil
 }
 
 // AssignIssue is pop's assignment (srd041 R9.1): only the person running
 // it, and a pop that lost to an earlier taker is an error naming them.
-func (t *Tracker) AssignIssue(project string, iid int, user gitlab.User) error {
+func (t *Tracker) AssignIssue(project string, iid int, user tracker.User) error {
 	if user.Username != t.Store.User {
 		return fmt.Errorf("%w: pop assigns only the person who runs it, not %s (srd041 R9.1)", ErrRefused, user.Username)
 	}
@@ -270,7 +270,7 @@ func (t *Tracker) AssignIssue(project string, iid int, user gitlab.User) error {
 // data issue enters the backlog (srd041 R3.1), so admission moves only a
 // data issue's state; for any other issue, and for an issue already past
 // admission that later fails, for which srd041 has no row, lint sets or
-// clears only the label, as it does on GitLab.
+// clears only the label.
 func (t *Tracker) Triage(project string, iid int, admitted bool) (bool, error) {
 	found, err := t.find(project, iid)
 	if err != nil {
@@ -385,7 +385,7 @@ func (t *Tracker) rev(project, ref string) string {
 func (t *Tracker) GetFile(project, p, ref string) ([]byte, error) {
 	out, err := t.raw(project, "show", t.rev(project, ref)+":"+p)
 	if err != nil {
-		return nil, fmt.Errorf("%s at %s: %w", p, ref, gitlab.ErrNotFound)
+		return nil, fmt.Errorf("%s at %s: %w", p, ref, tracker.ErrNotFound)
 	}
 	return out, nil
 }
@@ -393,7 +393,7 @@ func (t *Tracker) GetFile(project, p, ref string) ([]byte, error) {
 func (t *Tracker) ListDir(project, dir, ref string) ([]string, error) {
 	out, err := t.git(project, "ls-tree", "--name-only", t.rev(project, ref), strings.TrimSuffix(dir, "/")+"/")
 	if err != nil || out == "" {
-		return nil, fmt.Errorf("%s at %s: %w", dir, ref, gitlab.ErrNotFound)
+		return nil, fmt.Errorf("%s at %s: %w", dir, ref, tracker.ErrNotFound)
 	}
 	return strings.Split(out, "\n"), nil
 }
@@ -403,80 +403,78 @@ func (t *Tracker) TagExists(project, tag string) (bool, error) {
 	return out != "", err
 }
 
-// belong to commands that still run on GitLab (GAP10).
-
 // FindMilestone looks in the project, then in its ancestor groups.
-func (t *Tracker) FindMilestone(project, title string) (gitlab.Milestone, error) {
+func (t *Tracker) FindMilestone(project, title string) (tracker.Milestone, error) {
 	ms, _, err := t.Store.Milestones()
 	if err != nil {
-		return gitlab.Milestone{}, err
+		return tracker.Milestone{}, err
 	}
 	for _, scope := range ancestors(project) {
 		for _, m := range ms {
 			if m.Scope == scope && m.Title == title {
-				return toGitlab(m), nil
+				return toTracker(m), nil
 			}
 		}
 	}
-	return gitlab.Milestone{}, fmt.Errorf("milestone %s for %s: %w", title, project, gitlab.ErrNotFound)
+	return tracker.Milestone{}, fmt.Errorf("milestone %s for %s: %w", title, project, tracker.ErrNotFound)
 }
 
 // ActiveMilestones lists the milestones of the project and its ancestor
 // groups by due date. A beads milestone is never closed, so all are active.
-func (t *Tracker) ActiveMilestones(project string) ([]gitlab.Milestone, error) {
+func (t *Tracker) ActiveMilestones(project string) ([]tracker.Milestone, error) {
 	ms, _, err := t.Store.Milestones()
 	if err != nil {
 		return nil, err
 	}
 	scopes := ancestors(project)
-	var out []gitlab.Milestone
+	var out []tracker.Milestone
 	for _, m := range ms {
 		if slices.Contains(scopes, m.Scope) {
-			out = append(out, toGitlab(m))
+			out = append(out, toTracker(m))
 		}
 	}
-	slices.SortStableFunc(out, func(a, b gitlab.Milestone) int {
+	slices.SortStableFunc(out, func(a, b tracker.Milestone) int {
 		return strings.Compare(a.DueDate+"\x00"+a.Title, b.DueDate+"\x00"+b.Title)
 	})
 	return out, nil
 }
 
-func (t *Tracker) EnsureMilestone(group string, m gitlab.Milestone) (string, error) {
+func (t *Tracker) EnsureMilestone(group string, m tracker.Milestone) (string, error) {
 	return t.Store.EnsureMilestone(Milestone{Scope: group, Title: m.Title, Description: m.Description,
 		StartDate: m.StartDate, DueDate: m.DueDate})
 }
 
-func toGitlab(m Milestone) gitlab.Milestone {
-	return gitlab.Milestone{Title: m.Title, Description: m.Description, StartDate: m.StartDate, DueDate: m.DueDate}
+func toTracker(m Milestone) tracker.Milestone {
+	return tracker.Milestone{Title: m.Title, Description: m.Description, StartDate: m.StartDate, DueDate: m.DueDate}
 }
 
 // IssueAwards is always empty: beads has no award emoji, and a peer read
 // is an approval comment instead (srd015 R1.2).
-func (t *Tracker) IssueAwards(string, int) ([]gitlab.Award, error) { return nil, nil }
+func (t *Tracker) IssueAwards(string, int) ([]tracker.Award, error) { return nil, nil }
 
 // GroupLabels lists the labels defined on the group itself.
-func (t *Tracker) GroupLabels(group string) ([]gitlab.Label, error) {
+func (t *Tracker) GroupLabels(group string) ([]tracker.Label, error) {
 	ls, _, err := t.Store.Labels()
 	if err != nil {
 		return nil, err
 	}
-	var out []gitlab.Label
+	var out []tracker.Label
 	for _, l := range ls {
 		if l.Scope == group {
-			out = append(out, gitlab.Label{Name: l.Name, Color: l.Color, Description: l.Description})
+			out = append(out, tracker.Label{Name: l.Name, Color: l.Color, Description: l.Description})
 		}
 	}
 	return out, nil
 }
 
-func (t *Tracker) CreateGroupLabel(group string, l gitlab.Label) error {
+func (t *Tracker) CreateGroupLabel(group string, l tracker.Label) error {
 	return t.Store.PutLabel(Label{Scope: group, Name: l.Name, Color: l.Color, Description: l.Description}, false)
 }
 
-func (t *Tracker) UpdateGroupLabel(group string, l gitlab.Label) error {
+func (t *Tracker) UpdateGroupLabel(group string, l tracker.Label) error {
 	err := t.Store.PutLabel(Label{Scope: group, Name: l.Name, Color: l.Color, Description: l.Description}, true)
 	if errors.Is(err, ErrNotFound) {
-		return fmt.Errorf("%w: %v", gitlab.ErrNotFound, err)
+		return fmt.Errorf("%w: %v", tracker.ErrNotFound, err)
 	}
 	return err
 }

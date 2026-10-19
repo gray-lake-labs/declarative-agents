@@ -9,13 +9,13 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 
 	_ "github.com/gray-lake-labs/scrum-master/internal/commands"
 )
 
 func main() {
-	tracker := func() (gitlab.Tracker, error) {
+	tracker := func() (tracker.Tracker, error) {
 		if !beads.Configured() {
 			return nil, errors.New("no tracker: set TPM_TRACKER to the tracker repository (eng04-beads-sync)")
 		}

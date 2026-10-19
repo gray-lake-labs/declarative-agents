@@ -16,7 +16,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Document is a Markdown corpus document: its frontmatter and its tagged
@@ -264,8 +264,8 @@ type File struct {
 }
 
 // Get reads and parses the Markdown document at path from project at ref.
-// A missing document's error wraps gitlab.ErrNotFound.
-func Get(t gitlab.Tracker, project, path, ref string) (File, error) {
+// A missing document's error wraps tracker.ErrNotFound.
+func Get(t tracker.Tracker, project, path, ref string) (File, error) {
 	b, err := t.GetFile(project, path, ref)
 	if err != nil {
 		return File{}, fmt.Errorf("%s: %w", path, err)

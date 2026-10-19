@@ -10,11 +10,11 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	_ "github.com/gray-lake-labs/scrum-master/internal/commands"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/help"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
-func noTracker() (gitlab.Tracker, error) { return nil, errors.New("help reads no tracker") }
+func noTracker() (tracker.Tracker, error) { return nil, errors.New("help reads no tracker") }
 
 func tpm(t *testing.T, args ...string) (string, error) {
 	t.Helper()

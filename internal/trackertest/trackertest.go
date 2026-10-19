@@ -1,5 +1,5 @@
 // Package trackertest runs one test against every tracker tpm serves: the
-// GitLab fake and a beads tracker over real git repositories on local disk
+// in-memory fake and a beads tracker over real git repositories on local disk
 // (srd042 R1.1). A test describes its program through Program and asserts
 // through the tracker interface, never a backend's internals.
 package trackertest
@@ -16,8 +16,8 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 // User is the person every Program's tracker acts as, the fake's Me.
@@ -28,37 +28,37 @@ const User = "me"
 type Program interface {
 	AddFile(project, ref, path string, content []byte)
 	AddTag(project, tag string)
-	Tracker() gitlab.Tracker
+	Tracker() tracker.Tracker
 	// Writes counts the writes the tracker has made, so a test can prove a
 	// dry run or a second run changed nothing.
 	Writes() int
 	// As is the program's tracker acting as another person, for a step
 	// someone other than User takes, such as a peer read.
-	As(user string) gitlab.Tracker
-	// AddMerge declares a merged merge request of project: on beads a
+	As(user string) tracker.Tracker
+	// AddMerge declares a merge into project: on beads a
 	// --no-ff merge commit on its default branch, numbered mr.IID, by
 	// mr.Author on mr.MergedAt, with mr.Title and mr.Description as its
 	// message.
-	AddMerge(project string, mr gitlab.MergeRequest)
+	AddMerge(project string, mr tracker.Merge)
 	// AddRepository declares a project's repository with nothing in it, for
 	// a test that works in its checkout.
 	AddRepository(project string)
 	// Checkout is a project's local checkout once Tracker has built it; the
-	// GitLab fake has none and returns the empty string.
+	// fake has none and returns the empty string.
 	Checkout(project string) string
 }
 
-// Each runs test once per tracker, as subtests named gitlab and beads.
+// Each runs test once per tracker, as subtests named fake and beads.
 func Each(t *testing.T, test func(t *testing.T, p Program)) {
-	t.Run("gitlab", func(t *testing.T) { test(t, fakeProgram{gitlabtest.New()}) })
+	t.Run("fake", func(t *testing.T) { test(t, fakeProgram{fake.New()}) })
 	t.Run("beads", func(t *testing.T) { test(t, newBeadsProgram(t)) })
 }
 
-type fakeProgram struct{ *gitlabtest.Fake }
+type fakeProgram struct{ *fake.Fake }
 
-func (f fakeProgram) Tracker() gitlab.Tracker { return f.Fake }
-func (f fakeProgram) Writes() int             { return f.Fake.Writes }
-func (f fakeProgram) AddMerge(project string, mr gitlab.MergeRequest) {
+func (f fakeProgram) Tracker() tracker.Tracker { return f.Fake }
+func (f fakeProgram) Writes() int              { return f.Fake.Writes }
+func (f fakeProgram) AddMerge(project string, mr tracker.Merge) {
 	mr.State = "merged"
 	f.Fake.MRs[project] = append(f.Fake.MRs[project], &mr)
 }
@@ -66,22 +66,22 @@ func (f fakeProgram) AddMerge(project string, mr gitlab.MergeRequest) {
 func (f fakeProgram) AddRepository(string)   {}
 func (f fakeProgram) Checkout(string) string { return "" }
 
-func (f fakeProgram) As(user string) gitlab.Tracker {
+func (f fakeProgram) As(user string) tracker.Tracker {
 	return fakeAs{f.Fake, user}
 }
 
 // fakeAs is the fake acting as another person: it is who CurrentUser
 // names and who authors the notes it posts.
 type fakeAs struct {
-	*gitlabtest.Fake
+	*fake.Fake
 	user string
 }
 
-func (f fakeAs) CurrentUser() (gitlab.User, error) { return gitlab.User{Username: f.user}, nil }
+func (f fakeAs) CurrentUser() (tracker.User, error) { return tracker.User{Username: f.user}, nil }
 
 func (f fakeAs) CreateNote(project string, iid int, body string) error {
 	me := f.Fake.Me
-	f.Fake.Me = gitlab.User{Username: f.user}
+	f.Fake.Me = tracker.User{Username: f.user}
 	defer func() { f.Fake.Me = me }()
 	return f.Fake.CreateNote(project, iid, body)
 }
@@ -95,7 +95,7 @@ type beadsProgram struct {
 	remote  string
 	files   map[string]map[string]map[string][]byte // project, ref, path
 	tags    map[string][]string
-	merges  map[string][]gitlab.MergeRequest
+	merges  map[string][]tracker.Merge
 	repos   map[string]bool
 	tracker *beads.Tracker
 	work    string
@@ -106,10 +106,10 @@ func newBeadsProgram(t *testing.T) *beadsProgram {
 	root := t.TempDir()
 	return &beadsProgram{t: t, root: root, remote: beadstest.TrackerRepository(t, root),
 		files: map[string]map[string]map[string][]byte{}, tags: map[string][]string{},
-		merges: map[string][]gitlab.MergeRequest{}, repos: map[string]bool{}}
+		merges: map[string][]tracker.Merge{}, repos: map[string]bool{}}
 }
 
-func (b *beadsProgram) AddMerge(project string, mr gitlab.MergeRequest) {
+func (b *beadsProgram) AddMerge(project string, mr tracker.Merge) {
 	if b.tracker != nil {
 		b.t.Fatal("trackertest: AddMerge after Tracker")
 	}
@@ -148,7 +148,7 @@ func (b *beadsProgram) AddTag(project, tag string) {
 	b.tags[project] = append(b.tags[project], tag)
 }
 
-func (b *beadsProgram) Tracker() gitlab.Tracker {
+func (b *beadsProgram) Tracker() tracker.Tracker {
 	if b.tracker != nil {
 		return b.tracker
 	}
@@ -178,7 +178,7 @@ func (b *beadsProgram) Tracker() gitlab.Tracker {
 }
 
 // As gives another person their own clone of the tracker repository.
-func (b *beadsProgram) As(user string) gitlab.Tracker {
+func (b *beadsProgram) As(user string) tracker.Tracker {
 	b.Tracker()
 	if tr, ok := b.as[user]; ok {
 		return tr
@@ -252,13 +252,13 @@ func (b *beadsProgram) Writes() int {
 	return n - 1
 }
 
-// merge lands each declared merge request as a --no-ff merge on main, in
+// merge lands each declared merge as a --no-ff merge on main, in
 // IID order, with filler merges dated long before any test's window so
 // that each lands at its declared number: on beads a merge's number is its
 // place in the default branch's first-parent history.
-func (b *beadsProgram) merge(dir string, mrs []gitlab.MergeRequest) {
+func (b *beadsProgram) merge(dir string, mrs []tracker.Merge) {
 	t := b.t
-	slices.SortFunc(mrs, func(a, c gitlab.MergeRequest) int { return a.IID - c.IID })
+	slices.SortFunc(mrs, func(a, c tracker.Merge) int { return a.IID - c.IID })
 	n := 0
 	land := func(title, body, author, date string) {
 		n++

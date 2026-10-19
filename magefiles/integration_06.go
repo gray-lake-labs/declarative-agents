@@ -145,7 +145,7 @@ func (Integration) Plan() error {
 	}
 	// The plan branch starts from main, which earlier targets may have
 	// changed, and takes the seed's fixtures as its first commit, so its
-	// merge request applies to main whatever main holds.
+	// merge applies to main whatever main holds.
 	if err := r.git(clone, "checkout", "--quiet", "-B", branch, "origin/main"); err != nil {
 		return err
 	}

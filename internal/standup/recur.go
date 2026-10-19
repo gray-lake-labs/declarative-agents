@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // RecurOptions shape the next instance; zero values keep the issue's own.
@@ -46,9 +46,9 @@ func recursMarker(project string, iid int) string {
 // Recur opens the next instance of a recurring issue (srd013 R8.1, srd001
 // R8.3): same labels and milestone, the next due date, and the run
 // appended to Previous Runs. An open issue is closed first with a run
-// summary; one a merge request closed is left as it is. When the next
+// summary; one a merge closed is left as it is. When the next
 // instance already exists, nothing is written.
-func Recur(t gitlab.Tracker, project string, iid int, o RecurOptions) (RecurResult, error) {
+func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurResult, error) {
 	r := RecurResult{Project: project, Previous: iid, DryRun: o.DryRun}
 	i, err := t.GetIssue(project, iid)
 	if err != nil {
@@ -71,7 +71,7 @@ func Recur(t gitlab.Tracker, project string, iid int, o RecurOptions) (RecurResu
 	}
 
 	marker := recursMarker(project, iid)
-	all, err := t.ListIssues(project, gitlab.IssueQuery{State: "all"})
+	all, err := t.ListIssues(project, tracker.IssueQuery{State: "all"})
 	if err != nil {
 		return r, err
 	}
@@ -86,7 +86,7 @@ func Recur(t gitlab.Tracker, project string, iid int, o RecurOptions) (RecurResu
 	if now.IsZero() {
 		now = time.Now()
 	}
-	outcome := "closed by its merge request"
+	outcome := "closed by its merge"
 	if i.State != "closed" {
 		r.Closed = true
 		outcome = "closed by tpm issue recur without its work"
@@ -97,14 +97,14 @@ func Recur(t gitlab.Tracker, project string, iid int, o RecurOptions) (RecurResu
 		return r, nil
 	}
 	if r.Closed {
-		if err := t.CreateNote(project, iid, fmt.Sprintf("Run summary: closed on %s without a merge request; the next instance is due %s.", now.Format("2006-01-02"), r.DueDate)); err != nil {
+		if err := t.CreateNote(project, iid, fmt.Sprintf("Run summary: closed on %s without a merge; the next instance is due %s.", now.Format("2006-01-02"), r.DueDate)); err != nil {
 			return r, err
 		}
-		if _, err := t.UpdateIssue(project, iid, gitlab.IssueUpdate{State: ptr("close")}); err != nil {
+		if _, err := t.UpdateIssue(project, iid, tracker.IssueUpdate{State: ptr("close")}); err != nil {
 			return r, err
 		}
 	}
-	next, err := t.CreateIssue(project, gitlab.NewIssue{Title: r.Title, Description: body, Labels: i.Labels, DueDate: r.DueDate, Milestone: i.Milestone})
+	next, err := t.CreateIssue(project, tracker.NewIssue{Title: r.Title, Description: body, Labels: i.Labels, DueDate: r.DueDate, Milestone: i.Milestone})
 	if err != nil {
 		return r, err
 	}

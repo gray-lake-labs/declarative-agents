@@ -34,7 +34,7 @@ func deliver(t *testing.T, dir, branch, user, date, message string) {
 // beads from the merge commits on its default branch: each merge is
 // numbered by its place in that history, carries its author and merge
 // date, and closes the issues its message cites; a plain commit is not a
-// merge, and author and date filter as on GitLab.
+// merge, and author and date filter it.
 func TestMergedHistoryFromMergeCommits(t *testing.T) {
 	tr := newTestTracker(t, "alice")
 	dir := tr.checkout("g/po-1")
@@ -42,7 +42,7 @@ func TestMergedHistoryFromMergeCommits(t *testing.T) {
 	beadstest.Git(t, dir, "commit", "-q", "--allow-empty", "-m", "a plain commit on main")
 	deliver(t, dir, "2-rubric", "bob", "2026-10-27", "Merge 2-rubric (g/po-1#2)")
 
-	all, err := tr.MergedMergeRequests("g/po-1", "", "2026-10-01")
+	all, err := tr.Merges("g/po-1", "", "2026-10-01")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,13 +56,13 @@ func TestMergedHistoryFromMergeCommits(t *testing.T) {
 		t.Fatalf("first merge = %+v", first)
 	}
 
-	if recent, _ := tr.MergedMergeRequests("g/po-1", "", "2026-10-26"); len(recent) != 1 || recent[0].IID != 2 || recent[0].Author != "bob" {
+	if recent, _ := tr.Merges("g/po-1", "", "2026-10-26"); len(recent) != 1 || recent[0].IID != 2 || recent[0].Author != "bob" {
 		t.Fatalf("since 2026-10-26 = %+v, want bob's merge 2 only", recent)
 	}
-	if mine, _ := tr.MergedMergeRequests("g/po-1", "alice", "2026-10-01"); len(mine) != 1 || mine[0].IID != 1 {
+	if mine, _ := tr.Merges("g/po-1", "alice", "2026-10-01"); len(mine) != 1 || mine[0].IID != 1 {
 		t.Fatalf("alice's = %+v, want merge 1 only", mine)
 	}
-	if _, err := tr.MergedMergeRequests("g/po-1", "", "last week"); err == nil {
+	if _, err := tr.Merges("g/po-1", "", "last week"); err == nil {
 		t.Fatal("a since that is not a date was accepted")
 	}
 }

@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
@@ -22,9 +22,9 @@ func block(what, comp, since, waiting string) Entry {
 }
 
 // aggregateFixture is two weeks of reports from three people, a tracker
-// with one met objective and two merged merge requests, and the
+// with one met objective and two merges, and the
 // configuration naming them.
-func aggregateFixture(t *testing.T, p trackertest.Program) (string, gitlab.Tracker, Config) {
+func aggregateFixture(t *testing.T, p trackertest.Program) (string, tracker.Tracker, Config) {
 	t.Helper()
 	dir := t.TempDir()
 	put := func(user, week string, w, b []Entry) {
@@ -38,11 +38,11 @@ func aggregateFixture(t *testing.T, p trackertest.Program) (string, gitlab.Track
 	put("bob", "2026-W42", []Entry{work("g/po-2#1", "fleet", "on-track", "no"), work("g/po-2#2", "fleet", "done", "yes")},
 		[]Entry{block("no scoring quota", "fleet", "2026-10-12", "scoring-api")})
 
-	p.AddMerge("g/po-1", gitlab.MergeRequest{IID: 7, Title: "Fix the grader cache", Author: "alice", MergedAt: "2026-10-13", Description: "Closes #9"})
-	p.AddMerge("g/po-1", gitlab.MergeRequest{IID: 8, Title: "Score one agent", Author: "alice", MergedAt: "2026-10-14", Description: "Closes #4"})
+	p.AddMerge("g/po-1", tracker.Merge{IID: 7, Title: "Fix the grader cache", Author: "alice", MergedAt: "2026-10-13", Description: "Closes #9"})
+	p.AddMerge("g/po-1", tracker.Merge{IID: 8, Title: "Score one agent", Author: "alice", MergedAt: "2026-10-14", Description: "Closes #4"})
 	f := p.Tracker()
 	for i := 0; i < 2; i++ {
-		f.CreateIssue("g/po-2", gitlab.NewIssue{Title: "objective"})
+		f.CreateIssue("g/po-2", tracker.NewIssue{Title: "objective"})
 	}
 	f.CreateNote("g/po-2", 2, "Met.\n\n<!-- tpm program event=met objective=obj001 -->")
 	cfg := Config{Team: []Member{{"alice", "g/po-1"}, {"bob", "g/po-2"}, {"carol", "g/po-3"}}, System: "g/system"}
@@ -100,9 +100,9 @@ func TestActionableSignalIsPushedAsIssue(t *testing.T) {
 }
 
 // systemIssues lists g/system's issues, open or closed.
-func systemIssues(t *testing.T, f gitlab.Tracker) []gitlab.Issue {
+func systemIssues(t *testing.T, f tracker.Tracker) []tracker.Issue {
 	t.Helper()
-	all, err := f.ListIssues("g/system", gitlab.IssueQuery{State: "all"})
+	all, err := f.ListIssues("g/system", tracker.IssueQuery{State: "all"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +145,7 @@ func testAggregateHonoursJSONAndDryRun(t *testing.T, p trackertest.Program) {
 	writes := p.Writes()
 	var out bytes.Buffer
 	err := cli.Default.Run([]string{"reports", "aggregate", "--json", "--dry-run", "--push", "--dir", dir, "--from", "2026-W41", "--to", "2026-W42"},
-		&out, func() (gitlab.Tracker, error) { return f, nil })
+		&out, func() (tracker.Tracker, error) { return f, nil })
 	if err != nil {
 		t.Fatal(err)
 	}

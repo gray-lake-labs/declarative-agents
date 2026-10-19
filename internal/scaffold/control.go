@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // labelAxes are the axes of the labels config format in its order, with the
@@ -21,7 +21,7 @@ var labelAxes = []struct{ name, prefix, exclusive, required string }{
 
 // LabelsDocument renders labels as control/labels.md in the labels config
 // format, so tpm issue labels reads back exactly labels.
-func LabelsDocument(labels []gitlab.Label) string {
+func LabelsDocument(labels []tracker.Label) string {
 	var b strings.Builder
 	b.WriteString("---\nid: labels\ntitle: Label schema\n---\n\n")
 	b.WriteString("<!-- field: version -->\n## Version\n\n1\n\n<!-- field: axes -->\n## Axes\n")

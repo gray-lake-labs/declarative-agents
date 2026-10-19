@@ -5,7 +5,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Classification is the plane and kind tpm derives from the paths a
@@ -74,7 +74,7 @@ type Labelling struct {
 // Derive fills what the caller did not give: plane and kind from the paths
 // (Classify), and the component from the subsystem SRD in the system
 // repository that declares project. Explicit values always win.
-func Derive(t gitlab.Tracker, project, system, ref string, paths []string, given Labelling) (Labelling, error) {
+func Derive(t tracker.Tracker, project, system, ref string, paths []string, given Labelling) (Labelling, error) {
 	out := given
 	if out.Plane == "" && len(paths) > 0 {
 		c, err := Classify(paths, given.Kind, system != "" && ProjectPath(project) == ProjectPath(system))

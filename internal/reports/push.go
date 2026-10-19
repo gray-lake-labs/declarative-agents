@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // PushResult is one actionable signal and the issue that carries it.
@@ -22,7 +22,7 @@ func signalMarker(s Signal) string {
 
 // SignalIssue is the issue an actionable signal becomes, in do-work's input
 // format (srd018 R6.3).
-func SignalIssue(s Signal) gitlab.NewIssue {
+func SignalIssue(s Signal) tracker.NewIssue {
 	body := fmt.Sprintf(`%s (%s, %s).
 
 %s
@@ -36,15 +36,15 @@ func SignalIssue(s Signal) gitlab.NewIssue {
 
 - The next tpm reports aggregate no longer reports %s for %s (test: tpm_reports_aggregate; environment: local)
 `, s.Detail, s.Kind, s.Week, signalMarker(s), s.Kind, s.Subject, s.Kind, s.Subject)
-	return gitlab.NewIssue{Title: fmt.Sprintf("Signal: %s on %s", s.Kind, s.Subject), Description: body,
+	return tracker.NewIssue{Title: fmt.Sprintf("Signal: %s on %s", s.Kind, s.Subject), Description: body,
 		Labels: program.Labels("management", "", "", s.Component)}
 }
 
 // PushSignals files each actionable signal as an issue in the system
 // repository, once: an open issue already carrying the signal is kept
 // (srd018 R3.6, R6.3).
-func PushSignals(t gitlab.Tracker, system string, signals []Signal, p program.Policy, dryRun bool) ([]PushResult, error) {
-	open, err := t.ListIssues(system, gitlab.IssueQuery{State: "opened"})
+func PushSignals(t tracker.Tracker, system string, signals []Signal, p program.Policy, dryRun bool) ([]PushResult, error) {
+	open, err := t.ListIssues(system, tracker.IssueQuery{State: "opened"})
 	if err != nil {
 		return nil, err
 	}

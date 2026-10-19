@@ -6,19 +6,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 // readingTracker is a tracker that knows which tracker commit it read.
 type readingTracker struct {
-	*gitlabtest.Fake
-	read gitlab.Read
+	*fake.Fake
+	read tracker.Read
 }
 
-func (r readingTracker) LastRead() (gitlab.Read, bool) { return r.read, r.read.Commit != "" }
+func (r readingTracker) LastRead() (tracker.Read, bool) { return r.read, r.read.Commit != "" }
 
-func runReading(t *testing.T, read gitlab.Read, args ...string) string {
+func runReading(t *testing.T, read tracker.Read, args ...string) string {
 	t.Helper()
 	reg := &Registry{}
 	reg.Register(&Command{Group: "g", Name: "c", Run: func(ctx *Context) error {
@@ -28,7 +28,7 @@ func runReading(t *testing.T, read gitlab.Read, args ...string) string {
 		return ctx.Emit(map[string]string{"result": "done"}, "done")
 	}})
 	var out bytes.Buffer
-	tracker := func() (gitlab.Tracker, error) { return readingTracker{gitlabtest.New(), read}, nil }
+	tracker := func() (tracker.Tracker, error) { return readingTracker{fake.New(), read}, nil }
 	if err := reg.Run(append([]string{"g", "c"}, args...), &out, tracker); err != nil {
 		t.Fatal(err)
 	}
@@ -40,10 +40,10 @@ func runReading(t *testing.T, read gitlab.Read, args ...string) string {
 // when it read offline from the cache and when it last pulled (srd042 R3.3,
 // rel03.0-uc002 S1). A tracker that reads nothing adds nothing.
 func TestEmitNamesTheTrackerRead(t *testing.T) {
-	online := gitlab.Read{Commit: "4f2a9c1d0e8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f", At: "2026-11-02T09:00:00Z"}
+	online := tracker.Read{Commit: "4f2a9c1d0e8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f", At: "2026-11-02T09:00:00Z"}
 	var got struct {
-		Result string      `json:"result"`
-		Read   gitlab.Read `json:"tracker_read"`
+		Result string       `json:"result"`
+		Read   tracker.Read `json:"tracker_read"`
 	}
 	if err := json.Unmarshal([]byte(runReading(t, online, "--json")), &got); err != nil {
 		t.Fatal(err)
@@ -55,12 +55,12 @@ func TestEmitNamesTheTrackerRead(t *testing.T) {
 		t.Fatalf("human = %q, want the result and the tracker commit", human)
 	}
 
-	offline := gitlab.Read{Commit: online.Commit, At: online.At, Offline: true}
+	offline := tracker.Read{Commit: online.Commit, At: online.At, Offline: true}
 	if human := runReading(t, offline); !strings.Contains(human, "offline") || !strings.Contains(human, online.At) {
 		t.Fatalf("offline human = %q, want offline and the last pull time", human)
 	}
 
-	if human := runReading(t, gitlab.Read{}); strings.Contains(human, "tracker") {
+	if human := runReading(t, tracker.Read{}); strings.Contains(human, "tracker") {
 		t.Fatalf("human = %q, want no tracker line from a tracker that read nothing", human)
 	}
 }

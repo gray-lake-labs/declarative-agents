@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func newTestTracker(t *testing.T, user string) *Tracker {
@@ -26,13 +26,13 @@ func newTestTracker(t *testing.T, user string) *Tracker {
 // assignee's in-progress transition.
 func TestTrackerMapsIssuesAndNotes(t *testing.T) {
 	tr := newTestTracker(t, "alice")
-	a, err := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "first", Description: "body", Labels: []string{"plane::data"},
+	a, err := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "first", Description: "body", Labels: []string{"plane::data"},
 		DueDate: "2026-11-27", Milestone: "01.1"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	b, _ := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "second"})
-	other, _ := tr.CreateIssue("g/po-2", gitlab.NewIssue{Title: "elsewhere"})
+	b, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "second"})
+	other, _ := tr.CreateIssue("g/po-2", tracker.NewIssue{Title: "elsewhere"})
 	if a.IID != 1 || b.IID != 2 || other.IID != 1 {
 		t.Fatalf("iids = %d, %d, %d, want 1, 2 per repository and 1 in the other", a.IID, b.IID, other.IID)
 	}
@@ -45,15 +45,15 @@ func TestTrackerMapsIssuesAndNotes(t *testing.T) {
 		got.DueDate != "2026-11-27" || !got.HasLabel("plane::data") || got.Project != "g/po-1" {
 		t.Fatalf("issue = %+v, want the created fields back", got)
 	}
-	if _, err := tr.GetIssue("g/po-1", 9); !errors.Is(err, gitlab.ErrNotFound) {
+	if _, err := tr.GetIssue("g/po-1", 9); !errors.Is(err, tracker.ErrNotFound) {
 		t.Fatalf("missing issue = %v, want ErrNotFound", err)
 	}
 
-	list, _ := tr.ListIssues("g/po-1", gitlab.IssueQuery{State: "opened", Labels: []string{"plane::data"}})
+	list, _ := tr.ListIssues("g/po-1", tracker.IssueQuery{State: "opened", Labels: []string{"plane::data"}})
 	if len(list) != 1 || list[0].IID != 1 {
 		t.Fatalf("label query = %+v, want issue 1 only", list)
 	}
-	if list, _ := tr.ListIssues("g/po-1", gitlab.IssueQuery{Search: "second"}); len(list) != 1 || list[0].IID != 2 {
+	if list, _ := tr.ListIssues("g/po-1", tracker.IssueQuery{Search: "second"}); len(list) != 1 || list[0].IID != 2 {
 		t.Fatalf("search = %+v, want issue 2 only", list)
 	}
 
@@ -65,13 +65,13 @@ func TestTrackerMapsIssuesAndNotes(t *testing.T) {
 	}
 
 	closeState, reopen := "close", "reopen"
-	if got, err := tr.UpdateIssue("g/po-1", 2, gitlab.IssueUpdate{State: &closeState}); err != nil || got.State != "closed" {
+	if got, err := tr.UpdateIssue("g/po-1", 2, tracker.IssueUpdate{State: &closeState}); err != nil || got.State != "closed" {
 		t.Fatalf("close = %+v, %v", got, err)
 	}
-	if list, _ := tr.ListIssues("g/po-1", gitlab.IssueQuery{State: "opened"}); len(list) != 1 {
+	if list, _ := tr.ListIssues("g/po-1", tracker.IssueQuery{State: "opened"}); len(list) != 1 {
 		t.Fatalf("open issues after close = %+v, want 1", list)
 	}
-	if got, err := tr.UpdateIssue("g/po-1", 2, gitlab.IssueUpdate{State: &reopen}); err != nil || got.State != "opened" {
+	if got, err := tr.UpdateIssue("g/po-1", 2, tracker.IssueUpdate{State: &reopen}); err != nil || got.State != "opened" {
 		t.Fatalf("reopen = %+v, %v", got, err)
 	}
 
@@ -79,7 +79,7 @@ func TestTrackerMapsIssuesAndNotes(t *testing.T) {
 	if err := tr.AssignIssue("g/po-1", 1, me); err != nil {
 		t.Fatal(err)
 	}
-	got, err = tr.UpdateIssue("g/po-1", 1, gitlab.IssueUpdate{AddLabels: []string{"status::in-progress"}})
+	got, err = tr.UpdateIssue("g/po-1", 1, tracker.IssueUpdate{AddLabels: []string{"status::in-progress"}})
 	if err != nil || !slices.Contains(got.Labels, "status::in-progress") {
 		t.Fatalf("start = %+v, %v, want status::in-progress", got, err)
 	}

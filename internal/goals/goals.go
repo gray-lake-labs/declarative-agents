@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // WebBase is the web root repositories are cited under, TPM_WEB_BASE: a
@@ -30,7 +30,7 @@ func init() {
 		fs.StringVar(&a.release, "release", "", "road-map release version (required)")
 		fs.StringVar(&a.ref, "ref", "main", "ref of the road map, docs/road-map.md")
 	}
-	load := func(ctx *cli.Context) (gitlab.Tracker, Sources, error) {
+	load := func(ctx *cli.Context) (tracker.Tracker, Sources, error) {
 		if a.system == "" || a.release == "" {
 			return nil, Sources{}, fmt.Errorf("%w: needs --system and --release", cli.ErrUsage)
 		}

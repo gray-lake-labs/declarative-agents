@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/plan"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
@@ -21,7 +21,7 @@ const po1 = "g/po-1"
 // period is a reports checkout with one week in which po-1's objective
 // g/po-1#1 is reported done and complete, and a tracker holding that
 // objective issue and the repository's sprint-end issue g/po-1#2.
-func period(t *testing.T, p trackertest.Program) (string, gitlab.Tracker, reports.Config) {
+func period(t *testing.T, p trackertest.Program) (string, tracker.Tracker, reports.Config) {
 	t.Helper()
 	dir := t.TempDir()
 	start, _ := reports.ParseWeek("2026-W42")
@@ -32,15 +32,15 @@ func period(t *testing.T, p trackertest.Program) (string, gitlab.Tracker, report
 	}, nil)), 0o644)
 	p.AddRepository(po1)
 	f := p.Tracker()
-	f.CreateIssue(po1, gitlab.NewIssue{Title: "Objective R1", Labels: []string{"plane::management"},
+	f.CreateIssue(po1, tracker.NewIssue{Title: "Objective R1", Labels: []string{"plane::management"},
 		Description: "Objective R1\n\n<!-- tpm goals objective=obj001-reliable-agents#R1 release=01.0 -->"})
-	f.CreateIssue(po1, gitlab.NewIssue{Title: "Recurring: sprint end 01.0", Labels: []string{"type::recurring"},
+	f.CreateIssue(po1, tracker.NewIssue{Title: "Recurring: sprint end 01.0", Labels: []string{"type::recurring"},
 		Description: plan.SprintEndBody("01.0", "2026-11-06")})
 	cfg := reports.Config{Team: []reports.Member{{Username: "lead", Project: po1}}, ReminderWeekday: "wednesday", StatusIssueTitle: "x"}
 	return dir, f, cfg
 }
 
-func aggregate(t *testing.T, dir string, f gitlab.Tracker, cfg reports.Config) reports.Aggregation {
+func aggregate(t *testing.T, dir string, f tracker.Tracker, cfg reports.Config) reports.Aggregation {
 	t.Helper()
 	a, err := reports.Aggregate(f, reports.AggregateInput{Dir: dir, Config: cfg, Policy: program.Defaults(), From: "2026-W42", To: "2026-W42"})
 	if err != nil {
@@ -100,11 +100,11 @@ func testReportedCompleteClosesWithoutMet(t *testing.T, p trackertest.Program) {
 // confirmation the merge alone closes the issue.
 // closeBoth stands in for delivery on the fake, which has no repositories
 // to merge in: both issues close.
-func closeBoth(t *testing.T, f gitlab.Tracker) {
+func closeBoth(t *testing.T, f tracker.Tracker) {
 	t.Helper()
 	closed := "close"
 	for _, iid := range []int{1, 2} {
-		if _, err := f.UpdateIssue(po1, iid, gitlab.IssueUpdate{State: &closed}); err != nil {
+		if _, err := f.UpdateIssue(po1, iid, tracker.IssueUpdate{State: &closed}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -113,7 +113,7 @@ func closeBoth(t *testing.T, f gitlab.Tracker) {
 // localMergeCloses is the beads delivery (srd042 R2.3): the sprint-end
 // branch merges locally with a message citing both issues, and close
 // closes each on that merge commit.
-func localMergeCloses(t *testing.T, f gitlab.Tracker, checkout string) {
+func localMergeCloses(t *testing.T, f tracker.Tracker, checkout string) {
 	t.Helper()
 	git := func(args ...string) string {
 		t.Helper()

@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/release"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Objective is one objective issue of the repository and its state.
@@ -38,7 +38,7 @@ type Facts struct {
 
 // Input is one sprint-end facts run.
 type Input struct {
-	Tracker   gitlab.Tracker
+	Tracker   tracker.Tracker
 	Project   string
 	Aggregate reports.Aggregation
 	Releases  program.Releases
@@ -54,7 +54,7 @@ const goalsMarker = "<!-- tpm goals objective="
 func MakeFacts(in Input) (Facts, error) {
 	f := Facts{Project: in.Project, Aggregate: in.Aggregate}
 	// An objective issue is known by tasks' marker, not by a label.
-	issues, err := in.Tracker.ListIssues(in.Project, gitlab.IssueQuery{State: "all"})
+	issues, err := in.Tracker.ListIssues(in.Project, tracker.IssueQuery{State: "all"})
 	if err != nil {
 		return f, err
 	}

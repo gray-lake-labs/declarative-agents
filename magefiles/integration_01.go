@@ -8,8 +8,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func init() {
@@ -84,7 +84,7 @@ func (Integration) Pop() error {
 		return err
 	}
 	closeState := "close"
-	if _, err := r.tr.UpdateIssue(po1, closed.IID, gitlab.IssueUpdate{State: &closeState}); err != nil {
+	if _, err := r.tr.UpdateIssue(po1, closed.IID, tracker.IssueUpdate{State: &closeState}); err != nil {
 		return err
 	}
 	_, err = r.runTPM("issue", "pop", "--project", po1, "--issue", fmt.Sprint(closed.IID), "--dir", clone)

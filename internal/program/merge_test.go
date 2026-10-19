@@ -8,8 +8,8 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 // TestMergeDeliversOnBeads is the beads delivery (srd042 R2.3): a docs/
@@ -19,8 +19,8 @@ import (
 // nothing.
 func TestMergeDeliversOnBeads(t *testing.T) {
 	tr, checkout := newBeadsTracker(t, "alice")
-	objective, _ := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Objective R1", Labels: []string{"plane::management"}})
-	work, _ := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Change the use case", Milestone: "m", Description: goodBody,
+	objective, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Objective R1", Labels: []string{"plane::management"}})
+	work, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Change the use case", Milestone: "m", Description: goodBody,
 		Labels: []string{"plane::data", "kind::spec", "component::po-1"}})
 	p, err := Pop(tr, ExecGit{}, "g/po-1", work.IID, checkout, Defaults(), false)
 	if err != nil {
@@ -77,7 +77,7 @@ func TestMergeDeliversOnBeads(t *testing.T) {
 // TestMergeNeedsTheBeadsTracker: a tracker that does not close issues on a
 // local merge is refused.
 func TestMergeNeedsTheBeadsTracker(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	i := admitted(f, "Score one agent")
 	if _, err := Merge(f, ExecGit{}, "g/po-1", "g/po-1", i.IID, "1-score-one-agent", ".", AuditGate{}, nil, false); err == nil || !strings.Contains(err.Error(), "tpm issue merge serves the beads tracker") {
 		t.Fatalf("merge on a tracker without local merges = %v, want a refusal naming the beads tracker", err)
@@ -102,7 +102,7 @@ func reviewer(t *testing.T, tr *beads.Tracker, checkout, user string) *beads.Tra
 func TestMergeNeedsAnApprovalOfItsTip(t *testing.T) {
 	alice, checkout := newBeadsTracker(t, "alice")
 	bob := reviewer(t, alice, checkout, "bob")
-	work, _ := alice.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Score one agent", Milestone: "m", Description: goodBody,
+	work, _ := alice.CreateIssue("g/po-1", tracker.NewIssue{Title: "Score one agent", Milestone: "m", Description: goodBody,
 		Labels: []string{"plane::data", "kind::build", "component::po-1"}})
 	p, err := Pop(alice, ExecGit{}, "g/po-1", work.IID, checkout, Defaults(), false)
 	if err != nil {
@@ -147,7 +147,7 @@ func TestMergeNeedsAnApprovalOfItsTip(t *testing.T) {
 		t.Fatalf("merge with bob's approval of the tip = %+v, %v", m, err)
 	}
 
-	status, _ := alice.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Weekly status", Labels: []string{"plane::management"}})
+	status, _ := alice.CreateIssue("g/po-1", tracker.NewIssue{Title: "Weekly status", Labels: []string{"plane::management"}})
 	beadstest.Git(t, checkout, "checkout", "-q", "-b", "status-week", "main")
 	beadstest.Git(t, checkout, "commit", "-q", "--allow-empty", "-m", "status")
 	beadstest.Git(t, checkout, "push", "-q", "-u", "origin", "status-week")

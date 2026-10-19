@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // PeerReadMarker marks the comment that approves a release issue as a peer
@@ -24,7 +24,7 @@ type ApproveResult struct {
 // Approve posts the peer-read approval on a release issue as the person
 // running it. A person cannot approve their own release issue, and a
 // second approval by the same person posts nothing.
-func Approve(t gitlab.Tracker, project string, iid int) (ApproveResult, error) {
+func Approve(t tracker.Tracker, project string, iid int) (ApproveResult, error) {
 	r := ApproveResult{Project: project, IID: iid}
 	i, err := t.GetIssue(project, iid)
 	if err != nil {
@@ -53,7 +53,7 @@ func Approve(t gitlab.Tracker, project string, iid int) (ApproveResult, error) {
 
 // peerRead is who other than author approved the issue, by a thumbs-up
 // award or an approval comment, or nobody.
-func peerRead(t gitlab.Tracker, project string, iid int, author string) (string, error) {
+func peerRead(t tracker.Tracker, project string, iid int, author string) (string, error) {
 	awards, err := t.IssueAwards(project, iid)
 	if err != nil {
 		return "", fmt.Errorf("could not read the release issue's awards: %w", err)

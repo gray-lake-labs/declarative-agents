@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 func identity(t *testing.T) {
@@ -84,7 +84,7 @@ func TestInitWritesControlFiles(t *testing.T) {
 	if _, err := Init(InitOptions{Dir: dir}); err != nil {
 		t.Fatal(err)
 	}
-	f := gitlabtest.New()
+	f := fake.New()
 	for _, n := range []string{program.LabelsFile, program.PolicyFile} {
 		b, err := os.ReadFile(filepath.Join(dir, n))
 		if err != nil {

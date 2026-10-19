@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Policy is what admission reads from control/policy.md and
@@ -113,7 +113,7 @@ type labelsFile struct {
 
 // LoadPolicy reads the control files of the program repository at ref and
 // falls back to Defaults for each file that is absent.
-func LoadPolicy(t gitlab.Tracker, project, ref string) (Policy, error) {
+func LoadPolicy(t tracker.Tracker, project, ref string) (Policy, error) {
 	p := Defaults()
 	if project == "" {
 		return p, nil
@@ -162,7 +162,7 @@ func LoadPolicy(t gitlab.Tracker, project, ref string) (Policy, error) {
 		case string:
 			p.ManagementFilers = []string{v}
 		}
-	} else if !errors.Is(err, gitlab.ErrNotFound) {
+	} else if !errors.Is(err, tracker.ErrNotFound) {
 		return p, err
 	}
 	if b, err := t.GetFile(project, LabelsFile, ref); err == nil {
@@ -181,7 +181,7 @@ func LoadPolicy(t gitlab.Tracker, project, ref string) (Policy, error) {
 		pick("plane", &p.Planes)
 		pick("type", &p.Types)
 		pick("kind", &p.Kinds)
-	} else if !errors.Is(err, gitlab.ErrNotFound) {
+	} else if !errors.Is(err, tracker.ErrNotFound) {
 		return p, err
 	}
 	return p, nil

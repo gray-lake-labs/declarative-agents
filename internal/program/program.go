@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func init() {
@@ -250,14 +250,14 @@ func init() {
 			if err != nil {
 				return err
 			}
-			var issues []gitlab.Issue
+			var issues []tracker.Issue
 			if lintArgs.iid != 0 {
 				i, err := t.GetIssue(lintArgs.project, lintArgs.iid)
 				if err != nil {
 					return err
 				}
-				issues = []gitlab.Issue{i}
-			} else if issues, err = t.ListIssues(lintArgs.project, gitlab.IssueQuery{State: "opened", UpdatedAfter: lintArgs.since}); err != nil {
+				issues = []tracker.Issue{i}
+			} else if issues, err = t.ListIssues(lintArgs.project, tracker.IssueQuery{State: "opened", UpdatedAfter: lintArgs.since}); err != nil {
 				return err
 			}
 			var results []LintResult
@@ -329,7 +329,7 @@ func init() {
 					return err
 				}
 			}
-			in := gitlab.NewIssue{Title: fileArgs.title, Description: string(body), DueDate: fileArgs.due, Milestone: milestone,
+			in := tracker.NewIssue{Title: fileArgs.title, Description: string(body), DueDate: fileArgs.due, Milestone: milestone,
 				Labels: Labels(l.Plane, fileArgs.typ, l.Kind, l.Component)}
 			r, err := File(t, fileArgs.project, in, p, ctx.DryRun)
 			if err != nil {

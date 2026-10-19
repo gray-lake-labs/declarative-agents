@@ -65,7 +65,7 @@ type Issue struct {
 	State      string `json:"state,omitempty"`
 	StateActor string `json:"state_actor,omitempty"`
 	// Repository is the code repository the issue belongs to, the field a
-	// GitLab project path maps to (srd042 R2.4), and IID its number there,
+	// project path maps to (srd042 R2.4), and IID its number there,
 	// unique within the repository.
 	Repository string `json:"repository,omitempty"`
 	IID        int    `json:"iid,omitempty"`

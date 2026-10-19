@@ -10,10 +10,10 @@ import (
 	"github.com/magefile/mage/mg"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Integration holds the release integration targets the test suites name.
@@ -231,7 +231,7 @@ func (Integration) Program() error {
 	ns, _ := r.notes(po1, i.IID)
 	c.expect(len(ns) == 1 && strings.Contains(ns[0].Body, "Admission failed"), "lint comments: %d", len(ns))
 
-	if _, err := r.tr.UpdateIssue(po1, i.IID, gitlab.IssueUpdate{Description: &good}); err != nil {
+	if _, err := r.tr.UpdateIssue(po1, i.IID, tracker.IssueUpdate{Description: &good}); err != nil {
 		return err
 	}
 	var linted []program.LintResult

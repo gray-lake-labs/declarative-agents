@@ -3,8 +3,8 @@ package release
 import (
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 func TestNextReportsLatestAndCandidates(t *testing.T) {
@@ -49,7 +49,7 @@ func TestBreakingClassFollowsPolicy(t *testing.T) {
 }
 
 func TestPolicyLoadsReleasesAndDefinitionOfDone(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	f.AddFile("g/system", "main", "control/policy.md", []byte(`---
 id: policy
 title: Policy

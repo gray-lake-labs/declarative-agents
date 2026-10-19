@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // TagInput is one tpm release tag: the release issue holding the gate's
@@ -44,7 +44,7 @@ type gateRun struct {
 
 // latestGateRun reads the release issue's evidence events for the tag and
 // returns the most recent run.
-func latestGateRun(notes []gitlab.Note, artifact, tag string) (gateRun, bool) {
+func latestGateRun(notes []tracker.Note, artifact, tag string) (gateRun, bool) {
 	runs := map[string]*gateRun{}
 	for _, n := range notes {
 		e, ok := events.Parse(n.Body)
@@ -83,7 +83,7 @@ func first(e events.Event, key string) string {
 // greater than the artifact's latest tag (R2.2). The tag message and a
 // comment on the release issue state the class (R2.3). It runs no handoff
 // (R2.4).
-func ReleaseTag(t gitlab.Tracker, in TagInput) (TagResult, error) {
+func ReleaseTag(t tracker.Tracker, in TagInput) (TagResult, error) {
 	tag := TagName(in.Policy.Releases.TagFormat, in.Artifact, in.Version)
 	r := TagResult{Project: in.Project, Issue: in.Issue, Tag: tag, DryRun: in.DryRun}
 	if status, err := in.Git("status", "--porcelain"); err != nil {

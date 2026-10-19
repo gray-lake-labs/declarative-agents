@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // SRDDir holds a repository's SRDs; in the system repository, subsystem
@@ -32,7 +32,7 @@ type Subsystems []Subsystem
 // LoadSubsystems reads every SRD under SRDDir in the system repository at
 // ref and keeps those that declare an owner and
 // components.
-func LoadSubsystems(t gitlab.Tracker, system, ref string) (Subsystems, error) {
+func LoadSubsystems(t tracker.Tracker, system, ref string) (Subsystems, error) {
 	files, err := t.ListDir(system, SRDDir, ref)
 	if err != nil {
 		return nil, err

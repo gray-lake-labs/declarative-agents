@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 func TestPlaneAndKindFollowTheChangedPaths(t *testing.T) {
@@ -70,7 +70,7 @@ Objective issues arrive.
 `
 
 func TestDeriveFillsWhatIsNotGivenAndExplicitWins(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd010-po-1.md", []byte(subsystemFixture))
 
 	l, err := Derive(f, "g/product-owners/po-1", "g/system", "main", []string{"docs/specs/use-cases/rel01.0-uc001-x.md"}, Labelling{})
@@ -114,7 +114,7 @@ Objective issues arrive.
 `
 
 func TestLoadSubsystemsReadsMarkdown(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd010-po-1.md", []byte(subsystemFixture))
 	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd011-po-2.md", []byte(subsystemMarkdown))
 	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd012-po-3.yaml", []byte("id: srd012-po-3\nowner: ignored\ncomponents: [{name: po-3}]\n"))
@@ -133,7 +133,7 @@ func TestLoadSubsystemsReadsMarkdown(t *testing.T) {
 
 func TestSpecIssueNeedsAcceptanceCriteria(t *testing.T) {
 	p := Defaults()
-	issue := gitlab.Issue{Milestone: "m", Labels: []string{"plane::data", "kind::spec", "component::po-1"}, Description: "Rewrite the use case\n"}
+	issue := tracker.Issue{Milestone: "m", Labels: []string{"plane::data", "kind::spec", "component::po-1"}, Description: "Rewrite the use case\n"}
 	if r := strings.Join(Lint(issue, p), ";"); !strings.Contains(r, "Acceptance Criteria") || !strings.Contains(r, "Requirements") {
 		t.Fatalf("reasons: %s", r)
 	}
@@ -144,11 +144,11 @@ func TestSpecIssueNeedsAcceptanceCriteria(t *testing.T) {
 }
 
 func TestSpecIssueIsAdmittedForAnyMember(t *testing.T) {
-	f := gitlabtest.New()
-	f.Me = gitlab.User{ID: 9, Username: "developer"}
+	f := fake.New()
+	f.Me = tracker.User{ID: 9, Username: "developer"}
 	p := Defaults()
 	p.ManagementFilers = []string{"tpm-lead"}
-	in := gitlab.NewIssue{Title: "Split the use case", Milestone: "m",
+	in := tracker.NewIssue{Title: "Split the use case", Milestone: "m",
 		Description: "## Requirements\n\n1. Split F3.\n\n## Acceptance Criteria\n\n- mage audit passes (test: mage_audit; environment: local)\n",
 		Labels:      Labels("data", "", "spec", "po-1")}
 	r, err := File(f, "g/po-1", in, p, false)
@@ -158,18 +158,18 @@ func TestSpecIssueIsAdmittedForAnyMember(t *testing.T) {
 }
 
 func TestManagementIssueRefusedForNonLead(t *testing.T) {
-	f := gitlabtest.New()
-	f.Me = gitlab.User{ID: 9, Username: "developer"}
+	f := fake.New()
+	f.Me = tracker.User{ID: 9, Username: "developer"}
 	p := Defaults()
 	p.ManagementFilers = []string{"tpm-lead"}
-	in := gitlab.NewIssue{Title: "Move release 01.1", Labels: Labels("management", "", "", "system")}
+	in := tracker.NewIssue{Title: "Move release 01.1", Labels: Labels("management", "", "", "system")}
 	if _, err := File(f, "g/system", in, p, false); err == nil || !strings.Contains(err.Error(), "may not file a plane::management issue") {
 		t.Fatalf("err = %v", err)
 	}
 	if f.Writes != 0 {
 		t.Fatal("a refused issue was filed")
 	}
-	f.Me = gitlab.User{ID: 1, Username: "tpm-lead"}
+	f.Me = tracker.User{ID: 1, Username: "tpm-lead"}
 	if _, err := File(f, "g/system", in, p, false); err != nil {
 		t.Fatalf("lead refused: %v", err)
 	}

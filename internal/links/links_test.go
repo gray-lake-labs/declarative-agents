@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 func TestParseCitesReadsEveryLineAndAsk(t *testing.T) {
@@ -38,7 +38,7 @@ The reader accepts records.
 `
 
 func TestResolve(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	f.AddTag("g/system", "v1.4.0")
 	f.AddFile("g/system", "v1.4.0", "docs/srd003.md", []byte(srdMarkdown))
 	base := "https://gitlab.example.com/g/system/-/blob/"

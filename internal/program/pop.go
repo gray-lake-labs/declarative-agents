@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Git runs git in a directory and returns its standard output. Tests use a
@@ -77,7 +77,7 @@ type PopResult struct {
 // and a data issue admission does not admit. Everything it finds already in
 // place is reused, so a second pop changes nothing. dir is any directory in
 // the local checkout of the project.
-func Pop(t gitlab.Tracker, git Git, project string, iid int, dir string, p Policy, dryRun bool) (PopResult, error) {
+func Pop(t tracker.Tracker, git Git, project string, iid int, dir string, p Policy, dryRun bool) (PopResult, error) {
 	i, err := t.GetIssue(project, iid)
 	if err != nil {
 		return PopResult{}, err
@@ -106,7 +106,7 @@ func Pop(t gitlab.Tracker, git Git, project string, iid int, dir string, p Polic
 			if err := t.AssignIssue(project, iid, me); err != nil {
 				return r, err
 			}
-			if reader, ok := t.(gitlab.Reader); ok {
+			if reader, ok := t.(tracker.Reader); ok {
 				read, _ := reader.LastRead()
 				r.Provisional = read.Offline
 			}

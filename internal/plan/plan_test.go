@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
@@ -145,10 +145,10 @@ func system(t *testing.T) string {
 
 // input is the planning input over p's tracker: one objective issue in
 // g/po-1 for obj001's R2, which the aggregate reports slipped.
-func input(t *testing.T, dir string, p trackertest.Program) (Input, gitlab.Tracker) {
+func input(t *testing.T, dir string, p trackertest.Program) (Input, tracker.Tracker) {
 	t.Helper()
 	f := p.Tracker()
-	i, err := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Objective R2",
+	i, err := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Objective R2",
 		Description: "Objective\n\n<!-- tpm goals objective=obj001-reliable-agents#R2 release=01.0 -->"})
 	if err != nil {
 		t.Fatal(err)
@@ -203,7 +203,7 @@ func testPlanReleaseReturnsItemsWithoutEvidence(t *testing.T, p trackertest.Prog
 	if len(c.WithoutEvidence) != 1 || c.WithoutEvidence[0].ID != "obj002-fast-scoring#R2.1" || !slices.Equal(c.WithoutEvidence[0].Missing, []string{"environment"}) {
 		t.Fatalf("without evidence = %+v", c.WithoutEvidence)
 	}
-	planning, err := f.CreateIssue("g/system", gitlab.NewIssue{Title: "Plan release 01.1"})
+	planning, err := f.CreateIssue("g/system", tracker.NewIssue{Title: "Plan release 01.1"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // MergeResult is what merge reports.
@@ -23,7 +23,7 @@ type MergeResult struct {
 	DryRun       bool     `json:"dry_run"`
 }
 
-// Merge is delivery on the beads tracker, which has no merge requests
+// Merge is delivery on the beads tracker, which delivers by local merge
 // (srd042 R2.3): it requires the issue open, each closes open, commits of
 // its own, the corpus audit passing when docs/ changes, and another person's approval
 // of the commit it merges (srd013 R5.5), then merges the branch --no-ff
@@ -31,7 +31,7 @@ type MergeResult struct {
 // citing the issue and each issue it closes, pushes it, and closes each on
 // that merge. A branch already merged is not merged again; its issues
 // still close.
-func Merge(t gitlab.Tracker, git Git, project, issueProject string, iid int, branch, dir string, gate AuditGate, closes []string, dryRun bool) (MergeResult, error) {
+func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, gate AuditGate, closes []string, dryRun bool) (MergeResult, error) {
 	r := MergeResult{Project: project, IID: iid, Branch: branch, DryRun: dryRun}
 	if _, ok := t.(MergeCloser); !ok {
 		return r, fmt.Errorf("this tracker does not close issues on a local merge; tpm issue merge serves the beads tracker")

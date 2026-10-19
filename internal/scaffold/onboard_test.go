@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 // subsystemSRD lists one component, the repository the program already has.
@@ -38,9 +38,9 @@ Records arrive.
 | ingest | https://git.example.invalid/g/ingest | / |
 `
 
-func system(t *testing.T) *gitlabtest.Fake {
+func system(t *testing.T) *fake.Fake {
 	t.Helper()
-	f := gitlabtest.New()
+	f := fake.New()
 	f.AddFile("g/system", "main", "docs/specs/software-requirements/srd010-ingest.md", []byte(subsystemSRD))
 	return f
 }
@@ -77,7 +77,7 @@ func TestOnboardFilesOneRegistration(t *testing.T) {
 	if err != nil || !r.Registration.Filed || r.Registration.Issue == nil {
 		t.Fatalf("registration: %+v, %v", r.Registration, err)
 	}
-	issues, _ := f.ListIssues("g/system", gitlab.IssueQuery{State: "opened"})
+	issues, _ := f.ListIssues("g/system", tracker.IssueQuery{State: "opened"})
 	if len(issues) != 1 {
 		t.Fatalf("%d issues in the system repository, want 1", len(issues))
 	}
@@ -106,7 +106,7 @@ func TestOnboardFilesNoSecondRegistration(t *testing.T) {
 	if err != nil || r.Registration.Filed || !strings.Contains(r.Registration.Reason, "already lists") {
 		t.Fatalf("onboard of a listed repository: %+v, %v", r.Registration, err)
 	}
-	if issues, _ := f.ListIssues("g/system", gitlab.IssueQuery{State: "opened"}); len(issues) != 1 {
+	if issues, _ := f.ListIssues("g/system", tracker.IssueQuery{State: "opened"}); len(issues) != 1 {
 		t.Fatalf("%d registrations, want 1", len(issues))
 	}
 }

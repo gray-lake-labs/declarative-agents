@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // approvalPrefix opens the marker an approval comment carries; the commit
@@ -30,7 +30,7 @@ type ApproveResult struct {
 // R5.6). The issue's assignee cannot approve their own work, and a second
 // approval of the same commit by the same person posts nothing. branch
 // defaults to the issue's pop branch; dir is any checkout of project.
-func Approve(t gitlab.Tracker, git Git, project, issueProject string, iid int, branch, dir string) (ApproveResult, error) {
+func Approve(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string) (ApproveResult, error) {
 	r := ApproveResult{Project: project, IID: iid}
 	if issueProject != project {
 		r.IssueProject = issueProject
@@ -81,7 +81,7 @@ func Approve(t gitlab.Tracker, git Git, project, issueProject string, iid int, b
 // assignees or, for an issue nobody took, other than merger (srd013 R5.5).
 // When nobody did, the error names what is missing, and the commit an
 // earlier approval named, if any.
-func approval(t gitlab.Tracker, issueProject string, iid int, branch, tip, merger string) (string, error) {
+func approval(t tracker.Tracker, issueProject string, iid int, branch, tip, merger string) (string, error) {
 	i, err := t.GetIssue(issueProject, iid)
 	if err != nil {
 		return "", err
