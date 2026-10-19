@@ -16,7 +16,7 @@ running.
 The reports subcommands keep each report in a fixed, checkable shape and
 aggregate a week or a sprint of them against the tracker. The weekly
 sprint update and the stakeholder update are recurring audit issues worked
-by the inner loop (implement, do-work, merge request); these
+by the inner loop (implement, do-work, merge); these
 subcommands are what those issues read and what their acceptance criteria
 check, so a roll-up starts from computed candidates instead of a pile of
 prose.
@@ -114,12 +114,12 @@ Subcommands are in the tpm group reports, honour --json and --dry-run, and never
 <!-- req: R6.1 -->
 ### R6.1
 
-The sprint update is a recurring issue (srd001 R8) per member per week. Its Requirements name tpm standup activity, fetch, and inbox (srd010) as the facts to draft from; its Acceptance Criteria are a report in the fixed shape that passes tpm reports validate, written by the member about their own work only. It closes by merge request, and implement re-creates it for the next week.
+The sprint update is a recurring issue (srd001 R8) per member per week. Its Requirements name tpm standup activity, fetch, and inbox (srd010) as the facts to draft from; its Acceptance Criteria are a report in the fixed shape that passes tpm reports validate, written by the member about their own work only. It closes by its merge, and implement re-creates it for the next week.
 
 <!-- req: R6.2 -->
 ### R6.2
 
-The stakeholder update is a recurring issue per lead per period. Its Requirements name tpm reports aggregate with the tracker check and the previous roll-up's open risks; its Acceptance Criteria are a summary, an updated risk list, and a deck rendered by tpm reports deck, with no comparison or ranking of people. The lead approves the outline as a review on the merge request before the summary is written.
+The stakeholder update is a recurring issue per lead per period. Its Requirements name tpm reports aggregate with the tracker check and the previous roll-up's open risks; its Acceptance Criteria are a summary, an updated risk list, and a deck rendered by tpm reports deck, with no comparison or ranking of people. The lead approves the outline on the summary's issue before the summary is written.
 
 <!-- req: R6.3 -->
 ### R6.3
@@ -137,7 +137,7 @@ For each person the configuration lists, ensures one status issue (the sprint up
 <!-- req: R7.2 -->
 ### R7.2
 
-Is idempotent: a second run in the same week files nothing. The scheduled CI job runs it each week, so the next instance follows the merge request that closed the last one.
+Is idempotent: a second run in the same week files nothing. The scheduled CI job runs it each week, so the next instance follows the merge that closed the last one.
 
 <!-- req: R8 -->
 ## R8 - tpm reports week
@@ -145,7 +145,7 @@ Is idempotent: a second run in the same week files nothing. The scheduled CI job
 <!-- req: R8.1 -->
 ### R8.1
 
-For a project and a person, returns the project's open objective issues with their due dates and the person's activity since the ISO week began: merge requests merged and issues closed. These are the facts the status issue's guided script drafts from.
+For a project and a person, returns the project's open objective issues with their due dates and the person's activity since the ISO week began: branches merged and issues closed. These are the facts the status issue's guided script drafts from.
 
 <!-- req: R9 -->
 ## R9 - Weekly status issue
@@ -168,7 +168,7 @@ Its Requirements section is the guided script the owner works with implement: fo
 <!-- req: R9.4 -->
 ### R9.4
 
-It closes by merge request; the reports repository's scheduled tpm reports status-issues run recurs it with the next week's due date (R7, srd001 R8.3).
+It closes by its merge; the reports repository's scheduled tpm reports status-issues run recurs it with the next week's due date (R7, srd001 R8.3).
 
 <!-- req: R10 -->
 ## R10 - Summary on a system release
@@ -181,12 +181,12 @@ A release tag in the system repository triggers a CI pipeline that runs tpm repo
 <!-- req: R10.2 -->
 ### R10.2
 
-The pipeline opens a merge request in the reports repository with the computed aggregate and deck, linked to the open stakeholder update issue (R6.2), and spends no model tokens. When the lead works that issue, the model drafts the summary prose from the reports and the aggregate and iterates on it with the lead (design.md D10). The lead's review is the approval; nothing is published unreviewed.
+The pipeline pushes a branch to the reports repository with the computed aggregate and deck and files one issue for its review, linked to the open stakeholder update issue (R6.2), and spends no model tokens. When the lead works that issue, the model drafts the summary prose from the reports and the aggregate and iterates on it with the lead (design.md D10). The lead's review is the approval; nothing is published unreviewed.
 
 <!-- req: R10.3 -->
 ### R10.3
 
-Run twice on the same tag, the pipeline opens no second merge request.
+Run twice on the same tag, the pipeline pushes no second branch and files no second issue.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -249,7 +249,7 @@ deck renders an approved summary within the slide limit; every subcommand honour
 <!-- ac: AC5 -->
 ### AC5
 
-The sprint update and the stakeholder update exist only as recurring issues whose acceptance criteria name validate, aggregate, and deck; each closes by merge request and is re-created for the next period; an actionable signal becomes a pushed issue.
+The sprint update and the stakeholder update exist only as recurring issues whose acceptance criteria name validate, aggregate, and deck; each closes by its merge and is re-created for the next period; an actionable signal becomes a pushed issue.
 
 <!-- field: traces -->
 #### Traces
@@ -286,7 +286,7 @@ Each listed person receives one weekly status issue due the day after the remind
 <!-- ac: AC8 -->
 ### AC8
 
-A system release tag runs aggregate and deck in CI and opens one merge request with the computed aggregate and deck in the reports repository, linked to the stakeholder update issue; the summary prose is drafted by the model only during the lead's review; a second run on the same tag opens none.
+A system release tag runs aggregate and deck in CI and pushes one branch with the computed aggregate and deck to the reports repository, with one issue for its review, linked to the stakeholder update issue; the summary prose is drafted by the model only during the lead's review; a second run on the same tag opens none.
 
 <!-- field: traces -->
 #### Traces

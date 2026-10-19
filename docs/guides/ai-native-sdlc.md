@@ -33,7 +33,7 @@ flowchart LR
     O[outer-loop skill] -->|specify| I
     A[recurring audit] -->|due| I
     I -->|implement| W[worktree, sub-issues if needed]
-    W -->|do-work| MR[merge request]
+    W -->|do-work| MR[reviewed merge]
     MR -->|review and merge| M[default branch]
     M -->|closes| I
     M -->|tpm release| REL[version tag]
@@ -51,7 +51,7 @@ it. The tracker holds the plan, so no window has to.
 | Push | Anyone, or an outer-loop skill on their answer | `specify` | One item with plane, kind, component, Requirements, Acceptance Criteria, Design Decisions, and an estimate, filed unassigned |
 | Pop | The person who will do it | `implement` | The item assigned to that person and no one else, a fresh worktree from the default branch, and sub-issues when the item is larger than one pass |
 | Work | The assignee, driving an agent | `do-work` | Each unit built against its Acceptance Criteria and committed with its requirements; actual size logged against the estimate |
-| Gate | Another person | merge request | Review against the definition of done |
+| Gate | Another person | approval, then merge | Review against the definition of done |
 | Close | The merge | closing lines | The item and its sub-issues closed; cycle time recorded |
 | Release | The producer, when others depend on it | `tpm release gate`, then `tpm release tag` | A version tag behind the release gate, which handoff routes downstream |
 
@@ -80,17 +80,17 @@ person the findings that landed on their work overnight.
 
 ## The definition of done
 
-Every merge request is approved by a person other than its author. No kind
+Every merge is approved by a person other than its author. No kind
 and no size is exempt. The reviewer is not checking what the tests check; the
 reviewer looks for what passes the tests and is still wrong: a pattern that
 will not scale, a security hole, drift from the architecture, a shortcut the
-acceptance criteria did not forbid. The merge request lists what the reviewer
-was asked to look at.
+acceptance criteria did not forbid. The issue's Requirements and
+Acceptance Criteria are what the reviewer reads the change against.
 
 The rest of the definition of done is the item's own Acceptance Criteria,
 and each criterion names the test that proves it and the environment where
 that proof counts. A component item is done when its tests pass in the
-local environment and its merge request merges. An objective is done only
+local environment and its branch merges. An objective is done only
 when the tests its requirements name pass in the environment it names, on a
 recorded pinned set, which track-goals records as evidence; closing the
 objective's items is not enough. By kind, the criteria usually say:
@@ -120,7 +120,7 @@ only when the previous environment's suites passed, on the trigger the
 receiving environment declares. Handoff to a customer's R&D environment is
 a person's approval, and the test software ships with the release.
 
-Because agents produce merge requests faster than people read them, review is
+Because agents produce changes faster than people read them, review is
 the bottleneck of the loop. The answer is to make review faster, through
 small items, clear acceptance criteria, and a stated reviewer focus, never to
 make it rarer.
@@ -128,7 +128,7 @@ make it rarer.
 ## Measures
 
 Velocity is cycle time from an objective planned to met, and from item
-filed to merge request merged; rework is met objectives reopened by failing
-evidence, items reopened, and merge requests reverted. All are read from the
+filed to branch merged; rework is met objectives reopened by failing
+evidence, items reopened, and merges reverted. All are read from the
 ledger and the tracker by component; nobody types them, and nothing is
 measured per person.

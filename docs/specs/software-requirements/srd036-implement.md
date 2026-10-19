@@ -10,20 +10,20 @@ An issue that is worked on the default branch, or in a checkout shared
 with other work, mixes changes nobody can review apart, and closing it by
 hand says nothing about what changed. The process has one path from an
 issue to a change: the person who works it takes it, works on its own
-branch in its own worktree, and the merge request that lands the branch
+branch in its own worktree, and the merge that lands the branch
 closes it.
 
 implement is that path. tpm claims the issue for the caller and opens its
 branch and worktree (srd013 R7); the work in the worktree is the person's
-or their agent's; tpm opens the merge request that closes the issue
+or their agent's; tpm merges the branch, which closes the issue
 (srd013 R5). A change under docs/, a design change or a planning change,
-passes the corpus gate before its merge request opens (srd034 R2.2).
+passes the corpus gate before it merges (srd034 R2.2).
 
 <!-- field: goals -->
 ## Goals
 
 - G1: Every issue is worked on its own branch in its own worktree, by the person who took it.
-- G2: Only the merge of its merge request closes the issue.
+- G2: Only the merge of its branch closes the issue.
 - G3: A change under docs/ merges only through the corpus gate, whatever the issue's plane or kind.
 
 <!-- req: R1 -->
@@ -108,7 +108,7 @@ Popping an open, admitted issue assigns only the caller and returns its branch a
 <!-- ac: AC2 -->
 ### AC2
 
-Finishing opens one merge request that closes the issue; an issue whose branch changes docs/ opens it only when mage audit passes; the skill closes nothing itself.
+Finishing merges the branch once, which closes the issue; an issue whose branch changes docs/ merges it only when mage audit passes; the skill closes nothing itself.
 
 <!-- field: traces -->
 #### Traces

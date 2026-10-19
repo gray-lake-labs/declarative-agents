@@ -16,7 +16,7 @@ An agent is a session that runs one skill for the person who started it. It read
 <!-- field: ownership_rules -->
 ## Ownership rules
 
-A change the Retrospective keeps is a plane::control issue worked against policy.md through the inner loop and closed by a reviewed merge request (srd001 R2.2, srd033). There is no separate path for changing a rule.
+A change the Retrospective keeps is a plane::control issue worked against policy.md through the inner loop and closed by a reviewed merge (srd001 R2.2, srd033). There is no separate path for changing a rule.
 
 <!-- field: overall_findings -->
 ## Overall findings
@@ -42,7 +42,7 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
        - "commits with the unit's record embedded": null
        - "and logs actual against estimated size; on GitLab it arrives with epics after release 00.0": null
     1. - skill: implement (finish)
-       - does: opens the merge request that closes the issue
+       - does: merges the branch, which closes the issue
        - "gated by mage audit for a change under docs/; a reviewer merges it": null
     1. - skill: implement (release issue)
        - does: runs tpm release next
@@ -93,8 +93,8 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
 
 | id | rule |
 | --- | --- |
-| A1 | One inner loop for all work. Code, architecture documents, OpenAPI schemas, infrastructure (Terraform, Helm), papers, research, and reviews all run push, pop, do-work, merge request. The issue states the deliverable and its acceptance criteria; do-work needs no extension per kind of deliverable. |
+| A1 | One inner loop for all work. Code, architecture documents, OpenAPI schemas, infrastructure (Terraform, Helm), papers, research, and reviews all run push, pop, do-work, merge. The issue states the deliverable and its acceptance criteria; do-work needs no extension per kind of deliverable. |
 | A2 | Scripts (tpm subcommands) are tools the loops call, not agents. Event-driven scripts (lint, track-goals, handoff) run in CI on tracker events; they are tools the loops depend on, not agents either. |
 | A3 | People direct agents; agents never direct other agents. Work moves between sessions only through the tracker, as issues, comments, links, and tags, under the same rules as everyone else. |
-| A4 | An agent never assigns work to anyone but the person who ran implement, never approves anything, and never changes a rule except by a merge request a person approves. Taking, approving, and rule changes are the three acts the process reserves for people. |
+| A4 | An agent never assigns work to anyone but the person who ran implement, never approves anything, and never changes a rule except by a merge a person approves. Taking, approving, and rule changes are the three acts the process reserves for people. |
 | A5 | The kind label routes pull: it decides who takes an issue, whether it is offered, and how it is counted (srd001 R20.4). It does not change how the work runs. |

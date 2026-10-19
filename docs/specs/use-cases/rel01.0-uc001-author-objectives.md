@@ -11,7 +11,7 @@ test_suite: test-rel01.0-objectives
 
 The technical program manager writes the program's objectives for the
 coming periods as an objective document in the system repository and
-merges it through the inner loop. The merge request runs mage audit, which
+merges it through the inner loop. The merge runs mage audit, which
 runs the parent's specification-critic corpus-audit agent over the
 repository; a malformed document does not merge. The merged document is
 what the next release plans from and what objective issues cite.
@@ -31,7 +31,7 @@ The program agrees what it commits to for the next horizon of periods.
 
 - The system repository carries the docs/ corpus, docs/corpus-charter.yaml, and docs/external-pins.yaml (design.md D7).
 - The parent release that docs/external-pins.yaml pins is available in the clone cache docs/external-checkouts.yaml names.
-- CI in the system repository runs mage audit on merge requests that change docs/.
+- The system repository runs mage audit before every merge that changes docs/.
 
 <!-- field: flow -->
 ## Flow
@@ -39,9 +39,9 @@ The program agrees what it commits to for the next horizon of periods.
 - F1: The technical program manager files an issue for the objectives and pops it with implement.
 - F2: Model step (structure): the model turns the technical program manager's objectives conversation into docs/specs/objectives/objNNN-short-name.md, an SRD in the parent's format, with a problem, goals, one requirement group per objective with a due item in its applicability, numbered items, non_goals, acceptance criteria naming tests and an environment, the owner role and the horizon in its context, and status to_be_agreed.
 - F3: Model step (iterate): the model revises the document with the technical program manager until they accept it; the status moves to agreed when the program agrees it.
-- F4: mage audit runs the gate tests and the specification-critic corpus-audit agent of the pinned parent release, locally and in CI on the merge request; the agent runs deterministic checks and spends no model tokens.
+- F4: mage audit runs the gate tests and the specification-critic corpus-audit agent of the pinned parent release, locally and before the merge; the agent runs deterministic checks and spends no model tokens.
 - F5: A missing required field, an acceptance criterion tracing an absent item, or an unpinned reference fails the audit and blocks the merge.
-- F6: The merge request merges with the audit passing; the document's item ids are stable from then on.
+- F6: The branch merges with the audit passing; the document's item ids are stable from then on.
 
 <!-- field: touchpoints -->
 ## Touchpoints
@@ -84,7 +84,7 @@ A changed objective is added as a new item or document and the old one retired; 
 <!-- sc: S3 -->
 ### S3
 
-mage audit runs the specification-critic agent on every merge request that changes docs/, fails on a malformed objective document, and blocks its merge.
+mage audit runs the specification-critic agent before every merge that changes docs/, fails on a malformed objective document, and blocks its merge.
 
 <!-- field: traces -->
 #### Traces

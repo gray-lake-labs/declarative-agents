@@ -77,7 +77,7 @@ The corpus audit gates objective documents in every repository that carries them
 <!-- req: R2.2 -->
 ### R2.2
 
-Every repository that carries objective documents runs the corpus audit in CI on each merge request that changes docs/, and a failing audit blocks the merge.
+Every repository that carries objective documents runs the corpus audit on each change to docs/ before it merges, and a failing audit blocks the merge.
 
 <!-- req: R2.3 -->
 ### R2.3
@@ -241,7 +241,7 @@ An objective document at docs/specs/objectives/ has every field the objective do
 <!-- ac: AC2 -->
 ### AC2
 
-The corpus audit fails on a malformed objective document, runs in CI on every merge request that changes docs/, and is the release gate check of a documents-only repository.
+The corpus audit fails on a malformed objective document, runs before every merge that changes docs/, and is the release gate check of a documents-only repository.
 
 <!-- field: traces -->
 #### Traces

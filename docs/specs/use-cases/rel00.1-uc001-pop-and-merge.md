@@ -1,6 +1,6 @@
 ---
 id: rel00.1-uc001-pop-and-merge
-title: A Developer Pops an Issue into a Worktree and Its Merge Request Closes It
+title: A Developer Pops an Issue into a Worktree and Its Merge Closes It
 status: implemented
 priority: P1
 test_suite: test-rel00.1-pop
@@ -11,7 +11,7 @@ test_suite: test-rel00.1-pop
 
 A Developer takes an admitted issue with implement. tpm claims it for them
 alone and opens its own branch and worktree; the work is done and
-committed there; tpm opens the merge request that closes the issue, and a
+committed there; tpm merges the branch, which closes the issue, and a
 reviewer merges it. The skill asks nothing and closes nothing itself.
 
 <!-- field: actor -->
@@ -41,7 +41,7 @@ An admitted issue the Developer chooses to work.
 
 | id | target | reason |
 | --- | --- | --- |
-| T1 | [srd013-program](../software-requirements/srd013-program.md) [R5.1](../software-requirements/srd013-program.md#r51), [R5.2](../software-requirements/srd013-program.md#r52), [R7.1](../software-requirements/srd013-program.md#r71), [R7.2](../software-requirements/srd013-program.md#r72), [R7.3](../software-requirements/srd013-program.md#r73), [R7.4](../software-requirements/srd013-program.md#r74) | S1, S2, and S3 trace pop and the merge request. |
+| T1 | [srd013-program](../software-requirements/srd013-program.md) [R5.1](../software-requirements/srd013-program.md#r51), [R5.2](../software-requirements/srd013-program.md#r52), [R7.1](../software-requirements/srd013-program.md#r71), [R7.2](../software-requirements/srd013-program.md#r72), [R7.3](../software-requirements/srd013-program.md#r73), [R7.4](../software-requirements/srd013-program.md#r74) | S1, S2, and S3 trace pop and the merge. |
 | T2 | [srd036-implement](../software-requirements/srd036-implement.md) [R1.1](../software-requirements/srd036-implement.md#r11), [R2.1](../software-requirements/srd036-implement.md#r21), [R2.2](../software-requirements/srd036-implement.md#r22), [R2.3](../software-requirements/srd036-implement.md#r23), [R3.1](../software-requirements/srd036-implement.md#r31), [R3.3](../software-requirements/srd036-implement.md#r33), [R4.1](../software-requirements/srd036-implement.md#r41), [R4.2](../software-requirements/srd036-implement.md#r42) | S1, S2, and S3 trace the skill. |
 | T3 | [srd041-states](../software-requirements/srd041-states.md) [R7.1](../software-requirements/srd041-states.md#r71), [R9.1](../software-requirements/srd041-states.md#r91) | S1 and S2 trace closing and the assignee rule. |
 | T4 | [srd013-program](../software-requirements/srd013-program.md) [AC4](../software-requirements/srd013-program.md#ac4), [AC7](../software-requirements/srd013-program.md#ac7) | S1 and S2 trace these acceptance criteria. |
@@ -88,7 +88,7 @@ The worktree pop opens carries the skills installed in the checkout, so the issu
 <!-- sc: S2 -->
 ### S2
 
-The merge request opened by tpm closes the issue when it merges; the skill closes nothing itself and asks nothing.
+The merge tpm makes closes the issue; the skill closes nothing itself and asks nothing.
 
 <!-- field: traces -->
 #### Traces

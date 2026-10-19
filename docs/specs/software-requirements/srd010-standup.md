@@ -117,7 +117,7 @@ tpm standup block sets blocked with the given note as a comment; tpm standup unb
 <!-- req: R7.4 -->
 ### R7.4
 
-tpm standup done closes an issue only when its assignee has no merge request open for it and the issue's kind has no merge finishing condition (question, handoff with a recorded decision); every other close is by merge (srd041 R9.3).
+tpm standup done closes an issue only when its assignee has no unmerged branch for it and the issue's kind has no merge finishing condition (question, handoff with a recorded decision); every other close is by merge (srd041 R9.3).
 
 <!-- req: R8 -->
 ## R8 - tpm standup adhoc

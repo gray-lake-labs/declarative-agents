@@ -98,7 +98,7 @@ Runs on-merge for every merged request and on-release for every release tag in t
 <!-- req: R5.1 -->
 ### R5.1
 
-Every issue handoff creates carries a handoff marker naming the merge request or tag that caused it. Before creating, handoff searches the target project for that marker and consumer and skips creation when it exists.
+Every issue handoff creates carries a handoff marker naming the merge or tag that caused it. Before creating, handoff searches the target project for that marker and consumer and skips creation when it exists.
 
 <!-- req: R5.2 -->
 ### R5.2

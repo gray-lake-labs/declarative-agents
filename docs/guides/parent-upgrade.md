@@ -86,7 +86,7 @@ corpus claiming a provenance nobody checked.
 
 8. **Verify.** A green audit is not green tests: run `go test ./...` and
    `mage regression:all`, whose rig seeds a Markdown road map and subsystem
-   SRDs, and record both in the bump's merge request. A bump that cannot
+   SRDs, and record both in the bump's merged change. A bump that cannot
    reach the rig says so there rather than leaving it implied.
 
 ## Recurrence

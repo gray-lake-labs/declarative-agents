@@ -77,7 +77,7 @@ docs/ directory with SRDs and a road-map, checked by the same audit.
 |---|---|---|---|
 | System | Technical program manager | System SRDs, interface YAMLs, and the subsystem SRDs in the system repository | System tests pass on the pinned set in the final environment |
 | Subsystem | Product Owner | Requirements that satisfy its objectives; the local road-map | Its requirements' tests pass in the environment each objective names |
-| Component | Developers | Issues with make-work, then code through push, pop, and do-work | Component tests pass; the merge request is reviewed and merged |
+| Component | Developers | Issues with make-work, then code through push, pop, and do-work | Component tests pass; the branch is approved and merged |
 | Test subsystem | Scrum Master | SRDs for environments, pipelines, and suites | Known-good sets pass and known-bad sets fail |
 
 Layout is declared, not inferred. A subsystem SRD in the system repository
@@ -85,7 +85,7 @@ lists its components by repository URL and path, and each environment is an
 SRD in the test-subsystem repository. Repositories reference each other only
 by URLs pinned to a release tag, so a citation never drifts under its reader.
 
-![The levels of the extended system and who owns each. The extended system holds the system, owned by the technical program manager, and beside it the test subsystem, owned by the Scrum Master. The system holds the system SRDs, which say what the system must do and which subsystem satisfies each requirement; the interface YAMLs, the contracts subsystems implement and contract tests are generated from; and two subsystems, each owned by a Product Owner, done when their requirements pass in the named environment. Each subsystem holds components named by repository URL and path, such as group/ingest and group/platform:/cmd/agent, written by Developers and done when component tests pass and a person approved the merge request. Subsystems implement the interfaces, and their requirements cite system requirements pinned to a release tag. The test subsystem holds the environments (local, dev, staging, production PoC, customer R&D, each an SRD with its trigger and suites) and the suites and pipelines (regression, contract, install, and upgrade tests, shipped with the release); it generates contract tests from the interfaces and runs every pinned set of the system, posting the evidence.](../../figures/levels.png)
+![The levels of the extended system and who owns each. The extended system holds the system, owned by the technical program manager, and beside it the test subsystem, owned by the Scrum Master. The system holds the system SRDs, which say what the system must do and which subsystem satisfies each requirement; the interface YAMLs, the contracts subsystems implement and contract tests are generated from; and two subsystems, each owned by a Product Owner, done when their requirements pass in the named environment. Each subsystem holds components named by repository URL and path, such as group/ingest and group/platform:/cmd/agent, written by Developers and done when component tests pass and a person approved the merge. Subsystems implement the interfaces, and their requirements cite system requirements pinned to a release tag. The test subsystem holds the environments (local, dev, staging, production PoC, customer R&D, each an SRD with its trigger and suites) and the suites and pipelines (regression, contract, install, and upgrade tests, shipped with the release); it generates contract tests from the interfaces and runs every pinned set of the system, posting the evidence.](../../figures/levels.png)
 
 Done is evidence. Every acceptance criterion names the test that proves it
 and the environment where that proof counts. The environments form one
@@ -97,13 +97,13 @@ triggered as each environment's SRD declares; handoff to a customer is a
 person's approval, and the test software ships with the release so the
 customer can run it.
 
-![The environment chain, from a developer's machine to a customer's R&D. Our environments run left to right: local proves the component works with unit and component tests, run by the Developer and by CI on every merge request; dev proves subsystems and the system work on a fresh install with install, contract, and regression tests on each component release; staging proves one subsystem's release upgrades a running system, on each subsystem release or nightly; production PoC proves the same upgrade path holds under real use, once a pinned set is green in staging. A green production PoC goes to a handoff approval, where a person decides the pinned set, its evidence, and its test software are ready. Handoff crosses into customer R&D: their dev environment proves it installs and upgrades on their infrastructure and data, using our suites run by them, with evidence coming back to our objective; their staging and production are beyond the handoff.](../../figures/environments.png)
+![The environment chain, from a developer's machine to a customer's R&D. Our environments run left to right: local proves the component works with unit and component tests, run by the Developer and before every merge; dev proves subsystems and the system work on a fresh install with install, contract, and regression tests on each component release; staging proves one subsystem's release upgrades a running system, on each subsystem release or nightly; production PoC proves the same upgrade path holds under real use, once a pinned set is green in staging. A green production PoC goes to a handoff approval, where a person decides the pinned set, its evidence, and its test software are ready. Handoff crosses into customer R&D: their dev environment proves it installs and upgrades on their infrastructure and data, using our suites run by them, with evidence coming back to our objective; their staging and production are beyond the handoff.](../../figures/environments.png)
 
 What is left for people runs in two loops. The inner loop is how any one
 item gets done, the same for every role and every kind of work: `make-work`
 turns a plan into issues, `specify` files an issue with its
 Requirements, Acceptance Criteria, and Design Decisions, `implement`
-takes it into a worktree, `do-work` builds it, a merge request reviewed by
+takes it into a worktree, `do-work` builds it, a merge approved by
 another person closes it, and `tpm release tag` tags a release once its
 gate passed. The inner
 loop is described in [ai-native-sdlc.md](ai-native-sdlc.md). Audits are
@@ -127,7 +127,7 @@ ledger: comment events record when it was planned, every piece of evidence
 (requirement, environment, version, result), and when it was met. Anyone
 can replay those events to the objective's state. A rule change from the
 retrospective is a control-plane issue like any other, popped, worked
-against `policy.md`, and merged by a reviewed merge request.
+against `policy.md`, and merged by a reviewed merge.
 
 When a component releases a version of a shared artifact, the release
 creates the work its consumers owe. Consumers are the repositories that cite
@@ -156,13 +156,13 @@ role works items through the same inner loop, so a Product Owner refining a
 specification and a Developer changing a Helm chart run the same push, pop,
 do-work, and merge. Agents never direct other agents, never assign work to
 anyone but the person who popped it, never approve anything, and never
-change a rule except by a merge request a person approves; the
+change a rule except by a merge a person approves; the
 [agents semantic model](../specs/semantic-models/agents.md) states these
 rules. The one relationship between roles that is not mediated by the
 tracker is the push of intent: the owner of each level pushes objectives to the level below,
 citing the requirements they must satisfy at a release tag.
 
-![One three-week release cycle, read left to right, one row per role. Technical program manager: 1, plan picks the system requirements the next release will hold; 2, tasks pushes one objective issue per subsystem and to the test subsystem, citing requirements pinned to the tag. Product Owner: 3, writes requirements with an agent through push, pop, and do-work, each criterion naming its test and environment; 4, plan places them in a release of the subsystem's road-map and posts planned on the objective. Developers: 5, make-work turns the planned release into issues; 6, push, pop, and do-work build each issue, a person reviews every merge request, and local tests are the first evidence; 7, release-push tags the component release. Scrum Master: 8, promotion by CI/CD installs the pinned set in dev, upgrades it in staging and production PoC, and runs the suites; 9, track-goals nightly posts evidence on each objective. The objective issue is the ledger of planned, evidence, and met; 10, sprint-review judges the Increment against it at the end of the period, and unmet objectives move to the next release.](../../figures/release-cycle.png)
+![One three-week release cycle, read left to right, one row per role. Technical program manager: 1, plan picks the system requirements the next release will hold; 2, tasks pushes one objective issue per subsystem and to the test subsystem, citing requirements pinned to the tag. Product Owner: 3, writes requirements with an agent through push, pop, and do-work, each criterion naming its test and environment; 4, plan places them in a release of the subsystem's road-map and posts planned on the objective. Developers: 5, make-work turns the planned release into issues; 6, push, pop, and do-work build each issue, a person approves every merge, and local tests are the first evidence; 7, release-push tags the component release. Scrum Master: 8, promotion by CI/CD installs the pinned set in dev, upgrades it in staging and production PoC, and runs the suites; 9, track-goals nightly posts evidence on each objective. The objective issue is the ledger of planned, evidence, and met; 10, sprint-review judges the Increment against it at the end of the period, and unmet objectives move to the next release.](../../figures/release-cycle.png)
 
 The rest of this page takes one column at a time, from the slowest to the
 fastest, and one accountability at a time within it, with a diagram wherever
@@ -326,7 +326,7 @@ sequenceDiagram
     S->>T: specify, one plane::control issue with current and proposed values
     Note over Team,T: the policy changes only through the inner loop
     Team->>S: implement and do-work on the issue
-    S->>T: merge request changing the staging environment SRD
+    S->>T: reviewed merge changing the staging environment SRD
     Rev->>T: approves and merges
 ```
 
@@ -354,7 +354,7 @@ sequenceDiagram
     Dev->>S: implement on this week's sprint update item
     S->>T: tpm standup activity, fetch, and inbox for the week
     S->>S: do-work drafts the report, tpm reports validate passes
-    S->>T: merge request with the report, next week's item re-created
+    S->>T: reviewed merge of the report, next week's item re-created
     Lead->>S: implement on the stakeholder update item
     S->>T: tpm reports aggregate over the ledger
     S->>T: summary, risks, and deck merged after the outline is approved
@@ -470,7 +470,7 @@ sequenceDiagram
     loop each unit
         S->>S: build against its acceptance criteria, commit with its requirements
     end
-    S->>T: merge request; local tests run and are recorded as evidence
+    S->>T: reviewed merge; local tests run and are recorded as evidence
     R->>T: reviews what tests cannot see, approves
     R->>T: merges
     T-->>T: issue and sub-issues closed by the merge
@@ -502,7 +502,7 @@ sequenceDiagram
     CI->>S: tpm goals run
     C->>S: daily-scrum shows the consume issue
     C->>S: implement, then do-work
-    S->>T: merge closes it; the citation moves to v2.0.0 by reviewed merge request
+    S->>T: merge closes it; the citation moves to v2.0.0 by reviewed merge
     CI->>S: tpm handoff on-merge
     S->>T: downstream-done event on the release issue, mentions P
 ```

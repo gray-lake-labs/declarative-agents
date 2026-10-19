@@ -63,8 +63,8 @@ Table 3: Practices to adopt, in order.
 | Practice | In the playbook | For us |
 |---|---|---|
 | Evals of the agent configuration | 20 to 50 real tasks with accepted outcomes, run nightly and on every change to `CLAUDE.md`, skills, or hooks; configuration changes gated on pass rate; every incident becomes a permanent case | Extend the GitLab regression rig, which tests the tpm CLI and the skills' deterministic parts, to run sessions with our skills on recorded tasks and gate skill changes on the result |
-| An agent review pass with an enforced human approval | `REVIEW.md` defines bug, security, and compliance passes; findings never approve or block; a code owner must approve; the authoring agent never can | A merge request job in the common CI of infrastructure/gitlab, under a service account, plus a Premium approval rule |
-| Guardrails on the session | Hooks for rules that must always hold, managed settings engineers cannot disable, an OS sandbox, credentials denied to the agent | Open; skills are advisory, so any rule we rely on needs a hook or a merge request re-check behind it |
+| An agent review pass with an enforced human approval | `REVIEW.md` defines bug, security, and compliance passes; findings never approve or block; a code owner must approve; the authoring agent never can | A review pass run before tpm issue merge under its own identity, with the merge's approval rule (srd013 R5.5) as the enforced human approval |
+| Guardrails on the session | Hooks for rules that must always hold, managed settings engineers cannot disable, an OS sandbox, credentials denied to the agent | Open; skills are advisory, so any rule we rely on needs a hook or a re-check at merge behind it |
 | A loop from production signals to new work | Deterministic detection on a rolling baseline; log, diagnose, or act through a pull request by band; the agent writes the next `intent.md` | Open; our audits watch evidence age and blockers, not production signals; this belongs with the platform's observability subsystem |
 
 The first two are cheap and build on what exists, so we take them first.
@@ -81,4 +81,4 @@ only the handoff to customer R&D. That is acceptable while production PoC is
 a proof of concept. Before it carries real operations, promotion into it
 needs a person's approval, and we should decide where that approval lives:
 in the promotion pipeline, in the environments repository as a reviewed
-merge request, or in the environment's SRD as its trigger.
+merge, or in the environment's SRD as its trigger.

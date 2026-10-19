@@ -6,7 +6,7 @@ title: "Definition of done: evidence in a named environment"
 <!-- field: problem -->
 ## Problem
 
-Agents produce merge requests faster than people read them, and an issue
+Agents produce changes faster than people read them, and an issue
 that closes says only that someone stopped working on it. Some artifacts
 pass every unit test and still fail where they run: a schema that compiles
 but breaks a consumer, a subsystem that installs cleanly but not as an
@@ -150,7 +150,7 @@ Gate definitions live only in the policy file and in environment SRDs. A script 
 <!-- req: R6.2 -->
 ### R6.2
 
-Changing a gate is a plane::control change (srd001 R2): an issue and a reviewed merge request.
+Changing a gate is a plane::control change (srd001 R2): an issue and a reviewed merge.
 
 <!-- req: R6.3 -->
 ### R6.3
@@ -264,7 +264,7 @@ Gate definitions exist only in policy and environment SRDs, a gate change goes t
 <!-- ac: AC7 -->
 ### AC7
 
-Every merge request tpm opens lists what its reviewer is asked to look at.
+tpm merges no change without another person's approval of the exact commit it merges (srd013 R5.5).
 
 <!-- field: traces -->
 #### Traces

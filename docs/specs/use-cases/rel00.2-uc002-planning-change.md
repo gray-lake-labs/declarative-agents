@@ -38,7 +38,7 @@ A change to a planning document, or an objective issue received.
 - F2: Model step (structure): the model turns the request into the issue body.
 - F3: tpm sets plane::management, refuses the issue when the person is not a lead, and files it unassigned; it never enters the backlog.
 - F4: The lead, or for an objective issue the receiving Product Owner, pops it and changes the documents in the worktree.
-- F5: implement runs mage audit and opens the merge request only when it passes; the merge closes the issue.
+- F5: implement runs mage audit and merges only when it passes; the merge closes the issue.
 
 <!-- field: touchpoints -->
 ## Touchpoints
@@ -76,7 +76,7 @@ A request naming a planning document becomes a plane::management issue filed by 
 <!-- sc: S2 -->
 ### S2
 
-The lead or the receiving Product Owner pops the issue, and its merge request opens only through mage audit.
+The lead or the receiving Product Owner pops the issue, and its branch merges only through mage audit.
 
 <!-- field: traces -->
 #### Traces

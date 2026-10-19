@@ -134,7 +134,7 @@ The set of repositories that cite an interface by pinned URL is that interface's
 <!-- req: R5.5 -->
 ### R5.5
 
-Moving a reference to a newer tag is an edit made through the inner loop, with the old and new tags in the merge request, so the change of what is cited is reviewed.
+Moving a reference to a newer tag is an edit made through the inner loop, with the old and new tags in the merged change, so the change of what is cited is reviewed.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -198,7 +198,7 @@ Two issues whose Upstream lines name each other produce one cycle finding listin
 <!-- ac: AC5 -->
 ### AC5
 
-A Cites URL with an existing tag, path, and anchor resolves; one naming a branch, a missing tag, a missing path, or a missing anchor is reported as a finding and fails the audit; the citing repositories of an interface are its consumers; retargeting a citation is a reviewed merge request.
+A Cites URL with an existing tag, path, and anchor resolves; one naming a branch, a missing tag, a missing path, or a missing anchor is reported as a finding and fails the audit; the citing repositories of an interface are its consumers; retargeting a citation is a reviewed merge.
 
 <!-- field: traces -->
 #### Traces
