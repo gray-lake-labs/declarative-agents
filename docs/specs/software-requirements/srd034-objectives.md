@@ -210,6 +210,24 @@ Retired in 01.2 (design.md D12).
 
 The whole interaction surface for an owner below the system repository is: issues with due dates in their own repository, the tracker's due-date notifications, the steps inside each issue's body, and implement. No requirement of this SRD adds a tool, a notification channel, or a step outside an issue.
 
+<!-- req: R10 -->
+## R10 - Direction: objectives drawn from epics
+
+<!-- req: R10.1 -->
+### R10.1
+
+Once a release plans srd045, an objective item may cite the epic items it draws down, by URL pinned to the system release tag, beside the requirement items it cites; an objective with no epic citation stays valid (srd045 R1.2).
+
+<!-- req: R10.2 -->
+### R10.2
+
+An objective's dates and progress are derived, never typed: its target date is the due item of R1.4; its planned start is the start of the milestone its planned event names; its completion is the time of its met event; its progress is the share of its cited epic points that is done (srd019 R9.4).
+
+<!-- req: R10.3 -->
+### R10.3
+
+Until that release, objective items cite requirement items only, and an objective's due item is its only date.
+
 <!-- field: non_goals -->
 ## Non-goals
 
@@ -333,3 +351,15 @@ Nothing this SRD specifies asks a downstream owner to use a tool, channel, or st
 #### Traces
 
 - [R9.1](#r91)
+
+<!-- ac: AC10 -->
+### AC10
+
+The release that plans srd045 writes the requirement items for epic citations and derived dates and progress from R10.1 and R10.2; until then the interim rule of R10.3 holds.
+
+<!-- field: traces -->
+#### Traces
+
+- [R10.1](#r101)
+- [R10.2](#r102)
+- [R10.3](#r103)

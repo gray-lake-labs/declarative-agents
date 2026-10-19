@@ -119,6 +119,24 @@ Refuses to place a requirement without a named test and environment, and refuses
 
 Refuses to create work issues; Developers turn the plan into issues with make-work.
 
+<!-- req: R6 -->
+## R6 - Direction: planning from epics
+
+<!-- req: R6.1 -->
+### R6.1
+
+Once a release plans srd045, plan in the system repository also reads the agreed epic documents: the items no met objective has drawn down, in their owners' order and the order their dependencies and anchors allow; the changes to each epic since the last release tag; and the program's velocity, or an assumed one it asks the technical program manager for until the ledger has a period of it (srd045 R1.3, R1.4). It recommends the objective items that draw down as many points as velocity allows.
+
+<!-- req: R6.2 -->
+### R6.2
+
+In Scrum terms, the ranking of R3.1 orders the Product Backlog, and choosing objective items from the epics' remaining items, after the epics changed through the audit gate, is backlog refinement and Sprint Planning.
+
+<!-- req: R6.3 -->
+### R6.3
+
+Until that release, plan reads the agreed objective documents and the system SRDs only (R2) and ranks candidates as R3.1 states.
+
 <!-- field: non_goals -->
 ## Non-goals
 
@@ -169,3 +187,15 @@ No requirement without test and environment is placed, no issue is assigned, and
 
 - [R5.1](#r51)
 - [R5.2](#r52)
+
+<!-- ac: AC4 -->
+### AC4
+
+The release that plans srd045 writes plan's requirement items for epics and velocity from R6.1 and R6.2; until then the interim rule of R6.3 holds.
+
+<!-- field: traces -->
+#### Traces
+
+- [R6.1](#r61)
+- [R6.2](#r62)
+- [R6.3](#r63)

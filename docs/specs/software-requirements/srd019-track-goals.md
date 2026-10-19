@@ -192,6 +192,11 @@ It keeps waiting states true from Upstream, Requires, and Cites dependencies, an
 
 Until it runs, an objective closes as reported complete by its repository's sprint-end merge (srd038 R2), and planning takes slipped objectives from the aggregate's slipped-commitment signal (srd018 R3.2).
 
+<!-- req: R9.4 -->
+### R9.4
+
+Once a release plans srd045, track-goals also reports each objective's progress: the points of the epic items it cites whose evidence passed, or whose citing issues closed where no evidence is named yet, over all the points it cites. Progress reads 100 percent only when the ledger replays to met, and an objective that cites no epic reports no percentage.
+
 <!-- field: non_goals -->
 ## Non-goals
 
@@ -301,3 +306,4 @@ Release 02.0's planning writes track-goals' requirements from R9; until then the
 - [R9.1](#r91)
 - [R9.2](#r92)
 - [R9.3](#r93)
+- [R9.4](#r94)
