@@ -13,16 +13,22 @@ audits, so the charter here decides which checks gate this corpus.
 |---|---|
 | Checks that gate this corpus | `docs/corpus-charter.yaml` |
 | Tracked parent release | `docs/external-pins.yaml` |
-| The release's agent, spec tool, and source | the user cache directory, `scrum-master/release/<tag>`, downloaded on first use |
+| The release's agent and source, and the spec tool built from it | the user cache directory, `scrum-master/release/<tag>`, fetched on first use |
 | Parent requirements this corpus derives from | `derived_from` entries in the SRDs |
 
-The parent publishes each tag's `agent` and `spectool` for darwin and linux
-on amd64 and arm64, with `SHA256SUMS`. `mage audit` and `mage fmt` download
-the pinned tag's binaries for the host, refuse any whose checksum does not
-match, and keep them in the cache. They also lay out the tag's source archive
-there as a git repository tagged with the release, which is the clone the
-audit resolves `derived_from` entries against. A host the parent publishes no
-binary for fails with an error that names it.
+The parent publishes each tag's `agent` for darwin and linux on amd64 and
+arm64, with `SHA256SUMS`. `mage audit` downloads the pinned tag's agent for
+the host, refuses it if its checksum does not match, and keeps it in the
+cache. It also lays out the tag's source archive there as a git repository
+tagged with the release, which is the clone the audit resolves `derived_from`
+entries against. A host the parent publishes no binary for fails with an
+error that names it.
+
+The spec tool behind `mage fmt`, `mage convert`, and `mage specCheck` is this
+repository's own (`magefiles/spec.go`): it lists the tracked documents, reads
+objective documents as SRDs, and formats each with the parent's Markdown
+library. It is built once per tag against that library in the downloaded
+source.
 
 ## Running the audit
 
