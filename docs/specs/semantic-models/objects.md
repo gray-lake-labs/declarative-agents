@@ -31,7 +31,8 @@ Defines every object the process uses by its relation to the issue, the only uni
 | link | An Upstream line to another issue, a Requires line to a release, or a Cites line to a requirement or interface pinned to a tag. | srd007 | from one issue to an issue, a tag, or a pinned file anchor |
 | release_tag | A version tag on the producing repository, created only after the artifact's gate passed. | srd008, srd015 | created by a kind::release issue; read by Requires lines and by handoff |
 | merge_request | The only way an issue is closed as delivered; closes its issue and that issue's tasks. | srd041 R7, srd008 | closes exactly one issue |
-| backlog | Not an object. The query for open, unassigned, admitted, backlog-kind data issues (the ready state). | srd041 R3 | a view over issues |
+| product_backlog | Not an object. The epic documents and the road-map's releases, ordered by the owner of the level: road-map release order first, then each epic's item order. The Product Owner orders a subsystem's, the technical program manager the program's; plan's ranking proposes and the owner decides. | srd045 R1.1, srd031 R3.1, srd031 R6.2, docs/guides/agile-mapping.md | documents that objective issues cite |
+| backlog | Not an object. The query for open, unassigned, admitted, backlog-kind data issues (the ready state); the Product Backlog is product_backlog. | srd041 R3 | a view over issues |
 | dashboard | Not an object. A rendering of the ledger and evidence committed to a repository; never edited. | srd019 | a view over issues |
 
 <!-- field: taxonomy_rules -->

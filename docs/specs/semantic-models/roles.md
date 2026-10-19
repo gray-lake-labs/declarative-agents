@@ -28,6 +28,18 @@ Defines the four roles of the process by the level each owns, what each writes, 
 | developer | Writes code. | Owns components. Turns the plan into issues with make-work, works them through the inner loop, and reviews branches for architecture, security, and anything the tests cannot see. In a program of developers and researchers, also runs experiments, writes reports, and reviews others' artifacts; the kind label says which. | [make-work, daily-scrum, specify, implement, do-work, tpm release] |
 | scrum_master | Runs standups, removes blockers, counts points. | "Owns the test subsystem: the environments of the chain, the pipelines that promote pinned sets between them, and the suites that produce evidence, each specified as an SRD. Owns the audits, track-goals among them, and facilitates the Retrospective. There is no scrum master agent." | [sprint-retrospective, track-goals, audits] |
 
+<!-- field: relationships -->
+## Relationships
+
+Each role's relationship to the Scrum Guide (2020); docs/guides/agile-mapping.md maps every event, artifact, and commitment.
+
+| role | scrum_guide | fit | rationale |
+| --- | --- | --- | --- |
+| technical_program_manager | none; the Guide has no role above one team | addition | A program of several teams needs one owner of the system's requirements, interfaces, and releases, who pushes each team the objectives that become its Sprint Goals; the nearest counterparts are Nexus's integration work and SAFe's Release Train Engineer with Solution Management. It orders the program's backlog and never assigns work. |
+| product_owner | Product Owner | aligned, with an addition | Orders the subsystem's backlog, owns its goals, and judges the Increment; also writes requirements with an agent, because acceptance criteria that name a test and an environment are what make done checkable. |
+| developer | Developers | aligned | Create the Increment, own the Sprint Backlog through make-work, hold to the Definition of Done, and adapt daily. |
+| scrum_master | Scrum Master | deviation | The administrative half of the role (standups, the board, counting points, chasing blockers) is scripts; what remains is the part of the team's effectiveness that is a system to own: the environments, suites, and audits that decide done, and the Retrospective. Coaching stays a person's work. |
+
 <!-- field: actor_boundaries | form: "tree" -->
 ## Actor boundaries
 

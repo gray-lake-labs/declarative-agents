@@ -79,6 +79,7 @@ docs/road-map.md.
 | docs/engineering/eng02-tpm-and-skills.md | [eng02-tpm-and-skills](engineering/eng02-tpm-and-skills.md) |
 | docs/engineering/eng03-releasing-scrum-master.md | [eng03-releasing-scrum-master](engineering/eng03-releasing-scrum-master.md) |
 | docs/engineering/eng04-beads-sync.md | [eng04-beads-sync](engineering/eng04-beads-sync.md) |
+| docs/guides/agile-mapping.md | agile-mapping |
 | docs/guides/ai-native-sdlc.md | ai-native-sdlc |
 | docs/guides/corpus-audit.md | corpus-audit |
 | docs/guides/parent-upgrade.md | parent-upgrade |
