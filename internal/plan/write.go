@@ -9,7 +9,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Release is the release plan writes into the road map: its
@@ -43,7 +43,7 @@ var releaseMarker = regexp.MustCompile(`(?m)^<!-- release: ([^ |]+)( \|[^>]*)? -
 // candidates hold back for a missing test or environment is not placed:
 // it comes back in Returned, and on issue, when given, a comment names it
 // and what it lacks so its owner can fix the objective document.
-func WriteRelease(dir string, r Release, c Candidates, t gitlab.Tracker, issueProject string, issueIID int) (Written, error) {
+func WriteRelease(dir string, r Release, c Candidates, t tracker.Tracker, issueProject string, issueIID int) (Written, error) {
 	w := Written{Path: RoadMap}
 	held := map[string][]string{}
 	for _, it := range c.WithoutEvidence {

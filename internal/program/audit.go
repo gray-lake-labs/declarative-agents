@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // AuditRunner runs the corpus gate command in a directory and returns its
@@ -35,7 +35,7 @@ type AuditGate struct {
 
 // checkCloses parses each --closes reference, project#iid, and refuses one
 // that is malformed, missing, or already closed.
-func checkCloses(t gitlab.Tracker, closes []string) ([][2]any, error) {
+func checkCloses(t tracker.Tracker, closes []string) ([][2]any, error) {
 	var out [][2]any
 	for _, ref := range closes {
 		p, n, ok := strings.Cut(ref, "#")

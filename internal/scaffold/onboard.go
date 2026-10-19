@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // OnboardOptions are what tpm onboard is given.
@@ -52,7 +52,7 @@ func registrationMarker(repository string) string {
 // files its registration in the system repository (srd043 R2): one issue
 // asking the subsystem SRD's owner to list the repository, never a commit
 // there.
-func Onboard(t gitlab.Tracker, o OnboardOptions) (OnboardResult, error) {
+func Onboard(t tracker.Tracker, o OnboardOptions) (OnboardResult, error) {
 	r := OnboardResult{Dir: o.Dir, DryRun: o.DryRun}
 	if err := requireRepository(o.Dir); err != nil {
 		return r, err
@@ -83,7 +83,7 @@ func Onboard(t gitlab.Tracker, o OnboardOptions) (OnboardResult, error) {
 	return r, err
 }
 
-func register(t gitlab.Tracker, o OnboardOptions) (Registration, error) {
+func register(t tracker.Tracker, o OnboardOptions) (Registration, error) {
 	subs, err := program.LoadSubsystems(t, o.System, o.Ref)
 	if err != nil {
 		return Registration{}, err
@@ -92,7 +92,7 @@ func register(t gitlab.Tracker, o OnboardOptions) (Registration, error) {
 		return Registration{Reason: fmt.Sprintf("%s already lists %s", sub.ID, program.ProjectPath(o.Repository))}, nil
 	}
 	marker := registrationMarker(o.Repository)
-	open, err := t.ListIssues(o.System, gitlab.IssueQuery{State: "opened"})
+	open, err := t.ListIssues(o.System, tracker.IssueQuery{State: "opened"})
 	if err != nil {
 		return Registration{}, err
 	}
@@ -105,7 +105,7 @@ func register(t gitlab.Tracker, o OnboardOptions) (Registration, error) {
 	if err != nil {
 		return Registration{}, err
 	}
-	in := gitlab.NewIssue{
+	in := tracker.NewIssue{
 		Title:       fmt.Sprintf("Register %s in %s", program.ProjectPath(o.Repository), o.Subsystem),
 		Description: registrationBody(o) + "\n\n" + marker + "\n",
 		Labels:      program.Labels("management", "", "", ""),

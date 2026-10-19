@@ -39,7 +39,7 @@ tpm release tag creates a release tag in a downstream repository (rel01.2-uc001-
 - F2: tpm finds the upstream repositories whose objective documents list this repository in delivered_by or whose objective issues the release closed.
 - F3: For each, tpm searches for an issue carrying the handoff marker for this tag and stops if one exists.
 - F4: Otherwise tpm files one unassigned issue naming the old and new tags, with Requirements listing the files and fields whose pinned references move, and the handoff marker.
-- F5: The upstream owner pops the issue; the reference moves in a merge request that shows the old and new tags.
+- F5: The upstream owner pops the issue; the reference moves in a merged change that shows the old and new tags.
 
 <!-- field: touchpoints -->
 ## Touchpoints
@@ -84,7 +84,7 @@ The issue carries a handoff marker naming the tag, and a second run on the same 
 <!-- sc: S3 -->
 ### S3
 
-The reference moves only through a reviewed merge request with the old and new tags; no script edits it in place.
+The reference moves only through a reviewed merge with the old and new tags; no script edits it in place.
 
 <!-- field: traces -->
 #### Traces

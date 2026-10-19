@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Cite is one "Cites: URL" line of an issue description (config format
@@ -44,7 +44,7 @@ func ParseCites(body string) []Cite {
 // Resolve reports why a pinned reference does not resolve, or nil when its
 // tag exists, its path exists at the tag, and its anchor names an entry of
 // the file there (srd007 R5.2). The reference must already be pinned.
-func Resolve(t gitlab.Tracker, r Ref) error {
+func Resolve(t tracker.Tracker, r Ref) error {
 	if err := r.Pinned(); err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func Resolve(t gitlab.Tracker, r Ref) error {
 		return fmt.Errorf("%s: %s has no tag %q", r.Raw, r.Project, r.Tag)
 	}
 	content, err := t.GetFile(r.Project, r.Path, r.Tag)
-	if errors.Is(err, gitlab.ErrNotFound) {
+	if errors.Is(err, tracker.ErrNotFound) {
 		return fmt.Errorf("%s: %s does not exist at %s", r.Raw, r.Path, r.Tag)
 	}
 	if err != nil {

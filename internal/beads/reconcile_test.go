@@ -8,7 +8,7 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // TestReconcileCommandConfirmsProvisionalPops runs tpm tracker reconcile on
@@ -20,7 +20,7 @@ func TestReconcileCommandConfirmsProvisionalPops(t *testing.T) {
 	clone := filepath.Join(root, "alice-tracker")
 	beadstest.Clone(t, remote, clone, "alice")
 	tr := NewTracker(clone, "alice", beadstest.CodeRepository(t, root, "po-1", "alice"))
-	i, err := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "work"})
+	i, err := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "work"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,13 +33,13 @@ func TestReconcileCommandConfirmsProvisionalPops(t *testing.T) {
 	beadstest.Git(t, clone, "remote", "set-url", "origin", remote)
 
 	var out bytes.Buffer
-	err = cli.Default.Run([]string{"tracker", "reconcile", "--json"}, &out, func() (gitlab.Tracker, error) { return tr, nil })
+	err = cli.Default.Run([]string{"tracker", "reconcile", "--json"}, &out, func() (tracker.Tracker, error) { return tr, nil })
 	if err != nil {
 		t.Fatal(err)
 	}
 	var got struct {
 		Reconciled []Reconciled `json:"reconciled"`
-		Read       gitlab.Read  `json:"tracker_read"`
+		Read       tracker.Read `json:"tracker_read"`
 	}
 	if err := json.Unmarshal(out.Bytes(), &got); err != nil {
 		t.Fatalf("%v: %s", err, out.String())

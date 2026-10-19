@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/links"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Plan is what tpm goals plan returns and tpm goals push takes back once the
@@ -37,7 +37,7 @@ type PlannedObjective struct {
 
 // MakePlan computes the facts and recommendations for every objective of
 // the release (srd022 R2, R3.1, R3.2). It asks nothing.
-func MakePlan(t gitlab.Tracker, s Sources) (Plan, error) {
+func MakePlan(t tracker.Tracker, s Sources) (Plan, error) {
 	p := Plan{System: s.System, Release: s.Release.Version, Tag: s.Release.Tag, Milestone: s.Release.Milestone}
 	candidates := s.Subsystems.Repositories()
 	index := map[string]int{}
@@ -111,10 +111,10 @@ func marker(key, release string) string {
 	return fmt.Sprintf("<!-- tpm goals objective=%s release=%s -->", key, release)
 }
 
-func findExisting(t gitlab.Tracker, repo, key, release string) (*gitlab.Issue, error) {
-	issues, err := t.ListIssues(repo, gitlab.IssueQuery{State: "opened", Labels: []string{"plane::management"}})
+func findExisting(t tracker.Tracker, repo, key, release string) (*tracker.Issue, error) {
+	issues, err := t.ListIssues(repo, tracker.IssueQuery{State: "opened", Labels: []string{"plane::management"}})
 	if err != nil {
-		if errors.Is(err, gitlab.ErrNotFound) {
+		if errors.Is(err, tracker.ErrNotFound) {
 			return nil, fmt.Errorf("repository %s does not exist or is not readable", repo)
 		}
 		return nil, err

@@ -14,12 +14,12 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/release"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // RoadMap is the road map's path in a repository checkout.
@@ -58,7 +58,7 @@ type Candidates struct {
 type Input struct {
 	Dir       string
 	System    string
-	Tracker   gitlab.Tracker
+	Tracker   tracker.Tracker
 	Aggregate *reports.Aggregation
 	Releases  program.Releases
 	Artifact  string

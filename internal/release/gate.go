@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Check results an evidence event records.
@@ -81,7 +81,7 @@ func testName(c program.Check) string {
 // comment; any other
 // check fails as not runnable (R2.5). A dry run runs nothing and posts
 // nothing.
-func RunGate(t gitlab.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) {
+func RunGate(t tracker.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) {
 	r := ReleaseGateResult{Project: in.Project, Issue: in.Issue, Artifact: in.Artifact, Version: in.Version.String(),
 		Tag: TagName(in.Policy.Releases.TagFormat, in.Artifact, in.Version), Run: in.Now.UTC().Format("20060102T150405Z"), DryRun: in.DryRun}
 	checks := in.Policy.Gate(in.Artifact)
@@ -133,7 +133,7 @@ func RunGate(t gitlab.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) {
 	return r, nil
 }
 
-func runCheck(t gitlab.Tracker, in ReleaseGateInput, issue gitlab.Issue, c program.Check) (string, string) {
+func runCheck(t tracker.Tracker, in ReleaseGateInput, issue tracker.Issue, c program.Check) (string, string) {
 	switch {
 	case c.Kind == "peer-read":
 		by, err := peerRead(t, in.Project, in.Issue, issue.Author)

@@ -7,7 +7,7 @@ title: "Shared: reading the corpus and config documents"
 ## Problem
 
 tpm reads a program's road map, SRDs, and objective documents, and its own
-configuration files, all in the marker form the pinned Nokia
+configuration files, all in the marker form the pinned parent
 declarative-agents release declares. This repository consumes that release
 only through its audit and its format tools, never as a Go module, so tpm
 carries its own reader for the form. A reader that drifts from what the

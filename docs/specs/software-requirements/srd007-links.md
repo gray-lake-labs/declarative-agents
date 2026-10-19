@@ -116,12 +116,12 @@ Cycle findings appear in the program's weekly roll-up and dashboard until the cy
 
 A cross-repository reference is a URL of the form https://HOST/GROUP/REPO/-/blob/TAG/PATH#ANCHOR, where TAG is a release tag of REPO, PATH is a file in it, and ANCHOR is a requirement id (Rn or Rn.m) or an interface name in that file. In an issue description it is a line Cites: URL; in a corpus document it is a field value.
 
-<!-- req: R5.2 | derived_from: [{"repo": "github.com/Nokia-Bell-Labs/declarative-agents", "release": "v0.20261017.2", "srd": "srd014-spec-graph", "item": "R3.16", "reason": "The parent resolves a cross-repository citation only at its validated release through a local clone cache; a citation here resolves the same way, at its tag, so the parent's audit can check it."}] -->
+<!-- req: R5.2 | derived_from: [{"repo": "github.com/gray-lake-labs/declarative-agents", "release": "v0.20261017.2", "srd": "srd014-spec-graph", "item": "R3.16", "reason": "The parent resolves a cross-repository citation only at its validated release through a local clone cache; a citation here resolves the same way, at its tag, so the parent's audit can check it."}] -->
 ### R5.2
 
 A reference resolves when the tag exists, the path exists at that tag, and the anchor names an entry of the file at that tag.
 
-<!-- req: R5.3 | derived_from: [{"repo": "github.com/Nokia-Bell-Labs/declarative-agents", "release": "v0.20261017.2", "srd": "srd014-spec-graph", "item": "R3.18", "reason": "The parent reports a citation without a release as unpinned; this corpus inherits that rule and makes it fail the audit."}] -->
+<!-- req: R5.3 | derived_from: [{"repo": "github.com/gray-lake-labs/declarative-agents", "release": "v0.20261017.2", "srd": "srd014-spec-graph", "item": "R3.18", "reason": "The parent reports a citation without a release as unpinned; this corpus inherits that rule and makes it fail the audit."}] -->
 ### R5.3
 
 A reference to a branch, to a commit not reachable from a tag, or with no anchor is unpinned. An unpinned or unresolvable reference is a finding that fails the audit; it is never treated as satisfied.
@@ -134,7 +134,7 @@ The set of repositories that cite an interface by pinned URL is that interface's
 <!-- req: R5.5 -->
 ### R5.5
 
-Moving a reference to a newer tag is an edit made through the inner loop, with the old and new tags in the merge request, so the change of what is cited is reviewed.
+Moving a reference to a newer tag is an edit made through the inner loop, with the old and new tags in the merged change, so the change of what is cited is reviewed.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -198,7 +198,7 @@ Two issues whose Upstream lines name each other produce one cycle finding listin
 <!-- ac: AC5 -->
 ### AC5
 
-A Cites URL with an existing tag, path, and anchor resolves; one naming a branch, a missing tag, a missing path, or a missing anchor is reported as a finding and fails the audit; the citing repositories of an interface are its consumers; retargeting a citation is a reviewed merge request.
+A Cites URL with an existing tag, path, and anchor resolves; one naming a branch, a missing tag, a missing path, or a missing anchor is reported as a finding and fails the audit; the citing repositories of an interface are its consumers; retargeting a citation is a reviewed merge.
 
 <!-- field: traces -->
 #### Traces

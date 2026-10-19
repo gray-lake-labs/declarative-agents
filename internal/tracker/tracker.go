@@ -1,8 +1,8 @@
-// Package gitlab is tpm's tracker boundary, named for the tracker tpm first
-// served. Every package that reads or writes issues goes through the
-// Tracker interface: production uses the beads tracker (internal/beads),
-// and tests use it or the fake in gitlabtest.
-package gitlab
+// Package tracker is tpm's tracker boundary. Every package that reads or
+// writes issues goes through the Tracker interface: production uses the
+// beads tracker (internal/beads), and tests use it or the fake in
+// internal/tracker/fake.
+package tracker
 
 import "errors"
 
@@ -94,9 +94,9 @@ type Award struct {
 	User string `json:"user"`
 }
 
-// MergeRequest is one merged delivery in a project's history, as reports
+// Merge is one merged delivery in a project's history, as reports
 // read it; on beads a merge commit (srd042 R2.3).
-type MergeRequest struct {
+type Merge struct {
 	IID          int    `json:"iid"`
 	Title        string `json:"title"`
 	Description  string `json:"description"`
@@ -131,15 +131,15 @@ type Read struct {
 }
 
 // Reader is a tracker that knows what it last read. The beads tracker is
-// one; GitLab, a single server, has nothing to report.
+// one; the fake, which reads nothing remote, is not.
 type Reader interface {
 	LastRead() (Read, bool)
 }
 
 // Triager is a tracker that holds admission as srd041 state transitions
 // fired by lint, not as a bare label: Triage admits or flags one issue and
-// reports whether its state changed. GitLab is not one; there admission is
-// the needs-triage label alone.
+// reports whether its state changed. The fake is not one; there admission
+// is the needs-triage label alone.
 type Triager interface {
 	Triage(project string, iid int, admitted bool) (bool, error)
 }
@@ -167,10 +167,10 @@ type Tracker interface {
 	// twice leaves one milestone (srd001 R7.1, srd031 R4.2). It returns
 	// MilestoneCreated, MilestoneUpdated, or MilestoneUnchanged.
 	EnsureMilestone(group string, m Milestone) (string, error)
-	// MergedMergeRequests lists the merge requests merged into the project
+	// Merges lists the merges into the project
 	// since a YYYY-MM-DD date, by author or, with author empty, by anyone
 	// (srd018 R3.2, R8.1).
-	MergedMergeRequests(project, author, since string) ([]MergeRequest, error)
+	Merges(project, author, since string) ([]Merge, error)
 	// IssueAwards lists the award emoji on an issue (srd015 R1.2).
 	IssueAwards(project string, iid int) ([]Award, error)
 	// GroupLabels lists the labels defined on the group itself.

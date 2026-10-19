@@ -6,7 +6,7 @@ title: Process policy
 <!-- field: purpose -->
 ## Purpose
 
-Holds every rule of the control plane that a program may tune: admission, plan scoring, escalation thresholds, release classification, extra event names, and the gate for each artifact, which binds the artifact to the tests and environments whose evidence decides done (srd008). Scripts read rules from this file at run time and hold none in code (srd001 R2.4). A change to it is a plane::control issue and a reviewed merge request.
+Holds every rule of the control plane that a program may tune: admission, plan scoring, escalation thresholds, release classification, extra event names, and the gate for each artifact, which binds the artifact to the tests and environments whose evidence decides done (srd008). Scripts read rules from this file at run time and hold none in code (srd001 R2.4). A change to it is a plane::control issue and a reviewed merge.
 
 <!-- field: schema -->
 ## Schema
@@ -35,7 +35,7 @@ mapping
 <!-- field: description -->
 #### Description
 
-require_milestone (boolean, data issues must carry a sprint milestone), require_acceptance_criteria (boolean, build, experiment, research, and spec issues must have an Acceptance Criteria section), management_filers (list of usernames or the word leads, who may file plane::management issues; tpm issue file refuses anyone else), audit_command (the corpus gate tpm issue merge runs in the worktree before merging a docs/ change; mage audit by default), control_reviewers (count of lead approvals a plane::control merge request needs).
+require_milestone (boolean, data issues must carry a sprint milestone), require_acceptance_criteria (boolean, build, experiment, research, and spec issues must have an Acceptance Criteria section), management_filers (list of usernames or the word leads, who may file plane::management issues; tpm issue file refuses anyone else), audit_command (the corpus gate tpm issue merge runs in the worktree before merging a docs/ change; mage audit by default), control_reviewers (count of lead approvals a plane::control merge needs).
 
 <!-- schema_entry: scoring -->
 ### scoring

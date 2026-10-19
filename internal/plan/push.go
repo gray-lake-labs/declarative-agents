@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // SprintEndLabels are a sprint-end issue's labels besides its component: a
@@ -67,7 +67,7 @@ var weekRange = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 // and files one sprint-end issue per releasing repository, each found by
 // its marker so a second push updates and creates nothing (srd031 R4.2,
 // R4.3, R4.6; srd038 R1.1; srd001 R7).
-func Push(t gitlab.Tracker, in PushInput) (PushResult, error) {
+func Push(t tracker.Tracker, in PushInput) (PushResult, error) {
 	var res PushResult
 	if !weekRange.MatchString(in.End) {
 		return res, fmt.Errorf("--end must be YYYY-MM-DD, not %q", in.End)
@@ -93,7 +93,7 @@ func Push(t gitlab.Tracker, in PushInput) (PushResult, error) {
 	}
 	groups := groupsOf(r.Items, docs)
 
-	m := gitlab.Milestone{Title: r.Milestone, StartDate: start.Format(time.DateOnly), DueDate: in.End,
+	m := tracker.Milestone{Title: r.Milestone, StartDate: start.Format(time.DateOnly), DueDate: in.End,
 		Description: fmt.Sprintf("Release %s, %s to %s.", r.Version, isoWeek(start), isoWeek(end))}
 	if in.DryRun {
 		res.Milestone = "dry-run"
@@ -167,7 +167,7 @@ var checked = regexp.MustCompile(`(?m)^- \[x\] (\S+?):`)
 
 // pushSprint keeps one sprint issue for the release with one checklist item
 // per objective; an item a person ticked stays ticked (srd001 R7.2, R7.4).
-func pushSprint(t gitlab.Tracker, in PushInput, r Release, groups []group) (IssueAction, error) {
+func pushSprint(t tracker.Tracker, in PushInput, r Release, groups []group) (IssueAction, error) {
 	a := IssueAction{Project: in.System}
 	existing, err := find(t, in.System, "type::sprint", sprintMarker(r.Version))
 	if err != nil {
@@ -189,12 +189,12 @@ func pushSprint(t gitlab.Tracker, in PushInput, r Release, groups []group) (Issu
 		fmt.Fprintf(&b, "- [%s] %s: %s\n", box, g.key, g.title)
 	}
 	b.WriteString("\n" + sprintMarker(r.Version) + "\n")
-	return upsert(t, in, a, existing, gitlab.NewIssue{Title: "Sprint " + r.Version, Description: b.String(),
+	return upsert(t, in, a, existing, tracker.NewIssue{Title: "Sprint " + r.Version, Description: b.String(),
 		Labels: []string{"plane::management", "type::sprint"}, DueDate: in.End, Milestone: r.Milestone})
 }
 
 // pushSprintEnd keeps one sprint-end issue for the release in repo.
-func pushSprintEnd(t gitlab.Tracker, in PushInput, r Release, repo string) (IssueAction, error) {
+func pushSprintEnd(t tracker.Tracker, in PushInput, r Release, repo string) (IssueAction, error) {
 	a := IssueAction{Project: repo}
 	existing, err := find(t, repo, "type::recurring", sprintEndMarker(r.Version))
 	if err != nil {
@@ -205,7 +205,7 @@ func pushSprintEnd(t gitlab.Tracker, in PushInput, r Release, repo string) (Issu
 		return a, err
 	}
 	labels := append([]string{"type::recurring"}, program.Labels(l.Plane, "", l.Kind, l.Component)...)
-	return upsert(t, in, a, existing, gitlab.NewIssue{Title: "Recurring: sprint end " + r.Version,
+	return upsert(t, in, a, existing, tracker.NewIssue{Title: "Recurring: sprint end " + r.Version,
 		Description: SprintEndBody(r.Version, in.End), Labels: labels, DueDate: in.End, Milestone: r.Milestone})
 }
 
@@ -240,8 +240,8 @@ Once per period. tpm plan push for the next release files the next sprint-end is
 }
 
 // find returns the open issue in project carrying marker, if any.
-func find(t gitlab.Tracker, project, label, marker string) (*gitlab.Issue, error) {
-	issues, err := t.ListIssues(project, gitlab.IssueQuery{State: "opened", Labels: []string{label}})
+func find(t tracker.Tracker, project, label, marker string) (*tracker.Issue, error) {
+	issues, err := t.ListIssues(project, tracker.IssueQuery{State: "opened", Labels: []string{label}})
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +255,7 @@ func find(t gitlab.Tracker, project, label, marker string) (*gitlab.Issue, error
 
 // upsert files in when there is no existing issue, else updates its
 // description and due date when they differ.
-func upsert(t gitlab.Tracker, in PushInput, a IssueAction, existing *gitlab.Issue, n gitlab.NewIssue) (IssueAction, error) {
+func upsert(t tracker.Tracker, in PushInput, a IssueAction, existing *tracker.Issue, n tracker.NewIssue) (IssueAction, error) {
 	if existing == nil {
 		r, err := program.File(t, a.Project, n, in.Policy, in.DryRun)
 		if err != nil {
@@ -265,8 +265,8 @@ func upsert(t gitlab.Tracker, in PushInput, a IssueAction, existing *gitlab.Issu
 		return a, nil
 	}
 	a.IID, a.Admitted = existing.IID, true
-	// GitLab stores a description without its trailing newline, so the
-	// comparison ignores the whitespace around it.
+	// A tracker may store a description without its trailing newline, so
+	// the comparison ignores the whitespace around it.
 	if strings.TrimSpace(existing.Description) == strings.TrimSpace(n.Description) && existing.DueDate == n.DueDate {
 		a.Action = "unchanged"
 		return a, nil
@@ -275,17 +275,17 @@ func upsert(t gitlab.Tracker, in PushInput, a IssueAction, existing *gitlab.Issu
 	if in.DryRun {
 		return a, nil
 	}
-	_, err := t.UpdateIssue(a.Project, existing.IID, gitlab.IssueUpdate{Description: &n.Description, DueDate: &n.DueDate})
+	_, err := t.UpdateIssue(a.Project, existing.IID, tracker.IssueUpdate{Description: &n.Description, DueDate: &n.DueDate})
 	return a, err
 }
 
 // postPlanned posts a planned event on each open objective issue for one of
 // the release's objectives that tasks filed for another release
 // (srd031 R4.3, srd006 R8).
-func postPlanned(t gitlab.Tracker, in PushInput, r Release, repos []string, docs []*objectives.Document, groups []group) ([]PlannedOnIssue, error) {
+func postPlanned(t tracker.Tracker, in PushInput, r Release, repos []string, docs []*objectives.Document, groups []group) ([]PlannedOnIssue, error) {
 	var out []PlannedOnIssue
 	for _, repo := range repos {
-		issues, err := t.ListIssues(repo, gitlab.IssueQuery{State: "opened", Labels: []string{"plane::management"}})
+		issues, err := t.ListIssues(repo, tracker.IssueQuery{State: "opened", Labels: []string{"plane::management"}})
 		if err != nil {
 			return out, err
 		}

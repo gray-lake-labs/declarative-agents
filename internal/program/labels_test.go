@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
 // seeded is a tracker whose group g already holds labels.
-func seeded(t *testing.T, p trackertest.Program, labels ...gitlab.Label) gitlab.Tracker {
+func seeded(t *testing.T, p trackertest.Program, labels ...tracker.Label) tracker.Tracker {
 	t.Helper()
 	f := p.Tracker()
 	for _, l := range labels {
@@ -22,13 +22,13 @@ func seeded(t *testing.T, p trackertest.Program, labels ...gitlab.Label) gitlab.
 	return f
 }
 
-func groupLabels(t *testing.T, f gitlab.Tracker) map[string]gitlab.Label {
+func groupLabels(t *testing.T, f tracker.Tracker) map[string]tracker.Label {
 	t.Helper()
 	have, err := f.GroupLabels("g")
 	if err != nil {
 		t.Fatal(err)
 	}
-	m := map[string]gitlab.Label{}
+	m := map[string]tracker.Label{}
 	for _, l := range have {
 		m[l.Name] = l
 	}
@@ -45,7 +45,7 @@ func actions(res []LabelResult) map[string]int {
 
 func TestLabelsCreatesOnceAndNeverDeletes(t *testing.T) {
 	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
-		f := seeded(t, p, gitlab.Label{Name: "team-only", Color: "#000000"})
+		f := seeded(t, p, tracker.Label{Name: "team-only", Color: "#000000"})
 		want := DefaultLabels()
 
 		res, err := SyncLabels(f, "g", want, false, false)
@@ -65,8 +65,8 @@ func TestLabelsCreatesOnceAndNeverDeletes(t *testing.T) {
 
 func TestDifferingLabelIsReportedThenUpdatedOnRequest(t *testing.T) {
 	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
-		f := seeded(t, p, gitlab.Label{Name: "plane::data", Color: "#2CA02C", Description: "managed by terraform"})
-		want := []gitlab.Label{{Name: "plane::data", Color: "#1f75cb", Description: "Work"}}
+		f := seeded(t, p, tracker.Label{Name: "plane::data", Color: "#2CA02C", Description: "managed by terraform"})
+		want := []tracker.Label{{Name: "plane::data", Color: "#1f75cb", Description: "Work"}}
 
 		res, _ := SyncLabels(f, "g", want, false, false)
 		if res[0].Action != "differs" || groupLabels(t, f)["plane::data"].Color != "#2CA02C" {
@@ -81,7 +81,7 @@ func TestDifferingLabelIsReportedThenUpdatedOnRequest(t *testing.T) {
 
 func TestLabelsColorCompareIgnoresCaseAndDryRunWritesNothing(t *testing.T) {
 	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
-		f := seeded(t, p, gitlab.Label{Name: "kind::spec", Color: "#8E7CC3", Description: "Changes requirements or design documents under docs/"})
+		f := seeded(t, p, tracker.Label{Name: "kind::spec", Color: "#8E7CC3", Description: "Changes requirements or design documents under docs/"})
 		writes := p.Writes()
 		res, err := SyncLabels(f, "g", DefaultLabels(), true, true)
 		if err != nil || p.Writes() != writes {
@@ -96,7 +96,7 @@ func TestLabelsColorCompareIgnoresCaseAndDryRunWritesNothing(t *testing.T) {
 }
 
 func TestLoadLabelsReadsControlFileOrDefaults(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	if l, err := LoadLabels(f, "g/system", "main"); err != nil || len(l) != len(DefaultLabels()) {
 		t.Fatalf("defaults: %d %v", len(l), err)
 	}
@@ -160,7 +160,7 @@ subsystem SRDs
 // TestConfigFormatExamplesDecode holds the labels and policy config formats
 // to their own examples: each example is a config document tpm reads.
 func TestConfigFormatExamplesDecode(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	f.AddFile("g/system", "main", LabelsFile, specExample(t, "labels"))
 	f.AddFile("g/system", "main", PolicyFile, specExample(t, "policy"))
 	labels, err := LoadLabels(f, "g/system", "main")

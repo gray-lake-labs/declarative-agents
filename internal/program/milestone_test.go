@@ -10,22 +10,22 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 func day(offset int) string { return time.Now().AddDate(0, 0, offset).Format("2006-01-02") }
 
 // fileWith runs tpm issue file for a data issue against f and returns
 // the result and the filed issue.
-func fileWith(t *testing.T, f *gitlabtest.Fake, extra ...string) (FileResult, gitlab.Issue) {
+func fileWith(t *testing.T, f *fake.Fake, extra ...string) (FileResult, tracker.Issue) {
 	t.Helper()
 	body := filepath.Join(t.TempDir(), "issue.md")
 	os.WriteFile(body, []byte(goodBody), 0o644)
 	args := append([]string{"issue", "file", "--json", "--project", "g/po-1", "--title", "Score one agent",
 		"--body-file", body, "--plane", "data", "--kind", "build", "--component", "po-1"}, extra...)
 	var out bytes.Buffer
-	if err := cli.Default.Run(args, &out, func() (gitlab.Tracker, error) { return f, nil }); err != nil {
+	if err := cli.Default.Run(args, &out, func() (tracker.Tracker, error) { return f, nil }); err != nil {
 		t.Fatalf("file: %v", err)
 	}
 	var r FileResult
@@ -40,10 +40,10 @@ func fileWith(t *testing.T, f *gitlabtest.Fake, extra ...string) (FileResult, gi
 }
 
 func TestFileSetsActiveSprintMilestone(t *testing.T) {
-	f := gitlabtest.New()
-	f.Milestones["sprint-41"] = gitlab.Milestone{Title: "sprint-41", StartDate: day(-20), DueDate: day(-6)}
-	f.Milestones["sprint-42"] = gitlab.Milestone{Title: "sprint-42", StartDate: day(-5), DueDate: day(9)}
-	f.Milestones["no-dates"] = gitlab.Milestone{Title: "no-dates"}
+	f := fake.New()
+	f.Milestones["sprint-41"] = tracker.Milestone{Title: "sprint-41", StartDate: day(-20), DueDate: day(-6)}
+	f.Milestones["sprint-42"] = tracker.Milestone{Title: "sprint-42", StartDate: day(-5), DueDate: day(9)}
+	f.Milestones["no-dates"] = tracker.Milestone{Title: "no-dates"}
 	r, i := fileWith(t, f)
 	if r.Milestone != "sprint-42" || i.Milestone != "sprint-42" || r.MilestoneReason != "" {
 		t.Fatalf("result %+v, issue milestone %q", r, i.Milestone)
@@ -54,7 +54,7 @@ func TestFileSetsActiveSprintMilestone(t *testing.T) {
 }
 
 func TestFileLeavesMilestoneWhenNoneOrSeveralActive(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	r, i := fileWith(t, f)
 	if r.Milestone != "" || i.Milestone != "" || !strings.Contains(r.MilestoneReason, "no active milestone") {
 		t.Fatalf("none: %+v", r)
@@ -63,8 +63,8 @@ func TestFileLeavesMilestoneWhenNoneOrSeveralActive(t *testing.T) {
 		t.Fatal("admitted a data issue without a sprint")
 	}
 
-	f.Milestones["a"] = gitlab.Milestone{Title: "a", StartDate: day(-3), DueDate: day(3)}
-	f.Milestones["b"] = gitlab.Milestone{Title: "b", StartDate: day(-1), DueDate: day(10)}
+	f.Milestones["a"] = tracker.Milestone{Title: "a", StartDate: day(-3), DueDate: day(3)}
+	f.Milestones["b"] = tracker.Milestone{Title: "b", StartDate: day(-1), DueDate: day(10)}
 	r, i = fileWith(t, f)
 	if r.Milestone != "" || i.Milestone != "" || !strings.Contains(r.MilestoneReason, "several active milestones cover") || !strings.Contains(r.MilestoneReason, "a, b") {
 		t.Fatalf("several: %+v", r)
@@ -72,9 +72,9 @@ func TestFileLeavesMilestoneWhenNoneOrSeveralActive(t *testing.T) {
 }
 
 func TestFileExplicitMilestoneWins(t *testing.T) {
-	f := gitlabtest.New()
-	f.Milestones["sprint-42"] = gitlab.Milestone{Title: "sprint-42", StartDate: day(-5), DueDate: day(9)}
-	f.Milestones["later"] = gitlab.Milestone{Title: "later"}
+	f := fake.New()
+	f.Milestones["sprint-42"] = tracker.Milestone{Title: "sprint-42", StartDate: day(-5), DueDate: day(9)}
+	f.Milestones["later"] = tracker.Milestone{Title: "later"}
 	r, i := fileWith(t, f, "--milestone", "later")
 	if r.Milestone != "later" || i.Milestone != "later" || r.MilestoneReason != "" {
 		t.Fatalf("result %+v, issue milestone %q", r, i.Milestone)
@@ -82,7 +82,7 @@ func TestFileExplicitMilestoneWins(t *testing.T) {
 }
 
 func TestFileReportsComponent(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	r, i := fileWith(t, f)
 	if r.Component != "po-1" || !i.HasLabel("component::po-1") {
 		t.Fatalf("given: component %q, labels %v", r.Component, i.Labels)
@@ -94,7 +94,7 @@ func TestFileReportsComponent(t *testing.T) {
 	var out bytes.Buffer
 	err := cli.Default.Run([]string{"issue", "file", "--json", "--project", "g/product-owners/po-1", "--system", "g/system",
 		"--title", "Score one agent", "--body-file", body, "--plane", "data", "--kind", "build"},
-		&out, func() (gitlab.Tracker, error) { return f, nil })
+		&out, func() (tracker.Tracker, error) { return f, nil })
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,25 +8,25 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
 // gateFixture is a release issue on a tracker, a clean checkout at
 // revision abc123, and a recorder of the commands local checks run.
 type gateFixture struct {
-	tr    gitlab.Tracker
-	issue gitlab.Issue
+	tr    tracker.Tracker
+	issue tracker.Issue
 	ran   []string
 	fail  map[string]bool
 	dirty bool
 }
 
-func newGateFixture(t *testing.T, tr gitlab.Tracker) *gateFixture {
+func newGateFixture(t *testing.T, tr tracker.Tracker) *gateFixture {
 	t.Helper()
-	i, err := tr.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Release a 0.3.0"})
+	i, err := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Release a 0.3.0"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,16 +132,16 @@ func testDocumentsOnlyGateIsMageAudit(t *testing.T, tp trackertest.Program) {
 }
 
 func TestGatePeerReadNeedsAnotherPersonsThumbsUp(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	g := newGateFixture(t, f)
 	p := policyWith("a", program.Check{Kind: "peer-read"})
 	key := "g/po-1#1"
-	f.Awards[key] = []gitlab.Award{{Name: "thumbsup", User: g.issue.Author}, {Name: "heart", User: "reviewer"}}
+	f.Awards[key] = []tracker.Award{{Name: "thumbsup", User: g.issue.Author}, {Name: "heart", User: "reviewer"}}
 	r, err := g.run(p, "a", t0)
 	if err != nil || r.Passed || r.Checks[0].Result != ResultPending || r.Checks[0].Environment != "none" {
 		t.Fatalf("own thumbs-up: %+v %v", r, err)
 	}
-	f.Awards[key] = append(f.Awards[key], gitlab.Award{Name: "thumbsup", User: "reviewer"})
+	f.Awards[key] = append(f.Awards[key], tracker.Award{Name: "thumbsup", User: "reviewer"})
 	r, err = g.run(p, "a", t0.Add(time.Minute))
 	if err != nil || !r.Passed || !strings.Contains(r.Checks[0].Reason, "reviewer") {
 		t.Fatalf("reviewer thumbs-up: %+v %v", r, err)

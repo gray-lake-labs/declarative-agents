@@ -1,5 +1,5 @@
 # The checks this corpus's audit gates on. The shipped specification-critic
-# corpus-audit profile of Nokia-Bell-Labs/declarative-agents binds
+# corpus-audit profile of gray-lake-labs/declarative-agents binds
 # docs/corpus-charter.yaml relative to --directory, so this file decides what
 # gates here (parent GH-2346 mechanism). The audit command is in
 # docs/guides/corpus-audit.md.

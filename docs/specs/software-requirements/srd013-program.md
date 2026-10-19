@@ -15,14 +15,14 @@ title: "Script: issue (tpm issue ...)"
 ## Problem
 
 Every issue that enters a program has to carry the labels and sections the
-other scripts read, and every merge request has to tell its reviewer what to
+other scripts read, and every merge has to tell its reviewer what to
 look at. Done by hand, admission means something different in each
 repository, and an issue missing its acceptance criteria reaches do-work
 with nothing to build against.
 
 The issue subcommands are the small set of issue operations every
 repository shares: the labels admission reads, admission, filing, showing,
-taking an issue into a worktree, and opening a merge request. Together with
+taking an issue into a worktree, and delivering it by a reviewed merge. Together with
 the specify and implement skills (srd035, srd036) they are the inner
 loop on GitLab.
 Tracking objectives against evidence, verifying what was built, closing
@@ -33,7 +33,7 @@ recording a release plan belongs to plan.
 ## Goals
 
 - G1: Admission is a script, so needs-triage means the same thing in every repository.
-- G2: Filing an issue and opening its merge request each have one subcommand, used by every skill.
+- G2: Filing an issue and merging its branch each have one subcommand, used by every skill.
 - G3: Every issue is taken the same way, claimed by the person who works it, on its own branch, in its own worktree.
 
 <!-- req: R1 -->
@@ -237,7 +237,7 @@ merge merges the branch with a merge commit citing the issue and named sub-issue
 <!-- ac: AC5 -->
 ### AC5
 
-A merge request that changes docs/ names mage audit in its reviewer focus, whatever its issue's plane or kind.
+A merge of a branch that changes docs/ runs mage audit first and merges nothing when it fails, whatever its issue's plane or kind.
 
 <!-- field: traces -->
 #### Traces

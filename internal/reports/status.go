@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/standup"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // StatusLabels are the status issue's labels besides its component: a
@@ -70,7 +70,7 @@ func StatusBody(cfg Config, m Member, reportsProject string, weekStart time.Time
 
 ## Recurrence
 
-Weekly, due the day after %[8]s. After the merge request closes it, the reports repository's scheduled tpm reports status-issues run opens the next week's instance.
+Weekly, due the day after %[8]s. After its merge closes it, the reports repository's scheduled tpm reports status-issues run opens the next week's instance.
 
 ## Previous Runs
 
@@ -104,7 +104,7 @@ type StatusInput struct {
 // StatusIssues leaves one status issue per listed person for the target
 // week: an existing one is kept, the person's latest status issue is
 // recurred, and with none a fresh one is filed (srd018 R7).
-func StatusIssues(t gitlab.Tracker, in StatusInput) ([]StatusResult, error) {
+func StatusIssues(t tracker.Tracker, in StatusInput) ([]StatusResult, error) {
 	reminder, err := Weekday(in.Config.ReminderWeekday)
 	if err != nil {
 		return nil, err
@@ -114,11 +114,11 @@ func StatusIssues(t gitlab.Tracker, in StatusInput) ([]StatusResult, error) {
 	var out []StatusResult
 	for _, m := range in.Config.Team {
 		r := StatusResult{User: m.Username, Project: m.Project, Week: week, DueDate: due}
-		issues, err := t.ListIssues(m.Project, gitlab.IssueQuery{State: "all", Labels: []string{"type::recurring"}})
+		issues, err := t.ListIssues(m.Project, tracker.IssueQuery{State: "all", Labels: []string{"type::recurring"}})
 		if err != nil {
 			return out, err
 		}
-		var latest *gitlab.Issue
+		var latest *tracker.Issue
 		latestWeek := ""
 		for k := range issues {
 			mm := statusPattern.FindStringSubmatch(issues[k].Description)
@@ -148,7 +148,7 @@ func StatusIssues(t gitlab.Tracker, in StatusInput) ([]StatusResult, error) {
 					return out, err
 				}
 				labels := append([]string{"type::recurring"}, program.Labels(l.Plane, "", l.Kind, l.Component)...)
-				fr, err := program.File(t, m.Project, gitlab.NewIssue{Title: in.Config.Title(week), Description: body, Labels: labels, DueDate: due}, in.Policy, in.DryRun)
+				fr, err := program.File(t, m.Project, tracker.NewIssue{Title: in.Config.Title(week), Description: body, Labels: labels, DueDate: due}, in.Policy, in.DryRun)
 				if err != nil {
 					return out, err
 				}

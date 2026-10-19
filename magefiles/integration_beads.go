@@ -2,7 +2,7 @@ package main
 
 // The 03.0 targets build fixture tracker repositories on local disk and
 // need no rig and no network (test-rel03.0-beads-tracker), so they are not
-// among the integrationTargets mage regression runs against GitLab.
+// among the integrationTargets mage regression runs against the rig.
 
 // BeadsPopClose proves one issue's life on beads: pop assigns only the caller, the merge closes it with the commit cited, a second close changes nothing (test-rel03.0-beads-tracker).
 func (Integration) BeadsPopClose() error {

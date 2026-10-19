@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 func TestPlannedRoundTripsThroughMarker(t *testing.T) {
@@ -41,8 +41,8 @@ func TestParseIgnoresCommentsWithoutExactlyOneMarker(t *testing.T) {
 }
 
 func TestPostIsIdempotentAndDryRunWritesNothing(t *testing.T) {
-	f := gitlabtest.New()
-	issue, _ := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: "objective"})
+	f := fake.New()
+	issue, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "objective"})
 	writes := f.Writes
 	e, text := Planned("01.0", []string{"https://h/g/s/-/blob/v1/o.md#R1.1"}, "dev")
 

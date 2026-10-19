@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
@@ -19,7 +19,7 @@ const (
 // planned is a system checkout whose road map holds release 01.1, and a
 // tracker with the fleet's subsystem SRD and its objective issue filed for
 // release 01.0, whose IID it returns.
-func planned(t *testing.T, p trackertest.Program) (PushInput, gitlab.Tracker, int) {
+func planned(t *testing.T, p trackertest.Program) (PushInput, tracker.Tracker, int) {
 	t.Helper()
 	p.AddFile(sys, "main", "docs/specs/software-requirements/srd010-delivery.md", read(t, "../../testdata/system/srd010-delivery.md"))
 	dir := system(t)
@@ -32,7 +32,7 @@ func planned(t *testing.T, p trackertest.Program) (PushInput, gitlab.Tracker, in
 		Items: []string{"obj001-reliable-agents#R2.1", "obj002-fast-scoring#R1.1"}}, c, nil, "", 0); err != nil {
 		t.Fatal(err)
 	}
-	objective, err := f.CreateIssue(fleet, gitlab.NewIssue{Title: "Objective R2", Labels: []string{"plane::management"},
+	objective, err := f.CreateIssue(fleet, tracker.NewIssue{Title: "Objective R2", Labels: []string{"plane::management"},
 		Description: "Objective R2\n\n<!-- tpm goals objective=obj001-reliable-agents#R2 release=01.0 -->"})
 	if err != nil {
 		t.Fatal(err)
@@ -42,18 +42,18 @@ func planned(t *testing.T, p trackertest.Program) (PushInput, gitlab.Tracker, in
 }
 
 // issuesOf lists every issue of project, open or closed, by IID.
-func issuesOf(t *testing.T, f gitlab.Tracker, project string) []gitlab.Issue {
+func issuesOf(t *testing.T, f tracker.Tracker, project string) []tracker.Issue {
 	t.Helper()
-	issues, err := f.ListIssues(project, gitlab.IssueQuery{State: "all"})
+	issues, err := f.ListIssues(project, tracker.IssueQuery{State: "all"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	return issues
 }
 
-func describe(t *testing.T, f gitlab.Tracker, project string, iid int, d string) {
+func describe(t *testing.T, f tracker.Tracker, project string, iid int, d string) {
 	t.Helper()
-	if _, err := f.UpdateIssue(project, iid, gitlab.IssueUpdate{Description: &d}); err != nil {
+	if _, err := f.UpdateIssue(project, iid, tracker.IssueUpdate{Description: &d}); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -74,7 +74,7 @@ func testPushSprintUpdatesMilestoneAndChecklist(t *testing.T, p trackertest.Prog
 		t.Fatal(err)
 	}
 	m, _ := f.FindMilestone(sys, "01.1")
-	if res.Milestone != gitlab.MilestoneCreated || m.DueDate != "2026-11-27" || m.StartDate != "2026-11-07" || m.Description != "Release 01.1, 2026-W45 to 2026-W48." {
+	if res.Milestone != tracker.MilestoneCreated || m.DueDate != "2026-11-27" || m.StartDate != "2026-11-07" || m.Description != "Release 01.1, 2026-W45 to 2026-W48." {
 		t.Fatalf("milestone %s %+v", res.Milestone, m)
 	}
 	sprint := issuesOf(t, f, sys)[0]
@@ -90,7 +90,7 @@ func testPushSprintUpdatesMilestoneAndChecklist(t *testing.T, p trackertest.Prog
 		t.Fatal(err)
 	}
 	after := issuesOf(t, f, sys)
-	if res.Milestone != gitlab.MilestoneUpdated || res.Sprint.Action != "updated" || len(after) != 1 ||
+	if res.Milestone != tracker.MilestoneUpdated || res.Sprint.Action != "updated" || len(after) != 1 ||
 		!strings.Contains(after[0].Description, "- [x] obj002-fast-scoring#R1") || after[0].DueDate != "2026-12-04" {
 		t.Fatalf("second push: %+v\n%s", res, after[0].Description)
 	}
@@ -127,7 +127,7 @@ func testPlanPushFilesSprintEndIssuesOnce(t *testing.T, p trackertest.Program) {
 		!strings.Contains(notes[0].Body, "/-/blob/corpus/v0.1.0/docs/specs/objectives/obj001-reliable-agents.md#R2.1") {
 		t.Fatalf("planned event: %+v", notes)
 	}
-	// GitLab stores descriptions without the trailing newline.
+	// A tracker may store descriptions without the trailing newline.
 	for _, project := range []string{sys, fleet} {
 		for _, i := range issuesOf(t, f, project) {
 			if d := strings.TrimRight(i.Description, "\n"); d != i.Description {
@@ -140,7 +140,7 @@ func testPlanPushFilesSprintEndIssuesOnce(t *testing.T, p trackertest.Program) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if p.Writes() != writes || res.Milestone != gitlab.MilestoneUnchanged || res.Sprint.Action != "unchanged" ||
+	if p.Writes() != writes || res.Milestone != tracker.MilestoneUnchanged || res.Sprint.Action != "unchanged" ||
 		res.SprintEnds[0].Action != "unchanged" || res.Planned[0].Posted || len(issuesOf(t, f, fleet)) != 2 {
 		t.Fatalf("second push wrote %d: %+v", p.Writes()-writes, res)
 	}

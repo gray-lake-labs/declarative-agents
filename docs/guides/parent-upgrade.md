@@ -1,7 +1,7 @@
 # Parent Upgrade
 
 This corpus derives some of its requirements from the parent,
-Nokia-Bell-Labs/declarative-agents. Each such requirement carries a
+gray-lake-labs/declarative-agents. Each such requirement carries a
 `derived_from` entry naming the parent release it was validated against,
 and `docs/external-pins.yaml` names the release the corpus tracks. When the
 parent ships a new release, we move the pin, and every requirement whose
@@ -12,13 +12,13 @@ is that workflow, invoked by name as **parent-upgrade**.
 
 | What | Where |
 |---|---|
-| Tracked pin | `docs/external-pins.yaml`, key `github.com/Nokia-Bell-Labs/declarative-agents` |
-| Parent cache | `../declarative-agents-nokia` (set in `docs/external-checkouts.yaml`; Nokia `main` and its release tags only) |
+| Tracked pin | `docs/external-pins.yaml`, key `github.com/gray-lake-labs/declarative-agents` |
+| Release cache | the user cache directory, `scrum-master/release/<tag>`: each release's agent, spec tool, and source, downloaded and checksum-verified on first use |
 | Provenance entries | the `derived_from` attribute of an SRD's `req` marker, a JSON list of `repo`, `release`, `srd`, `item`, `reason` |
 | Corpus format | the parent's Markdown format (its eng10), checked by the audit's `markdown-format` and `not-canonical` checks |
-| Format tools | `mage convert`, `mage fmt`, `mage specCheck` (`magefiles/spec.go`), built once per pin from the pinned release |
+| Format tools | `mage convert`, `mage fmt`, `mage specCheck` (`magefiles/spec.go`), running the pinned release's published spec tool |
 | Audit that reports staleness | the parent corpus audit, `docs/guides/corpus-audit.md` |
-| Next bump | the open issue `Recurring: bump the Nokia declarative-agents pin` |
+| Next bump | the open issue `Recurring: bump the declarative-agents pin` |
 
 ## The resolution idiom
 
@@ -32,14 +32,13 @@ corpus claiming a provenance nobody checked.
 
 ## Steps
 
-1. **Bring the release into the cache.**
-   `git -C ../declarative-agents-nokia fetch --tags origin`, then confirm the
-   new tag is on Nokia's line:
-   `git -C ../declarative-agents-nokia merge-base --is-ancestor <tag> origin/main`.
+1. **Check the release is published.** The new tag lists its binaries and
+   `SHA256SUMS` on the parent's releases page; mage downloads them on first
+   use after the pin moves.
 
 2. **Move the pin.** Set the key in `docs/external-pins.yaml` to the new tag.
 
-3. **Convert and format.** The format tools rebuild against the new pin on
+3. **Convert and format.** The format tools download the new pin's spec tool on
    first use. `mage convert all` converts any corpus document still in YAML
    to Markdown in place and prints what the conversion reported; it has
    work only when this corpus gained a YAML document or the release
@@ -52,8 +51,10 @@ corpus claiming a provenance nobody checked.
 
 4. **Re-pin what did not change.** For every `derived_from` entry, compare the
    cited item's text at the entry's `release` and at the new pin
-   (`git -C ../declarative-agents-nokia show <release>:<path-to-srd>`; the
-   parent's SRDs are Markdown, each item under its own `req` marker). Where
+   (the file under each release's cached `src/`, `scrum-master/release/<release>`
+   in the user cache, which `mage audit` downloads for the pin; download an
+   older one the same way. The parent's SRDs are Markdown, each item under
+   its own `req` marker). Where
    the text is byte-identical, set `release` to the pin. This is the
    mechanical half the parent's `mage upgrade` performs for its own modules;
    that target is wired to the parent's module list and does not reach this
@@ -86,13 +87,13 @@ corpus claiming a provenance nobody checked.
 
 8. **Verify.** A green audit is not green tests: run `go test ./...` and
    `mage regression:all`, whose rig seeds a Markdown road map and subsystem
-   SRDs, and record both in the bump's merge request. A bump that cannot
+   SRDs, and record both in the bump's merged change. A bump that cannot
    reach the rig says so there rather than leaving it implied.
 
 ## Recurrence
 
 The repository keeps one open issue for the next bump, titled
-`Recurring: bump the Nokia declarative-agents pin`. The change that moves the
+`Recurring: bump the declarative-agents pin`. The change that moves the
 pin closes it, and whoever closes it opens a fresh copy with the pinned
 release updated (gh-issue-pop Phase 6), so the pin history reads from the
 issue chain and the next release always has somewhere to land. A larger

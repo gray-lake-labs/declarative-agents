@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 const (
@@ -41,7 +41,7 @@ type Sources struct {
 // Load reads the release from the road-map on ref, then the objective
 // documents and subsystem SRDs at the release tag, so every fact is the
 // one the Cites lines will pin.
-func Load(t gitlab.Tracker, system, version, ref string) (Sources, error) {
+func Load(t tracker.Tracker, system, version, ref string) (Sources, error) {
 	s := Sources{System: system, Documents: map[string]*objectives.Document{}}
 	f, err := corpus.Get(t, system, roadMapPath, ref)
 	if err != nil {

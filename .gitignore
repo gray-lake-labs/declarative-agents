@@ -1,3 +1,4 @@
 .regression/
 
 infra/platform/
+docs/external-checkouts.yaml

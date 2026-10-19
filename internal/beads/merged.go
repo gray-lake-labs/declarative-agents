@@ -6,21 +6,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // citation is a project#iid reference in a merge commit's message.
 var citation = regexp.MustCompile(`[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)*#\d+`)
 
-// MergedMergeRequests reads a project's merged history from the merge
-// commits on its default branch, the delivery a merge request is on GitLab
-// (srd042 R2.3). A merge is numbered by its place in the branch's
+// Merges reads a project's merged history from the merge
+// commits on its default branch, which are its deliveries (srd042 R2.3). A merge is numbered by its place in the branch's
 // first-parent history, so the number is stable; its author is the merge
 // commit's author and its merge date the commit date; and it closes every
-// issue its message cites, written into the description as GitLab's
+// issue its message cites, written into the description as
 // Closes lines. The branch read is whichever of the local and origin
 // default branches is the newer.
-func (t *Tracker) MergedMergeRequests(project, author, since string) ([]gitlab.MergeRequest, error) {
+func (t *Tracker) Merges(project, author, since string) ([]tracker.Merge, error) {
 	if _, err := time.Parse("2006-01-02", since); err != nil {
 		return nil, fmt.Errorf("since %q is not YYYY-MM-DD", since)
 	}
@@ -41,7 +40,7 @@ func (t *Tracker) MergedMergeRequests(project, author, since string) ([]gitlab.M
 	if err != nil {
 		return nil, err
 	}
-	var out []gitlab.MergeRequest
+	var out []tracker.Merge
 	n := 0
 	for _, entry := range strings.Split(log, "\x1e") {
 		fields := strings.SplitN(strings.TrimLeft(entry, "\n"), "\x1f", 3)
@@ -58,7 +57,7 @@ func (t *Tracker) MergedMergeRequests(project, author, since string) ([]gitlab.M
 		for _, ref := range citation.FindAllString(message, -1) {
 			description += "\n\nCloses " + ref
 		}
-		out = append(out, gitlab.MergeRequest{IID: n, Title: title, Description: strings.TrimSpace(description),
+		out = append(out, tracker.Merge{IID: n, Title: title, Description: strings.TrimSpace(description),
 			TargetBranch: base, State: "merged", Author: by, MergedAt: date})
 	}
 	return out, nil

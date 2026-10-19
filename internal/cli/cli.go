@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Command is one subcommand of one group. A command with an empty Name is
@@ -33,9 +33,9 @@ type Context struct {
 	DryRun  bool
 	Flags   *flag.FlagSet
 	Out     io.Writer
-	Tracker func() (gitlab.Tracker, error)
+	Tracker func() (tracker.Tracker, error)
 	// used is the tracker the command opened, so Emit can name what it read.
-	used gitlab.Tracker
+	used tracker.Tracker
 }
 
 // Emit writes v as JSON with --json, else the human text. When the command's
@@ -59,16 +59,16 @@ func (c *Context) Emit(v any, human string) error {
 	return err
 }
 
-func (c *Context) read() (gitlab.Read, bool) {
-	if r, isReader := c.used.(gitlab.Reader); isReader {
+func (c *Context) read() (tracker.Read, bool) {
+	if r, isReader := c.used.(tracker.Reader); isReader {
 		return r.LastRead()
 	}
-	return gitlab.Read{}, false
+	return tracker.Read{}, false
 }
 
 // withRead adds tracker_read to v when v encodes as a JSON object; any
 // other shape is left as it is, so no output changes type.
-func withRead(v any, read gitlab.Read) any {
+func withRead(v any, read tracker.Read) any {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return v
@@ -82,7 +82,7 @@ func withRead(v any, read gitlab.Read) any {
 	return obj
 }
 
-func readLine(r gitlab.Read) string {
+func readLine(r tracker.Read) string {
 	commit := r.Commit
 	if len(commit) > 12 {
 		commit = commit[:12]
@@ -144,7 +144,7 @@ func (r *Registry) Commands(group string) []*Command {
 var ErrUsage = errors.New("usage")
 
 // Run parses args (without the program name) and runs one subcommand.
-func (r *Registry) Run(args []string, out io.Writer, tracker func() (gitlab.Tracker, error)) error {
+func (r *Registry) Run(args []string, out io.Writer, open func() (tracker.Tracker, error)) error {
 	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" {
 		fmt.Fprint(out, r.usage())
 		if len(args) == 0 {
@@ -181,11 +181,11 @@ func (r *Registry) Run(args []string, out io.Writer, tracker func() (gitlab.Trac
 	fs := flag.NewFlagSet(strings.TrimSpace("tpm "+cmd.Group+" "+cmd.Name), flag.ContinueOnError)
 	fs.SetOutput(out)
 	ctx := &Context{Flags: fs, Out: out}
-	ctx.Tracker = func() (gitlab.Tracker, error) {
+	ctx.Tracker = func() (tracker.Tracker, error) {
 		if ctx.used != nil {
 			return ctx.used, nil
 		}
-		t, err := tracker()
+		t, err := open()
 		if err == nil {
 			ctx.used = t
 		}

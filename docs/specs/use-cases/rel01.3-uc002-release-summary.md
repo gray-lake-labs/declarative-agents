@@ -11,7 +11,7 @@ test_suite: test-rel01.3-tag-triggered
 
 When the system repository tags a release, a CI pipeline runs tpm reports
 aggregate over the reports since the previous system release and tpm
-reports deck over the result, and opens one merge request in the reports
+reports deck over the result, and opens one summary for review in the reports
 repository with the computed aggregate and deck, linked to the open
 stakeholder update issue. The pipeline spends no model tokens. When the
 lead works the stakeholder update, the model drafts the summary prose from
@@ -40,7 +40,7 @@ tpm release tag creates a release tag in the system repository.
 - F1: The tag triggers the system repository's summary pipeline, which runs tpm.
 - F2: tpm reports aggregate computes the signals over the reports between the previous system release tag and this one.
 - F3: tpm reports deck renders the computed aggregate into the deck template, within the configured slide limit.
-- F4: tpm opens one merge request in the reports repository with the computed aggregate and the deck, linked to the stakeholder update issue; if one exists for this tag, it opens none.
+- F4: tpm pushes one branch and files one review issue in the reports repository with the computed aggregate and the deck, linked to the stakeholder update issue; if one exists for this tag, it opens none.
 - F5: Model step (combine): when the lead pops the stakeholder update issue, the model drafts the summary prose from the reports and the computed aggregate.
 - F6: Model step (iterate): the model revises the outline and the summary with the lead; the merge closes the stakeholder update issue.
 
@@ -60,7 +60,7 @@ tpm release tag creates a release tag in the system repository.
 <!-- sc: S1 -->
 ### S1
 
-A system tag runs aggregate and deck in CI and opens one merge request with the computed aggregate and deck, linked to the stakeholder update issue.
+A system tag runs aggregate and deck in CI and pushes one branch, with one review issue, holding the computed aggregate and deck, linked to the stakeholder update issue.
 
 <!-- field: traces -->
 #### Traces
@@ -74,7 +74,7 @@ A system tag runs aggregate and deck in CI and opens one merge request with the 
 <!-- sc: S2 -->
 ### S2
 
-A second run on the same tag opens no merge request.
+A second run on the same tag pushes no branch and files no issue.
 
 <!-- field: traces -->
 #### Traces
@@ -85,7 +85,7 @@ A second run on the same tag opens no merge request.
 <!-- sc: S3 -->
 ### S3
 
-The model drafts the summary prose and iterates on it with the lead; the stakeholder update closes by the reviewed merge request, with the lead's approval of the outline and no comparison of people.
+The model drafts the summary prose and iterates on it with the lead; the stakeholder update closes by the reviewed merge, with the lead's approval of the outline and no comparison of people.
 
 <!-- field: traces -->
 #### Traces

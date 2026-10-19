@@ -70,7 +70,7 @@ Only the program lead or a sub-project lead files a plane::management issue. Scr
 <!-- req: R1.3 -->
 ### R1.3
 
-A plane::management issue never enters the backlog. It is assigned by the pop of the lead who works it, the filer or, for an objective issue, the receiving Product Owner, and closed by that lead's merge request, or for an objective by track-goals when it is met (R30.1).
+A plane::management issue never enters the backlog. It is assigned by the pop of the lead who works it, the filer or, for an objective issue, the receiving Product Owner, and closed by that lead's merge, or for an objective by track-goals when it is met (R30.1).
 
 <!-- req: R1.4 -->
 ### R1.4
@@ -88,7 +88,7 @@ A plane::control issue changes a rule the process runs by: the label schema, the
 <!-- req: R2.2 -->
 ### R2.2
 
-A plane::control issue is closed only by a merge request that changes a policy file and that a lead other than the author approved.
+A plane::control issue is closed only by a merge that changes a policy file and that a lead other than the author approved.
 
 <!-- req: R2.3 -->
 ### R2.3
@@ -139,7 +139,7 @@ Rules flow from the control plane to the data plane only as policy files that sc
 <!-- req: R4.3 -->
 ### R4.3
 
-State flows up only as tracker state: issues, labels, comments, merge requests, and tags, read by the reporting scripts. No plane sends status through a channel outside the tracker.
+State flows up only as tracker state: issues, labels, comments, merges, and tags, read by the reporting scripts. No plane sends status through a channel outside the tracker.
 
 <!-- req: R5 -->
 ## R5 - Exactly one plane
@@ -170,7 +170,7 @@ An epic is an issue labelled type::epic whose description holds a task list of m
 <!-- req: R6.2 -->
 ### R6.2
 
-An epic is never popped into a worktree and never has a merge request of its own. A pop request on an epic is refused and lists its open members.
+An epic is never popped into a worktree and never has a merge of its own. A pop request on an epic is refused and lists its open members.
 
 <!-- req: R6.3 -->
 ### R6.3
@@ -249,7 +249,7 @@ A plain issue's steps are child tasks under it. Tasks are not issues; they carry
 <!-- req: R9.3 -->
 ### R9.3
 
-A plain issue is worked in one worktree and closed, with all its tasks, by one merge request.
+A plain issue is worked in one worktree and closed, with all its tasks, by one merge.
 
 <!-- req: R9.4 -->
 ### R9.4
@@ -262,7 +262,7 @@ A plain issue may be a member of at most one epic.
 <!-- req: R10.1 -->
 ### R10.1
 
-Builds or changes software. Finished when the merge request's tests pass and the actual size is recorded against the estimate.
+Builds or changes software. Finished when the merged branch's tests pass and the actual size is recorded against the estimate.
 
 <!-- req: R10.2 -->
 ### R10.2
@@ -412,7 +412,7 @@ A producer may decline a defect, request, or question. Declining closes the issu
 <!-- req: R20.4 -->
 ### R20.4
 
-The kind routes pull: it decides who takes an issue, whether it is offered, and how it is counted. It does not change how the work runs. Every kind is popped, worked by do-work against the issue's Requirements and Acceptance Criteria, and closed by one merge request or one recorded answer.
+The kind routes pull: it decides who takes an issue, whether it is offered, and how it is counted. It does not change how the work runs. Every kind is popped, worked by do-work against the issue's Requirements and Acceptance Criteria, and closed by one merge or one recorded answer.
 
 <!-- req: R21 -->
 ## R21 - The component axis
@@ -621,7 +621,7 @@ Any member of the program files it, and it is in the backlog like every other pl
 <!-- req: R33.3 -->
 ### R33.3
 
-It carries Requirements and Acceptance Criteria, and its merge request changes docs/ and merges only when the corpus audit passes (srd034 R2.2).
+It carries Requirements and Acceptance Criteria, and its branch changes docs/ and merges only when the corpus audit passes (srd034 R2.2).
 
 <!-- field: goals -->
 ## Goals
@@ -629,7 +629,7 @@ It carries Requirements and Acceptance Criteria, and its merge request changes d
 - G1: Every issue declares its plane, kind, and component with exactly one label each; type and state are set only where they apply.
 - G2: Each plane has its own filing and closing rules, and information crosses planes in one direction per kind.
 - G3: The objects that are not plain work are recognizable from one type label, and the hierarchy stays flat at epic, issue, and task.
-- G4: Every kind of work travels the same inner loop (push, pop, do-work, merge request); the kind decides who pulls it and what finishing means, not how it runs.
+- G4: Every kind of work travels the same inner loop (push, pop, do-work, merge); the kind decides who pulls it and what finishing means, not how it runs.
 - G5: The process reads component values without defining them.
 
 <!-- field: non_goals -->
@@ -642,13 +642,13 @@ It carries Requirements and Acceptance Criteria, and its merge request changes d
 - A goal type; an objective is an ordinary issue whose events are its ledger (srd006 R11).
 - Nesting epics or nesting worktrees.
 - Estimating effort per kind.
-- A separate workflow per kind; every kind ends in one merge request or one recorded answer on the same issue loop.
+- A separate workflow per kind; every kind ends in one merge or one recorded answer on the same issue loop.
 - Sub-kinds; a program that needs finer distinctions uses its own labels outside the process axes.
 - Naming, ordering, or describing any component.
 - Ownership of a component by a person; people declare which components they will pull, the component does not name people.
 - Hierarchies of components.
 - Priority or ordering; scheduling is a policy, not a state.
-- States inside a merge request (draft, review, approved); those belong to the merge request, not the issue.
+- States of a branch under review (draft, review, approved); the issue carries only its approval comment (srd013 R5.6).
 - Per-component state machines; one machine serves every component.
 
 <!-- field: acceptance_criteria -->
@@ -670,7 +670,7 @@ A management-plane issue filed by a non-lead, or a script-created management iss
 <!-- ac: AC2 -->
 ### AC2
 
-A control-plane issue closes only through a merge request that changes a policy file with a second lead's approval; control-plane issues never appear in the backlog; every script's rules resolve to a policy-file entry.
+A control-plane issue closes only through a merge that changes a policy file with a second lead's approval; control-plane issues never appear in the backlog; every script's rules resolve to a policy-file entry.
 
 <!-- field: traces -->
 #### Traces
@@ -760,7 +760,7 @@ A breaking release marks each subscribing recurring issue needs-run and a compat
 <!-- ac: AC9 -->
 ### AC9
 
-A plain issue carries one component, kind, plane, and milestone; its tasks are never in the backlog; one merge request closes it with its tasks; no plain issue appears in two epics.
+A plain issue carries one component, kind, plane, and milestone; its tasks are never in the backlog; one merge closes it with its tasks; no plain issue appears in two epics.
 
 <!-- field: traces -->
 #### Traces
@@ -773,7 +773,7 @@ A plain issue carries one component, kind, plane, and milestone; its tasks are n
 <!-- ac: AC10 -->
 ### AC10
 
-Build, experiment, and research issues are filed by people, ready when unassigned, and close only when their finishing artifact (passing tests and size, result with reproduction command, document with a Result section) is in the merge request.
+Build, experiment, and research issues are filed by people, ready when unassigned, and close only when their finishing artifact (passing tests and size, result with reproduction command, document with a Result section) is in the merged branch.
 
 <!-- field: traces -->
 #### Traces
@@ -955,7 +955,7 @@ Retired in 01.2 (design.md D12).
 <!-- ac: AC24 -->
 ### AC24
 
-A kind::spec issue filed by any member is admitted into the backlog with Requirements and Acceptance Criteria, and its merge request changing docs/ merges only when the corpus audit passes.
+A kind::spec issue filed by any member is admitted into the backlog with Requirements and Acceptance Criteria, and its branch changing docs/ merges only when the corpus audit passes.
 
 <!-- field: traces -->
 #### Traces

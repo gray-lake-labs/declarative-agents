@@ -73,7 +73,7 @@ Posted by handoff on the issue named in a closed issue's Upstream line (srd007 R
 <!-- req: R3.2 -->
 ### R3.2
 
-Required keys are from (the closed issue) and mr (the closing merge request). It mentions the upstream issue's assignee.
+Required keys are from (the closed issue) and mr (the closing merge commit; the key keeps its name). It mentions the upstream issue's assignee.
 
 <!-- req: R4 -->
 ## R4 - event=superseded
@@ -204,7 +204,7 @@ No other source (labels, assignee, closed state, checklists) is read to decide w
 
 - Chat or mail integration; the tracker's notifications are the delivery.
 - Threading or reactions; events are flat comments.
-- Events on merge requests; events attach to issues.
+- Events on anything but issues; events attach to issues.
 
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria

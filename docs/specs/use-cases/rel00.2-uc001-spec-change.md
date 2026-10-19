@@ -12,9 +12,9 @@ test_suite: test-rel00.2-docs-change
 Requirements change during design: a Developer adds a component SRD,
 rewrites a use case, or adjusts a test suite. specify files the request
 as a kind::spec data issue, anyone's and in the backlog. The Developer pops
-it and changes docs/ in the worktree; implement runs mage audit and opens
-no merge request while it fails; once it passes, the merge request names
-mage audit and its merge closes the issue.
+it and changes docs/ in the worktree; tpm issue merge runs mage audit first
+and merges nothing while it fails; once it passes, the merge
+closes the issue.
 
 <!-- field: actor -->
 ## Actor
@@ -39,7 +39,7 @@ A design change to a component SRD, use case, test suite, or the architecture.
 - F2: Model step (structure): the model turns the request into the issue body.
 - F3: tpm sets plane::data and kind::spec and files the issue unassigned through tpm issue file; it is admitted into the backlog.
 - F4: The Developer pops it into its worktree and changes the documents there.
-- F5: implement runs mage audit; a failure is reported with its findings and no merge request is opened.
+- F5: implement runs mage audit; a failure is reported with its findings and nothing merges.
 - F6: tpm issue merge runs mage audit in the worktree; with the audit passing it merges the branch, and the merge closes the issue.
 
 <!-- field: touchpoints -->
@@ -50,7 +50,7 @@ A design change to a component SRD, use case, test suite, or the architecture.
 | T1 | [srd001-labels](../software-requirements/srd001-labels.md) [R33.1](../software-requirements/srd001-labels.md#r331), [R33.2](../software-requirements/srd001-labels.md#r332), [R33.3](../software-requirements/srd001-labels.md#r333) | S1 traces kind::spec. |
 | T2 | [srd035-specify](../software-requirements/srd035-specify.md) [R2.2](../software-requirements/srd035-specify.md#r22) | S1 traces how push picks the kind. |
 | T3 | [srd036-implement](../software-requirements/srd036-implement.md) [R3.2](../software-requirements/srd036-implement.md#r32) | S2 traces the audit gate. |
-| T4 | [srd013-program](../software-requirements/srd013-program.md) [R5.3](../software-requirements/srd013-program.md#r53) | S2 traces the reviewer focus. |
+| T4 | [srd013-program](../software-requirements/srd013-program.md) [R5.3](../software-requirements/srd013-program.md#r53) | S2 traces the corpus gate before the merge. |
 | T5 | [srd034-objectives](../software-requirements/srd034-objectives.md) [R2.1](../software-requirements/srd034-objectives.md#r21), [R2.2](../software-requirements/srd034-objectives.md#r22) | S2 traces the corpus gate. |
 | T6 | [srd001-labels](../software-requirements/srd001-labels.md) [AC24](../software-requirements/srd001-labels.md#ac24) | S1 traces this acceptance criterion. |
 | T7 | [srd035-specify](../software-requirements/srd035-specify.md) [AC1](../software-requirements/srd035-specify.md#ac1) | S1 traces this acceptance criterion. |
@@ -79,7 +79,7 @@ A request naming a docs/ path other than a planning document becomes an admitted
 <!-- sc: S2 -->
 ### S2
 
-The merge request opens only when mage audit passes, names mage audit in its reviewer focus, and closes the issue when merged.
+The merge happens only when mage audit passes, and it closes the issue.
 
 <!-- field: traces -->
 #### Traces
@@ -96,7 +96,7 @@ The merge request opens only when mage audit passes, names mage audit in its rev
 ## Out of scope
 
 - Planning documents; that is rel00.2-uc002-planning-change.
-- Running mage audit in CI on the merge request; filed as GH-150.
+- Running mage audit in CI on every change; filed as GH-150.
 
 <!-- field: assumptions -->
 ## Assumptions

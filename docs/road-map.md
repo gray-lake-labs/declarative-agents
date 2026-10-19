@@ -314,7 +314,7 @@ a system release tag opens the computed aggregate for the lead's review.
 Moved from 01.2 on 2026-10-18 so the period loop ships first. Open before
 planning: the deck renders from an approved summary (srd018 R4.1, R6.2)
 but the tag pipeline renders it from the raw aggregate; the pipeline and
-the lead each open a merge request for the stakeholder update; the
+the lead each open a change for review for the stakeholder update; the
 reports configuration has no slide limit; and aggregation runs over ISO
 weeks, not a tag range.
 
@@ -331,14 +331,14 @@ weeks, not a tag range.
 | id | summary | status | priority |
 | --- | --- | --- | --- |
 | [rel01.3-uc001-reference-update](specs/use-cases/rel01.3-uc001-reference-update.md) | A downstream release tag files one reference-update issue upstream. | specified | P2 |
-| [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md) | A system release tag opens one merge request with the computed aggregate and deck; the model drafts the prose during the lead's review. | specified | P2 |
+| [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md) | A system release tag opens one summary for review with the computed aggregate and deck; the model drafts the prose during the lead's review. | specified | P2 |
 
 <!-- field: test_suites -->
 ### Test suites
 
 | id | summary | status |
 | --- | --- | --- |
-| [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | Idempotent tag-triggered reference-update issues and summary merge requests. | specified |
+| [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | Idempotent tag-triggered reference-update issues and summaries for review. | specified |
 
 <!-- field: proof -->
 ### Proof

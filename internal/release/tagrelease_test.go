@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
@@ -17,9 +17,9 @@ func TestTagRequiresPassingGateAndIncreasingVersion(t *testing.T) {
 	})
 }
 
-func testTagRequiresPassingGateAndIncreasingVersion(t *testing.T, f gitlab.Tracker) {
+func testTagRequiresPassingGateAndIncreasingVersion(t *testing.T, f tracker.Tracker) {
 	dir, git := repo(t, gatesMarkdown)
-	issue, _ := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: "Release a"})
+	issue, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Release a"})
 	p := policyWith("a", program.Check{Kind: "custom", Environment: "local", Command: "check"})
 	failing := false
 	gate := func(version string, at time.Time) {

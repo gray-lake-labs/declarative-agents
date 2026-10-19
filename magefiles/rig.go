@@ -16,7 +16,7 @@ import (
 	"github.com/magefile/mage/mg"
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Regression creates, uses, and destroys the regression rig
@@ -375,22 +375,22 @@ func (r *rigEnv) remoteBranch(project, branch string) bool {
 // milestone ensures a group milestone on the rig group, started yesterday,
 // so it is the active sprint tpm issue file defaults to.
 func (r *rigEnv) milestone(title, due string) error {
-	_, err := r.tr.EnsureMilestone(r.group, gitlab.Milestone{Title: title,
+	_, err := r.tr.EnsureMilestone(r.group, tracker.Milestone{Title: title,
 		StartDate: time.Now().AddDate(0, 0, -1).Format(time.DateOnly), DueDate: due})
 	return err
 }
 
-func (r *rigEnv) issues(project string) ([]gitlab.Issue, error) {
-	return r.tr.ListIssues(project, gitlab.IssueQuery{State: "opened"})
+func (r *rigEnv) issues(project string) ([]tracker.Issue, error) {
+	return r.tr.ListIssues(project, tracker.IssueQuery{State: "opened"})
 }
 
-func (r *rigEnv) issue(project string, iid int) (gitlab.Issue, error) {
+func (r *rigEnv) issue(project string, iid int) (tracker.Issue, error) {
 	return r.tr.GetIssue(project, iid)
 }
 
-func (r *rigEnv) notes(project string, iid int) ([]gitlab.Note, error) {
+func (r *rigEnv) notes(project string, iid int) ([]tracker.Note, error) {
 	ns, err := r.tr.ListNotes(project, iid)
-	var out []gitlab.Note
+	var out []tracker.Note
 	for _, n := range ns {
 		if !n.System {
 			out = append(out, n)

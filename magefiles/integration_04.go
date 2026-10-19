@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/release"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func init() {
@@ -79,7 +79,7 @@ major-and-minor-before-1.0
 	if err != nil {
 		return err
 	}
-	issue, err := r.tr.CreateIssue(po1, gitlab.NewIssue{Title: "Release grader 0.1.0"})
+	issue, err := r.tr.CreateIssue(po1, tracker.NewIssue{Title: "Release grader 0.1.0"})
 	if err != nil {
 		return err
 	}

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 // recGit records git calls; rev-parse --show-toplevel answers root, and
@@ -36,16 +36,16 @@ func (g *recGit) Run(dir string, args ...string) (string, error) {
 	return "", nil
 }
 
-func admitted(f *gitlabtest.Fake, title string) gitlab.Issue {
-	i, _ := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: title, Milestone: "m", Description: goodBody,
+func admitted(f *fake.Fake, title string) tracker.Issue {
+	i, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: title, Milestone: "m", Description: goodBody,
 		Labels: []string{"plane::data", "kind::build", "component::po-1"}})
 	return i
 }
 
-func newPopFixture(t *testing.T) (*gitlabtest.Fake, *recGit) {
+func newPopFixture(t *testing.T) (*fake.Fake, *recGit) {
 	t.Helper()
 	root := filepath.Join(t.TempDir(), "po-1")
-	return gitlabtest.New(), &recGit{root: root}
+	return fake.New(), &recGit{root: root}
 }
 
 func TestPopAssignsOnlyTheCaller(t *testing.T) {
@@ -67,7 +67,7 @@ func TestPopRefusesHeldOrUnadmitted(t *testing.T) {
 	f.Issues["g/po-1"][held.IID-1].Assignees = []string{"someone"}
 	closed := admitted(f, "Closed")
 	f.Issues["g/po-1"][closed.IID-1].State = "closed"
-	triage, _ := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: "No criteria", Labels: []string{"plane::data", "kind::build"}})
+	triage, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "No criteria", Labels: []string{"plane::data", "kind::build"}})
 	for _, c := range []struct {
 		iid  int
 		want string

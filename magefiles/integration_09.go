@@ -33,10 +33,6 @@ func (Integration) Onboard() error {
 	if err := r.seedSystem(system, po1, po2); err != nil {
 		return err
 	}
-	cache, err := parentCheckout(r.root)
-	if err != nil {
-		return err
-	}
 	store := filepath.Join(r.run.Dir, "joining", "store")
 	if err := os.MkdirAll(store, 0o755); err != nil {
 		return err
@@ -68,11 +64,11 @@ func (Integration) Onboard() error {
 			"registration issue: %+v %v", i, err)
 	}
 
-	writeFileTo(filepath.Join(store, checkoutsFile), "checkouts:\n  "+parentRepository+": "+cache+"\n")
 	if err := gitIn(store, "add", "-A"); err != nil {
 		return err
 	}
 	c.expect(runCorpusAudit(store, runStreaming) == nil, "the parent's corpus audit fails on the corpus tpm onboard wrote")
+	c.expect(specCheckAt(store) == nil, "the spec tool's check fails on the corpus tpm onboard wrote")
 
 	second, err := onboard()
 	if err != nil {

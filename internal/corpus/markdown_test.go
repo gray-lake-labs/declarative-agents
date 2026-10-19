@@ -5,8 +5,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 const doc = `---
@@ -81,14 +81,14 @@ func TestParseRefusesADocumentWithoutFrontmatter(t *testing.T) {
 }
 
 func TestGetReadsMarkdown(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	f.AddFile("g/s", "main", "docs/a.md", []byte("---\nid: a\n---\n"))
 	f.AddFile("g/s", "main", "docs/b.yaml", []byte("id: b\n"))
 	got, err := Get(f, "g/s", "docs/a.md", "main")
 	if err != nil || got.Path != "docs/a.md" || got.Markdown.ID() != "a" {
 		t.Fatalf("a: %+v %v", got, err)
 	}
-	if _, err := Get(f, "g/s", "docs/c.md", "main"); !errors.Is(err, gitlab.ErrNotFound) {
+	if _, err := Get(f, "g/s", "docs/c.md", "main"); !errors.Is(err, tracker.ErrNotFound) {
 		t.Fatalf("missing: %v", err)
 	}
 	if _, err := Get(f, "g/s", "docs/b.yaml", "main"); err == nil {

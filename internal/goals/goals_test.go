@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
@@ -28,7 +28,7 @@ func read(t *testing.T, p string) []byte {
 
 // fixture is the system repository: its road map, subsystem SRD, and
 // objective document.
-func fixture(t *testing.T, p trackertest.Program) (gitlab.Tracker, Sources) {
+func fixture(t *testing.T, p trackertest.Program) (tracker.Tracker, Sources) {
 	t.Helper()
 	p.AddFile(system, "main", "docs/road-map.md", read(t, "../../testdata/system/road-map.md"))
 	p.AddTag(system, "v0.1.0")
@@ -43,9 +43,9 @@ func fixture(t *testing.T, p trackertest.Program) (gitlab.Tracker, Sources) {
 }
 
 // fleetIssues lists every fleet issue, open or closed.
-func fleetIssues(t *testing.T, f gitlab.Tracker) []gitlab.Issue {
+func fleetIssues(t *testing.T, f tracker.Tracker) []tracker.Issue {
 	t.Helper()
-	issues, err := f.ListIssues(fleet, gitlab.IssueQuery{State: "all"})
+	issues, err := f.ListIssues(fleet, tracker.IssueQuery{State: "all"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func testPushFilesOneDatedPinnedObjectiveIssue(t *testing.T, tp trackertest.Prog
 	if res[0].Action != "created" || res[1].Action != "refused" || !strings.Contains(strings.Join(res[1].Reasons, ";"), "no repository confirmed") {
 		t.Fatalf("res = %+v", res)
 	}
-	issues, _ := f.ListIssues(fleet, gitlabRequest())
+	issues, _ := f.ListIssues(fleet, openIssues())
 	if len(issues) != 1 {
 		t.Fatalf("issues = %d", len(issues))
 	}
@@ -148,7 +148,7 @@ func testSecondPushChangesNothingAndKeepsOwnerNotes(t *testing.T, tp trackertest
 	}
 	i := fleetIssues(t, f)[0]
 	owned := i.Description + "Owner: rubric drafted, waiting on trajectories.\n"
-	if _, err := f.UpdateIssue(fleet, i.IID, gitlab.IssueUpdate{Description: &owned}); err != nil {
+	if _, err := f.UpdateIssue(fleet, i.IID, tracker.IssueUpdate{Description: &owned}); err != nil {
 		t.Fatal(err)
 	}
 	writes := tp.Writes()
@@ -196,7 +196,7 @@ func TestDueFallsBackToMilestoneAndDryRunWritesNothing(t *testing.T) {
 
 func testDueFallsBackToMilestoneAndDryRunWritesNothing(t *testing.T, tp trackertest.Program) {
 	f, s := fixture(t, tp)
-	if _, err := f.EnsureMilestone("program", gitlabMilestone("2026-11-06")); err != nil {
+	if _, err := f.EnsureMilestone("program", sprintMilestone("2026-11-06")); err != nil {
 		t.Fatal(err)
 	}
 	writes := tp.Writes()

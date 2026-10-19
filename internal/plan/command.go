@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/release"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func init() {
@@ -27,7 +27,7 @@ func init() {
 		fs.StringVar(&a.control, "control", "", "program repository holding control/policy.md; defaults to --system")
 		fs.StringVar(&a.ref, "ref", "main", "ref of the control files")
 	}
-	candidates := func(ctx *cli.Context) (Candidates, gitlab.Tracker, error) {
+	candidates := func(ctx *cli.Context) (Candidates, tracker.Tracker, error) {
 		in := Input{Dir: a.dir, System: a.system, Artifact: a.artifact, Now: time.Now(), Releases: program.Defaults().Releases}
 		if a.system != "" {
 			t, err := ctx.Tracker()

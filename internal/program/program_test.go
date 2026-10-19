@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab/gitlabtest"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 const goodBody = `Satisfy the evaluation objective
@@ -22,8 +22,8 @@ Environment: dev
 - One agent is scored (test: grader_scores_fixture_agent; environment: dev)
 `
 
-func objective(body string) gitlab.Issue {
-	return gitlab.Issue{Project: "g/po-1", IID: 1, Description: body, Milestone: "2026-W43..W45",
+func objective(body string) tracker.Issue {
+	return tracker.Issue{Project: "g/po-1", IID: 1, Description: body, Milestone: "2026-W43..W45",
 		Labels: []string{"plane::data", "kind::build", "component::fleet"}}
 }
 
@@ -49,7 +49,7 @@ func TestLintReportsEveryFailure(t *testing.T) {
 }
 
 func TestSprintIssueNeedsNoComponent(t *testing.T) {
-	i := gitlab.Issue{Labels: []string{"plane::management", "type::sprint"}}
+	i := tracker.Issue{Labels: []string{"plane::management", "type::sprint"}}
 	if r := Lint(i, Defaults()); len(r) != 0 {
 		t.Fatalf("reasons: %v", r)
 	}
@@ -58,17 +58,17 @@ func TestSprintIssueNeedsNoComponent(t *testing.T) {
 func TestManagementFilersAreEnforcedWhenListed(t *testing.T) {
 	p := Defaults()
 	p.ManagementFilers = []string{"tpm-lead"}
-	i := gitlab.Issue{Author: "someone", Labels: []string{"plane::management", "component::system"}}
+	i := tracker.Issue{Author: "someone", Labels: []string{"plane::management", "component::system"}}
 	if r := Lint(i, p); len(r) != 1 || !strings.Contains(r[0], "someone may not file a management issue") {
 		t.Fatalf("reasons: %v", r)
 	}
 }
 
 func TestApplySetsAndClearsNeedsTriageAndNothingElse(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	p := Defaults()
 	bad := objective(strings.Replace(goodBody, "/-/blob/v1.0.0/", "/-/blob/main/", 1))
-	created, _ := f.CreateIssue("g/po-1", gitlab.NewIssue{Title: "o", Description: bad.Description, Labels: bad.Labels, Milestone: bad.Milestone})
+	created, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "o", Description: bad.Description, Labels: bad.Labels, Milestone: bad.Milestone})
 
 	r, err := Apply(f, created, Lint(created, p), p, false)
 	if err != nil || r.Admitted || !r.Changed {
@@ -98,8 +98,8 @@ func TestApplySetsAndClearsNeedsTriageAndNothingElse(t *testing.T) {
 }
 
 func TestFileCreatesUnassignedLintedIssueAndDryRunWritesNothing(t *testing.T) {
-	f := gitlabtest.New()
-	in := gitlab.NewIssue{Title: "objective", Description: goodBody, Milestone: "2026-W43..W45", Labels: Labels("data", "", "build", "fleet")}
+	f := fake.New()
+	in := tracker.NewIssue{Title: "objective", Description: goodBody, Milestone: "2026-W43..W45", Labels: Labels("data", "", "build", "fleet")}
 	r, err := File(f, "g/po-1", in, Defaults(), true)
 	if err != nil || !r.DryRun || !r.Lint.Admitted || f.Writes != 0 {
 		t.Fatalf("dry run: r=%+v err=%v writes=%d", r, err, f.Writes)
@@ -115,7 +115,7 @@ func TestFileCreatesUnassignedLintedIssueAndDryRunWritesNothing(t *testing.T) {
 }
 
 func TestLoadPolicyReadsControlFiles(t *testing.T) {
-	f := gitlabtest.New()
+	f := fake.New()
 	f.AddFile("g/system", "main", "control/policy.md", []byte(`---
 id: policy
 title: Policy

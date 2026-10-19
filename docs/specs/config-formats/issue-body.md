@@ -152,7 +152,7 @@ html comment
 <!-- field: description -->
 #### Description
 
-"<!-- handoff: PROJECT!MR -->" in the description of an issue handoff created, naming the merge request or "PROJECT@TAG" naming the tag that caused it. Makes handoff idempotent (srd014 R5).
+"<!-- handoff: PROJECT!MR -->" in the description of an issue handoff created, naming the merge (the marker keeps its PROJECT!MR form) or "PROJECT@TAG" naming the tag that caused it. Makes handoff idempotent (srd014 R5).
 
 <!-- schema_entry: event_marker -->
 ### event_marker

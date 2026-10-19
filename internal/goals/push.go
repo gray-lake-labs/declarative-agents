@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/links"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Pushed is what push reports for one objective.
@@ -25,12 +25,12 @@ type Pushed struct {
 // posts its planned event (srd022 R4.1, R4.3). An objective with no
 // repository, no environment, or an unpinned citation is refused with its
 // reason (R5.1); the others proceed.
-func Push(t gitlab.Tracker, s Sources, p Plan, webBase string, policy program.Policy, dryRun bool) ([]Pushed, error) {
+func Push(t tracker.Tracker, s Sources, p Plan, webBase string, policy program.Policy, dryRun bool) ([]Pushed, error) {
 	due := ""
 	if p.Milestone != "" {
 		if m, err := t.FindMilestone(p.System, p.Milestone); err == nil {
 			due = m.DueDate
-		} else if !errors.Is(err, gitlab.ErrNotFound) {
+		} else if !errors.Is(err, tracker.ErrNotFound) {
 			return nil, err
 		}
 	}
@@ -73,17 +73,17 @@ func Push(t gitlab.Tracker, s Sources, p Plan, webBase string, policy program.Po
 		if existing != nil {
 			body = KeepNotes(body, existing.Description)
 		}
-		var issue gitlab.Issue
+		var issue tracker.Issue
 		switch {
 		case existing == nil:
-			in := gitlab.NewIssue{Title: title, Description: body, DueDate: issueDue, Milestone: p.Milestone,
+			in := tracker.NewIssue{Title: title, Description: body, DueDate: issueDue, Milestone: p.Milestone,
 				Labels: program.Labels("management", "", "", comp.Name)}
 			f, err := program.File(t, o.Repository, in, policy, dryRun)
 			if err != nil {
 				return out, err
 			}
 			r.Action, r.IID, r.WebURL = "created", f.IID, f.WebURL
-			issue = gitlab.Issue{Project: o.Repository, IID: f.IID}
+			issue = tracker.Issue{Project: o.Repository, IID: f.IID}
 		case existing.Description == body && existing.DueDate == issueDue:
 			r.Action, r.IID, r.WebURL = "unchanged", existing.IID, existing.WebURL
 			issue = *existing
@@ -91,7 +91,7 @@ func Push(t gitlab.Tracker, s Sources, p Plan, webBase string, policy program.Po
 			r.Action, r.IID, r.WebURL = "updated", existing.IID, existing.WebURL
 			issue = *existing
 			if !dryRun {
-				u := gitlab.IssueUpdate{Description: &body}
+				u := tracker.IssueUpdate{Description: &body}
 				if issueDue != "" {
 					u.DueDate = &issueDue
 				}

@@ -11,7 +11,7 @@ status: specified
 Each run starts with mage regression:up creating the repositories below in
 a fresh rig run on local disk and ends with mage regression:down removing them.
 The tag stages push a downstream tag and a system tag and prove the
-reference-update issue and the summary merge request, each idempotent.
+reference-update issue and the summary's branch and review issue, each idempotent.
 
 <!-- field: traces -->
 ## Traces
@@ -62,8 +62,8 @@ go test ./internal/handoff -run '^TestDownstreamTagFilesReferenceUpdateOnce$'
 - [srd014-handoff](../software-requirements/srd014-handoff.md) [AC4](../software-requirements/srd014-handoff.md#ac4)
 - [srd007-links](../software-requirements/srd007-links.md) [AC5](../software-requirements/srd007-links.md#ac5)
 
-<!-- case: A system tag opens one summary merge request | status: specified -->
-### A system tag opens one summary merge request
+<!-- case: A system tag opens one summary for review | status: specified -->
+### A system tag opens one summary for review
 
 <!-- field: use_case -->
 #### Use case
@@ -87,7 +87,7 @@ go test ./internal/reports -run '^TestSystemTagOpensOneSummaryMergeRequest$'
 - merge_request: one, with the computed aggregate and deck, linked to the stakeholder update issue
 - model_tokens_in_ci: 0
 - deck_slides: within the configured limit
-- second_run: no merge request opened
+- second_run: no second branch or review issue
 
 <!-- field: traces -->
 #### Traces

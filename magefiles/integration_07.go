@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/help"
 	"github.com/gray-lake-labs/scrum-master/internal/standup"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func init() {
@@ -48,8 +48,8 @@ func (Integration) IssueGroup() error {
 	c.expect(err != nil && strings.Contains(err.Error(), "tpm issue pop") && strings.Contains(err.Error(), "tpm install"),
 		"tpm program pop: %v, want a refusal naming tpm issue pop and tpm install", err)
 
-	recurring := func(title, due, body string) (gitlab.Issue, error) {
-		return r.tr.CreateIssue(po1, gitlab.NewIssue{Title: title, Labels: []string{"type::recurring"}, DueDate: due, Description: body})
+	recurring := func(title, due, body string) (tracker.Issue, error) {
+		return r.tr.CreateIssue(po1, tracker.NewIssue{Title: title, Labels: []string{"type::recurring"}, DueDate: due, Description: body})
 	}
 	recur := func(iid int) (standup.RecurResult, error) {
 		var res standup.RecurResult

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func registry(got *Context, name *string) *Registry {
@@ -21,7 +21,7 @@ func registry(got *Context, name *string) *Registry {
 	return r
 }
 
-func noTracker() (gitlab.Tracker, error) { return nil, errors.New("no tracker in tests") }
+func noTracker() (tracker.Tracker, error) { return nil, errors.New("no tracker in tests") }
 
 func TestJSONAndDryRunReachTheSubcommand(t *testing.T) {
 	var ctx Context

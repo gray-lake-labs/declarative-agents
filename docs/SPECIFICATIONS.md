@@ -20,7 +20,7 @@ srd018's, the sprint-end issue that pushes the release is srd038's, and
 the reference-update issue on a downstream release is srd014's. srd035 and srd036 specify the
 inner loop on GitLab: specify files one admitted issue whose plane says
 whether it is project work or a requirements change, and implement takes
-it into its own branch and worktree until its merge request closes it.
+it into its own branch and worktree until its merge closes it.
 srd037 is the Agent Plugins 1.0 package of the skills and tpm install,
 which writes the skills embedded in tpm for Cursor, Claude Code, or
 GitHub Copilot. srd039 is the shared reader of corpus and config
@@ -146,7 +146,7 @@ docs/road-map.md.
 | id | title | release | status | test_suite | path |
 | --- | --- | --- | --- | --- | --- |
 | [rel00.0-uc001-push-project-work](specs/use-cases/rel00.0-uc001-push-project-work.md) | A Developer Pushes a Request and It Becomes an Admitted Issue | 00.0 | implemented | [test-rel00.0-push](specs/test-suites/test-rel00.0-push.md) | docs/specs/use-cases/rel00.0-uc001-push-project-work.md |
-| [rel00.1-uc001-pop-and-merge](specs/use-cases/rel00.1-uc001-pop-and-merge.md) | A Developer Pops an Issue into a Worktree and Its Merge Request Closes It | 00.1 | implemented | [test-rel00.1-pop](specs/test-suites/test-rel00.1-pop.md) | docs/specs/use-cases/rel00.1-uc001-pop-and-merge.md |
+| [rel00.1-uc001-pop-and-merge](specs/use-cases/rel00.1-uc001-pop-and-merge.md) | A Developer Pops an Issue into a Worktree and Its Merge Closes It | 00.1 | implemented | [test-rel00.1-pop](specs/test-suites/test-rel00.1-pop.md) | docs/specs/use-cases/rel00.1-uc001-pop-and-merge.md |
 | [rel00.2-uc001-spec-change](specs/use-cases/rel00.2-uc001-spec-change.md) | A Developer Changes a Requirement During Design Through the Audit Gate | 00.2 | implemented | [test-rel00.2-docs-change](specs/test-suites/test-rel00.2-docs-change.md) | docs/specs/use-cases/rel00.2-uc001-spec-change.md |
 | [rel00.2-uc002-planning-change](specs/use-cases/rel00.2-uc002-planning-change.md) | A Lead Changes the Plan Through a Management Issue and the Same Gate | 00.2 | implemented | [test-rel00.2-docs-change](specs/test-suites/test-rel00.2-docs-change.md) | docs/specs/use-cases/rel00.2-uc002-planning-change.md |
 | [rel00.3-uc001-install-skills](specs/use-cases/rel00.3-uc001-install-skills.md) | A Developer Installs the Skills for Their Agent | 00.3 | implemented | [test-rel00.3-install](specs/test-suites/test-rel00.3-install.md) | docs/specs/use-cases/rel00.3-uc001-install-skills.md |
@@ -186,7 +186,7 @@ docs/road-map.md.
 | --- | --- |
 | GAP1 | Use cases exist for releases 00 (00.0 to 00.3) and 01 (01.0 to 01.4) only. Release 02.0 has none: srd008, srd019, srd020, srd032, and srd033 hold its direction only (design.md D12), and their items and use cases are written when 02.0 is planned. |
 | GAP2 | Test suites exist for releases 00 (00.0 to 00.3) and 01 (01.0 to 01.4) only. test-rel00.0-push, test-rel00.1-pop, test-rel00.2-docs-change, test-rel00.3-install, test-rel01.0-objectives, test-rel01.1-weekly-status, test-rel01.2-sprint-end, and test-rel01.4-agent-legible-cli are implemented; test-rel01.3-tag-triggered is specified, and acceptance criteria outside them have no test case yet. |
-| GAP3 | The audit is the parent's specification-critic corpus-audit agent, run by mage audit after the repository gate tests. It does not yet run in CI on merge requests that change docs/ (srd034 R2.2); this repository has no pipeline. |
+| GAP3 | The audit is the parent's specification-critic corpus-audit agent, run by mage audit after the repository gate tests. It does not yet run in CI on changes to docs/ (srd034 R2.2); tpm issue merge runs it before each merge; this repository has no pipeline. |
 | GAP4 | Open decision. The promotion trigger for each environment (each subsystem release, nightly from the latest releases, or both) is declared per environment SRD; no default is chosen yet. |
 | GAP5 | Open decision. The channel by which evidence from customer R&D environments returns to the objective ledger is not specified (srd008, srd019 non-goals). |
 | GAP6 | Open decision. Release 01.4 renames the program group to issue, moves recur into it from standup, and adds init, onboard, and help (srd013, srd043, srd044). The other subcommand groups (standup, goals, handoff, release, reports, plan, sprint-end) are rationalized when 02.0 rewrites track-goals (srd019). |

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func init() {
@@ -56,7 +56,7 @@ func newWeeklyEnv(cloneName string) (*weeklyEnv, error) {
 // objectiveIssue files an open objective issue in project, as tasks
 // would, and returns its reference.
 func (e *weeklyEnv) objectiveIssue(project, title string) (string, int, error) {
-	i, err := e.tr.CreateIssue(project, gitlab.NewIssue{Title: title,
+	i, err := e.tr.CreateIssue(project, tracker.NewIssue{Title: title,
 		Description: "An objective.\n\n<!-- tpm goals objective=obj001-reliable-agents:R1 release=" + rigRelease + " -->",
 		DueDate:     time.Now().AddDate(0, 0, 21).Format(time.DateOnly)})
 	if err != nil {
@@ -153,7 +153,7 @@ func (Integration) WeeklyStatus() error {
 		}
 		want := start.AddDate(0, 0, 7)
 		c.expect(n.DueDate == next[0].DueDate && next[0].Week == reports.ISOWeek(want), "next instance due %s week %s", n.DueDate, next[0].Week)
-		c.expect(strings.Contains(n.Description, fmt.Sprintf("%s#%d (due %s): closed by its merge request.", e.po1, status.IID, status.DueDate)), "next instance lacks the run in Previous Runs")
+		c.expect(strings.Contains(n.Description, fmt.Sprintf("%s#%d (due %s): closed by its merge.", e.po1, status.IID, status.DueDate)), "next instance lacks the run in Previous Runs")
 	}
 	return c.err("weeklyStatus")
 }

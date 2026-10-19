@@ -10,10 +10,10 @@ import (
 	"github.com/magefile/mage/mg"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // Integration holds the release integration targets the test suites name.
@@ -42,10 +42,6 @@ func (Integration) ObjectivesAudit() error {
 	if err != nil {
 		return err
 	}
-	cache, err := parentCheckout(root)
-	if err != nil {
-		return err
-	}
 	c := &check{}
 	audit := func(fixture string) ([]objectives.Finding, error) {
 		tmp, err := os.MkdirTemp("", "scrum-master-objectives-*")
@@ -56,7 +52,6 @@ func (Integration) ObjectivesAudit() error {
 		if err := runStreaming(root, "cp", "-R", "docs", tmp); err != nil {
 			return nil, err
 		}
-		writeFileTo(filepath.Join(tmp, checkoutsFile), "checkouts:\n  "+parentRepository+": "+cache+"\n")
 		dst := filepath.Join(tmp, objectives.Dir, filepath.Base(fixture))
 		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 			return nil, err
@@ -231,7 +226,7 @@ func (Integration) Program() error {
 	ns, _ := r.notes(po1, i.IID)
 	c.expect(len(ns) == 1 && strings.Contains(ns[0].Body, "Admission failed"), "lint comments: %d", len(ns))
 
-	if _, err := r.tr.UpdateIssue(po1, i.IID, gitlab.IssueUpdate{Description: &good}); err != nil {
+	if _, err := r.tr.UpdateIssue(po1, i.IID, tracker.IssueUpdate{Description: &good}); err != nil {
 		return err
 	}
 	var linted []program.LintResult

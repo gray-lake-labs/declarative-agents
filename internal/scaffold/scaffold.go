@@ -26,7 +26,7 @@ import (
 var templates embed.FS
 
 // parentRepository is the parent whose format the templates follow.
-const parentRepository = "github.com/Nokia-Bell-Labs/declarative-agents"
+const parentRepository = "github.com/gray-lake-labs/declarative-agents"
 
 // Result is what happened to one file: created, kept, or overwritten
 // (srd043 R3.2).
@@ -75,7 +75,7 @@ func corpusFiles(level string) (map[string][]byte, error) {
 			return err
 		}
 		b, err := templates.ReadFile(p)
-		files[fill.Replace(strings.TrimPrefix(p, root+"/"))] = []byte(fill.Replace(string(b)))
+		files[fill.Replace(strings.TrimSuffix(strings.TrimPrefix(p, root+"/"), ".tmpl"))] = []byte(fill.Replace(string(b)))
 		return err
 	})
 	if err != nil {

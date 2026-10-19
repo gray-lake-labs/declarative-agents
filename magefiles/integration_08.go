@@ -24,10 +24,6 @@ func (Integration) Init() error {
 	if err != nil {
 		return err
 	}
-	cache, err := parentCheckout(root)
-	if err != nil {
-		return err
-	}
 	tmp, err := os.MkdirTemp("", "tpm-init-")
 	if err != nil {
 		return err
@@ -86,11 +82,11 @@ func (Integration) Init() error {
 	c.expect(len(first.Skills) > 0, "first init installed no skills")
 	c.expect(first.Tracker != nil && first.Tracker.Seeded && len(first.Tracker.Labels) > 0, "tracker not seeded: %+v", first.Tracker)
 
-	writeFileTo(filepath.Join(repo, checkoutsFile), "checkouts:\n  "+parentRepository+": "+cache+"\n")
 	if err := sh(repo, "git", "add", "-A"); err != nil {
 		return err
 	}
 	c.expect(runCorpusAudit(repo, runStreaming) == nil, "the parent's corpus audit fails on the corpus tpm init wrote")
+	c.expect(specCheckAt(repo) == nil, "the spec tool's check fails on the corpus tpm init wrote")
 	docs, err := objectives.LoadDir(filepath.Join(repo, objectives.Dir))
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err

@@ -8,7 +8,7 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func newBeadsTracker(t *testing.T, user string) (*beads.Tracker, string) {
@@ -43,7 +43,7 @@ func beadsState(t *testing.T, tr *beads.Tracker, project string, iid int) beads.
 // it and linting again admits it. The sprint milestone is found by date.
 func TestFileAndLintOnBeads(t *testing.T) {
 	tr, _ := newBeadsTracker(t, "alice")
-	if _, err := tr.EnsureMilestone("g", gitlab.Milestone{Title: "01.1", StartDate: "2026-11-02", DueDate: "2026-11-13"}); err != nil {
+	if _, err := tr.EnsureMilestone("g", tracker.Milestone{Title: "01.1", StartDate: "2026-11-02", DueDate: "2026-11-13"}); err != nil {
 		t.Fatal(err)
 	}
 	sprint, reason, err := SprintMilestone(tr, "g/po-1", time.Date(2026, 11, 5, 0, 0, 0, 0, time.UTC))
@@ -51,7 +51,7 @@ func TestFileAndLintOnBeads(t *testing.T) {
 		t.Fatalf("sprint = %q (%s), %v, want 01.1", sprint, reason, err)
 	}
 
-	good, err := File(tr, "g/po-1", gitlab.NewIssue{Title: "Score one agent", Description: goodBody, Milestone: sprint,
+	good, err := File(tr, "g/po-1", tracker.NewIssue{Title: "Score one agent", Description: goodBody, Milestone: sprint,
 		Labels: Labels("data", "", "build", "po-1")}, Defaults(), false)
 	if err != nil {
 		t.Fatal(err)
@@ -63,7 +63,7 @@ func TestFileAndLintOnBeads(t *testing.T) {
 		t.Fatalf("admitted issue = %s %v, want ready", got.State, got.Labels)
 	}
 
-	bad, err := File(tr, "g/po-1", gitlab.NewIssue{Title: "Missing its kind", Description: goodBody, Milestone: sprint,
+	bad, err := File(tr, "g/po-1", tracker.NewIssue{Title: "Missing its kind", Description: goodBody, Milestone: sprint,
 		Labels: Labels("data", "", "", "po-1")}, Defaults(), false)
 	if err != nil {
 		t.Fatal(err)
@@ -80,7 +80,7 @@ func TestFileAndLintOnBeads(t *testing.T) {
 		t.Fatalf("notes = %+v, want the reasons posted once", notes)
 	}
 
-	issue, err = tr.UpdateIssue("g/po-1", bad.IID, gitlab.IssueUpdate{AddLabels: []string{"kind::build"}})
+	issue, err = tr.UpdateIssue("g/po-1", bad.IID, tracker.IssueUpdate{AddLabels: []string{"kind::build"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,10 +95,10 @@ func TestFileAndLintOnBeads(t *testing.T) {
 // TestNonDataIssueKeepsItsStateThroughAdmission: only a data issue enters
 // the backlog (srd041 R3.1), so a management issue that fails admission
 // carries the needs-triage label but stays open, and its author can still
-// pop it, as on GitLab.
+// pop it.
 func TestNonDataIssueKeepsItsStateThroughAdmission(t *testing.T) {
 	tr, checkout := newBeadsTracker(t, "alice")
-	filed, err := File(tr, "g/po-1", gitlab.NewIssue{Title: "Move release 01.1", Labels: Labels("management", "", "", "")}, Defaults(), false)
+	filed, err := File(tr, "g/po-1", tracker.NewIssue{Title: "Move release 01.1", Labels: Labels("management", "", "", "")}, Defaults(), false)
 	if err != nil {
 		t.Fatal(err)
 	}

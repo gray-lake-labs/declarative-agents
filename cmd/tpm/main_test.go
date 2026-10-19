@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func TestIssueGroupServesSubcommands(t *testing.T) {
@@ -28,7 +28,7 @@ func TestIssueGroupServesSubcommands(t *testing.T) {
 
 func TestProgramGroupRefusesWithPointer(t *testing.T) {
 	opened := false
-	tracker := func() (gitlab.Tracker, error) { opened = true; return nil, errors.New("no tracker in this test") }
+	tracker := func() (tracker.Tracker, error) { opened = true; return nil, errors.New("no tracker in this test") }
 	for _, args := range [][]string{{"program"}, {"program", "pop", "--project", "g/po-1", "--issue", "1"}} {
 		var out bytes.Buffer
 		err := cli.Default.Run(args, &out, tracker)
