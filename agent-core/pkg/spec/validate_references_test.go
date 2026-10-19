@@ -353,13 +353,17 @@ func TestValidate_ArchitectureRelatedDocuments(t *testing.T) {
 	root := t.TempDir()
 	require.NoError(t, os.MkdirAll(filepath.Join(root, "docs"), 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(root, "docs", "SPECIFICATIONS.md"), []byte("x"), 0o644))
+	require.NoError(t, os.MkdirAll(filepath.Join(root, "sibling", "docs"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "sibling", "docs", "ARCHITECTURE.md"), []byte("x"), 0o644))
 
 	corpus := &Corpus{
 		RootDir: root,
 		Architecture: Architecture{
 			RelatedDocuments: []RelatedDocument{
-				{Doc: "docs/SPECIFICATIONS.md", Purpose: "exists"},
-				{Doc: "docs/VISION.md", Purpose: "missing"},
+				{Doc: "docs/SPECIFICATIONS.md", Purpose: "exists, corpus-root-relative"},
+				{Doc: "SPECIFICATIONS.md", Purpose: "exists, document-relative"},
+				{Doc: "../sibling/docs/ARCHITECTURE.md", Purpose: "exists, document-relative outside docs"},
+				{Doc: "docs/VISION.md", Purpose: "missing under both bases"},
 			},
 		},
 	}

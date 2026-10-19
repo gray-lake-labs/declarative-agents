@@ -45,9 +45,9 @@ const (
 type Corpus struct {
 	RootDir string
 
-	SRDs       map[string]SRD
-	UseCases   map[string]UseCase
-	TestSuites map[string]TestSuite
+	SRDs         map[string]SRD
+	UseCases     map[string]UseCase
+	TestSuites   map[string]TestSuite
 	Roadmap      Roadmap
 	SpecIndex    SpecIndex
 	Architecture Architecture
