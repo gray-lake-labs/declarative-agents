@@ -22,7 +22,7 @@ Names the three layers the process separates, what each owns, how fast it change
 
 | crossing | description |
 | --- | --- |
-| intent_down | The management plane hands the data plane a milestone, a sprint issue, and the objectives create-goals pushed. Nothing else. |
+| intent_down | The management plane hands the data plane a milestone, a sprint issue, and the objectives tasks pushed. Nothing else. |
 | rules_down | The control plane hands the data plane its policy files, read by scripts at run time. |
 | state_up | The data plane hands the other planes tracker state: issues, labels, comments, merge requests, tags. The reporting scripts read it; nobody sends status any other way. |
 

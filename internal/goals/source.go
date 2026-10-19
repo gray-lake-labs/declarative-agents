@@ -1,4 +1,4 @@
-// Package goals is the tpm side of create-goals (srd022, srd034 R3): it
+// Package goals is the tpm side of tasks (srd022, srd034 R3): it
 // computes each objective's facts and recommendations, and files the
 // confirmed objective issues. Nothing here is a model step (design.md D10).
 package goals
@@ -19,7 +19,7 @@ const (
 	roadMapPath = "docs/road-map.md"
 )
 
-// Release is the road-map release create-goals pushes objectives for. A
+// Release is the road-map release tasks pushes objectives for. A
 // consuming program's road-map names the objective items a release proves
 // as objectives: [objNNN-short-name#Rn.m] (srd034 R3.1).
 type Release struct {
@@ -29,7 +29,7 @@ type Release struct {
 	Objectives []string `yaml:"objectives"`
 }
 
-// Sources are the facts create-goals reads from the system repository at
+// Sources are the facts tasks reads from the system repository at
 // the release tag.
 type Sources struct {
 	System     string
@@ -58,7 +58,7 @@ func Load(t gitlab.Tracker, system, version, ref string) (Sources, error) {
 	}
 	s.Release = rm.Releases[i]
 	if s.Release.Tag == "" {
-		return s, fmt.Errorf("release %s has no tag; create-goals pins Cites lines to it", version)
+		return s, fmt.Errorf("release %s has no tag; tasks pins Cites lines to it", version)
 	}
 	if len(s.Release.Objectives) == 0 {
 		return s, fmt.Errorf("release %s names no objective items", version)

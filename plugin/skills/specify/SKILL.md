@@ -1,9 +1,9 @@
 ---
-name: issue-push
+name: specify
 description: Turn one request into one admitted issue in this repository (srd035). Use when a person describes work, a bug, or a requirements change and asks to file, push, or open an issue for it.
 ---
 
-# issue-push
+# specify
 
 Invoking this skill files the issue. tpm picks the labels, files, and lints;
 the one model step is writing the body (design.md D10, srd035).

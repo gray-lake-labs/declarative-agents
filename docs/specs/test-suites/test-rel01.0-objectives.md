@@ -12,7 +12,7 @@ Each run starts with mage regression:up creating the repositories below in
 a fresh rig run on local disk and ends with mage regression:down removing them.
 The audit stage proves that mage audit runs the specification-critic
 corpus-audit agent from the pinned parent release and fails on a malformed
-objective document. The push stage runs create-goals against the rig's
+objective document. The push stage runs tasks against the rig's
 system repository and two Product Owner repositories, and proves the dated, admitted, pinned objective issues and their planned
 events, and that a second run changes nothing.
 
@@ -95,8 +95,8 @@ go test ./internal/objectives -run '^TestEachMalformedDocumentYieldsExactlyItsFi
 - [srd034-objectives](../software-requirements/srd034-objectives.md) [AC1](../software-requirements/srd034-objectives.md#ac1)
 - [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2)
 
-<!-- case: create-goals files one dated objective issue per owner | status: implemented -->
-### create-goals files one dated objective issue per owner
+<!-- case: tasks files one dated objective issue per owner | status: implemented -->
+### tasks files one dated objective issue per owner
 
 <!-- field: use_case -->
 #### Use case
@@ -132,8 +132,8 @@ go test ./internal/goals -run '^Test(PushFilesOneDatedPinnedObjectiveIssue|DueFa
 - [srd006-events](../software-requirements/srd006-events.md) [AC7](../software-requirements/srd006-events.md#ac7)
 - [srd007-links](../software-requirements/srd007-links.md) [AC5](../software-requirements/srd007-links.md#ac5)
 
-<!-- case: create-goals asks only for a missing owner and refuses unpinned citations | status: implemented -->
-### create-goals asks only for a missing owner and refuses unpinned citations
+<!-- case: tasks asks only for a missing owner and refuses unpinned citations | status: implemented -->
+### tasks asks only for a missing owner and refuses unpinned citations
 
 <!-- field: use_case -->
 #### Use case
@@ -197,8 +197,8 @@ go test ./internal/program ./internal/cli -run '^Test(FileCreatesUnassignedLinte
 - [srd013-program](../software-requirements/srd013-program.md) [AC2](../software-requirements/srd013-program.md#ac2)
 - [srd013-program](../software-requirements/srd013-program.md) [AC3](../software-requirements/srd013-program.md#ac3)
 
-<!-- case: The owner's only step is issue-pop | status: implemented -->
-### The owner's only step is issue-pop
+<!-- case: The owner's only step is implement | status: implemented -->
+### The owner's only step is implement
 
 <!-- field: use_case -->
 #### Use case

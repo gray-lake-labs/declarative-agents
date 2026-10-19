@@ -11,9 +11,9 @@ test_suite: test-rel00.2-docs-change
 
 A lead (the technical program manager or a sub-project lead) changes the
 plan: the road-map, a system or subsystem SRD, or an objective document.
-issue-push files it as a plane::management issue, lead-only and out of the
+specify files it as a plane::management issue, lead-only and out of the
 backlog. The lead pops it and merges the docs/ change through the same
-audit gate as a design change. An objective issue create-goals filed is
+audit gate as a design change. An objective issue tasks filed is
 worked this way by the Product Owner who received it.
 
 <!-- field: actor -->
@@ -34,11 +34,11 @@ A change to a planning document, or an objective issue received.
 <!-- field: flow -->
 ## Flow
 
-- F1: The lead runs issue-push with a request that names a planning document.
+- F1: The lead runs specify with a request that names a planning document.
 - F2: Model step (structure): the model turns the request into the issue body.
 - F3: tpm sets plane::management, refuses the issue when the person is not a lead, and files it unassigned; it never enters the backlog.
 - F4: The lead, or for an objective issue the receiving Product Owner, pops it and changes the documents in the worktree.
-- F5: issue-pop runs mage audit and opens the merge request only when it passes; the merge closes the issue.
+- F5: implement runs mage audit and opens the merge request only when it passes; the merge closes the issue.
 
 <!-- field: touchpoints -->
 ## Touchpoints
@@ -60,7 +60,7 @@ A change to a planning document, or an objective issue received.
 <!-- sc: S1 -->
 ### S1
 
-A request naming a planning document becomes a plane::management issue filed by a lead and kept out of the backlog; a non-lead's is refused; create-goals objective issues are the other management issues scripts file.
+A request naming a planning document becomes a plane::management issue filed by a lead and kept out of the backlog; a non-lead's is refused; tasks objective issues are the other management issues scripts file.
 
 <!-- field: traces -->
 #### Traces

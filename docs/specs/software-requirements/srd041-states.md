@@ -140,7 +140,7 @@ The transitions table below is the complete state machine. A script that is aske
 <!-- req: R8.2 -->
 ### R8.2
 
-Each row names the actor that fires it, one of person, pop, merge, track-goals, handoff, or lint. pop is the person's own issue-pop. lint is admission.
+Each row names the actor that fires it, one of person, pop, merge, track-goals, handoff, or lint. pop is the person's own implement. lint is admission.
 
 <!-- req: R8.3 -->
 ### R8.3

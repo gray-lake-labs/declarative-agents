@@ -220,7 +220,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - numbering: same as srd; each requirement group is one objective
   - acceptance_criteria_fields: same as srd
   - acceptance_criteria_note: tests and applicability are required (D8); applicability names the environment. Until the program's environment SRDs exist, it names a chain stage D8 lists and the audit cannot resolve it (srd034 R1.5).
-  - purpose: States what the program commits to for a horizon of periods, owned by the technical program manager. plan-release places its items in a release and create-goals cites them, pinned, on the objective issues it files (srd034).
+  - purpose: States what the program commits to for a horizon of periods, owned by the technical program manager. plan places its items in a release and tasks cites them, pinned, on the objective issues it files (srd034).
 - use_case:
   - location: docs/specs/use-cases/relNN.N-ucNNN-short-name.md
   - required_fields:

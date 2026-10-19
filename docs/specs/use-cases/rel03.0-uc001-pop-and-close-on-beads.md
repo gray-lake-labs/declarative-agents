@@ -26,7 +26,7 @@ backend and the tracker repository.
 <!-- field: trigger -->
 ## Trigger
 
-The person runs the issue-pop skill on a ready issue.
+The person runs the implement skill on a ready issue.
 
 <!-- field: preconditions -->
 ## Preconditions

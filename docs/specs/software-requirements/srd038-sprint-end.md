@@ -60,7 +60,7 @@ Once track-goals runs in the program, R2.1 no longer applies and objectives clos
 ## Non-goals
 
 - Closing objectives on evidence; that is track-goals (srd019).
-- Planning the next period; that is plan-release (srd031).
+- Planning the next period; that is plan (srd031).
 
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria

@@ -30,9 +30,9 @@ counted, not how the work runs.
 ```mermaid
 flowchart LR
     P[planned release] -->|make-work| I[item with requirements and acceptance criteria]
-    O[outer-loop skill] -->|issue-push| I
+    O[outer-loop skill] -->|specify| I
     A[recurring audit] -->|due| I
-    I -->|issue-pop| W[worktree, sub-issues if needed]
+    I -->|implement| W[worktree, sub-issues if needed]
     W -->|do-work| MR[merge request]
     MR -->|review and merge| M[default branch]
     M -->|closes| I
@@ -48,8 +48,8 @@ it. The tracker holds the plan, so no window has to.
 | Step | Who | Skill | Produces |
 |---|---|---|---|
 | Make | Developers, from a planned release | `make-work` | One item per change the release needs, each in do-work's input format |
-| Push | Anyone, or an outer-loop skill on their answer | `issue-push` | One item with plane, kind, component, Requirements, Acceptance Criteria, Design Decisions, and an estimate, filed unassigned |
-| Pop | The person who will do it | `issue-pop` | The item assigned to that person and no one else, a fresh worktree from the default branch, and sub-issues when the item is larger than one pass |
+| Push | Anyone, or an outer-loop skill on their answer | `specify` | One item with plane, kind, component, Requirements, Acceptance Criteria, Design Decisions, and an estimate, filed unassigned |
+| Pop | The person who will do it | `implement` | The item assigned to that person and no one else, a fresh worktree from the default branch, and sub-issues when the item is larger than one pass |
 | Work | The assignee, driving an agent | `do-work` | Each unit built against its Acceptance Criteria and committed with its requirements; actual size logged against the estimate |
 | Gate | Another person | merge request | Review against the definition of done |
 | Close | The merge | closing lines | The item and its sub-issues closed; cycle time recorded |
@@ -74,7 +74,7 @@ branch, contract checks at every artifact boundary, the dashboard, the weekly
 sprint update, and the stakeholder update. Each is a recurring item worked
 by this same loop, on a schedule or when a person triggers it. A run is
 popped and worked like any other item; its findings are pushed as new items
-rather than written into a report nobody acts on; and `issue-pop`
+rather than written into a report nobody acts on; and `implement`
 re-creates the recurring item for the next run. The Daily Scrum shows each
 person the findings that landed on their work overnight.
 

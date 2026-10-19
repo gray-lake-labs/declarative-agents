@@ -26,9 +26,9 @@ Table 1: Spec Kit commands and their counterparts here.
 | `/specify` | What to build and why | SRDs: problem, goals, requirements, acceptance criteria |
 | `/clarify` | Structured questions about what is unclear | Skills ask bounded questions; make-work proposes and people agree before anything is filed |
 | `/plan` | Technology and architecture | `ARCHITECTURE.md` and each issue's Design Decisions |
-| `/tasks` | A breakdown into steps | `make-work`, filing issues with `issue-push` |
+| `/tasks` | A breakdown into steps | `make-work`, filing issues with `specify` |
 | `/analyze` | Consistency and coverage across artifacts | The audit |
-| `/implement` | Build the tasks | `issue-pop` and `do-work` |
+| `/implement` | Build the tasks | `implement` and `do-work` |
 
 If the inner loop were all we needed, we would adopt Spec Kit and stop.
 

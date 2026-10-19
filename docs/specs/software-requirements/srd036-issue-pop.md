@@ -1,6 +1,6 @@
 ---
 id: srd036-issue-pop
-title: "Skill: issue-pop"
+title: "Skill: implement"
 ---
 
 <!-- field: problem -->
@@ -13,7 +13,7 @@ issue to a change: the person who works it takes it, works on its own
 branch in its own worktree, and the merge request that lands the branch
 closes it.
 
-issue-pop is that path. tpm claims the issue for the caller and opens its
+implement is that path. tpm claims the issue for the caller and opens its
 branch and worktree (srd013 R7); the work in the worktree is the person's
 or their agent's; tpm opens the merge request that closes the issue
 (srd013 R5). A change under docs/, a design change or a planning change,
@@ -50,7 +50,7 @@ Every change for the issue is made in that worktree.
 <!-- req: R2.3 -->
 ### R2.3
 
-The worktree carries the skills of every agent installed in the checkout pop ran from (srd037), so a person or agent working there can finish the issue with issue-pop.
+The worktree carries the skills of every agent installed in the checkout pop ran from (srd037), so a person or agent working there can finish the issue with implement.
 
 <!-- req: R3 -->
 ## R3 - Finish

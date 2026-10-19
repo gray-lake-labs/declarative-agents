@@ -1,4 +1,4 @@
-// Package plan is the tpm side of plan-release in the system repository
+// Package plan is the tpm side of plan in the system repository
 // (srd031): it ranks the objective items the next release could prove and
 // writes the chosen release into the road map. Nothing here is a model
 // step (design.md D10).
@@ -183,7 +183,7 @@ func missing(d *objectives.Document, group, item string) []string {
 }
 
 // slippedGroups maps each objective group whose issue the aggregate names
-// in a slipped-commitment signal; the issue's create-goals marker names
+// in a slipped-commitment signal; the issue's tasks marker names
 // the group (srd018 R3.2, srd031 R2.3).
 func slippedGroups(in Input) (map[string]bool, error) {
 	out := map[string]bool{}
@@ -209,7 +209,7 @@ func slippedGroups(in Input) (map[string]bool, error) {
 	return out, nil
 }
 
-// objectiveKey reads objNNN-short-name#Rn from create-goals' marker.
+// objectiveKey reads objNNN-short-name#Rn from tasks' marker.
 func objectiveKey(description string) string {
 	_, rest, ok := strings.Cut(description, "<!-- tpm goals objective=")
 	if !ok {

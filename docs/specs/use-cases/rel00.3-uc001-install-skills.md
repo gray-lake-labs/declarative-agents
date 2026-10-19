@@ -36,7 +36,7 @@ A repository without the skills, or a tpm upgrade.
 ## Flow
 
 - F1: The Developer runs tpm install --agent <cursor|claude|copilot> in the repository; tpm writes every embedded skill to the agent's command directory with the agent's header and a version and checksum stamp.
-- F2: tpm lists the installed files in its block in the clone's .git/info/exclude, so git ignores them and the Developer commits nothing; issue-push and issue-pop now run from the agent.
+- F2: tpm lists the installed files in its block in the clone's .git/info/exclude, so git ignores them and the Developer commits nothing; specify and implement now run from the agent.
 - F3: After a tpm upgrade, tpm install --check names each outdated file and exits non-zero.
 - F4: tpm install updates the files tpm wrote, keeps and reports any a person edited, and --check passes again.
 

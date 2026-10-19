@@ -38,7 +38,7 @@ The tracker's due-date notification for the week's status issue.
 
 - F1: The weekly status issue exists in the owner's repository with a Recurrence section, a due date the day after the reminder weekday, and a body that mentions the owner without assigning them.
 - F2: The tracker sends its due-date notification to the owner, a participant through the mention.
-- F3: The owner runs issue-pop on the status issue; its Requirements list the steps.
+- F3: The owner runs implement on the status issue; its Requirements list the steps.
 - F4: tpm reports week returns as JSON every open objective issue in the repository with its due date and the owner's tracker activity for the week.
 - F5: Model step (structure): the model asks the owner about each objective and turns the answers into the report in the fixed shape: status, problems, and complete or not complete per objective.
 - F6: tpm reports validate checks the report; tpm program merge merges it in the reports repository and closes the status issue in the owner's repository.
@@ -79,7 +79,7 @@ Each person the reports configuration lists receives one status issue per week, 
 <!-- sc: S2 -->
 ### S2
 
-Worked with issue-pop, the issue produces a report with status, problems, and complete or not complete for every open objective, which tpm reports validate passes.
+Worked with implement, the issue produces a report with status, problems, and complete or not complete for every open objective, which tpm reports validate passes.
 
 <!-- field: traces -->
 #### Traces

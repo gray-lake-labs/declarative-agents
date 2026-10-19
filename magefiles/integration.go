@@ -90,7 +90,7 @@ func (Integration) ObjectivesAudit() error {
 	return c.err("objectivesAudit")
 }
 
-// CreateGoals seeds the rig's system repository and proves create-goals files one dated, pinned objective issue per owner, once (test-rel01.0-objectives).
+// CreateGoals seeds the rig's system repository and proves tasks files one dated, pinned objective issue per owner, once (test-rel01.0-objectives).
 func (Integration) CreateGoals() error {
 	r, err := newRigEnv()
 	if err != nil {

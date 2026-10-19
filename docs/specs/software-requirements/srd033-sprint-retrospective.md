@@ -112,12 +112,12 @@ After the review, sprint-retrospective reads the period's audit metrics and push
 <!-- req: R6.2 -->
 ### R6.2
 
-Until it is written, a change to the policy is a plane::control issue filed with issue-push (srd001 R2).
+Until it is written, a change to the policy is a plane::control issue filed with specify (srd001 R2).
 
 <!-- field: non_goals -->
 ## Non-goals
 
-- Changing objectives; that is plan-release and create-goals.
+- Changing objectives; that is plan and tasks.
 - Team morale or interpersonal discussion; the skill structures the process facts and leaves the rest of the conversation to the people in it.
 
 <!-- field: acceptance_criteria -->
