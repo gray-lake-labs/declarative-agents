@@ -24,7 +24,7 @@ type Integration mg.Namespace
 func init() {
 	integrationTargets = append(integrationTargets,
 		Integration{}.ObjectivesAudit,
-		Integration{}.CreateGoals,
+		Integration{}.Tasks,
 		Integration{}.Program,
 	)
 }
@@ -90,8 +90,8 @@ func (Integration) ObjectivesAudit() error {
 	return c.err("objectivesAudit")
 }
 
-// CreateGoals seeds the rig's system repository and proves tasks files one dated, pinned objective issue per owner, once (test-rel01.0-objectives).
-func (Integration) CreateGoals() error {
+// Tasks seeds the rig's system repository and proves tasks files one dated, pinned objective issue per owner, once (test-rel01.0-objectives).
+func (Integration) Tasks() error {
 	r, err := newRigEnv()
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func (Integration) CreateGoals() error {
 	}
 	c.expect(len(plan.Objectives) == 2, "plan has %d objectives, want 2", len(plan.Objectives))
 	if len(plan.Objectives) != 2 {
-		return c.err("createGoals")
+		return c.err("tasks")
 	}
 	c.expect(plan.Objectives[0].Repository == po1, "R1 recommended %q, want %s", plan.Objectives[0].Repository, po1)
 	c.expect(plan.Objectives[0].Environment == "dev", "R1 environment %q", plan.Objectives[0].Environment)
@@ -185,7 +185,7 @@ func (Integration) CreateGoals() error {
 		return err
 	}
 	c.expect(len(refused) == 2 && refused[1].Action == "refused", "missing environment not refused: %+v", refused)
-	return c.err("createGoals")
+	return c.err("tasks")
 }
 
 // Program proves file and lint against a rig repository: needs-triage with reasons, cleared once fixed, and nothing written on a dry run (test-rel01.0-objectives).

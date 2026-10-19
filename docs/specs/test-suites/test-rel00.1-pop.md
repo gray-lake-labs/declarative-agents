@@ -58,7 +58,7 @@ go test ./internal/program -run '^TestPop(AssignsOnlyTheCaller|RefusesHeldOrUnad
 #### Traces
 
 - [srd013-program](../software-requirements/srd013-program.md) [AC7](../software-requirements/srd013-program.md#ac7)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC1](../software-requirements/srd036-issue-pop.md#ac1)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC1](../software-requirements/srd036-implement.md#ac1)
 - [srd041-states](../software-requirements/srd041-states.md) [AC5](../software-requirements/srd041-states.md#ac5)
 
 <!-- case: The merge closes the issue | status: implemented -->
@@ -90,8 +90,8 @@ go test ./internal/program -run '^TestMerge(DeliversOnBeads|NeedsAnApprovalOfIts
 #### Traces
 
 - [srd013-program](../software-requirements/srd013-program.md) [AC4](../software-requirements/srd013-program.md#ac4)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC2](../software-requirements/srd036-issue-pop.md#ac2)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC3](../software-requirements/srd036-issue-pop.md#ac3)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC2](../software-requirements/srd036-implement.md#ac2)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC3](../software-requirements/srd036-implement.md#ac3)
 - [srd041-states](../software-requirements/srd041-states.md) [AC4](../software-requirements/srd041-states.md#ac4)
 
 <!-- case: The worktree carries the checkout's skills | status: implemented -->
@@ -123,4 +123,4 @@ go test ./internal/program -run '^TestPop(InstallsSkillsIntoWorktree|WithoutInst
 #### Traces
 
 - [srd013-program](../software-requirements/srd013-program.md) [AC7](../software-requirements/srd013-program.md#ac7)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC4](../software-requirements/srd036-issue-pop.md#ac4)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC4](../software-requirements/srd036-implement.md#ac4)

@@ -106,7 +106,7 @@ go test ./internal/objectives -run '^TestEachMalformedDocumentYieldsExactlyItsFi
 <!-- field: integration_target -->
 #### Integration target
 
-mage integration:createGoals
+mage integration:tasks
 
 <!-- field: go_test -->
 #### Go test
@@ -128,7 +128,7 @@ go test ./internal/goals -run '^Test(PushFilesOneDatedPinnedObjectiveIssue|DueFa
 #### Traces
 
 - [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3)
-- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [AC2](../software-requirements/srd022-create-goals.md#ac2)
+- [srd022-tasks](../software-requirements/srd022-tasks.md) [AC2](../software-requirements/srd022-tasks.md#ac2)
 - [srd006-events](../software-requirements/srd006-events.md) [AC7](../software-requirements/srd006-events.md#ac7)
 - [srd007-links](../software-requirements/srd007-links.md) [AC5](../software-requirements/srd007-links.md#ac5)
 
@@ -143,7 +143,7 @@ go test ./internal/goals -run '^Test(PushFilesOneDatedPinnedObjectiveIssue|DueFa
 <!-- field: integration_target -->
 #### Integration target
 
-mage integration:createGoals
+mage integration:tasks
 
 <!-- field: go_test -->
 #### Go test
@@ -161,8 +161,8 @@ go test ./internal/goals -run '^Test(PlanRecommendsOwnerAndEnvironment|UnpinnedC
 <!-- field: traces -->
 #### Traces
 
-- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [AC1](../software-requirements/srd022-create-goals.md#ac1)
-- [srd022-create-goals](../software-requirements/srd022-create-goals.md) [AC3](../software-requirements/srd022-create-goals.md#ac3)
+- [srd022-tasks](../software-requirements/srd022-tasks.md) [AC1](../software-requirements/srd022-tasks.md#ac1)
+- [srd022-tasks](../software-requirements/srd022-tasks.md) [AC3](../software-requirements/srd022-tasks.md#ac3)
 
 <!-- case: Filing and admission | status: implemented -->
 ### Filing and admission
@@ -208,7 +208,7 @@ go test ./internal/program ./internal/cli -run '^Test(FileCreatesUnassignedLinte
 <!-- field: integration_target -->
 #### Integration target
 
-mage integration:createGoals
+mage integration:tasks
 
 <!-- field: go_test -->
 #### Go test

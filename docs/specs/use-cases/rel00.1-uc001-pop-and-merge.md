@@ -42,10 +42,10 @@ An admitted issue the Developer chooses to work.
 | id | target | reason |
 | --- | --- | --- |
 | T1 | [srd013-program](../software-requirements/srd013-program.md) [R5.1](../software-requirements/srd013-program.md#r51), [R5.2](../software-requirements/srd013-program.md#r52), [R7.1](../software-requirements/srd013-program.md#r71), [R7.2](../software-requirements/srd013-program.md#r72), [R7.3](../software-requirements/srd013-program.md#r73), [R7.4](../software-requirements/srd013-program.md#r74) | S1, S2, and S3 trace pop and the merge request. |
-| T2 | [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R1.1](../software-requirements/srd036-issue-pop.md#r11), [R2.1](../software-requirements/srd036-issue-pop.md#r21), [R2.2](../software-requirements/srd036-issue-pop.md#r22), [R2.3](../software-requirements/srd036-issue-pop.md#r23), [R3.1](../software-requirements/srd036-issue-pop.md#r31), [R3.3](../software-requirements/srd036-issue-pop.md#r33), [R4.1](../software-requirements/srd036-issue-pop.md#r41), [R4.2](../software-requirements/srd036-issue-pop.md#r42) | S1, S2, and S3 trace the skill. |
+| T2 | [srd036-implement](../software-requirements/srd036-implement.md) [R1.1](../software-requirements/srd036-implement.md#r11), [R2.1](../software-requirements/srd036-implement.md#r21), [R2.2](../software-requirements/srd036-implement.md#r22), [R2.3](../software-requirements/srd036-implement.md#r23), [R3.1](../software-requirements/srd036-implement.md#r31), [R3.3](../software-requirements/srd036-implement.md#r33), [R4.1](../software-requirements/srd036-implement.md#r41), [R4.2](../software-requirements/srd036-implement.md#r42) | S1, S2, and S3 trace the skill. |
 | T3 | [srd041-states](../software-requirements/srd041-states.md) [R7.1](../software-requirements/srd041-states.md#r71), [R9.1](../software-requirements/srd041-states.md#r91) | S1 and S2 trace closing and the assignee rule. |
 | T4 | [srd013-program](../software-requirements/srd013-program.md) [AC4](../software-requirements/srd013-program.md#ac4), [AC7](../software-requirements/srd013-program.md#ac7) | S1 and S2 trace these acceptance criteria. |
-| T5 | [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC1](../software-requirements/srd036-issue-pop.md#ac1), [AC2](../software-requirements/srd036-issue-pop.md#ac2), [AC3](../software-requirements/srd036-issue-pop.md#ac3), [AC4](../software-requirements/srd036-issue-pop.md#ac4) | S1, S2, and S3 trace these acceptance criteria. |
+| T5 | [srd036-implement](../software-requirements/srd036-implement.md) [AC1](../software-requirements/srd036-implement.md#ac1), [AC2](../software-requirements/srd036-implement.md#ac2), [AC3](../software-requirements/srd036-implement.md#ac3), [AC4](../software-requirements/srd036-implement.md#ac4) | S1, S2, and S3 trace these acceptance criteria. |
 | T6 | [srd041-states](../software-requirements/srd041-states.md) [AC4](../software-requirements/srd041-states.md#ac4), [AC5](../software-requirements/srd041-states.md#ac5) | S1 and S2 trace these acceptance criteria. |
 | T7 | [srd037-install](../software-requirements/srd037-install.md) [R6.3](../software-requirements/srd037-install.md#r63) | S3 traces the install into the worktree. |
 
@@ -60,10 +60,10 @@ Pop assigns only the person who runs it and opens the issue's own branch and wor
 <!-- field: traces -->
 #### Traces
 
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R1.1](../software-requirements/srd036-issue-pop.md#r11)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R2.1](../software-requirements/srd036-issue-pop.md#r21)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R2.2](../software-requirements/srd036-issue-pop.md#r22)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC1](../software-requirements/srd036-issue-pop.md#ac1)
+- [srd036-implement](../software-requirements/srd036-implement.md) [R1.1](../software-requirements/srd036-implement.md#r11)
+- [srd036-implement](../software-requirements/srd036-implement.md) [R2.1](../software-requirements/srd036-implement.md#r21)
+- [srd036-implement](../software-requirements/srd036-implement.md) [R2.2](../software-requirements/srd036-implement.md#r22)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC1](../software-requirements/srd036-implement.md#ac1)
 - [srd013-program](../software-requirements/srd013-program.md) [R7.1](../software-requirements/srd013-program.md#r71)
 - [srd013-program](../software-requirements/srd013-program.md) [R7.2](../software-requirements/srd013-program.md#r72)
 - [srd013-program](../software-requirements/srd013-program.md) [R7.3](../software-requirements/srd013-program.md#r73)
@@ -79,8 +79,8 @@ The worktree pop opens carries the skills installed in the checkout, so the issu
 <!-- field: traces -->
 #### Traces
 
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R2.3](../software-requirements/srd036-issue-pop.md#r23)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC4](../software-requirements/srd036-issue-pop.md#ac4)
+- [srd036-implement](../software-requirements/srd036-implement.md) [R2.3](../software-requirements/srd036-implement.md#r23)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC4](../software-requirements/srd036-implement.md#ac4)
 - [srd013-program](../software-requirements/srd013-program.md) [R7.4](../software-requirements/srd013-program.md#r74)
 - [srd013-program](../software-requirements/srd013-program.md) [AC7](../software-requirements/srd013-program.md#ac7)
 - [srd037-install](../software-requirements/srd037-install.md) [R6.3](../software-requirements/srd037-install.md#r63)
@@ -93,12 +93,12 @@ The merge request opened by tpm closes the issue when it merges; the skill close
 <!-- field: traces -->
 #### Traces
 
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R3.1](../software-requirements/srd036-issue-pop.md#r31)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R3.3](../software-requirements/srd036-issue-pop.md#r33)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC2](../software-requirements/srd036-issue-pop.md#ac2)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R4.1](../software-requirements/srd036-issue-pop.md#r41)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R4.2](../software-requirements/srd036-issue-pop.md#r42)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC3](../software-requirements/srd036-issue-pop.md#ac3)
+- [srd036-implement](../software-requirements/srd036-implement.md) [R3.1](../software-requirements/srd036-implement.md#r31)
+- [srd036-implement](../software-requirements/srd036-implement.md) [R3.3](../software-requirements/srd036-implement.md#r33)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC2](../software-requirements/srd036-implement.md#ac2)
+- [srd036-implement](../software-requirements/srd036-implement.md) [R4.1](../software-requirements/srd036-implement.md#r41)
+- [srd036-implement](../software-requirements/srd036-implement.md) [R4.2](../software-requirements/srd036-implement.md#r42)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC3](../software-requirements/srd036-implement.md#ac3)
 - [srd013-program](../software-requirements/srd013-program.md) [R5.1](../software-requirements/srd013-program.md#r51)
 - [srd013-program](../software-requirements/srd013-program.md) [R5.2](../software-requirements/srd013-program.md#r52)
 - [srd013-program](../software-requirements/srd013-program.md) [AC4](../software-requirements/srd013-program.md#ac4)

@@ -89,9 +89,9 @@ go test ./internal/program -run '^(TestPlaneAndKindFollowTheChangedPaths|TestFil
 <!-- field: traces -->
 #### Traces
 
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC1](../software-requirements/srd035-issue-push.md#ac1)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC2](../software-requirements/srd035-issue-push.md#ac2)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC3](../software-requirements/srd035-issue-push.md#ac3)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC4](../software-requirements/srd035-issue-push.md#ac4)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC1](../software-requirements/srd035-specify.md#ac1)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC2](../software-requirements/srd035-specify.md#ac2)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC3](../software-requirements/srd035-specify.md#ac3)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC4](../software-requirements/srd035-specify.md#ac4)
 - [srd013-program](../software-requirements/srd013-program.md) [AC3](../software-requirements/srd013-program.md#ac3)
 - [srd001-labels](../software-requirements/srd001-labels.md) [AC3](../software-requirements/srd001-labels.md#ac3)

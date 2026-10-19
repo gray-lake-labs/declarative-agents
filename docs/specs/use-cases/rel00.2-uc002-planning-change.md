@@ -45,13 +45,13 @@ A change to a planning document, or an objective issue received.
 
 | id | target | reason |
 | --- | --- | --- |
-| T1 | [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R5.2](../software-requirements/srd035-issue-push.md#r52) | S1 traces the lead-only rule. |
+| T1 | [srd035-specify](../software-requirements/srd035-specify.md) [R5.2](../software-requirements/srd035-specify.md#r52) | S1 traces the lead-only rule. |
 | T2 | [srd001-labels](../software-requirements/srd001-labels.md) [R1.1](../software-requirements/srd001-labels.md#r11), [R1.2](../software-requirements/srd001-labels.md#r12), [R1.3](../software-requirements/srd001-labels.md#r13), [R1.4](../software-requirements/srd001-labels.md#r14) | S1 traces the management plane. |
-| T3 | [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R2.1](../software-requirements/srd036-issue-pop.md#r21) | S2 traces pop. |
+| T3 | [srd036-implement](../software-requirements/srd036-implement.md) [R2.1](../software-requirements/srd036-implement.md#r21) | S2 traces pop. |
 | T4 | [srd013-program](../software-requirements/srd013-program.md) [R7.1](../software-requirements/srd013-program.md#r71) | S2 traces the claim. |
-| T5 | [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC4](../software-requirements/srd035-issue-push.md#ac4) | S1 traces this acceptance criterion. |
+| T5 | [srd035-specify](../software-requirements/srd035-specify.md) [AC4](../software-requirements/srd035-specify.md#ac4) | S1 traces this acceptance criterion. |
 | T6 | [srd001-labels](../software-requirements/srd001-labels.md) [AC1](../software-requirements/srd001-labels.md#ac1) | S1 traces this acceptance criterion. |
-| T7 | [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC1](../software-requirements/srd036-issue-pop.md#ac1) | S2 traces this acceptance criterion. |
+| T7 | [srd036-implement](../software-requirements/srd036-implement.md) [AC1](../software-requirements/srd036-implement.md#ac1) | S2 traces this acceptance criterion. |
 | T8 | [srd013-program](../software-requirements/srd013-program.md) [AC7](../software-requirements/srd013-program.md#ac7) | S2 traces this acceptance criterion. |
 
 <!-- field: success_criteria -->
@@ -65,8 +65,8 @@ A request naming a planning document becomes a plane::management issue filed by 
 <!-- field: traces -->
 #### Traces
 
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R5.2](../software-requirements/srd035-issue-push.md#r52)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC4](../software-requirements/srd035-issue-push.md#ac4)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R5.2](../software-requirements/srd035-specify.md#r52)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC4](../software-requirements/srd035-specify.md#ac4)
 - [srd001-labels](../software-requirements/srd001-labels.md) [R1.1](../software-requirements/srd001-labels.md#r11)
 - [srd001-labels](../software-requirements/srd001-labels.md) [R1.2](../software-requirements/srd001-labels.md#r12)
 - [srd001-labels](../software-requirements/srd001-labels.md) [R1.3](../software-requirements/srd001-labels.md#r13)
@@ -81,8 +81,8 @@ The lead or the receiving Product Owner pops the issue, and its merge request op
 <!-- field: traces -->
 #### Traces
 
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [R2.1](../software-requirements/srd036-issue-pop.md#r21)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC1](../software-requirements/srd036-issue-pop.md#ac1)
+- [srd036-implement](../software-requirements/srd036-implement.md) [R2.1](../software-requirements/srd036-implement.md#r21)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC1](../software-requirements/srd036-implement.md#ac1)
 - [srd013-program](../software-requirements/srd013-program.md) [R7.1](../software-requirements/srd013-program.md#r71)
 - [srd013-program](../software-requirements/srd013-program.md) [AC7](../software-requirements/srd013-program.md#ac7)
 

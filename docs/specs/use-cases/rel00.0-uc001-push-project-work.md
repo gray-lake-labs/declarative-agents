@@ -45,10 +45,10 @@ A request for project work in a component's repository.
 | id | target | reason |
 | --- | --- | --- |
 | T1 | [srd013-program](../software-requirements/srd013-program.md) [R3.1](../software-requirements/srd013-program.md#r31), [R3.3](../software-requirements/srd013-program.md#r33), [R6.1](../software-requirements/srd013-program.md#r61), [R6.2](../software-requirements/srd013-program.md#r62) | S1 and S2 trace labels and filing. |
-| T2 | [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R1.1](../software-requirements/srd035-issue-push.md#r11), [R2.1](../software-requirements/srd035-issue-push.md#r21), [R2.2](../software-requirements/srd035-issue-push.md#r22), [R3.1](../software-requirements/srd035-issue-push.md#r31), [R3.2](../software-requirements/srd035-issue-push.md#r32), [R3.3](../software-requirements/srd035-issue-push.md#r33), [R4.1](../software-requirements/srd035-issue-push.md#r41), [R4.2](../software-requirements/srd035-issue-push.md#r42), [R5.1](../software-requirements/srd035-issue-push.md#r51), [R5.3](../software-requirements/srd035-issue-push.md#r53) | S2 and S3 trace push. |
+| T2 | [srd035-specify](../software-requirements/srd035-specify.md) [R1.1](../software-requirements/srd035-specify.md#r11), [R2.1](../software-requirements/srd035-specify.md#r21), [R2.2](../software-requirements/srd035-specify.md#r22), [R3.1](../software-requirements/srd035-specify.md#r31), [R3.2](../software-requirements/srd035-specify.md#r32), [R3.3](../software-requirements/srd035-specify.md#r33), [R4.1](../software-requirements/srd035-specify.md#r41), [R4.2](../software-requirements/srd035-specify.md#r42), [R5.1](../software-requirements/srd035-specify.md#r51), [R5.3](../software-requirements/srd035-specify.md#r53) | S2 and S3 trace push. |
 | T3 | [srd001-labels](../software-requirements/srd001-labels.md) [R3.1](../software-requirements/srd001-labels.md#r31), [R3.2](../software-requirements/srd001-labels.md#r32), [R3.3](../software-requirements/srd001-labels.md#r33), [R3.4](../software-requirements/srd001-labels.md#r34) | S2 traces the data plane. |
 | T4 | [srd013-program](../software-requirements/srd013-program.md) [AC3](../software-requirements/srd013-program.md#ac3), [AC6](../software-requirements/srd013-program.md#ac6) | S1 and S2 trace these acceptance criteria. |
-| T5 | [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC1](../software-requirements/srd035-issue-push.md#ac1), [AC2](../software-requirements/srd035-issue-push.md#ac2), [AC3](../software-requirements/srd035-issue-push.md#ac3), [AC4](../software-requirements/srd035-issue-push.md#ac4) | S2 and S3 trace these acceptance criteria. |
+| T5 | [srd035-specify](../software-requirements/srd035-specify.md) [AC1](../software-requirements/srd035-specify.md#ac1), [AC2](../software-requirements/srd035-specify.md#ac2), [AC3](../software-requirements/srd035-specify.md#ac3), [AC4](../software-requirements/srd035-specify.md#ac4) | S2 and S3 trace these acceptance criteria. |
 | T6 | [srd001-labels](../software-requirements/srd001-labels.md) [AC3](../software-requirements/srd001-labels.md#ac3) | S2 traces this acceptance criterion. |
 
 <!-- field: success_criteria -->
@@ -74,17 +74,17 @@ A request that names no docs/ or control/ path becomes one admitted, unassigned 
 <!-- field: traces -->
 #### Traces
 
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R1.1](../software-requirements/srd035-issue-push.md#r11)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R2.1](../software-requirements/srd035-issue-push.md#r21)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R2.2](../software-requirements/srd035-issue-push.md#r22)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R3.1](../software-requirements/srd035-issue-push.md#r31)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC1](../software-requirements/srd035-issue-push.md#ac1)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R3.2](../software-requirements/srd035-issue-push.md#r32)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R3.3](../software-requirements/srd035-issue-push.md#r33)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC2](../software-requirements/srd035-issue-push.md#ac2)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R4.1](../software-requirements/srd035-issue-push.md#r41)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R4.2](../software-requirements/srd035-issue-push.md#r42)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC3](../software-requirements/srd035-issue-push.md#ac3)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R1.1](../software-requirements/srd035-specify.md#r11)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R2.1](../software-requirements/srd035-specify.md#r21)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R2.2](../software-requirements/srd035-specify.md#r22)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R3.1](../software-requirements/srd035-specify.md#r31)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC1](../software-requirements/srd035-specify.md#ac1)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R3.2](../software-requirements/srd035-specify.md#r32)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R3.3](../software-requirements/srd035-specify.md#r33)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC2](../software-requirements/srd035-specify.md#ac2)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R4.1](../software-requirements/srd035-specify.md#r41)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R4.2](../software-requirements/srd035-specify.md#r42)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC3](../software-requirements/srd035-specify.md#ac3)
 - [srd013-program](../software-requirements/srd013-program.md) [R3.1](../software-requirements/srd013-program.md#r31)
 - [srd013-program](../software-requirements/srd013-program.md) [R3.3](../software-requirements/srd013-program.md#r33)
 - [srd013-program](../software-requirements/srd013-program.md) [AC3](../software-requirements/srd013-program.md#ac3)
@@ -102,9 +102,9 @@ No issue is assigned by push, and the specify skill is at most 50 lines.
 <!-- field: traces -->
 #### Traces
 
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R5.1](../software-requirements/srd035-issue-push.md#r51)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [R5.3](../software-requirements/srd035-issue-push.md#r53)
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC4](../software-requirements/srd035-issue-push.md#ac4)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R5.1](../software-requirements/srd035-specify.md#r51)
+- [srd035-specify](../software-requirements/srd035-specify.md) [R5.3](../software-requirements/srd035-specify.md#r53)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC4](../software-requirements/srd035-specify.md#ac4)
 
 <!-- field: out_of_scope -->
 ## Out of scope

@@ -1,5 +1,5 @@
 ---
-id: srd022-create-goals
+id: srd022-tasks
 title: "Skill: tasks"
 ---
 

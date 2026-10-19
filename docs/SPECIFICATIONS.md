@@ -102,13 +102,13 @@ docs/road-map.md.
 | [srd018-reports](specs/software-requirements/srd018-reports.md) | docs/specs/software-requirements/srd018-reports.md | Script: reports (tpm reports ...) | 01.1 |
 | [srd019-track-goals](specs/software-requirements/srd019-track-goals.md) | docs/specs/software-requirements/srd019-track-goals.md | Script: track-goals (tpm goals ...) | 02.0 |
 | [srd020-daily-scrum](specs/software-requirements/srd020-daily-scrum.md) | docs/specs/software-requirements/srd020-daily-scrum.md | Skill: daily-scrum | 02.0 |
-| [srd022-create-goals](specs/software-requirements/srd022-create-goals.md) | docs/specs/software-requirements/srd022-create-goals.md | Skill: tasks | 01.0 |
-| [srd031-plan-release](specs/software-requirements/srd031-plan-release.md) | docs/specs/software-requirements/srd031-plan-release.md | Skill: plan | 01.2 |
+| [srd022-tasks](specs/software-requirements/srd022-tasks.md) | docs/specs/software-requirements/srd022-tasks.md | Skill: tasks | 01.0 |
+| [srd031-plan](specs/software-requirements/srd031-plan.md) | docs/specs/software-requirements/srd031-plan.md | Skill: plan | 01.2 |
 | [srd032-sprint-review](specs/software-requirements/srd032-sprint-review.md) | docs/specs/software-requirements/srd032-sprint-review.md | Skill: sprint-review | 02.0 |
 | [srd033-sprint-retrospective](specs/software-requirements/srd033-sprint-retrospective.md) | docs/specs/software-requirements/srd033-sprint-retrospective.md | Skill: sprint-retrospective | 02.0 |
 | [srd034-objectives](specs/software-requirements/srd034-objectives.md) | docs/specs/software-requirements/srd034-objectives.md | Objective documents and the dated objective loop | 01.0 |
-| [srd035-issue-push](specs/software-requirements/srd035-issue-push.md) | docs/specs/software-requirements/srd035-issue-push.md | Skill: specify | 00.0 |
-| [srd036-issue-pop](specs/software-requirements/srd036-issue-pop.md) | docs/specs/software-requirements/srd036-issue-pop.md | Skill: implement | 00.1 |
+| [srd035-specify](specs/software-requirements/srd035-specify.md) | docs/specs/software-requirements/srd035-specify.md | Skill: specify | 00.0 |
+| [srd036-implement](specs/software-requirements/srd036-implement.md) | docs/specs/software-requirements/srd036-implement.md | Skill: implement | 00.1 |
 | [srd037-install](specs/software-requirements/srd037-install.md) | docs/specs/software-requirements/srd037-install.md | Script: install (tpm install) | 00.3 |
 | [srd038-sprint-end](specs/software-requirements/srd038-sprint-end.md) | docs/specs/software-requirements/srd038-sprint-end.md | Skill: sprint-end | 01.2 |
 | [srd039-corpus](specs/software-requirements/srd039-corpus.md) | docs/specs/software-requirements/srd039-corpus.md | Shared: corpus and config documents (internal/corpus) | 01.0 |

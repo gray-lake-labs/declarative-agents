@@ -151,8 +151,8 @@ go test ./magefiles -run '^TestSkillFilesStayWithinLineLimit$'
 <!-- field: traces -->
 #### Traces
 
-- [srd035-issue-push](../software-requirements/srd035-issue-push.md) [AC4](../software-requirements/srd035-issue-push.md#ac4)
-- [srd036-issue-pop](../software-requirements/srd036-issue-pop.md) [AC3](../software-requirements/srd036-issue-pop.md#ac3)
+- [srd035-specify](../software-requirements/srd035-specify.md) [AC4](../software-requirements/srd035-specify.md#ac4)
+- [srd036-implement](../software-requirements/srd036-implement.md) [AC3](../software-requirements/srd036-implement.md#ac3)
 
 <!-- case: Git ignores the installed files and nothing else | status: implemented -->
 ### Git ignores the installed files and nothing else

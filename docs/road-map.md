@@ -33,7 +33,7 @@ tpm picks the labels, files, and lints.
 
 - srd001-labels
 - srd013-program
-- srd035-issue-push
+- srd035-specify
 
 <!-- field: use_cases -->
 ### Use cases
@@ -67,7 +67,7 @@ Sub-issues and do-work arrive with epics later.
 <!-- field: srds -->
 ### SRDs
 
-- srd036-issue-pop
+- srd036-implement
 - srd041-states
 
 <!-- field: use_cases -->
@@ -179,7 +179,7 @@ Owner works through release 00.1's implement and 00.2's audit gate.
 
 - srd006-events
 - srd007-links
-- srd022-create-goals
+- srd022-tasks
 - srd034-objectives
 - srd039-corpus
 
@@ -220,7 +220,7 @@ Owner works through release 00.1's implement and 00.2's audit gate.
 - mage audit
 - mage regression:all
 - mage integration:objectivesAudit
-- mage integration:createGoals
+- mage integration:tasks
 - mage integration:program
 
 <!-- release: 01.1 | status: implemented -->
@@ -277,7 +277,7 @@ issue, and files the next period's sprint-end issues.
 - srd001-labels
 - srd015-release
 - srd018-reports
-- srd031-plan-release
+- srd031-plan
 - srd034-objectives
 - srd038-sprint-end
 - srd040-format-tools
@@ -304,7 +304,7 @@ issue, and files the next period's sprint-end issues.
 - mage regression:all
 - mage integration:release
 - mage integration:sprintEnd
-- mage integration:planRelease
+- mage integration:plan
 
 <!-- release: 01.3 | status: specified -->
 ## 01.3 - Tags trigger handoff and the summary

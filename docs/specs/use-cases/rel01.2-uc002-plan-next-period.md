@@ -51,10 +51,10 @@ The current period's sprint-end issues have closed.
 
 | id | target | reason |
 | --- | --- | --- |
-| T1 | [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R1.1](../software-requirements/srd031-plan-release.md#r11), [R2.1](../software-requirements/srd031-plan-release.md#r21), [R2.2](../software-requirements/srd031-plan-release.md#r22), [R3.1](../software-requirements/srd031-plan-release.md#r31), [R3.2](../software-requirements/srd031-plan-release.md#r32), [R4.1](../software-requirements/srd031-plan-release.md#r41), [R4.2](../software-requirements/srd031-plan-release.md#r42), [R4.3](../software-requirements/srd031-plan-release.md#r43), [R4.4](../software-requirements/srd031-plan-release.md#r44), [R4.5](../software-requirements/srd031-plan-release.md#r45), [R4.6](../software-requirements/srd031-plan-release.md#r46), [R5.1](../software-requirements/srd031-plan-release.md#r51), [R5.2](../software-requirements/srd031-plan-release.md#r52) | S1 to S3 trace plan's reads, questions, pushes, and refusals. |
+| T1 | [srd031-plan](../software-requirements/srd031-plan.md) [R1.1](../software-requirements/srd031-plan.md#r11), [R2.1](../software-requirements/srd031-plan.md#r21), [R2.2](../software-requirements/srd031-plan.md#r22), [R3.1](../software-requirements/srd031-plan.md#r31), [R3.2](../software-requirements/srd031-plan.md#r32), [R4.1](../software-requirements/srd031-plan.md#r41), [R4.2](../software-requirements/srd031-plan.md#r42), [R4.3](../software-requirements/srd031-plan.md#r43), [R4.4](../software-requirements/srd031-plan.md#r44), [R4.5](../software-requirements/srd031-plan.md#r45), [R4.6](../software-requirements/srd031-plan.md#r46), [R5.1](../software-requirements/srd031-plan.md#r51), [R5.2](../software-requirements/srd031-plan.md#r52) | S1 to S3 trace plan's reads, questions, pushes, and refusals. |
 | T2 | [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.1](../software-requirements/srd034-objectives.md#r31) | S1 traces planning from objective documents. |
 | T3 | [srd001-labels](../software-requirements/srd001-labels.md) [R7.1](../software-requirements/srd001-labels.md#r71), [R7.2](../software-requirements/srd001-labels.md#r72), [R7.4](../software-requirements/srd001-labels.md#r74) | S4 traces the sprint milestone and sprint issue. |
-| T4 | [srd031-plan-release](../software-requirements/srd031-plan-release.md) [AC1](../software-requirements/srd031-plan-release.md#ac1), [AC2](../software-requirements/srd031-plan-release.md#ac2), [AC3](../software-requirements/srd031-plan-release.md#ac3) | S1 to S3 trace these acceptance criteria. |
+| T4 | [srd031-plan](../software-requirements/srd031-plan.md) [AC1](../software-requirements/srd031-plan.md#ac1), [AC2](../software-requirements/srd031-plan.md#ac2), [AC3](../software-requirements/srd031-plan.md#ac3) | S1 to S3 trace these acceptance criteria. |
 | T5 | [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3) | S1 traces this acceptance criterion. |
 | T6 | [srd001-labels](../software-requirements/srd001-labels.md) [AC7](../software-requirements/srd001-labels.md#ac7) | S4 traces this acceptance criterion. |
 
@@ -69,12 +69,12 @@ plan reads the road-map, SRDs, objective documents, open objectives, and the per
 <!-- field: traces -->
 #### Traces
 
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R1.1](../software-requirements/srd031-plan-release.md#r11)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R2.1](../software-requirements/srd031-plan-release.md#r21)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R2.2](../software-requirements/srd031-plan-release.md#r22)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R3.1](../software-requirements/srd031-plan-release.md#r31)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R3.2](../software-requirements/srd031-plan-release.md#r32)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [AC1](../software-requirements/srd031-plan-release.md#ac1)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R1.1](../software-requirements/srd031-plan.md#r11)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R2.1](../software-requirements/srd031-plan.md#r21)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R2.2](../software-requirements/srd031-plan.md#r22)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R3.1](../software-requirements/srd031-plan.md#r31)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R3.2](../software-requirements/srd031-plan.md#r32)
+- [srd031-plan](../software-requirements/srd031-plan.md) [AC1](../software-requirements/srd031-plan.md#ac1)
 - [srd034-objectives](../software-requirements/srd034-objectives.md) [R3.1](../software-requirements/srd034-objectives.md#r31)
 - [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3)
 
@@ -86,13 +86,13 @@ The release entry merges through the inner loop, the plan is tagged in the syste
 <!-- field: traces -->
 #### Traces
 
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R4.1](../software-requirements/srd031-plan-release.md#r41)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R4.2](../software-requirements/srd031-plan-release.md#r42)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R4.3](../software-requirements/srd031-plan-release.md#r43)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R4.4](../software-requirements/srd031-plan-release.md#r44)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R4.5](../software-requirements/srd031-plan-release.md#r45)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R4.6](../software-requirements/srd031-plan-release.md#r46)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [AC2](../software-requirements/srd031-plan-release.md#ac2)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R4.1](../software-requirements/srd031-plan.md#r41)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R4.2](../software-requirements/srd031-plan.md#r42)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R4.3](../software-requirements/srd031-plan.md#r43)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R4.4](../software-requirements/srd031-plan.md#r44)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R4.5](../software-requirements/srd031-plan.md#r45)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R4.6](../software-requirements/srd031-plan.md#r46)
+- [srd031-plan](../software-requirements/srd031-plan.md) [AC2](../software-requirements/srd031-plan.md#ac2)
 
 <!-- sc: S3 -->
 ### S3
@@ -102,9 +102,9 @@ No item without test and environment is placed, no issue is assigned, and no wor
 <!-- field: traces -->
 #### Traces
 
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R5.1](../software-requirements/srd031-plan-release.md#r51)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [R5.2](../software-requirements/srd031-plan-release.md#r52)
-- [srd031-plan-release](../software-requirements/srd031-plan-release.md) [AC3](../software-requirements/srd031-plan-release.md#ac3)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R5.1](../software-requirements/srd031-plan.md#r51)
+- [srd031-plan](../software-requirements/srd031-plan.md) [R5.2](../software-requirements/srd031-plan.md#r52)
+- [srd031-plan](../software-requirements/srd031-plan.md) [AC3](../software-requirements/srd031-plan.md#ac3)
 
 <!-- sc: S4 -->
 ### S4
