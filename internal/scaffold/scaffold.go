@@ -26,7 +26,7 @@ import (
 var templates embed.FS
 
 // parentRepository is the parent whose format the templates follow.
-const parentRepository = "github.com/Nokia-Bell-Labs/declarative-agents"
+const parentRepository = "github.com/gray-lake-labs/declarative-agents"
 
 // Result is what happened to one file: created, kept, or overwritten
 // (srd043 R3.2).

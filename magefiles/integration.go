@@ -42,10 +42,6 @@ func (Integration) ObjectivesAudit() error {
 	if err != nil {
 		return err
 	}
-	cache, err := parentCheckout(root)
-	if err != nil {
-		return err
-	}
 	c := &check{}
 	audit := func(fixture string) ([]objectives.Finding, error) {
 		tmp, err := os.MkdirTemp("", "scrum-master-objectives-*")
@@ -56,7 +52,6 @@ func (Integration) ObjectivesAudit() error {
 		if err := runStreaming(root, "cp", "-R", "docs", tmp); err != nil {
 			return nil, err
 		}
-		writeFileTo(filepath.Join(tmp, checkoutsFile), "checkouts:\n  "+parentRepository+": "+cache+"\n")
 		dst := filepath.Join(tmp, objectives.Dir, filepath.Base(fixture))
 		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 			return nil, err

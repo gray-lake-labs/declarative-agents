@@ -19,7 +19,7 @@ Specifications lead implementation. A new skill or a change to one starts with a
 <!-- article: D2 -->
 ### D2 - Every file is Markdown with tags
 
-Every file is Markdown with marker tags. Structured artifacts use the format the pinned Nokia declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's objective documents, which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides. Four files are not Markdown because a consumer outside this repository requires their format: docs/external-pins.yaml and docs/external-checkouts.yaml, which the parent's audit reads by path; docs/corpus-charter.yaml, which the parent's audit executes; and plugin/plugin.json, which the Agent Plugins 1.0 standard names.
+Every file is Markdown with marker tags. Structured artifacts use the format the pinned Nokia declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's objective documents, which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides. Four files are not Markdown because a consumer outside this repository requires their format: docs/external-pins.yaml, which the parent's audit reads by path, and docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the parent's audit executes; and plugin/plugin.json, which the Agent Plugins 1.0 standard names.
 
 <!-- article: D3 -->
 ### D3 - Traceability
@@ -307,7 +307,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - location: docs/external-checkouts.yaml
   - required_fields:
     1. checkouts
-  - purpose: Overrides the clone-cache location per parent repository, relative to the repository root.
+  - purpose: Points each parent repository at the downloaded release's source for one audit run; written and removed by mage audit and ignored by git, or written by a person to override the location.
 - engineering_guideline:
   - location: docs/engineering/engNN-short-name.md
   - required_fields:
