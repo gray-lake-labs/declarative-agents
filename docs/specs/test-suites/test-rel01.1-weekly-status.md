@@ -25,9 +25,9 @@ component, and that an actionable signal becomes an issue.
 <!-- field: preconditions -->
 ## Preconditions
 
-- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository, a reports repository, and one Product Owner repository with open objective issue fixtures, and writes their paths as JSON for the integration targets (eng01).
+- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository, a reports repository, and one Product Owner repository with open Sprint Goal fixtures, and writes their paths as JSON for the integration targets (eng01).
 - mage regression:down removes the run after the targets run, including when they fail.
-- Fixture reports cover a week and a period, including a shared blocker, an aging blocker, a slipped commitment, a missing report, and a reported-complete objective with no met event.
+- Fixture reports cover a week and a period, including a shared blocker, an aging blocker, a slipped commitment, a missing report, and a reported-complete Sprint Goal with no met event.
 
 <!-- field: test_cases -->
 ## Test cases
@@ -116,10 +116,10 @@ go test ./internal/reports -run '^Test(ValidatePassesPerObjectiveReport|Validate
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- report_items: status, problems, and complete or not complete for every open objective
+- report_items: status, problems, and complete or not complete for every open Sprint Goal
 - validate_well_formed: exit 0
 - validate_mismatch: non-zero exit naming the report
-- week: open objective issues with due dates and the week's activity
+- week: open Sprint Goals with due dates and the week's activity
 
 <!-- field: traces -->
 #### Traces
@@ -181,7 +181,7 @@ go test ./internal/reports -run '^TestAggregateSignalsByComponentNeverByPerson$'
 
 - signals: shared blocker, aging blocker, slipped commitment, missing report, tracker contradiction, unreported merged work
 - phrasing: by component or blocker; no person ranked or compared
-- progress: per objective, reported complete distinct from met
+- progress: per Sprint Goal, reported complete distinct from met
 
 <!-- field: traces -->
 #### Traces

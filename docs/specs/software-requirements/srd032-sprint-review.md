@@ -7,7 +7,7 @@ title: "Skill: sprint-review"
 ## Problem
 
 A three-week period ends with a question only the Product Owner can answer:
-is the Increment accepted. Whether each objective is met is already
+is the Increment accepted. Whether each Sprint Goal is met is already
 decided by evidence: track-goals has recorded which tests passed in which
 environment on which version. What evidence cannot decide is whether the
 result is what the users needed. Reviewed from a demo alone, the Increment
@@ -95,7 +95,7 @@ Retired in 01.2 (design.md D12).
 <!-- req: R6.1 -->
 ### R6.1
 
-At a period's end, sprint-review shows the Product Owner each objective's ledger and evidence, records the Product Owner's verdict on the Increment, and pushes follow-up items.
+At a period's end, sprint-review shows the Product Owner each Sprint Goal's ledger and evidence, records the Product Owner's verdict on the Increment, and pushes follow-up items.
 
 <!-- req: R6.2 -->
 ### R6.2

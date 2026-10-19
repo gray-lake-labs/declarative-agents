@@ -22,7 +22,7 @@ list of mapping
 <!-- field: description -->
 #### Description
 
-The people who report: username (tracker username) and project (the repository whose open objective issues they report on and where their status issue is filed). Stage one lists the Product Owners.
+The people who report: username (tracker username) and project (the repository whose open Sprint Goals they report on and where their status issue is filed). Stage one lists the Product Owners.
 
 <!-- schema_entry: reminder_weekday -->
 ### reminder_weekday

@@ -3,7 +3,7 @@
 This guide describes how one piece of work travels from intent to a merged,
 reviewed result. Every role uses this loop, for every kind of work, and the
 outer-loop Scrum skills exist to feed it. How releases are planned,
-objectives pushed between levels, evidence collected, and the Increment
+Sprint Goals pushed between levels, evidence collected, and the Increment
 reviewed is the subject of
 [process.md](process.md); the two layers are separate, and a team could run
 this loop under a different management structure.
@@ -38,7 +38,7 @@ flowchart LR
     M -->|closes| I
     M -->|tpm release| REL[version tag]
     REL -->|test subsystem CI/CD| E[environments]
-    E -->|track-goals: evidence| OBJ[objective ledger]
+    E -->|track-goals: evidence| OBJ[Sprint Goal ledger]
 ```
 
 Planning and execution are kept in separate context windows on purpose. When
@@ -90,10 +90,10 @@ Acceptance Criteria are what the reviewer reads the change against.
 The rest of the definition of done is the item's own Acceptance Criteria,
 and each criterion names the test that proves it and the environment where
 that proof counts. A component item is done when its tests pass in the
-local environment and its branch merges. An objective is done only
+local environment and its branch merges. A Sprint Goal is done only
 when the tests its requirements name pass in the environment it names, on a
 recorded pinned set, which track-goals records as evidence; closing the
-objective's items is not enough. By kind, the criteria usually say:
+Sprint Goal's items is not enough. By kind, the criteria usually say:
 
 | Kind | Finished when |
 |---|---|
@@ -127,8 +127,8 @@ make it rarer.
 
 ## Measures
 
-Velocity is cycle time from an objective planned to met, and from item
-filed to branch merged; rework is met objectives reopened by failing
+Velocity is cycle time from a Sprint Goal planned to met, and from item
+filed to branch merged; rework is met Sprint Goals reopened by failing
 evidence, items reopened, and merges reverted. All are read from the
 ledger and the tracker by component; nobody types them, and nothing is
 measured per person.

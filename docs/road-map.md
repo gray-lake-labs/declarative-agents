@@ -11,14 +11,14 @@ and push, 00.1 pop and merge, 00.2 changes under docs/ through the audit
 gate, and 00.3 tpm install for Cursor, Claude Code, and GitHub Copilot.
 Every issue, project work, a design change, or a planning change, has one
 path to a merged change. Release 01 builds the interaction between the technical program manager
-and the Product Owners (srd034) in three dot releases: 01.0 objectives
+and the Product Owners (srd034) in three dot releases: 01.0 Sprint Goals
 reach the Product Owner as dated issues, 01.1 status comes back weekly,
 and 01.2 the sprint end releases and plans the next period. 01.4, the
 agent-legible CLI, ships before 01.3. Each use case cites only the
 requirement items its release delivers, so the SRDs it touches are partly
 delivered; the rest waits for 02.0. Release 04.0 aligns the planning
 documents with the agile hierarchy (theme, initiative, epic, feature,
-user story) and renames the objective issue the Sprint Goal. Every release proves itself with mage
+user story) and renames the Sprint Goal the Sprint Goal. Every release proves itself with mage
 audit, which runs the parent's specification-critic corpus-audit agent
 (docs/guides/corpus-audit.md), and with its test suite.
 
@@ -98,7 +98,7 @@ Sub-issues and do-work arrive with tracking issues later.
 
 Any merge request that changes docs/ merges only through mage audit: a
 kind::spec design change anyone files, and a plane::management planning
-change a lead files. Objective issues are worked this way.
+change a lead files. Sprint Goals are worked this way.
 
 <!-- field: srds | form: "empty list" -->
 ### SRDs
@@ -163,17 +163,17 @@ version, kept out of the repository by .git/info/exclude, and tpm install
 - mage integration:install
 
 <!-- release: 01.0 | status: implemented -->
-## 01.0 - Objectives reach the Product Owner
+## 01.0 - Sprint Goals reach the Product Owner
 
-The technical program manager writes the program's objectives as an
-objective document that mage audit checks through the
+The technical program manager writes the program's Sprint Goals as an
+initiative that mage audit checks through the
 specification-critic agent, and tasks files one dated, pinned,
-admitted objective issue in each Product Owner's repository. The
+admitted Sprint Goal in each Product Owner's repository. The
 release also builds what that path needs: the magefile that runs the
 agent audit, tpm issue file and lint, the planned event, and the
 regression rig: the Terraform split into infra/modules/program with
 the production and disposable roots, and gitlabrig (eng01). Its
-objective issues are plane::management issues the receiving Product
+Sprint Goals are plane::management issues the receiving Product
 Owner works through release 00.1's implement and 00.2's audit gate.
 
 <!-- field: srds -->
@@ -206,15 +206,15 @@ Owner works through release 00.1's implement and 00.2's audit gate.
 
 | id | summary | status | priority |
 | --- | --- | --- | --- |
-| [rel01.0-uc001-author-objectives](specs/use-cases/rel01.0-uc001-author-objectives.md) | The technical program manager merges an objective document that the specification-critic agent audit passes. | implemented | P1 |
-| [rel01.0-uc002-push-objective-issues](specs/use-cases/rel01.0-uc002-push-objective-issues.md) | tasks files one dated, pinned, admitted objective issue per Product Owner. | implemented | P1 |
+| [rel01.0-uc001-author-objectives](specs/use-cases/rel01.0-uc001-author-objectives.md) | The technical program manager merges an initiative that the specification-critic agent audit passes. | implemented | P1 |
+| [rel01.0-uc002-push-objective-issues](specs/use-cases/rel01.0-uc002-push-objective-issues.md) | tasks files one dated, pinned, admitted Sprint Goal per Product Owner. | implemented | P1 |
 
 <!-- field: test_suites -->
 ### Test suites
 
 | id | summary | status |
 | --- | --- | --- |
-| [test-rel01.0-objectives](specs/test-suites/test-rel01.0-objectives.md) | The agent audit passes a well-formed objective document and fails a malformed one; tasks files dated objective issues once. | implemented |
+| [test-rel01.0-objectives](specs/test-suites/test-rel01.0-objectives.md) | The agent audit passes a well-formed initiative and fails a malformed one; tasks files dated Sprint Goals once. | implemented |
 
 <!-- field: proof -->
 ### Proof
@@ -229,9 +229,9 @@ Owner works through release 00.1's implement and 00.2's audit gate.
 ## 01.1 - Status comes back weekly
 
 A dated weekly status issue in each Product Owner's repository walks
-the owner through every open objective and yields a validated report;
+the owner through every open Sprint Goal and yields a validated report;
 the next week's issue follows with its new due date. The technical
-program manager aggregates the reports by component and by objective,
+program manager aggregates the reports by component and by Sprint Goal,
 never by person.
 
 <!-- field: srds -->
@@ -245,7 +245,7 @@ never by person.
 
 | id | summary | status | priority |
 | --- | --- | --- | --- |
-| [rel01.1-uc001-weekly-status](specs/use-cases/rel01.1-uc001-weekly-status.md) | A Product Owner works a dated status issue into a validated per-objective report. | implemented | P1 |
+| [rel01.1-uc001-weekly-status](specs/use-cases/rel01.1-uc001-weekly-status.md) | A Product Owner works a dated status issue into a validated per-Sprint-Goal report. | implemented | P1 |
 | [rel01.1-uc002-period-rollup](specs/use-cases/rel01.1-uc002-period-rollup.md) | The technical program manager aggregates a week or period of reports into signals by component. | implemented | P2 |
 
 <!-- field: test_suites -->
@@ -268,8 +268,8 @@ never by person.
 
 A sprint-end issue summarizes the period, asks the owner what to
 change, and releases behind the gate once its merge request merges;
-objectives reported complete close by that merge without a met event.
-plan records the next period's objective items, publishes the
+Sprint Goals reported complete close by that merge without a met event.
+plan records the next period's initiative items, publishes the
 plan as a documents-only system tag, dates the milestone and the sprint
 issue, and files the next period's sprint-end issues.
 
@@ -290,7 +290,7 @@ issue, and files the next period's sprint-end issues.
 | id | summary | status | priority |
 | --- | --- | --- | --- |
 | [rel01.2-uc001-sprint-end-release](specs/use-cases/rel01.2-uc001-sprint-end-release.md) | A sprint-end issue summarizes the period, asks, and releases on confirmation. | implemented | P1 |
-| [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md) | The technical program manager plans the next period's objective items with plan. | implemented | P1 |
+| [rel01.2-uc002-plan-next-period](specs/use-cases/rel01.2-uc002-plan-next-period.md) | The technical program manager plans the next period's initiative items with plan. | implemented | P1 |
 
 <!-- field: test_suites -->
 ### Test suites
@@ -397,7 +397,7 @@ renamed commands, and the help is written once against them.
 ## 02.0 - Evidence, handoff, and cadence
 
 What the TPM-to-Product-Owner loop does not need yet: done as evidence
-in a named environment and track-goals closing objectives on it, the
+in a named environment and track-goals closing Sprint Goals on it, the
 full handoff and release fan-out, the daily standup and Daily Scrum,
 the sprint review and retrospective as skills, forecasts and
 burn-ups rolled up from story evidence, and the requirement
@@ -463,8 +463,8 @@ an optional feature, and user story are document types the corpus gate
 checks, each with at most one parent, and the issue that executes a
 story and its tasks stay in the tracker. Links between them are the
 agile set: parent, blocks and blocked by, depends on, relates to,
-duplicates, and implements. The objective document becomes the
-initiative and the per-period objective issue becomes the team's Sprint
+duplicates, and implements. The initiative becomes the
+initiative and the per-period Sprint Goal becomes the team's Sprint
 Goal, which lists the stories its Sprint Planning selected and carries
 the ledger, with evidence anchored to the story criterion it proves.
 Story points and velocity live on stories. Released behaviour stays

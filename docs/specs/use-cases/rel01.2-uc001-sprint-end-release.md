@@ -11,9 +11,9 @@ test_suite: test-rel01.2-sprint-end
 
 At the end of each period a sprint-end issue waits in every repository that
 releases, due on the milestone end date. The owner pops it; its steps
-summarize the period from the reports and the objective issues, ask the
+summarize the period from the reports and the Sprint Goals, ask the
 owner what should change, apply the answer, and push the release once the
-owner confirms. Objectives the owner reports complete close with that
+owner confirms. Sprint Goals the owner reports complete close with that
 merge as reported complete, never as met, because track-goals is
 not running yet. A documents-only repository's gate is the corpus audit.
 
@@ -38,10 +38,10 @@ The tracker's due-date notification for the period's sprint-end issue.
 
 - F1: tpm plan push filed the sprint-end issue when the period was planned, with a Recurrence section and a due date on the milestone end date; in the system repository it references the sprint issue and leaves its checklist to the program lead.
 - F2: The owner runs implement on it.
-- F3: tpm sprint-end facts returns as JSON the period's aggregate, each objective issue's ledger and reported status, and the version tpm release next recommends.
+- F3: tpm sprint-end facts returns as JSON the period's aggregate, each Sprint Goal's ledger and reported status, and the version tpm release next recommends.
 - F4: Model step (combine): the model drafts the period summary from the period's reports and tpm's output.
-- F5: Model step (iterate): the model revises the summary with the owner and applies, in the worktree, the changes the owner names to objectives or the release.
-- F6: The summary is committed at docs/sprint-ends/RELEASE.md, and tpm issue merge merges it with --closes for each objective the owner reported complete; the merge closes the sprint-end issue and those objectives.
+- F5: Model step (iterate): the model revises the summary with the owner and applies, in the worktree, the changes the owner names to Sprint Goals or the release.
+- F6: The summary is committed at docs/sprint-ends/RELEASE.md, and tpm issue merge merges it with --closes for each Sprint Goal the owner reported complete; the merge closes the sprint-end issue and those Sprint Goals.
 - F7: The issue's Requirements ask the owner to confirm the release and its version; with no confirmation, or nothing to release, the merge alone closes the issue and no tag is made.
 - F8: Once the merge lands, tpm release gate runs the declared checks on main, the default gate unless the repository releases a declared artifact, with the sprint-end issue as the release issue; tpm release tag creates the tag at the confirmed version only after the gate passes, and a version that does not increase is refused.
 
@@ -103,7 +103,7 @@ A documents-only repository releases only a corpus that mage audit passes.
 <!-- sc: S4 -->
 ### S4
 
-An objective reported complete closes by the sprint-end merge with no met event and is shown as reported complete; once track-goals runs, objectives close only on met.
+A Sprint Goal reported complete closes by the sprint-end merge with no met event and is shown as reported complete; once track-goals runs, Sprint Goals close only on met.
 
 <!-- field: traces -->
 #### Traces

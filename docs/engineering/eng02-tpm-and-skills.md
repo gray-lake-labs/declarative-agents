@@ -25,9 +25,9 @@ The model does three kinds of work, and only these.
 
 | Model task | Example |
 |---|---|
-| Turn loose conversation into a structured file | The TPM's objectives discussion into an objective document; a Product Owner's answers into the weekly report |
+| Turn loose conversation into a structured file | The TPM's Sprint Goals discussion into an initiative; a Product Owner's answers into the weekly report |
 | Combine several files into one summary | A period's reports into the sprint-end or stakeholder summary |
-| Iterate on that content with the person | Revising a summary or an objective document until the person accepts it |
+| Iterate on that content with the person | Revising a summary or an initiative until the person accepts it |
 
 Table: Model tasks.
 

@@ -46,7 +46,7 @@ Writes into --dir, by default the root of the git repository holding the working
 <!-- req: R1.2 -->
 ### R1.2
 
-Every skeleton document is in the format of the parent release tpm was built with, holds only fields that release declares, and states in each field what the owner writes there. The skeleton as written passes the parent's corpus audit (docs/guides/corpus-audit.md) and the objective-document gate.
+Every skeleton document is in the format of the parent release tpm was built with, holds only fields that release declares, and states in each field what the owner writes there. The skeleton as written passes the parent's corpus audit (docs/guides/corpus-audit.md) and the hierarchy gate.
 
 <!-- req: R1.3 -->
 ### R1.3
@@ -118,7 +118,7 @@ The templates name no person, organization, product, or project (design.md D6); 
 <!-- ac: AC1 -->
 ### AC1
 
-init in an empty git repository writes VISION, ARCHITECTURE, SPECIFICATIONS, a road-map with one release, the design constitution, the charter, the pins, and the system SRD in the parent's format, the default labels and policy, and the skills for the named agents; the parent's corpus audit and the objective gate pass on the result.
+init in an empty git repository writes VISION, ARCHITECTURE, SPECIFICATIONS, a road-map with one release, the design constitution, the charter, the pins, and the system SRD in the parent's format, the default labels and policy, and the skills for the named agents; the parent's corpus audit and the Sprint Goal gate pass on the result.
 
 <!-- field: traces -->
 #### Traces

@@ -19,7 +19,7 @@ Specifications lead implementation. A new skill or a change to one starts with a
 <!-- article: D2 -->
 ### D2 - Every file is Markdown with tags
 
-Every file is Markdown with marker tags. Structured artifacts use the format the pinned declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's objective documents, which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides. Four files are not Markdown because a consumer outside this repository requires their format: docs/external-pins.yaml, which the parent's audit reads by path, and docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the parent's audit executes; and plugin/plugin.json, which the Agent Plugins 1.0 standard names.
+Every file is Markdown with marker tags. Structured artifacts use the format the pinned declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's hierarchy documents (themes, initiatives, epics, features, and stories), which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides. Four files are not Markdown because a consumer outside this repository requires their format: docs/external-pins.yaml, which the parent's audit reads by path, and docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the parent's audit executes; and plugin/plugin.json, which the Agent Plugins 1.0 standard names.
 
 <!-- article: D3 -->
 ### D3 - Traceability
@@ -69,7 +69,7 @@ A configuration file scrum-master reads is a config document: Markdown with fron
 <!-- article: D12 -->
 ### D12 - Future releases hold direction
 
-An SRD whose release is not the next one holds its problem, goals, non-goals, and one requirement group of direction; its detailed requirement items are written when its release is planned, as its use cases are. Items written earlier and never built retire in place (D6) rather than wait to mislead the planning of the release before them. A requirement that depends on behavior an unbuilt SRD specifies states its interim rule, the behavior that holds until that SRD is built, as srd038 R2 does for objectives closing before track-goals runs. An SRD that is partly built keeps its built items live and reduces only the rest.
+An SRD whose release is not the next one holds its problem, goals, non-goals, and one requirement group of direction; its detailed requirement items are written when its release is planned, as its use cases are. Items written earlier and never built retire in place (D6) rather than wait to mislead the planning of the release before them. A requirement that depends on behavior an unbuilt SRD specifies states its interim rule, the behavior that holds until that SRD is built, as srd038 R2 does for Sprint Goals closing before track-goals runs. An SRD that is partly built keeps its built items live and reduces only the rest.
 
 <!-- field: schema | form: "tree" -->
 ## Schema
@@ -122,9 +122,9 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
     1. title
     1. releases
   - program_release_fields:
-    - deliverables: the objective items the release proves, objNNN-short-name#Rn.m, listed before release
+    - deliverables: the initiative items the release proves, inNNN-short-name#Rn.m (objNNN-short-name#Rn.m for an objective document), listed before release
     - release.publication: tag (the release tag Cites lines pin) and milestone, as tree items
-  - purpose: Assigns SRDs and use cases to releases and status values. In a program's system repository a release also names the objective items it proves and its tag and milestone, in program_release_fields (srd034 R3.1).
+  - purpose: Assigns SRDs and use cases to releases and status values. In a program's system repository a release also names the initiative items it proves and its tag and milestone, in program_release_fields (srd034 R3.1).
 - srd:
   - location: docs/specs/software-requirements/srdNNN-short-name.md
   - required_fields:

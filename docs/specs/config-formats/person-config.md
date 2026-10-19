@@ -61,7 +61,7 @@ string
 <!-- field: description -->
 #### Description
 
-The project holding the person's objectives and ad-hoc tasks, when the person keeps them apart from component repositories. Optional.
+The project holding the person's Sprint Goals and ad-hoc tasks, when the person keeps them apart from component repositories. Optional.
 
 <!-- schema_entry: state.last_run -->
 ### state.last_run

@@ -22,7 +22,7 @@ reference-update issue and the summary's branch and review issue, each idempoten
 <!-- field: preconditions -->
 ## Preconditions
 
-- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository, a reports repository, and the Product Owner repositories, with a period of fixture reports and objective issues, and writes their paths as JSON for the integration targets (eng01).
+- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository, a reports repository, and the Product Owner repositories, with a period of fixture reports and Sprint Goals, and writes their paths as JSON for the integration targets (eng01).
 - mage regression:down removes the run after the targets run, including when they fail.
 - The tag pipeline reaches the rig's tracker repository.
 

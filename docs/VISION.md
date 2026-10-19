@@ -24,14 +24,14 @@ subsystems have components; each level has one owner (the technical
 program manager, a Product Owner, the Developers), and the test subsystem
 has its own owner, the Scrum Master. Every repository at every level
 carries the same docs/ corpus, and repositories reference each other by
-URLs pinned to release tags. An objective is met when the tests its
+URLs pinned to release tags. A Sprint Goal is met when the tests its
 acceptance criteria name pass in the environment it names, not when its
 issues close; the environments run from a developer's machine through dev,
 staging, and a production proof of concept to the customer's R&D
 environments, and the test software ships with every release.
 
 The process is organized in three planes. The management plane sets intent
-on a three-week cadence: the next release at each level and the objectives
+on a three-week cadence: the next release at each level and the Sprint Goals
 each level pushes to the level below. The control plane holds the rules
 that decide how an issue moves: the label schema, the state machine,
 routing, admission, scheduling, and escalation, as versioned policy files.
@@ -44,7 +44,7 @@ worktree, work it with do-work, merge, release) is the same for every role
 and every kind of work, because every issue states its own requirements
 and acceptance criteria. Audits are recurring issues the same loop works
 on a schedule; track-goals is the audit that follows pinned references,
-collects test evidence, and closes objectives on it. The outer loops are
+collects test evidence, and closes Sprint Goals on it. The outer loops are
 the Scrum events, specified here as SRDs: each reads the tracker, asks
 people only what the tracker cannot know, and pushes issues for the inner
 loop.
@@ -81,14 +81,14 @@ administrative work is what is left between people and delivery.
 ## Vision model diagram
 
 One three-week release cycle, numbered in order. Intent enters as
-objectives, the work flows as issues, and evidence returns to each
-objective's ledger, which the sprint review judges.
+Sprint Goals, the work flows as issues, and evidence returns to each
+Sprint Goal's ledger, which the sprint review judges.
 
 ```mermaid
 flowchart LR
   subgraph MGMT[Management plane: intent, once per release period]
     S1["1 plan: the system release"]
-    S2["2 tasks: one objective per owner, citing pinned requirements"]
+    S2["2 tasks: one Sprint Goal per team, citing pinned initiative items"]
     S3["3 write requirements: SRDs whose criteria name a test and an environment"]
     S4["4 plan: the subsystem release, posted as planned"]
   end
@@ -102,9 +102,9 @@ flowchart LR
   end
   subgraph TEST[Test subsystem: evidence]
     S8["8 promotion: the pinned set runs in dev, staging, production PoC"]
-    S9["9 track-goals: nightly evidence on each objective"]
+    S9["9 track-goals: nightly evidence on each Sprint Goal"]
   end
-  LEDGER[("objective issue: the ledger of planned, evidence, met")]
+  LEDGER[("Sprint Goal: the ledger of planned, evidence, met")]
   S10["10 sprint-review: the Increment judged against the ledger"]
 
   S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9
@@ -112,23 +112,28 @@ flowchart LR
   S4 -.->|planned| LEDGER
   S9 -.->|evidence, met| LEDGER
   LEDGER -.->|met or open| S10
-  S10 -->|unmet objectives move to the next release| S1
+  S10 -->|unmet Sprint Goals move to the next release| S1
   RULES -->|admit and gate every issue| DATA
 ```
 
 <!-- field: what_this_does -->
 ## What this does
 
-Goals, intents, and objectives are one concept here, named at different
-grains. An objective document (srd034) is a program's intent for a release
-period, written by the technical program manager in the system
-repository: what is wanted, why, and how its owner will know it is met.
-An idea or an incident between periods enters as a filed issue. The
-requirements that satisfy an objective are SRDs: an objective cites
-requirement items by URL pinned to a release tag, and an SRD's acceptance
-criteria name the test and the environment that prove them. So the chain
-from intent to evidence is objective, requirement, issue, merge, release,
-evidence on the objective's ledger.
+Planning follows the agile hierarchy, each level a document the corpus
+gate checks (srd034, srd045). A theme names a strategic area and an
+initiative a multi-team outcome for several quarters, the program's
+Product Goal, both written by the technical program manager in the system
+repository. An epic is a large body of work under an initiative, an
+optional feature a capability inside it, and a user story the unit of
+value a team finishes in one sprint, each with one parent and owned by a
+Product Owner. Each sprint, every team receives a Sprint Goal, an issue
+citing the initiative items it serves, and its Sprint Planning lists on
+it the stories it selected, ranked and sized in story points. A story's
+acceptance criteria name the test and the environment that prove them,
+and cite the SRD requirement items they satisfy by URL pinned to a release
+tag. An idea or an incident between sprints enters as a filed issue. So
+the chain from intent to evidence is initiative, epic, story, issue,
+merge, release, and evidence on the Sprint Goal's ledger.
 
 The process defines, and tpm and the skills implement:
 
@@ -138,11 +143,11 @@ The process defines, and tpm and the skills implement:
   the same corpus shape in every repository.
 - A three-week period ending in a release at each level. plan
   picks the requirements the release proves; tasks pushes one
-  objective per downstream owner, citing the requirements by URL pinned
+  Sprint Goal per downstream owner, citing the requirements by URL pinned
   to the release tag and naming the environment where it counts.
-- The objective issue as ledger: planned, evidence, and met events from
-  which the objective's state is replayed. track-goals posts evidence and
-  closes an objective when its tests pass in its environment.
+- The Sprint Goal as ledger: planned, evidence, and met events from
+  which the Sprint Goal's state is replayed. track-goals posts evidence and
+  closes a Sprint Goal when its tests pass in its environment.
 - An environment chain (local, dev, staging, production PoC, customer
   R&D), each an SRD in the test subsystem, with promotion as CI/CD
   automation and handoff to a customer as a human approval.
@@ -154,7 +159,7 @@ The process defines, and tpm and the skills implement:
   (regression tests, contract checks, the sprint and stakeholder updates)
   are recurring issues worked by the same loop.
 - Outer-loop skills for the decisions people make together: plan a
-  release, push objectives downstream, run the Daily Scrum, review the
+  release, push Sprint Goals downstream, run the Daily Scrum, review the
   Increment against evidence, and change the rules at the Retrospective.
   Each pushes issues in do-work's input format.
 - Pull, not assignment: open, unassigned, admitted issues are ready, and
@@ -203,8 +208,8 @@ The design is aligned with the [AI-Native SDLC
 Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook):
 both make a committed specification the source of truth, have an agent
 build from it, put a person at the gates, and run delivery as a loop
-rather than a line. The playbook's intent.md is this process's objective
-document, and its spec.md is an SRD. This process adds what the playbook
+rather than a line. The playbook's intent.md is this process's initiative,
+and its spec.md is a story with the SRD it cites. This process adds what the playbook
 leaves to one team in one repository: levels, contracts between teams,
 and done as evidence in a named environment. The comparison, and the
 practices taken from the playbook, are in
@@ -213,11 +218,11 @@ practices taken from the playbook, are in
 <!-- field: success_criteria -->
 ## Success criteria
 
-- one_command_morning: A person's morning is one command: it shows what closed, what is overdue, what became unblocked, a plan, and the evidence findings on their objectives.
+- one_command_morning: A person's morning is one command: it shows what closed, what is overdue, what became unblocked, a plan, and the evidence findings on their Sprint Goals.
 - downstream_issues_unwritten: A released artifact creates every downstream issue its consumers owe without anyone writing one, and never creates the same one twice.
-- met_only_by_evidence: Every objective is met only by passing evidence in its named environment, recorded on its ledger; closing all of its issues without that evidence leaves it open.
+- met_only_by_evidence: Every Sprint Goal is met only by passing evidence in its named environment, recorded on its ledger; closing all of its issues without that evidence leaves it open.
 - pinned_references_resolve: Every cross-repository reference is pinned to a release tag and resolves; the audit fails otherwise.
-- cycle_time_from_ledger: Cycle time from objective planned to met, and rework, are read from the ledger for every release; nobody types them.
+- cycle_time_from_ledger: Cycle time from Sprint Goal planned to met, and rework, are read from the ledger for every release; nobody types them.
 - generated_dashboard: The program's dashboard is regenerated from the tracker and is never edited by hand; deleting it loses nothing.
 - no_person_ranked: No script assigns, ranks, or estimates a person; the only assignment is a person's own implement.
 - flows_without_management: A program keeps flowing for a full sprint with no management-plane action, on its last milestone, release, and policy.

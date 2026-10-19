@@ -15,8 +15,8 @@ story points and velocity live on stories, and the Product Owner orders
 the backlog by rank.
 
 Before release 04.0 the process had none of that under those names. A
-program's intent was an objective document, the per-period commitment
-was an objective issue, and stories did not exist as such: their
+program's intent was an initiative, the per-period commitment
+was a Sprint Goal, and stories did not exist as such: their
 acceptance criteria were scattered across SRD items and issues. A reader
 had to translate every word, and the translation hid where value was
 delivered.
@@ -154,7 +154,7 @@ A team's velocity is the story points of its stories done per sprint, read from 
 <!-- req: R6.1 -->
 ### R6.1
 
-The corpus gate checks every hierarchy document against its type: the required fields and context items, a parent of the right kind that resolves, link targets that resolve (srd007 R8.2), no parent or blocked_by cycle, a story's points, and a criterion without a test or an environment. The parent's corpus audit does not read these directories, so a magefiles gate inside mage audit checks them, as it checks objective documents (srd034 R2.1).
+The corpus gate checks every hierarchy document against its type: the required fields and context items, a parent of the right kind that resolves, link targets that resolve (srd007 R8.2), no parent or blocked_by cycle, a story's points, and a criterion without a test or an environment. The parent's corpus audit does not read these directories, so a magefiles gate inside mage audit checks them, as it checks initiatives (srd034 R2.1).
 
 <!-- req: R7 -->
 ## R7 - Forecasts (direction)

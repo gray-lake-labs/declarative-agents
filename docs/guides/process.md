@@ -26,9 +26,9 @@ time typing code.
 The second figure is AI-native Scrum, on the same grid, with each block split
 into what people do and what agents do. Intent is pushed down: the technical
 program manager sets the architecture and declares each system release, and
-pushes each subsystem its objectives with the environment where they count.
+pushes each subsystem its Sprint Goals with the environment where they count.
 Work is pulled: each subsystem's Product Owner writes the requirements that
-satisfy its objectives with an agent, Developers turn the plan into issues,
+satisfy its Sprint Goals with an agent, Developers turn the plan into issues,
 and people pop issues for themselves. Agents never plan a sprint on
 their own; they bring the facts into planning and record the plan people
 agree. Specifications are written by people and agents together, the agent
@@ -37,11 +37,11 @@ OpenAPI schemas, or Markdown. The Scrum Master stops doing the administration
 and owns the developer environment, the agents, and the pipelines that do
 it. Velocity keeps its usual meaning, the story points of epic backlog items
 drawn down per period, read from the ledger (srd045); cycle time from
-objective planned to met, and rework, which the figure's legend lists, are
+Sprint Goal planned to met, and rework, which the figure's legend lists, are
 the flow measures read beside it. [agile-mapping.md](agile-mapping.md)
 maps every element of the Scrum Guide to its counterpart here.
 
-![AI-native Scrum: people decide, agents do the administration and the code. The same grid with the columns product horizon, release period, and daily work; each block shows what people do above what agents do. Technical program manager, owning the system: people set the architecture, write the system SRDs and the subsystem SRDs that name each owner and component, declare which subsystem satisfies which system requirement, plan the next system release and push objectives citing pinned requirements with their environment, approve handoff to customer R&D environments, resolve breakages, and answer cross-team questions; agents hold the system requirements and contracts at pinned tags, bring what track-goals recorded into release planning, record the release and post planned events, draft the program report from the ledger, run boundary testing, and follow pinned references across repositories. Product Owner, owning a subsystem: people write requirements that satisfy each objective with every criterion naming its test and environment, plan the subsystem release, push objectives to downstream component repositories, judge the Increment against recorded evidence, and clarify intent; agents propose requirements, draft specifications, flag vague specs, show each objective's ledger and evidence at the Review, and keep the dashboard current. Scrum Master, owning the test subsystem: people specify the environments and their promotion triggers as SRDs, agree the working agreement and Definition of Done, choose improvements, keep the suites honest, and keep CI and promotion from becoming the bottleneck; agents apply the agreement, prepare agendas, bring cycle time, rework, and evidence age to the Retrospective, file agreed changes, and promote pinned sets along the environment chain posting each result as evidence. Developers, owning the components: people approve releases, turn the planned release into issues with make-work, estimate review complexity, write prompt files, give agents context, and review pull requests; agents announce releases to citing repositories, propose tasks, size items, lint each issue for a named test and environment, generate the code, auto-test, and merge after human review recording local test evidence. Legend: the Definition of Done is human review plus the named tests passing in the named environment, recorded as evidence; a period is three weeks ending in a release; velocity is cycle time from objective planned to met, plus rework.](../../figures/scrum-ai-native.png)
+![AI-native Scrum: people decide, agents do the administration and the code. The same grid with the columns product horizon, release period, and daily work; each block shows what people do above what agents do. Technical program manager, owning the system: people set the architecture, write the system SRDs and the subsystem SRDs that name each owner and component, declare which subsystem satisfies which system requirement, plan the next system release and push Sprint Goals citing pinned requirements with their environment, approve handoff to customer R&D environments, resolve breakages, and answer cross-team questions; agents hold the system requirements and contracts at pinned tags, bring what track-goals recorded into release planning, record the release and post planned events, draft the program report from the ledger, run boundary testing, and follow pinned references across repositories. Product Owner, owning a subsystem: people write requirements that satisfy each Sprint Goal with every criterion naming its test and environment, plan the subsystem release, push Sprint Goals to downstream component repositories, judge the Increment against recorded evidence, and clarify intent; agents propose requirements, draft specifications, flag vague specs, show each Sprint Goal's ledger and evidence at the Review, and keep the dashboard current. Scrum Master, owning the test subsystem: people specify the environments and their promotion triggers as SRDs, agree the working agreement and Definition of Done, choose improvements, keep the suites honest, and keep CI and promotion from becoming the bottleneck; agents apply the agreement, prepare agendas, bring cycle time, rework, and evidence age to the Retrospective, file agreed changes, and promote pinned sets along the environment chain posting each result as evidence. Developers, owning the components: people approve releases, turn the planned release into issues with make-work, estimate review complexity, write prompt files, give agents context, and review pull requests; agents announce releases to citing repositories, propose tasks, size items, lint each issue for a named test and environment, generate the code, auto-test, and merge after human review recording local test evidence. Legend: the Definition of Done is human review plus the named tests passing in the named environment, recorded as evidence; a period is three weeks ending in a release; velocity is cycle time from Sprint Goal planned to met, plus rework.](../../figures/scrum-ai-native.png)
 
 The specification behind the process is organized in three planes rather
 than by role, and the third figure regroups the second figure's content by
@@ -54,7 +54,7 @@ Master act in it, and it changes only through reviewed edits. The data plane
 is the work; the Developers act in it, continuously. Each item for people
 names the role that does it.
 
-![AI-native Scrum by plane: intent, rules, and work. The three planes as rows against the three time horizons, each block split into people, labelled by role, and agents, regrouping the second figure's items. Management: the TPM writes system and subsystem SRDs, plans system releases and pushes objectives with pinned citations, and approves customer handoff; the PO writes requirements against objectives, plans subsystem releases, pushes objectives downstream, and judges the Increment against evidence; agents bring track-goals' records into planning, post planned events, draft reports from the ledger and specifications, and show evidence at the Review. Control: the TPM sets the architecture and resolves breakages; the SM specifies environments and promotion triggers, agrees the Definition of Done, keeps the suites honest, and keeps CI and promotion fast; agents hold pinned shared context, follow pinned references, apply the agreement, bring evidence age to the Retrospective, and promote pinned sets posting evidence. Data: Developers approve releases, turn the plan into issues with make-work, estimate review complexity, give agents context, and review pull requests; agents announce releases to citing repositories, lint issues for test and environment, generate the code, auto-test, and merge after human review.](../../figures/scrum-planes.png)
+![AI-native Scrum by plane: intent, rules, and work. The three planes as rows against the three time horizons, each block split into people, labelled by role, and agents, regrouping the second figure's items. Management: the TPM writes system and subsystem SRDs, plans system releases and pushes Sprint Goals with pinned citations, and approves customer handoff; the PO writes requirements against Sprint Goals, plans subsystem releases, pushes Sprint Goals downstream, and judges the Increment against evidence; agents bring track-goals' records into planning, post planned events, draft reports from the ledger and specifications, and show evidence at the Review. Control: the TPM sets the architecture and resolves breakages; the SM specifies environments and promotion triggers, agrees the Definition of Done, keeps the suites honest, and keeps CI and promotion fast; agents hold pinned shared context, follow pinned references, apply the agreement, bring evidence age to the Retrospective, and promote pinned sets posting evidence. Data: Developers approve releases, turn the plan into issues with make-work, estimate review complexity, give agents context, and review pull requests; agents announce releases to citing repositories, lint issues for test and environment, generate the code, auto-test, and merge after human review.](../../figures/scrum-planes.png)
 
 All three figures read in two directions. Down a column, intent and working rules
 flow from the technical program manager, the Product Owner, and the Scrum
@@ -80,7 +80,7 @@ docs/ directory with SRDs and a road-map, checked by the same audit.
 | Level | Owner | Writes | Done when |
 |---|---|---|---|
 | System | Technical program manager | System SRDs, interface YAMLs, and the subsystem SRDs in the system repository | System tests pass on the pinned set in the final environment |
-| Subsystem | Product Owner | Requirements that satisfy its objectives; the local road-map | Its requirements' tests pass in the environment each objective names |
+| Subsystem | Product Owner | Requirements that satisfy its Sprint Goals; the local road-map | Its requirements' tests pass in the environment each Sprint Goal names |
 | Component | Developers | Issues with make-work, then code through push, pop, and do-work | Component tests pass; the branch is approved and merged |
 | Test subsystem | Scrum Master | SRDs for environments, pipelines, and suites | Known-good sets pass and known-bad sets fail |
 
@@ -101,7 +101,7 @@ triggered as each environment's SRD declares; handoff to a customer is a
 person's approval, and the test software ships with the release so the
 customer can run it.
 
-![The environment chain, from a developer's machine to a customer's R&D. Our environments run left to right: local proves the component works with unit and component tests, run by the Developer and before every merge; dev proves subsystems and the system work on a fresh install with install, contract, and regression tests on each component release; staging proves one subsystem's release upgrades a running system, on each subsystem release or nightly; production PoC proves the same upgrade path holds under real use, once a pinned set is green in staging. A green production PoC goes to a handoff approval, where a person decides the pinned set, its evidence, and its test software are ready. Handoff crosses into customer R&D: their dev environment proves it installs and upgrades on their infrastructure and data, using our suites run by them, with evidence coming back to our objective; their staging and production are beyond the handoff.](../../figures/environments.png)
+![The environment chain, from a developer's machine to a customer's R&D. Our environments run left to right: local proves the component works with unit and component tests, run by the Developer and before every merge; dev proves subsystems and the system work on a fresh install with install, contract, and regression tests on each component release; staging proves one subsystem's release upgrades a running system, on each subsystem release or nightly; production PoC proves the same upgrade path holds under real use, once a pinned set is green in staging. A green production PoC goes to a handoff approval, where a person decides the pinned set, its evidence, and its test software are ready. Handoff crosses into customer R&D: their dev environment proves it installs and upgrades on their infrastructure and data, using our suites run by them, with evidence coming back to our Sprint Goal; their staging and production are beyond the handoff.](../../figures/environments.png)
 
 What is left for people runs in two loops. The inner loop is how any one
 item gets done, the same for every role and every kind of work: `make-work`
@@ -113,23 +113,23 @@ gate passed. The inner
 loop is described in [ai-native-sdlc.md](ai-native-sdlc.md). Audits are
 recurring items the same loop works on a schedule; `track-goals` is the
 audit that follows pinned references every night, posts the evidence it
-finds on each objective, and closes an objective when its evidence passes.
+finds on each Sprint Goal, and closes a Sprint Goal when its evidence passes.
 
 The outer loops are the Scrum events, the workflows where people decide
 together.
 
 | Skill | Who | Reads | Asks | Pushes or posts |
 |---|---|---|---|---|
-| `plan` | Technical program manager (system), Product Owner (subsystem), before each three-week period | Road-map, SRDs, open objectives, track-goals status | Which requirements the next release proves | The road-map release entry, its milestone, planned events |
-| `tasks` | Technical program manager, or a Product Owner with downstream repositories | The planned release, subsystem and environment SRDs | Which owner satisfies an objective, only where none is recommended | Objective issues citing pinned requirement URLs, one to the test subsystem |
+| `plan` | Technical program manager (system), Product Owner (subsystem), before each three-week period | Road-map, SRDs, open Sprint Goals, track-goals status | Which requirements the next release proves | The road-map release entry, its milestone, planned events |
+| `tasks` | Technical program manager, or a Product Owner with downstream repositories | The planned release, subsystem and environment SRDs | Which owner satisfies a Sprint Goal, only where none is recommended | Sprint Goals citing pinned requirement URLs, one to the test subsystem |
 | `daily-scrum` | Each Developer, daily | In-progress issues, overnight evidence findings, waiting issues | Blockers, interrupts | Blocker and interrupt issues |
-| `sprint-review` | Product Owner, end of each period | Each objective's ledger and evidence | Is the Increment accepted? | Follow-up issues |
+| `sprint-review` | Product Owner, end of each period | Each Sprint Goal's ledger and evidence | Is the Increment accepted? | Follow-up issues |
 | `sprint-retrospective` | Scrum Master with the team, end of each period | Audit metrics, current policy | Which improvements? | Policy-change issues |
 
-The road-map is the plan, tags are releases, and each objective issue is a
+The road-map is the plan, tags are releases, and each Sprint Goal is a
 ledger: comment events record when it was planned, every piece of evidence
 (requirement, environment, version, result), and when it was met. Anyone
-can replay those events to the objective's state. A rule change from the
+can replay those events to the Sprint Goal's state. A rule change from the
 retrospective is a control-plane issue like any other, popped, worked
 against `policy.md`, and merged by a reviewed merge.
 
@@ -163,10 +163,10 @@ anyone but the person who popped it, never approve anything, and never
 change a rule except by a merge a person approves; the
 [agents semantic model](../specs/semantic-models/agents.md) states these
 rules. The one relationship between roles that is not mediated by the
-tracker is the push of intent: the owner of each level pushes objectives to the level below,
+tracker is the push of intent: the owner of each level pushes Sprint Goals to the level below,
 citing the requirements they must satisfy at a release tag.
 
-![One three-week release cycle, read left to right, one row per role. Technical program manager: 1, plan picks the system requirements the next release will hold; 2, tasks pushes one objective issue per subsystem and to the test subsystem, citing requirements pinned to the tag. Product Owner: 3, writes requirements with an agent through push, pop, and do-work, each criterion naming its test and environment; 4, plan places them in a release of the subsystem's road-map and posts planned on the objective. Developers: 5, make-work turns the planned release into issues; 6, push, pop, and do-work build each issue, a person approves every merge, and local tests are the first evidence; 7, release-push tags the component release. Scrum Master: 8, promotion by CI/CD installs the pinned set in dev, upgrades it in staging and production PoC, and runs the suites; 9, track-goals nightly posts evidence on each objective. The objective issue is the ledger of planned, evidence, and met; 10, sprint-review judges the Increment against it at the end of the period, and unmet objectives move to the next release.](../../figures/release-cycle.png)
+![One three-week release cycle, read left to right, one row per role. Technical program manager: 1, plan picks the system requirements the next release will hold; 2, tasks pushes one Sprint Goal per subsystem and to the test subsystem, citing requirements pinned to the tag. Product Owner: 3, writes requirements with an agent through push, pop, and do-work, each criterion naming its test and environment; 4, plan places them in a release of the subsystem's road-map and posts planned on the Sprint Goal. Developers: 5, make-work turns the planned release into issues; 6, push, pop, and do-work build each issue, a person approves every merge, and local tests are the first evidence; 7, release-push tags the component release. Scrum Master: 8, promotion by CI/CD installs the pinned set in dev, upgrades it in staging and production PoC, and runs the suites; 9, track-goals nightly posts evidence on each Sprint Goal. The Sprint Goal is the ledger of planned, evidence, and met; 10, sprint-review judges the Increment against it at the end of the period, and unmet Sprint Goals move to the next release.](../../figures/release-cycle.png)
 
 The rest of this page takes one column at a time, from the slowest to the
 fastest, and one accountability at a time within it, with a diagram wherever
@@ -186,7 +186,7 @@ that assigns work is `implement`, run by the person taking it. Subsystems
 are placeholders: alpha produces a shared schema, beta consumes it, and both
 belong to one system.
 
-## Product horizon: releases and objectives
+## Product horizon: releases and Sprint Goals
 
 ### Technical program manager and Product Owner (management plane): plan and push
 
@@ -194,7 +194,7 @@ Each repository's road-map is its intent over several releases: the
 releases, the requirements each proves, and their status. Before each
 three-week period, the owner of a level runs `plan` to choose the
 requirements the next release proves, and `tasks` to push one
-objective to each owner below. At system level that is the technical
+Sprint Goal to each owner below. At system level that is the technical
 program manager pushing to each subsystem's Product Owner and to the Scrum
 Master; at subsystem level it is a Product Owner pushing to downstream
 component repositories when there are any.
@@ -214,12 +214,12 @@ sequenceDiagram
     S->>T: road-map entry merged through the inner loop, milestone 1.4
     TPM->>S: tasks for release 1.4
     S->>T: subsystem SRDs and environment SRDs
-    S-->>TPM: owner and environment taken for each objective
-    TPM->>S: owner for an objective with none recommended
-    S->>T: objective in alpha: Cites system@v1.4.0 R2.1, Environment dev
-    S->>T: objective in the test subsystem: suites for 1.4
-    S->>T: planned event on each objective
-    PO->>S: do-work on alpha's requirements against the objective
+    S-->>TPM: owner and environment taken for each Sprint Goal
+    TPM->>S: owner for a Sprint Goal with none recommended
+    S->>T: Sprint Goal in alpha: Cites system@v1.4.0 R2.1, Environment dev
+    S->>T: Sprint Goal in the test subsystem: suites for 1.4
+    S->>T: planned event on each Sprint Goal
+    PO->>S: do-work on alpha's requirements against the Sprint Goal
     PO->>S: plan in alpha
     S->>T: alpha road-map entry, milestone, planned event moved
 ```
@@ -245,7 +245,7 @@ gantt
     Consume schema 2.0  :b3, 2026-11-30, 19d
 ```
 
-Nothing stores status in the road-map. Whether an objective was met is in
+Nothing stores status in the road-map. Whether a Sprint Goal was met is in
 its ledger, written by track-goals from evidence.
 
 ### Scrum Master (control plane): the working agreement and the test subsystem
@@ -277,7 +277,7 @@ objects of the data plane.
 ### Product Owner (management plane): requirements and review
 
 Inside the period, the Product Owner writes the subsystem's requirements
-against its objectives as ordinary issues worked by do-work on the
+against its Sprint Goals as ordinary issues worked by do-work on the
 subsystem's docs/, each acceptance criterion naming its test and
 environment. At the end, the Product Owner judges the Increment against the
 evidence track-goals recorded; met is a fact, acceptance is a judgment.
@@ -294,13 +294,13 @@ sequenceDiagram
     PO->>S: sprint-review
     S->>T: tpm goals status and tpm goals verify for the release
     S->>T: tpm reports aggregate for the period
-    loop each objective
+    loop each Sprint Goal
         S-->>PO: ledger state and latest evidence, recommend accept or not
         PO->>S: accepted or not
     end
     PO->>S: two gaps become follow-ups
     S->>T: specify, follow-ups with test and environment named
-    S->>T: verdicts commented on the objectives
+    S->>T: verdicts commented on the Sprint Goals
 ```
 
 ### Scrum Master (control plane): the retrospective
@@ -380,14 +380,14 @@ At this time scale the control plane is automation applying the rules
 continuously: `tpm issue lint` admits new issues or marks them
 needs-triage, the test subsystem's pipelines promote pinned sets along the
 environment chain, and track-goals follows pinned references, posts
-evidence, closes met objectives, and keeps every issue's waiting flag true
+evidence, closes met Sprint Goals, and keeps every issue's waiting flag true
 to its links.
 
 The figure below expands step 8 of the release cycle into the systems that
 carry it out. Where the release cycle shows people and agents, this one
 shows GitLab, its pipelines, Argo CD, and the GKE clusters on GCP.
 
-![Step 8, promotion: the systems that carry a release along the environment chain. Four rows, one per system: GitLab (repositories and registry), GitLab CI/CD (pipelines), Argo CD (one per cluster), and GKE on GCP (one project and cluster per environment). 8.1, the tag that release-push puts on a component repository starts the tag pipeline from infrastructure/gitlab, which lints, tests, and builds the image; 8.2, it pushes the image to the container registry; 8.3, it triggers the promotion pipeline in test/environments with the project and tag; 8.4, the promotion pipeline commits the new version into the dev pinned set in the environments repository, which holds one pinned set per environment; 8.5, Argo CD in dev syncs to that pinned set; 8.6, it installs the system fresh on the dev cluster; when Argo CD reports healthy, the suite pipeline runs, 8.7, the install, contract, and regression suites against dev and keeps the results as test reports; 8.8, when they are green, the staging pinned set is committed and Argo CD upgrades the running system in staging, where upgrade and regression suites run; 8.9, when staging is green, the production PoC pinned set is committed and Argo CD upgrades it, where upgrade and smoke suites run. The test reports feed step 9, track-goals, which posts evidence on the objective nightly. Fill shows ownership: the product scrum owns the component repository; the test scrum owns the environments repository, its pipelines, and the Argo CD applications; the infrastructure scrum owns the GitLab structure, the CI templates, the registry, the GCP projects, the GKE clusters, and Argo CD itself. Clusters pull images from the registry; handoff to customer R&D is outside the figure and needs a person's approval.](../../figures/promotion-systems.png)
+![Step 8, promotion: the systems that carry a release along the environment chain. Four rows, one per system: GitLab (repositories and registry), GitLab CI/CD (pipelines), Argo CD (one per cluster), and GKE on GCP (one project and cluster per environment). 8.1, the tag that release-push puts on a component repository starts the tag pipeline from infrastructure/gitlab, which lints, tests, and builds the image; 8.2, it pushes the image to the container registry; 8.3, it triggers the promotion pipeline in test/environments with the project and tag; 8.4, the promotion pipeline commits the new version into the dev pinned set in the environments repository, which holds one pinned set per environment; 8.5, Argo CD in dev syncs to that pinned set; 8.6, it installs the system fresh on the dev cluster; when Argo CD reports healthy, the suite pipeline runs, 8.7, the install, contract, and regression suites against dev and keeps the results as test reports; 8.8, when they are green, the staging pinned set is committed and Argo CD upgrades the running system in staging, where upgrade and regression suites run; 8.9, when staging is green, the production PoC pinned set is committed and Argo CD upgrades it, where upgrade and smoke suites run. The test reports feed step 9, track-goals, which posts evidence on the Sprint Goal nightly. Fill shows ownership: the product scrum owns the component repository; the test scrum owns the environments repository, its pipelines, and the Argo CD applications; the infrastructure scrum owns the GitLab structure, the CI templates, the registry, the GCP projects, the GKE clusters, and Argo CD itself. Clusters pull images from the registry; handoff to customer R&D is outside the figure and needs a person's approval.](../../figures/promotion-systems.png)
 
 ```mermaid
 sequenceDiagram
@@ -403,9 +403,9 @@ sequenceDiagram
     CI->>CI: staging trigger is nightly: upgrade alpha on the running system
     CI->>CI: upgrade suites pass in staging
     CI->>S: tpm goals run, nightly
-    S->>T: resolve Cites system@v1.4.0 R2.1 on alpha's objective
+    S->>T: resolve Cites system@v1.4.0 R2.1 on alpha's Sprint Goal
     S->>T: evidence event: R2.1, test ingest_fresh, dev, set 1.4-a0.2, pass
-    S->>T: met event; objective closed
+    S->>T: met event; Sprint Goal closed
     opt a criterion names no environment
         S-->>T: finding on the dashboard; audit fails until fixed
     end
@@ -434,7 +434,7 @@ sequenceDiagram
     S->>T: tpm standup inbox for overnight evidence findings
     S->>T: tpm standup unblocked
     S->>T: tpm standup score and the last tpm goals run
-    S-->>P: in progress, evidence findings on my objectives, still waiting
+    S-->>P: in progress, evidence findings on my Sprint Goals, still waiting
     S-->>P: scored plan
     S-->>P: anything blocking, recommended none
     P->>S: alpha has not answered on the schema field

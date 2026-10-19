@@ -48,8 +48,8 @@ Table 2: What this process covers that Spec Kit does not.
 | Scope | One feature in one repository | A system of subsystems across repositories, linked by URLs pinned to a release tag |
 | Done | The tasks are implemented | The named tests pass in the named environment |
 | Environments | None | local, dev, staging, production proof of concept, then customer R&D, each declared as an SRD with its trigger and suites |
-| Cadence | None | A system release every three weeks, objectives pushed downstream, unmet objectives carried to the next release |
-| Record | `tasks.md` in the feature branch | Issues in the tracker; each objective issue is a ledger of planned, evidence, and met |
+| Cadence | None | A system release every three weeks, Sprint Goals pushed downstream, unmet Sprint Goals carried to the next release |
+| Record | `tasks.md` in the feature branch | Issues in the tracker; each Sprint Goal is a ledger of planned, evidence, and met |
 | Testing software | The feature's own tests | A test subsystem with its own owner, shipped with the release so a customer can run it |
 
 Three of these decide the matter for us. The first is review. The framework
@@ -75,7 +75,7 @@ Table 3: What any inner loop must provide.
 
 | Obligation | Why |
 |---|---|
-| Requirements cite upstream requirements by URL pinned to a release tag | track-goals follows the citation to decide which objective a requirement serves |
+| Requirements cite upstream requirements by URL pinned to a release tag | track-goals follows the citation to decide which Sprint Goal a requirement serves |
 | Each acceptance criterion names its test and its environment | Evidence can be collected without a person interpreting the spec |
 | Work is visible as tracker issues | daily-scrum, sprint-review, and track-goals read the tracker, not files on a branch |
 | A person other than the author reviews every merge | The Definition of Done |
@@ -110,6 +110,6 @@ corpus and the people who use it. We keep that cost down in two ways. The
 inner loop is not ours to reinvent: push, pop, and do-work already exist in
 coding-skills, and Spec Kit is an acceptable substitute inside any
 repository. What this corpus specifies is only the layer Spec Kit does not
-attempt: levels, objectives, evidence, environments, and review. If Spec
+attempt: levels, Sprint Goals, evidence, environments, and review. If Spec
 Kit grows that layer, we should read it closely and drop whatever of ours it
 replaces.

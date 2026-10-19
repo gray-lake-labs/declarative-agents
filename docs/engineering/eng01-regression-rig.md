@@ -6,7 +6,7 @@ title: "Regression Rig: A Program on Local Disk Per Run"
 <!-- field: introduction -->
 ## Introduction
 
-The process lives in the tracker and the repositories: objective issues,
+The process lives in the tracker and the repositories: Sprint Goals,
 due dates, deliveries, tags. A test that mocks them proves the mock. We
 run every release's regression against a real program that the run builds
 and removes, so each run starts from a known layout and leaves nothing

@@ -17,7 +17,7 @@ the two and cites it.
 
 The process is three planes over one tracker, repeated at every level of
 a program. The management plane sets intent once per three-week period:
-the next release at each level and the objectives each level pushes to
+the next release at each level and the Sprint Goals each level pushes to
 the level below. The control plane holds the rules an issue moves by, as
 policy files under version control. The data plane is the work: issues
 popped, built, merged, released, promoted through environments, and
@@ -28,13 +28,13 @@ A program has levels, and each has one owner. The system level belongs
 to the technical program manager, who writes system SRDs, interface
 YAMLs, and the subsystem SRDs that declare each subsystem's owner and
 components. Each subsystem belongs to a Product Owner, who writes the
-requirements that satisfy the objectives pushed to it. Components belong
+stories and requirements that serve the Sprint Goals pushed to it. Components belong
 to Developers. The test subsystem belongs to the Scrum Master, who
 specifies its environments, pipelines, and suites as SRDs. Every
 repository at every level carries the same docs/ corpus, and
 repositories reference each other only by URLs pinned to release tags.
 
-Every object is an issue or something attached to one. An objective is
+Every object is an issue or something attached to one. A Sprint Goal is
 an issue whose comment events are its ledger: planned, evidence, met. A
 sprint is a milestone and a sprint issue. A tracking issue is an issue with a
 list of member issues. A recurring issue is a subscription to an
@@ -44,9 +44,9 @@ promotes. The five label axes (plane, type, kind, component, state)
 make an issue self-describing.
 
 Done is evidence. An acceptance criterion names the test that proves it
-and the environment where that proof counts; an objective is met when
+and the environment where that proof counts; a Sprint Goal is met when
 those tests pass there on a recorded pinned set, and track-goals, the
-nightly audit, records the evidence and closes the objective. The
+nightly audit, records the evidence and closes the Sprint Goal. The
 environments form one chain, local, dev, staging, production PoC, and
 customer R&D, with promotion as CI/CD in the test subsystem and handoff
 to a customer as a human approval. The test software ships with every
@@ -79,7 +79,7 @@ flowchart TB
     SRDS[system and subsystem SRDs]
     PLAN[plan]
     GOALS[tasks]
-    OBJ[objective issues: the ledger]
+    OBJ[Sprint Goals: the ledger]
     REVIEW[sprint-review]
   end
 
@@ -143,10 +143,10 @@ flowchart TB
   Before each three-week period the technical program manager runs
   plan in the system repository: the requirements the next system
   release proves go into the road-map through a reviewed merge,
-  and the milestone exists. tasks then pushes one objective to each
+  and the milestone exists. tasks then pushes one Sprint Goal to each
   subsystem owner and one to the test subsystem, each citing its system
   requirements pinned to the release tag and naming its environment. Each
-  Product Owner writes requirements that satisfy their objectives with
+  Product Owner writes the stories and the requirements they cite for their Sprint Goals with
   do-work, runs plan for the subsystem, and, with downstream
   repositories, tasks for them. Developers turn each subsystem plan
   into issues with make-work.
@@ -157,8 +157,8 @@ flowchart TB
   in the production PoC, each step only on passing suites and on the
   trigger the receiving environment declares. track-goals runs nightly,
   follows pinned references from the system repository, posts each result
-  as an evidence event on the objective it proves, and closes the
-  objective with a met event when every requirement's latest evidence in
+  as an evidence event on the Sprint Goal it proves, and closes the
+  Sprint Goal with a met event when every requirement's latest evidence in
   its environment passed. Missing evidence or an unresolved reference fails
   the audit.
 - artifact_release:
@@ -175,7 +175,7 @@ flowchart TB
   set and its test-subsystem release go to the customer R&D environments.
 - morning:
   daily-scrum fetches the person's in-progress issues, the overnight
-  evidence findings on their objectives, and what is waiting, with a
+  evidence findings on their Sprint Goals, and what is waiting, with a
   scored plan. It asks about blockers and interrupts and pushes an issue
   for each. The person takes a ready issue with implement.
 - weekly:
@@ -183,7 +183,7 @@ flowchart TB
   each is popped, worked by do-work from tpm standup and tpm reports
   output, closed by its merge, and re-created for the next week.
 - period_end:
-  sprint-review shows each objective's ledger state and evidence; the
+  sprint-review shows each Sprint Goal's ledger state and evidence; the
   Product Owner accepts the Increment or not and follow-up items are
   pushed. Then sprint-retrospective reads the period's audit metrics and
   pushes at most three plane::control issues, worked by the inner loop,
@@ -238,7 +238,7 @@ Lines the scripts read from an issue description: `Upstream: <project>#<iid>`,
 the issue that produced the artifact this issue consumes;
 `Requires: <artifact> >= <version>`, a release this issue waits on;
 `Cites: <url pinned to a tag>#<anchor>`, an upstream requirement or
-interface; `Environment: <name>`, where an objective's evidence counts; the
+interface; `Environment: <name>`, where a Sprint Goal's evidence counts; the
 `## Requirements`, `## Acceptance Criteria`, and `## Design Decisions`
 sections, do-work's input; the `## Downstream` section, the artifacts this
 issue's merge produces and who should review them;
@@ -254,13 +254,13 @@ comment.
 
 Set intent once per three-week period at each level and read the result as evidence. Never touches an individual work issue.
 
-The management plane writes releases, requirements, and objectives. It does not write, move, or assign work, and never declares an objective met; evidence does.
+The management plane writes releases, requirements, and Sprint Goals. It does not write, move, or assign work, and never declares a Sprint Goal met; evidence does.
 
 <!-- field: capabilities -->
 #### Capabilities
 
 - plan: the requirements the next release proves, at system or subsystem level; road-map entry, milestone, planned events
-- tasks: one objective per downstream owner and release, citing requirements pinned to the release tag, naming its environment
+- tasks: one Sprint Goal per downstream owner and release, citing requirements pinned to the release tag, naming its environment
 - sprint-review: the Product Owner's verdict on the Increment against evidence; pushes follow-up items
 
 <!-- field: ownership -->
@@ -268,7 +268,7 @@ The management plane writes releases, requirements, and objectives. It does not 
 
 - docs/road-map.md in each repository
 - system and subsystem SRDs
-- objective issues and their ledgers
+- Sprint Goals and their ledgers
 
 <!-- component: control_plane -->
 ### control_plane
@@ -297,7 +297,7 @@ Rules live in files, not in script code. A rule change is a plane::control issue
 Do the work. Continuous flow, pull only, headless when the management plane is absent.
 
 Its objects are the issue, a commitment with component, kind, plane, and
-milestone, and sub-issues for its units; the objective, an issue citing
+milestone, and sub-issues for its units; the Sprint Goal, an issue citing
 pinned requirements and naming an environment, whose events are its ledger;
 the tracking issue, type::tracking, a list of member issues that is never popped; the
 recurring issue, type::recurring, a subscription to an artifact that runs
@@ -306,7 +306,7 @@ commitment, carrying a machine marker, whose mentions create to-dos; and
 the link: Upstream to an issue, Requires to a release, Cites to a pinned
 requirement or interface.
 
-Only implement assigns. Only a person files an upstream defect or request. Only a merge, a person's decline, or track-goals on a met objective closes an issue.
+Only implement assigns. Only a person files an upstream defect or request. Only a merge, a person's decline, or track-goals on a met Sprint Goal closes an issue.
 
 <!-- field: capabilities -->
 #### Capabilities
@@ -333,12 +333,12 @@ Promotion is automation, not a skill. Handoff into a customer R&D environment is
 - environment SRDs: local, dev (fresh install), staging (one subsystem upgraded on a running system), production PoC (same upgrade path), customer R&D environments; each with owner, trigger, and suites
 - pipelines: CI/CD that promotes a pinned set to the next environment when every suite of the current one passed, on the trigger the receiving environment declares
 - suites: component, subsystem, system, and contract tests, with known-good and known-bad sets that test the tests
-- track-goals: the audit that follows pinned references, collects results as evidence events, closes met objectives, keeps waiting states true, and fails on missing evidence
+- track-goals: the audit that follows pinned references, collects results as evidence events, closes met Sprint Goals, keeps waiting states true, and fails on missing evidence
 
 <!-- component: dashboard -->
 ### dashboard
 
-Render the ledger into the repository: objectives by state, evidence per requirement and environment, waiting chains, version skew, unresolved references, cycle time. Regenerated by CI; never edited; a cache.
+Render the ledger into the repository: Sprint Goals by state, evidence per requirement and environment, waiting chains, version skew, unresolved references, cycle time. Regenerated by CI; never edited; a cache.
 
 <!-- field: capabilities -->
 #### Capabilities
@@ -408,11 +408,11 @@ A consumer repository holds one recurring issue per artifact it depends on. Rele
 One issue per dependency, permanently, with its history; and the consumer list can be derived from the subscriptions instead of maintained by hand.
 
 <!-- decision: 7 -->
-### 7 - Objectives are issues, and their events are the ledger
+### 7 - Sprint Goals are issues, and their events are the ledger
 
-An objective is an ordinary issue that cites the requirements it must satisfy by pinned URL and names its environment. Its planned, evidence, and met events are its ledger, and it closes on evidence. A tracking issue remains an issue with a list of members, closed when the last member closes, never popped.
+A Sprint Goal is an ordinary issue, one per team per sprint, that cites the initiative items it serves by pinned URL, names its environment, and lists the stories its Sprint Planning selected. Its planned, evidence, and met events are its ledger, with each evidence event anchored to the story criterion it proves, and it closes on evidence. A tracking issue remains an issue with a list of members, closed when the last member closes, never popped.
 
-A separate goal object would be a second unit of work. Closing an objective when its issues close measures activity; closing it on evidence measures whether the code runs where it has to.
+A separate goal object would be a second unit of work. Closing a Sprint Goal when its issues close measures activity; closing it on evidence measures whether the code runs where it has to.
 
 <!-- decision: 8 -->
 ### 8 - The dashboard is a cache
@@ -459,9 +459,9 @@ The process runs every week in every repository, so a step the model does costs 
 <!-- decision: 14 -->
 ### 14 - A document's type is its directory and prefix
 
-Goals, intents, and objectives are one concept. A program's intent for a release period is an objective document, docs/specs/objectives/objNNN-short-name.md (srd034). The requirements that satisfy it are SRDs, docs/specs/software-requirements/srdNNN-short-name.md. Use cases and test suites keep their relNN.N-ucNNN- and test-relNN.N- names. An idea or an incident between periods is an issue, not a document. The path alone says which kind a document is, and the parent's declarations already select a file's type by its whole path.
+A program's planning items are the agile hierarchy, each a document type with its own directory and prefix: a theme at docs/specs/themes/thNNN-short-name.md, an initiative at docs/specs/initiatives/inNNN-short-name.md (srd034; an objective document at docs/specs/objectives/objNNN-short-name.md is read as one), an epic at docs/specs/epics/epNNN-short-name.md, a feature at docs/specs/features/ftNNN-short-name.md, and a story at docs/specs/stories/stNNN-short-name.md (srd045). The requirements stories cite are SRDs, docs/specs/software-requirements/srdNNN-short-name.md. Use cases and test suites keep their relNN.N-ucNNN- and test-relNN.N- names. An idea or an incident between periods is an issue, not a document. The path alone says which kind a document is, and the parent's declarations already select a file's type by its whole path.
 
-Two alternatives were rejected. An intent- prefix would add a document type that no reader needs: intent at the grain of a period is already an objective, and at a smaller grain it is already an issue. A type field in the frontmatter would depend on the parent format, whose SRD frontmatter allows a fixed set of keys (id, title, status, retired_in, replaced_by, depends_on, derived_from) and no type, so an objective document could not carry one and still be an SRD (srd034 R1.1). A published document's path is pinned in citation URLs across repositories (design.md D9), so renaming one keeps its old path: a retired stub there, with status retired and replaced_by naming the new id, which the audit's retired-id-missing check requires. The four SRDs given Spec Kit names (srd022-tasks, srd031-plan, srd035-specify, srd036-implement) keep stubs at their old paths for that reason.
+Two alternatives were rejected. A single intent- type for every level would hide the distinctions an agile reader relies on: a theme, an initiative, an epic, a feature, and a story differ in timeframe, owner, and parent, and each has its own name in every agile tool. A type field in the frontmatter would depend on the parent format, whose SRD frontmatter allows a fixed set of keys (id, title, status, retired_in, replaced_by, depends_on, derived_from) and no type, so a hierarchy document could not carry one and still be an SRD (srd034 R1.1). A published document's path is pinned in citation URLs across repositories (design.md D9), so renaming one keeps its old path: a retired stub there, with status retired and replaced_by naming the new id, which the audit's retired-id-missing check requires. The four SRDs given Spec Kit names (srd022-tasks, srd031-plan, srd035-specify, srd036-implement) keep stubs at their old paths for that reason.
 
 <!-- field: technology_choices -->
 ## Technology choices
@@ -488,16 +488,16 @@ Two alternatives were rejected. An intent- prefix would add a document type that
 | docs/SPECIFICATIONS.md | index of the corpus and its coverage gaps |
 | docs/road-map.md | releases of this corpus, each listing its SRDs, config formats, and semantic models |
 | docs/constitutions/ | design.md, the document registry and writing rules |
-| docs/specs/software-requirements/ | srd001-srd008 control plane and gates; srd010-srd019 one per script (tpm subcommand group), srd019 the track-goals audit; srd020-srd033 one per outer-loop skill (command); srd034 objective documents and the dated objective issues; srd035-srd036 the specify and implement skills (the inner loop on GitLab); srd037 tpm install; srd038 the sprint-end skill; srd039 the corpus and config document reader (internal/corpus); srd040 the format tools and format gates (magefiles); srd041 issue states and transitions; srd042 the beads tracker; srd043 tpm init and onboard; srd044 tpm help. An SRD of an unplanned release holds its direction only (design.md D12) |
+| docs/specs/software-requirements/ | srd001-srd008 control plane and gates; srd010-srd019 one per script (tpm subcommand group), srd019 the track-goals audit; srd020-srd033 one per outer-loop skill (command); srd034 initiatives and the dated Sprint Goals; srd035-srd036 the specify and implement skills (the inner loop on GitLab); srd037 tpm install; srd038 the sprint-end skill; srd039 the corpus and config document reader (internal/corpus); srd040 the format tools and format gates (magefiles); srd041 issue states and transitions; srd042 the beads tracker; srd043 tpm init and onboard; srd044 tpm help. An SRD of an unplanned release holds its direction only (design.md D12) |
 | docs/specs/config-formats/ | labels, policy, person-config, issue-body, report, reports-config |
-| docs/specs/objectives/ | objective documents (srd034), in a consuming program's system repository; none in this corpus |
+| docs/specs/themes/, initiatives/, epics/, features/, stories/ | the backlog hierarchy (srd034, srd045): themes, initiatives, and cross-team epics in a consuming program's system repository, a team's epics, features, and stories in its own; none in this corpus. docs/specs/objectives/ is read as initiatives |
 | docs/specs/semantic-models/ | planes, roles, objects, agents |
 | docs/specs/use-cases/ | one use case per path through a release, citing the requirement items it delivers; release 01 has eight |
 | docs/specs/test-suites/ | one suite per release, tracing its use cases and acceptance criteria; release 01 has three |
 | docs/engineering/ | engineering guidelines (eng01 the regression rig, eng02 tpm and skills, eng03 releasing scrum-master, eng04 beads sync) |
 | docs/guides/ | prose a person reads start to finish (process.md for the outer loops, ai-native-sdlc.md for the inner loop) |
 | go.mod | the Go module the tpm binary and the magefiles build from |
-| internal/<script>/ | one package per script SRD (program, goals in 01.0; reports, standup in 01.1; plan for plan and sprintend for the sprint-end issue in 01.2; scaffold for tpm init and onboard in 01.4), tracker access through the tracker interface in internal/tracker, served by internal/beads; objectives, links, events, cli, and corpus (which reads a Markdown corpus document or config document) are shared; internal/release runs a gates file and cuts v0.YYYYMMDD.N tags (eng03), and tpm release (srd015) builds on it |
+| internal/<script>/ | one package per script SRD (program, goals in 01.0; reports, standup in 01.1; plan for plan and sprintend for the sprint-end issue in 01.2; scaffold for tpm init and onboard in 01.4), tracker access through the tracker interface in internal/tracker, served by internal/beads; Sprint Goals, links, events, cli, and corpus (which reads a Markdown corpus document or config document) are shared; internal/release runs a gates file and cuts v0.YYYYMMDD.N tags (eng03), and tpm release (srd015) builds on it |
 | magefiles/ | mage audit (gate tests, including the skill size limit, then the specification-critic corpus-audit agent), the regression rig and the mage regression targets, the integration targets the test suites name, and mage tag and mage tagDryRun, which run release-gates.md through internal/release (eng03) |
 | release-gates.md | the gates a scrum-master release passes (mage audit, go test ./..., mage integration:install), in the declarative-agents gates-file format (eng03) |
 | cmd/tpm/ | the tpm CLI entry point, one subcommand group per script (issue, named program before 01.4, goals, init, install, release, reports, standup, plan, and sprint-end built; handoff planned) |
@@ -520,8 +520,8 @@ The requirements are complete and release 00 (00.0 to 00.3), releases 01.0 to 01
 - Implemented: 00.2 changes under docs/: tpm program open-merge-request ran the corpus gate (audit_command, mage audit by default) in the worktree before opening a merge request for a docs/ change, which tpm issue merge does since 03.0; tpm issue file refuses a plane::management issue from a caller the policy does not list (2 use cases, test-rel00.2-docs-change)
 - Implemented: 00.1 pop and merge: tpm issue pop (claim, branch <iid>-<slug>, worktree beside the checkout, refusals), tpm program open-merge-request (review focus, acceptance criteria, Closes), replaced by tpm issue merge in 03.0, the implement skill (1 use case, test-rel00.1-pop)
 - Implemented: 00.0 labels and push: tpm issue labels (creates missing labels, --update rewrites differing ones), tpm issue file --path deriving plane, kind, and component, the specify skill (1 use case, test-rel00.0-push)
-- Implemented: 01.0 objectives reach the Product Owner: mage audit (gate tests, objective-document gate, specification-critic agent); the Terraform split and gitlabrig with mage regression; tpm issue file and lint; tpm goals plan and push; the tasks skill (2 use cases, test-rel01.0-objectives)
-- Implemented: 01.2 sprint end closes the loop: the sprint-end issue summarizes the period and releases behind the gate once its summary merges, closing the objectives reported complete; plan records the next period, tags the plan, dates the milestone and sprint issue, and files the sprint-end issues (2 use cases, test-rel01.2-sprint-end)
+- Implemented: 01.0 Sprint Goals reach the Product Owner: mage audit (gate tests, hierarchy gate, specification-critic agent); the Terraform split and gitlabrig with mage regression; tpm issue file and lint; tpm goals plan and push; the tasks skill (2 use cases, test-rel01.0-objectives)
+- Implemented: 01.2 sprint end closes the loop: the sprint-end issue summarizes the period and releases behind the gate once its summary merges, closing the Sprint Goals reported complete; plan records the next period, tags the plan, dates the milestone and sprint issue, and files the sprint-end issues (2 use cases, test-rel01.2-sprint-end)
 - Implemented: 03.0 the tracker becomes beads: the program's facts live in a tracker repository synchronized through git (srd042, eng04), tpm issue merge delivers by a local merge, and the GitLab client leaves; the regression rig provisions fixture tracker repositories (2 use cases, test-rel03.0-beads-tracker)
 - Specified: 01.3 tags trigger handoff and the summary (2 use cases, test-rel01.3-tag-triggered)
 - Specified: 02.0 evidence, handoff, and cadence: gates, track-goals, daily-scrum, sprint-review, sprint-retrospective (no use cases yet)

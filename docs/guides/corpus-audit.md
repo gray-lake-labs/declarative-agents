@@ -26,7 +26,7 @@ error that names it.
 
 The spec tool behind `mage fmt`, `mage convert`, and `mage specCheck` is this
 repository's own (`magefiles/spec.go`): it lists the tracked documents, reads
-objective documents as SRDs, and formats each with the parent's Markdown
+initiatives as SRDs, and formats each with the parent's Markdown
 library. It is built once per tag against that library in the downloaded
 source.
 
@@ -34,7 +34,7 @@ source.
 
 The entry point is `mage audit`. It runs the repository gate tests
 (`go test ./magefiles/...`: gofmt, the 50-line skill limit, the
-objective-document gate, the help pages, and the rest), then runs the pinned
+hierarchy gate, the help pages, and the rest), then runs the pinned
 release's agent over the repository root. For that run it writes
 `docs/external-checkouts.yaml`, pointing the parent at the cached source, and
 removes it afterwards. The file is ignored by git; a checkouts file a person

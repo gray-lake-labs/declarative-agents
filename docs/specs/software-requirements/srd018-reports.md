@@ -145,7 +145,7 @@ Is idempotent: a second run in the same week files nothing. The scheduled CI job
 <!-- req: R8.1 -->
 ### R8.1
 
-For a project and a person, returns the project's open Sprint Goal issues (objective issues included) with their due dates and the person's activity since the ISO week began: branches merged and issues closed. These are the facts the status issue's guided script drafts from.
+For a project and a person, returns the project's open Sprint Goal issues (Sprint Goals included) with their due dates and the person's activity since the ISO week began: branches merged and issues closed. These are the facts the status issue's guided script drafts from.
 
 <!-- req: R9 -->
 ## R9 - Weekly status issue

@@ -22,7 +22,7 @@ into one Sprint Goal per team per sprint: a dated issue in the team's own
 repository that cites the initiative items the team serves, whose body
 carries its own steps, and on which the team's Sprint Planning lists the
 stories it selected (srd045). Before release 04.0 an initiative was called
-an objective document and a Sprint Goal an objective issue; both are still
+an initiative and a Sprint Goal a Sprint Goal; both are still
 read under the old names. What comes back lives with each skill: the weekly
 status issue and the release summary with reports (srd018), the sprint-end
 issue and the interim close with sprint-end (srd038), and the reference

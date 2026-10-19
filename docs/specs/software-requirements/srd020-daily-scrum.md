@@ -110,7 +110,7 @@ Retired in 01.2 (design.md D12).
 <!-- req: R6.1 -->
 ### R6.1
 
-Each morning daily-scrum shows a person their in-progress issues, the overnight evidence findings on their objectives, and what is waiting, with a scored plan, and pushes an issue for each blocker or interrupt they name.
+Each morning daily-scrum shows a person their in-progress issues, the overnight evidence findings on their Sprint Goals, and what is waiting, with a scored plan, and pushes an issue for each blocker or interrupt they name.
 
 <!-- req: R6.2 -->
 ### R6.2

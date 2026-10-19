@@ -13,7 +13,7 @@ The technical program manager runs tpm reports aggregate over the week's
 or the period's reports. It groups the items by component and computes the
 signals no single report shows: shared and aging blockers, slipping
 commitments, missing reports, contradictions with the tracker, and merged
-work nobody reported. It states progress by objective, never by person.
+work nobody reported. It states progress by Sprint Goal, never by person.
 A signal that needs action becomes an issue.
 
 <!-- field: actor -->
@@ -37,8 +37,8 @@ A week or a period of reports has merged in the reports repository.
 
 - F1: The technical program manager runs tpm reports aggregate for the week or the period.
 - F2: tpm reads every report in range and groups their items by component.
-- F3: tpm computes the signals and checks each report against the tracker, including a report calling an objective complete with no met event.
-- F4: tpm states each objective's progress from its ledger and its reported status, and expresses no signal as a comparison of people.
+- F3: tpm computes the signals and checks each report against the tracker, including a report calling a Sprint Goal complete with no met event.
+- F4: tpm states each Sprint Goal's progress from its ledger and its reported status, and expresses no signal as a comparison of people.
 - F5: With --push, tpm reports aggregate files each signal that needs action as an issue in do-work's input format in the system repository.
 
 <!-- field: touchpoints -->
@@ -68,7 +68,7 @@ aggregate groups the range's items by component and reports every listed signal 
 <!-- sc: S2 -->
 ### S2
 
-Progress is stated per objective from its ledger and its reported status, not as counts of closed issues.
+Progress is stated per Sprint Goal from its ledger and its reported status, not as counts of closed issues.
 
 <!-- field: traces -->
 #### Traces

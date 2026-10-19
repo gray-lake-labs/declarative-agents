@@ -23,7 +23,7 @@ title: "States: where an issue is and who may move it"
 | +blocked | -blocked | person | none | the assignee clears it |
 | open recurring | +needs-run | handoff | none | a breaking release of its artifact is tagged |
 | any open | closed | merge | none | a merge that closes the issue lands, whatever state the issue is in (R7.1) |
-| open Sprint Goal | closed | track-goals | none | its ledger replays to met and the met event is posted; an objective issue is a Sprint Goal |
+| open Sprint Goal | closed | track-goals | none | its ledger replays to met and the met event is posted; a Sprint Goal is a Sprint Goal |
 | any open | closed | person | none | declined, duplicate (with a Duplicates line naming the original, srd007 R6.4), or answered, with the reason as the last comment |
 | closed | open | person | none | reopened; admission runs again |
 

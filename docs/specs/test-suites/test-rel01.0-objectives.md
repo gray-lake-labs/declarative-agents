@@ -1,6 +1,6 @@
 ---
 id: test-rel01.0-objectives
-title: Test Suite for Release 01.0 Objectives Reach the Product Owner
+title: Test Suite for Release 01.0 Sprint Goals Reach the Product Owner
 release: "01.0"
 status: implemented
 ---
@@ -12,8 +12,8 @@ Each run starts with mage regression:up creating the repositories below in
 a fresh rig run on local disk and ends with mage regression:down removing them.
 The audit stage proves that mage audit runs the specification-critic
 corpus-audit agent from the pinned parent release and fails on a malformed
-objective document. The push stage runs tasks against the rig's
-system repository and two Product Owner repositories, and proves the dated, admitted, pinned objective issues and their planned
+initiative. The push stage runs tasks against the rig's
+system repository and two Product Owner repositories, and proves the dated, admitted, pinned Sprint Goals and their planned
 events, and that a second run changes nothing.
 
 <!-- field: traces -->
@@ -32,8 +32,8 @@ events, and that a second run changes nothing.
 <!-- field: test_cases -->
 ## Test cases
 
-<!-- case: A well-formed objective document passes the agent audit | status: implemented -->
-### A well-formed objective document passes the agent audit
+<!-- case: A well-formed initiative passes the agent audit | status: implemented -->
+### A well-formed initiative passes the agent audit
 
 <!-- field: use_case -->
 #### Use case
@@ -55,7 +55,7 @@ go test ./magefiles -run '^TestObjectiveGateRejectsMalformedFixtures$'
 
 - agent_terminal_state: Passed
 - exit_code: 0
-- objective_items: every requirement group has a due item in its applicability and numbered items
+- initiative_items: every requirement group has a due item in its applicability and numbered items
 
 <!-- field: traces -->
 #### Traces
@@ -63,8 +63,8 @@ go test ./magefiles -run '^TestObjectiveGateRejectsMalformedFixtures$'
 - [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC1](../software-requirements/srd034-initiatives.md#ac1)
 - [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
-<!-- case: A malformed objective document fails the audit and blocks the merge | status: implemented -->
-### A malformed objective document fails the audit and blocks the merge
+<!-- case: A malformed initiative fails the audit and blocks the merge | status: implemented -->
+### A malformed initiative fails the audit and blocks the merge
 
 <!-- field: use_case -->
 #### Use case
@@ -95,8 +95,8 @@ go test ./internal/objectives -run '^TestEachMalformedDocumentYieldsExactlyItsFi
 - [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC1](../software-requirements/srd034-initiatives.md#ac1)
 - [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
-<!-- case: tasks files one dated objective issue per owner | status: implemented -->
-### tasks files one dated objective issue per owner
+<!-- case: tasks files one dated Sprint Goal per owner | status: implemented -->
+### tasks files one dated Sprint Goal per owner
 
 <!-- field: use_case -->
 #### Use case
@@ -117,7 +117,7 @@ go test ./internal/goals -run '^Test(PushFilesOneDatedPinnedObjectiveIssue|DueFa
 #### Expected outputs
 
 - issues_per_owner: 1
-- cites_lines: one per objective item, pinned to the release tag
+- cites_lines: one per initiative item, pinned to the release tag
 - environment_line: present
 - due_date: the requirement group's due item, or the milestone end date
 - notes_section: present and empty
@@ -153,7 +153,7 @@ go test ./internal/goals -run '^Test(PlanRecommendsOwnerAndEnvironment|UnpinnedC
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- questions: a repository only for an objective with no recommended owner, chosen from the candidates
+- questions: a repository only for a Sprint Goal with no recommended owner, chosen from the candidates
 - unpinned_citation: refused, no issue filed
 - missing_environment: refused, no issue filed
 - second_run: no new issue and no duplicate event

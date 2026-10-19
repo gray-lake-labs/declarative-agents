@@ -1,6 +1,6 @@
 ---
 id: rel01.0-uc002-push-objective-issues
-title: Create-Goals Files Dated Objective Issues for the Product Owners
+title: Create-Goals Files Dated Sprint Goals for the Product Owners
 status: implemented
 priority: P1
 test_suite: test-rel01.0-objectives
@@ -10,13 +10,13 @@ test_suite: test-rel01.0-objectives
 ## Summary
 
 After the system release is planned, the technical program manager runs
-tasks, which is the decision to file the release's objectives. tpm
-reads the agreed objective document and the release, recommends the
-Product Owner and the environment for each objective, and files one
-objective issue in each owner's repository. The technical program manager
-is asked only for the owner of an objective tpm cannot place. The model
+tasks, which is the decision to file the release's Sprint Goals. tpm
+reads the agreed initiative and the release, recommends the
+Product Owner and the environment for each Sprint Goal, and files one
+Sprint Goal in each owner's repository. The technical program manager
+is asked only for the owner of a Sprint Goal tpm cannot place. The model
 generates nothing here. Each
-issue cites its objective items pinned to the release tag, carries the
+issue cites its initiative items pinned to the release tag, carries the
 steps as its Requirements, a due date, and an empty Notes section, and
 passes admission. The Product Owner receives it in their own repository
 and learns nothing new to take it.
@@ -34,19 +34,19 @@ The system release is recorded in docs/road-map.md with its tag.
 <!-- field: preconditions -->
 ## Preconditions
 
-- rel01.0-uc001-author-objectives merged an agreed objective document.
-- The road-map release names the objective items it proves and the tracker milestone carries its end date.
+- rel01.0-uc001-author-objectives merged an agreed initiative.
+- The road-map release names the initiative items it proves and the tracker milestone carries its end date.
 - Subsystem SRDs declare each Product Owner's repository (design.md subsystem_srd).
 
 <!-- field: flow -->
 ## Flow
 
 - F1: The technical program manager starts tasks in the system repository.
-- F2: tpm reads the planned release and its tag, the agreed objective document, the subsystem SRDs, and the objective issues already filed for the release, and returns as JSON each objective item with a recommended owner (the Product Owner whose subsystem SRD declares the component) and environment.
-- F3: The skill takes every recommendation and asks the technical program manager only for the repository of an objective with no recommended owner, offering the candidates; it asks for no confirmation.
-- F4: tpm renders each objective issue from the document, with one Cites line per item pinned to the release tag, the Environment line, the document's Requirements as ordered steps and its Acceptance Criteria, a due date, and an empty Notes section.
+- F2: tpm reads the planned release and its tag, the agreed initiative, the subsystem SRDs, and the Sprint Goals already filed for the release, and returns as JSON each initiative item with a recommended owner (the Product Owner whose subsystem SRD declares the component) and environment.
+- F3: The skill takes every recommendation and asks the technical program manager only for the repository of a Sprint Goal with no recommended owner, offering the candidates; it asks for no confirmation.
+- F4: tpm renders each Sprint Goal from the document, with one Cites line per item pinned to the release tag, the Environment line, the document's Requirements as ordered steps and its Acceptance Criteria, a due date, and an empty Notes section.
 - F5: tpm issue file files each issue in the owner's repository, unassigned; tpm issue lint admits it or sets needs-triage with the reasons.
-- F6: tpm posts a planned event on each objective issue it created or updated; a second run creates no duplicate.
+- F6: tpm posts a planned event on each Sprint Goal it created or updated; a second run creates no duplicate.
 - F7: The Product Owner receives a dated issue in their own repository whose body states what to do.
 
 <!-- field: touchpoints -->
@@ -54,7 +54,7 @@ The system release is recorded in docs/road-map.md with its tag.
 
 | id | target | reason |
 | --- | --- | --- |
-| T1 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R3.2](../software-requirements/srd034-initiatives.md#r32), [R3.3](../software-requirements/srd034-initiatives.md#r33), [R3.4](../software-requirements/srd034-initiatives.md#r34), [R9.1](../software-requirements/srd034-initiatives.md#r91) | S1 and S6 trace how an objective issue is rendered and what the owner does with it. |
+| T1 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R3.2](../software-requirements/srd034-initiatives.md#r32), [R3.3](../software-requirements/srd034-initiatives.md#r33), [R3.4](../software-requirements/srd034-initiatives.md#r34), [R9.1](../software-requirements/srd034-initiatives.md#r91) | S1 and S6 trace how a Sprint Goal is rendered and what the owner does with it. |
 | T2 | [srd022-tasks](../software-requirements/srd022-tasks.md) [R1.1](../software-requirements/srd022-tasks.md#r11), [R2.1](../software-requirements/srd022-tasks.md#r21), [R2.2](../software-requirements/srd022-tasks.md#r22), [R2.3](../software-requirements/srd022-tasks.md#r23), [R3.1](../software-requirements/srd022-tasks.md#r31), [R3.2](../software-requirements/srd022-tasks.md#r32), [R3.3](../software-requirements/srd022-tasks.md#r33), [R4.1](../software-requirements/srd022-tasks.md#r41), [R4.3](../software-requirements/srd022-tasks.md#r43), [R5.1](../software-requirements/srd022-tasks.md#r51), [R5.2](../software-requirements/srd022-tasks.md#r52), [R5.3](../software-requirements/srd022-tasks.md#r53) | S1, S2, and S5 trace tasks' reads, questions, pushes, and refusals. |
 | T3 | [srd013-program](../software-requirements/srd013-program.md) [R1.1](../software-requirements/srd013-program.md#r11), [R1.2](../software-requirements/srd013-program.md#r12), [R1.3](../software-requirements/srd013-program.md#r13), [R2.1](../software-requirements/srd013-program.md#r21), [R3.1](../software-requirements/srd013-program.md#r31) | S3 traces filing and admission. |
 | T4 | [srd007-links](../software-requirements/srd007-links.md) [R5.1](../software-requirements/srd007-links.md#r51), [R5.2](../software-requirements/srd007-links.md#r52), [R5.3](../software-requirements/srd007-links.md#r53) | S4 traces pinned citations. |
@@ -71,7 +71,7 @@ The system release is recorded in docs/road-map.md with its tag.
 <!-- sc: S1 -->
 ### S1
 
-Each owner receives one objective issue per release with pinned Cites lines, an Environment line, the document's Requirements and Acceptance Criteria, a due date, and an empty Notes section.
+Each owner receives one Sprint Goal per release with pinned Cites lines, an Environment line, the document's Requirements and Acceptance Criteria, a due date, and an empty Notes section.
 
 <!-- field: traces -->
 #### Traces
@@ -86,7 +86,7 @@ Each owner receives one objective issue per release with pinned Cites lines, an 
 <!-- sc: S2 -->
 ### S2
 
-tasks reads its facts from the release, the documents, and existing objectives, takes the recommended owner and the environment, asks only for a missing owner, asks no confirmation, and refuses an unpinned citation or a missing environment.
+tasks reads its facts from the release, the documents, and existing Sprint Goals, takes the recommended owner and the environment, asks only for a missing owner, asks no confirmation, and refuses an unpinned citation or a missing environment.
 
 <!-- field: traces -->
 #### Traces
@@ -107,7 +107,7 @@ tasks reads its facts from the release, the documents, and existing objectives, 
 <!-- sc: S3 -->
 ### S3
 
-Every objective issue is filed unassigned through tpm issue file and admitted by tpm issue lint, which flags an unpinned Cites line or a criterion without test and environment.
+Every Sprint Goal is filed unassigned through tpm issue file and admitted by tpm issue lint, which flags an unpinned Cites line or a criterion without test and environment.
 
 <!-- field: traces -->
 #### Traces
@@ -124,7 +124,7 @@ Every objective issue is filed unassigned through tpm issue file and admitted by
 <!-- sc: S4 -->
 ### S4
 
-Each Cites line is a URL pinned to a release tag that resolves to an item of the objective document.
+Each Cites line is a URL pinned to a release tag that resolves to an item of the initiative.
 
 <!-- field: traces -->
 #### Traces
@@ -137,7 +137,7 @@ Each Cites line is a URL pinned to a release tag that resolves to an item of the
 <!-- sc: S5 -->
 ### S5
 
-Each created or updated objective issue carries one planned event naming its release, requirements, and environment.
+Each created or updated Sprint Goal carries one planned event naming its release, requirements, and environment.
 
 <!-- field: traces -->
 #### Traces
@@ -161,8 +161,8 @@ The Product Owner takes the issue with implement and needs no other tool, channe
 <!-- field: out_of_scope -->
 ## Out of scope
 
-- The objective issue for the test subsystem (srd022 R4.2); stage one has no test subsystem.
-- Deciding that an objective is met; objectives close at the sprint end (rel01.2-uc001-sprint-end-release).
+- The Sprint Goal for the test subsystem (srd022 R4.2); stage one has no test subsystem.
+- Deciding that a Sprint Goal is met; Sprint Goals close at the sprint end (rel01.2-uc001-sprint-end-release).
 - Assigning the issue to anyone.
 
 <!-- field: assumptions -->

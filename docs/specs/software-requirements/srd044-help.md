@@ -15,7 +15,7 @@ title: "Script: help (tpm help)"
 
 tpm's help is a usage listing: group names and flags. An agent or a person
 meeting the binary learns nothing from it about the process it implements:
-what an objective is, how an issue moves from filed to merged, which
+what a Sprint Goal is, how an issue moves from filed to merged, which
 command serves which step of the release cycle, or where evidence comes
 from. The skills carry some of this, and the corpus all of it, but neither
 travels with the binary into a repository that has not yet installed
@@ -45,7 +45,7 @@ tpm help <group> exists for every tpm group. It prints what the group is for in 
 <!-- req: R1.3 -->
 ### R1.3
 
-tpm help <concept> exists for at least objective, admission, approval, milestone, tracker, evidence, release, and recurring issue. Each prints a paragraph, the commands that touch the concept, and the SRD that specifies it.
+tpm help <concept> exists for at least Sprint Goal, admission, approval, milestone, tracker, evidence, release, and recurring issue. Each prints a paragraph, the commands that touch the concept, and the SRD that specifies it.
 
 <!-- req: R1.4 -->
 ### R1.4

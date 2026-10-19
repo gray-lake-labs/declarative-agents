@@ -15,7 +15,7 @@ a feature under the epic, and user stories under the feature in the team's
 repository, each story with its statement, points, rank, and acceptance
 criteria naming a test and an environment. Each document is merged through
 the audit gate, and mage audit's hierarchy gate checks every document's
-fields, its parent's kind, and its links. An objective document written
+fields, its parent's kind, and its links. An initiative written
 before release 04.0 passes as an initiative.
 
 <!-- field: actor -->
