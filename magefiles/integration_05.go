@@ -104,10 +104,10 @@ func (Integration) WeeklyStatus() error {
 		return err
 	}
 	found := false
-	for _, o := range week.Objectives {
+	for _, o := range week.SprintGoals {
 		found = found || o.Ref == objective
 	}
-	c.expect(found, "week objectives %+v lack %s", week.Objectives, objective)
+	c.expect(found, "week objectives %+v lack %s", week.SprintGoals, objective)
 
 	start, err := reports.ParseWeek(status.Week)
 	if err != nil {
@@ -216,7 +216,7 @@ func (Integration) Reports() error {
 	}
 	progress := map[string]string{}
 	for _, p := range a.Progress {
-		progress[p.Objective] = p.State
+		progress[p.SprintGoal] = p.State
 	}
 	c.expect(progress[met] == "met" && progress[claimed] == "reported complete", "progress %v", progress)
 

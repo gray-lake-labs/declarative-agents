@@ -21,7 +21,7 @@ type Finding struct {
 func (f Finding) String() string { return fmt.Sprintf("%s: %s: %s", f.File, f.Field, f.Message) }
 
 var (
-	docIDPattern  = regexp.MustCompile(`^obj\d{3}-[a-z0-9-]+$`)
+	docIDPattern  = regexp.MustCompile(`^(in|obj)\d{3}-[a-z0-9-]+$`)
 	groupPattern  = regexp.MustCompile(`^R(\d+)$`)
 	itemPattern   = regexp.MustCompile(`^R(\d+)\.\d+$`)
 	goalPattern   = regexp.MustCompile(`^G\d+$`)
@@ -39,7 +39,7 @@ func Validate(d *Document) []Finding {
 	v.require("horizon", d.Horizon)
 	if d.ID != "" {
 		if !docIDPattern.MatchString(d.ID) {
-			v.add("id", "%q is not objNNN-short-name", d.ID)
+			v.add("id", "%q is not inNNN-short-name or objNNN-short-name", d.ID)
 		} else if want := strings.TrimSuffix(filepath.Base(d.Path), ".md"); d.Path != "" && d.ID != want {
 			v.add("id", "%q does not match the file name %q", d.ID, want)
 		}

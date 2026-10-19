@@ -96,7 +96,7 @@ func init() {
 
 	var weekArgs struct{ project, user string }
 	cli.Default.Register(&cli.Command{
-		Group: "reports", Name: "week", Summary: "the open objective issues and a person's activity this week",
+		Group: "reports", Name: "week", Summary: "the open Sprint Goals and a person's activity this week",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&weekArgs.project, "project", "", "project path (required)")
 			fs.StringVar(&weekArgs.user, "user", "", "tracker username; empty is the caller")
@@ -123,8 +123,8 @@ func init() {
 			}
 			var b strings.Builder
 			fmt.Fprintf(&b, "%s, %s since %s\n", r.Project, r.User, r.Since)
-			for _, o := range r.Objectives {
-				fmt.Fprintf(&b, "  objective %s due %s: %s\n", o.Ref, o.DueDate, o.Title)
+			for _, o := range r.SprintGoals {
+				fmt.Fprintf(&b, "  Sprint Goal %s due %s: %s\n", o.Ref, o.DueDate, o.Title)
 			}
 			fmt.Fprintf(&b, "  %d merged, %d closed\n", len(r.Merged), len(r.Closed))
 			return ctx.Emit(r, b.String())
@@ -182,7 +182,7 @@ func init() {
 				fmt.Fprintf(&b, "  %-24s %s\n", s.Kind, s.Detail)
 			}
 			for _, pr := range a.Progress {
-				fmt.Fprintf(&b, "  progress %s (%s): %s\n", pr.Objective, pr.Component, pr.State)
+				fmt.Fprintf(&b, "  progress %s (%s): %s\n", pr.SprintGoal, pr.Component, pr.State)
 			}
 			for _, pr := range a.Pushed {
 				fmt.Fprintf(&b, "  pushed %s: %s #%d\n", pr.Key, pr.Action, pr.IID)

@@ -74,7 +74,7 @@ list of entries
 <!-- field: description -->
 #### Description
 
-The "## Work" section, one entry per open objective issue in the person's repository, each a Markdown list item of key: value pairs separated by semicolons. Keys: objective (the issue reference, project#iid), component, status (on-track, at-risk, blocked, or done), complete (yes or no), and problems (free text, "none" when there are none).
+The "## Work" section, one entry per open Sprint Goal issue in the person's repository, each a Markdown list item of key: value pairs separated by semicolons. Keys: sprint_goal (the issue reference, project#iid; a report written before release 04.0 names it objective, which is read as an alias), component, status (on-track, at-risk, blocked, or done), complete (yes or no), and problems (free text, "none" when there are none).
 
 <!-- schema_entry: blockers -->
 ### blockers
@@ -114,8 +114,8 @@ reports/<YYYY-Qn>/<YYYY-Www>-<username>.md in the reports repository, one file p
     ---
     ## Work
 
-    - objective: group/product-owners/po-1#4; component: grader; status: at-risk; complete: no; problems: the scoring API returns stale results
-    - objective: group/product-owners/po-1#5; component: grader; status: done; complete: yes; problems: none
+    - sprint_goal: group/product-owners/po-1#4; component: grader; status: at-risk; complete: no; problems: the scoring API returns stale results
+    - sprint_goal: group/product-owners/po-1#5; component: grader; status: done; complete: yes; problems: none
 
     ## Blockers
 

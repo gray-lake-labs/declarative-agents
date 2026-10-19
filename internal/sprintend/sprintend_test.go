@@ -70,8 +70,8 @@ func testReportedCompleteClosesWithoutMet(t *testing.T, p trackertest.Program) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(facts.Objectives) != 1 || !facts.Objectives[0].ReportedComplete || facts.Objectives[0].Met || facts.Objectives[0].Objective != "obj001-reliable-agents#R1" {
-		t.Fatalf("facts = %+v", facts.Objectives)
+	if len(facts.SprintGoals) != 1 || !facts.SprintGoals[0].ReportedComplete || facts.SprintGoals[0].Met || !facts.SprintGoals[0].Legacy || len(facts.SprintGoals[0].Serves) != 1 || facts.SprintGoals[0].Serves[0] != "obj001-reliable-agents#R1" {
+		t.Fatalf("facts = %+v", facts.SprintGoals)
 	}
 	if contradictions(before) != 1 {
 		t.Fatalf("an open objective reported complete is a contradiction until sprint end closes it: %+v", before.Signals)
@@ -89,8 +89,8 @@ func testReportedCompleteClosesWithoutMet(t *testing.T, p trackertest.Program) {
 		t.Fatalf("after the merge: %+v %+v", after.Progress, after.Signals)
 	}
 	facts, _ = MakeFacts(Input{Tracker: f, Project: po1, Aggregate: after, Releases: program.Defaults().Releases, Artifact: "grader"})
-	if facts.Objectives[0].State != "closed" || facts.Objectives[0].Met || slices.Contains(facts.Objectives[0].Ledger, "met") {
-		t.Fatalf("closed objective = %+v", facts.Objectives[0])
+	if facts.SprintGoals[0].State != "closed" || facts.SprintGoals[0].Met || slices.Contains(facts.SprintGoals[0].Ledger, "met") {
+		t.Fatalf("closed objective = %+v", facts.SprintGoals[0])
 	}
 }
 

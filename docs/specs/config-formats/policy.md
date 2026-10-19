@@ -176,8 +176,8 @@ mage audit
 <!-- field: type -->
 ### Type
 
-<!-- field: objective -->
-#### Objective
+<!-- field: sprint_goal -->
+#### Sprint goal
 
 15
 

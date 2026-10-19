@@ -88,7 +88,7 @@ go test ./internal/program -run '^TestMergeDeliversOnBeads$'
 
 - [srd036-implement](../software-requirements/srd036-implement.md) [AC2](../software-requirements/srd036-implement.md#ac2)
 - [srd013-program](../software-requirements/srd013-program.md) [AC5](../software-requirements/srd013-program.md#ac5)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
 <!-- case: A planning change is lead-only and kept out of the backlog | status: implemented -->
 ### A planning change is lead-only and kept out of the backlog

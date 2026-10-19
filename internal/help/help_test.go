@@ -62,7 +62,7 @@ func TestHelpConceptPages(t *testing.T) {
 	for _, p := range pages {
 		byName[p.Name] = p
 	}
-	for _, c := range []string{"objective", "admission", "approval", "milestone", "tracker", "evidence", "release", "recurring"} {
+	for _, c := range []string{"sprint-goal", "backlog", "objective", "admission", "approval", "milestone", "tracker", "evidence", "release", "recurring"} {
 		p, ok := byName[c]
 		if !ok {
 			t.Errorf("no concept page %s", c)

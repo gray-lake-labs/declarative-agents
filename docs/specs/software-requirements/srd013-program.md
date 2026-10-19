@@ -25,7 +25,7 @@ repository shares: the labels admission reads, admission, filing, showing,
 taking an issue into a worktree, and delivering it by a reviewed merge. Together with
 the specify and implement skills (srd035, srd036) they are the inner
 loop on GitLab.
-Tracking objectives against evidence, verifying what was built, closing
+Tracking Sprint Goals against evidence, verifying what was built, closing
 drained tracking issues, and rendering the dashboard belong to track-goals (srd019);
 recording a release plan belongs to plan.
 
@@ -91,7 +91,7 @@ A data issue filed without a milestone and without a type gets the sprint: the a
 <!-- req: R4.1 -->
 ### R4.1
 
-Returns one issue with its labels, its state per srd041 R1–R32, its sub-issues and their states, its Upstream, Requires, and Cites lines with track-goals' explanation of each (srd019), its tracking issue if any, and its event comments, including its ledger events for an objective.
+Returns one issue with its labels, its state per srd041 R1–R32, its sub-issues and their states, its link lines (Upstream, Requires, Cites, Blocked-by, Blocks, Depends-on, Relates-to, Duplicates, Implements; srd007) with track-goals' explanation of each (srd019), its tracking issue if any, and its event comments, including its ledger events for a Sprint Goal.
 
 <!-- req: R5 -->
 ## R5 - tpm issue merge
@@ -185,7 +185,7 @@ The marker recur writes into the next instance's body, naming the issue it recur
 
 - Splitting an issue into sub-issues and working them; that arrives with tracking issues and do-work in a later release.
 - Choosing what goes in a release; that is plan.
-- Tracking objectives, verifying merged work, closing tracking issues, or rendering the dashboard; that is track-goals (srd019).
+- Tracking Sprint Goals, verifying merged work, closing tracking issues, or rendering the dashboard; that is track-goals (srd019).
 - Offering or assigning work to a person.
 
 <!-- field: acceptance_criteria -->

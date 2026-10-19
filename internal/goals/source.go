@@ -72,7 +72,7 @@ func Load(t tracker.Tracker, system, version, ref string) (Sources, error) {
 		if _, seen := s.Documents[doc]; seen {
 			continue
 		}
-		p := path.Join(objectives.Dir, doc+".md")
+		p := path.Join(objectives.DirFor(doc), doc+".md")
 		f, err := corpus.Get(t, system, p, tag)
 		if err != nil {
 			return s, fmt.Errorf("%s at %s: %w", p, tag, err)

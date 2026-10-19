@@ -46,7 +46,7 @@ The request as the person states it, and the subsystem SRD that declares the rep
 <!-- req: R2.2 -->
 ### R2.2
 
-The paths the request names. A change to the road-map, a system or subsystem SRD, an objective document, or the sprint is a plane::management issue; any other change under docs/ is a plane::data issue of kind::spec (srd001 R33); a change under control/ is a plane::control issue; anything else is a plane::data issue of the kind the request states.
+The paths the request names. A change to the road-map, a system or subsystem SRD, an initiative, or the sprint is a plane::management issue; any other change under docs/ is a plane::data issue of kind::spec (srd001 R33); a change under control/ is a plane::control issue; anything else is a plane::data issue of the kind the request states.
 
 <!-- req: R3 -->
 ## R3 - Asks only what is not computed

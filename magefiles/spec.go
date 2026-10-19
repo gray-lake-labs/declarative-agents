@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -54,10 +56,18 @@ func specToolAt(dir, command, scope string) error {
 	return runStreaming(dir, tool, command, scope)
 }
 
+// specToolBinary is where the spec tool built from this specToolMain lives
+// under a release's directory.
+func specToolBinary(dir string) string {
+	sum := sha256.Sum256([]byte(specToolMain))
+	return filepath.Join(dir, "spectool-built-"+hex.EncodeToString(sum[:6]))
+}
+
 // ensureSpecTool builds the spec tool against the release's agent-core
-// source once per tag.
+// source once per tag and per version of specToolMain, so a change to the
+// tool's own source is never served by a binary built before it.
 func ensureSpecTool(rel parentRelease, run commandRunner) (string, error) {
-	binary := filepath.Join(rel.Dir, "spectool-built")
+	binary := specToolBinary(rel.Dir)
 	if _, err := os.Stat(binary); err == nil {
 		return binary, nil
 	}
@@ -131,17 +141,21 @@ import (
 	"RELEASE_MODULE/pkg/spec/markdown"
 )
 
-// objectivePath names an objective document, scrum-master's type written as an
-// SRD in the release's format; the release declares no location for it, so
-// the tool reads it with the SRD declaration (design.md objective).
-var objectivePath = regexp.MustCompile("(^|/)objectives/([a-z]+/)?obj[0-9]{3}-[a-z0-9-]+\\.(yaml|md)$")
+// hierarchyPath names a hierarchy document (theme, initiative, epic,
+// feature, story) or an objective document, scrum-master's types written as
+// SRDs in the release's format; the release declares no location for them,
+// so the tool reads them with the SRD declaration (design.md hierarchy).
+var hierarchyPath = regexp.MustCompile("(^|/)(themes|initiatives|epics|features|stories|objectives)/([a-z]+/)?(th|in|ep|ft|st|obj)[0-9]{3}-[a-z0-9-]+\\.(yaml|md)$")
+
+// hierarchyTypes names the scope of each hierarchy directory.
+var hierarchyTypes = map[string]string{"themes": "theme", "initiatives": "initiative", "epics": "epic", "features": "feature", "stories": "story", "objectives": "objective"}
 
 // declarationFor picks a document's declaration and the type its scope
-// names: an objective document's is the SRD's, under the scope objective.
+// names: a hierarchy document's is the SRD's, under the scope of its kind.
 func declarationFor(declarations markdown.Declarations, path string, source bool) (*markdown.Declaration, string, bool) {
-	if objectivePath.MatchString(path) {
+	if m := hierarchyPath.FindStringSubmatch(path); m != nil {
 		d, ok := declarations["srd"]
-		return d, "objective", ok
+		return d, hierarchyTypes[m[2]], ok
 	}
 	var d *markdown.Declaration
 	var ok bool

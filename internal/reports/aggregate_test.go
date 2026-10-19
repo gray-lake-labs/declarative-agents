@@ -82,7 +82,7 @@ func testAggregateSignalsByComponentNeverByPerson(t *testing.T, p trackertest.Pr
 
 	progress := map[string]string{}
 	for _, p := range a.Progress {
-		progress[p.Objective] = p.State
+		progress[p.SprintGoal] = p.State
 	}
 	if progress["g/po-1#5"] != "reported complete" || progress["g/po-2#2"] != "met" || progress["g/po-1#4"] != "blocked" {
 		t.Fatalf("progress %v", progress)

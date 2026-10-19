@@ -70,7 +70,7 @@ For a week or a sprint, reads every report in it and groups items by component.
 <!-- req: R3.2 -->
 ### R3.2
 
-Computes signals: blockers shared by two or more reports, blockers older than policy.escalation.blocker_age_days, commitments that slipped in policy.escalation.slip_releases or more consecutive reports, components with an expected report missing, items that contradict the ledger (a report calling an objective done that has no met event, srd006 R10, unless a sprint-end merge closed it as reported complete before track-goals runs, srd038 R2), and merged work in the tracker that no report mentions.
+Computes signals: blockers shared by two or more reports, blockers older than policy.escalation.blocker_age_days, commitments that slipped in policy.escalation.slip_releases or more consecutive reports, components with an expected report missing, items that contradict the ledger (a report calling a Sprint Goal done that has no met event, srd006 R10, unless a sprint-end merge closed it as reported complete before track-goals runs, srd038 R2), and merged work in the tracker that no report mentions.
 
 <!-- req: R3.3 -->
 ### R3.3
@@ -85,7 +85,7 @@ Expresses every signal by component or by blocker, never as a comparison or rank
 <!-- req: R3.5 -->
 ### R3.5
 
-States progress as the ledger state of each objective (srd006 R11) and its latest evidence, never as counts of closed issues or tasks.
+States progress as the ledger state of each Sprint Goal (srd006 R11) and its latest evidence, never as counts of closed issues or tasks.
 
 <!-- req: R3.6 -->
 ### R3.6
@@ -145,7 +145,7 @@ Is idempotent: a second run in the same week files nothing. The scheduled CI job
 <!-- req: R8.1 -->
 ### R8.1
 
-For a project and a person, returns the project's open objective issues with their due dates and the person's activity since the ISO week began: branches merged and issues closed. These are the facts the status issue's guided script drafts from.
+For a project and a person, returns the project's open Sprint Goal issues (Sprint Goals included) with their due dates and the person's activity since the ISO week began: branches merged and issues closed. These are the facts the status issue's guided script drafts from.
 
 <!-- req: R9 -->
 ## R9 - Weekly status issue
@@ -163,7 +163,7 @@ Its due date is the day after the reminder weekday in the reports repository's c
 <!-- req: R9.3 -->
 ### R9.3
 
-Its Requirements section is the guided script the owner works with implement: for each open objective issue in the repository, record its status, its problems, and complete or not complete. The output is a report in the srd018 shape that passes tpm reports validate.
+Its Requirements section is the guided script the owner works with implement: for each open Sprint Goal issue in the repository, record its status, its problems, and complete or not complete. The output is a report in the srd018 shape that passes tpm reports validate.
 
 <!-- req: R9.4 -->
 ### R9.4
@@ -194,12 +194,12 @@ Run twice on the same tag, the pipeline pushes no second branch and files no sec
 <!-- req: R11.1 -->
 ### R11.1
 
-Once a release plans srd045, the system release's aggregate also renders a roadmap forecast, the remaining epic items spread over future periods at velocity in dependency order, and a burn-up per epic, points drawn down against total points, from the epics and the ledger alone (srd045 R1.5). Both are committed beside the dashboard, regenerated each run, never edited, and labelled as forecasts, not baselines.
+Once track-goals runs (02.0), the system release's aggregate also renders a roadmap forecast, the remaining stories of each epic spread over future sprints at velocity in Blocked-by order, and a burn-up per epic and initiative, story points done against total points, from the hierarchy documents and the ledger alone (srd045 R7.1). Both are committed beside the dashboard, regenerated each run, never edited, and labelled as forecasts, not baselines.
 
 <!-- req: R11.2 -->
 ### R11.2
 
-Until that release, reports render no forecast and no burn-up.
+Until then, reports render no forecast and no burn-up (srd045 R7.2).
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -274,7 +274,7 @@ The sprint update and the stakeholder update exist only as recurring issues whos
 <!-- ac: AC6 -->
 ### AC6
 
-status-issues leaves exactly one status issue per listed person for the coming week, recurring the last closed one or filing a fresh one, and files nothing on a second run; week returns the open objective issues with due dates and the person's activity since the week began.
+status-issues leaves exactly one status issue per listed person for the coming week, recurring the last closed one or filing a fresh one, and files nothing on a second run; week returns the open Sprint Goal issues with due dates and the person's activity since the week began.
 
 <!-- field: traces -->
 #### Traces
@@ -286,7 +286,7 @@ status-issues leaves exactly one status issue per listed person for the coming w
 <!-- ac: AC7 -->
 ### AC7
 
-Each listed person receives one weekly status issue due the day after the reminder weekday, which mentions them without assigning them; worked with implement it produces a report with status, problems, and complete or not complete per open objective that passes tpm reports validate, and it is re-created with the next due date.
+Each listed person receives one weekly status issue due the day after the reminder weekday, which mentions them without assigning them; worked with implement it produces a report with status, problems, and complete or not complete per open Sprint Goal that passes tpm reports validate, and it is re-created with the next due date.
 
 <!-- field: traces -->
 #### Traces
@@ -311,7 +311,7 @@ A system release tag runs aggregate and deck in CI and pushes one branch with th
 <!-- ac: AC9 -->
 ### AC9
 
-The release that plans srd045 writes the forecast requirement items from R11.1; until then the interim rule of R11.2 holds.
+Release 02.0's planning writes the forecast requirement items from R11.1; until then the interim rule of R11.2 holds.
 
 <!-- field: traces -->
 #### Traces

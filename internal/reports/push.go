@@ -30,7 +30,7 @@ func SignalIssue(s Signal) tracker.NewIssue {
 ## Requirements
 
 1. Find the cause of the %s signal for %s and decide with the component's owner what changes.
-2. Record the decision as a comment on this issue and update the affected objective or blocker issues.
+2. Record the decision as a comment on this issue and update the affected Sprint Goal or blocker issues.
 
 ## Acceptance Criteria
 

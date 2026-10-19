@@ -6,7 +6,7 @@ title: "Shared: reading the corpus and config documents"
 <!-- field: problem -->
 ## Problem
 
-tpm reads a program's road map, SRDs, and objective documents, and its own
+tpm reads a program's road map, SRDs, and initiatives, and its own
 configuration files, all in the marker form the pinned parent
 declarative-agents release declares. This repository consumes that release
 only through its audit and its format tools, never as a Go module, so tpm

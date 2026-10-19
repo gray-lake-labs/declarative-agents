@@ -13,6 +13,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
@@ -87,7 +88,7 @@ func Push(t tracker.Tracker, in PushInput) (PushResult, error) {
 	if r.Milestone == "" || r.Tag == "" {
 		return res, fmt.Errorf("release %s has no milestone or tag in release.publication", r.Version)
 	}
-	docs, err := objectives.LoadDir(filepath.Join(in.Dir, objectives.Dir))
+	docs, err := objectives.LoadAll(in.Dir)
 	if err != nil {
 		return res, err
 	}
@@ -145,7 +146,7 @@ func groupsOf(items []string, docs []*objectives.Document) []group {
 		g := group{key: k, environment: "dev", items: []string{item}}
 		for _, d := range docs {
 			if d.ID == key {
-				g.title, g.docPath = d.Requirements[gid].Title, filepath.ToSlash(filepath.Join(objectives.Dir, filepath.Base(d.Path)))
+				g.title, g.docPath = d.Requirements[gid].Title, filepath.ToSlash(filepath.Join(objectives.DirFor(d.ID), filepath.Base(d.Path)))
 				if c := d.CriteriaFor(gid); len(c) > 0 && c[0].Environment != "" {
 					g.environment = c[0].Environment
 				}
@@ -279,9 +280,9 @@ func upsert(t tracker.Tracker, in PushInput, a IssueAction, existing *tracker.Is
 	return a, err
 }
 
-// postPlanned posts a planned event on each open objective issue for one of
-// the release's objectives that tasks filed for another release
-// (srd031 R4.3, srd006 R8).
+// postPlanned posts a planned event on each open Sprint Goal, or objective
+// issue read as one, that serves an outcome of the release but was filed for
+// another release (srd031 R4.3, srd006 R8).
 func postPlanned(t tracker.Tracker, in PushInput, r Release, repos []string, docs []*objectives.Document, groups []group) ([]PlannedOnIssue, error) {
 	var out []PlannedOnIssue
 	for _, repo := range repos {
@@ -290,17 +291,29 @@ func postPlanned(t tracker.Tracker, in PushInput, r Release, repos []string, doc
 			return out, err
 		}
 		for _, issue := range issues {
-			key := objectiveKey(issue.Description)
-			j := slices.IndexFunc(groups, func(g group) bool { return g.key == key })
-			if j < 0 || strings.Contains(issue.Description, "release="+r.Version+" -->") {
+			m, ok := sprintgoal.Parse(issue.Description)
+			if !ok || m.Release == r.Version {
 				continue
 			}
-			g := groups[j]
 			var cites []string
-			for _, item := range g.items {
-				cites = append(cites, goals.CiteURL(in.WebBase, in.System, r.Tag, g.docPath, item))
+			environment := ""
+			for _, key := range m.Serves {
+				j := slices.IndexFunc(groups, func(g group) bool { return g.key == key })
+				if j < 0 {
+					continue
+				}
+				g := groups[j]
+				for _, item := range g.items {
+					cites = append(cites, goals.CiteURL(in.WebBase, in.System, r.Tag, g.docPath, item))
+				}
+				if environment == "" {
+					environment = g.environment
+				}
 			}
-			e, text := events.Planned(r.Version, cites, g.environment)
+			if len(cites) == 0 {
+				continue
+			}
+			e, text := events.Planned(r.Version, cites, environment)
 			posted, err := events.Post(t, repo, issue.IID, e, events.PlannedRequired, text, in.DryRun)
 			if err != nil {
 				return out, err

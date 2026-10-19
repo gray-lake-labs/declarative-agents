@@ -12,7 +12,7 @@ Each run starts with mage regression:up creating the repositories below in
 a fresh rig run on local disk and ends with mage regression:down removing them.
 The sprint-end stage works a sprint-end issue in the rig to a
 confirmed release behind a passing gate, and proves reported-complete
-objectives close without a met event. The planning stage runs plan
+Sprint Goals close without a met event. The planning stage runs plan
 for the next period. The tag-triggered stages are release 01.3's
 (test-rel01.3-tag-triggered).
 
@@ -25,7 +25,7 @@ for the next period. The tag-triggered stages are release 01.3's
 <!-- field: preconditions -->
 ## Preconditions
 
-- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository, a reports repository, and one Product Owner repository, with a period of fixture reports and objective issues, and writes their paths as JSON for the integration targets (eng01).
+- mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository, a reports repository, and one Product Owner repository, with a period of fixture reports and Sprint Goals, and writes their paths as JSON for the integration targets (eng01).
 - mage regression:down removes the run after the targets run, including when they fail.
 - The system repository is the documents-only fixture: policy declares its corpus check as the gate of the corpus artifact (in the rig, the rig audit), and the grader gate of a Product Owner repository.
 - The tag pipeline reaches the rig's tracker repository.
@@ -99,10 +99,10 @@ go test ./internal/release -run '^Test(GateRunsDeclaredChecks|TagRequiresPassing
 
 - [srd015-release](../software-requirements/srd015-release.md) [AC1](../software-requirements/srd015-release.md#ac1)
 - [srd015-release](../software-requirements/srd015-release.md) [AC2](../software-requirements/srd015-release.md#ac2)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC2](../software-requirements/srd034-objectives.md#ac2)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC2](../software-requirements/srd034-initiatives.md#ac2)
 
-<!-- case: Reported-complete objectives close without a met event | status: implemented -->
-### Reported-complete objectives close without a met event
+<!-- case: Reported-complete Sprint Goals close without a met event | status: implemented -->
+### Reported-complete Sprint Goals close without a met event
 
 <!-- field: use_case -->
 #### Use case
@@ -122,7 +122,7 @@ go test ./internal/sprintend -run '^TestReportedCompleteClosesWithoutMet$'
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- closed_objectives: the ones reported complete, by the sprint-end merge
+- closed_sprint_goals: the ones reported complete, by the sprint-end merge
 - met_events: none
 - rollup_state: reported complete
 
@@ -152,11 +152,11 @@ go test ./internal/plan -run '^Test(PlanReleaseRanksSlippedFirst|PlanReleaseWrit
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- questions: objective items, version, and end date, each with a recommendation
+- questions: initiative items, version, and end date, each with a recommendation
 - road_map_change: deliverables and release.publication written, filed, and merged through the inner loop
 - plan_tag: the system repository tagged behind mage audit with the tag release.publication names
 - milestone: named for the release, end date set
-- planned_events: one per objective whose release moved
+- planned_events: one per Sprint Goal whose release moved
 - item_without_test: returned with a comment, not placed
 - assignees_and_work_issues: none
 
@@ -166,7 +166,7 @@ go test ./internal/plan -run '^Test(PlanReleaseRanksSlippedFirst|PlanReleaseWrit
 - [srd031-plan](../software-requirements/srd031-plan.md) [AC1](../software-requirements/srd031-plan.md#ac1)
 - [srd031-plan](../software-requirements/srd031-plan.md) [AC2](../software-requirements/srd031-plan.md#ac2)
 - [srd031-plan](../software-requirements/srd031-plan.md) [AC3](../software-requirements/srd031-plan.md#ac3)
-- [srd034-objectives](../software-requirements/srd034-objectives.md) [AC3](../software-requirements/srd034-objectives.md#ac3)
+- [srd034-initiatives](../software-requirements/srd034-initiatives.md) [AC3](../software-requirements/srd034-initiatives.md#ac3)
 
 <!-- case: The sprint milestone and sprint issue are updated, not duplicated | status: implemented -->
 ### The sprint milestone and sprint issue are updated, not duplicated
@@ -189,7 +189,7 @@ go test ./internal/plan -run '^Test(PushSprintUpdatesMilestoneAndChecklist|PlanP
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- sprint_issue: one per milestone, checklist item per objective
+- sprint_issue: one per milestone, checklist item per Sprint Goal
 - sprint_end_issues: one per releasing repository, due on the milestone end date
 - second_push: dates and checklist updated; nothing created
 

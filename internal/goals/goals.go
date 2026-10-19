@@ -42,7 +42,7 @@ func init() {
 		return t, s, err
 	}
 	cli.Default.Register(&cli.Command{
-		Group: "goals", Name: "plan", Summary: "objectives of a release with recommended owner and environment",
+		Group: "goals", Name: "plan", Summary: "initiative outcomes of a release with recommended team and environment",
 		Flags: common,
 		Run: func(ctx *cli.Context) error {
 			t, s, err := load(ctx)
@@ -61,7 +61,7 @@ func init() {
 		},
 	})
 	cli.Default.Register(&cli.Command{
-		Group: "goals", Name: "push", Summary: "file the confirmed objective issues and post planned events",
+		Group: "goals", Name: "push", Summary: "file one Sprint Goal per team and post planned events",
 		Flags: func(fs *flag.FlagSet) {
 			common(fs)
 			fs.StringVar(&a.planFile, "plan", "", "confirmed plan JSON from tpm goals plan (required)")

@@ -11,8 +11,8 @@ test_suite: test-rel01.4-agent-legible-cli
 
 An agent with tpm on PATH and nothing else learns the process from the
 binary. tpm help gives it the planes, the steps of the release cycle, and
-the command that serves each; tpm help issue and tpm help objective say
-what the issue lifecycle and an objective are. It then files and pops an
+the command that serves each; tpm help issue and tpm help Sprint Goal say
+what the issue lifecycle and a Sprint Goal are. It then files and pops an
 issue with tpm issue, the group named for what every subcommand acts on.
 A skill installed from an earlier tpm that still calls tpm program fails
 with a message naming tpm issue and tpm install, and tpm issue recur
@@ -39,7 +39,7 @@ An agent meets tpm for the first time, or after an upgrade to release 01.4.
 ## Flow
 
 - F1: The agent runs tpm help and reads the process page: planes, the ten release-cycle steps with the group or skill serving each, and the pointer to docs/VISION.md.
-- F2: The agent runs tpm help issue and tpm help objective, and tpm help --list for the other pages.
+- F2: The agent runs tpm help issue and tpm help Sprint Goal, and tpm help --list for the other pages.
 - F3: The agent runs tpm issue pop on the admitted issue and works it in the worktree tpm returns.
 - F4: A skill still installed from an earlier tpm runs tpm program pop; tpm exits non-zero naming tpm issue and tpm install, and tpm install updates the skill.
 - F5: The recurring issue's run ends; tpm issue recur closes it, logs the run, and opens the next instance once.

@@ -19,6 +19,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/release"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
@@ -48,6 +49,9 @@ type Candidates struct {
 	Tag             string `json:"recommended_tag"`
 	Items           []Item `json:"items"`
 	WithoutEvidence []Item `json:"without_evidence,omitempty"`
+	// Backlog is the team's Product Backlog, when the checkout holds stories
+	// (srd031 R6.4).
+	Backlog *Backlog `json:"backlog,omitempty"`
 
 	agreed map[string]bool // every item of an agreed objective document
 }
@@ -86,7 +90,7 @@ func MakeCandidates(in Input) (Candidates, error) {
 	if err != nil {
 		return c, err
 	}
-	docs, err := objectives.LoadDir(filepath.Join(in.Dir, objectives.Dir))
+	docs, err := objectives.LoadAll(in.Dir)
 	if err != nil {
 		return c, err
 	}
@@ -182,9 +186,9 @@ func missing(d *objectives.Document, group, item string) []string {
 	return out
 }
 
-// slippedGroups maps each objective group whose issue the aggregate names
-// in a slipped-commitment signal; the issue's tasks marker names
-// the group (srd018 R3.2, srd031 R2.3).
+// slippedGroups maps each initiative outcome whose Sprint Goal the aggregate
+// names in a slipped-commitment signal; the Sprint Goal's tasks marker names
+// the outcomes it serves (srd018 R3.2, srd031 R2.3).
 func slippedGroups(in Input) (map[string]bool, error) {
 	out := map[string]bool{}
 	if in.Aggregate == nil || in.Tracker == nil {
@@ -200,23 +204,15 @@ func slippedGroups(in Input) (map[string]bool, error) {
 		}
 		issue, err := in.Tracker.GetIssue(project, iid)
 		if err != nil {
-			return nil, fmt.Errorf("slipped objective %s: %w", s.Subject, err)
+			return nil, fmt.Errorf("slipped Sprint Goal %s: %w", s.Subject, err)
 		}
-		if key := objectiveKey(issue.Description); key != "" {
-			out[key] = true
+		if m, ok := sprintgoal.Parse(issue.Description); ok {
+			for _, key := range m.Serves {
+				out[key] = true
+			}
 		}
 	}
 	return out, nil
-}
-
-// objectiveKey reads objNNN-short-name#Rn from tasks' marker.
-func objectiveKey(description string) string {
-	_, rest, ok := strings.Cut(description, "<!-- tpm goals objective=")
-	if !ok {
-		return ""
-	}
-	key, _, _ := strings.Cut(rest, " ")
-	return key
 }
 
 // nextVersion is the road map's next minor version: 01.1 is followed by

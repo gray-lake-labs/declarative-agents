@@ -1,8 +1,9 @@
-// Package objectives loads and validates objective documents (srd034 R1).
-// An objective document is an SRD in the pinned parent release's Markdown
-// format: owner and horizon are items of its context, a group's due and
+// Package objectives loads and validates initiative documents (srd034 R1),
+// and objective documents, their name before release 04.0, as initiatives.
+// An initiative is an SRD in the pinned parent release's Markdown format:
+// owner, horizon, and parent are items of its context, a group's due and
 // delivered_by are items of the group's applicability, and a criterion's
-// environment is its applicability (design.md schema.objective).
+// environment is its applicability (design.md schema.initiative).
 package objectives
 
 import (
@@ -15,8 +16,21 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 )
 
-// Dir is where a system repository keeps its objective documents.
-const Dir = "docs/specs/objectives"
+// Dir is where a system repository keeps its initiatives; LegacyDir is where
+// it kept objective documents, which are read as initiatives (srd034 R1.1).
+const (
+	Dir       = "docs/specs/initiatives"
+	LegacyDir = "docs/specs/objectives"
+)
+
+// DirFor is the directory a document id lives in: objNNN ids in LegacyDir,
+// every other id in Dir.
+func DirFor(id string) string {
+	if strings.HasPrefix(id, "obj") {
+		return LegacyDir
+	}
+	return Dir
+}
 
 // Document is one objective document.
 type Document struct {
@@ -30,6 +44,7 @@ type Document struct {
 	AcceptanceCriteria []Criterion
 	Owner              string
 	Horizon            string
+	Parent             string
 	Status             string
 }
 
@@ -92,6 +107,7 @@ func fromMarkdown(d *Document, md *corpus.Document) {
 	d.Status, _ = md.Front["status"].(string)
 	context := md.Field("context").Tree()
 	d.Owner, d.Horizon = corpus.TreeString(context, "owner"), corpus.TreeString(context, "horizon")
+	d.Parent = corpus.TreeString(context, "parent")
 	d.Problem = md.Field("problem").Text()
 	d.NonGoals = md.Field("non_goals").List()
 	for _, g := range md.Field("goals").List() {
@@ -133,12 +149,16 @@ func fromMarkdown(d *Document, md *corpus.Document) {
 	}
 }
 
-// LoadDir reads every objNNN-*.md document under dir, in name order. An
-// absent dir holds no documents.
+// LoadDir reads every inNNN-*.md and objNNN-*.md document under dir, in
+// name order. An absent dir holds no documents.
 func LoadDir(dir string) ([]*Document, error) {
-	paths, err := filepath.Glob(filepath.Join(dir, "obj*.md"))
-	if err != nil {
-		return nil, err
+	var paths []string
+	for _, pattern := range []string{"in[0-9]*.md", "obj[0-9]*.md"} {
+		found, err := filepath.Glob(filepath.Join(dir, pattern))
+		if err != nil {
+			return nil, err
+		}
+		paths = append(paths, found...)
 	}
 	sort.Strings(paths)
 	docs := make([]*Document, 0, len(paths))
@@ -148,6 +168,20 @@ func LoadDir(dir string) ([]*Document, error) {
 			return nil, err
 		}
 		docs = append(docs, d)
+	}
+	return docs, nil
+}
+
+// LoadAll reads the initiatives of the repository at root: those under Dir
+// and the objective documents under LegacyDir.
+func LoadAll(root string) ([]*Document, error) {
+	var docs []*Document
+	for _, dir := range []string{Dir, LegacyDir} {
+		found, err := LoadDir(filepath.Join(root, dir))
+		if err != nil {
+			return nil, err
+		}
+		docs = append(docs, found...)
 	}
 	return docs, nil
 }

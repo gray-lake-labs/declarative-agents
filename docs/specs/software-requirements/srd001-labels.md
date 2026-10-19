@@ -60,17 +60,17 @@ them.
 <!-- req: R1.1 -->
 ### R1.1
 
-A plane::management issue changes intent: a road-map release, a system or subsystem SRD (structure and ownership), an objective document, a sprint issue, or an exit decision. A change to a component SRD, a use case, a test suite, or the architecture is design work, a kind::spec issue (R33).
+A plane::management issue changes intent: a road-map release, a system or subsystem SRD (structure and ownership), a theme, initiative, epic, feature, or story document, a sprint issue, or an exit decision. A change to a component SRD, a use case, a test suite, or the architecture is design work, a kind::spec issue (R33).
 
 <!-- req: R1.2 -->
 ### R1.2
 
-Only the program lead or a sub-project lead files a plane::management issue. Scripts file exactly two kinds of plane::management issue: the sprint issue (R7), and the objective issues tasks files for a receiving Product Owner (srd022, srd034 R3), since a Product Owner answers an objective by writing requirements.
+Only the program lead or a sub-project lead files a plane::management issue. Scripts file exactly two kinds of plane::management issue: the sprint issue (R7), and the Sprint Goal issues tasks files for a receiving Product Owner (srd022, srd034 R3), since a Product Owner answers a Sprint Goal by selecting stories and writing the requirements they cite.
 
 <!-- req: R1.3 -->
 ### R1.3
 
-A plane::management issue never enters the backlog. It is assigned by the pop of the lead who works it, the filer or, for an objective issue, the receiving Product Owner, and closed by that lead's merge, or for an objective by track-goals when it is met (R30.1).
+A plane::management issue never enters the backlog. It is assigned by the pop of the lead who works it, the filer or, for a Sprint Goal, the receiving Product Owner, and closed by that lead's merge, or for a Sprint Goal by track-goals when it is met (R30.1).
 
 <!-- req: R1.4 -->
 ### R1.4
@@ -203,7 +203,7 @@ A sprint is a group milestone named for the release it plans (srd031 R4.2), with
 <!-- req: R7.2 -->
 ### R7.2
 
-The sprint issue's description is the exit checklist, one item per objective of the release, copied from the road-map release when plan records it. Each item is ticked from that objective's ledger, never from its issues.
+The sprint issue's description is the exit checklist, one item per Sprint Goal of the release, copied from the road-map release when plan records it. Each item is ticked from that Sprint Goal's ledger, never from its issues.
 
 <!-- req: R7.3 -->
 ### R7.3
@@ -644,7 +644,7 @@ It carries Requirements and Acceptance Criteria, and its branch changes docs/ an
 - Permissions in the tracker itself; the plane rules are enforced by admission and review, not by tracker roles.
 - A fourth plane. Telemetry and dashboards are views over tracker state, not a plane.
 - Tracking issues as a native tracker object (a tracker's epics); the process uses only features of the free tier.
-- A goal type; an objective is an ordinary issue whose events are its ledger (srd006 R11).
+- A goal type; a Sprint Goal is an ordinary issue whose events are its ledger (srd006 R11).
 - Nesting tracking issues or nesting worktrees.
 - Estimating effort per kind.
 - A separate workflow per kind; every kind ends in one merge or one recorded answer on the same issue loop.
@@ -662,7 +662,7 @@ It carries Requirements and Acceptance Criteria, and its branch changes docs/ an
 <!-- ac: AC1 -->
 ### AC1
 
-A management-plane issue filed by a non-lead, or a script-created management issue other than the sprint issue or a tasks objective issue, is flagged by admission; no management-plane issue appears in the backlog; each is assigned only by the pop of the lead who works it; no management-plane action creates, labels, or assigns a data-plane issue.
+A management-plane issue filed by a non-lead, or a script-created management issue other than the sprint issue or a tasks Sprint Goal issue, is flagged by admission; no management-plane issue appears in the backlog; each is assigned only by the pop of the lead who works it; no management-plane action creates, labels, or assigns a data-plane issue.
 
 <!-- field: traces -->
 #### Traces
@@ -740,7 +740,7 @@ A tracking issue with cross-project members shows their progress in its task lis
 <!-- ac: AC7 -->
 ### AC7
 
-Pushing a sprint creates one milestone and one sprint issue whose checklist matches the release's objectives; pushing it again changes only dates and text; no script ticks or closes the sprint issue.
+Pushing a sprint creates one milestone and one sprint issue whose checklist matches the release's Sprint Goals; pushing it again changes only dates and text; no script ticks or closes the sprint issue.
 
 <!-- field: traces -->
 #### Traces

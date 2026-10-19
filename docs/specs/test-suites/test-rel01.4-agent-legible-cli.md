@@ -10,7 +10,7 @@ status: implemented
 
 The suite runs offline. It inits an empty git repository with an empty
 tracker repository beside it, runs the parent's corpus audit and the
-objective gate over the result, onboards a second repository, and runs
+Sprint Goal gate over the result, onboards a second repository, and runs
 both commands again. It reads every help page, holds the pages to the
 dispatch table and the corpus, runs every issue subcommand under its new
 group and the old group name, and recurs a recurring issue whose earlier
@@ -56,7 +56,7 @@ go test ./internal/scaffold -run '^TestInit(WritesSkeleton|WritesControlFiles|In
 - corpus: VISION, ARCHITECTURE, SPECIFICATIONS, road-map with one release, design constitution, charter, pins, system SRD
 - control: labels.md and policy.md holding the defaults
 - skills: installed for the named agents
-- audit: the parent's corpus audit and the objective gate pass on the new repository
+- audit: the parent's corpus audit and the Sprint Goal gate pass on the new repository
 
 <!-- field: traces -->
 #### Traces
@@ -178,7 +178,7 @@ go test ./internal/help -run '^TestHelp(ProcessPage|GroupPages|ConceptPages|List
 
 - process_page: the planes, the ten release-cycle steps with the group or skill serving each, the corpus and control locations, the pointer to VISION
 - group_pages: one per group
-- concept_pages: objective, admission, approval, milestone, tracker, evidence, release, recurring issue
+- concept_pages: Sprint Goal, admission, approval, milestone, tracker, evidence, release, recurring issue
 - page_length: at most 60 lines
 - unknown_page: non-zero exit listing the pages
 

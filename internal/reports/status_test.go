@@ -156,8 +156,8 @@ func testWeekListsOpenObjectivesAndActivity(t *testing.T, p trackertest.Program)
 	if r.Week != "2026-W42" || r.Since != "2026-10-12" {
 		t.Fatalf("week %s since %s", r.Week, r.Since)
 	}
-	if len(r.Objectives) != 1 || r.Objectives[0].Ref != po1+"#"+itoa(obj.IID) || r.Objectives[0].DueDate != "2026-11-06" {
-		t.Fatalf("objectives %+v", r.Objectives)
+	if len(r.SprintGoals) != 1 || r.SprintGoals[0].Ref != po1+"#"+itoa(obj.IID) || r.SprintGoals[0].DueDate != "2026-11-06" {
+		t.Fatalf("objectives %+v", r.SprintGoals)
 	}
 	if len(r.Merged) != 1 || r.Merged[0].IID != 1 || len(r.Closed) != 1 || r.Closed[0].Title != "Grader notes" {
 		t.Fatalf("activity merged=%+v closed=%+v", r.Merged, r.Closed)

@@ -117,7 +117,7 @@ Until it is written, a change to the policy is a plane::control issue filed with
 <!-- field: non_goals -->
 ## Non-goals
 
-- Changing objectives; that is plan and tasks.
+- Changing Sprint Goals; that is plan and tasks.
 - Team morale or interpersonal discussion; the skill structures the process facts and leaves the rest of the conversation to the people in it.
 
 <!-- field: acceptance_criteria -->

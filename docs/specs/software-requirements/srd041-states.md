@@ -17,14 +17,14 @@ title: "States: where an issue is and who may move it"
 | taken | ready | person | clear | the assignee releases it back |
 | taken | in-progress | person | none | the assignee starts it |
 | in-progress | taken | person | none | the assignee stops it |
-| any open | +waiting | track-goals | none | an Upstream, Requires, or Cites dependency is unsatisfied or unresolvable |
+| any open | +waiting | track-goals | none | a Blocked-by, Upstream, or Requires dependency is unsatisfied, or a dependency or Cites line is unresolvable (srd007 R3.1) |
 | +waiting | -waiting | track-goals | none | every dependency is satisfied |
 | taken or in-progress | +blocked | person | none | the assignee states a blocker in a comment |
 | +blocked | -blocked | person | none | the assignee clears it |
 | open recurring | +needs-run | handoff | none | a breaking release of its artifact is tagged |
 | any open | closed | merge | none | a merge that closes the issue lands, whatever state the issue is in (R7.1) |
-| open objective | closed | track-goals | none | its ledger replays to met and the met event is posted |
-| any open | closed | person | none | declined, duplicate, or answered, with the reason as the last comment |
+| open Sprint Goal | closed | track-goals | none | its ledger replays to met and the met event is posted; a Sprint Goal is a Sprint Goal |
+| any open | closed | person | none | declined, duplicate (with a Duplicates line naming the original, srd007 R6.4), or answered, with the reason as the last comment |
 | closed | open | person | none | reopened; admission runs again |
 
 <!-- field: problem -->
@@ -122,7 +122,7 @@ Blocked is a person's statement about something the tracker cannot see; waiting 
 <!-- req: R7.1 -->
 ### R7.1
 
-The tracker's closed state. Reached by the merge of a request that closes the issue, by a person declining it with a reason as the last comment, or, for an objective issue, by track-goals when its ledger replays to met (srd019).
+The tracker's closed state. Reached by the merge of a request that closes the issue, by a person declining it with a reason as the last comment, or, for a Sprint Goal issue, by track-goals when its ledger replays to met (srd019).
 
 <!-- req: R7.2 -->
 ### R7.2
@@ -163,7 +163,7 @@ Only a person clears their own assignment. No script changes an assignee except 
 <!-- req: R9.3 -->
 ### R9.3
 
-Only a merge, a person declining with a reason, or track-goals on a met objective closes an issue.
+Only a merge, a person declining with a reason, or track-goals on a met Sprint Goal closes an issue.
 
 <!-- req: R9.4 -->
 ### R9.4
@@ -244,7 +244,7 @@ Blocked is set and cleared only by the assignee with a comment saying what it wa
 <!-- ac: AC4 -->
 ### AC4
 
-An issue closes only by a closing merge, a person's decline with a reason, or track-goals posting met on an objective; closing an objective's sub-issues alone never closes it; a reopened issue is checked by admission again.
+An issue closes only by a closing merge, a person's decline with a reason, or track-goals posting met on a Sprint Goal; closing a Sprint Goal's sub-issues alone never closes it; a reopened issue is checked by admission again.
 
 <!-- field: traces -->
 #### Traces

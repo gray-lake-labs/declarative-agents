@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 )
 
 // TestPopAndCloseCitesTheMergeCommit walks one issue's life on beads
@@ -82,9 +84,9 @@ func TestStateTableReplaysOnBeads(t *testing.T) {
 				if row.Requires != "" {
 					i.Labels = append(i.Labels, row.Requires)
 				}
-				if row.Kind == KindObjective {
+				if row.Kind == KindSprintGoal {
 					i.Labels = []string{"plane::management"}
-					i.Description = objectiveMarker + "objective=obj001#R1 release=01.0 -->"
+					i.Description = sprintgoal.Marker("04.0", []string{"in001-reliable-agents#R1"})
 				}
 				if row.To == "-"+Waiting || row.To == "-"+Blocked {
 					i.Labels = append(i.Labels, strings.TrimPrefix(row.To, "-"))
@@ -138,6 +140,28 @@ func TestStateTableReplaysOnBeads(t *testing.T) {
 		if !errors.Is(err, ErrRefused) || !strings.Contains(err.Error(), c.to) {
 			t.Fatalf("%s to %s by %s = %v, want a refusal naming the transition", c.id, c.to, c.actor, err)
 		}
+	}
+}
+
+// TestObjectiveIssueIsSprintGoal lets track-goals close an objective issue
+// filed before release 04.0 as it closes a Sprint Goal, and refuses that
+// close on an issue with neither marker (srd041 R8, srd034 R3.7).
+func TestObjectiveIssueIsSprintGoal(t *testing.T) {
+	old := ready("sm-1")
+	old.Labels = []string{"plane::management"}
+	old.Description = "body\n<!-- tpm goals objective=obj001-reliable-agents#R1 release=01.0 -->\n"
+	plain := ready("sm-2")
+	plain.Labels = []string{"plane::management"}
+	f := newFixture(t, old, plain)
+	alice := f.clone("alice")
+	if err := alice.Fire("sm-1", ActorTrackGoals, Closed); err != nil {
+		t.Fatalf("track-goals close of an objective issue refused: %v", err)
+	}
+	if got := f.remoteIssue("sm-1"); got.State != Closed {
+		t.Fatalf("state = %s, want closed", got.State)
+	}
+	if err := alice.Fire("sm-2", ActorTrackGoals, Closed); !errors.Is(err, ErrRefused) {
+		t.Fatalf("track-goals closed an issue that is no Sprint Goal: %v", err)
 	}
 }
 

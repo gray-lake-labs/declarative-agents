@@ -12,7 +12,7 @@ test_suite: test-rel01.1-weekly-status
 Each week a status issue waits in the Product Owner's repository, due the
 day after the reminder weekday, so the tracker's due-date notification
 reaches the owner on that weekday. The owner pops it; its steps walk each
-open objective issue and record status, problems, and complete or not
+open Sprint Goal and record status, problems, and complete or not
 complete. The result is a report in the reports repository's fixed shape
 that tpm reports validate passes, merged through the inner loop, after
 which the next week's issue exists with its new due date.
@@ -31,7 +31,7 @@ The tracker's due-date notification for the week's status issue.
 ## Preconditions
 
 - tpm reports init scaffolded the reports repository, its report schema, its validate CI job, and its configuration listing the team and the reminder weekday.
-- The Product Owner's repository holds open objective issues filed by rel01.0-uc002-push-objective-issues.
+- The Product Owner's repository holds open Sprint Goals filed by rel01.0-uc002-push-objective-issues.
 
 <!-- field: flow -->
 ## Flow
@@ -39,8 +39,8 @@ The tracker's due-date notification for the week's status issue.
 - F1: The weekly status issue exists in the owner's repository with a Recurrence section, a due date the day after the reminder weekday, and a body that mentions the owner without assigning them.
 - F2: The tracker sends its due-date notification to the owner, a participant through the mention.
 - F3: The owner runs implement on the status issue; its Requirements list the steps.
-- F4: tpm reports week returns as JSON every open objective issue in the repository with its due date and the owner's tracker activity for the week.
-- F5: Model step (structure): the model asks the owner about each objective and turns the answers into the report in the fixed shape: status, problems, and complete or not complete per objective.
+- F4: tpm reports week returns as JSON every open Sprint Goal in the repository with its due date and the owner's tracker activity for the week.
+- F5: Model step (structure): the model asks the owner about each Sprint Goal and turns the answers into the report in the fixed shape: status, problems, and complete or not complete per Sprint Goal.
 - F6: tpm reports validate checks the report; tpm issue merge merges it in the reports repository and closes the status issue in the owner's repository.
 - F7: The merge lands and closes the status issue; the reports repository's scheduled tpm reports status-issues run recurs it (tpm issue recur), opening the next week's instance with the next due date and the run appended to Previous Runs.
 
@@ -79,7 +79,7 @@ Each person the reports configuration lists receives one status issue per week, 
 <!-- sc: S2 -->
 ### S2
 
-Worked with implement, the issue produces a report with status, problems, and complete or not complete for every open objective, which tpm reports validate passes.
+Worked with implement, the issue produces a report with status, problems, and complete or not complete for every open Sprint Goal, which tpm reports validate passes.
 
 <!-- field: traces -->
 #### Traces

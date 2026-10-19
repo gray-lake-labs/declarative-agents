@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Plan the next release in the system repository, choosing its objective items, publishing the plan as a tag, dating the period, and filing its sprint-end issues (srd031, srd034 R3.1, R5.1). Use when the technical program manager asks to plan the next period or release.
+description: Plan the next release in the system repository, choosing its initiative items, publishing the plan as a tag, dating the period, and filing its sprint-end issues; or, in a team's repository, run Sprint Planning from the ranked stories (srd031, srd034 R3.1, srd045 R5). Use when the technical program manager asks to plan the next period or release, or a Product Owner asks to plan the team's sprint.
 ---
 
 # plan
@@ -27,3 +27,14 @@ Input: the system repository path, and the period's `tpm reports aggregate
    Show the milestone, the sprint issue, the sprint-end issues, the
    planned events, and anything skipped.
 8. Run tasks for the release.
+
+Sprint Planning, in a team's repository once tasks filed its Sprint Goal:
+
+1. Run `tpm plan candidates --dir . --json` and show the backlog: the
+   stories by rank with points, the velocity, and the recommended stories.
+   When velocity is not measured, ask the Product Owner for an assumed one
+   and run it again with `--velocity <points>`.
+2. Ask which stories enter the sprint. Ask nothing else.
+3. Run `tpm plan backlog --project <team repository> --release <version> --stories <a,b> --dir . --json`
+   and show the Sprint Goal it updated.
+4. Run make-work for each chosen story; each issue carries `Implements: <story>`.

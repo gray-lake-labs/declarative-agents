@@ -24,7 +24,7 @@ Table 1: Playbook practices and their counterparts here.
 
 | Playbook | This process |
 |---|---|
-| `intent.md`, then `spec.md`, then `plan.md`, each committed and each triggering the next stage | Objective documents (srd034), which are this process's intent, then SRDs, the requirements an objective cites by pinned URL, then issues in do-work's input format; the pop marker commit embeds the plan verbatim. Goals, intents, and objectives are one concept here (VISION, ARCHITECTURE decision 14) |
+| `intent.md`, then `spec.md`, then `plan.md`, each committed and each triggering the next stage | Initiatives (srd034), which are this process's intent, then SRDs, the requirements a Sprint Goal cites by pinned URL, then issues in do-work's input format; the pop marker commit embeds the plan verbatim. Goals, intents, and Sprint Goals are one concept here (VISION, ARCHITECTURE decision 14) |
 | Plan mode by default; nothing is implemented without an accepted plan | `gh-issue-pop` decomposes an item into sub-issues before `do-work` builds anything |
 | The product owner reviews and approves the agent's spec rather than writing it | The Product Owner writes requirements with an agent through push, pop, and do-work |
 | Story points and refinement meetings retired | Issues are estimated in size and review complexity, with estimated against actual lines of code logged; story points stay only on epic backlog items, for velocity and forecasts (srd045), and refinement is a reviewed change to an epic rather than a meeting ([agile-mapping.md](agile-mapping.md)) |
@@ -45,9 +45,9 @@ Table 2: What this process covers that the playbook does not.
 | Concern | Playbook | This process |
 |---|---|---|
 | Scope | One team, one repository, one service | A system of subsystems across repositories, linked by requirements pinned to a release tag |
-| Coordination between teams | None | The technical program manager plans system releases and pushes objectives to each subsystem; handoff fans releases out to the repositories that cite them |
-| Done | A merged pull request that passes review and evals | The named tests pass in the named environment, recorded as evidence on the objective |
-| Record of progress | Git history and pull request metadata | Each objective issue is a ledger of planned, evidence, and met events that anyone can replay |
+| Coordination between teams | None | The technical program manager plans system releases and pushes Sprint Goals to each subsystem; handoff fans releases out to the repositories that cite them |
+| Done | A merged pull request that passes review and evals | The named tests pass in the named environment, recorded as evidence on the Sprint Goal |
+| Record of progress | Git history and pull request metadata | Each Sprint Goal is a ledger of planned, evidence, and met events that anyone can replay |
 | Environments | Autonomy tiers for dev, staging, and production | A chain from local to customer R&D, each environment an SRD with its trigger and suites, owned by a test subsystem |
 | Testing software | The feature's tests and the agent evals | A test subsystem with its own owner, shipped with each release so a customer can run it |
 

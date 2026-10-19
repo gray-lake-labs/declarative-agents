@@ -144,9 +144,27 @@ func Evidence(requirement, test, environment, version, result string, extra ...K
 // PlannedRequired are the planned event's required keys (srd006 R8.2).
 var PlannedRequired = []string{"release", "requirement", "environment"}
 
-// Planned is the event tasks and plan post on an objective
-// issue: the release it counts toward, each requirement it satisfies as a
-// pinned URL, and the environment where its evidence counts (srd006 R8).
+// PlannedStoriesRequired are the planned event's keys once Sprint Planning
+// has listed stories, so a changed Sprint Backlog posts a new event.
+var PlannedStoriesRequired = []string{"release", "requirement", "story", "environment"}
+
+// PlannedStories is the planned event Sprint Planning posts on a Sprint
+// Goal: Planned's keys and each story the Sprint Backlog lists (srd006 R8.2).
+func PlannedStories(release string, requirements, stories []string, environment string) (Event, string) {
+	e, _ := Planned(release, requirements, environment)
+	env := e.Keys[len(e.Keys)-1]
+	e.Keys = e.Keys[:len(e.Keys)-1]
+	for _, s := range stories {
+		e.Keys = append(e.Keys, KV{"story", s})
+	}
+	e.Keys = append(e.Keys, env)
+	text := fmt.Sprintf("Planned for release %s with %d stories; evidence counts in %s.", release, len(stories), environment)
+	return e, text
+}
+
+// Planned is the event tasks and plan post on a Sprint Goal: the release it
+// counts toward, each initiative item it serves as a pinned URL, and the
+// environment where its evidence counts (srd006 R8).
 func Planned(release string, requirements []string, environment string) (Event, string) {
 	e := Event{Name: "planned", Keys: []KV{{"release", release}}}
 	for _, r := range requirements {

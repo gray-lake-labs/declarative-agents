@@ -34,11 +34,14 @@ func TestSpecToolSourceUsesThePinnedRelease(t *testing.T) {
 
 func TestSpecToolIsBuiltOncePerTag(t *testing.T) {
 	rel := parentRelease{Tag: "v1", Dir: t.TempDir()}
-	os.WriteFile(filepath.Join(rel.Dir, "spectool-built"), []byte("built"), 0o755)
+	os.WriteFile(specToolBinary(rel.Dir), []byte("built"), 0o755)
 	ran := 0
 	got, err := ensureSpecTool(rel, func(string, string, ...string) error { ran++; return nil })
-	if err != nil || got != filepath.Join(rel.Dir, "spectool-built") || ran != 0 {
+	if err != nil || got != specToolBinary(rel.Dir) || ran != 0 {
 		t.Fatalf("got %s err %v ran %d", got, err, ran)
+	}
+	if !strings.HasPrefix(filepath.Base(got), "spectool-built-") || filepath.Base(got) == "spectool-built-" {
+		t.Errorf("binary %s is not keyed on the tool's source", got)
 	}
 }
 
@@ -125,13 +128,13 @@ func mustAbs(t *testing.T, p string) string {
 	return a
 }
 
-// TestSpecToolReadsObjectivesAsSRDs holds the tool to reading an objective
-// document, at any depth under an objectives directory, with the SRD
-// declaration under the scope objective (design.md objective).
+// TestSpecToolReadsObjectivesAsSRDs holds the tool to reading a hierarchy
+// or objective document, at any depth under its directory, with the SRD
+// declaration under the scope of its kind (design.md hierarchy).
 func TestSpecToolReadsObjectivesAsSRDs(t *testing.T) {
-	m := regexp.MustCompile(`objectivePath = regexp.MustCompile\(("[^"]+")\)`).FindStringSubmatch(specToolMain)
+	m := regexp.MustCompile(`hierarchyPath = regexp.MustCompile\(("[^"]+")\)`).FindStringSubmatch(specToolMain)
 	if m == nil {
-		t.Fatal("specToolMain declares no objectivePath")
+		t.Fatal("specToolMain declares no hierarchyPath")
 	}
 	pattern, err := strconv.Unquote(m[1])
 	if err != nil {
@@ -145,12 +148,16 @@ func TestSpecToolReadsObjectivesAsSRDs(t *testing.T) {
 		"docs/specs/software-requirements/srd001-labels.md":     false,
 		"docs/specs/objectives/README.md":                       false,
 		"testdata/legacy/obj001-reliable-agents.yaml":           false,
+		"docs/specs/initiatives/in001-reliable-agents.md":       true,
+		"docs/specs/stories/st001-score-trajectories.md":        true,
+		"testdata/hierarchy/valid/docs/specs/themes/th001-a.md": true,
+		"docs/specs/stories/README.md":                          false,
 	} {
 		if re.MatchString(path) != want {
-			t.Errorf("%s: objective = %v, want %v", path, !want, want)
+			t.Errorf("%s: hierarchy = %v, want %v", path, !want, want)
 		}
 	}
-	for _, want := range []string{`declarations["srd"]`, `"objective"`} {
+	for _, want := range []string{`declarations["srd"]`, `"objective"`, `"story"`} {
 		if !strings.Contains(specToolMain, want) {
 			t.Errorf("specToolMain lacks %s", want)
 		}

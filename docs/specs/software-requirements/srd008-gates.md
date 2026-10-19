@@ -163,7 +163,7 @@ A scorecard check names its evaluator and threshold in policy; the evaluator is 
 <!-- req: R7.1 -->
 ### R7.1
 
-Done is decided by level from evidence events alone: a component, a subsystem objective, a system release, and the test subsystem each get a done rule when release 02.0 is planned.
+Done is decided by level from evidence events alone: a component, a subsystem Sprint Goal, a system release, and the test subsystem each get a done rule when release 02.0 is planned.
 
 <!-- req: R7.2 -->
 ### R7.2

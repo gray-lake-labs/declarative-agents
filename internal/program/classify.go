@@ -3,6 +3,7 @@ package program
 import (
 	"fmt"
 	"path"
+	"slices"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
@@ -16,15 +17,20 @@ type Classification struct {
 	Reason string `json:"reason"`
 }
 
-// planning reports whether a path is a planning document: the road-map or an
-// objective document in any repository, and an SRD in the system repository,
-// which is a system or subsystem SRD (srd001 R1.1).
+// planningDirs hold the hierarchy documents and the objective documents read
+// as initiatives (srd045, srd034 R1.1).
+var planningDirs = []string{"docs/specs/themes/", "docs/specs/initiatives/", "docs/specs/epics/", "docs/specs/features/", "docs/specs/stories/", "docs/specs/objectives/"}
+
+// planning reports whether a path is a planning document: the road-map or a
+// theme, initiative, epic, feature, story, or objective document in any
+// repository, and an SRD in the system repository, which is a system or
+// subsystem SRD (srd001 R1.1).
 func planning(p string, inSystem bool) bool {
 	p = path.Clean(strings.TrimPrefix(p, "./"))
 	switch {
 	case p == "docs/road-map.md":
 		return true
-	case strings.HasPrefix(p, "docs/specs/objectives/"):
+	case slices.ContainsFunc(planningDirs, func(d string) bool { return strings.HasPrefix(p, d) }):
 		return true
 	case inSystem && strings.HasPrefix(p, SRDDir+"/"):
 		return true

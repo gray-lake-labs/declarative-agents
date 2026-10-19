@@ -32,7 +32,7 @@ func Init(dir string, cfg Config, now time.Time, dryRun bool) ([]InitResult, err
 		return nil, err
 	}
 	example := Render("po-1", ISOWeek(now), []Entry{
-		{"objective": "group/product-owners/po-1#4", "component": "grader", "status": "at-risk", "complete": "no", "problems": "the scoring API returns stale results"},
+		{"sprint_goal": "group/product-owners/po-1#4", "component": "grader", "status": "at-risk", "complete": "no", "problems": "the scoring API returns stale results"},
 	}, []Entry{
 		{"blocker": "stale results from the scoring API", "component": "grader", "since": now.Format("2006-01-02"), "waiting-on": "scoring-api"},
 	})

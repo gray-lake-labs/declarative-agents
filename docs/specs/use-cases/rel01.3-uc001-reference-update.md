@@ -10,8 +10,8 @@ test_suite: test-rel01.3-tag-triggered
 ## Summary
 
 When a Product Owner's repository tags a release, CI files one issue in
-each upstream repository whose objective documents list that repository in
-delivered_by, or whose objective issues the release closed. The issue names
+each upstream repository whose initiatives list that repository in
+delivered_by, or whose Sprint Goals the release closed. The issue names
 the old and new tags and the files and fields to change, so the upstream
 owner moves the pinned references through the inner loop. A second run on
 the same tag files nothing.
@@ -29,14 +29,14 @@ tpm release tag creates a release tag in a downstream repository (rel01.2-uc001-
 <!-- field: preconditions -->
 ## Preconditions
 
-- The upstream objective documents list delivering repositories in delivered_by, or the release closed upstream objective issues.
+- The upstream initiatives list delivering repositories in delivered_by, or the release closed upstream Sprint Goals.
 - CI holds a token scoped to the program group.
 
 <!-- field: flow -->
 ## Flow
 
 - F1: The tag triggers the downstream repository's CI job, which runs tpm.
-- F2: tpm finds the upstream repositories whose objective documents list this repository in delivered_by or whose objective issues the release closed.
+- F2: tpm finds the upstream repositories whose initiatives list this repository in delivered_by or whose Sprint Goals the release closed.
 - F3: For each, tpm searches for an issue carrying the handoff marker for this tag and stops if one exists.
 - F4: Otherwise tpm files one unassigned issue naming the old and new tags, with Requirements listing the files and fields whose pinned references move, and the handoff marker.
 - F5: The upstream owner pops the issue; the reference moves in a merged change that shows the old and new tags.

@@ -132,7 +132,7 @@ The program's CI runs tpm handoff on-merge on merge to a default branch and tpm 
 <!-- req: R8.1 -->
 ### R8.1
 
-A release tag in a downstream repository files one issue in each upstream repository whose objective documents list that repository in delivered_by, or whose objective issues the release closed, naming the old and new tag.
+A release tag in a downstream repository files one issue in each upstream repository whose initiatives list that repository in delivered_by, or whose Sprint Goals the release closed, naming the old and new tag.
 
 <!-- req: R8.2 -->
 ### R8.2

@@ -10,15 +10,16 @@ Before each three-week period, someone has to say which requirements the
 next release will prove. At system level that is the technical program
 manager choosing the system requirements the next system release covers;
 at subsystem level it is the Product Owner choosing which of the
-subsystem's requirements, written to satisfy upstream objectives, the next
-subsystem release covers. Decided in a meeting, the choice lives in slides,
+subsystem's requirements, written to serve the initiative items on its
+Sprint Goal, the next subsystem release covers, and which stories the
+team's next sprint takes from its Product Backlog. Decided in a meeting, the choice lives in slides,
 and the road-map says something else.
 
 plan reads the road-map, the requirements or, in the system
-repository, the agreed objective documents, and what track-goals says is
+repository, the agreed initiatives, and what track-goals says is
 already met (before track-goals runs, what the period's reports say
 slipped), asks the owner which requirements go into the next
-release, and records the answer in the road-map and on the objectives it
+release, and records the answer in the road-map and on the Sprint Goals it
 moves. It works the same at both levels, because every repository carries
 the same corpus.
 
@@ -43,12 +44,12 @@ Started before each three-week period by the technical program manager in the sy
 <!-- req: R2.1 -->
 ### R2.1
 
-The repository's road-map (docs/road-map.md): its releases, their requirements or, in the system repository, their objective items (deliverables, design.md schema.roadmap), and their status.
+The repository's road-map (docs/road-map.md): its releases, their requirements or, in the system repository, their initiative items (deliverables, design.md schema.roadmap), and their status.
 
 <!-- req: R2.2 -->
 ### R2.2
 
-The repository's SRDs, in the system repository the agreed objective documents (srd034 R1), and at subsystem level the open objective issues filed in the repository, with the upstream requirements they cite by pinned URL (srd007 R5).
+The repository's SRDs, in the system repository the agreed initiatives (srd034 R1), and at subsystem level the open Sprint Goal issues filed in the repository, with the initiative items they cite by pinned URL (srd007 R5).
 
 <!-- req: R2.3 -->
 ### R2.3
@@ -66,7 +67,7 @@ Waiting dependencies as track-goals explains them (srd019), so a requirement tha
 <!-- req: R3.1 -->
 ### R3.1
 
-Asks the owner which requirements, or in the system repository which objective items, enter the next release, recommending slipped ones first, then those that satisfy the objectives with the earliest upstream release, then the rest in road-map order. tpm plan candidates computes the ranking.
+Asks the owner which requirements, or in the system repository which initiative items, enter the next release, recommending slipped ones first, then those that serve the Sprint Goals with the earliest upstream release, then the rest in road-map order. tpm plan candidates computes the ranking.
 
 <!-- req: R3.2 -->
 ### R3.2
@@ -79,7 +80,7 @@ Asks for the release's version and end date, recommending the next minor version
 <!-- req: R4.1 -->
 ### R4.1
 
-The release entry in docs/road-map.md, listing its requirements by id, or in the system repository its objective items in deliverables and its milestone and tag in release.publication, written by tpm plan write in the worktree of a plane::management issue filed with specify, and merged through the inner loop, so the plan is a reviewed change.
+The release entry in docs/road-map.md, listing its requirements by id, or in the system repository its initiative items in deliverables and its milestone and tag in release.publication, written by tpm plan write in the worktree of a plane::management issue filed with specify, and merged through the inner loop, so the plan is a reviewed change.
 
 <!-- req: R4.2 -->
 ### R4.2
@@ -89,12 +90,12 @@ The tracker milestone named for the release, with its ISO weeks in its descripti
 <!-- req: R4.3 -->
 ### R4.3
 
-A planned event (srd006 R8) on each objective issue whose release changed.
+A planned event (srd006 R8) on each Sprint Goal issue whose release changed.
 
 <!-- req: R4.4 -->
 ### R4.4
 
-Returns each requirement or objective item whose acceptance criteria lack a test or an environment to its owner with a comment naming what is missing, instead of placing it.
+Returns each requirement or initiative item whose acceptance criteria lack a test or an environment to its owner with a comment naming what is missing, instead of placing it.
 
 <!-- req: R4.5 -->
 ### R4.5
@@ -104,7 +105,7 @@ In the system repository, once the release entry merges, a documents-only releas
 <!-- req: R4.6 -->
 ### R4.6
 
-tpm plan push dates the milestone, sets the sprint issue (srd001 R7) with one checklist item per objective, posts the planned events, and files one sprint-end issue (srd038 R1.1) in each releasing repository due on the milestone end date; a second run updates and creates nothing.
+tpm plan push dates the milestone, sets the sprint issue (srd001 R7) with one checklist item per Sprint Goal, posts the planned events, and files one sprint-end issue (srd038 R1.1) in each releasing repository due on the milestone end date; a second run updates and creates nothing.
 
 <!-- req: R5 -->
 ## R5 - Refusals
@@ -120,28 +121,43 @@ Refuses to place a requirement without a named test and environment, and refuses
 Refuses to create work issues; Developers turn the plan into issues with make-work.
 
 <!-- req: R6 -->
-## R6 - Direction: planning from epics
+## R6 - Sprint Planning from stories
 
-<!-- req: R6.1 -->
+<!-- req: R6.1 | status: retired | retired_in: 4 | replaced_by: ["srd031-plan R6.4", "srd045-backlog R5.2"] -->
 ### R6.1
 
-Once a release plans srd045, plan in the system repository also reads the agreed epic documents: the items no met objective has drawn down, in their owners' order and the order their dependencies and anchors allow; the changes to each epic since the last release tag; and the program's velocity, or an assumed one it asks the technical program manager for until the ledger has a period of it (srd045 R1.3, R1.4). It recommends the objective items that draw down as many points as velocity allows.
+Retired in 04.0: plan selects stories, not epic items (R6.4).
 
 <!-- req: R6.2 -->
 ### R6.2
 
-In Scrum terms, the ranking of R3.1 orders the Product Backlog, and choosing objective items from the epics' remaining items, after the epics changed through the audit gate, is backlog refinement and Sprint Planning.
+In Scrum terms, the ranking of R3.1 orders the program's initiative items, and the ranking of R6.4 orders a team's Product Backlog; choosing from them is Sprint Planning, and changing a document or a story's rank through the audit gate is backlog refinement.
 
-<!-- req: R6.3 -->
+<!-- req: R6.3 | status: retired | retired_in: 4 -->
 ### R6.3
 
-Until that release, plan reads the agreed objective documents and the system SRDs only (R2) and ranks candidates as R3.1 states.
+Retired in 04.0 with R6.1.
+
+<!-- req: R6.4 -->
+### R6.4
+
+In a team's repository, tpm plan candidates also lists the team's Product Backlog (srd045 R5.1): its agreed stories that are not done, by rank, with their points, the team's velocity (srd045 R5.3), and, recommended in rank order, the stories whose points fit it.
+
+<!-- req: R6.5 -->
+### R6.5
+
+Asks the Product Owner which stories enter the sprint, recommending those of R6.4, and asks for an assumed velocity when the team has finished no sprint.
+
+<!-- req: R6.6 -->
+### R6.6
+
+tpm plan backlog writes the chosen stories, with their points, into the Sprint Backlog section of the team's Sprint Goal and posts a planned event naming them (srd034 R3.5); a second run with the same stories changes nothing.
 
 <!-- field: non_goals -->
 ## Non-goals
 
 - Estimating capacity per person.
-- Pushing objectives downstream; that is tasks (srd022).
+- Filing Sprint Goals downstream; that is tasks (srd022).
 
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria
@@ -149,7 +165,7 @@ Until that release, plan reads the agreed objective documents and the system SRD
 <!-- ac: AC1 -->
 ### AC1
 
-Facts come from the road-map, the SRDs, open objectives with pinned citations, track-goals status, and dependency explanations; the requirements and the version are asked with recommendations; the skill runs at system and subsystem level alike.
+Facts come from the road-map, the SRDs, open Sprint Goals with pinned citations, the team's stories, track-goals status, and dependency explanations; the requirements and the version are asked with recommendations; the skill runs at system and subsystem level alike.
 
 <!-- field: traces -->
 #### Traces
@@ -165,7 +181,7 @@ Facts come from the road-map, the SRDs, open objectives with pinned citations, t
 <!-- ac: AC2 -->
 ### AC2
 
-The release entry is merged through the inner loop, the system repository's plan is tagged, the milestone exists with the end date, the sprint issue and the period's sprint-end issues exist once, each moved objective gets a planned event, and a requirement or objective item without test or environment is returned with a comment.
+The release entry is merged through the inner loop, the system repository's plan is tagged, the milestone exists with the end date, the sprint issue and the period's sprint-end issues exist once, each moved Sprint Goal gets a planned event, and a requirement or initiative item without test or environment is returned with a comment.
 
 <!-- field: traces -->
 #### Traces
@@ -191,11 +207,23 @@ No requirement without test and environment is placed, no issue is assigned, and
 <!-- ac: AC4 -->
 ### AC4
 
-The release that plans srd045 writes plan's requirement items for epics and velocity from R6.1 and R6.2; until then the interim rule of R6.3 holds.
+In a team's repository plan lists the not-done agreed stories by rank with points and velocity, recommends those that fit, asks an assumed velocity when the team has none, and writes the chosen stories to the Sprint Goal with a planned event; a second push with the same stories changes nothing.
+
+<!-- field: traces -->
+#### Traces
+
+- [R6.2](#r62)
+- [R6.4](#r64)
+- [R6.5](#r65)
+- [R6.6](#r66)
+
+<!-- ac: AC5 | status: retired | retired_in: 4 -->
+### AC5
+
+Retired in 04.0 with the direction items it traced.
 
 <!-- field: traces -->
 #### Traces
 
 - [R6.1](#r61)
-- [R6.2](#r62)
 - [R6.3](#r63)
