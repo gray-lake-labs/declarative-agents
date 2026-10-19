@@ -19,6 +19,9 @@ func TestPlaneAndKindFollowTheChangedPaths(t *testing.T) {
 	}{
 		{"road-map anywhere", []string{"docs/road-map.md"}, "", false, "management", ""},
 		{"objective document", []string{"docs/specs/objectives/obj001-a.md"}, "", false, "management", ""},
+		{"initiative", []string{"docs/specs/initiatives/in001-a.md"}, "", false, "management", ""},
+		{"story in a team repository", []string{"docs/specs/stories/st001-a.md"}, "", false, "management", ""},
+		{"theme, epic, and feature", []string{"docs/specs/themes/th001-a.md", "docs/specs/epics/ep001-a.md", "docs/specs/features/ft001-a.md"}, "", true, "management", ""},
 		{"system SRD", []string{"docs/specs/software-requirements/srd010-po-1.md"}, "", true, "management", ""},
 		{"component SRD", []string{"docs/specs/software-requirements/srd003-reader.md"}, "", false, "data", "spec"},
 		{"use case", []string{"./docs/specs/use-cases/rel01.0-uc001-x.md"}, "", false, "data", "spec"},

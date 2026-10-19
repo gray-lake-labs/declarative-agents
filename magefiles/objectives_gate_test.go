@@ -7,11 +7,12 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 )
 
-// TestObjectiveDocumentsAreValid gates every objective document in the
-// repository (srd034 R2.1). The parent's corpus audit does not read
-// docs/specs/objectives/ (SPECIFICATIONS GAP8), so mage audit checks it here.
+// TestObjectiveDocumentsAreValid gates every initiative and objective
+// document in the repository against srd034 R1 (srd034 R2.1). The parent's
+// corpus audit does not read docs/specs/initiatives/ or docs/specs/objectives/
+// (SPECIFICATIONS GAP8), so mage audit checks them here.
 func TestObjectiveDocumentsAreValid(t *testing.T) {
-	docs, err := objectives.LoadDir(filepath.Join("..", objectives.Dir))
+	docs, err := objectives.LoadAll("..")
 	if err != nil {
 		t.Fatal(err)
 	}

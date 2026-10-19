@@ -87,7 +87,7 @@ func Push(t tracker.Tracker, in PushInput) (PushResult, error) {
 	if r.Milestone == "" || r.Tag == "" {
 		return res, fmt.Errorf("release %s has no milestone or tag in release.publication", r.Version)
 	}
-	docs, err := objectives.LoadDir(filepath.Join(in.Dir, objectives.Dir))
+	docs, err := objectives.LoadAll(in.Dir)
 	if err != nil {
 		return res, err
 	}
@@ -145,7 +145,7 @@ func groupsOf(items []string, docs []*objectives.Document) []group {
 		g := group{key: k, environment: "dev", items: []string{item}}
 		for _, d := range docs {
 			if d.ID == key {
-				g.title, g.docPath = d.Requirements[gid].Title, filepath.ToSlash(filepath.Join(objectives.Dir, filepath.Base(d.Path)))
+				g.title, g.docPath = d.Requirements[gid].Title, filepath.ToSlash(filepath.Join(objectives.DirFor(d.ID), filepath.Base(d.Path)))
 				if c := d.CriteriaFor(gid); len(c) > 0 && c[0].Environment != "" {
 					g.environment = c[0].Environment
 				}

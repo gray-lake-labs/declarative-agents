@@ -86,7 +86,7 @@ func MakeCandidates(in Input) (Candidates, error) {
 	if err != nil {
 		return c, err
 	}
-	docs, err := objectives.LoadDir(filepath.Join(in.Dir, objectives.Dir))
+	docs, err := objectives.LoadAll(in.Dir)
 	if err != nil {
 		return c, err
 	}
