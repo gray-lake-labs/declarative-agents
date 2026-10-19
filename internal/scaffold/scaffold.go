@@ -1,5 +1,6 @@
 // Package scaffold lays down a program repository's corpus: tpm init for the
-// system repository (srd043).
+// system repository and tpm onboard for each repository that joins it
+// (srd043).
 package scaffold
 
 import (
@@ -50,17 +51,31 @@ func ParentRelease() (string, error) {
 	return pins.Pins[parentRepository], nil
 }
 
-// corpusFiles is the corpus skeleton every repository of a program carries:
-// the set's templates, the design constitution, and the parent pin.
-func corpusFiles(set string) (map[string][]byte, error) {
+// levels are the owners the templates name, by the level a repository is at.
+var levels = map[string]string{
+	"system":    "the technical program manager",
+	"subsystem": "the Product Owner",
+}
+
+// corpusFiles is the corpus skeleton every repository of a program carries
+// (design.md D7), for a repository at level: the templates with the level
+// and its owner filled in, the design constitution, the charter, and the
+// parent pin.
+func corpusFiles(level string) (map[string][]byte, error) {
+	owner, ok := levels[level]
+	if !ok {
+		return nil, fmt.Errorf("no corpus for level %q", level)
+	}
+	fill := strings.NewReplacer("{{level}}", level, "{{Level}}", strings.ToUpper(level[:1])+level[1:],
+		"{{owner}}", owner, "{{Owner}}", strings.ToUpper(owner[:1])+owner[1:])
 	files := map[string][]byte{}
-	root := path.Join("templates", set)
+	root := path.Join("templates", "corpus")
 	err := fs.WalkDir(templates, root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
 		}
 		b, err := templates.ReadFile(p)
-		files[strings.TrimPrefix(p, root+"/")] = b
+		files[fill.Replace(strings.TrimPrefix(p, root+"/"))] = []byte(fill.Replace(string(b)))
 		return err
 	})
 	if err != nil {

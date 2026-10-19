@@ -6,7 +6,7 @@ title: Program Specification Index
 <!-- field: overview -->
 ## Overview
 
-The technical program manager writes here how the specifications are organized and which releases they belong to.
+{{Owner}} writes here how the specifications are organized and which releases they belong to.
 
 <!-- field: roadmap_summary | form: "typed table" -->
 ## Roadmap summary
@@ -30,7 +30,7 @@ The technical program manager writes here how the specifications are organized a
 
 | id | path | title | release |
 | --- | --- | --- | --- |
-| [srd001-system](specs/software-requirements/srd001-system.md) | docs/specs/software-requirements/srd001-system.md | System: what the program's system does | 01.0 |
+| [srd001-{{level}}](specs/software-requirements/srd001-{{level}}.md) | docs/specs/software-requirements/srd001-{{level}}.md | {{Level}}: what the {{level}} does | 01.0 |
 
 <!-- field: config_format_index -->
 ## Config format index
@@ -53,4 +53,4 @@ None
 
 | id | gap |
 | --- | --- |
-| GAP1 | No release is planned yet; the technical program manager plans the first one with plan-release. |
+| GAP1 | No release is planned yet; {{owner}} plans the first one with plan-release. |

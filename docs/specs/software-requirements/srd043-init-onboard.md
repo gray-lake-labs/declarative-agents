@@ -8,6 +8,7 @@ title: "Script: init and onboard (tpm init, tpm onboard)"
 
 - Scaffolding and enforcement are separate. init and onboard make a corpus complete when it is created; keeping it complete afterwards is the audit's job. A check that a corpus holds its required documents belongs in the parent's corpus audit, so it gates every repository that carries a charter; a required-documents key in the policy was rejected because it would duplicate the auditor in tpm and fire only on tpm's paths.
 - The registration of a member repository is filed, not written. The subsystem SRD that lists a component belongs to the system repository's owner and changes through that repository's gate, so onboard files the change as an issue and never commits there (design.md D4, D7).
+- The registration is a plane::management issue: it changes a subsystem SRD, which is intent. Filed through tpm issue file under the system repository's policy, it is refused like any management issue when the policy names who may file one and the caller is not among them; the refusal says who may.
 - tpm reports init (srd018 R1) stays its own subcommand. The reports repository has its own layout and owner, and folding it into onboard would change an implemented command for no reader's benefit.
 - The templates are embedded in the binary beside the skills and written against the parent format release tpm was built with, so a tpm release and the corpus it scaffolds always agree.
 
@@ -68,7 +69,7 @@ With --tracker naming a tracker repository that has no commits, makes its first 
 <!-- req: R2.1 -->
 ### R2.1
 
-Writes into --dir, a checkout of the repository joining the program, the same corpus skeleton as init less the control files, which only the system repository holds.
+Writes into --dir, a checkout of the repository joining the program, the same corpus skeleton as init at the subsystem's level: a subsystem SRD, docs/specs/software-requirements/srd001-subsystem.md, in place of the system SRD, every field naming the Product Owner as the one who writes it, and no control files, which only the system repository holds.
 
 <!-- req: R2.2 -->
 ### R2.2
