@@ -40,7 +40,7 @@ for each repository that joins it.
 <!-- req: R1.1 -->
 ### R1.1
 
-Writes into --dir, by default the root of the git repository holding the working directory, the system repository's corpus skeleton: docs/VISION.md, docs/ARCHITECTURE.md, docs/SPECIFICATIONS.md, docs/road-map.md, docs/constitutions/design.md, docs/corpus-charter.yaml, and docs/external-pins.yaml.
+Writes into --dir, by default the root of the git repository holding the working directory, the system repository's corpus skeleton: docs/VISION.md, docs/ARCHITECTURE.md, docs/SPECIFICATIONS.md, docs/road-map.md with one release, docs/constitutions/design.md, docs/corpus-charter.yaml, docs/external-pins.yaml, and a system SRD, docs/specs/software-requirements/srd001-system.md, which that release lists. The parent's corpus audit loads no corpus without an SRD and no road-map without a release, so the skeleton carries one of each for the owner to rewrite.
 
 <!-- req: R1.2 -->
 ### R1.2
@@ -117,7 +117,7 @@ The templates name no person, organization, product, or project (design.md D6); 
 <!-- ac: AC1 -->
 ### AC1
 
-init in an empty git repository writes VISION, ARCHITECTURE, SPECIFICATIONS, road-map, the design constitution, the charter, and the pins in the parent's format, the default labels and policy, and the skills for the named agents; the parent's corpus audit and the objective gate pass on the result.
+init in an empty git repository writes VISION, ARCHITECTURE, SPECIFICATIONS, a road-map with one release, the design constitution, the charter, the pins, and the system SRD in the parent's format, the default labels and policy, and the skills for the named agents; the parent's corpus audit and the objective gate pass on the result.
 
 <!-- field: traces -->
 #### Traces

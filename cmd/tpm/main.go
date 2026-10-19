@@ -17,6 +17,7 @@ import (
 	_ "github.com/gray-lake-labs/scrum-master/internal/program"
 	_ "github.com/gray-lake-labs/scrum-master/internal/release"
 	_ "github.com/gray-lake-labs/scrum-master/internal/reports"
+	_ "github.com/gray-lake-labs/scrum-master/internal/scaffold"
 	_ "github.com/gray-lake-labs/scrum-master/internal/sprintend"
 	_ "github.com/gray-lake-labs/scrum-master/internal/standup"
 )

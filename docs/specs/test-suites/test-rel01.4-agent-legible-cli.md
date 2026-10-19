@@ -53,7 +53,7 @@ go test ./internal/... -run '^TestInit(WritesSkeleton|WritesControlFiles|Install
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- corpus: VISION, ARCHITECTURE, SPECIFICATIONS, road-map, design constitution, charter, pins
+- corpus: VISION, ARCHITECTURE, SPECIFICATIONS, road-map with one release, design constitution, charter, pins, system SRD
 - control: labels.md and policy.md holding the defaults
 - skills: installed for the named agents
 - audit: the parent's corpus audit and the objective gate pass on the new repository

@@ -38,7 +38,7 @@ A new program, then a repository joining it.
 <!-- field: flow -->
 ## Flow
 
-- F1: The technical program manager runs tpm init --tracker <tracker> --agent claude in the empty repository; tpm writes VISION, ARCHITECTURE, SPECIFICATIONS, road-map, the design constitution, the charter, the pins, control/labels.md, control/policy.md, and the skills, and reports each file created.
+- F1: The technical program manager runs tpm init --tracker <tracker> --agent claude in the empty repository; tpm writes VISION, ARCHITECTURE, SPECIFICATIONS, a road-map with one release, the design constitution, the charter, the pins, a system SRD, control/labels.md, control/policy.md, and the skills, and reports each file created.
 - F2: tpm makes the tracker repository's first commit and creates the program's labels there.
 - F3: The parent's corpus audit and the objective gate pass on the new repository.
 - F4: A Product Owner runs tpm onboard --system <system> --subsystem <srd> in the joining repository's checkout; tpm writes the skeleton without control files and files one issue in the system repository asking for the components-table row.
