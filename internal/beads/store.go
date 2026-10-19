@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	jitter "math/rand/v2"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,8 +16,13 @@ import (
 )
 
 // pushAttempts bounds how often a write re-synchronizes after its push is
-// rejected by a newer tracker repository.
-const pushAttempts = 5
+// rejected by a newer tracker repository; between attempts it waits a
+// growing, jittered delay so contending writers stop colliding in lockstep.
+const (
+	pushAttempts  = 20
+	pushBaseDelay = 200 * time.Millisecond
+	pushMaxDelay  = 8 * time.Second
+)
 
 // Store is one working clone of the tracker repository, used on behalf of
 // one person. Its files are a cache; the tracker repository is the source
@@ -28,6 +34,8 @@ type Store struct {
 	// beforeWrite runs between a write's synchronization and its commit, so
 	// a test can land another clone's write inside that window.
 	beforeWrite func()
+	// sleep waits between rejected pushes; tests replace it.
+	sleep func(time.Duration)
 	// last is the most recent synchronization, what the last read reflects.
 	last *Freshness
 }
@@ -365,6 +373,10 @@ func (s *Store) writeFiles(what string, fn func() (bool, error)) (fr Freshness, 
 	if err != nil || !changed {
 		return fr, false, false, err
 	}
+	before, err := s.git("rev-parse", "HEAD")
+	if err != nil {
+		return fr, false, false, err
+	}
 	if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
 		return fr, false, false, err
 	}
@@ -375,17 +387,30 @@ func (s *Store) writeFiles(what string, fn func() (bool, error)) (fr Freshness, 
 		return fr, true, true, nil
 	}
 	queued, err = s.push()
-	return fr, true, queued, err
+	if err != nil {
+		// A failed write is not written: drop its commit and the merges made
+		// while retrying, so no later push lands it. Writes queued offline
+		// sit below before and stay queued.
+		if _, rerr := s.git("reset", "-q", "--hard", before); rerr != nil {
+			return fr, false, false, errors.Join(err, rerr)
+		}
+		return fr, false, false, err
+	}
+	return fr, true, queued, nil
 }
 
 // push lands the clone's commits in the tracker repository, merging and
 // retrying when the repository moved since the last pull. It reports queued
 // when the repository turned out to be unreachable.
 func (s *Store) push() (queued bool, err error) {
+	delay := pushBaseDelay
+	var last error
 	for range pushAttempts {
-		if _, err := s.git("push", "-q", "origin", "HEAD:main"); err == nil {
+		if _, last = s.git("push", "-q", "origin", "HEAD:main"); last == nil {
 			return false, nil
 		}
+		s.wait(delay)
+		delay = min(2*delay, pushMaxDelay)
 		fr, err := s.Sync()
 		if err != nil {
 			return false, err
@@ -394,7 +419,17 @@ func (s *Store) push() (queued bool, err error) {
 			return true, nil
 		}
 	}
-	return false, fmt.Errorf("push to the tracker repository rejected %d times", pushAttempts)
+	return false, fmt.Errorf("push to the tracker repository rejected %d times; nothing was written (last: %v)", pushAttempts, last)
+}
+
+// wait sleeps a random duration up to d, so writers that collided retry at
+// different moments.
+func (s *Store) wait(d time.Duration) {
+	sleep := s.sleep
+	if sleep == nil {
+		sleep = time.Sleep
+	}
+	sleep(time.Duration(jitter.Int64N(int64(d)) + 1))
 }
 
 func (s *Store) read() ([]Issue, error) {

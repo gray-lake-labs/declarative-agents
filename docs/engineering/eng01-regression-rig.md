@@ -70,9 +70,50 @@ internal/trackertest build the same kind of program per test. mage
 regression is what proves the commands end to end, through the built
 binary and the environment a person's machine gives it.
 
+<!-- section: gitlab -->
+## The opt-in GitLab variant
+
+The local rig proves the commands; it cannot prove beads under the
+conditions a program meets on a hosted origin: pushes that lose a race
+over the network, many people writing at once, a clone that was offline.
+mage regression:gitlab does, and it is opt-in. It runs only when
+GITLAB_TOKEN is set, and skips with a message that says so otherwise; it
+never joins mage regression, the integration targets, or a release gate,
+so the regression above stays offline and fast.
+
+It needs GITLAB_TOKEN, a token with the api scope; GITLAB_RIG_GROUP, the
+existing group the run creates its own group under, named in the
+environment rather than in the repository because it is the person's
+own; and optionally GITLAB_BASE_URL for an instance other than gitlab.com.
+Each run applies the Terraform root infra/regression, which builds on the
+program module infra/modules/program, with local state under
+.regression/gitlab-<run-id>: a private group rig-<run-id> holding a tracker
+repository, system, reports, and the product-owner repositories. The run
+clones each repository, makes the tracker's first commit, and installs the
+skills into each with tpm install.
+
+The workload runs at least four workers at once, each with its own clone
+of the tracker and its own checkouts, because a beads tracker is not safe
+to share, and each runs one command at a time, as a person at one machine
+does: disjoint creates, contended pops of the same issues, closes by
+merge, and one worker that goes offline and reconciles late. After a final
+sync on every clone it asserts that every clone reads the same tracker
+state, every disjoint write landed, each contended issue has exactly one
+taker, the earliest to push, raced creates are renumbered consistently,
+and the offline worker's lost pop is reported. The semantics are srd042's
+and eng04's, already tested locally; this run adds the real remote.
+
+The run destroys its group with terraform destroy when it ends, including
+when an assertion fails, so its cost is a private group for the length of
+a run. mage regression:gitlabSweep destroys any run an interrupted
+regression left behind. Provisioning restores the Terraform release 03.0
+removed; provisioning through the GitLab API in Go was the alternative,
+rejected so that the rig builds a program the same way a program is built.
+
 <!-- field: references -->
 ## References
 
 - docs/engineering/eng04-beads-sync.md (the tracker repository and choosing the backend)
 - docs/specs/software-requirements/srd042-beads-tracker.md R4.2 (the rig builds fixture tracker repositories)
 - docs/specs/test-suites/test-rel01.0-objectives.md (first suite to run on the rig)
+- infra/regression and infra/modules/program (the GitLab variant's Terraform)

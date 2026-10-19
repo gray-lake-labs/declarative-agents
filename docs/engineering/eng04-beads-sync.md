@@ -42,6 +42,14 @@ start, named by the tracker repository commit it pulled. Second, the
 window for conflicting writes is the length of one command, not the
 length of a working session.
 
+A push the tracker repository rejects because another write landed first
+re-pulls, merges by the rules below, and pushes again, after a randomized,
+growing delay so writers that collided do not collide again in lockstep.
+When the attempts run out the command fails and nothing was written: the
+clone drops that write's commit, so no later push can land it, and writes
+queued offline before it stay queued. The opt-in GitLab rig holds this
+under four writers at once (eng01-regression-rig).
+
 <!-- section: conflicts -->
 ## Conflicts
 
