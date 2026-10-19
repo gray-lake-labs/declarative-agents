@@ -27,6 +27,7 @@ const (
 	TSGlob      = "test-*.md"
 	RoadmapFile = "docs/road-map.md"
 	SpecFile    = "docs/SPECIFICATIONS.md"
+	ArchFile    = "docs/ARCHITECTURE.md"
 	AgentsDir   = "agents"
 	CoreInstall = "/opt/agent-core"
 	SMSubdir    = "docs/specs/semantic-models"
@@ -47,8 +48,9 @@ type Corpus struct {
 	SRDs       map[string]SRD
 	UseCases   map[string]UseCase
 	TestSuites map[string]TestSuite
-	Roadmap    Roadmap
-	SpecIndex  SpecIndex
+	Roadmap      Roadmap
+	SpecIndex    SpecIndex
+	Architecture Architecture
 
 	Machines         map[string]core.MachineSpec
 	ToolSelections   map[string][]string
@@ -147,6 +149,11 @@ func LoadCorpus(rootDir string, opts ...CorpusOption) (*Corpus, error) {
 		return nil, err
 	}
 
+	arch, err := loadArchitecture(scan, ArchFile)
+	if err != nil {
+		return nil, err
+	}
+
 	machines, toolSel, machineOrder, err := discoverAndParseMachines(rootDir)
 	if err != nil {
 		return nil, err
@@ -169,6 +176,7 @@ func LoadCorpus(rootDir string, opts ...CorpusOption) (*Corpus, error) {
 		TestSuites:          tss,
 		Roadmap:             rm,
 		SpecIndex:           si,
+		Architecture:        arch,
 		Machines:            machines,
 		ToolSelections:      toolSel,
 		ToolDeclarations:    toolDecls,

@@ -306,13 +306,27 @@ func (rm *Roadmap) ReleaseVersions() []string {
 
 // SpecIndex is the parsed SPECIFICATIONS.md file.
 type SpecIndex struct {
-	ID             string           `yaml:"id"`
-	Title          string           `yaml:"title"`
-	Overview       string           `yaml:"overview"`
-	RoadmapSummary []RoadmapEntry   `yaml:"roadmap_summary"`
-	SRDIndex       []SRDEntry       `yaml:"srd_index"`
-	UseCaseIndex   []UseCaseEntry   `yaml:"use_case_index"`
-	TestSuiteIndex []TestSuiteEntry `yaml:"test_suite_index"`
+	ID                 string               `yaml:"id"`
+	Title              string               `yaml:"title"`
+	Overview           string               `yaml:"overview"`
+	RoadmapSummary     []RoadmapEntry       `yaml:"roadmap_summary"`
+	FoundationIndex    []DocumentIndexEntry `yaml:"foundation_document_index"`
+	SRDIndex           []SRDEntry           `yaml:"srd_index"`
+	ConfigFormatIndex  []DocumentIndexEntry `yaml:"config_format_index"`
+	SemanticModelIndex []DocumentIndexEntry `yaml:"semantic_model_index"`
+	UseCaseIndex       []UseCaseEntry       `yaml:"use_case_index"`
+	TestSuiteIndex     []TestSuiteEntry     `yaml:"test_suite_index"`
+}
+
+// DocumentIndexEntry is a single document reference in the spec index's
+// foundation_document_index, config_format_index, or semantic_model_index
+// tables (GH-2: an unparsed index section cannot be path-checked, so a
+// missing document it names raised no finding).
+type DocumentIndexEntry struct {
+	ID      string `yaml:"id"`
+	Title   string `yaml:"title"`
+	Summary string `yaml:"summary"`
+	Path    string `yaml:"path"`
 }
 
 // RoadmapEntry is a release summary within the spec index.

@@ -9,6 +9,23 @@ import (
 	"strings"
 )
 
+// validateIndexCorpus runs the checks that compare the corpus's indexes —
+// SPECIFICATIONS.md's tables, the road map, and ARCHITECTURE.md's
+// related_documents — against the documents and files they name.
+func validateIndexCorpus(corpus *Corpus) []Finding {
+	var findings []Finding
+	findings = append(findings, checkUseCaseIndexRefs(corpus)...)
+	findings = append(findings, checkTestSuiteIndexRefs(corpus)...)
+	findings = append(findings, checkRoadmapUseCaseRefs(corpus)...)
+	findings = append(findings, checkUseCaseTestSuiteReciprocity(corpus)...)
+	findings = append(findings, checkTestCaseUseCaseRefs(corpus)...)
+	findings = append(findings, checkSpecIndexPaths(corpus)...)
+	findings = append(findings, checkArchitectureRelatedDocuments(corpus)...)
+	findings = append(findings, checkRoadmapSummaryCoverage(corpus)...)
+	findings = append(findings, checkIndexDocumentAgreement(corpus)...)
+	return findings
+}
+
 func checkUseCaseIndexRefs(corpus *Corpus) []Finding {
 	var findings []Finding
 	for _, entry := range corpus.SpecIndex.UseCaseIndex {
@@ -120,45 +137,89 @@ func checkTestCaseUseCaseRefs(corpus *Corpus) []Finding {
 }
 
 // checkSpecIndexPaths verifies that path fields in spec index entries
-// point to existing files.
+// point to existing files. Every index table SPECIFICATIONS.md carries is
+// covered, the document indexes included: a foundation document deleted or
+// never written used to pass because its index section was not parsed, and
+// the formatter quietly unlinks an entry whose target is missing (GH-2).
 
 func checkSpecIndexPaths(corpus *Corpus) []Finding {
 	if corpus.RootDir == "" {
 		return nil
 	}
 	var findings []Finding
-	for _, entry := range corpus.SpecIndex.SRDIndex {
-		if entry.Path != "" {
-			if !fileExists(filepath.Join(corpus.RootDir, entry.Path)) {
-				findings = append(findings, Finding{
-					Check:   "index-broken-path",
-					Level:   "error",
-					Message: fmt.Sprintf("srd_index entry %s path %q does not exist", entry.ID, entry.Path),
-				})
-			}
-		}
+	for _, index := range corpus.SpecIndex.pathIndexes() {
+		findings = append(findings, documentIndexBrokenPaths(corpus, index.name, index.entries)...)
 	}
-	for _, entry := range corpus.SpecIndex.UseCaseIndex {
-		if entry.Path != "" {
-			if !fileExists(filepath.Join(corpus.RootDir, entry.Path)) {
-				findings = append(findings, Finding{
-					Check:   "index-broken-path",
-					Level:   "error",
-					Message: fmt.Sprintf("use_case_index entry %s path %q does not exist", entry.ID, entry.Path),
-				})
-			}
-		}
+	return findings
+}
+
+// pathIndex is one of SPECIFICATIONS.md's index tables reduced to what the
+// path check reads: the table's field name and its id/path entries.
+type pathIndex struct {
+	name    string
+	entries []DocumentIndexEntry
+}
+
+// pathIndexes lists every index table whose entries carry a path, each
+// reduced to id/path pairs for the broken-path check.
+func (si *SpecIndex) pathIndexes() []pathIndex {
+	srds := make([]DocumentIndexEntry, len(si.SRDIndex))
+	for i, e := range si.SRDIndex {
+		srds[i] = DocumentIndexEntry{ID: e.ID, Path: e.Path}
 	}
-	for _, entry := range corpus.SpecIndex.TestSuiteIndex {
-		if entry.Path != "" {
-			if !fileExists(filepath.Join(corpus.RootDir, entry.Path)) {
-				findings = append(findings, Finding{
-					Check:   "index-broken-path",
-					Level:   "error",
-					Message: fmt.Sprintf("test_suite_index entry %s path %q does not exist", entry.ID, entry.Path),
-				})
-			}
+	ucs := make([]DocumentIndexEntry, len(si.UseCaseIndex))
+	for i, e := range si.UseCaseIndex {
+		ucs[i] = DocumentIndexEntry{ID: e.ID, Path: e.Path}
+	}
+	tss := make([]DocumentIndexEntry, len(si.TestSuiteIndex))
+	for i, e := range si.TestSuiteIndex {
+		tss[i] = DocumentIndexEntry{ID: e.ID, Path: e.Path}
+	}
+	return []pathIndex{
+		{"foundation_document_index", si.FoundationIndex},
+		{"srd_index", srds},
+		{"config_format_index", si.ConfigFormatIndex},
+		{"semantic_model_index", si.SemanticModelIndex},
+		{"use_case_index", ucs},
+		{"test_suite_index", tss},
+	}
+}
+
+// documentIndexBrokenPaths reports the entries of one document index table
+// whose path does not resolve, whether or not the entry is written as a link.
+func documentIndexBrokenPaths(corpus *Corpus, index string, entries []DocumentIndexEntry) []Finding {
+	var findings []Finding
+	for _, entry := range entries {
+		if entry.Path == "" || fileExists(filepath.Join(corpus.RootDir, entry.Path)) {
+			continue
 		}
+		findings = append(findings, Finding{
+			Check:   "index-broken-path",
+			Level:   "error",
+			Message: fmt.Sprintf("%s entry %s path %q does not exist", index, entry.ID, entry.Path),
+		})
+	}
+	return findings
+}
+
+// checkArchitectureRelatedDocuments verifies that every related_documents
+// entry in ARCHITECTURE.md names a file that exists. The doc column is a
+// path relative to the corpus root; an entry for a deleted or never-written
+// document raised no finding before, because nothing parsed the table (GH-2).
+func checkArchitectureRelatedDocuments(corpus *Corpus) []Finding {
+	if corpus.RootDir == "" {
+		return nil
+	}
+	var findings []Finding
+	for _, ref := range corpus.Architecture.RelatedDocuments {
+		if ref.Doc == "" || fileExists(filepath.Join(corpus.RootDir, ref.Doc)) {
+			continue
+		}
+		findings = append(findings, Finding{
+			Check:   "architecture-broken-related-document",
+			Level:   "error",
+			Message: fmt.Sprintf("ARCHITECTURE.md related_documents entry %q does not exist", ref.Doc),
+		})
 	}
 	return findings
 }

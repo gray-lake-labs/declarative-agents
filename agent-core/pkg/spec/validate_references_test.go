@@ -4,9 +4,12 @@
 package spec
 
 import (
+	"os"
+	"path/filepath"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestValidate_TestSuiteCoversUseCase(t *testing.T) {
@@ -316,4 +319,69 @@ func TestValidate_IndexDocumentAgreement_MissingDocument(t *testing.T) {
 		UseCases:  map[string]UseCase{},
 	}
 	assert.Empty(t, checkIndexDocumentAgreement(corpus))
+}
+
+func TestValidate_DocumentIndexPaths_Broken(t *testing.T) {
+	root := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(root, "docs"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "docs", "ARCHITECTURE.md"), []byte("x"), 0o644))
+
+	corpus := &Corpus{
+		RootDir: root,
+		SpecIndex: SpecIndex{
+			FoundationIndex: []DocumentIndexEntry{
+				{ID: "agent-core", Path: "docs/VISION.md"},
+				{ID: "architecture-agent-core", Path: "docs/ARCHITECTURE.md"},
+			},
+			ConfigFormatIndex:  []DocumentIndexEntry{{ID: "cfg-gone", Path: "docs/specs/config-formats/gone.md"}},
+			SemanticModelIndex: []DocumentIndexEntry{{ID: "sm-gone", Path: "docs/specs/semantic-models/gone.md"}},
+		},
+	}
+	findings := checkSpecIndexPaths(corpus)
+	require.Len(t, findings, 3)
+	for _, f := range findings {
+		assert.Equal(t, "index-broken-path", f.Check)
+		assert.Equal(t, "error", f.Level)
+	}
+	assert.Contains(t, findings[0].Message, "foundation_document_index entry agent-core")
+	assert.Contains(t, findings[0].Message, "docs/VISION.md")
+	assert.Contains(t, findings[1].Message, "config_format_index entry cfg-gone")
+	assert.Contains(t, findings[2].Message, "semantic_model_index entry sm-gone")
+}
+
+func TestValidate_ArchitectureRelatedDocuments(t *testing.T) {
+	root := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(root, "docs"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "docs", "SPECIFICATIONS.md"), []byte("x"), 0o644))
+
+	corpus := &Corpus{
+		RootDir: root,
+		Architecture: Architecture{
+			RelatedDocuments: []RelatedDocument{
+				{Doc: "docs/SPECIFICATIONS.md", Purpose: "exists"},
+				{Doc: "docs/VISION.md", Purpose: "missing"},
+			},
+		},
+	}
+	findings := checkArchitectureRelatedDocuments(corpus)
+	require.Len(t, findings, 1)
+	assert.Equal(t, "architecture-broken-related-document", findings[0].Check)
+	assert.Equal(t, "error", findings[0].Level)
+	assert.Contains(t, findings[0].Message, "docs/VISION.md")
+}
+
+func TestParseArchitectureBytes_RelatedDocuments(t *testing.T) {
+	data := []byte(`
+id: architecture-test
+title: Test Architecture
+related_documents:
+  - doc: docs/VISION.md
+    purpose: What we build and why
+  - doc: docs/SPECIFICATIONS.md
+    purpose: Canonical index
+`)
+	a, err := parseArchitectureBytes(data, "docs/ARCHITECTURE.md")
+	require.NoError(t, err)
+	require.Len(t, a.RelatedDocuments, 2)
+	assert.Equal(t, "docs/VISION.md", a.RelatedDocuments[0].Doc)
 }
