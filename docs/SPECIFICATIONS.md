@@ -65,7 +65,7 @@ docs/road-map.md.
 | "01.4" | The agent-legible CLI | 2 | 2 | implemented |
 | "02.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
 | "03.0" | The tracker becomes beads | 2 | 2 | implemented |
-| "04.0" | The agile hierarchy | 0 | 0 | specified |
+| "04.0" | The agile hierarchy | 0 | 3 | specified |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -165,6 +165,9 @@ docs/road-map.md.
 | [rel01.4-uc002-agent-learns-the-cli](specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md) | An Agent Learns the Process from tpm and Works an Issue | 01.4 | implemented | [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | docs/specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md |
 | [rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md) | An Issue Is Popped, Delivered, and Closed Against Beads | 03.0 | implemented | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md |
 | [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md) | Two Clones Synchronize Through the Tracker Repository | 03.0 | implemented | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | docs/specs/use-cases/rel03.0-uc002-two-clones-synchronize.md |
+| [rel04.0-uc001-author-the-hierarchy](specs/use-cases/rel04.0-uc001-author-the-hierarchy.md) | The Technical Program Manager and a Product Owner Write the Backlog Hierarchy Through the Gate | 04.0 | specified | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc001-author-the-hierarchy.md |
+| [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md) | A Product Owner Plans a Sprint From the Ranked Stories and the Sprint Goal Lists Them | 04.0 | specified | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md |
+| [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md) | A Sprint Goal Closes at Sprint End With Its Stories Reported, and Old Objective Issues Read as Sprint Goals | 04.0 | specified | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md |
 
 <!-- field: test_suite_index | form: "typed table" -->
 ## Test suite index
@@ -181,6 +184,7 @@ docs/road-map.md.
 | [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | Test Suite for Release 01.3 Tags Trigger Handoff and the Summary | "01.3" | 2 | [[rel01.3-uc001-reference-update](specs/use-cases/rel01.3-uc001-reference-update.md), [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md)] | docs/specs/test-suites/test-rel01.3-tag-triggered.md |
 | [test-rel01.4-agent-legible-cli](specs/test-suites/test-rel01.4-agent-legible-cli.md) | Test Suite for Release 01.4 The Agent-Legible CLI | "01.4" | 8 | [[rel01.4-uc001-bootstrap-a-program](specs/use-cases/rel01.4-uc001-bootstrap-a-program.md), [rel01.4-uc002-agent-learns-the-cli](specs/use-cases/rel01.4-uc002-agent-learns-the-cli.md)] | docs/specs/test-suites/test-rel01.4-agent-legible-cli.md |
 | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | Test Suite for Release 03.0 The Tracker Becomes Beads | "03.0" | 4 | [[rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md), [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md)] | docs/specs/test-suites/test-rel03.0-beads-tracker.md |
+| [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | Test Suite for Release 04.0 The Agile Hierarchy | "04.0" | 7 | [[rel04.0-uc001-author-the-hierarchy](specs/use-cases/rel04.0-uc001-author-the-hierarchy.md), [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md), [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md)] | docs/specs/test-suites/test-rel04.0-agile-hierarchy.md |
 
 <!-- field: coverage_gaps -->
 ## Coverage gaps

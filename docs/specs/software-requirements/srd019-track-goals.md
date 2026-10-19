@@ -6,27 +6,28 @@ title: "Script: track-goals (tpm goals ...)"
 <!-- field: problem -->
 ## Problem
 
-An objective is met when the tests its requirements name pass in the
-environment it names, on a recorded version. That evidence is spread across
-repositories: the objective issue sits in a subsystem repository, the
-requirement it satisfies in the system repository at a tagged version, the
-test results in the test subsystem's pipelines. Nobody reconciles that by
-hand every night, so objectives are declared met when their issues close,
-and gaps surface at the review.
+A Sprint Goal is met when the tests its stories' acceptance criteria name
+pass in the environments they name, on a recorded version. That evidence is
+spread across repositories: the Sprint Goal and its stories sit in a team's
+repository, the initiative it serves and the requirements its stories cite
+in the system repository at a tagged version, the test results in the test
+subsystem's pipelines. Nobody reconciles that by hand every night, so
+Sprint Goals are declared met when their issues close, and gaps surface at
+the review.
 
 track-goals is the audit that does the reconciling. It follows pinned
 references from the system repository down through every subsystem and
-component, collects the evidence each objective's acceptance criteria name,
-records it on the objective as ledger events, closes the objective when the
-evidence passes, keeps every issue's waiting state true to its links, and
+component, collects the evidence each listed story's acceptance criteria
+name, records it on the Sprint Goal as ledger events anchored to each
+criterion, closes the Sprint Goal when the evidence passes, keeps every issue's waiting state true to its links, and
 fails when evidence is missing or a reference does not resolve. Daily
 scrum, sprint review, and the retrospective read its output.
 
 <!-- field: goals -->
 ## Goals
 
-- G1: Every open objective's ledger reflects the latest evidence for each of its requirements after one run.
-- G2: An objective closes when, and only when, its evidence passes.
+- G1: Every open Sprint Goal's ledger reflects the latest evidence for each criterion of its listed stories after one run.
+- G2: A Sprint Goal closes when, and only when, its evidence passes.
 - G3: Missing evidence and unresolved references fail the audit instead of passing silently.
 - G4: The waiting flag on every open issue matches its links after one run.
 
@@ -80,7 +81,7 @@ Retired in 01.2 (design.md D12).
 Retired in 01.2 (design.md D12).
 
 <!-- req: R4 -->
-## R4 - Close objectives and drained tracking issues
+## R4 - Close Sprint Goals and drained tracking issues
 
 <!-- req: R4.1 | status: retired | retired_in: 1.2 -->
 ### R4.1
@@ -180,7 +181,7 @@ Retired in 01.2 (design.md D12).
 <!-- req: R9.1 -->
 ### R9.1
 
-track-goals follows each objective's pinned references, records test results as evidence events, and closes an objective with a met event when every requirement's latest evidence in its environment passed.
+track-goals follows each Sprint Goal's pinned references and its listed stories, records test results as evidence events anchored to the story criterion each proves, and closes a Sprint Goal with a met event when every listed story's criteria have passing latest evidence in their environments (srd006 R9, R10).
 
 <!-- req: R9.2 -->
 ### R9.2
@@ -190,12 +191,12 @@ It keeps waiting states true from Upstream, Requires, and Cites dependencies, an
 <!-- req: R9.3 -->
 ### R9.3
 
-Until it runs, an objective closes as reported complete by its repository's sprint-end merge (srd038 R2), and planning takes slipped objectives from the aggregate's slipped-commitment signal (srd018 R3.2).
+Until it runs, a Sprint Goal closes as reported complete by its repository's sprint-end merge (srd038 R2), its stories are done as that merge reports them (srd038 R2.4), and planning takes slipped Sprint Goals from the aggregate's slipped-commitment signal (srd018 R3.2).
 
 <!-- req: R9.4 -->
 ### R9.4
 
-Once a release plans srd045, track-goals also reports each objective's progress: the points of the epic items it cites whose evidence passed, or whose citing issues closed where no evidence is named yet, over all the points it cites. Progress reads 100 percent only when the ledger replays to met, and an objective that cites no epic reports no percentage.
+track-goals also reports each Sprint Goal's progress, and each epic's and initiative's through Parent links (srd045 R3.3): the story points of done stories over the points of all the stories counted, a story being done when every criterion has passing latest evidence. A Sprint Goal's progress reads 100 percent only when its ledger replays to met.
 
 <!-- field: non_goals -->
 ## Non-goals

@@ -14,10 +14,12 @@ and environments that will prove it. Passed down in meetings, these
 obligations lose the exact requirement and version they came from, and the
 owner below writes requirements against a moving target.
 
-tasks reads the release just planned and pushes one objective issue
-to each downstream owner, citing the upstream requirements by URL pinned to
-the release tag and naming the environment where the objective counts.
-Each objective issue is the ledger track-goals writes evidence to.
+tasks reads the release just planned and files one Sprint Goal issue
+for each downstream team, citing the initiative items it serves by URL
+pinned to the release tag and naming the environment where its evidence
+counts. Each Sprint Goal is the ledger track-goals writes evidence to, and
+the team's Sprint Planning lists on it the stories it selected (srd034,
+srd045). Before release 04.0 a Sprint Goal was called an objective issue.
 Invoking tasks is the decision to file them: it takes every owner
 and environment tpm can compute, asks only for what it cannot, and pushes
 without a further confirmation.
@@ -25,9 +27,9 @@ without a further confirmation.
 <!-- field: goals -->
 ## Goals
 
-- G1: Every requirement of a planned release reaches the downstream owner who must satisfy it, as an objective issue.
-- G2: Every objective cites its upstream requirements at an exact tag and names the environment where it counts.
-- G3: The test subsystem receives an objective for the suites and environments each release needs.
+- G1: Every initiative item of a planned release reaches the downstream team that must serve it, on that team's Sprint Goal.
+- G2: Every Sprint Goal cites the initiative items it serves at an exact tag and names the environment where it counts.
+- G3: The test subsystem receives a Sprint Goal for the suites and environments each release needs.
 
 <!-- req: R1 -->
 ## R1 - Trigger
@@ -53,7 +55,7 @@ The subsystem SRDs (design.md subsystem_srd) for the downstream owners and their
 <!-- req: R2.3 -->
 ### R2.3
 
-Open objective issues already in the downstream repositories for this release, so an objective is updated, not duplicated.
+Open Sprint Goal issues (and objective issues, read as Sprint Goals) already in the downstream repositories for this release, so a Sprint Goal is updated, not duplicated.
 
 <!-- req: R3 -->
 ## R3 - Asks only what is not computed
@@ -61,12 +63,12 @@ Open objective issues already in the downstream repositories for this release, s
 <!-- req: R3.1 -->
 ### R3.1
 
-Takes the owner tpm recommends for each objective: the Product Owner whose subsystem SRD declares a repository the objective's delivered_by names (srd034 R1.4). Asks which downstream owner satisfies an objective only when none is recommended, offering the repositories the subsystem SRDs declare.
+Takes the owner tpm recommends for each initiative item: the Product Owner whose subsystem SRD declares a repository the item's delivered_by names (srd034 R1.4). Asks which downstream team serves an item only when none is recommended, offering the repositories the subsystem SRDs declare.
 
 <!-- req: R3.2 -->
 ### R3.2
 
-Takes the environment the objective's acceptance criteria name, else dev, and asks nothing about it.
+Takes the environment the initiative's acceptance criteria name, else dev, and asks nothing about it.
 
 <!-- req: R3.3 -->
 ### R3.3
@@ -79,17 +81,17 @@ Asks nothing the road-map, the SRDs, or the tracker already answers, and asks fo
 <!-- req: R4.1 -->
 ### R4.1
 
-One objective issue per downstream owner and release, filed with specify in the owner's repository, in do-work's input format, with one Cites line per upstream requirement pinned to the release tag (srd007 R5) and one Environment line.
+One Sprint Goal issue per downstream team and release, filed with specify in the team's repository, in do-work's input format, with one Cites line per initiative item it serves pinned to the release tag (srd007 R5), one Environment line, and an empty Sprint Backlog section (srd034 R3.5).
 
 <!-- req: R4.2 -->
 ### R4.2
 
-One objective issue to the Scrum Master in the test-subsystem repository naming the suites and environments the release needs to produce its evidence.
+One Sprint Goal issue to the Scrum Master in the test-subsystem repository naming the suites and environments the release needs to produce its evidence.
 
 <!-- req: R4.3 -->
 ### R4.3
 
-A planned event (srd006 R8) on each objective it creates or updates.
+A planned event (srd006 R8) on each Sprint Goal it creates or updates.
 
 <!-- req: R5 -->
 ## R5 - Refusals
@@ -97,7 +99,7 @@ A planned event (srd006 R8) on each objective it creates or updates.
 <!-- req: R5.1 -->
 ### R5.1
 
-Refuses to push an objective with an unpinned citation or without an environment.
+Refuses to file a Sprint Goal with an unpinned citation or without an environment.
 
 <!-- req: R5.2 -->
 ### R5.2
@@ -113,7 +115,8 @@ Refuses to copy names or confidential content from inputs.
 ## Non-goals
 
 - Choosing what goes in the release; that is plan (srd031).
-- Deciding that an objective is met; that is track-goals (srd019).
+- Deciding that a Sprint Goal is met; that is track-goals (srd019).
+- Selecting stories; that is the team's Sprint Planning (srd045 R5.2).
 
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria
@@ -121,7 +124,7 @@ Refuses to copy names or confidential content from inputs.
 <!-- ac: AC1 -->
 ### AC1
 
-Facts come from the planned release, subsystem and environment SRDs, and existing objectives; the recommended owner and the environment are taken without asking; only an objective with no recommended owner is asked about; no confirmation is asked before the push.
+Facts come from the planned release, subsystem and environment SRDs, and existing Sprint Goals; the recommended owner and the environment are taken without asking; only an initiative item with no recommended owner is asked about; no confirmation is asked before the push.
 
 <!-- field: traces -->
 #### Traces
@@ -137,7 +140,7 @@ Facts come from the planned release, subsystem and environment SRDs, and existin
 <!-- ac: AC2 -->
 ### AC2
 
-Each downstream owner receives one objective per release with Cites lines pinned to the release tag and an Environment line; the test subsystem receives one objective for the release's suites and environments; each carries a planned event; a second run creates no duplicate.
+Each downstream team receives one Sprint Goal per release with Cites lines pinned to the release tag, an Environment line, and an empty Sprint Backlog section; the test subsystem receives one Sprint Goal for the release's suites and environments; each carries a planned event; a second run creates no duplicate.
 
 <!-- field: traces -->
 #### Traces

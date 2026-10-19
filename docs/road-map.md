@@ -472,7 +472,7 @@ readable: objective documents, issues, and markers are read as their
 new names. Until track-goals runs (02.0), a Sprint Goal closes at the
 sprint end as reported complete (srd038 R2). Its use cases, authoring
 the hierarchy, planning a sprint from stories, and the Sprint Goal
-ledger, are written with the requirement items they touch.
+ledger, cite the requirement items they touch.
 
 <!-- field: srds -->
 ### SRDs
@@ -501,8 +501,29 @@ ledger, are written with the requirement items they touch.
 
 - issue-body
 
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel04.0-uc001-author-the-hierarchy](specs/use-cases/rel04.0-uc001-author-the-hierarchy.md) | The technical program manager and a Product Owner write a theme, initiative, epic, feature, and stories that the hierarchy gate checks. | specified | P1 |
+| [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md) | tasks files the team's Sprint Goal; Sprint Planning chooses ranked stories to velocity and lists them on it. | specified | P1 |
+| [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md) | The sprint-end merge closes a Sprint Goal with its stories reported, and objective issues read as Sprint Goals. | specified | P1 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | The gate passes a hierarchy and fails each malformed document; Sprint Planning lists ranked stories on the Sprint Goal; the sprint end closes it with its stories reported; objective issues read as Sprint Goals. | specified |
+
 <!-- field: proof -->
 ### Proof
 
 - mage audit
 - mage regression:all
+- mage integration:hierarchyGate
+- mage integration:tasks
+- mage integration:sprintPlanning
+- mage integration:program
+- mage integration:sprintEnd
