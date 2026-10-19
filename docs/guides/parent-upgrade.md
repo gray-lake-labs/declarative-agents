@@ -1,7 +1,7 @@
 # Parent Upgrade
 
 This corpus derives some of its requirements from the parent,
-Nokia-Bell-Labs/declarative-agents. Each such requirement carries a
+gray-lake-labs/declarative-agents. Each such requirement carries a
 `derived_from` entry naming the parent release it was validated against,
 and `docs/external-pins.yaml` names the release the corpus tracks. When the
 parent ships a new release, we move the pin, and every requirement whose
@@ -18,7 +18,7 @@ is that workflow, invoked by name as **parent-upgrade**.
 | Corpus format | the parent's Markdown format (its eng10), checked by the audit's `markdown-format` and `not-canonical` checks |
 | Format tools | `mage convert`, `mage fmt`, `mage specCheck` (`magefiles/spec.go`), running the pinned release's published spec tool |
 | Audit that reports staleness | the parent corpus audit, `docs/guides/corpus-audit.md` |
-| Next bump | the open issue `Recurring: bump the Nokia declarative-agents pin` |
+| Next bump | the open issue `Recurring: bump the declarative-agents pin` |
 
 ## The resolution idiom
 
@@ -93,7 +93,7 @@ corpus claiming a provenance nobody checked.
 ## Recurrence
 
 The repository keeps one open issue for the next bump, titled
-`Recurring: bump the Nokia declarative-agents pin`. The change that moves the
+`Recurring: bump the declarative-agents pin`. The change that moves the
 pin closes it, and whoever closes it opens a fresh copy with the pinned
 release updated (gh-issue-pop Phase 6), so the pin history reads from the
 issue chain and the next release always has somewhere to land. A larger

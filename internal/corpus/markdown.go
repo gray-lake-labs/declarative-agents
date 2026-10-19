@@ -1,6 +1,6 @@
 // Package corpus reads a program repository's specification documents
 // (srd039). A
-// corpus is Markdown in the format the pinned Nokia declarative-agents
+// corpus is Markdown in the format the pinned declarative-agents
 // release declares (its eng10): frontmatter, then headings each tagged by
 // the marker comment above it (design.md D2). scrum-master's configuration
 // files are config documents in the same marker form (design.md D11).

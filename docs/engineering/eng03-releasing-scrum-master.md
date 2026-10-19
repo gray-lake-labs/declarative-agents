@@ -84,8 +84,8 @@ release-manager agent, but only in a private repository that the
 environment scrum-master deploys to cannot reach. scrum-master therefore
 implements the same contract in internal/release, in plain Go, with
 no agent: every step is a rule, and design.md D10 puts rules in code.
-The audit agent still comes from the public Nokia-Bell-Labs
-declarative-agents tag the corpus pins (docs/guides/corpus-audit.md).
+The audit agent still comes from the public gray-lake-labs
+declarative-agents release the corpus pins (docs/guides/corpus-audit.md).
 
 internal/release holds the gates file, the stage runner, and the
 tagging (NextDateTag, RemoteTags, Release.Tag), each behind a git

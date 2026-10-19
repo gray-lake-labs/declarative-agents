@@ -12,13 +12,8 @@ import (
 )
 
 // parentRepository is the parent corpus whose specification-critic agent
-// audits this repository (docs/guides/corpus-audit.md); legacyParent is the
-// name derived_from entries written before the corpus followed the fork
-// still use, resolved against the same release.
-const (
-	parentRepository = "github.com/gray-lake-labs/declarative-agents"
-	legacyParent     = "github.com/Nokia-Bell-Labs/declarative-agents"
-)
+// audits this repository (docs/guides/corpus-audit.md).
+const parentRepository = "github.com/gray-lake-labs/declarative-agents"
 
 const (
 	pinsFile      = "docs/external-pins.yaml"
@@ -52,7 +47,7 @@ func runCorpusAudit(root string, run commandRunner) error {
 	if err != nil {
 		return err
 	}
-	restore, err := withCheckouts(root, rel.Src, parentRepository, legacyParent)
+	restore, err := withCheckouts(root, rel.Src, parentRepository)
 	if err != nil {
 		return err
 	}
