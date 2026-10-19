@@ -48,7 +48,46 @@ line
 <!-- field: description -->
 #### Description
 
-"Cites: URL" on its own line in a description, where URL is a cross-repository reference pinned to a release tag with a requirement or interface anchor (srd007 R5). Zero or more. An objective issue carries one per upstream requirement it satisfies. A Cites line may end in " | review" or " | handoff", asking for a review or a handoff decision when a new tag of the cited interface is released (srd014 R2.6).
+"Cites: URL" on its own line in a description, where URL is a cross-repository reference pinned to a release tag with a requirement or interface anchor (srd007 R5). Zero or more. A Sprint Goal issue carries one per initiative or epic item it serves. A Cites line may end in " | review" or " | handoff", asking for a review or a handoff decision when a new tag of the cited interface is released (srd014 R2.6).
+
+<!-- schema_entry: link_lines -->
+### link_lines
+
+<!-- field: type -->
+#### Type
+
+line
+
+<!-- field: description -->
+#### Description
+
+"Blocked-by: TARGET", "Blocks: TARGET", "Depends-on: TARGET", "Relates-to: TARGET", and "Duplicates: TARGET", each on its own line in a description (srd007 R6). TARGET is PROJECT#IID, a same-repository document id, or a pinned URL. Blocks and Blocked-by are the two ends of one link; Blocked-by makes an issue waiting, Depends-on and Relates-to never do. At most one Duplicates line.
+
+<!-- schema_entry: implements_line -->
+### implements_line
+
+<!-- field: type -->
+#### Type
+
+line
+
+<!-- field: description -->
+#### Description
+
+"Implements: STORY" on its own line in a description, naming the story the issue executes by same-repository id or pinned URL (srd007 R6.5). make-work writes it on every issue it creates from a story. At most one.
+
+<!-- schema_entry: sprint_backlog_section -->
+### sprint_backlog_section
+
+<!-- field: type -->
+#### Type
+
+section
+
+<!-- field: description -->
+#### Description
+
+A "## Sprint Backlog" heading on a Sprint Goal issue followed by one line per story its Sprint Planning selected, "- STORY title (N points)", where STORY is a same-repository id or a pinned URL (srd034). plan writes it; the planned event names the same stories.
 
 <!-- schema_entry: environment_line -->
 ### environment_line
@@ -61,7 +100,7 @@ line
 <!-- field: description -->
 #### Description
 
-"Environment: NAME" on its own line in an objective issue's description, naming the environment SRD where its evidence counts. Exactly one on an objective issue.
+"Environment: NAME" on its own line in a Sprint Goal issue's description, naming the environment SRD where its evidence counts. Exactly one on a Sprint Goal issue.
 
 <!-- schema_entry: downstream_section -->
 ### downstream_section
@@ -126,7 +165,7 @@ section
 <!-- field: description -->
 #### Description
 
-A "## Notes" heading on an objective issue, filed empty by tasks and filled by the owner with the details of the work as it proceeds (srd034 R3.3). Free text; no script reads or writes it.
+A "## Notes" heading on a Sprint Goal issue, filed empty by tasks and filled by the owner with the details of the work as it proceeds (srd034 R3.3). Free text; no script reads or writes it.
 
 <!-- schema_entry: estimate_line -->
 ### estimate_line
@@ -178,7 +217,7 @@ html comment
 <!-- field: description -->
 #### Description
 
-Event markers that make an objective issue its own ledger (srd006 R8–R11): "<!-- tpm program event=planned release=R requirement=URL environment=E -->", "<!-- tpm program event=evidence requirement=URL test=T environment=E version=V result=pass|fail -->", and "<!-- tpm program event=met release=R version=V -->".
+Event markers that make a Sprint Goal issue its own ledger (srd006 R8–R11): "<!-- tpm program event=planned release=R requirement=URL story=REF environment=E -->", "<!-- tpm program event=evidence criterion=URL test=T environment=E version=V result=pass|fail -->", and "<!-- tpm program event=met release=R version=V -->".
 
 <!-- schema_entry: previous_runs_section -->
 ### previous_runs_section

@@ -17,11 +17,11 @@ Events are comments on the issue they concern, with a marker that scripts
 can read and a mention when a person must act. They inform; they never
 change an issue's state.
 
-Three events make an objective issue its own ledger. The road-map is the
-plan and tags are releases; the objective issue records when its work was
-planned, every piece of test evidence that bears on it, and when it was
-met. Replaying those events reconstructs the objective's state without
-reading anything else.
+Three events make a team's Sprint Goal issue its own ledger. The road-map
+is the plan and tags are releases; the Sprint Goal records when its work was
+planned and which stories it lists, every piece of test evidence that bears
+on a criterion of those stories, and when it was met. Replaying those events
+reconstructs the Sprint Goal's state without reading anything else.
 
 <!-- field: goals -->
 ## Goals
@@ -29,7 +29,7 @@ reading anything else.
 - G1: Information between components travels as comments on the issue it concerns.
 - G2: Scripts can recognize, query, and deduplicate events without parsing prose.
 - G3: A person who must act on an event is told through the tracker's own notification.
-- G4: An objective's state (planned, evidence so far, met) is reconstructable from the events on its issue alone.
+- G4: A Sprint Goal's state (planned, evidence so far, met) is reconstructable from the events on its issue alone.
 
 <!-- req: R1 -->
 ## R1 - Marker format
@@ -143,12 +143,12 @@ The vocabulary is closed. A program adds an event name only through a plane::con
 <!-- req: R8.1 -->
 ### R8.1
 
-Posted on an objective issue when tasks pushes it, and again whenever plan places it in a different road-map release.
+Posted on a Sprint Goal issue (srd034) when tasks files it, again whenever plan places it in a different road-map release, and again when the team's Sprint Planning lists the stories it selected.
 
 <!-- req: R8.2 -->
 ### R8.2
 
-Required keys are release (the road-map release the objective counts toward), requirement (each upstream requirement it satisfies, as a pinned URL, srd007 R5), and environment (where its evidence counts). requirement may repeat.
+Required keys are release (the road-map release the Sprint Goal counts toward), requirement (each initiative or epic item it serves, as a pinned URL, srd007 R5), and environment (where its evidence counts). The key story names each story the Sprint Goal lists, by pinned URL or same-repository id; it is absent until Sprint Planning lists stories. requirement and story may repeat.
 
 <!-- req: R9 -->
 ## R9 - event=evidence
@@ -156,12 +156,12 @@ Required keys are release (the road-map release the objective counts toward), re
 <!-- req: R9.1 -->
 ### R9.1
 
-Posted on an objective issue by track-goals each time a test named in one of the objective's acceptance criteria has run in the named environment on a recorded version.
+Posted on a Sprint Goal issue by track-goals each time a test named in an acceptance criterion of one of its listed stories has run in the named environment on a recorded version.
 
 <!-- req: R9.2 -->
 ### R9.2
 
-Required keys are requirement (the pinned URL of the requirement the test proves), test (the test's identifier), environment, version (the pinned set of releases under test), and result (pass or fail). A run that produced no result posts nothing; missing evidence is reported, never recorded as a pass.
+Required keys are criterion (the pinned URL of the story acceptance criterion the test proves, …/stNNN-short-name.md#ACn), test (the test's identifier), environment, version (the pinned set of releases under test), and result (pass or fail). A run that produced no result posts nothing; missing evidence is reported, never recorded as a pass.
 
 <!-- req: R9.3 -->
 ### R9.3
@@ -174,17 +174,17 @@ Evidence events are append-only. A later run posts a new event; it never edits o
 <!-- req: R10.1 -->
 ### R10.1
 
-Posted on an objective issue by track-goals when, for every requirement named by its planned event, the latest evidence event in the named environment has result pass.
+Posted on a Sprint Goal issue by track-goals when, for every acceptance criterion of every story named by its latest planned event, the latest evidence event in the named environment has result pass.
 
 <!-- req: R10.2 -->
 ### R10.2
 
-Required keys are release and version (the pinned set on which the objective was met). It mentions the objective's owner.
+Required keys are release and version (the pinned set on which the Sprint Goal was met). It mentions the team's Product Owner.
 
 <!-- req: R10.3 -->
 ### R10.3
 
-A later evidence event with result fail on a requirement of a met objective posts a new planned event for the same release, which reopens the ledger; met is never edited away.
+A later evidence event with result fail on a criterion of a met Sprint Goal posts a new planned event for the same release, which reopens the ledger; met is never edited away.
 
 <!-- req: R11 -->
 ## R11 - Ledger replay
@@ -192,12 +192,17 @@ A later evidence event with result fail on a requirement of a met objective post
 <!-- req: R11.1 -->
 ### R11.1
 
-The state of an objective is computed from its events in order: planned when the latest planned event has no later met event; proving while some but not all of its requirements have a passing latest evidence event; met when the latest met event is later than the latest planned event.
+The state of a Sprint Goal is computed from its events in order: planned when the latest planned event has no later met event; proving while some but not all of its stories' criteria have a passing latest evidence event; met when the latest met event is later than the latest planned event.
 
 <!-- req: R11.2 -->
 ### R11.2
 
-No other source (labels, assignee, closed state, checklists) is read to decide whether an objective is met.
+No other source (labels, assignee, closed state, checklists) is read to decide whether a Sprint Goal is met.
+
+<!-- req: R11.3 -->
+### R11.3
+
+An objective issue's events are a Sprint Goal's: a planned event without a story key and an evidence event whose requirement key names a requirement rather than a criterion are replayed with the requirement in the criterion's place, so ledgers written before release 04.0 replay unchanged.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -283,7 +288,7 @@ Running the same handoff twice posts no duplicate event; no event changes any la
 <!-- ac: AC7 -->
 ### AC7
 
-Pushing an objective posts one planned event with release, each requirement as a pinned URL, and environment; moving it to another release posts a new planned event.
+Filing a Sprint Goal posts one planned event with release, each initiative or epic item as a pinned URL, and environment; listing its stories posts a planned event naming each story; moving it to another release posts a new planned event.
 
 <!-- field: traces -->
 #### Traces
@@ -294,7 +299,7 @@ Pushing an objective posts one planned event with release, each requirement as a
 <!-- ac: AC8 -->
 ### AC8
 
-Each test run named by an objective's criteria in the named environment posts one evidence event with requirement, test, environment, version, and result; a run with no result posts nothing; earlier evidence events are never edited.
+Each test run named by a listed story's criterion in the named environment posts one evidence event on the Sprint Goal with criterion, test, environment, version, and result; a run with no result posts nothing; earlier evidence events are never edited.
 
 <!-- field: traces -->
 #### Traces
@@ -306,7 +311,7 @@ Each test run named by an objective's criteria in the named environment posts on
 <!-- ac: AC9 -->
 ### AC9
 
-met is posted, mentioning the owner, only when every planned requirement's latest evidence in the named environment passed; a later failing evidence event posts a new planned event and leaves the earlier met in place.
+met is posted, mentioning the Product Owner, only when every criterion of every listed story has passing latest evidence in the named environment; a later failing evidence event posts a new planned event and leaves the earlier met in place.
 
 <!-- field: traces -->
 #### Traces
@@ -318,10 +323,11 @@ met is posted, mentioning the owner, only when every planned requirement's lates
 <!-- ac: AC10 -->
 ### AC10
 
-Replaying any sequence of planned, evidence, and met events yields planned, proving, or met as R11.1 defines, with the same answer as track-goals, and without reading labels, assignee, or closed state.
+Replaying any sequence of planned, evidence, and met events yields planned, proving, or met as R11.1 defines, with the same answer as track-goals, and without reading labels, assignee, or closed state; an objective issue's ledger replays to the same state it had before release 04.0.
 
 <!-- field: traces -->
 #### Traces
 
 - [R11.1](#r111)
 - [R11.2](#r112)
+- [R11.3](#r113)
