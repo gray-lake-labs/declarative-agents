@@ -49,7 +49,7 @@ var skeleton = []string{
 	"docs/ARCHITECTURE.md", "docs/SPECIFICATIONS.md", "docs/VISION.md", "docs/constitutions/design.md",
 	"docs/corpus-charter.yaml", "docs/external-pins.yaml", "docs/road-map.md",
 	"docs/specs/software-requirements/srd001-system.md",
-	"README.md", "docs/specs/epics/README.md", "docs/specs/initiatives/README.md", "docs/specs/themes/README.md",
+	"AGENTS.md", "README.md", "docs/specs/epics/README.md", "docs/specs/initiatives/README.md", "docs/specs/themes/README.md",
 }
 
 // orientationMarkers are the begin and end lines every orientation file
