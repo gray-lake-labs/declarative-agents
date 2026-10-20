@@ -25,4 +25,4 @@ repository path.
    tpm sets the plane, kind, and component from the paths.
 5. Show the issue URL, its plane, kind, and component, and whether
    admission admitted it. When it did not, show the reasons; fix the body and run
-   `tpm issue lint --project <project> --issue <iid>`.
+   `tpm issue lint --project <project> --issue <iid> --control <system>`.

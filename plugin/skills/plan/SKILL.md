@@ -18,10 +18,10 @@ Input: the system repository path, and the period's `tpm reports aggregate
 3. Show the ranked items (slipped first) and the held-back items with what
    they lack. Ask which items enter the release, and confirm or change the
    recommended version, end date, and tag. Ask nothing else.
-4. Run `tpm plan write --dir . --system <system> --version <version> --tag <tag> --items <a,b> --issue <planning issue> --json`.
+4. Run `tpm plan write --dir . --system <system> --version <version> --tag <tag> --items <a,b> --issue <system>#<planning issue iid> --json`.
    Show the items it returned for a missing test or environment.
 5. Commit docs/road-map.md and run `tpm issue merge` as implement does.
-6. Once it merges, on main: `tpm release gate --artifact corpus --version <the tag's version> --issue <planning issue>`,
+6. Once it merges, on main: `tpm release gate --artifact corpus --version <the tag's version> --issue <system>#<planning issue iid> --control <system>`,
    then `tpm release tag` with the same flags. That tag publishes the plan.
 7. Run `tpm plan push --dir . --system <system> --version <version> --end <end date> --json`.
    Show the milestone, the sprint issue, the sprint-end issues, the

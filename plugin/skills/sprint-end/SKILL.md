@@ -9,12 +9,12 @@ The sprint-end issue's Requirements are the steps; this skill names the
 tpm command for each. The model writes only the summary; every fact comes
 from tpm (design.md D10, srd038 R1).
 
-Input: the project path, the sprint-end issue, a reports checkout, the
-period's first and last ISO weeks, and the artifact the repository
-releases.
+Input: the project path, the sprint-end issue, the program's system
+repository, a reports checkout, the period's first and last ISO weeks, and
+the artifact the repository releases.
 
 1. Take the issue with implement and work in its worktree.
-2. Run `tpm sprint-end facts --project <project> --reports <checkout> --from <week> --to <week> --artifact <artifact> --json`.
+2. Run `tpm sprint-end facts --project <project> --reports <checkout> --from <week> --to <week> --artifact <artifact> --control <system> --json`.
 3. Model step (combine): draft the period's summary from the reports and
    those facts.
 4. Ask the owner what to change in the summary, the Sprint Goals, or the
@@ -23,10 +23,10 @@ releases.
 5. Write the summary at docs/sprint-ends/<release>.md, run
    `tpm sprint-end stories --dir . --release <release> --done <ids> --json`,
    commit it, and run
-   `tpm issue merge --project <project> --issue <iid> --closes <project#iid> --json`
+   `tpm issue merge --project <project> --issue <iid> --closes <project#iid> --control <system> --json`
    with one --closes per Sprint Goal the owner reports complete; the merge
    closes the issue and those Sprint Goals.
 6. Ask the owner to confirm the release and its version (facts recommends
    one). With no confirmation, or nothing to release, stop here.
-7. Once the summary merges, on main: `tpm release gate --artifact <artifact> --version <version> --issue <project#iid>`,
+7. Once the summary merges, on main: `tpm release gate --artifact <artifact> --version <version> --issue <project#iid> --control <system>`,
    then `tpm release tag` with the same flags. Show the tag.

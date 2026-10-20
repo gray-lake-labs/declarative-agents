@@ -74,7 +74,7 @@ func Push(t tracker.Tracker, in PushInput) (PushResult, error) {
 		return res, fmt.Errorf("--end must be YYYY-MM-DD, not %q", in.End)
 	}
 	end, _ := time.Parse(time.DateOnly, in.End)
-	start := end.AddDate(0, 0, 1-periodDays)
+	start := periodStart(end)
 	releases, err := readRoadMap(in.Dir)
 	if err != nil {
 		return res, err
@@ -323,6 +323,14 @@ func postPlanned(t tracker.Tracker, in PushInput, r Release, repos []string, doc
 		}
 	}
 	return out, nil
+}
+
+// periodStart is the first working day of the period end closes: the
+// Monday of the ISO week two weeks before end's, so a period ending on
+// Friday of W45 runs from Monday of W43.
+func periodStart(end time.Time) time.Time {
+	weekday := (int(end.Weekday()) + 6) % 7 // Monday is 0
+	return end.AddDate(0, 0, -weekday-(periodDays-7))
 }
 
 // isoWeek names the ISO week of a date, such as 2026-W43.

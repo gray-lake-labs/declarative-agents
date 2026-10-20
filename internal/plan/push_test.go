@@ -74,7 +74,7 @@ func testPushSprintUpdatesMilestoneAndChecklist(t *testing.T, p trackertest.Prog
 		t.Fatal(err)
 	}
 	m, _ := f.FindMilestone(sys, "01.1")
-	if res.Milestone != tracker.MilestoneCreated || m.DueDate != "2026-11-27" || m.StartDate != "2026-11-07" || m.Description != "Release 01.1, 2026-W45 to 2026-W48." {
+	if res.Milestone != tracker.MilestoneCreated || m.DueDate != "2026-11-27" || m.StartDate != "2026-11-09" || m.Description != "Release 01.1, 2026-W46 to 2026-W48." {
 		t.Fatalf("milestone %s %+v", res.Milestone, m)
 	}
 	sprint := issuesOf(t, f, sys)[0]
