@@ -430,7 +430,7 @@ Component values come from the subsystem SRDs in the system repository: each com
 <!-- req: R21.2 -->
 ### R21.2
 
-Every issue other than a sprint issue carries exactly one component label. An issue with none or with more than one is labelled needs-triage by admission (R23) and stays out of the backlog.
+Every issue other than a sprint issue carries exactly one component label. An issue with none or with more than one is labelled needs-triage by admission (R23) and stays out of the backlog. Until a subsystem SRD declares a component, as in a program tpm init has just laid down, there is no value to choose, and an issue with no component label is admitted.
 
 <!-- req: R21.3 -->
 ### R21.3

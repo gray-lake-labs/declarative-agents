@@ -103,6 +103,9 @@ func init() {
 				return err
 			}
 			human := fmt.Sprintf("%s#%d on %s in %s", r.Project, r.IID, r.Branch, r.Worktree)
+			if len(r.NotAdmitted) > 0 {
+				human += "\nnot admitted, which does not block a non-data issue: " + strings.Join(r.NotAdmitted, "; ")
+			}
 			if !ctx.DryRun {
 				if r.Installed, err = InstallSkills(r.Checkout, r.Worktree); err != nil {
 					r.InstallError = err.Error()

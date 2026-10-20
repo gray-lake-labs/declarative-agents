@@ -70,6 +70,10 @@ type PopResult struct {
 	// (srd036 R2.3); InstallError says why that failed, without undoing pop.
 	Installed    []string `json:"installed,omitempty"`
 	InstallError string   `json:"install_error,omitempty"`
+	// NotAdmitted are the reasons a management or control issue fails
+	// admission. They do not block pop, which refuses only data issues
+	// admission has not admitted (srd013 R7.1).
+	NotAdmitted []string `json:"not_admitted,omitempty"`
 }
 
 // Pop claims an issue for the caller and opens its own branch and worktree
@@ -95,10 +99,11 @@ func Pop(t tracker.Tracker, git Git, project string, iid int, dir string, p Poli
 			return r, fmt.Errorf("%s#%d is assigned to %s; only that person pops it", project, iid, a)
 		}
 	}
-	if i.HasLabel("plane::data") {
-		if reasons := Lint(i, p); len(reasons) > 0 {
+	if reasons := Lint(i, p); len(reasons) > 0 {
+		if i.HasLabel("plane::data") {
 			return r, fmt.Errorf("%s#%d is not admitted: %s", project, iid, strings.Join(reasons, "; "))
 		}
+		r.NotAdmitted = reasons
 	}
 	if !slices.Contains(i.Assignees, me.Username) {
 		r.Assigned = true

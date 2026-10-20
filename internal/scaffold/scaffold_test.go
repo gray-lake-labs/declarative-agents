@@ -132,9 +132,12 @@ func TestInitWritesControlFiles(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(labels, program.DefaultLabels()) {
 		t.Fatalf("control/labels.md reads back as %v, %v; want the defaults", labels, err)
 	}
+	// The fresh program's subsystem SRDs declare no component yet.
+	want := program.Defaults()
+	want.ComponentsRead = true
 	policy, err := program.LoadPolicy(f, "g/system", "main")
-	if err != nil || !reflect.DeepEqual(policy, program.Defaults()) {
-		t.Fatalf("control/policy.md reads back as %+v, %v; want %+v", policy, err, program.Defaults())
+	if err != nil || !reflect.DeepEqual(policy, want) {
+		t.Fatalf("control/policy.md reads back as %+v, %v; want %+v", policy, err, want)
 	}
 }
 

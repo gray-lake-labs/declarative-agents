@@ -31,6 +31,10 @@ func TestPlaneAndKindFollowTheChangedPaths(t *testing.T) {
 		{"planning beats design", []string{"docs/ARCHITECTURE.md", "docs/road-map.md"}, "", false, "management", ""},
 		{"control beats design", []string{"docs/ARCHITECTURE.md", "control/labels.md"}, "", false, "control", ""},
 		{"design beats code", []string{"internal/x.go", "docs/specs/test-suites/test-rel01.0-x.md"}, "build", false, "data", "spec"},
+		{"theme directory with its slash", []string{"docs/specs/themes/"}, "", true, "management", ""},
+		{"epic directory without its slash", []string{"docs/specs/epics"}, "", false, "management", ""},
+		{"SRD directory in the system repository", []string{"docs/specs/software-requirements/"}, "", true, "management", ""},
+		{"SRD directory in a team repository", []string{"docs/specs/software-requirements/"}, "", false, "data", "spec"},
 	}
 	for _, c := range cases {
 		got, err := Classify(c.paths, c.kind, c.inSystem)
