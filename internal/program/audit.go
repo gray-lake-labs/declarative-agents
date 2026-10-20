@@ -34,25 +34,27 @@ type AuditGate struct {
 }
 
 // checkCloses parses each --closes reference, project#iid, and refuses one
-// that is malformed, missing, or already closed.
-func checkCloses(t tracker.Tracker, closes []string) ([][2]any, error) {
-	var out [][2]any
+// that is malformed or missing. One already closed, as a Sprint Goal both a
+// team's and the program's sprint-end merges name, is returned apart: the
+// merge reports it and closes the rest.
+func checkCloses(t tracker.Tracker, closes []string) (open [][2]any, closed []string, err error) {
 	for _, ref := range closes {
 		p, n, ok := strings.Cut(ref, "#")
 		other, err := strconv.Atoi(n)
 		if !ok || p == "" || err != nil || other <= 0 {
-			return nil, fmt.Errorf("--closes %q is not project#iid", ref)
+			return nil, nil, fmt.Errorf("--closes %q is not project#iid", ref)
 		}
 		c, err := t.GetIssue(p, other)
 		if err != nil {
-			return nil, fmt.Errorf("--closes %s: %w", ref, err)
+			return nil, nil, fmt.Errorf("--closes %s: %w", ref, err)
 		}
 		if c.State == "closed" {
-			return nil, fmt.Errorf("--closes %s is already closed", ref)
+			closed = append(closed, ref)
+			continue
 		}
-		out = append(out, [2]any{p, other})
+		open = append(open, [2]any{p, other})
 	}
-	return out, nil
+	return open, closed, nil
 }
 
 // checkBefore runs the gate, naming what was withheld when it fails.

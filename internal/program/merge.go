@@ -2,10 +2,13 @@ package program
 
 import (
 	"fmt"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/gray-lake-labs/scrum-master/internal/events"
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
@@ -20,7 +23,12 @@ type MergeResult struct {
 	ApprovedBy   string   `json:"approved_by,omitempty"`
 	Merged       bool     `json:"merged"` // merge made the merge commit now
 	Closed       []string `json:"closed,omitempty"`
-	DryRun       bool     `json:"dry_run"`
+	// AlreadyClosed are --closes issues another merge closed first.
+	AlreadyClosed []string `json:"already_closed,omitempty"`
+	// Reported are the Sprint Goals the merge closed as reported complete,
+	// each with a reported_complete event on its ledger (srd038 R2.2).
+	Reported []string `json:"reported_complete,omitempty"`
+	DryRun   bool     `json:"dry_run"`
 }
 
 // MergedByTrailer names, on a merge commit, the tracker user who ran the
@@ -44,10 +52,11 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 	if issueProject != project {
 		r.IssueProject = issueProject
 	}
-	others, err := checkCloses(t, closes)
+	others, already, err := checkCloses(t, closes)
 	if err != nil {
 		return r, err
 	}
+	r.AlreadyClosed = already
 	base, err := t.DefaultBranch(project)
 	if err != nil {
 		return r, err
@@ -92,6 +101,15 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		for _, p := range strings.Split(paths, "\n") {
 			if p == "docs" || strings.HasPrefix(p, "docs/") {
 				r.Audit = true
+			}
+			if path.Dir(p) == sprintgoal.SummaryDir && path.Ext(p) == ".md" {
+				summary, err := inMain("show", "refs/heads/"+branch+":"+p)
+				if err != nil {
+					continue // the branch deletes it
+				}
+				if problems := sprintgoal.CheckSummary(summary); len(problems) > 0 {
+					return r, fmt.Errorf("the sprint-end summary %s is not in its format (design.md sprint_end_summary): %s; nothing merged", p, strings.Join(problems, "; "))
+				}
 			}
 		}
 		if r.Audit {
@@ -143,6 +161,22 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		if c.Closed {
 			r.Closed = append(r.Closed, p+"#"+strconv.Itoa(n))
 		}
+	}
+	for _, tgt := range others {
+		p, n := tgt[0].(string), tgt[1].(int)
+		i, err := t.GetIssue(p, n)
+		if err != nil {
+			return r, err
+		}
+		m, ok := sprintgoal.Parse(i.Description)
+		if !ok {
+			continue
+		}
+		e, text := events.ReportedComplete(m.Release, r.Commit)
+		if _, err := events.Post(t, p, n, e, events.ReportedCompleteRequired, text, false); err != nil {
+			return r, fmt.Errorf("closed %s#%d, but its ledger has no reported_complete event: %w", p, n, err)
+		}
+		r.Reported = append(r.Reported, p+"#"+strconv.Itoa(n))
 	}
 	return r, nil
 }

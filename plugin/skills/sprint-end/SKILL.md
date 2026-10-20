@@ -21,7 +21,8 @@ the artifact the repository releases.
    release, which Sprint Goals are complete, and which stories each Sprint
    Goal lists (facts names them) are done. Apply the answers in the worktree.
 5. Write the summary at docs/sprint-ends/<release>.md, run
-   `tpm sprint-end stories --dir . --release <release> --done <ids> --json`,
+   `tpm sprint-end stories --dir . --release <release> --project <project> --done <ids> --json`
+   (a story of another team as project#story),
    commit it, and run
    `tpm issue merge --project <project> --issue <iid> --closes <project#iid> --control <system> --json`
    with one --closes per Sprint Goal the owner reports complete; the merge

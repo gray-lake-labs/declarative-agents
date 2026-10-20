@@ -5,6 +5,7 @@ package sprintend
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
@@ -28,7 +29,8 @@ type SprintGoal struct {
 	ReportedComplete bool     `json:"reported_complete"`
 	Met              bool     `json:"met"`
 	Ledger           []string `json:"ledger"` // the event names posted on it, in order
-	// Stories lists the story ids its Sprint Backlog section names.
+	// Stories lists the stories its Sprint Backlog section names, as
+	// project#story.
 	Stories []string `json:"stories"`
 }
 
@@ -43,8 +45,12 @@ type Facts struct {
 
 // Input is one sprint-end facts run.
 type Input struct {
-	Tracker   tracker.Tracker
-	Project   string
+	Tracker tracker.Tracker
+	Project string
+	// Teams are the program's team repositories, read beside Project when
+	// it is the system repository: every Sprint Goal lives in a team's
+	// repository, and the program's period closes on all of them.
+	Teams     []string
 	Aggregate reports.Aggregation
 	Releases  program.Releases
 	Artifact  string
@@ -56,37 +62,22 @@ type Input struct {
 // release next recommends.
 func MakeFacts(in Input) (Facts, error) {
 	f := Facts{Project: in.Project, Aggregate: in.Aggregate}
-	// A Sprint Goal is known by tasks' marker, not by a label.
-	issues, err := in.Tracker.ListIssues(in.Project, tracker.IssueQuery{State: "all"})
-	if err != nil {
-		return f, err
-	}
 	progress := map[string]reports.Progress{}
 	for _, p := range in.Aggregate.Progress {
 		progress[p.SprintGoal] = p
 	}
-	for _, i := range issues {
-		m, ok := sprintgoal.Parse(i.Description)
-		if !ok {
-			continue
+	projects := []string{in.Project}
+	for _, team := range in.Teams {
+		if !slices.Contains(projects, team) {
+			projects = append(projects, team)
 		}
-		ref := fmt.Sprintf("%s#%d", in.Project, i.IID)
-		o := SprintGoal{Issue: ref, Serves: m.Serves, Legacy: m.Legacy, Release: m.Release, Title: i.Title, State: i.State,
-			Ledger: []string{}, Stories: sprintgoal.SprintBacklog(i.Description)}
-		notes, err := in.Tracker.ListNotes(in.Project, i.IID)
+	}
+	for _, project := range projects {
+		goals, err := sprintGoals(in.Tracker, project, progress)
 		if err != nil {
 			return f, err
 		}
-		for _, n := range notes {
-			if e, ok := events.Parse(n.Body); ok {
-				o.Ledger = append(o.Ledger, e.Name)
-				o.Met = o.Met || e.Name == "met"
-			}
-		}
-		if p, ok := progress[ref]; ok {
-			o.Reported, o.ReportedComplete = p.Reported, p.Complete || p.Reported == "done"
-		}
-		f.SprintGoals = append(f.SprintGoals, o)
+		f.SprintGoals = append(f.SprintGoals, goals...)
 	}
 	f.Next = release.Next(in.Releases, in.Artifact, in.Tags)
 	for _, c := range f.Next.Candidates {
@@ -95,4 +86,44 @@ func MakeFacts(in Input) (Facts, error) {
 		}
 	}
 	return f, nil
+}
+
+// sprintGoals lists project's Sprint Goals with their ledgers; each story
+// they list is named project#story, since story ids repeat across teams.
+func sprintGoals(t tracker.Tracker, project string, progress map[string]reports.Progress) ([]SprintGoal, error) {
+	// A Sprint Goal is known by tasks' marker, not by a label.
+	issues, err := t.ListIssues(project, tracker.IssueQuery{State: "all"})
+	if err != nil {
+		return nil, err
+	}
+	var out []SprintGoal
+	for _, i := range issues {
+		m, ok := sprintgoal.Parse(i.Description)
+		if !ok {
+			continue
+		}
+		ref := fmt.Sprintf("%s#%d", project, i.IID)
+		o := SprintGoal{Issue: ref, Serves: m.Serves, Legacy: m.Legacy, Release: m.Release, Title: i.Title, State: i.State,
+			Ledger: []string{}, Stories: []string{}}
+		for _, s := range sprintgoal.SprintBacklog(i.Description) {
+			o.Stories = append(o.Stories, project+"#"+s)
+		}
+		notes, err := t.ListNotes(project, i.IID)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range notes {
+			if e, ok := events.Parse(n.Body); ok {
+				o.Ledger = append(o.Ledger, e.Name)
+				o.Met = o.Met || e.Name == "met"
+				o.ReportedComplete = o.ReportedComplete || e.Name == "reported_complete"
+			}
+		}
+		if p, ok := progress[ref]; ok {
+			o.Reported = p.Reported
+			o.ReportedComplete = o.ReportedComplete || p.Complete || p.Reported == "done"
+		}
+		out = append(out, o)
+	}
+	return out, nil
 }

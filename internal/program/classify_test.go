@@ -35,6 +35,7 @@ func TestPlaneAndKindFollowTheChangedPaths(t *testing.T) {
 		{"epic directory without its slash", []string{"docs/specs/epics"}, "", false, "management", ""},
 		{"SRD directory in the system repository", []string{"docs/specs/software-requirements/"}, "", true, "management", ""},
 		{"SRD directory in a team repository", []string{"docs/specs/software-requirements/"}, "", false, "data", "spec"},
+		{"sprint-end summary", []string{"docs/sprint-ends/01.0.md"}, "", true, "management", ""},
 	}
 	for _, c := range cases {
 		got, err := Classify(c.paths, c.kind, c.inSystem)

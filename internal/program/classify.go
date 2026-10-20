@@ -17,9 +17,10 @@ type Classification struct {
 	Reason string `json:"reason"`
 }
 
-// planningDirs hold the hierarchy documents and the objective documents read
-// as initiatives (srd045, srd034 R1.1).
-var planningDirs = []string{"docs/specs/themes/", "docs/specs/initiatives/", "docs/specs/epics/", "docs/specs/features/", "docs/specs/stories/", "docs/specs/objectives/"}
+// planningDirs hold the hierarchy documents, the objective documents read
+// as initiatives (srd045, srd034 R1.1), and the sprint-end summaries, which
+// close a period (srd038).
+var planningDirs = []string{"docs/specs/themes/", "docs/specs/initiatives/", "docs/specs/epics/", "docs/specs/features/", "docs/specs/stories/", "docs/specs/objectives/", "docs/sprint-ends/"}
 
 // planning reports whether a path is a planning document: the road-map or a
 // theme, initiative, epic, feature, story, or objective document in any

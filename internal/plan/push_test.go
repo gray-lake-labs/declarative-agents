@@ -145,3 +145,28 @@ func testPlanPushFilesSprintEndIssuesOnce(t *testing.T, p trackertest.Program) {
 		t.Fatalf("second push wrote %d: %+v", p.Writes()-writes, res)
 	}
 }
+
+// TestPushFilesTheSystemsSprintEnd files the system repository's own
+// sprint-end issue once its system SRD declares it a component (srd043
+// R1.1), with its component, and skips nothing.
+func TestPushFilesTheSystemsSprintEnd(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		srd := strings.NewReplacer("srd010-delivery", "srd001-system", "| fleet |", "| system |",
+			"/program/delivery/fleet", "/"+sys).Replace(string(read(t, "../../testdata/system/srd010-delivery.md")))
+		p.AddFile(sys, "main", "docs/specs/software-requirements/srd001-system.md", []byte(srd))
+		in, f, _ := planned(t, p)
+		res, err := Push(f, in)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var system *IssueAction
+		for i := range res.SprintEnds {
+			if res.SprintEnds[i].Project == sys {
+				system = &res.SprintEnds[i]
+			}
+		}
+		if len(res.Skipped) != 0 || system == nil || system.Action != "filed" || !system.Admitted {
+			t.Fatalf("sprint-end issues %+v, skipped %v", res.SprintEnds, res.Skipped)
+		}
+	})
+}

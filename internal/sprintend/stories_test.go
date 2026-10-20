@@ -57,3 +57,30 @@ func TestSprintEndRecordsStoriesDone(t *testing.T) {
 		t.Fatalf("sprint backlog %v", got)
 	}
 }
+
+// TestSummaryFormat checks a summary's Stories done section: project#story
+// entries, or None.; the backlog reads its own stories back by id.
+func TestSummaryFormat(t *testing.T) {
+	for text, want := range map[string]int{
+		"# Sprint end 01.0\n\n## Stories done\n\n- g/po-1#st001-score\n- g/agent-ops#st001-deploy\n": 0,
+		"# Sprint end 01.0\n\n## Stories done\n\nNone.\n":                                            0,
+		"# Sprint end 01.0\n\nNo stories section.\n":                                                 1,
+		"# Sprint end 01.0\n\n## Stories done\n\n- st001-score\n":                                    1,
+		"# Sprint end 01.0\n\n## Stories done\n\n":                                                   1,
+	} {
+		if got := sprintgoal.CheckSummary(text); len(got) != want {
+			t.Errorf("CheckSummary(%q) = %v, want %d problem(s)", text, got, want)
+		}
+	}
+	dir := t.TempDir()
+	ends := filepath.Join(dir, sprintgoal.SummaryDir)
+	if err := os.MkdirAll(ends, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(ends, "01.0.md"), []byte("# Sprint end 01.0\n\n## Stories done\n\n- g/po-1#st001-score\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if done, err := sprintgoal.StoriesDone(dir); err != nil || !slices.Equal(done.Last, []string{"st001-score"}) {
+		t.Fatalf("done %+v, %v", done, err)
+	}
+}

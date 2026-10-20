@@ -1,6 +1,7 @@
 package sprintend
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/release"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
 	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func init() {
@@ -53,7 +55,15 @@ func init() {
 			if err != nil {
 				return err
 			}
-			f, err := MakeFacts(Input{Tracker: t, Project: a.project, Aggregate: agg, Releases: p.Releases, Artifact: a.artifact, Tags: tags})
+			in := Input{Tracker: t, Project: a.project, Aggregate: agg, Releases: p.Releases, Artifact: a.artifact, Tags: tags}
+			if a.control != "" && program.ProjectPath(a.control) == program.ProjectPath(a.project) {
+				subs, err := program.LoadSubsystems(t, a.control, a.ref)
+				if err != nil && !errors.Is(err, tracker.ErrNotFound) {
+					return err
+				}
+				in.Teams = subs.Repositories()
+			}
+			f, err := MakeFacts(in)
 			if err != nil {
 				return err
 			}
@@ -66,13 +76,14 @@ func init() {
 		},
 	})
 
-	var st struct{ dir, release, done string }
+	var st struct{ dir, release, done, project string }
 	cli.Default.Register(&cli.Command{
 		Group: "sprint-end", Name: "stories", Summary: "record which of the Sprint Backlog's stories the owner reports done in the sprint-end summary",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&st.dir, "dir", ".", "the sprint-end issue's worktree")
 			fs.StringVar(&st.release, "release", "", "the release whose summary records them (required)")
-			fs.StringVar(&st.done, "done", "", "the done stories' ids, comma-separated; empty records none")
+			fs.StringVar(&st.done, "done", "", "the done stories, project#story or a story id of --project, comma-separated; empty records none")
+			fs.StringVar(&st.project, "project", "", "the project a bare story id belongs to")
 		},
 		Run: func(ctx *cli.Context) error {
 			if st.release == "" {
@@ -80,9 +91,16 @@ func init() {
 			}
 			var ids []string
 			for _, id := range strings.Split(st.done, ",") {
-				if id = strings.TrimSpace(id); id != "" {
-					ids = append(ids, id)
+				if id = strings.TrimSpace(id); id == "" {
+					continue
 				}
+				if !strings.Contains(id, "#") {
+					if st.project == "" {
+						return fmt.Errorf("%w: story %q names no project; give project#story or --project", cli.ErrUsage, id)
+					}
+					id = st.project + "#" + id
+				}
+				ids = append(ids, id)
 			}
 			path := filepath.Join(st.dir, sprintgoal.SummaryDir, st.release+".md")
 			changed, err := sprintgoal.RecordStoriesDone(path, ids, ctx.DryRun)

@@ -302,11 +302,11 @@ func (Integration) SprintEnd() error {
 	var recorded struct {
 		Changed bool `json:"changed"`
 	}
-	if err := r.tpmJSON(&recorded, "sprint-end", "stories", "--dir", popped.Worktree, "--release", "01.0", "--done", "st001-score-trajectories"); err != nil {
+	if err := r.tpmJSON(&recorded, "sprint-end", "stories", "--dir", popped.Worktree, "--release", "01.0", "--project", po1, "--done", "st001-score-trajectories"); err != nil {
 		return err
 	}
 	summary, _ := os.ReadFile(filepath.Join(popped.Worktree, "docs/sprint-ends/01.0.md"))
-	c.expect(recorded.Changed && strings.Contains(string(summary), "## Stories done\n\n- st001-score-trajectories\n"), "stories done not recorded:\n%s", summary)
+	c.expect(recorded.Changed && strings.Contains(string(summary), "## Stories done\n\n- "+po1+"#st001-score-trajectories\n"), "stories done not recorded:\n%s", summary)
 	if err := r.commitPush(popped.Worktree, "Summarize release 01.0's period", "docs/sprint-ends/01.0.md"); err != nil {
 		return err
 	}
@@ -319,6 +319,7 @@ func (Integration) SprintEnd() error {
 		return err
 	}
 	c.expect(merged.Merged && slices.Contains(merged.Closed, objRef), "sprint-end merge does not close %s: %+v", objRef, merged)
+	c.expect(slices.Contains(merged.Reported, objRef), "sprint-end merge records no reported_complete on %s: %+v", objRef, merged)
 	c.expect(r.closed(po1, filed.IID), "sprint-end issue still open after its merge")
 	c.expect(r.closed(po1, objIID), "%s still open after the sprint-end merge", objRef)
 	notes, err := r.notes(po1, objIID)

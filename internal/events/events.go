@@ -162,6 +162,18 @@ func PlannedStories(release string, requirements, stories []string, environment 
 	return e, text
 }
 
+// ReportedCompleteRequired are the keys that identify a reported_complete
+// event.
+var ReportedCompleteRequired = []string{"release", "commit"}
+
+// ReportedComplete is the event a sprint-end merge posts on a Sprint Goal it
+// closes because the owner reports it complete: the release and the merge
+// commit. It is not met: no evidence stands behind it (srd038 R2.2).
+func ReportedComplete(release, commit string) (Event, string) {
+	e := Event{Name: "reported_complete", Keys: []KV{{"release", release}, {"commit", commit}}}
+	return e, fmt.Sprintf("Reported complete for release %s by the sprint-end merge %s; not met.", release, commit)
+}
+
 // Planned is the event tasks and plan post on a Sprint Goal: the release it
 // counts toward, each initiative item it serves as a pinned URL, and the
 // environment where its evidence counts (srd006 R8).
