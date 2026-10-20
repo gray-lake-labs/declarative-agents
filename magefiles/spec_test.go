@@ -3,55 +3,10 @@ package main
 import (
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
-	"strings"
 	"testing"
+
+	"github.com/gray-lake-labs/scrum-master/internal/spectool"
 )
-
-func TestSpecToolSourceUsesThePinnedRelease(t *testing.T) {
-	dir, release := t.TempDir(), t.TempDir()
-	const releaseModule = "example.com/parent/agent-core"
-	os.WriteFile(filepath.Join(release, "go.mod"), []byte("module "+releaseModule+"\n\ngo 1.26\n"), 0o644)
-	os.WriteFile(filepath.Join(release, "go.sum"), []byte("example.com/x v1.0.0 h1:abc=\n"), 0o644)
-	if err := writeSpecToolSource(dir, release); err != nil {
-		t.Fatal(err)
-	}
-	mod, _ := os.ReadFile(filepath.Join(dir, "go.mod"))
-	if !strings.Contains(string(mod), "replace "+releaseModule+" => "+release) {
-		t.Fatalf("go.mod does not resolve the release to its extracted source:\n%s", mod)
-	}
-	if sum, _ := os.ReadFile(filepath.Join(dir, "go.sum")); !strings.Contains(string(sum), "example.com/x") {
-		t.Fatal("go.sum does not carry the release's checksums")
-	}
-	main, _ := os.ReadFile(filepath.Join(dir, "main.go"))
-	for _, want := range []string{`"` + releaseModule + `/pkg/spec/markdown"`, "ConvertYAML", "FormatLinked", "LinkIndexes", "Diagnose", "not-canonical"} {
-		if !strings.Contains(string(main), want) {
-			t.Errorf("main.go lacks %s", want)
-		}
-	}
-}
-
-func TestSpecToolIsBuiltOncePerTag(t *testing.T) {
-	rel := parentRelease{Tag: "v1", Dir: t.TempDir()}
-	os.WriteFile(specToolBinary(rel.Dir), []byte("built"), 0o755)
-	ran := 0
-	got, err := ensureSpecTool(rel, func(string, string, ...string) error { ran++; return nil })
-	if err != nil || got != specToolBinary(rel.Dir) || ran != 0 {
-		t.Fatalf("got %s err %v ran %d", got, err, ran)
-	}
-	if !strings.HasPrefix(filepath.Base(got), "spectool-built-") || filepath.Base(got) == "spectool-built-" {
-		t.Errorf("binary %s is not keyed on the tool's source", got)
-	}
-}
-
-func TestModuleOfReadsTheDeclaredPath(t *testing.T) {
-	gomod := filepath.Join(t.TempDir(), "go.mod")
-	os.WriteFile(gomod, []byte("// comment\nmodule example.com/parent/agent-core\n\ngo 1.26\n"), 0o644)
-	if got, err := moduleOf(gomod); err != nil || got != "example.com/parent/agent-core" {
-		t.Fatalf("got %q err %v", got, err)
-	}
-}
 
 // TestSpecToolConvertsAndFormats builds the tool against a real release's
 // source and runs it on a copy of the corpus, converting an objective
@@ -66,7 +21,7 @@ func TestSpecToolConvertsAndFormats(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tool, err := ensureSpecTool(rel, runStreaming)
+	tool, err := spectool.Ensure(rel.Dir, filepath.Join(rel.Src, "agent-core"), runStreaming)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,40 +81,4 @@ func mustAbs(t *testing.T, p string) string {
 		t.Fatal(err)
 	}
 	return a
-}
-
-// TestSpecToolReadsObjectivesAsSRDs holds the tool to reading a hierarchy
-// or objective document, at any depth under its directory, with the SRD
-// declaration under the scope of its kind (design.md hierarchy).
-func TestSpecToolReadsObjectivesAsSRDs(t *testing.T) {
-	m := regexp.MustCompile(`hierarchyPath = regexp.MustCompile\(("[^"]+")\)`).FindStringSubmatch(specToolMain)
-	if m == nil {
-		t.Fatal("specToolMain declares no hierarchyPath")
-	}
-	pattern, err := strconv.Unquote(m[1])
-	if err != nil {
-		t.Fatal(err)
-	}
-	re := regexp.MustCompile(pattern)
-	for path, want := range map[string]bool{
-		"docs/specs/objectives/obj001-reliable-agents.md":       true,
-		"docs/specs/objectives/obj001-reliable-agents.yaml":     true,
-		"testdata/objectives/malformed/obj002-missing-owner.md": true,
-		"docs/specs/software-requirements/srd001-labels.md":     false,
-		"docs/specs/objectives/README.md":                       false,
-		"testdata/legacy/obj001-reliable-agents.yaml":           false,
-		"docs/specs/initiatives/in001-reliable-agents.md":       true,
-		"docs/specs/stories/st001-score-trajectories.md":        true,
-		"testdata/hierarchy/valid/docs/specs/themes/th001-a.md": true,
-		"docs/specs/stories/README.md":                          false,
-	} {
-		if re.MatchString(path) != want {
-			t.Errorf("%s: hierarchy = %v, want %v", path, !want, want)
-		}
-	}
-	for _, want := range []string{`declarations["srd"]`, `"objective"`, `"story"`} {
-		if !strings.Contains(specToolMain, want) {
-			t.Errorf("specToolMain lacks %s", want)
-		}
-	}
 }

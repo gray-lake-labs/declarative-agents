@@ -1,6 +1,7 @@
 package scaffold
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -142,5 +143,98 @@ func TestDoctorSubsystemGetsNoControl(t *testing.T) {
 		if strings.HasPrefix(p, "control/") || strings.Contains(p, "themes/") || strings.Contains(p, "initiatives/") {
 			t.Errorf("a subsystem repository got %s", p)
 		}
+	}
+}
+
+// The tests run offline: the spec tool finds nothing unless a test says
+// otherwise, and a Go toolchain is on PATH.
+func init() {
+	specTool = func(string, string, string) ([]string, error) { return nil, nil }
+	lookGo = func() error { return nil }
+}
+
+// stubTool replaces the spec tool for one test with one that answers each
+// command with its lines and error, and records the commands run.
+func stubTool(t *testing.T, answers map[string][]string, fails map[string]error) *[]string {
+	t.Helper()
+	var ran []string
+	prev := specTool
+	specTool = func(_, command, _ string) ([]string, error) {
+		ran = append(ran, command)
+		return answers[command], fails[command]
+	}
+	t.Cleanup(func() { specTool = prev })
+	return &ran
+}
+
+func TestDoctorRepairRewritesCanonical(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	ran := stubTool(t, map[string][]string{"fmt": {"formatted docs/VISION.md"}}, nil)
+	r, err := Doctor(DoctorOptions{Dir: dir})
+	if err != nil || len(r.Repair.Repaired) != 1 || r.Repair.Repaired[0] != "docs/VISION.md" || len(r.Repair.Findings) != 0 {
+		t.Fatalf("repair: %+v, %v", r.Repair, err)
+	}
+	if strings.Join(*ran, ",") != "fmt,check" {
+		t.Fatalf("ran %v, want fmt then check", *ran)
+	}
+	if h := humanDoctor(r); !strings.Contains(h, "repaired     docs/VISION.md") {
+		t.Errorf("report:\n%s", h)
+	}
+}
+
+func TestDoctorRepairReportsUnrepairable(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	finding := "docs/specs/epics/ep001-x.md: missing-field: goals: add the goals field"
+	stubTool(t, map[string][]string{"check": {finding}}, map[string]error{"check": errors.New("1 problem(s) in 9 document(s)")})
+	r, err := Doctor(DoctorOptions{Dir: dir})
+	if err != nil || len(r.Repair.Repaired) != 0 || len(r.Repair.Findings) != 1 || r.Repair.Findings[0] != finding {
+		t.Fatalf("repair: %+v, %v", r.Repair, err)
+	}
+}
+
+func TestDoctorRepairDryRunOnlyChecks(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	ran := stubTool(t, map[string][]string{"check": {"docs/road-map.md" + notCanonical}}, map[string]error{"check": errors.New("1 problem(s)")})
+	r, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
+	if err != nil || len(r.Repair.Repaired) != 1 || r.Repair.Repaired[0] != "docs/road-map.md" || len(r.Repair.Findings) != 0 {
+		t.Fatalf("dry-run repair: %+v, %v", r.Repair, err)
+	}
+	if strings.Join(*ran, ",") != "check" {
+		t.Fatalf("a dry run ran %v", *ran)
+	}
+}
+
+func TestDoctorRepairSkipsWithoutGo(t *testing.T) {
+	dir := older(t)
+	lookGo = func() error { return errors.New("not found") }
+	t.Cleanup(func() { lookGo = func() error { return nil } })
+	ran := stubTool(t, nil, nil)
+	r, err := Doctor(DoctorOptions{Dir: dir})
+	if err != nil || !strings.Contains(r.Repair.Skipped, "no Go toolchain") || len(*ran) != 0 {
+		t.Fatalf("repair without Go: %+v, ran %v, %v", r.Repair, *ran, err)
+	}
+	if actions(r.Files)["README.md"] != "created" {
+		t.Fatal("doctor without Go did not do the rest")
+	}
+}
+
+func TestDoctorRepairSkipsUntrackedCorpus(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	stubTool(t, nil, map[string]error{"fmt": errors.New(`no corpus document matches "all"`)})
+	r, err := Doctor(DoctorOptions{Dir: dir})
+	if err != nil || !strings.Contains(r.Repair.Skipped, "commit the documents") {
+		t.Fatalf("repair of an untracked corpus: %+v, %v", r.Repair, err)
 	}
 }

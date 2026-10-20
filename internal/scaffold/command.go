@@ -127,7 +127,7 @@ func init() {
 	var o DoctorOptions
 	cli.Default.Register(&cli.Command{
 		Group:   "doctor",
-		Summary: "bring a program repository up to date after an upgrade of tpm: missing files, tpm's text, installed skills",
+		Summary: "bring a program repository up to date after an upgrade of tpm: missing files, tpm's text, document format, installed skills",
 		Flags: func(fs *flag.FlagSet) {
 			o = DoctorOptions{}
 			fs.StringVar(&o.Dir, "dir", "", "the program repository's checkout (default: the git root)")
@@ -168,6 +168,19 @@ func humanDoctor(r DoctorResult) string {
 		b.WriteString("\n")
 	}
 	fmt.Fprintf(&b, "%d files current\n", kept)
+	verb := "repaired"
+	if r.DryRun {
+		verb = "would repair"
+	}
+	for _, p := range r.Repair.Repaired {
+		fmt.Fprintf(&b, "%-12s %s\n", verb, p)
+	}
+	for _, f := range r.Repair.Findings {
+		fmt.Fprintf(&b, "finding      %s\n", f)
+	}
+	if r.Repair.Skipped != "" {
+		fmt.Fprintf(&b, "repair skipped: %s\n", r.Repair.Skipped)
+	}
 	agents := map[string]bool{}
 	for _, f := range r.Skills {
 		fmt.Fprintf(&b, "skill %-9s %s %s\n", f.Problem, f.Agent, f.Path)
