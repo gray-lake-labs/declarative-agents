@@ -153,12 +153,12 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - required_fields:
     1. id
     1. title
+    1. context
     1. problem
     1. goals
     1. requirements
     1. non_goals
     1. acceptance_criteria
-    1. context
     1. implementation_targets
   - context_items:
     1. owner
@@ -167,7 +167,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
     1. repository
     1. path
   - numbering: same as srd
-  - purpose: Declares one subsystem, its owner (a Product Owner, the owner item of context), and its components, each a row of implementation_targets by repository URL and path. Component label values (component::<name>) come from these rows.
+  - purpose: Declares one subsystem, its owner (a Product Owner, the owner item of context), and its components, each a row of implementation_targets by repository URL and path. Component label values (component::<name>) come from these rows. The system SRD tpm init writes has the same two fields, declaring the system repository a component of the program owned by the technical program manager.
 - environment_srd:
   - location: docs/specs/software-requirements/srdNNN-env-name.md in the test-subsystem repository
   - required_fields:

@@ -21,10 +21,12 @@ type Plan struct {
 	Objectives []PlannedObjective `json:"objectives"`
 }
 
-// PlannedObjective is one initiative outcome (a requirement group) with the
-// release items it carries, its recommendations, and the Sprint Goal or
-// objective issue already filed for it. Push files one Sprint Goal per team
-// serving every outcome confirmed for the team's repository.
+// PlannedObjective is one initiative item the release carries, with the
+// outcome (requirement group) it belongs to, its recommendations, and the
+// Sprint Goal or objective issue already filed for it. An outcome's items
+// come one per entry, so the person can confirm each for a different team
+// (srd022, srd034: one Cites line per item the team serves). Push files one
+// Sprint Goal per team serving every item confirmed for its repository.
 type PlannedObjective struct {
 	Key         string   `json:"key"` // objNNN-name#Rn
 	Document    string   `json:"document"`
@@ -39,11 +41,10 @@ type PlannedObjective struct {
 }
 
 // MakePlan computes the facts and recommendations for every initiative
-// outcome of the release (srd022 R2, R3.1, R3.2). It asks nothing.
+// item of the release (srd022 R2, R3.1, R3.2). It asks nothing.
 func MakePlan(t tracker.Tracker, s Sources) (Plan, error) {
 	p := Plan{System: s.System, Release: s.Release.Version, Tag: s.Release.Tag, Milestone: s.Release.Milestone}
 	candidates := s.Subsystems.Repositories()
-	index := map[string]int{}
 	for _, id := range s.Release.Objectives {
 		doc, item, _ := strings.Cut(id, "#")
 		group, _, ok := strings.Cut(item, ".")
@@ -53,10 +54,6 @@ func MakePlan(t tracker.Tracker, s Sources) (Plan, error) {
 			return p, fmt.Errorf("release objective %s names no item of %s", id, doc)
 		}
 		key := doc + "#" + group
-		if i, seen := index[key]; seen {
-			p.Objectives[i].Items = append(p.Objectives[i].Items, item)
-			continue
-		}
 		po := PlannedObjective{Key: key, Document: doc, Group: group, Title: obj.Title, Items: []string{item}, Due: obj.Due, Candidates: candidates}
 		po.Repository = recommendRepository(s, obj)
 		po.Environment = recommendEnvironment(d, group)
@@ -71,7 +68,6 @@ func MakePlan(t tracker.Tracker, s Sources) (Plan, error) {
 				po.Existing = goal.WebURL
 			}
 		}
-		index[key] = len(p.Objectives)
 		p.Objectives = append(p.Objectives, po)
 	}
 	return p, nil

@@ -63,7 +63,7 @@ func Onboard(t tracker.Tracker, o OnboardOptions) (OnboardResult, error) {
 	if o.Path == "" {
 		o.Path = "/"
 	}
-	files, err := corpusFiles("subsystem")
+	files, err := corpusFiles("subsystem", o.Dir)
 	if err != nil {
 		return r, err
 	}
@@ -105,10 +105,11 @@ func register(t tracker.Tracker, o OnboardOptions) (Registration, error) {
 	if err != nil {
 		return Registration{}, err
 	}
+	component, _, _ := subs.ComponentFor(o.System)
 	in := tracker.NewIssue{
 		Title:       fmt.Sprintf("Register %s in %s", program.ProjectPath(o.Repository), o.Subsystem),
-		Description: registrationBody(o) + "\n\n" + marker + "\n",
-		Labels:      append(program.Labels("management", "", "", ""), program.Op(program.OpOnboard)),
+		Description: registrationBody(o, policy.AuditCommand) + "\n\n" + marker + "\n",
+		Labels:      append(program.Labels("management", "", "", component.Name), program.Op(program.OpOnboard)),
 	}
 	res, err := program.File(t, o.System, in, policy, o.DryRun)
 	if err != nil {
@@ -119,7 +120,7 @@ func register(t tracker.Tracker, o OnboardOptions) (Registration, error) {
 
 // registrationBody asks the subsystem SRD's owner for the components-table
 // row, in do-work's input format.
-func registrationBody(o OnboardOptions) string {
+func registrationBody(o OnboardOptions, audit string) string {
 	repo := program.ProjectPath(o.Repository)
 	return fmt.Sprintf(`%[1]s joins the program and asks to be listed in %[2]s (design.md D7: membership is declared, not inferred).
 
@@ -129,5 +130,5 @@ func registrationBody(o OnboardOptions) string {
 
 ## Acceptance Criteria
 
-- %[2]s lists %[1]s, and the corpus audit passes (test: mage_audit; environment: local)`, repo, o.Subsystem, o.Repository, o.Path)
+- %[2]s lists %[1]s, and the corpus audit passes (test: %[5]s; environment: local)`, repo, o.Subsystem, o.Repository, o.Path, audit)
 }

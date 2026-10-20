@@ -427,7 +427,7 @@ The kind routes pull: it decides who takes an issue, whether it is offered, and 
 <!-- req: R21.1 -->
 ### R21.1
 
-Component values come from the subsystem SRDs in the system repository: each component a subsystem SRD declares (design.md subsystem_srd) is one label component::<name>. This corpus defines no value, and no policy file lists them a second time.
+Component values come from the subsystem SRDs in the system repository: each component a subsystem SRD declares (design.md subsystem_srd) is one label component::<name>. The system SRD tpm init writes declares the system repository the same way (srd043 R1.1). This corpus defines no value, and no policy file lists them a second time.
 
 <!-- req: R21.2 -->
 ### R21.2

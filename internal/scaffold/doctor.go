@@ -141,7 +141,7 @@ func Doctor(o DoctorOptions) (DoctorResult, error) {
 		return r, err
 	}
 	r.Level = level
-	files, err := corpusFiles(level)
+	files, err := corpusFiles(level, o.Dir)
 	if err != nil {
 		return r, err
 	}

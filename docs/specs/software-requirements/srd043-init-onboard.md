@@ -57,7 +57,7 @@ since the format tools run only in this repository's mage (srd040).
 <!-- req: R1.1 -->
 ### R1.1
 
-Writes into --dir, by default the root of the git repository holding the working directory, the system repository's corpus skeleton: docs/VISION.md, docs/ARCHITECTURE.md, docs/SPECIFICATIONS.md, docs/road-map.md with one release, docs/constitutions/design.md, docs/corpus-charter.yaml, docs/external-pins.yaml, and a system SRD, docs/specs/software-requirements/srd001-system.md, which that release lists. The parent's corpus audit loads no corpus without an SRD and no road-map without a release, so the skeleton carries one of each for the owner to rewrite.
+Writes into --dir, by default the root of the git repository holding the working directory, the system repository's corpus skeleton: docs/VISION.md, docs/ARCHITECTURE.md, docs/SPECIFICATIONS.md, docs/road-map.md with one release, docs/constitutions/design.md, docs/corpus-charter.yaml, docs/external-pins.yaml, and a system SRD, docs/specs/software-requirements/srd001-system.md, which that release lists. The parent's corpus audit loads no corpus without an SRD and no road-map without a release, so the skeleton carries one of each for the owner to rewrite. The system SRD declares the system repository a component of the program: its context names the technical program manager as owner, and its implementation_targets row names the repository at its origin's URL, path /, so issues in the system repository carry a component like any team repository's (srd001 R21). A repository with no origin gets the field as an empty list.
 
 <!-- req: R1.2 -->
 ### R1.2
@@ -95,7 +95,7 @@ Writes into --dir, a checkout of the repository joining the program, the same co
 <!-- req: R2.2 -->
 ### R2.2
 
-Files one issue in the system repository that --system names, through tpm issue file (srd013 R3), asking that the subsystem SRD --subsystem names list the repository in its components table, with the repository's URL and path. It never commits to the system repository.
+Files one issue in the system repository that --system names, through tpm issue file (srd013 R3), asking that the subsystem SRD --subsystem names list the repository in its components table, with the repository's URL and path. Its criterion names the program policy's audit command as the test, and it carries the system repository's component when the system SRD declares one. It never commits to the system repository.
 
 <!-- req: R2.3 -->
 ### R2.3
