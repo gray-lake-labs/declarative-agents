@@ -125,7 +125,7 @@ func TestOnboardFilesOneRegistration(t *testing.T) {
 		t.Fatalf("%d issues in the system repository, want 1", len(issues))
 	}
 	i := issues[0]
-	if !slices.Contains(i.Labels, "plane::management") || !strings.Contains(i.Title, "g/store") ||
+	if !slices.Contains(i.Labels, "plane::management") || !slices.Contains(i.Labels, "op::onboard") || !strings.Contains(i.Title, "g/store") ||
 		!strings.Contains(i.Description, "srd010-ingest") || !strings.Contains(i.Description, registrationMarker("g/store")) || len(i.Assignees) != 0 {
 		t.Fatalf("registration issue: %+v", i)
 	}

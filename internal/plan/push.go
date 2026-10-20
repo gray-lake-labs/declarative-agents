@@ -258,6 +258,7 @@ func find(t tracker.Tracker, project, label, marker string) (*tracker.Issue, err
 // description and due date when they differ.
 func upsert(t tracker.Tracker, in PushInput, a IssueAction, existing *tracker.Issue, n tracker.NewIssue) (IssueAction, error) {
 	if existing == nil {
+		n.Labels = append(n.Labels, program.Op(program.OpPlan))
 		r, err := program.File(t, a.Project, n, in.Policy, in.DryRun)
 		if err != nil {
 			return a, err

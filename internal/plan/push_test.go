@@ -78,7 +78,7 @@ func testPushSprintUpdatesMilestoneAndChecklist(t *testing.T, p trackertest.Prog
 		t.Fatalf("milestone %s %+v", res.Milestone, m)
 	}
 	sprint := issuesOf(t, f, sys)[0]
-	if res.Sprint.Action != "filed" || !slices.Contains(sprint.Labels, "type::sprint") || sprint.Milestone != "01.1" ||
+	if res.Sprint.Action != "filed" || !slices.Contains(sprint.Labels, "type::sprint") || !slices.Contains(sprint.Labels, "op::plan") || sprint.Milestone != "01.1" ||
 		!strings.Contains(sprint.Description, "- [ ] obj001-reliable-agents#R2: A scorecard a product team reads\n- [ ] obj002-fast-scoring#R1: Score in an hour\n") {
 		t.Fatalf("sprint issue %s:\n%s", res.Sprint.Action, sprint.Description)
 	}
@@ -111,7 +111,7 @@ func testPlanPushFilesSprintEndIssuesOnce(t *testing.T, p trackertest.Program) {
 	}
 	end := issuesOf(t, f, fleet)[1]
 	if end.DueDate != "2026-11-27" || end.Milestone != "01.1" || !slices.Contains(end.Labels, "component::fleet") ||
-		!slices.Contains(end.Labels, "type::recurring") || !strings.Contains(end.Description, "docs/sprint-ends/01.1.md") ||
+		!slices.Contains(end.Labels, "type::recurring") || !slices.Contains(end.Labels, "op::plan") || !strings.Contains(end.Description, "docs/sprint-ends/01.1.md") ||
 		!strings.Contains(end.Description, "## Recurrence") {
 		t.Fatalf("sprint-end issue %+v", end)
 	}

@@ -114,6 +114,7 @@ func (Integration) Push() error {
 		c.expect(len(i.Assignees) == 0, "#%d is assigned", res.IID)
 		c.expect(slices.Contains(i.Labels, "component::po-1"), "#%d labels %v lack component::po-1", res.IID, i.Labels)
 		c.expect(slices.Contains(i.Labels, "plane::data"), "#%d labels %v lack plane::data", res.IID, i.Labels)
+		c.expect(slices.Contains(i.Labels, "op::file"), "#%d labels %v lack op::file", res.IID, i.Labels)
 	}
 	return c.err("push")
 }

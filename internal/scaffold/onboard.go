@@ -108,7 +108,7 @@ func register(t tracker.Tracker, o OnboardOptions) (Registration, error) {
 	in := tracker.NewIssue{
 		Title:       fmt.Sprintf("Register %s in %s", program.ProjectPath(o.Repository), o.Subsystem),
 		Description: registrationBody(o) + "\n\n" + marker + "\n",
-		Labels:      program.Labels("management", "", "", ""),
+		Labels:      append(program.Labels("management", "", "", ""), program.Op(program.OpOnboard)),
 	}
 	res, err := program.File(t, o.System, in, policy, o.DryRun)
 	if err != nil {

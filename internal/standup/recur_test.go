@@ -14,7 +14,7 @@ func TestRecurReopensWithNextDueDateAndPreviousRuns(t *testing.T) {
 	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
 		f := p.Tracker()
 		labels := []string{"plane::data", "type::recurring", "kind::review", "component::po-1"}
-		first, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: regression run", Labels: labels, DueDate: "2026-10-15", Milestone: "rig-01.0",
+		first, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: regression run", Labels: append(slices.Clone(labels), "op::status"), DueDate: "2026-10-15", Milestone: "rig-01.0",
 			Description: "Run the suite.\n\n## Recurrence\n\nWeekly.\n\n## Previous Runs\n\n- none\n"})
 		now := time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC)
 
@@ -28,7 +28,7 @@ func TestRecurReopensWithNextDueDateAndPreviousRuns(t *testing.T) {
 			t.Fatalf("previous instance %s, notes %+v", old.State, notes)
 		}
 		next, _ := f.GetIssue("g/po-1", r.Next)
-		if next.Title != first.Title || !slices.Equal(next.Labels, labels) || next.DueDate != "2026-10-22" || next.Milestone != "rig-01.0" {
+		if next.Title != first.Title || !slices.Equal(next.Labels, append(labels, "op::recur")) || next.DueDate != "2026-10-22" || next.Milestone != "rig-01.0" {
 			t.Fatalf("next instance %+v", next)
 		}
 		if !strings.Contains(next.Description, "## Recurrence") || !strings.Contains(next.Description, "- g/po-1#1 (due 2026-10-15): closed by tpm issue recur without its work.") || strings.Contains(next.Description, "- none") {

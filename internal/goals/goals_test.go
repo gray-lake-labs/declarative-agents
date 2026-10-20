@@ -123,7 +123,7 @@ func testPushFilesOneDatedPinnedObjectiveIssue(t *testing.T, tp trackertest.Prog
 			t.Errorf("body lacks %q:\n%s", want, body)
 		}
 	}
-	if i.DueDate != "2026-11-06" || len(i.Assignees) != 0 || !i.HasLabel("plane::management") || !i.HasLabel("component::fleet") || i.HasLabel("needs-triage") {
+	if i.DueDate != "2026-11-06" || len(i.Assignees) != 0 || !i.HasLabel("plane::management") || !i.HasLabel("component::fleet") || !i.HasLabel("op::goals") || i.HasLabel("needs-triage") {
 		t.Fatalf("issue = %+v", i)
 	}
 	notes, _ := f.ListNotes(fleet, i.IID)

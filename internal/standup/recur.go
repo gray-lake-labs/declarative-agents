@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
@@ -104,7 +105,15 @@ func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurRes
 			return r, err
 		}
 	}
-	next, err := t.CreateIssue(project, tracker.NewIssue{Title: r.Title, Description: body, Labels: i.Labels, DueDate: r.DueDate, Milestone: i.Milestone})
+	// The next instance keeps the labels but one: it was filed by recur.
+	var labels []string
+	for _, l := range i.Labels {
+		if !strings.HasPrefix(l, "op::") {
+			labels = append(labels, l)
+		}
+	}
+	labels = append(labels, program.Op(program.OpRecur))
+	next, err := t.CreateIssue(project, tracker.NewIssue{Title: r.Title, Description: body, Labels: labels, DueDate: r.DueDate, Milestone: i.Milestone})
 	if err != nil {
 		return r, err
 	}

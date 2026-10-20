@@ -16,6 +16,7 @@ var labelAxes = []struct{ name, prefix, exclusive, required string }{
 	{"plane", "plane::", "true", "all"},
 	{"type", "type::", "true", "none"},
 	{"kind", "kind::", "true", "data"},
+	{"op", "op::", "true", "none"},
 	{"state", "", "false", "none"},
 }
 
@@ -26,8 +27,8 @@ func LabelsDocument(labels []tracker.Label) string {
 	b.WriteString("---\nid: labels\ntitle: Label schema\n---\n\n")
 	b.WriteString("<!-- field: version -->\n## Version\n\n1\n\n<!-- field: axes -->\n## Axes\n")
 	axisOf := func(name string) string {
-		for _, a := range labelAxes[:3] {
-			if strings.HasPrefix(name, a.prefix) {
+		for _, a := range labelAxes {
+			if a.prefix != "" && strings.HasPrefix(name, a.prefix) {
 				return a.name
 			}
 		}
