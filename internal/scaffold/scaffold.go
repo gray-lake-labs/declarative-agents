@@ -28,8 +28,8 @@ var templates embed.FS
 // parentRepository is the parent whose format the templates follow.
 const parentRepository = "github.com/gray-lake-labs/declarative-agents"
 
-// Result is what happened to one file: created, kept, refreshed, or
-// overwritten (srd043 R3.2, R3.5).
+// Result is what happened to one file: created, kept, appended, refreshed,
+// or overwritten (srd043 R3.2, R3.5).
 type Result struct {
 	Path   string `json:"path"`
 	Action string `json:"action"`
@@ -151,8 +151,9 @@ func requireRepository(dir string) error {
 
 // write lays files into dir. A file that exists is kept unless force
 // replaces it, so a second run changes nothing; an orientation file whose
-// managed block differs has the block refreshed and the rest kept (srd043
-// R3.5). A dry run writes nothing.
+// managed block differs has the block refreshed and the rest kept, and one
+// without a block has it appended after its text (srd043 R3.5). A dry run
+// writes nothing.
 func write(dir string, files map[string][]byte, force, dryRun bool) ([]Result, error) {
 	names := make([]string, 0, len(files))
 	for n := range files {
@@ -174,11 +175,14 @@ func write(dir string, files map[string][]byte, force, dryRun bool) ([]Result, e
 			r.Action = "overwritten"
 		default:
 			r.Action, r.Reason = "kept", "edited; --force replaces it"
-			if merged, ok := refreshManaged(cur, files[n]); ok {
-				if bytes.Equal(merged, cur) {
+			if merged, how, ok := refreshManaged(cur, files[n]); ok {
+				switch {
+				case bytes.Equal(merged, cur):
 					r.Reason = "unchanged; text outside the tpm block is yours"
-				} else {
-					r.Action, r.Reason, files[n] = "refreshed", "tpm block replaced; text outside it kept", merged
+				case how == "appended":
+					r.Action, r.Reason, files[n] = how, "tpm block added after your text", merged
+				default:
+					r.Action, r.Reason, files[n] = how, "tpm block replaced; text outside it kept", merged
 				}
 			}
 		}

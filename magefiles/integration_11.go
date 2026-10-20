@@ -17,7 +17,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Doctor)
 }
 
-// Doctor builds tpm, inits a system repository, turns it into one an older tpm laid down (orientation files deleted, a block rewritten around the owner's notes, a document out of canonical form), and proves tpm doctor's dry run writes nothing, its run restores the files, refreshes the block and keeps the notes, and repairs the document so the parent's corpus audit and the spec tool's check pass, and a second run changes nothing (test-rel04.1-orientation-doctor). It needs no rig.
+// Doctor builds tpm, inits a system repository, turns it into one an older tpm laid down (README.md deleted, AGENTS.md the owner's without a block, a block rewritten around the owner's notes, a document out of canonical form), and proves tpm doctor's dry run writes nothing, its run restores README.md, appends the block to AGENTS.md, refreshes the block and keeps the notes, and repairs the document so the parent's corpus audit and the spec tool's check pass, and a second run changes nothing (test-rel04.1-orientation-doctor). It needs no rig.
 func (Integration) Doctor() error {
 	root, err := repositoryRoot()
 	if err != nil {
@@ -64,13 +64,15 @@ func (Integration) Doctor() error {
 		return err
 	}
 
-	// What an older tpm left: no README.md or AGENTS.md, an epics README
-	// whose block is an older text between the owner's notes, and a VISION
-	// out of canonical form.
-	for _, f := range []string{"README.md", scaffold.AgentsFile} {
-		if err := os.Remove(filepath.Join(repo, f)); err != nil {
-			return err
-		}
+	// What an older tpm left: no README.md, an AGENTS.md the owner wrote
+	// without tpm's block, an epics README whose block is an older text
+	// between the owner's notes, and a VISION out of canonical form.
+	if err := os.Remove(filepath.Join(repo, "README.md")); err != nil {
+		return err
+	}
+	ownAgents := "Run the linter before committing.\n"
+	if err := os.WriteFile(filepath.Join(repo, scaffold.AgentsFile), []byte(ownAgents), 0o644); err != nil {
+		return err
 	}
 	epics := filepath.Join(repo, "docs", "specs", "epics", "README.md")
 	older := "owner's note above\n<!-- tpm:begin: an older note -->\nan older tpm's text\n" + scaffold.BlockEnd + "\nowner's note below\n"
@@ -106,7 +108,7 @@ func (Integration) Doctor() error {
 			got[f.Path] = f.Action
 		}
 		c.expect(r.Level == "system", "%s: level %q", run, r.Level)
-		c.expect(got["README.md"] == "created" && got[scaffold.AgentsFile] == "created", "%s: root files %v", run, got)
+		c.expect(got["README.md"] == "created" && got[scaffold.AgentsFile] == "appended", "%s: root files %v", run, got)
 		c.expect(got["docs/specs/epics/README.md"] == "refreshed", "%s: epics README %q", run, got["docs/specs/epics/README.md"])
 		c.expect(slices.Equal(r.Repair.Repaired, []string{"docs/VISION.md"}) && r.Repair.Skipped == "", "%s: repair %+v", run, r.Repair)
 	}
@@ -120,7 +122,8 @@ func (Integration) Doctor() error {
 	_, statErr := os.Stat(filepath.Join(repo, "README.md"))
 	b, _ := os.ReadFile(epics)
 	v, _ := os.ReadFile(vision)
-	c.expect(errors.Is(statErr, os.ErrNotExist) && string(b) == older && string(v) != string(canonical), "the dry run wrote")
+	ag, _ := os.ReadFile(filepath.Join(repo, scaffold.AgentsFile))
+	c.expect(errors.Is(statErr, os.ErrNotExist) && string(b) == older && string(v) != string(canonical) && string(ag) == ownAgents, "the dry run wrote")
 
 	first, err := doctor()
 	if err != nil {
@@ -134,6 +137,8 @@ func (Integration) Doctor() error {
 		"refreshed epics README:\n%s", b)
 	v, _ = os.ReadFile(vision)
 	c.expect(string(v) == string(canonical), "VISION not repaired to its canonical form")
+	a, _ := os.ReadFile(filepath.Join(repo, scaffold.AgentsFile))
+	c.expect(strings.HasPrefix(string(a), ownAgents+"\n<!-- tpm:begin"), "AGENTS.md: the owner's text not first:\n%s", a)
 	if err := sh("git", "add", "-A"); err != nil {
 		return err
 	}

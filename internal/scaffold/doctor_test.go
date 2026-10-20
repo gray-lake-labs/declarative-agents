@@ -70,6 +70,30 @@ func TestDoctorRefreshesBlock(t *testing.T) {
 	}
 }
 
+func TestDoctorAppendsToOrientationWithoutBlock(t *testing.T) {
+	dir := older(t)
+	agents := filepath.Join(dir, AgentsFile)
+	os.WriteFile(agents, []byte("Run the linter before committing.\n"), 0o644)
+	dry, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
+	if err != nil || actions(dry.Files)[AgentsFile] != "appended" {
+		t.Fatalf("dry run: %v, %v", actions(dry.Files), err)
+	}
+	if b, _ := os.ReadFile(agents); string(b) != "Run the linter before committing.\n" {
+		t.Fatalf("the dry run wrote AGENTS.md:\n%s", b)
+	}
+	r, err := Doctor(DoctorOptions{Dir: dir})
+	if err != nil || actions(r.Files)[AgentsFile] != "appended" {
+		t.Fatalf("doctor: %v, %v", actions(r.Files), err)
+	}
+	b, _ := os.ReadFile(agents)
+	if !strings.HasPrefix(string(b), "Run the linter before committing.\n\n"+BlockBegin) || !strings.Contains(string(b), "# Agent instructions") {
+		t.Fatalf("appended AGENTS.md:\n%s", b)
+	}
+	if again, _ := Doctor(DoctorOptions{Dir: dir}); actions(again.Files)[AgentsFile] != "kept" {
+		t.Fatalf("second run: %s", actions(again.Files)[AgentsFile])
+	}
+}
+
 func TestDoctorReportsStaleSkills(t *testing.T) {
 	dir := repo(t)
 	if _, err := Init(InitOptions{Dir: dir, Agents: []string{"claude"}, Version: "v0.1"}); err != nil {

@@ -95,6 +95,24 @@ func TestOnboardWritesOrientation(t *testing.T) {
 	}
 }
 
+func TestOnboardAppendsToExistingAgentsAndReadme(t *testing.T) {
+	dir := repo(t)
+	own := map[string]string{"README.md": "# store\n\nThe team's own README.\n", AgentsFile: "Use tabs.\n"}
+	for f, text := range own {
+		os.WriteFile(filepath.Join(dir, f), []byte(text), 0o644)
+	}
+	r, err := Onboard(system(t), joining(dir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for f, text := range own {
+		b, _ := os.ReadFile(filepath.Join(dir, f))
+		if actions(r.Files)[f] != "appended" || !strings.HasPrefix(string(b), text+"\n"+BlockBegin+"\n") || !strings.HasSuffix(string(b), BlockEnd+"\n") {
+			t.Errorf("%s: %s\n%s", f, actions(r.Files)[f], b)
+		}
+	}
+}
+
 func TestOnboardFilesOneRegistration(t *testing.T) {
 	f := system(t)
 	before := len(f.Files)

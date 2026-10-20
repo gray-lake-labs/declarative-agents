@@ -2,7 +2,9 @@ onboard: add a repository to a program
 
 A Product Owner runs this in a repository joining the program. It writes the
 same corpus at the subsystem's level, with README.md, AGENTS.md, and a
-README in epics/, features/, and stories/, and files one issue in the system
+README in epics/, features/, and stories/; a README.md or AGENTS.md the
+repository already has keeps its text, with tpm's text appended after it.
+It files one issue in the system
 repository asking that the subsystem SRD list the repository; it never
 commits there. Running it again files nothing while the registration is open
 or once the SRD lists the repository.

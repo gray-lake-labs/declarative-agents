@@ -61,6 +61,38 @@ go test ./internal/scaffold -run '^Test(InitWritesOrientation|OnboardWritesOrien
 
 - [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC5](../software-requirements/srd043-init-onboard.md#ac5)
 
+<!-- case: an existing AGENTS.md or README gets tpm's block appended | status: implemented -->
+### an existing AGENTS.md or README gets tpm's block appended
+
+<!-- field: use_case -->
+#### Use case
+
+[rel04.1-uc001-orient-and-repair](../use-cases/rel04.1-uc001-orient-and-repair.md)
+
+<!-- field: integration_target -->
+#### Integration target
+
+mage integration:onboard
+
+<!-- field: go_test -->
+#### Go test
+
+go test ./internal/scaffold -run '^Test(InitAppendsToOrientationWithoutBlock|OnboardAppendsToExistingAgentsAndReadme|DoctorAppendsToOrientationWithoutBlock)$'
+
+<!-- field: expected_outputs | form: "tree" -->
+#### Expected outputs
+
+- existing_agents_and_readme: appended, the owner's text first and tpm's block after one blank line
+- second_run: kept
+- dry_run: appended reported, nothing written
+- force: the whole file replaced
+- edited_vision: kept
+
+<!-- field: traces -->
+#### Traces
+
+- [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC6](../software-requirements/srd043-init-onboard.md#ac6)
+
 <!-- case: doctor brings an older repository up to date | status: implemented -->
 ### doctor brings an older repository up to date
 
@@ -84,9 +116,10 @@ go test ./internal/scaffold -run '^TestDoctor(AddsMissing|RefreshesBlock|Reports
 
 - missing_files: created, and nothing else
 - changed_block: refreshed, with the text around it kept
+- orientation_file_without_block: appended, with the owner's text first
 - stale_skills: reported with tpm install as the fix, none installed
 - dry_run: the same report, and nothing written
-- second_run: nothing created, refreshed, or repaired
+- second_run: nothing created, appended, refreshed, or repaired
 - not_a_program_repository: refused with the reason
 
 <!-- field: traces -->
