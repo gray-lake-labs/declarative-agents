@@ -48,10 +48,10 @@ The tracker repository comes first, so every step after it is recorded there. `t
    EOF
    /tmp/tpm issue file --project <program path> --system <program path> --title "Generate the program from the seed" \
      --body-file /tmp/generate.md --path docs/VISION.md --path docs/ARCHITECTURE.md --path docs/specs/themes/th001-<name>.md
-   /tmp/tpm issue pop --project <program path> --issue <issue number> --dir .
+   /tmp/tpm issue pop --project <program path> --issue <issue number> --dir . --control <program path>
    ```
 
-   `tpm issue pop` prints the worktree it opened, a sibling of the checkout. Steps 3 to 5 run there.
+   The issue needs no `component::` label: the program's subsystem SRDs declare no component until the hierarchy and its SRDs exist. `tpm issue pop` prints the worktree it opened, a sibling of the checkout. Steps 3 to 5 run there.
 
 3. In that worktree, give a coding agent this brief, with the angle-bracket placeholders filled in:
 

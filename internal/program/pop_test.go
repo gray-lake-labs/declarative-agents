@@ -82,6 +82,23 @@ func TestPopRefusesHeldOrUnadmitted(t *testing.T) {
 	}
 }
 
+// TestPopReportsUnadmittedManagementIssue pops a management issue that
+// fails admission, which admission does not gate, and reports why it fails
+// (srd013 R7.1).
+func TestPopReportsUnadmittedManagementIssue(t *testing.T) {
+	f, g := newPopFixture(t)
+	i, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Plan the next release", Description: goodBody,
+		Labels: []string{"plane::management"}})
+	r, err := Pop(f, g, "g/po-1", i.IID, ".", Defaults(), false)
+	if err != nil || !r.Assigned || len(r.NotAdmitted) != 1 || !strings.Contains(r.NotAdmitted[0], "component") {
+		t.Fatalf("r=%+v err=%v", r, err)
+	}
+	ok := admitted(f, "Admitted")
+	if r, err := Pop(f, g, "g/po-1", ok.IID, ".", Defaults(), false); err != nil || len(r.NotAdmitted) != 0 {
+		t.Fatalf("admitted issue: r=%+v err=%v", r, err)
+	}
+}
+
 func TestPopCreatesBranchAndWorktree(t *testing.T) {
 	f, g := newPopFixture(t)
 	i := admitted(f, "Score one agent: trajectories & rubric")

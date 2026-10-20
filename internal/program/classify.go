@@ -24,15 +24,17 @@ var planningDirs = []string{"docs/specs/themes/", "docs/specs/initiatives/", "do
 // planning reports whether a path is a planning document: the road-map or a
 // theme, initiative, epic, feature, story, or objective document in any
 // repository, and an SRD in the system repository, which is a system or
-// subsystem SRD (srd001 R1.1).
+// subsystem SRD (srd001 R1.1). A directory, with or without its trailing
+// slash, is planning when the documents in it are.
 func planning(p string, inSystem bool) bool {
 	p = path.Clean(strings.TrimPrefix(p, "./"))
+	dir := p + "/"
 	switch {
 	case p == "docs/road-map.md":
 		return true
-	case slices.ContainsFunc(planningDirs, func(d string) bool { return strings.HasPrefix(p, d) }):
+	case slices.ContainsFunc(planningDirs, func(d string) bool { return strings.HasPrefix(dir, d) }):
 		return true
-	case inSystem && strings.HasPrefix(p, SRDDir+"/"):
+	case inSystem && strings.HasPrefix(dir, SRDDir+"/"):
 		return true
 	}
 	return false
