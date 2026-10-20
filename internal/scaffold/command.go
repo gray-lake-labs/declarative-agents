@@ -219,6 +219,8 @@ func humanInit(r InitResult) string {
 		switch {
 		case t.Seeded:
 			fmt.Fprintf(&b, "tracker %s: first commit made, %d labels\n", t.Remote, len(t.Labels))
+		case t.Remote == "":
+			fmt.Fprintf(&b, "tracker: %s\n", t.Reason)
 		default:
 			fmt.Fprintf(&b, "tracker %s: %s\n", t.Remote, t.Reason)
 		}

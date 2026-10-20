@@ -193,6 +193,21 @@ func TestInitLeavesTrackerWithCommits(t *testing.T) {
 	}
 }
 
+func TestInitReportsNoTracker(t *testing.T) {
+	t.Setenv("TPM_TRACKER", "")
+	r, err := Init(InitOptions{Dir: repo(t)})
+	if err != nil || r.Tracker == nil || r.Tracker.Seeded || r.Tracker.Reason != NoTracker {
+		t.Fatalf("init without a tracker: %+v, %v", r.Tracker, err)
+	}
+	if out := humanInit(r); !strings.Contains(out, "tracker: "+NoTracker) {
+		t.Fatalf("init without a tracker does not say so:\n%s", out)
+	}
+	t.Setenv("TPM_TRACKER", "https://example.com/tracker.git")
+	if r, err := Init(InitOptions{Dir: repo(t)}); err != nil || r.Tracker != nil {
+		t.Fatalf("init with TPM_TRACKER set reported a tracker: %+v, %v", r.Tracker, err)
+	}
+}
+
 func TestScaffoldRerunChangesNothing(t *testing.T) {
 	dir := repo(t)
 	if _, err := Init(InitOptions{Dir: dir}); err != nil {
