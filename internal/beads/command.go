@@ -27,13 +27,15 @@ func init() {
 			if err != nil {
 				return err
 			}
-			lines := []string{fmt.Sprintf("%d provisional pops reconciled", len(r))}
-			for _, x := range r {
+			lines := []string{fmt.Sprintf("%d queued writes pushed; the tracker is at %s", len(r.Pushed), r.Commit)}
+			for _, w := range r.Pushed {
+				lines = append(lines, "pushed: "+w)
+			}
+			lines = append(lines, fmt.Sprintf("%d provisional pops reconciled", len(r.Reconciled)))
+			for _, x := range r.Reconciled {
 				lines = append(lines, x.ID+": "+x.Outcome)
 			}
-			return ctx.Emit(struct {
-				Reconciled []Reconciled `json:"reconciled"`
-			}{r}, strings.Join(lines, "\n"))
+			return ctx.Emit(r, strings.Join(lines, "\n"))
 		},
 	})
 }

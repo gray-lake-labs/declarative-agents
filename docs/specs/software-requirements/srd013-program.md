@@ -173,7 +173,7 @@ Installs into the worktree the skills of every agent installed in the checkout (
 <!-- req: R8.1 -->
 ### R8.1
 
-tpm issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists.
+tpm issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). With --summary (or --summary-file), the run's result is the run summary it closes the issue with and follows the outcome on the Previous Runs line, so a run that merges no file still carries its result forward. An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists.
 
 <!-- req: R8.2 -->
 ### R8.2

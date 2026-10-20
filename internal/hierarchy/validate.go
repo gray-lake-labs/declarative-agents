@@ -147,7 +147,7 @@ func (v *checker) parent(d *Doc, byID map[string]*Doc) {
 		return
 	}
 	if strings.Contains(d.Parent, "://") {
-		if err := links.CheckPinned(d.Parent); err != nil {
+		if err := links.CheckPinnedDocument(d.Parent); err != nil {
 			v.add("parent", "%v", err)
 		}
 		return

@@ -191,7 +191,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - numbering: same as srd
   - purpose: "Declares one environment of the chain (local, dev, staging, production PoC, customer R\u0026D): who owns it and what triggers promotion into it (context items), and which test suites run there (test_suite_traces). Promotion is CI/CD in the test subsystem; handoff into a customer R\u0026D environment is a human approval."
 - hierarchy_links:
-  - parent: at most one, naming the level above by kind; theme, then initiative, then epic, then feature, then story; a story may name an epic directly, and only a feature must have a parent
+  - parent: at most one, naming the level above by kind; theme, then initiative, then epic, then feature, then story; a story may name an epic directly, and only a feature must have a parent; a parent in another repository is a URL pinned to a tag, whose anchor is optional because it names the whole document
   - blocked_by: the documents that must finish before this one can; waiting derives from it (srd007)
   - depends_on: the documents whose output this one needs, which may proceed at the same time; reported, never blocking
   - relates_to: documents that share context; reported, never blocking

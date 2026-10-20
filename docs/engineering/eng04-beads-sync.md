@@ -76,7 +76,7 @@ successful synchronization of any command. What offline operation never
 does is silently present the cache as current, or let two offline
 sessions believe they both hold an assignment: an assignment taken
 offline is provisional, is marked so in the pop's own output, and
-confirms or reports as lost when tpm tracker reconcile runs back online. Every command's output names the tracker commit it read, and says when that was the cache.
+confirms or reports as lost when tpm tracker reconcile runs back online; reconcile also lists the queued writes it pushed and names the tracker commit after the push. Every command's output names the tracker commit it read, and says when that was the cache.
 
 <!-- section: choosing-the-backend -->
 ## Choosing the backend

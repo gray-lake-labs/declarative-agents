@@ -90,3 +90,26 @@ func TestRecurFindsEarlierMarker(t *testing.T) {
 		}
 	})
 }
+
+// TestRecurCarriesTheRunsSummary closes an open instance with the run's
+// summary and writes it on the next instance's Previous Runs line.
+func TestRecurCarriesTheRunsSummary(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		f := p.Tracker()
+		first, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: Daily Scrum", Labels: []string{"type::recurring"}, DueDate: "2026-10-15",
+			Description: "Scrum.\n\n## Previous Runs\n\n- none\n"})
+		r, err := Recur(f, "g/po-1", first.IID, RecurOptions{Now: time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC),
+			Summary: "Day 3: the grader\nis blocked on trajectories."})
+		if err != nil || !r.Closed {
+			t.Fatalf("recur: %+v %v", r, err)
+		}
+		notes, _ := f.ListNotes("g/po-1", first.IID)
+		if len(notes) != 1 || !strings.HasPrefix(notes[0].Body, "Run summary: Day 3: the grader\nis blocked on trajectories.") {
+			t.Fatalf("notes %+v", notes)
+		}
+		next, _ := f.GetIssue("g/po-1", r.Next)
+		if !strings.Contains(next.Description, "closed by tpm issue recur without its work. Day 3: the grader is blocked on trajectories.\n") {
+			t.Fatalf("next body:\n%s", next.Description)
+		}
+	})
+}
