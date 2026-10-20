@@ -1,7 +1,7 @@
 ---
 id: rel04.2-uc001-draft-a-planning-document
 title: An Owner Drafts a Planning Document from a Description in Conversation
-status: specified
+status: implemented
 priority: P1
 test_suite: test-rel04.2-draft
 ---

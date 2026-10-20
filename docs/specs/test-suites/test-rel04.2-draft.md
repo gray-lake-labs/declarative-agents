@@ -2,7 +2,7 @@
 id: test-rel04.2-draft
 title: Test Suite for Release 04.2 A Planning Document Drafted in Conversation
 release: "04.2"
-status: specified
+status: implemented
 ---
 
 <!-- field: overview -->
@@ -29,7 +29,7 @@ its line limit.
 <!-- field: test_cases -->
 ## Test cases
 
-<!-- case: backlog list names the hierarchy | status: specified -->
+<!-- case: backlog list names the hierarchy | status: implemented -->
 ### backlog list names the hierarchy
 
 <!-- field: use_case -->
@@ -59,7 +59,7 @@ go test ./internal/backlog -run '^TestList'
 
 - [srd045-backlog](../software-requirements/srd045-backlog.md) [AC8](../software-requirements/srd045-backlog.md#ac8)
 
-<!-- case: backlog check is the hierarchy gate | status: specified -->
+<!-- case: backlog check is the hierarchy gate | status: implemented -->
 ### backlog check is the hierarchy gate
 
 <!-- field: use_case -->
@@ -89,7 +89,7 @@ go test ./internal/backlog -run '^TestCheck'
 
 - [srd045-backlog](../software-requirements/srd045-backlog.md) [AC8](../software-requirements/srd045-backlog.md#ac8)
 
-<!-- case: the draft skill is installed within its limit | status: specified -->
+<!-- case: the draft skill is installed within its limit | status: implemented -->
 ### the draft skill is installed within its limit
 
 <!-- field: use_case -->

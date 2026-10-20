@@ -47,39 +47,12 @@ A program's system repository can be generated from one document that describes 
    > - Epics, platform setup first: `<one epic per major part of the system, each with its owning team>`. Each epic has a horizon longer than one sprint, `depends_on` links to the epics it needs, and acceptance criteria that name a test and an environment (`local`, `dev`, or `staging`).
    > - Deferred: `<the parts of the system this program does not build>`, and the documents say so.
    >
-   > **Rules.** Every hierarchy document has status `to_be_agreed`. Every acceptance criterion traces only to items in its own document. Leave `delivered_by` out until the teams' requirement documents exist. Diagrams are inline Mermaid, with no image files. Write no personal names and no links to private repositories. When the files are written, run the hierarchy gate and fix every finding.
+   > **Rules.** Every hierarchy document has status `to_be_agreed`. Every acceptance criterion traces only to items in its own document. Leave `delivered_by` out until the teams' requirement documents exist. Diagrams are inline Mermaid, with no image files. Write no personal names and no links to private repositories. When the files are written, run `tpm backlog check` and fix every finding.
 
-3. Run the hierarchy gate. `mage audit` runs it in this repository; until tpm exposes it to program repositories, build a checker from a clone of this one and run it from the program's root:
+3. Run the hierarchy gate, and fix every finding until it passes:
 
    ```bash
-   G=$(mktemp -d) && git clone -q <scrum-master checkout> "$G/sm" && mkdir -p "$G/sm/cmd/hiercheck"
-   cat > "$G/sm/cmd/hiercheck/main.go" <<'EOF'
-   package main
-
-   import (
-   	"fmt"
-   	"os"
-
-   	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
-   )
-
-   func main() {
-   	docs, err := hierarchy.Load(os.Args[1])
-   	if err != nil {
-   		fmt.Println("load:", err)
-   		os.Exit(2)
-   	}
-   	findings := hierarchy.Validate(docs)
-   	for _, f := range findings {
-   		fmt.Println(f)
-   	}
-   	if len(findings) > 0 {
-   		os.Exit(1)
-   	}
-   	fmt.Println("hierarchy gate: pass,", len(docs), "documents")
-   }
-   EOF
-   (cd "$G/sm" && go build -o /tmp/hiercheck ./cmd/hiercheck) && /tmp/hiercheck .
+   /tmp/tpm backlog check
    ```
 
 4. Commit the generated program and tag it, so later runs and regenerations can be compared against it:
@@ -89,7 +62,7 @@ A program's system repository can be generated from one document that describes 
    git tag -a "baseline/$(date -u +%Y%m%dT%H%M%SZ)" -m "Program generated from the seed"
    ```
 
-Every hierarchy document starts as `to_be_agreed`; agreeing them is the program's first planning decision, and `tpm plan` reads only agreed documents.
+Every hierarchy document starts as `to_be_agreed`; agreeing them is the program's first planning decision, and `tpm plan` reads only agreed documents. To add or rework one document at a time afterwards, use the `draft` skill, which drafts any level from a description in conversation with its owner.
 
 ## Build and test
 
