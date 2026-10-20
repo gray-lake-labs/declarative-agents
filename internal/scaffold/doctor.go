@@ -97,8 +97,8 @@ func repair(dir string, dryRun bool) RepairResult {
 	return r
 }
 
-// systemSRDPath and subsystemSRDPath are the SRDs init and onboard write, by which
-// doctor knows a repository's level.
+// systemSRDPath and subsystemSRDPath are the SRDs init and onboard write,
+// by which doctor knows a repository's level.
 const (
 	systemSRDPath    = "docs/specs/software-requirements/srd001-system.md"
 	subsystemSRDPath = "docs/specs/software-requirements/srd001-subsystem.md"

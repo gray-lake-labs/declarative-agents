@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/gray-lake-labs/scrum-master/internal/spectool"
 )
 
 // parentRepository is the parent corpus whose specification-critic agent
@@ -70,30 +70,7 @@ func runCorpusAudit(root string, run commandRunner) error {
 }
 
 // pinnedRelease reads the parent release docs/external-pins.yaml tracks.
-func pinnedRelease(root string) (string, error) {
-	var pins struct {
-		Pins map[string]string `yaml:"pins"`
-	}
-	if err := readYAML(filepath.Join(root, pinsFile), &pins); err != nil {
-		return "", err
-	}
-	tag := pins.Pins[parentRepository]
-	if tag == "" {
-		return "", fmt.Errorf("%s pins no release of %s", pinsFile, parentRepository)
-	}
-	return tag, nil
-}
-
-func readYAML(path string, into any) error {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	if err := yaml.Unmarshal(data, into); err != nil {
-		return fmt.Errorf("%s: %w", path, err)
-	}
-	return nil
-}
+func pinnedRelease(root string) (string, error) { return spectool.Pinned(root) }
 
 func repositoryRoot() (string, error) {
 	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()

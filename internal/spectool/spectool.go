@@ -88,7 +88,10 @@ func Run(dir, command, scope string) ([]string, error) {
 		}
 	}
 	if err != nil {
-		return lines, fmt.Errorf("%s", strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(stderr.String()), "spectool: ")))
+		if msg := strings.TrimPrefix(strings.TrimSpace(stderr.String()), "spectool: "); msg != "" {
+			return lines, fmt.Errorf("%s", msg)
+		}
+		return lines, fmt.Errorf("run the spec tool: %w", err)
 	}
 	return lines, nil
 }
