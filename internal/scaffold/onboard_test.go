@@ -70,6 +70,31 @@ func TestOnboardWritesMemberSkeleton(t *testing.T) {
 	}
 }
 
+func TestOnboardWritesOrientation(t *testing.T) {
+	dir := repo(t)
+	r, err := Onboard(system(t), joining(dir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := actions(r.Files)
+	for f, want := range map[string]string{
+		"README.md":                     "# Team subsystem repository",
+		"docs/specs/epics/README.md":    "`epNNN-short-name.md`",
+		"docs/specs/features/README.md": "`ftNNN-short-name.md`",
+		"docs/specs/stories/README.md":  "`stNNN-short-name.md`",
+	} {
+		b, _ := os.ReadFile(filepath.Join(dir, f))
+		if got[f] != "created" || !strings.Contains(string(b), want) || !strings.Contains(string(b), orientationMarkers[0]) {
+			t.Errorf("%s: %q\n%s", f, got[f], b)
+		}
+	}
+	for _, f := range []string{"docs/specs/themes/README.md", "docs/specs/initiatives/README.md"} {
+		if _, ok := got[f]; ok {
+			t.Errorf("a member repository got %s", f)
+		}
+	}
+}
+
 func TestOnboardFilesOneRegistration(t *testing.T) {
 	f := system(t)
 	before := len(f.Files)

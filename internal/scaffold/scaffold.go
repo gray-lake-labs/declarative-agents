@@ -58,9 +58,9 @@ var levels = map[string]string{
 }
 
 // corpusFiles is the corpus skeleton every repository of a program carries
-// (design.md D7), for a repository at level: the templates with the level
-// and its owner filled in, the design constitution, the charter, and the
-// parent pin.
+// (design.md D7), for a repository at level: the common templates and the
+// level's own orientation files (srd043 R1.6, R2.4) with the level and its
+// owner filled in, the design constitution, the charter, and the parent pin.
 func corpusFiles(level string) (map[string][]byte, error) {
 	owner, ok := levels[level]
 	if !ok {
@@ -69,17 +69,18 @@ func corpusFiles(level string) (map[string][]byte, error) {
 	fill := strings.NewReplacer("{{level}}", level, "{{Level}}", strings.ToUpper(level[:1])+level[1:],
 		"{{owner}}", owner, "{{Owner}}", strings.ToUpper(owner[:1])+owner[1:])
 	files := map[string][]byte{}
-	root := path.Join("templates", "corpus")
-	err := fs.WalkDir(templates, root, func(p string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+	for _, root := range []string{path.Join("templates", "corpus"), path.Join("templates", level)} {
+		err := fs.WalkDir(templates, root, func(p string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return err
+			}
+			b, err := templates.ReadFile(p)
+			files[fill.Replace(strings.TrimSuffix(strings.TrimPrefix(p, root+"/"), ".tmpl"))] = []byte(fill.Replace(string(b)))
 			return err
+		})
+		if err != nil {
+			return nil, err
 		}
-		b, err := templates.ReadFile(p)
-		files[fill.Replace(strings.TrimSuffix(strings.TrimPrefix(p, root+"/"), ".tmpl"))] = []byte(fill.Replace(string(b)))
-		return err
-	})
-	if err != nil {
-		return nil, err
 	}
 	release, err := ParentRelease()
 	if err != nil {

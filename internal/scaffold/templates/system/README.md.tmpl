@@ -1,0 +1,41 @@
+<!-- tpm:begin: tpm writes the text down to tpm:end, and tpm doctor refreshes it; write your own notes outside it -->
+# Program system repository
+
+This is the program's system repository. The technical program manager
+owns it. It holds the program's intent: the vision, the architecture, the
+release road map, and the top of the planning hierarchy. The work that
+delivers that intent happens in the teams' subsystem repositories, which
+point back here.
+
+## Read it in this order
+
+1. docs/VISION.md: what the program is for, and what it is not.
+2. docs/specs/themes/: the strategic areas the program serves.
+3. docs/specs/initiatives/: the outcomes the program commits to, each under a theme.
+4. docs/specs/epics/: the large bodies of work that deliver an initiative and span teams.
+5. docs/ARCHITECTURE.md: the subsystems and how they fit together.
+6. docs/road-map.md: the releases, and what each one proves.
+
+Each folder under docs/specs/ has a README that says what its documents are.
+
+## The planning hierarchy
+
+| Level | What it is | Timeframe | Owner | Parent | Lives in |
+| --- | --- | --- | --- | --- | --- |
+| Theme | A strategic area: the why | Months to years | Technical program manager | none | this repository |
+| Initiative | An outcome several teams deliver: the program's Product Goal | Several quarters | Technical program manager | a theme | this repository |
+| Epic | A large body of work under an initiative | One to three months | A Product Owner | an initiative | here when it spans teams, else the team's repository |
+| Feature (optional) | A capability inside an epic | Two to four sprints | A Product Owner | an epic | the team's repository |
+| Story | The unit of value a team finishes in one sprint | One sprint | The team's Product Owner | a feature or an epic | the team's repository |
+
+The chain from intent to evidence runs initiative, epic, story, issue,
+merge, release. Progress is computed from the story points of done
+stories, so no one types a percentage. Each sprint, every team gets a
+Sprint Goal issue that cites the initiative items it serves.
+
+## Where to go next
+
+- AGENTS.md: the tpm commands and skills that work on this repository, and the rules for changing it.
+- tpm help: the process, one page per command group and concept. Start with tpm help backlog.
+- docs/constitutions/design.md: the format every document here follows.
+<!-- tpm:end -->

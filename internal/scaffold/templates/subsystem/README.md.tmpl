@@ -1,0 +1,42 @@
+<!-- tpm:begin: tpm writes the text down to tpm:end, and tpm doctor refreshes it; write your own notes outside it -->
+# Team subsystem repository
+
+This repository belongs to a team in a program. Its Product Owner owns
+the documents here. It holds the team's subsystem specification and the
+lower part of the planning hierarchy: the team's epics, features, and
+stories. The program's themes and initiatives, and the epics that span
+teams, live in the program's system repository. This repository's
+documents name those as their parents by URL.
+
+## Read it in this order
+
+1. docs/VISION.md: what this subsystem is for, and what it is not.
+2. docs/specs/software-requirements/srd001-subsystem.md: what the subsystem must do.
+3. docs/specs/epics/: the team's large bodies of work, each under a program initiative.
+4. docs/specs/features/: optional capabilities inside an epic.
+5. docs/specs/stories/: the Product Backlog, the stories the team finishes one sprint at a time.
+6. docs/road-map.md: the releases, and what each one proves.
+
+Each folder under docs/specs/ has a README that says what its documents are.
+
+## The planning hierarchy
+
+| Level | What it is | Timeframe | Owner | Parent | Lives in |
+| --- | --- | --- | --- | --- | --- |
+| Theme | A strategic area: the why | Months to years | Technical program manager | none | the system repository |
+| Initiative | An outcome several teams deliver: the program's Product Goal | Several quarters | Technical program manager | a theme | the system repository |
+| Epic | A large body of work under an initiative | One to three months | A Product Owner | an initiative | here when one team owns it |
+| Feature (optional) | A capability inside an epic | Two to four sprints | The Product Owner | an epic | this repository |
+| Story | The unit of value a team finishes in one sprint | One sprint | The Product Owner | a feature or an epic | this repository |
+
+Each sprint the team gets a Sprint Goal issue. At Sprint Planning, the
+team lists on it the stories it selected, ranked and sized in story
+points. Progress rolls up from the points of done stories through the
+parent links.
+
+## Where to go next
+
+- AGENTS.md: the tpm commands and skills that work on this repository, and the rules for changing it.
+- tpm help: the process, one page per command group and concept. Start with tpm help backlog.
+- docs/constitutions/design.md: the format every document here follows.
+<!-- tpm:end -->

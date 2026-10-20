@@ -1,0 +1,25 @@
+<!-- tpm:begin: tpm writes the text down to tpm:end, and tpm doctor refreshes it; write your own notes outside it -->
+# Epics
+
+An epic is a large body of work under a program initiative, typically
+one to three months long. This team's Product Owner owns it. The epics
+here are the ones this team owns alone; an epic that spans teams lives in
+the system repository. An epic is not a unit of work: the stories under
+it are planned into sprints, and its progress is the share of their story
+points done.
+
+## Documents here
+
+- Name: `epNNN-short-name.md`, numbered in order and never reused.
+- Format: an SRD in the pinned parent release's Markdown format, with the fields docs/constitutions/design.md lists for this level.
+- Status: `to_be_agreed` while it is drafted, `agreed` once it passes review, and `retired` when it is replaced. Only agreed documents are planned and rolled up. A retired document keeps its path, because links pin it.
+- Parent: an initiative in the system repository, named by URL. Features and stories name an epic as theirs.
+- Changes go through an issue and the corpus gate, never a direct edit on main.
+
+## What reads them
+
+- tpm plan candidates lists the stories under an epic in the team's Product Backlog.
+- Features and stories name an epic as their parent; its progress is the story points of its done stories over those of all its agreed stories.
+
+See tpm help backlog for the whole hierarchy.
+<!-- tpm:end -->
