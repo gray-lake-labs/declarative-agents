@@ -19,7 +19,7 @@ Specifications lead implementation. A new skill or a change to one starts with a
 <!-- article: D2 -->
 ### D2 - Every file is Markdown with tags
 
-Every file is Markdown with marker tags. Structured artifacts use the format the pinned declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's hierarchy documents (themes, initiatives, epics, features, and stories), which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides. Four files are not Markdown because a consumer outside this repository requires their format: docs/external-pins.yaml, which the parent's audit reads by path, and docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the parent's audit executes; and plugin/plugin.json, which the Agent Plugins 1.0 standard names.
+Every file is Markdown with marker tags. Structured artifacts use the format the pinned declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's hierarchy documents (themes, initiatives, epics, features, and stories), which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides, except a program repository's orientation files, which tpm writes where a first-time reader looks: README.md and AGENTS.md at the root and a README.md in each hierarchy folder (srd043 R1.6, R2.4). Four files are not Markdown because a consumer outside this repository requires their format: docs/external-pins.yaml, which the parent's audit reads by path, and docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the parent's audit executes; and plugin/plugin.json, which the Agent Plugins 1.0 standard names.
 
 <!-- article: D3 -->
 ### D3 - Traceability
@@ -199,7 +199,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - targets: a same-repository document id, or a URL pinned to a release tag (D9) for a document in another repository
   - purpose: The vertical and horizontal links of the planning hierarchy, written as context items of each hierarchy document; an issue carries the same links as body lines (srd007). Progress rolls up through parent, never through anchors.
 - theme:
-  - location: docs/specs/themes/thNNN-short-name.md in the system (TPM) repository
+  - location: docs/specs/themes/thNNN-short-name.md in the system (TPM) repository; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document
   - format: an SRD in the pinned release's Markdown format (D2), as every hierarchy document is; scrum-master's format tools read it with the release's SRD declaration
   - required_fields:
     1. id
@@ -223,7 +223,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - acceptance_criteria_fields: same as srd
   - purpose: A strategic goal area for months to years, owned by the technical program manager. Initiatives name it as their parent, and reports group the initiatives and epics beneath it.
 - initiative:
-  - location: docs/specs/initiatives/inNNN-short-name.md in the system (TPM) repository; an objective document at docs/specs/objectives/objNNN-short-name.md is read as an initiative without change
+  - location: docs/specs/initiatives/inNNN-short-name.md in the system (TPM) repository; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document; an objective document at docs/specs/objectives/objNNN-short-name.md is read as an initiative without change
   - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id
@@ -259,7 +259,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - acceptance_criteria_note: tests and applicability are required (D8); applicability names the environment. Until the program's environment SRDs exist, it names a chain stage D8 lists and the audit cannot resolve it (srd034 R1.5).
   - purpose: A multi-team outcome over several quarters, the program's Product Goal, owned by the technical program manager. Its parent is a theme; epics name it as theirs. plan places its outcomes in a release and tasks cites them, pinned, on each team's Sprint Goal (srd034).
 - epic:
-  - location: docs/specs/epics/epNNN-short-name.md, in the system (TPM) repository when it spans teams or in a subsystem repository when one team owns it
+  - location: docs/specs/epics/epNNN-short-name.md, in the system (TPM) repository when it spans teams or in a subsystem repository when one team owns it; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document
   - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id
@@ -287,7 +287,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - acceptance_criteria_fields: same as srd
   - purpose: A large body of work spanning several sprints, typically one to three months, owned by a Product Owner. Its parent is an initiative; features and stories name it as theirs, and its progress is the share of its descendants' story points done (srd045). Not a unit of work (D4) and not a tracker object.
 - feature:
-  - location: docs/specs/features/ftNNN-short-name.md in the owning team's repository
+  - location: docs/specs/features/ftNNN-short-name.md in the owning team's repository; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document
   - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id
@@ -314,7 +314,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - acceptance_criteria_fields: same as srd
   - purpose: An optional layer, a distinct capability within an epic spanning two to four sprints, used when an epic is too large to break straight into stories. Its parent, an epic, is required; stories name it as theirs.
 - story:
-  - location: docs/specs/stories/stNNN-short-name.md in the owning team's repository
+  - location: docs/specs/stories/stNNN-short-name.md in the owning team's repository; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document
   - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id
