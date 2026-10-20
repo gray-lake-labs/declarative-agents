@@ -95,6 +95,23 @@ func TestComponentRequiredOnceDeclared(t *testing.T) {
 	}
 }
 
+// TestLintAllowsAtMostOneOp admits an issue with no op:: label, as every
+// issue filed before the axis has, and fails one with two (srd001 R34).
+func TestLintAllowsAtMostOneOp(t *testing.T) {
+	i := objective(goodBody)
+	if r := Lint(i, Defaults()); len(r) != 0 {
+		t.Fatalf("no op:: label: %v", r)
+	}
+	i.Labels = append(i.Labels, Op(OpFile))
+	if r := Lint(i, Defaults()); len(r) != 0 {
+		t.Fatalf("one op:: label: %v", r)
+	}
+	i.Labels = append(i.Labels, Op(OpPlan))
+	if r := strings.Join(Lint(i, Defaults()), "; "); !strings.Contains(r, "has 2 op:: labels, at most one") {
+		t.Fatalf("two op:: labels: %q", r)
+	}
+}
+
 // TestLintFlagsMalformedLinks admits well-formed agile link lines and flags
 // a malformed or unpinned target and a second Duplicates or Implements line
 // (srd007 R8.1).

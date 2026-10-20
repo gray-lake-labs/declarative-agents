@@ -22,8 +22,10 @@ type InitOptions struct {
 	// Tracker is a tracker repository to seed; Group is the program group
 	// whose labels are created there.
 	Tracker, Group string
-	User           string // the person the tracker's writes are made as
-	Force, DryRun  bool
+	// Prefix is the tracker's issue ID prefix; empty derives it from Group.
+	Prefix        string
+	User          string // the person the tracker's writes are made as
+	Force, DryRun bool
 }
 
 // InitResult is what tpm init reports.
@@ -39,6 +41,7 @@ type InitResult struct {
 type TrackerResult struct {
 	Remote string                `json:"remote"`
 	Seeded bool                  `json:"seeded"`
+	Prefix string                `json:"prefix,omitempty"` // the issue ID prefix the first commit set
 	Reason string                `json:"reason,omitempty"`
 	Labels []program.LabelResult `json:"labels,omitempty"`
 }
@@ -91,7 +94,7 @@ func Init(o InitOptions) (InitResult, error) {
 const NoTracker = "no tracker repository seeded; issues cannot be filed until one exists: rerun with --tracker and --group"
 
 // seedTracker makes an empty tracker repository's first commit, holding an
-// empty issues file, and creates the program's labels there. A tracker
+// empty issues file and the config file with the issue prefix, and creates the program's labels there. A tracker
 // repository that already has commits is left as it is.
 func seedTracker(o InitOptions) (TrackerResult, error) {
 	r := TrackerResult{Remote: o.Tracker}
@@ -118,8 +121,15 @@ func seedTracker(o InitOptions) (TrackerResult, error) {
 	if err := os.WriteFile(filepath.Join(clone, beads.IssuesFile), nil, 0o644); err != nil {
 		return r, err
 	}
+	r.Prefix = o.Prefix
+	if r.Prefix == "" {
+		r.Prefix = beads.PrefixFor(o.Group)
+	}
+	if err := beads.WriteConfig(clone, beads.Config{IssuePrefix: r.Prefix}); err != nil {
+		return r, err
+	}
 	for _, args := range [][]string{
-		{"add", beads.IssuesFile},
+		{"add", beads.IssuesFile, beads.ConfigFile},
 		{"commit", "-q", "-m", "tpm init: the tracker repository's first commit"},
 		{"push", "-q", "origin", "HEAD:main"},
 	} {

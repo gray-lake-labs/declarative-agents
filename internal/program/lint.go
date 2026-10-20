@@ -63,6 +63,10 @@ func Lint(i tracker.Issue, p Policy) []string {
 	}
 	listed("component", components, p.Components)
 
+	if ops := axis("op::"); len(ops) > 1 {
+		reasons = append(reasons, fmt.Sprintf("has %d op:: labels, at most one", len(ops)))
+	}
+
 	kinds := axis("kind::")
 	data := slices.Contains(planes, "data")
 	if data && len(types) == 0 && len(kinds) != 1 {

@@ -122,7 +122,7 @@ func pushTeam(t tracker.Tracker, s Sources, p Plan, webBase string, policy progr
 	switch {
 	case goal == nil:
 		in := tracker.NewIssue{Title: title, Description: body, DueDate: issueDue, Milestone: p.Milestone,
-			Labels: program.Labels("management", "", "", comp.Name)}
+			Labels: append(program.Labels("management", "", "", comp.Name), program.Op(program.OpGoals))}
 		f, err := program.File(t, repo, in, policy, dryRun)
 		if err != nil {
 			return err

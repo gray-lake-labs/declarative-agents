@@ -100,7 +100,9 @@ repository replaces a query scoped to a project.
 The program's beads database lives in one dedicated git repository, the
 tracker repository, separate from every code repository. It is the
 single source of truth for program facts; a working clone's local beads
-state is a cache.
+state is a cache. Its .beads/config.yaml sets the program's issue
+prefix, once, when tpm init seeds it: every issue's ID is that prefix and
+eight hex digits, and tpm when the file sets none. An ID is never renamed.
 
 <!-- req: R3.2 -->
 ### R3.2

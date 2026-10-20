@@ -10,6 +10,21 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
+// The operations that file issues. Each issue tpm files carries the one that
+// filed it as an op:: label, set at creation and never changed (srd001 R34).
+const (
+	OpFile    = "file"
+	OpPlan    = "plan"
+	OpGoals   = "goals"
+	OpOnboard = "onboard"
+	OpReport  = "report"
+	OpStatus  = "status"
+	OpRecur   = "recur"
+)
+
+// Op is the op:: label naming the operation that filed an issue.
+func Op(name string) string { return "op::" + name }
+
 // DefaultLabels are the label values the labels config format lists, used
 // when the program repository has no control/labels.md. Component labels
 // are not here: they come from the subsystem SRDs (srd001 R21.1).
@@ -32,6 +47,13 @@ func DefaultLabels() []tracker.Label {
 		{Name: "kind::defect", Color: "#d9534f", Description: "An artifact is wrong"},
 		{Name: "kind::request", Color: "#d10069", Description: "An artifact lacks something"},
 		{Name: "kind::question", Color: "#a8d695", Description: "Needs an answer, not a change"},
+		{Name: Op(OpFile), Color: "#95a5a6", Description: "Filed by tpm issue file"},
+		{Name: Op(OpPlan), Color: "#95a5a6", Description: "Filed by tpm plan push"},
+		{Name: Op(OpGoals), Color: "#95a5a6", Description: "Filed by tpm goals push"},
+		{Name: Op(OpOnboard), Color: "#95a5a6", Description: "Filed by tpm onboard"},
+		{Name: Op(OpReport), Color: "#95a5a6", Description: "Filed by tpm reports aggregate --push"},
+		{Name: Op(OpStatus), Color: "#95a5a6", Description: "Filed by tpm reports status"},
+		{Name: Op(OpRecur), Color: "#95a5a6", Description: "Opened by tpm issue recur"},
 		{Name: "needs-triage", Color: "#cc338b", Description: "Failed admission; not ready"},
 		{Name: "status::in-progress", Color: "#428bca", Description: "The assignee started it"},
 		{Name: "waiting", Color: "#e6e6fa", Description: "A link is unsatisfied; set by track-goals"},
@@ -69,7 +91,7 @@ func LoadLabels(t tracker.Tracker, project, ref string) ([]tracker.Label, error)
 		return nil, fmt.Errorf("%s %s: %w", project, LabelsFile, err)
 	}
 	var out []tracker.Label
-	for _, axis := range []string{"plane", "type", "kind", "state"} {
+	for _, axis := range []string{"plane", "type", "kind", "op", "state"} {
 		a, ok := f.Axes[axis]
 		if !ok {
 			continue

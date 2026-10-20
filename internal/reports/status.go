@@ -148,6 +148,7 @@ func StatusIssues(t tracker.Tracker, in StatusInput) ([]StatusResult, error) {
 					return out, err
 				}
 				labels := append([]string{"type::recurring"}, program.Labels(l.Plane, "", l.Kind, l.Component)...)
+				labels = append(labels, program.Op(program.OpStatus))
 				fr, err := program.File(t, m.Project, tracker.NewIssue{Title: in.Config.Title(week), Description: body, Labels: labels, DueDate: due}, in.Policy, in.DryRun)
 				if err != nil {
 					return out, err

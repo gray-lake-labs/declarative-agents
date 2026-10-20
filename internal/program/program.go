@@ -352,7 +352,7 @@ func init() {
 				}
 			}
 			in := tracker.NewIssue{Title: fileArgs.title, Description: string(body), DueDate: fileArgs.due, Milestone: milestone,
-				Labels: Labels(l.Plane, fileArgs.typ, l.Kind, l.Component)}
+				Labels: append(Labels(l.Plane, fileArgs.typ, l.Kind, l.Component), Op(OpFile))}
 			r, err := File(t, fileArgs.project, in, p, ctx.DryRun)
 			if err != nil {
 				return err
