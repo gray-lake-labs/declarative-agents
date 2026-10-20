@@ -1,6 +1,7 @@
 package hierarchy
 
 import (
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -119,5 +120,37 @@ func TestKindOfReadsThePrefix(t *testing.T) {
 	}
 	if _, ok := KindOf("srd001-labels"); ok {
 		t.Error("srd001-labels read as a hierarchy document")
+	}
+}
+
+// TestStoryParentMayNameTheWholeEpic admits a story whose parent is the
+// epic document pinned to a tag with no anchor, and still refuses one on a
+// branch (design.md story context parent).
+func TestStoryParentMayNameTheWholeEpic(t *testing.T) {
+	src := filepath.Join(fixtures, "malformed", "unpinned-parent", "docs", "specs", "stories", "st001-on-a-branch.md")
+	b, err := os.ReadFile(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for parent, findings := range map[string]int{
+		"https://gitlab.example.com/program/system/-/blob/v0.1.0/docs/specs/epics/ep001-agent-evaluation.md": 0,
+		"https://gitlab.example.com/program/system/-/blob/main/docs/specs/epics/ep001-agent-evaluation.md":   1,
+	} {
+		dir := t.TempDir()
+		stories := filepath.Join(dir, "docs", "specs", "stories")
+		if err := os.MkdirAll(stories, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		doc := strings.Replace(string(b), "https://gitlab.example.com/program/system/-/blob/main/docs/specs/epics/ep001-agent-evaluation.md#R1", parent, 1)
+		if err := os.WriteFile(filepath.Join(stories, "st001-on-a-branch.md"), []byte(doc), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		docs, err := Load(dir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if f := Validate(docs); len(f) != findings {
+			t.Errorf("parent %s: findings %v, want %d", parent, f, findings)
+		}
 	}
 }

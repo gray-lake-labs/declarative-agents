@@ -57,7 +57,7 @@ func Init(o InitOptions) (InitResult, error) {
 	if o.Tracker != "" && o.Group == "" {
 		return r, errors.New("--tracker needs --group, the program group whose labels it creates")
 	}
-	files, err := corpusFiles("system")
+	files, err := corpusFiles("system", o.Dir)
 	if err != nil {
 		return r, err
 	}

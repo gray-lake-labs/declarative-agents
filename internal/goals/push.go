@@ -3,6 +3,7 @@ package goals
 import (
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
 	"github.com/gray-lake-labs/scrum-master/internal/links"
@@ -62,7 +63,7 @@ func Push(t tracker.Tracker, s Sources, p Plan, webBase string, policy program.P
 			}
 		}
 		if _, _, ok := s.ComponentFor(o.Repository); o.Repository != "" && !ok {
-			r.Reasons = append(r.Reasons, fmt.Sprintf("no subsystem SRD declares %s", o.Repository))
+			r.Reasons = append(r.Reasons, fmt.Sprintf("no subsystem SRD declares %s at the plan tag %s; a subsystem declared after the plan was tagged needs the plan republished", o.Repository, p.Tag))
 		}
 		if len(r.Reasons) > 0 {
 			r.Action = "refused"
@@ -82,13 +83,33 @@ func Push(t tracker.Tracker, s Sources, p Plan, webBase string, policy program.P
 	return out, nil
 }
 
+// outcomes gathers a team's plan entries into one per outcome, in plan
+// order, each with every item the team was confirmed for: a Sprint Goal
+// serves each outcome once and cites each of its items.
+func outcomes(entries []PlannedObjective, members []int) []PlannedObjective {
+	var team []PlannedObjective
+	index := map[string]int{}
+	for _, m := range members {
+		o := entries[m]
+		if i, seen := index[o.Key]; seen {
+			for _, it := range o.Items {
+				if !slices.Contains(team[i].Items, it) {
+					team[i].Items = append(team[i].Items, it)
+				}
+			}
+			continue
+		}
+		index[o.Key] = len(team)
+		o.Items = slices.Clone(o.Items)
+		team = append(team, o)
+	}
+	return team
+}
+
 // pushTeam files or updates one team's Sprint Goal and records the result
 // on each outcome it serves.
 func pushTeam(t tracker.Tracker, s Sources, p Plan, webBase string, policy program.Policy, dryRun bool, due, repo string, members []int, out []Pushed) error {
-	team := make([]PlannedObjective, len(members))
-	for i, m := range members {
-		team[i] = p.Objectives[m]
-	}
+	team := outcomes(p.Objectives, members)
 	goal, legacy, err := findExisting(t, repo, p.Release)
 	if err != nil {
 		return err

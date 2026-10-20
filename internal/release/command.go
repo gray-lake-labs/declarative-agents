@@ -4,12 +4,33 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os/exec"
 	"strings"
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 )
+
+// commitsSince returns the messages of the commits in dir since tag, or of
+// every commit when there is no tag yet.
+func commitsSince(dir, tag string) ([]string, error) {
+	args := []string{"-C", dir, "log", "--format=%B%x1e"}
+	if tag != "" {
+		args = append(args, tag+"..HEAD")
+	}
+	out, err := exec.Command("git", args...).Output()
+	if err != nil {
+		return nil, fmt.Errorf("read the commits since %s: %w", tag, err)
+	}
+	var messages []string
+	for _, m := range strings.Split(string(out), "\x1e") {
+		if m = strings.TrimSpace(m); m != "" {
+			messages = append(messages, m)
+		}
+	}
+	return messages, nil
+}
 
 // RepoTags are the tags in the checkout at dir and on its origin.
 func RepoTags(dir string) ([]string, error) {
@@ -155,6 +176,11 @@ func init() {
 				return err
 			}
 			n := Next(p.Releases, args.artifact, tags)
+			messages, err := commitsSince(args.dir, n.LatestTag)
+			if err != nil {
+				return err
+			}
+			n.Recommend(messages)
 			return ctx.Emit(n, n.Human())
 		},
 	})

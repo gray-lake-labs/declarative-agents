@@ -264,3 +264,77 @@ func testPlanReleaseWritesTheRoadMapRelease(t *testing.T, p trackertest.Program)
 		t.Fatalf("after replacing: %+v", got)
 	}
 }
+
+// initRoadMap is the road map tpm init lays down: release 01.0 with prose
+// and srds, and no deliverables or publication yet.
+const initRoadMap = `---
+id: program-roadmap
+title: Program Road Map
+---
+
+<!-- field: overview -->
+## Overview
+
+The technical program manager writes here the system's releases.
+
+<!-- release: 01.0 | status: specified -->
+## 01.0 - First release
+
+The technical program manager writes here what the first release proves, after planning it with plan.
+
+<!-- field: srds -->
+### SRDs
+
+- srd001-system
+`
+
+// TestPlanAFreshProgram plans the release tpm init laid down: candidates
+// read its road map without failing and recommend 01.0 itself, and plan
+// write keeps its prose and srds (srd031 R3.1, R4.1).
+func TestPlanAFreshProgram(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		dir := system(t)
+		if err := os.WriteFile(filepath.Join(dir, RoadMap), []byte(initRoadMap), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		in, _ := input(t, dir, p)
+		c, err := MakeCandidates(in)
+		if err != nil || c.Version != "01.0" || c.Latest != "" || len(c.Items) == 0 {
+			t.Fatalf("candidates = version %q latest %q items %d, %v", c.Version, c.Latest, len(c.Items), err)
+		}
+		r := Release{Version: "01.0", Milestone: "01.0", Tag: c.Tag, Items: []string{c.Items[0].ID}}
+		if w, err := WriteRelease(dir, r, c, nil, "", 0); err != nil || w.Action != "replaced" {
+			t.Fatalf("write: %+v %v", w, err)
+		}
+		got := readFile(t, filepath.Join(dir, RoadMap))
+		for _, want := range []string{"## 01.0 - First release", "writes here what the first release proves", "<!-- field: srds -->\n### SRDs\n\n- srd001-system",
+			"<!-- field: deliverables -->", "- " + c.Items[0].ID, "- tag: " + c.Tag} {
+			if !strings.Contains(got, want) {
+				t.Errorf("road map lacks %q:\n%s", want, got)
+			}
+		}
+		if strings.Index(got, "### SRDs") > strings.Index(got, "### Deliverables") || strings.Index(got, "### Deliverables") > strings.Index(got, "### Release") {
+			t.Errorf("field order: want srds, deliverables, release:\n%s", got)
+		}
+		d, err := corpus.ParseMarkdown([]byte(got))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if rs := goals.ReleasesOf(d); len(rs) != 1 || rs[0].Tag != c.Tag || !slices.Equal(rs[0].Objectives, r.Items) {
+			t.Fatalf("releases = %+v", rs)
+		}
+		again, err := MakeCandidates(in)
+		if err != nil || again.Version != "01.1" || again.Latest != "01.0" {
+			t.Fatalf("after planning 01.0: version %q latest %q, %v", again.Version, again.Latest, err)
+		}
+	})
+}
+
+func TestPeriodStartsOnTheFirstWorkingDay(t *testing.T) {
+	for end, want := range map[string]string{"2026-11-06": "2026-10-19", "2026-11-27": "2026-11-09", "2026-11-08": "2026-10-19"} {
+		e, _ := time.Parse(time.DateOnly, end)
+		if got := periodStart(e).Format(time.DateOnly); got != want {
+			t.Errorf("periodStart(%s) = %s, want %s", end, got, want)
+		}
+	}
+}

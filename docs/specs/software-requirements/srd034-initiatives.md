@@ -97,7 +97,7 @@ plan (srd031) reads the agreed initiatives with the system SRDs when the technic
 <!-- req: R3.2 -->
 ### R3.2
 
-tasks (srd022) renders one Sprint Goal issue per team for the release from the initiatives: one Cites line per initiative item the team serves, pinned to the system release tag, the Environment line, Requirements and Acceptance Criteria copied from the document, and the due date set to the requirement group's due field or, without one, the milestone end date plan recorded (srd031 R4.2).
+tasks (srd022) renders one Sprint Goal issue per team for the release from the initiatives: each initiative item is confirmed for a team on its own, so one requirement group's items can go to different teams, and a team's Sprint Goal has one Cites line per initiative item it serves, pinned to the system release tag, the Environment line, Requirements and Acceptance Criteria copied from the document, and the due date set to the requirement group's due field or, without one, the milestone end date plan recorded (srd031 R4.2).
 
 <!-- req: R3.3 -->
 ### R3.3

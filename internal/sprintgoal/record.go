@@ -1,8 +1,10 @@
 package sprintgoal
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -109,6 +111,11 @@ func StoriesDone(dir string) (Done, error) {
 				break
 			}
 			if id, ok := strings.CutPrefix(line, "- "); ok {
+				// A repository's own summary names its stories
+				// project#story; its backlog knows them by id.
+				if _, story, ok := strings.Cut(id, "#"); ok {
+					id = story
+				}
 				ids = append(ids, id)
 				d.Release[id] = releaseOf(p)
 			}
@@ -134,4 +141,40 @@ func versionLess(a, b string) bool {
 		}
 	}
 	return len(pa) < len(pb)
+}
+
+// storyRef is one Stories done entry: the story's project and id, so a
+// summary that spans teams names each story unambiguously.
+var storyRef = regexp.MustCompile(`^[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)*#[a-z]+[0-9]+[a-z0-9-]*$`)
+
+// CheckSummary reports how a sprint-end summary departs from its format
+// (design.md sprint_end_summary): a Stories done section whose entries are
+// project#story ids, or None. when no listed story was done.
+func CheckSummary(text string) []string {
+	_, rest, ok := strings.Cut("\n"+text, "\n"+storiesHeading+"\n")
+	if !ok {
+		return []string{"it has no " + storiesHeading + " section; tpm sprint-end stories writes it"}
+	}
+	var problems []string
+	entries, none := 0, false
+	for _, line := range strings.Split(rest, "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "## ") {
+			break
+		}
+		if line == "None." {
+			none = true
+			continue
+		}
+		if id, ok := strings.CutPrefix(line, "- "); ok {
+			entries++
+			if !storyRef.MatchString(id) {
+				problems = append(problems, fmt.Sprintf("Stories done entry %q is not project#story", id))
+			}
+		}
+	}
+	if entries == 0 && !none {
+		problems = append(problems, storiesHeading+" lists no story and does not say None.")
+	}
+	return problems
 }

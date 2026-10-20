@@ -115,6 +115,10 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
     1. test_suite_index
     1. coverage_gaps
   - purpose: Indexes the corpus and records known coverage gaps.
+- sprint_end_summary:
+  - location: docs/sprint-ends/RELEASE.md in each repository whose sprint-end issue closes the period
+  - sections: the period's summary in prose, then a Stories done section listing each story the owner reports done as project#story, or None.
+  - purpose: Closes a period. The sprint-end skill writes it in the sprint-end issue's worktree, tpm sprint-end stories writes its Stories done section, and tpm issue merge refuses a summary not in this format (srd038 R2.4). Its issue is a plane::management issue.
 - roadmap:
   - location: docs/road-map.md
   - required_fields:
@@ -153,12 +157,12 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - required_fields:
     1. id
     1. title
+    1. context
     1. problem
     1. goals
     1. requirements
     1. non_goals
     1. acceptance_criteria
-    1. context
     1. implementation_targets
   - context_items:
     1. owner
@@ -167,7 +171,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
     1. repository
     1. path
   - numbering: same as srd
-  - purpose: Declares one subsystem, its owner (a Product Owner, the owner item of context), and its components, each a row of implementation_targets by repository URL and path. Component label values (component::<name>) come from these rows.
+  - purpose: Declares one subsystem, its owner (a Product Owner, the owner item of context), and its components, each a row of implementation_targets by repository URL and path. Component label values (component::<name>) come from these rows. The system SRD tpm init writes has the same two fields, declaring the system repository a component of the program owned by the technical program manager.
 - environment_srd:
   - location: docs/specs/software-requirements/srdNNN-env-name.md in the test-subsystem repository
   - required_fields:
@@ -191,7 +195,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - numbering: same as srd
   - purpose: "Declares one environment of the chain (local, dev, staging, production PoC, customer R\u0026D): who owns it and what triggers promotion into it (context items), and which test suites run there (test_suite_traces). Promotion is CI/CD in the test subsystem; handoff into a customer R\u0026D environment is a human approval."
 - hierarchy_links:
-  - parent: at most one, naming the level above by kind; theme, then initiative, then epic, then feature, then story; a story may name an epic directly, and only a feature must have a parent
+  - parent: at most one, naming the level above by kind; theme, then initiative, then epic, then feature, then story; a story may name an epic directly, and only a feature must have a parent; a parent in another repository is a URL pinned to a tag, whose anchor is optional because it names the whole document
   - blocked_by: the documents that must finish before this one can; waiting derives from it (srd007)
   - depends_on: the documents whose output this one needs, which may proceed at the same time; reported, never blocking
   - relates_to: documents that share context; reported, never blocking

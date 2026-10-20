@@ -247,10 +247,10 @@ func TestOfflineReadNamesTheLastPulledCommit(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := map[string]string{"sm-1": "lost to alice", "sm-2": "confirmed"}
-	if len(r) != len(want) {
+	if len(r.Reconciled) != len(want) {
 		t.Fatalf("reconcile = %+v, want %v", r, want)
 	}
-	for _, x := range r {
+	for _, x := range r.Reconciled {
 		if x.Outcome != want[x.ID] {
 			t.Fatalf("reconcile %s = %q, want %q", x.ID, x.Outcome, want[x.ID])
 		}

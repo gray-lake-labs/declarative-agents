@@ -92,3 +92,57 @@ func testTagRequiresPassingGateAndIncreasingVersion(t *testing.T, f tracker.Trac
 		t.Fatal("tagged a revision the gate did not check")
 	}
 }
+
+// TestTagReadsAPeerReadMadeAfterTheGate tags once someone else approves,
+// though the gate ran before the approval, and closes the release issue the
+// tag delivers (srd015 R1.2).
+func TestTagReadsAPeerReadMadeAfterTheGate(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
+		f := tp.Tracker()
+		dir, git := repo(t, gatesMarkdown)
+		issue, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Release the corpus"})
+		p := policyWith("corpus", program.Check{Kind: "peer-read"})
+		v, _ := ParseVersion("0.2.0")
+		r, err := RunGate(f, ReleaseGateInput{Project: "g/po-1", Issue: issue.IID, Artifact: "corpus", Version: v, Dir: dir,
+			Policy: p, Git: git, Out: io.Discard, Now: t0})
+		if err != nil || r.Checks[0].Result != ResultPending {
+			t.Fatalf("gate = %+v, %v", r, err)
+		}
+		tag := func() (TagResult, error) {
+			return ReleaseTag(f, TagInput{Project: "g/po-1", Issue: issue.IID, Artifact: "corpus", Version: v, Policy: p, Git: git})
+		}
+		if _, err := tag(); err == nil || !strings.Contains(err.Error(), "peer-read pending") {
+			t.Fatalf("tag before any approval = %v", err)
+		}
+		if _, err := Approve(tp.As("reviewer"), "g/po-1", issue.IID); err != nil {
+			t.Fatal(err)
+		}
+		res, err := tag()
+		if err != nil || !res.Pushed || !res.Closed {
+			t.Fatalf("tag after the approval = %+v, %v", res, err)
+		}
+		if got, _ := f.GetIssue("g/po-1", issue.IID); got.State != "closed" {
+			t.Fatalf("release issue %s after its tag", got.State)
+		}
+	})
+}
+
+func TestNextRecommendsFromTheCommits(t *testing.T) {
+	first := NextResult{}
+	first.Recommend(nil)
+	if first.Recommended != "minor" {
+		t.Errorf("first release: %+v", first)
+	}
+	for want, messages := range map[string][]string{
+		"":      nil,
+		"patch": {"Fix the scorer's rounding", "fix: a typo"},
+		"minor": {"Fix the scorer", "Add the trajectory store"},
+		"major": {"Add v2 scoring\n\nBREAKING CHANGE: scores are now 0-100"},
+	} {
+		n := NextResult{Latest: "0.1.0", LatestTag: "corpus/v0.1.0"}
+		n.Recommend(messages)
+		if n.Recommended != want || n.Reason == "" {
+			t.Errorf("%v: %+v, want %q", messages, n, want)
+		}
+	}
+}

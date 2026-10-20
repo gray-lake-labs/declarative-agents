@@ -46,6 +46,7 @@ func agentsFile(level string) ([]byte, error) {
 	b.WriteString("## Rules\n\n" +
 		"- Every change starts as an issue: file it with the specify skill or tpm issue file, take it with the implement skill or tpm issue pop, and deliver it with tpm issue merge. Never commit to main directly.\n" +
 		"- A change under docs/ is a change of intent: the corpus gate must pass before it merges.\n" +
+		"- Pass --control <system repository> to every tpm command that takes it, so the program's control/policy.md and control/labels.md apply instead of tpm's defaults.\n" +
 		"- Fetch facts with tpm and its --json output; never read or edit tracker files by hand. tpm does the workflow, and the model writes only language (docs/constitutions/design.md D10).\n" +
 		"- Every document follows docs/constitutions/design.md: Markdown with marker tags, in the format of the parent release docs/external-pins.yaml pins. After upgrading tpm, run tpm doctor to add missing files and repair the format.\n" +
 		"- Every figure is Mermaid in a fenced code block inside the Markdown document that shows it. Put no generated image file, and no other diagram source, under docs/.\n\n")

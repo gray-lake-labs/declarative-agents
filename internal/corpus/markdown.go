@@ -144,8 +144,15 @@ func (d *Document) HasKey(key string) bool {
 	return walk(d.Sections)
 }
 
-// Field returns the field named key directly under the section.
-func (s *Section) Field(key string) *Section { return field(s.Children, key) }
+// Field returns the field named key directly under the section; a nil
+// section has none, so a chain of Field calls over a record that lacks a
+// field reads as empty instead of failing.
+func (s *Section) Field(key string) *Section {
+	if s == nil {
+		return nil
+	}
+	return field(s.Children, key)
+}
 
 func field(sections []*Section, key string) *Section {
 	for _, s := range sections {

@@ -9,13 +9,18 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
+// mergedBy is the Merged-by trailer tpm issue merge writes, naming the
+// tracker user who merged.
+var mergedBy = regexp.MustCompile(`(?m)^Merged-by: (\S+)$`)
+
 // citation is a project#iid reference in a merge commit's message.
 var citation = regexp.MustCompile(`[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)*#\d+`)
 
 // Merges reads a project's merged history from the merge
 // commits on its default branch, which are its deliveries (srd042 R2.3). A merge is numbered by its place in the branch's
-// first-parent history, so the number is stable; its author is the merge
-// commit's author and its merge date the commit date; and it closes every
+// first-parent history, so the number is stable; its author is the tracker
+// user its Merged-by trailer names, which tpm issue merge writes, else the
+// merge commit's git author; its merge date is the commit date; and it closes every
 // issue its message cites, written into the description as
 // Closes lines. The branch read is whichever of the local and origin
 // default branches is the newer.
@@ -49,6 +54,10 @@ func (t *Tracker) Merges(project, author, since string) ([]tracker.Merge, error)
 		}
 		n++
 		by, date, message := fields[0], fields[1][:10], strings.TrimSpace(fields[2])
+		if m := mergedBy.FindStringSubmatch(message); m != nil {
+			by = m[1]
+			message = strings.TrimSpace(mergedBy.ReplaceAllString(message, ""))
+		}
 		if date < since || (author != "" && by != author) {
 			continue
 		}

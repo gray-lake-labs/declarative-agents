@@ -113,16 +113,19 @@ func (Integration) Tasks() error {
 	if err := r.tpmJSON(&plan, append([]string{"goals", "plan"}, base...)...); err != nil {
 		return err
 	}
-	c.expect(len(plan.Objectives) == 2, "plan has %d objectives, want 2", len(plan.Objectives))
-	if len(plan.Objectives) != 2 {
+	// One entry per item: R1's two items, then R2's one.
+	c.expect(len(plan.Objectives) == 3, "plan has %d items, want 3", len(plan.Objectives))
+	if len(plan.Objectives) != 3 {
 		return c.err("tasks")
 	}
-	c.expect(plan.Objectives[0].Repository == po1, "R1 recommended %q, want %s", plan.Objectives[0].Repository, po1)
-	c.expect(plan.Objectives[0].Environment == "dev", "R1 environment %q", plan.Objectives[0].Environment)
-	c.expect(plan.Objectives[1].Repository == "", "R2 recommended %q, want none", plan.Objectives[1].Repository)
+	for _, o := range plan.Objectives[:2] {
+		c.expect(o.Group == "R1" && o.Repository == po1 && o.Environment == "dev", "R1 item %+v, want recommended %s in dev", o, po1)
+	}
+	r2 := len(plan.Objectives) - 1
+	c.expect(plan.Objectives[r2].Repository == "", "R2 recommended %q, want none", plan.Objectives[r2].Repository)
 
 	// The person confirms R1 and names po-2 for R2, as the skill relays.
-	plan.Objectives[1].Repository = po2
+	plan.Objectives[r2].Repository = po2
 	planFile := filepath.Join(r.run.Dir, "plan.json")
 	writeJSONTo(planFile, plan)
 	push := append([]string{"goals", "push", "--plan", planFile}, base...)
@@ -175,13 +178,13 @@ func (Integration) Tasks() error {
 		c.expect(p.Action == "unchanged" && !p.Planned, "second push: %s %s planned %v", p.Key, p.Action, p.Planned)
 	}
 
-	plan.Objectives[1].Environment = ""
+	plan.Objectives[r2].Environment = ""
 	writeJSONTo(planFile, plan)
 	var refused []goals.Pushed
 	if err := r.tpmJSON(&refused, push...); err != nil {
 		return err
 	}
-	c.expect(len(refused) == 2 && refused[1].Action == "refused", "missing environment not refused: %+v", refused)
+	c.expect(len(refused) == 3 && refused[r2].Action == "refused", "missing environment not refused: %+v", refused)
 	return c.err("tasks")
 }
 

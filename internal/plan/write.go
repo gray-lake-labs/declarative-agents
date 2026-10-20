@@ -118,7 +118,7 @@ func putRelease(doc string, r Release) (string, string) {
 		if tail != "" {
 			tail = "\n" + strings.TrimLeft(tail, "\n")
 		}
-		return doc[:headEnd] + body.String() + tail, "replaced"
+		return doc[:headEnd] + kept(doc[headEnd:end]) + body.String() + tail, "replaced"
 	}
 	record := fmt.Sprintf("<!-- release: %s -->\n## %s\n%s", r.Version, r.Version, body.String())
 	if len(marks) == 0 {
@@ -134,6 +134,38 @@ func putRelease(doc string, r Release) (string, string) {
 		return before + "\n" + rest, "added"
 	}
 	return before, "added"
+}
+
+var recordField = regexp.MustCompile(`(?m)^<!-- field: ([a-z_]+)[^\n]*-->\n### `)
+
+// kept is what a release record's body keeps when plan rewrites it: its
+// prose and every field but deliverables and release, which plan owns
+// (srd031 R4.1). The owned fields follow, deliverables before release
+// (design.md roadmap program_release_fields).
+func kept(record string) string {
+	marks := recordField.FindAllStringSubmatchIndex(record, -1)
+	end := len(record)
+	if len(marks) > 0 {
+		end = marks[0][0]
+	}
+	out := strings.Trim(record[:end], "\n")
+	for i, m := range marks {
+		stop := len(record)
+		if i+1 < len(marks) {
+			stop = marks[i+1][0]
+		}
+		if name := record[m[2]:m[3]]; name == "deliverables" || name == "release" {
+			continue
+		}
+		if out != "" {
+			out += "\n\n"
+		}
+		out += strings.Trim(record[m[0]:stop], "\n")
+	}
+	if out == "" {
+		return ""
+	}
+	return "\n" + out + "\n"
 }
 
 // treeValue writes a tree item's value so it reads back as the same text:

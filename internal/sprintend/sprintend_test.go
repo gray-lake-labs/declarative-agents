@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gray-lake-labs/scrum-master/internal/events"
 	"github.com/gray-lake-labs/scrum-master/internal/plan"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
@@ -163,6 +164,36 @@ func TestSprintEndReleasesOnlyAfterConfirmation(t *testing.T) {
 			Artifact: "grader", Tags: []string{"grader/v0.1.0"}})
 		if err != nil || facts.Recommended != "0.2.0" || facts.Next.LatestTag != "grader/v0.1.0" {
 			t.Fatalf("recommendation = %q %+v %v", facts.Recommended, facts.Next, err)
+		}
+	})
+}
+
+// TestSystemFactsGatherTheTeams lists, for the system repository, the
+// Sprint Goals of every team repository, their stories as project#story,
+// and a goal a sprint-end merge reported complete from its ledger.
+func TestSystemFactsGatherTheTeams(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		f := p.Tracker()
+		const team = "g/agent-ops"
+		goal, err := f.CreateIssue(team, tracker.NewIssue{Title: "Sprint Goal: deploy", Labels: []string{"plane::management"},
+			Description: "Goal\n\n## Sprint Backlog\n\n- st001-deploy Deploy (3 points)\n\n<!-- tpm goals sprint-goal release=01.0 serves=in001-x#R1 -->\n"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		e, text := events.ReportedComplete("01.0", "abc123")
+		if _, err := events.Post(f, team, goal.IID, e, events.ReportedCompleteRequired, text, false); err != nil {
+			t.Fatal(err)
+		}
+		facts, err := MakeFacts(Input{Tracker: f, Project: "g/system", Teams: []string{team}, Releases: program.Defaults().Releases, Artifact: "corpus"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(facts.SprintGoals) != 1 {
+			t.Fatalf("facts = %+v", facts.SprintGoals)
+		}
+		g := facts.SprintGoals[0]
+		if g.Issue != fmt.Sprintf("%s#%d", team, goal.IID) || !g.ReportedComplete || g.Met || !slices.Equal(g.Stories, []string{team + "#st001-deploy"}) {
+			t.Fatalf("team goal = %+v", g)
 		}
 	})
 }

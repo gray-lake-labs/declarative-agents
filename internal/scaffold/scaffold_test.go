@@ -132,9 +132,13 @@ func TestInitWritesControlFiles(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(labels, program.DefaultLabels()) {
 		t.Fatalf("control/labels.md reads back as %v, %v; want the defaults", labels, err)
 	}
-	// The fresh program's subsystem SRDs declare no component yet.
-	want := program.Defaults()
+	// The fresh program's subsystem SRDs declare no component yet, and the
+	// system's corpus release needs a peer read.
+	want := InitPolicy()
 	want.ComponentsRead = true
+	if g := want.Gate("corpus"); len(g) != 1 || g[0].Kind != "peer-read" {
+		t.Fatalf("init's corpus gate = %+v, want a peer read", g)
+	}
 	policy, err := program.LoadPolicy(f, "g/system", "main")
 	if err != nil || !reflect.DeepEqual(policy, want) {
 		t.Fatalf("control/policy.md reads back as %+v, %v; want %+v", policy, err, want)
@@ -336,4 +340,41 @@ func TestTemplatesNameNoProject(t *testing.T) {
 		t.Fatal(err)
 	}
 	check("docs/corpus-charter.yaml", charter)
+}
+
+// TestInitDeclaresTheSystemComponent declares the system repository a
+// component of the program in the system SRD, from its origin, so issues
+// filed there derive a component; without an origin the field is empty.
+func TestInitDeclaresTheSystemComponent(t *testing.T) {
+	dir := repo(t)
+	run(t, dir, "remote", "add", "origin", "https://git.example.invalid/g/system.git")
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	b, err := os.ReadFile(filepath.Join(dir, systemSRDPath))
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := fake.New()
+	f.AddFile("g/system", "main", systemSRDPath, b)
+	subs, err := program.LoadSubsystems(f, "g/system", "main")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, sub, ok := subs.ComponentFor("g/system")
+	if !ok || c.Name != "system" || c.Path != "/" || sub.Owner != "The technical program manager" {
+		t.Fatalf("system component = %+v %+v %v:\n%s", c, sub, ok, b)
+	}
+	l, err := program.Derive(f, "g/system", "g/system", "main", []string{"docs/VISION.md"}, program.Labelling{})
+	if err != nil || l.Component != "system" {
+		t.Fatalf("an issue in the system repository derives %+v, %v", l, err)
+	}
+
+	bare := repo(t)
+	if _, err := Init(InitOptions{Dir: bare}); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(filepath.Join(bare, systemSRDPath)); !strings.Contains(string(b), "<!-- field: implementation_targets | form: \"empty list\" -->\n## Implementation targets\n\nNone\n") {
+		t.Fatalf("without an origin:\n%s", b)
+	}
 }

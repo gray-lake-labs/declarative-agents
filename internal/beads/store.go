@@ -88,6 +88,15 @@ type Reconciled struct {
 	Outcome string `json:"outcome"`
 }
 
+// ReconcileResult is what reconcile did: the queued writes it pushed, by
+// their commit subjects, the tracker commit after the push, and each
+// provisional pop's outcome.
+type ReconcileResult struct {
+	Pushed     []string     `json:"pushed"`
+	Commit     string       `json:"tracker_commit"`
+	Reconciled []Reconciled `json:"reconciled"`
+}
+
 // syncState is what a clone remembers between commands, kept under its git
 // directory so it is never tracked.
 type syncState struct {
@@ -190,36 +199,45 @@ func (s *Store) Comment(id, text string) error {
 // Reconcile is the first synchronization back online: it merges, pushes the
 // writes queued offline, and reports each provisional pop as confirmed or
 // lost to the taker who pushed first.
-func (s *Store) Reconcile() ([]Reconciled, error) {
+func (s *Store) Reconcile() (ReconcileResult, error) {
+	var r ReconcileResult
 	fr, err := s.Sync()
 	if err != nil {
-		return nil, err
+		return r, err
 	}
 	if fr.Offline {
-		return nil, fmt.Errorf("the tracker repository is still unreachable; last pulled %s at %s", fr.Commit, fr.At.Format(time.RFC3339))
+		return r, fmt.Errorf("the tracker repository is still unreachable; last pulled %s at %s", fr.Commit, fr.At.Format(time.RFC3339))
+	}
+	if log, err := s.git("log", "--reverse", "--format=%s", "origin/main..HEAD"); err != nil {
+		return r, err
+	} else if log != "" {
+		r.Pushed = strings.Split(log, "\n")
 	}
 	if queued, err := s.push(); err != nil {
-		return nil, err
+		return r, err
 	} else if queued {
-		return nil, errors.New("the tracker repository became unreachable during reconcile")
+		return r, errors.New("the tracker repository became unreachable during reconcile")
 	}
+	if r.Commit, err = s.git("rev-parse", "HEAD"); err != nil {
+		return r, err
+	}
+	s.last = &Freshness{Commit: r.Commit, At: s.Now().UTC()}
 	st, err := s.state()
 	if err != nil {
-		return nil, err
+		return r, err
 	}
-	var out []Reconciled
 	for _, p := range st.Provisional {
 		i, err := s.issue(p.ID)
 		if err != nil {
-			return out, err
+			return r, err
 		}
 		outcome := "confirmed"
 		if i.Assignee != p.User {
 			outcome = "lost to " + i.Assignee
 		}
-		out = append(out, Reconciled{ID: p.ID, Outcome: outcome})
+		r.Reconciled = append(r.Reconciled, Reconciled{ID: p.ID, Outcome: outcome})
 	}
-	return out, s.update(func(st *syncState) { st.Provisional = nil })
+	return r, s.update(func(st *syncState) { st.Provisional = nil })
 }
 
 // Sync pulls the tracker repository into the clone, merging by the eng04
