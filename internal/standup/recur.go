@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
@@ -17,9 +18,12 @@ type RecurOptions struct {
 	Title   string // the next instance's title
 	DueDate string // YYYY-MM-DD; empty is the issue's due date plus seven days
 	// Body replaces the issue's body above its Previous Runs section.
-	Body   string
-	Now    time.Time
-	DryRun bool
+	Body string
+	// Summary is the run's result: it closes an open instance as its run
+	// summary and follows the outcome on the Previous Runs line.
+	Summary string
+	Now     time.Time
+	DryRun  bool
 }
 
 // RecurResult is what recur reports.
@@ -91,20 +95,36 @@ func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurRes
 		r.Closed = true
 		outcome = "closed by tpm issue recur without its work"
 	}
+	summary := strings.Join(strings.Fields(o.Summary), " ")
 	run := fmt.Sprintf("- %s#%d (due %s): %s.", project, iid, orNone(i.DueDate), outcome)
+	if summary != "" {
+		run += " " + strings.TrimSuffix(summary, ".") + "."
+	}
 	body := nextBody(i.Description, o.Body, run) + "\n\n" + marker + "\n"
 	if o.DryRun {
 		return r, nil
 	}
 	if r.Closed {
-		if err := t.CreateNote(project, iid, fmt.Sprintf("Run summary: closed on %s without a merge; the next instance is due %s.", now.Format("2006-01-02"), r.DueDate)); err != nil {
+		note := fmt.Sprintf("Run summary: closed on %s without a merge; the next instance is due %s.", now.Format("2006-01-02"), r.DueDate)
+		if o.Summary != "" {
+			note = "Run summary: " + strings.TrimSpace(o.Summary) + "\n\n" + fmt.Sprintf("Closed on %s without a merge; the next instance is due %s.", now.Format("2006-01-02"), r.DueDate)
+		}
+		if err := t.CreateNote(project, iid, note); err != nil {
 			return r, err
 		}
 		if _, err := t.UpdateIssue(project, iid, tracker.IssueUpdate{State: ptr("close")}); err != nil {
 			return r, err
 		}
 	}
-	next, err := t.CreateIssue(project, tracker.NewIssue{Title: r.Title, Description: body, Labels: i.Labels, DueDate: r.DueDate, Milestone: i.Milestone})
+	// The next instance keeps the labels but one: it was filed by recur.
+	var labels []string
+	for _, l := range i.Labels {
+		if !strings.HasPrefix(l, "op::") {
+			labels = append(labels, l)
+		}
+	}
+	labels = append(labels, program.Op(program.OpRecur))
+	next, err := t.CreateIssue(project, tracker.NewIssue{Title: r.Title, Description: body, Labels: labels, DueDate: r.DueDate, Milestone: i.Milestone})
 	if err != nil {
 		return r, err
 	}

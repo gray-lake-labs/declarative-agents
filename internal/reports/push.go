@@ -37,7 +37,7 @@ func SignalIssue(s Signal) tracker.NewIssue {
 - The next tpm reports aggregate no longer reports %s for %s (test: tpm_reports_aggregate; environment: local)
 `, s.Detail, s.Kind, s.Week, signalMarker(s), s.Kind, s.Subject, s.Kind, s.Subject)
 	return tracker.NewIssue{Title: fmt.Sprintf("Signal: %s on %s", s.Kind, s.Subject), Description: body,
-		Labels: program.Labels("management", "", "", s.Component)}
+		Labels: append(program.Labels("management", "", "", s.Component), program.Op(program.OpReport))}
 }
 
 // PushSignals files each actionable signal as an issue in the system

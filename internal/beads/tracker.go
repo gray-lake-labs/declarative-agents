@@ -382,8 +382,11 @@ func (t *Tracker) rev(project, ref string) string {
 	return ref
 }
 
+// GetFile reads p at ref as text: through the repository's textconv, so a
+// git-crypt repository's files come back decrypted, and as stored where no
+// textconv is configured.
 func (t *Tracker) GetFile(project, p, ref string) ([]byte, error) {
-	out, err := t.raw(project, "show", t.rev(project, ref)+":"+p)
+	out, err := t.raw(project, "cat-file", "--textconv", t.rev(project, ref)+":"+p)
 	if err != nil {
 		return nil, fmt.Errorf("%s at %s: %w", p, ref, tracker.ErrNotFound)
 	}

@@ -17,22 +17,25 @@ type Classification struct {
 	Reason string `json:"reason"`
 }
 
-// planningDirs hold the hierarchy documents and the objective documents read
-// as initiatives (srd045, srd034 R1.1).
-var planningDirs = []string{"docs/specs/themes/", "docs/specs/initiatives/", "docs/specs/epics/", "docs/specs/features/", "docs/specs/stories/", "docs/specs/objectives/"}
+// planningDirs hold the hierarchy documents, the objective documents read
+// as initiatives (srd045, srd034 R1.1), and the sprint-end summaries, which
+// close a period (srd038).
+var planningDirs = []string{"docs/specs/themes/", "docs/specs/initiatives/", "docs/specs/epics/", "docs/specs/features/", "docs/specs/stories/", "docs/specs/objectives/", "docs/sprint-ends/"}
 
 // planning reports whether a path is a planning document: the road-map or a
 // theme, initiative, epic, feature, story, or objective document in any
 // repository, and an SRD in the system repository, which is a system or
-// subsystem SRD (srd001 R1.1).
+// subsystem SRD (srd001 R1.1). A directory, with or without its trailing
+// slash, is planning when the documents in it are.
 func planning(p string, inSystem bool) bool {
 	p = path.Clean(strings.TrimPrefix(p, "./"))
+	dir := p + "/"
 	switch {
 	case p == "docs/road-map.md":
 		return true
-	case slices.ContainsFunc(planningDirs, func(d string) bool { return strings.HasPrefix(p, d) }):
+	case slices.ContainsFunc(planningDirs, func(d string) bool { return strings.HasPrefix(dir, d) }):
 		return true
-	case inSystem && strings.HasPrefix(p, SRDDir+"/"):
+	case inSystem && strings.HasPrefix(dir, SRDDir+"/"):
 		return true
 	}
 	return false

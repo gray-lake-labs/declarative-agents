@@ -38,13 +38,19 @@ func TestReconcileCommandConfirmsProvisionalPops(t *testing.T) {
 		t.Fatal(err)
 	}
 	var got struct {
-		Reconciled []Reconciled `json:"reconciled"`
-		Read       tracker.Read `json:"tracker_read"`
+		ReconcileResult
+		Read tracker.Read `json:"tracker_read"`
 	}
 	if err := json.Unmarshal(out.Bytes(), &got); err != nil {
 		t.Fatalf("%v: %s", err, out.String())
 	}
 	if len(got.Reconciled) != 1 || got.Reconciled[0].Outcome != "confirmed" || got.Read.Commit == "" || got.Read.Offline {
 		t.Fatalf("reconcile = %+v, want one confirmed pop read online", got)
+	}
+	// The queued write is reported, and the read names the commit after
+	// the push, which the tracker repository now holds.
+	head := beadstest.Git(t, root, "--git-dir", remote, "rev-parse", "main")
+	if len(got.Pushed) != 1 || got.Commit != head || got.Read.Commit != head {
+		t.Fatalf("reconcile pushed %v at %s, read %s; the tracker is at %s", got.Pushed, got.Commit, got.Read.Commit, head)
 	}
 }

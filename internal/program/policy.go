@@ -13,10 +13,15 @@ import (
 // control/labels.md (config formats policy and labels). Without control
 // files, Defaults applies.
 type Policy struct {
-	Planes     []string
-	Types      []string
-	Kinds      []string
-	Components []string // empty: any component:: value is accepted
+	Planes []string
+	Types  []string
+	Kinds  []string
+	// Components are the components the control project's subsystem SRDs
+	// declare (srd001 R21.1), read when ComponentsRead. Read and empty, the
+	// program declares none yet, so no component:: label is required; not
+	// read, any component:: value is accepted.
+	Components     []string
+	ComponentsRead bool
 	// RequireAC lists the kinds whose issues must carry Requirements and
 	// Acceptance Criteria; any issue with a Cites line must carry them too.
 	RequireAC        []string
@@ -211,5 +216,10 @@ func LoadPolicy(t tracker.Tracker, project, ref string) (Policy, error) {
 	} else if !errors.Is(err, tracker.ErrNotFound) {
 		return p, err
 	}
+	subs, err := LoadSubsystems(t, project, ref)
+	if err != nil && !errors.Is(err, tracker.ErrNotFound) {
+		return p, fmt.Errorf("%s subsystem SRDs: %w", project, err)
+	}
+	p.Components, p.ComponentsRead = subs.Components(), true
 	return p, nil
 }

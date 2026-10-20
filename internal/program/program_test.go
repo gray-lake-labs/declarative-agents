@@ -1,6 +1,7 @@
 package program
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -45,6 +46,69 @@ func TestLintReportsEveryFailure(t *testing.T) {
 		if !strings.Contains(got, want) {
 			t.Errorf("missing %q in:\n%s", want, got)
 		}
+	}
+}
+
+// TestComponentRequiredOnceDeclared needs no component on an issue while
+// the program's subsystem SRDs declare none, and once they declare one,
+// treats a missing or undeclared component as a failure (srd001 R21.2,
+// R21.5).
+func TestComponentRequiredOnceDeclared(t *testing.T) {
+	componentReasons := func(i tracker.Issue, p Policy) []string {
+		var out []string
+		for _, r := range Lint(i, p) {
+			if strings.Contains(r, "component") {
+				out = append(out, r)
+			}
+		}
+		return out
+	}
+	i := objective(goodBody)
+	i.Labels = []string{"plane::management"}
+
+	fresh, err := LoadPolicy(fake.New(), "g/system", "main")
+	if err != nil || !fresh.ComponentsRead || len(fresh.Components) != 0 {
+		t.Fatalf("fresh program policy = %+v, %v", fresh, err)
+	}
+	if got := componentReasons(i, fresh); len(got) != 0 {
+		t.Errorf("fresh program: %v, want no component reason", got)
+	}
+	if got := componentReasons(i, Defaults()); len(got) != 1 {
+		t.Errorf("no control project read: %v, want the missing component", got)
+	}
+
+	f := fake.New()
+	f.AddFile("g/system", "main", SRDDir+"/srd010-po-1.md", []byte(subsystemFixture))
+	declared, err := LoadPolicy(f, "g/system", "main")
+	if err != nil || !slices.Equal(declared.Components, []string{"po-1"}) {
+		t.Fatalf("declared policy = %+v, %v", declared, err)
+	}
+	for labels, want := range map[string]string{"": "exactly one component:: label, has 0", "component::bogus": "component::bogus is not a listed component", "component::po-1": ""} {
+		i.Labels = []string{"plane::management"}
+		if labels != "" {
+			i.Labels = append(i.Labels, labels)
+		}
+		got := strings.Join(componentReasons(i, declared), "; ")
+		if (want == "" && got != "") || !strings.Contains(got, want) {
+			t.Errorf("%q: %q, want %q", labels, got, want)
+		}
+	}
+}
+
+// TestLintAllowsAtMostOneOp admits an issue with no op:: label, as every
+// issue filed before the axis has, and fails one with two (srd001 R34).
+func TestLintAllowsAtMostOneOp(t *testing.T) {
+	i := objective(goodBody)
+	if r := Lint(i, Defaults()); len(r) != 0 {
+		t.Fatalf("no op:: label: %v", r)
+	}
+	i.Labels = append(i.Labels, Op(OpFile))
+	if r := Lint(i, Defaults()); len(r) != 0 {
+		t.Fatalf("one op:: label: %v", r)
+	}
+	i.Labels = append(i.Labels, Op(OpPlan))
+	if r := strings.Join(Lint(i, Defaults()), "; "); !strings.Contains(r, "has 2 op:: labels, at most one") {
+		t.Fatalf("two op:: labels: %q", r)
 	}
 }
 

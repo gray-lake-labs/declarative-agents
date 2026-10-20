@@ -57,7 +57,7 @@ since the format tools run only in this repository's mage (srd040).
 <!-- req: R1.1 -->
 ### R1.1
 
-Writes into --dir, by default the root of the git repository holding the working directory, the system repository's corpus skeleton: docs/VISION.md, docs/ARCHITECTURE.md, docs/SPECIFICATIONS.md, docs/road-map.md with one release, docs/constitutions/design.md, docs/corpus-charter.yaml, docs/external-pins.yaml, and a system SRD, docs/specs/software-requirements/srd001-system.md, which that release lists. The parent's corpus audit loads no corpus without an SRD and no road-map without a release, so the skeleton carries one of each for the owner to rewrite.
+Writes into --dir, by default the root of the git repository holding the working directory, the system repository's corpus skeleton: docs/VISION.md, docs/ARCHITECTURE.md, docs/SPECIFICATIONS.md, docs/road-map.md with one release, docs/constitutions/design.md, docs/corpus-charter.yaml, docs/external-pins.yaml, and a system SRD, docs/specs/software-requirements/srd001-system.md, which that release lists. The parent's corpus audit loads no corpus without an SRD and no road-map without a release, so the skeleton carries one of each for the owner to rewrite. The system SRD declares the system repository a component of the program: its context names the technical program manager as owner, and its implementation_targets row names the repository at its origin's URL, path /, so issues in the system repository carry a component like any team repository's (srd001 R21). A repository with no origin gets the field as an empty list.
 
 <!-- req: R1.2 -->
 ### R1.2
@@ -67,7 +67,7 @@ Every skeleton document is in the format of the parent release tpm was built wit
 <!-- req: R1.3 -->
 ### R1.3
 
-Writes control/labels.md and control/policy.md holding the built-in defaults, in the config formats labels and policy.
+Writes control/labels.md and control/policy.md holding the built-in defaults, in the config formats labels and policy. The policy's definition of done gives the system's corpus release a peer-read check (srd015 R1.2), so the system is never released on its author's word.
 
 <!-- req: R1.4 -->
 ### R1.4
@@ -77,7 +77,7 @@ Installs the skills for the agents --agent names, through tpm install (srd037).
 <!-- req: R1.5 -->
 ### R1.5
 
-With --tracker naming a tracker repository that has no commits, makes its first commit holding an empty issues file (srd042) and creates the program's labels there (srd013 R6). A tracker repository that already has commits is left as it is.
+With --tracker naming a tracker repository that has no commits, makes its first commit holding an empty issues file and the config file setting the program's issue prefix, --prefix or else the last segment of --group (srd042 R3.1), and creates the program's labels there (srd013 R6). A tracker repository that already has commits is left as it is. Without --tracker, and with no tracker repository TPM_TRACKER names, reports that no tracker was seeded, so the operator knows no issue can be filed yet.
 
 <!-- req: R1.6 -->
 ### R1.6
@@ -95,7 +95,7 @@ Writes into --dir, a checkout of the repository joining the program, the same co
 <!-- req: R2.2 -->
 ### R2.2
 
-Files one issue in the system repository that --system names, through tpm issue file (srd013 R3), asking that the subsystem SRD --subsystem names list the repository in its components table, with the repository's URL and path. It never commits to the system repository.
+Files one issue in the system repository that --system names, through tpm issue file (srd013 R3), asking that the subsystem SRD --subsystem names list the repository in its components table, with the repository's URL and path. Its criterion names the program policy's audit command as the test, and it carries the system repository's component when the system SRD declares one. It never commits to the system repository.
 
 <!-- req: R2.3 -->
 ### R2.3
@@ -146,7 +146,7 @@ Runs in --dir, by default the root of the git repository holding the working dir
 <!-- req: R4.2 -->
 ### R4.2
 
-Writes every file init (at system level) or onboard (at subsystem level) writes that is missing, and appends or refreshes the orientation files' blocks (R3.5). Every other existing file is kept; doctor offers no --force. It files no issue, installs no skill, and touches no tracker.
+Writes every file init (at system level) or onboard (at subsystem level) writes that is missing, and appends or refreshes the orientation files' blocks (R3.5). At system level it extends control/labels.md with the axes and values tpm's defaults list that it lacks, keeping every value, color, and description it has and inserting rather than re-rendering, and names tpm issue labels as what creates them in the tracker. It also adds what init now writes into the system SRD and control/policy.md when they lack it: the SRD's context first and its implementation_targets last (R1.1), keeping every line the owner wrote, and the corpus release's peer-read gate when the definition of done names no corpus gate (R1.3). Every other existing file is kept; doctor offers no --force. It files no issue, installs no skill, and touches no tracker.
 
 <!-- req: R4.3 -->
 ### R4.3
@@ -166,7 +166,7 @@ Without a Go toolchain or the pinned release's source, skips the repair, says wh
 <!-- req: R4.6 -->
 ### R4.6
 
-A dry run reports what doctor would write, append, refresh, and repair and changes nothing. A second run reports nothing created, appended, refreshed, or repaired.
+A dry run reports what doctor would write, append, refresh, extend, and repair and changes nothing. A second run reports nothing created, appended, refreshed, extended, or repaired.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -196,7 +196,7 @@ init in an empty git repository writes VISION, ARCHITECTURE, SPECIFICATIONS, a r
 <!-- ac: AC2 -->
 ### AC2
 
-init with an empty tracker repository makes its first commit and creates the labels there; with a tracker repository that has commits it changes nothing there.
+init with an empty tracker repository makes its first commit and creates the labels there; with a tracker repository that has commits it changes nothing there; with no tracker repository given or named by TPM_TRACKER it reports that none was seeded.
 
 <!-- field: traces -->
 #### Traces
@@ -242,7 +242,7 @@ init writes README.md, AGENTS.md, and README.md in themes/, initiatives/, and ep
 <!-- ac: AC6 -->
 ### AC6
 
-On a repository an older tpm laid down, doctor adds exactly the missing files, refreshes a changed block and keeps the text around it, appends the block to an orientation file that has none, reports stale skills without installing them, refuses a directory that is not a program repository, writes nothing on a dry run, and changes nothing on a second run.
+On a repository an older tpm laid down, doctor adds exactly the missing files, refreshes a changed block and keeps the text around it, appends the block to an orientation file that has none, extends control/labels.md with the axes and values it lacks while keeping a recolored value and a program's own value, adds the system SRD's component and the corpus peer read an older init did not write, reports stale skills without installing them, refuses a directory that is not a program repository, writes nothing on a dry run, and changes nothing on a second run.
 
 <!-- field: traces -->
 #### Traces

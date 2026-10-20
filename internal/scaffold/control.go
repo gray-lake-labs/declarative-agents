@@ -2,9 +2,11 @@ package scaffold
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
+	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
@@ -16,6 +18,7 @@ var labelAxes = []struct{ name, prefix, exclusive, required string }{
 	{"plane", "plane::", "true", "all"},
 	{"type", "type::", "true", "none"},
 	{"kind", "kind::", "true", "data"},
+	{"op", "op::", "true", "none"},
 	{"state", "", "false", "none"},
 }
 
@@ -25,15 +28,37 @@ func LabelsDocument(labels []tracker.Label) string {
 	var b strings.Builder
 	b.WriteString("---\nid: labels\ntitle: Label schema\n---\n\n")
 	b.WriteString("<!-- field: version -->\n## Version\n\n1\n\n<!-- field: axes -->\n## Axes\n")
-	axisOf := func(name string) string {
-		for _, a := range labelAxes[:3] {
-			if strings.HasPrefix(name, a.prefix) {
-				return a.name
-			}
-		}
-		return "state"
-	}
 	for _, a := range labelAxes {
+		b.WriteString(axisSection(a.name, labels))
+		if a.name == "kind" {
+			b.WriteString("\n<!-- field: component -->\n### Component\n\n<!-- field: prefix -->\n#### Prefix\n\ncomponent::\n\n" +
+				"<!-- field: exclusive -->\n#### Exclusive\n\ntrue\n\n<!-- field: required -->\n#### Required\n\nall\n\n" +
+				"<!-- field: values_from -->\n#### Values from\n\nsubsystem SRDs (srd001 R21.1)\n\n<!-- field: color -->\n#### Color\n\n#7f8c8d\n")
+		}
+	}
+	return b.String()
+}
+
+// axisOf is the axis of labelAxes a label belongs to by its prefix; a
+// label with none is a state.
+func axisOf(name string) string {
+	for _, a := range labelAxes {
+		if a.prefix != "" && strings.HasPrefix(name, a.prefix) {
+			return a.name
+		}
+	}
+	return "state"
+}
+
+// axisSection renders one axis of labelAxes as control/labels.md holds it:
+// its prefix, exclusive, and required attributes and a values table of the
+// labels on it.
+func axisSection(name string, labels []tracker.Label) string {
+	var b strings.Builder
+	for _, a := range labelAxes {
+		if a.name != name {
+			continue
+		}
 		fmt.Fprintf(&b, "\n<!-- field: %s -->\n### %s\n\n", a.name, strings.ToUpper(a.name[:1])+a.name[1:])
 		prefix := a.prefix
 		if prefix == "" {
@@ -48,13 +73,141 @@ func LabelsDocument(labels []tracker.Label) string {
 				fmt.Fprintf(&b, "| %s | %s | %s |\n", strings.TrimPrefix(l.Name, a.prefix), l.Color, l.Description)
 			}
 		}
-		if a.name == "kind" {
-			b.WriteString("\n<!-- field: component -->\n### Component\n\n<!-- field: prefix -->\n#### Prefix\n\ncomponent::\n\n" +
-				"<!-- field: exclusive -->\n#### Exclusive\n\ntrue\n\n<!-- field: required -->\n#### Required\n\nall\n\n" +
-				"<!-- field: values_from -->\n#### Values from\n\nsubsystem SRDs (srd001 R21.1)\n\n<!-- field: color -->\n#### Color\n\n#7f8c8d\n")
-		}
 	}
 	return b.String()
+}
+
+// labelsFile is what ExtendLabels reads of control/labels.md: each axis's
+// prefix and value names.
+type labelsFile struct {
+	Axes map[string]struct {
+		Prefix string `yaml:"prefix"`
+		Values []struct {
+			Name string `yaml:"name"`
+		} `yaml:"values"`
+	} `yaml:"axes"`
+}
+
+// axisMarker finds an axis section of control/labels.md: its field marker
+// over a level 3 heading.
+var axisMarker = regexp.MustCompile(`(?m)^<!-- field: ([a-z_]+)[^\n]*-->\n### `)
+
+// ExtendLabels adds to the control/labels.md text doc every axis and value
+// of defaults it lacks, and returns the text and the labels it added (srd043
+// R4.2). A missing axis gets its whole section, before the next axis of
+// labelAxes the file has; a missing value gets one row at the end of its
+// axis's values table, with the default's color and description. Nothing
+// that exists is changed, reordered, or removed: a person's recolor and a
+// program's own values stay. Values are matched under the file's own prefix
+// for the axis.
+func ExtendLabels(doc []byte, defaults []tracker.Label) ([]byte, []string, error) {
+	var f labelsFile
+	if err := corpus.DecodeConfig(doc, &f); err != nil {
+		return doc, nil, err
+	}
+	text := string(doc)
+	var added []string
+	for _, a := range labelAxes {
+		var want []tracker.Label
+		for _, l := range defaults {
+			if axisOf(l.Name) == a.name {
+				want = append(want, l)
+			}
+		}
+		if len(want) == 0 {
+			continue
+		}
+		have, ok := f.Axes[a.name]
+		if !ok {
+			text = insertAxis(text, a.name, axisSection(a.name, want))
+			for _, l := range want {
+				added = append(added, l.Name)
+			}
+			continue
+		}
+		prefix := have.Prefix
+		if prefix == "None" {
+			prefix = ""
+		}
+		names := map[string]bool{}
+		for _, v := range have.Values {
+			names[prefix+v.Name] = true
+		}
+		for _, l := range want {
+			value := strings.TrimPrefix(l.Name, a.prefix)
+			if names[prefix+value] {
+				continue
+			}
+			var err error
+			if text, err = appendRow(text, a.name, []string{value, l.Color, l.Description}); err != nil {
+				return doc, nil, err
+			}
+			added = append(added, prefix+value)
+		}
+	}
+	return []byte(text), added, nil
+}
+
+// insertAxis puts section before the first axis after name in labelAxes
+// that text has, or at its end.
+func insertAxis(text, name, section string) string {
+	after := false
+	for _, a := range labelAxes {
+		if a.name == name {
+			after = true
+			continue
+		}
+		if !after {
+			continue
+		}
+		for _, m := range axisMarker.FindAllStringSubmatchIndex(text, -1) {
+			if text[m[2]:m[3]] == a.name {
+				return strings.TrimRight(text[:m[0]], "\n") + "\n" + section + "\n" + text[m[0]:]
+			}
+		}
+	}
+	return strings.TrimRight(text, "\n") + "\n" + section
+}
+
+// appendRow adds a row after the last row of axis's values table, padded
+// to the table's columns.
+func appendRow(text, axis string, cells []string) (string, error) {
+	marks := axisMarker.FindAllStringSubmatchIndex(text, -1)
+	for i, m := range marks {
+		if text[m[2]:m[3]] != axis {
+			continue
+		}
+		end := len(text)
+		if i+1 < len(marks) {
+			end = marks[i+1][0]
+		}
+		section := text[m[0]:end]
+		lines := strings.SplitAfter(section, "\n")
+		last, columns := -1, 0
+		for j, line := range lines {
+			if t := strings.TrimSpace(line); strings.HasPrefix(t, "|") {
+				if last < 0 || j == last+1 {
+					if last < 0 {
+						columns = strings.Count(t, "|") - 1
+					}
+					last = j
+				}
+			}
+		}
+		if last < 0 {
+			return text, fmt.Errorf("the %s axis has no values table to add to", axis)
+		}
+		for len(cells) < columns {
+			cells = append(cells, "")
+		}
+		row := "| " + strings.Join(cells, " | ") + " |\n"
+		if !strings.HasSuffix(lines[last], "\n") {
+			row = "\n" + row
+		}
+		lines = append(lines[:last+1], append([]string{row}, lines[last+1:]...)...)
+		return text[:m[0]] + strings.Join(lines, "") + text[end:], nil
+	}
+	return text, fmt.Errorf("control/labels.md has no %s axis section", axis)
 }
 
 // PolicyDocument renders p as control/policy.md in the policy config format:

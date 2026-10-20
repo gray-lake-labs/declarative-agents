@@ -1,6 +1,7 @@
 package release
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/program"
@@ -20,6 +21,41 @@ type NextResult struct {
 	Latest     string      `json:"latest,omitempty"`
 	LatestTag  string      `json:"latest_tag,omitempty"`
 	Candidates []Candidate `json:"candidates"`
+	// Recommended is the candidate the commits since the latest tag call
+	// for, and Reason says why; empty when nothing changed since it.
+	Recommended string `json:"recommended,omitempty"`
+	Reason      string `json:"reason"`
+}
+
+// Recommend picks the bump the commits since the latest release call for
+// (srd015 R3.1): a first release is minor; a commit that says BREAKING
+// CHANGE makes it major; commits that all fix something make it a patch;
+// any other change is minor. No commit since the latest release recommends
+// nothing.
+func (n *NextResult) Recommend(messages []string) {
+	switch {
+	case n.Latest == "":
+		n.Recommended, n.Reason = "minor", "no release yet: the first release is minor"
+		return
+	case len(messages) == 0:
+		n.Recommended, n.Reason = "", "no commit since "+n.LatestTag+": nothing to release"
+		return
+	}
+	fixes := 0
+	for _, m := range messages {
+		if strings.Contains(m, "BREAKING CHANGE") {
+			n.Recommended, n.Reason = "major", "a commit since "+n.LatestTag+" says BREAKING CHANGE"
+			return
+		}
+		if subject := strings.ToLower(strings.TrimSpace(m)); strings.HasPrefix(subject, "fix") {
+			fixes++
+		}
+	}
+	if fixes == len(messages) {
+		n.Recommended, n.Reason = "patch", fmt.Sprintf("all %d commits since %s fix something", fixes, n.LatestTag)
+		return
+	}
+	n.Recommended, n.Reason = "minor", fmt.Sprintf("%d commits since %s change more than fixes", len(messages), n.LatestTag)
 }
 
 // Next reports the artifact's latest version among tags and the next
@@ -47,7 +83,14 @@ func (n NextResult) Human() string {
 		b.WriteString(n.Artifact + ": latest " + n.Latest + " (" + n.LatestTag + ")\n")
 	}
 	for _, c := range n.Candidates {
-		b.WriteString("  " + c.Bump + " " + c.Version + " " + c.Class + "\n")
+		mark := ""
+		if c.Bump == n.Recommended {
+			mark = " (recommended)"
+		}
+		b.WriteString("  " + c.Bump + " " + c.Version + " " + c.Class + mark + "\n")
+	}
+	if n.Reason != "" {
+		b.WriteString("  " + n.Reason + "\n")
 	}
 	return b.String()
 }

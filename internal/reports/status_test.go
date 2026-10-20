@@ -72,7 +72,7 @@ func testStatusIssueDueAfterReminderWeekdayMentionsOwner(t *testing.T, p tracker
 	if i.Title != "Recurring: weekly status 2026-W42" || i.DueDate != "2026-10-15" || len(i.Assignees) != 0 {
 		t.Fatalf("issue %+v", i)
 	}
-	for _, l := range []string{"plane::data", "type::recurring", "kind::review", "component::po-1"} {
+	for _, l := range []string{"plane::data", "type::recurring", "kind::review", "component::po-1", "op::status"} {
 		if !slices.Contains(i.Labels, l) {
 			t.Errorf("labels %v lack %s", i.Labels, l)
 		}

@@ -76,13 +76,17 @@ func testPlanRecommendsOwnerAndEnvironment(t *testing.T, tp trackertest.Program)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(p.Objectives) != 2 {
+	// One entry per item, so each item can go to its own team.
+	if len(p.Objectives) != 3 {
 		t.Fatalf("objectives = %+v", p.Objectives)
 	}
-	r1, r2 := p.Objectives[0], p.Objectives[1]
-	if r1.Key != "obj001-reliable-agents#R1" || strings.Join(r1.Items, ",") != "R1.1,R1.2" || r1.Repository != fleet || r1.Environment != "dev" || r1.Due != "2026-11-06" {
-		t.Fatalf("R1 = %+v", r1)
+	for i, item := range []string{"R1.1", "R1.2"} {
+		r1 := p.Objectives[i]
+		if r1.Key != "obj001-reliable-agents#R1" || strings.Join(r1.Items, ",") != item || r1.Repository != fleet || r1.Environment != "dev" || r1.Due != "2026-11-06" {
+			t.Fatalf("%s = %+v", item, r1)
+		}
 	}
+	r2 := p.Objectives[2]
 	if r2.Repository != "" || len(r2.Candidates) != 1 || r2.Candidates[0] != fleet {
 		t.Fatalf("R2 = %+v", r2)
 	}
@@ -102,7 +106,8 @@ func testPushFilesOneDatedPinnedObjectiveIssue(t *testing.T, tp trackertest.Prog
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res[0].Action != "created" || res[1].Action != "refused" || !strings.Contains(strings.Join(res[1].Reasons, ";"), "no repository confirmed") {
+	if res[0].Action != "created" || res[1].Action != "created" || res[0].IID != res[1].IID || res[2].Action != "refused" ||
+		!strings.Contains(strings.Join(res[2].Reasons, ";"), "no repository confirmed") {
 		t.Fatalf("res = %+v", res)
 	}
 	issues, _ := f.ListIssues(fleet, openIssues())
@@ -123,7 +128,7 @@ func testPushFilesOneDatedPinnedObjectiveIssue(t *testing.T, tp trackertest.Prog
 			t.Errorf("body lacks %q:\n%s", want, body)
 		}
 	}
-	if i.DueDate != "2026-11-06" || len(i.Assignees) != 0 || !i.HasLabel("plane::management") || !i.HasLabel("component::fleet") || i.HasLabel("needs-triage") {
+	if i.DueDate != "2026-11-06" || len(i.Assignees) != 0 || !i.HasLabel("plane::management") || !i.HasLabel("component::fleet") || !i.HasLabel("op::goals") || i.HasLabel("needs-triage") {
 		t.Fatalf("issue = %+v", i)
 	}
 	notes, _ := f.ListNotes(fleet, i.IID)
@@ -172,9 +177,9 @@ func TestSprintGoalPerTeam(t *testing.T) {
 	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
 		f, s := fixture(t, tp)
 		p, _ := MakePlan(f, s)
-		p.Objectives[1].Repository = fleet
+		p.Objectives[2].Repository = fleet
 		res, err := Push(f, s, p, web, program.Defaults(), false)
-		if err != nil || res[0].Action != "created" || res[1].Action != "created" || res[0].IID != res[1].IID {
+		if err != nil || res[0].Action != "created" || res[2].Action != "created" || res[0].IID != res[2].IID {
 			t.Fatalf("res=%+v err=%v", res, err)
 		}
 		issues := fleetIssues(t, f)
@@ -285,6 +290,38 @@ func TestLoadRefusesADocumentThatIsNotAgreed(t *testing.T) {
 		p.AddFile(system, "v0.1.0", "docs/specs/objectives/obj001-reliable-agents.md", []byte(doc))
 		if _, err := Load(p.Tracker(), system, "01.0", "main"); err == nil || !strings.Contains(err.Error(), "only an agreed document") {
 			t.Fatalf("err = %v", err)
+		}
+	})
+}
+
+// TestOneOutcomeAcrossTwoTeams confirms an outcome's two items for two
+// teams: each team's Sprint Goal serves the outcome and cites only its own
+// item (srd022, srd034 R3.2).
+func TestOneOutcomeAcrossTwoTeams(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
+		const scoring = "program/delivery/scoring"
+		tp.AddFile(system, "v0.1.0", "docs/specs/software-requirements/srd011-scoring.md", []byte(strings.NewReplacer(
+			"srd010-delivery", "srd011-scoring", "| fleet |", "| scoring |", "/delivery/fleet", "/delivery/scoring").Replace(string(read(t, "../../testdata/system/srd010-delivery.md")))))
+		f, s := fixture(t, tp)
+		p, err := MakePlan(f, s)
+		if err != nil || len(p.Objectives) != 3 || len(p.Objectives[1].Candidates) != 2 {
+			t.Fatalf("plan = %+v, %v", p.Objectives, err)
+		}
+		p.Objectives[1].Repository = scoring
+		res, err := Push(f, s, p, web, program.Defaults(), false)
+		if err != nil || res[0].Action != "created" || res[1].Action != "created" || res[0].Project != fleet || res[1].Project != scoring {
+			t.Fatalf("res=%+v err=%v", res, err)
+		}
+		for repo, want := range map[string]string{fleet: "#R1.1", scoring: "#R1.2"} {
+			issues, _ := f.ListIssues(repo, openIssues())
+			if len(issues) != 1 {
+				t.Fatalf("%s has %d issues", repo, len(issues))
+			}
+			body := issues[0].Description
+			other := map[string]string{"#R1.1": "#R1.2", "#R1.2": "#R1.1"}[want]
+			if !strings.Contains(body, want) || strings.Contains(body, other) || !strings.Contains(body, "serves=obj001-reliable-agents#R1 ") {
+				t.Errorf("%s Sprint Goal:\n%s", repo, body)
+			}
 		}
 	})
 }

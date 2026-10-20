@@ -4,8 +4,13 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
+
+	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
 
 // older is a system repository as an older tpm laid it down: the skeleton
@@ -260,5 +265,201 @@ func TestDoctorRepairSkipsUntrackedCorpus(t *testing.T) {
 	r, err := Doctor(DoctorOptions{Dir: dir})
 	if err != nil || !strings.Contains(r.Repair.Skipped, "commit the documents") {
 		t.Fatalf("repair of an untracked corpus: %+v, %v", r.Repair, err)
+	}
+}
+
+// olderLabels is control/labels.md as a program set up before the op axis
+// keeps it: no op section, no kind::question, kind::build recolored, and a
+// kind::chore of the program's own.
+func olderLabels() string {
+	var labels []tracker.Label
+	for _, l := range program.DefaultLabels() {
+		switch {
+		case strings.HasPrefix(l.Name, "op::"), l.Name == "kind::question":
+			continue
+		case l.Name == "kind::build":
+			l.Color = "#000000"
+		}
+		labels = append(labels, l)
+	}
+	labels = append(labels, tracker.Label{Name: "kind::chore", Color: "#111111", Description: "Housekeeping"})
+	doc := LabelsDocument(labels)
+	start, end := strings.Index(doc, "\n<!-- field: op -->"), strings.Index(doc, "\n<!-- field: state -->")
+	return doc[:start] + doc[end:]
+}
+
+// TestDoctorExtendsLabels adds the op axis and the missing kind::question
+// to an older control/labels.md, keeps the program's recolor and its own
+// value byte for byte, reports the additions on a dry run without writing,
+// and changes nothing on a second run (srd043 R4.2, R4.6).
+func TestDoctorExtendsLabels(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(dir, program.LabelsFile)
+	before := olderLabels()
+	if err := os.WriteFile(path, []byte(before), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	labelsResult := func(r DoctorResult) Result {
+		for _, f := range r.Files {
+			if f.Path == program.LabelsFile {
+				return f
+			}
+		}
+		t.Fatalf("doctor reported no %s", program.LabelsFile)
+		return Result{}
+	}
+	want := []string{"kind::question", "op::file", "op::plan", "op::goals", "op::onboard", "op::report", "op::status", "op::recur"}
+
+	dry, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
+	if f := labelsResult(dry); err != nil || f.Action != "extended" || !slices.Equal(f.Labels, want) || !strings.Contains(f.Reason, "tpm issue labels") {
+		t.Fatalf("dry run: %+v, %v", f, err)
+	}
+	if b, _ := os.ReadFile(path); string(b) != before {
+		t.Fatal("the dry run wrote control/labels.md")
+	}
+
+	r, err := Doctor(DoctorOptions{Dir: dir})
+	if f := labelsResult(r); err != nil || f.Action != "extended" || !slices.Equal(f.Labels, want) {
+		t.Fatalf("doctor: %+v, %v", f, err)
+	}
+	b, _ := os.ReadFile(path)
+	got := string(b)
+	for _, keep := range []string{"| build | #000000 | Builds or changes software |", "| chore | #111111 | Housekeeping |", "| question | #a8d695 | Needs an answer, not a change |"} {
+		if !strings.Contains(got, keep) {
+			t.Errorf("control/labels.md lacks %q:\n%s", keep, got)
+		}
+	}
+	if strings.Index(got, "<!-- field: op -->") < strings.Index(got, "<!-- field: component -->") || strings.Index(got, "<!-- field: op -->") > strings.Index(got, "<!-- field: state -->") {
+		t.Errorf("the op axis is not between component and state:\n%s", got)
+	}
+	f := fake.New()
+	f.AddFile("g/system", "main", program.LabelsFile, b)
+	labels, err := program.LoadLabels(f, "g/system", "main")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, l := range labels {
+		names = append(names, l.Name)
+	}
+	for _, w := range append(want, "kind::chore") {
+		if !slices.Contains(names, w) {
+			t.Errorf("LoadLabels lacks %s: %v", w, names)
+		}
+	}
+
+	again, err := Doctor(DoctorOptions{Dir: dir})
+	if f := labelsResult(again); err != nil || f.Action != "kept" {
+		t.Fatalf("second run: %+v, %v", f, err)
+	}
+	if b2, _ := os.ReadFile(path); string(b2) != got {
+		t.Fatal("the second run changed control/labels.md")
+	}
+
+	if err := os.WriteFile(path, []byte("---\nid: labels\n---\n\n<!-- field: axes -->\n## Axes\n\n- [unclosed\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	broken, err := Doctor(DoctorOptions{Dir: dir})
+	if f := labelsResult(broken); err != nil || f.Action != "kept" || !strings.HasPrefix(f.Reason, "does not parse") {
+		t.Fatalf("unparseable labels: %+v, %v", f, err)
+	}
+}
+
+// TestExtendLabelsLeavesACompleteFile changes nothing in a file that lists
+// every default.
+func TestExtendLabelsLeavesACompleteFile(t *testing.T) {
+	doc := []byte(LabelsDocument(program.DefaultLabels()))
+	out, added, err := ExtendLabels(doc, program.DefaultLabels())
+	if err != nil || len(added) != 0 || string(out) != string(doc) {
+		t.Fatalf("added %v, err %v, changed %v", added, err, string(out) != string(doc))
+	}
+}
+
+// TestDoctorUpgradesTheSystem adds what tpm init now writes to a system
+// repository an older tpm laid down: the system SRD's context and its
+// component row, and the corpus release's peer read, keeping the owner's
+// text; a dry run writes nothing and a second run changes nothing.
+func TestDoctorUpgradesTheSystem(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	run(t, dir, "remote", "add", "origin", "https://git.example.invalid/g/system.git")
+	srdPath, policyPath := filepath.Join(dir, systemSRDPath), filepath.Join(dir, program.PolicyFile)
+	oldSRD := "---\nid: srd001-system\ntitle: \"System: what the system does\"\n---\n\n<!-- field: problem -->\n## Problem\n\nThe owner's problem.\n\n" +
+		"<!-- field: goals -->\n## Goals\n\n- G1: the owner's goal.\n"
+	oldPolicy := PolicyDocument(program.Defaults())
+	os.WriteFile(srdPath, []byte(oldSRD), 0o644)
+	os.WriteFile(policyPath, []byte(oldPolicy), 0o644)
+	result := func(r DoctorResult, path string) Result {
+		for _, f := range r.Files {
+			if f.Path == path {
+				return f
+			}
+		}
+		t.Fatalf("doctor reported no %s", path)
+		return Result{}
+	}
+
+	dry, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
+	if err != nil || result(dry, systemSRDPath).Action != "extended" || result(dry, program.PolicyFile).Action != "extended" {
+		t.Fatalf("dry run: %+v, %+v, %v", result(dry, systemSRDPath), result(dry, program.PolicyFile), err)
+	}
+	if b, _ := os.ReadFile(srdPath); string(b) != oldSRD {
+		t.Fatal("the dry run wrote the system SRD")
+	}
+
+	if _, err := Doctor(DoctorOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	srd, _ := os.ReadFile(srdPath)
+	got := string(srd)
+	if !strings.HasPrefix(got, "---\nid: srd001-system\ntitle: \"System: what the system does\"\n---\n\n"+systemContext+"\n<!-- field: problem -->") ||
+		!strings.Contains(got, "The owner's problem.") || !strings.HasSuffix(got, "| system | https://git.example.invalid/g/system.git | / |\n") {
+		t.Fatalf("system SRD:\n%s", got)
+	}
+	f := fake.New()
+	f.AddFile("g/system", "main", systemSRDPath, srd)
+	policy, _ := os.ReadFile(policyPath)
+	f.AddFile("g/system", "main", program.PolicyFile, policy)
+	subs, _ := program.LoadSubsystems(f, "g/system", "main")
+	if c, _, ok := subs.ComponentFor("g/system"); !ok || c.Name != "system" {
+		t.Fatalf("the system is no component: %+v", subs)
+	}
+	p, err := program.LoadPolicy(f, "g/system", "main")
+	if g := p.Gate("corpus"); err != nil || len(g) != 1 || g[0].Kind != "peer-read" || len(p.Gate("default")) != 1 || p.Gate("default")[0].Kind != "tests" {
+		t.Fatalf("policy gates: corpus %+v default %+v, %v", p.Gate("corpus"), p.Gate("default"), err)
+	}
+
+	again, err := Doctor(DoctorOptions{Dir: dir})
+	if err != nil || result(again, systemSRDPath).Action != "kept" || result(again, program.PolicyFile).Action != "kept" {
+		t.Fatalf("second run: %+v, %+v, %v", result(again, systemSRDPath), result(again, program.PolicyFile), err)
+	}
+}
+
+// TestCorpusPeerReadKeepsTheProgramsGate leaves a policy that names its own
+// corpus gate alone, and gives one with no definition of done init's whole
+// one.
+func TestCorpusPeerReadKeepsTheProgramsGate(t *testing.T) {
+	own := InitPolicy()
+	own.DefinitionOfDone["corpus"] = []program.Check{{Kind: "custom", Environment: "local", Command: "make check"}}
+	doc := []byte(PolicyDocument(own))
+	if out, changed, err := AddCorpusPeerRead(doc); err != nil || changed || string(out) != string(doc) {
+		t.Fatalf("own corpus gate: changed %v, %v", changed, err)
+	}
+	bare := PolicyDocument(program.Defaults())
+	bare = bare[:strings.Index(bare, "<!-- field: definition_of_done -->")]
+	out, changed, err := AddCorpusPeerRead([]byte(bare))
+	if err != nil || !changed {
+		t.Fatalf("no definition of done: changed %v, %v", changed, err)
+	}
+	f := fake.New()
+	f.AddFile("g/system", "main", program.PolicyFile, out)
+	p, err := program.LoadPolicy(f, "g/system", "main")
+	if err != nil || len(p.Gate("corpus")) != 1 || p.Gate("default")[0].Command != "go test ./..." {
+		t.Fatalf("policy from %q: %+v, %v", out, p.DefinitionOfDone, err)
 	}
 }

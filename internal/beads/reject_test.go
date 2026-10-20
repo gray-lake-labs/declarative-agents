@@ -89,7 +89,7 @@ func TestRejectedWriteKeepsQueuedWrites(t *testing.T) {
 		t.Fatal(err)
 	}
 	confirmed := false
-	for _, x := range r {
+	for _, x := range r.Reconciled {
 		confirmed = confirmed || (x.ID == "sm-1" && x.Outcome == "confirmed")
 	}
 	if !confirmed {

@@ -125,7 +125,8 @@ func testActionableSignalIsPushedAsIssue(t *testing.T, p trackertest.Program) {
 			t.Errorf("issue lacks %q:\n%s", want, i.Description)
 		}
 	}
-	if !strings.Contains(strings.Join(i.Labels, ","), "plane::management") || !strings.Contains(strings.Join(i.Labels, ","), "component::scoring-api") {
+	if !strings.Contains(strings.Join(i.Labels, ","), "plane::management") || !strings.Contains(strings.Join(i.Labels, ","), "component::scoring-api") ||
+		!strings.Contains(strings.Join(i.Labels, ","), "op::report") {
 		t.Fatalf("labels %v", i.Labels)
 	}
 	again, err := PushSignals(f, "g/system", signals, program.Defaults(), false)

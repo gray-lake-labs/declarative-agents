@@ -4,7 +4,10 @@ Each person's weekly status is a report in the reports repository: the
 facts come from the tracker, and the person adds only what it cannot know,
 such as whether a Sprint Goal is on track. This group scaffolds that
 repository, opens the weekly status issues, gathers a person's week,
-validates reports, and aggregates them into signals by component.
+validates reports, and aggregates them into signals by component. A cost
+overrun has no signal of its own: report it as a blocker naming the spend
+and the limit it passed, and the aggregate raises it with the other
+blockers.
 
 Subcommands:
   tpm reports init            scaffold a reports repository (srd018 R1)

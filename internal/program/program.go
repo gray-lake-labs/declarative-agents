@@ -74,14 +74,16 @@ func init() {
 	})
 
 	var popArgs struct {
-		project, dir, control, ref string
-		iid                        int
+		project, issueProject, branch, dir, control, ref string
+		iid                                              int
 	}
 	cli.Default.Register(&cli.Command{
 		Group: "issue", Name: "pop", Summary: "claim an issue and open its own branch and worktree",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&popArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&popArgs.iid, "issue", 0, "issue IID (required)")
+			fs.StringVar(&popArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
+			fs.StringVar(&popArgs.branch, "branch", "", "the branch to open; empty names it from the issue")
 			fs.StringVar(&popArgs.dir, "dir", ".", "a directory in the local checkout of the project")
 			fs.StringVar(&popArgs.control, "control", "", "program repository holding control/ files; empty uses the defaults")
 			fs.StringVar(&popArgs.ref, "ref", "main", "ref of the control files")
@@ -98,11 +100,18 @@ func init() {
 			if err != nil {
 				return err
 			}
-			r, err := Pop(t, ExecGit{}, popArgs.project, popArgs.iid, popArgs.dir, p, ctx.DryRun)
+			issueProject := popArgs.issueProject
+			if issueProject == "" {
+				issueProject = popArgs.project
+			}
+			r, err := PopIn(t, ExecGit{}, popArgs.project, issueProject, popArgs.iid, popArgs.branch, popArgs.dir, p, ctx.DryRun)
 			if err != nil {
 				return err
 			}
 			human := fmt.Sprintf("%s#%d on %s in %s", r.Project, r.IID, r.Branch, r.Worktree)
+			if len(r.NotAdmitted) > 0 {
+				human += "\nnot admitted, which does not block a non-data issue: " + strings.Join(r.NotAdmitted, "; ")
+			}
 			if !ctx.DryRun {
 				if r.Installed, err = InstallSkills(r.Checkout, r.Worktree); err != nil {
 					r.InstallError = err.Error()
@@ -349,7 +358,7 @@ func init() {
 				}
 			}
 			in := tracker.NewIssue{Title: fileArgs.title, Description: string(body), DueDate: fileArgs.due, Milestone: milestone,
-				Labels: Labels(l.Plane, fileArgs.typ, l.Kind, l.Component)}
+				Labels: append(Labels(l.Plane, fileArgs.typ, l.Kind, l.Component), Op(OpFile))}
 			r, err := File(t, fileArgs.project, in, p, ctx.DryRun)
 			if err != nil {
 				return err

@@ -136,10 +136,19 @@ func MakeCandidates(in Input) (Candidates, error) {
 		return 0
 	})
 	c.Items = items
-	if len(releases) > 0 {
-		c.Latest = releases[len(releases)-1].Version
+	if n := len(releases); n > 0 && unplanned(releases[n-1]) {
+		// tpm init lays down 01.0 with no items and no tag: that record is
+		// the next release, not a released one.
+		c.Version = releases[n-1].Version
+		if n > 1 {
+			c.Latest = releases[n-2].Version
+		}
+	} else {
+		if n > 0 {
+			c.Latest = releases[n-1].Version
+		}
+		c.Version = nextVersion(c.Latest)
 	}
-	c.Version = nextVersion(c.Latest)
 	c.EndDate = endDate(in, releases)
 	next := release.Next(in.Releases, in.Artifact, in.Tags)
 	for _, cand := range next.Candidates {
@@ -214,6 +223,10 @@ func slippedGroups(in Input) (map[string]bool, error) {
 	}
 	return out, nil
 }
+
+// unplanned reports whether a release record names no items and no tag:
+// a release laid down to be planned, not one planning has written.
+func unplanned(r goals.Release) bool { return len(r.Objectives) == 0 && r.Tag == "" }
 
 // nextVersion is the road map's next minor version: 01.1 is followed by
 // 01.2, and an empty road map starts at 01.0.

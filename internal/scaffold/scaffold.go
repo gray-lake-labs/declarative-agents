@@ -34,6 +34,8 @@ type Result struct {
 	Path   string `json:"path"`
 	Action string `json:"action"`
 	Reason string `json:"reason,omitempty"`
+	// Labels are the labels doctor added to control/labels.md.
+	Labels []string `json:"labels,omitempty"`
 }
 
 // ParentRelease is the parent release the templates were written against,
@@ -51,6 +53,20 @@ func ParentRelease() (string, error) {
 	return pins.Pins[parentRepository], nil
 }
 
+// implementationTargets is the system SRD's implementation_targets field
+// for the repository in dir: one row naming the repository, at its origin's
+// URL, path /. Without an origin there is no URL to declare, and the field
+// is the empty list in its canonical form.
+func implementationTargets(dir string) string {
+	out, err := exec.Command("git", "-C", dir, "remote", "get-url", "origin").Output()
+	url := strings.TrimSpace(string(out))
+	if err != nil || url == "" {
+		return "<!-- field: implementation_targets | form: \"empty list\" -->\n## Implementation targets\n\nNone\n"
+	}
+	return fmt.Sprintf("<!-- field: implementation_targets -->\n## Implementation targets\n\n| name | repository | path |\n| --- | --- | --- |\n| %s | %s | / |\n",
+		path.Base(program.ProjectPath(url)), url)
+}
+
 // levels are the owners the templates name, by the level a repository is at.
 var levels = map[string]string{
 	"system":    "the technical program manager",
@@ -61,13 +77,16 @@ var levels = map[string]string{
 // (design.md D7), for a repository at level: the common templates and the
 // level's own orientation files (srd043 R1.6, R2.4) with the level and its
 // owner filled in, the design constitution, the charter, and the parent pin.
-func corpusFiles(level string) (map[string][]byte, error) {
+// At the system level the system SRD declares the system repository in dir
+// as a component of the program, so its issues carry a component like any
+// team repository's.
+func corpusFiles(level, dir string) (map[string][]byte, error) {
 	owner, ok := levels[level]
 	if !ok {
 		return nil, fmt.Errorf("no corpus for level %q", level)
 	}
 	fill := strings.NewReplacer("{{level}}", level, "{{Level}}", strings.ToUpper(level[:1])+level[1:],
-		"{{owner}}", owner, "{{Owner}}", strings.ToUpper(owner[:1])+owner[1:])
+		"{{owner}}", owner, "{{Owner}}", strings.ToUpper(owner[:1])+owner[1:], "{{implementation_targets}}", implementationTargets(dir))
 	files := map[string][]byte{}
 	for _, root := range []string{path.Join("templates", "corpus"), path.Join("templates", level)} {
 		err := fs.WalkDir(templates, root, func(p string, d fs.DirEntry, err error) error {
@@ -136,8 +155,18 @@ func charterFile() ([]byte, error) {
 func controlFiles() map[string][]byte {
 	return map[string][]byte{
 		program.LabelsFile: []byte(LabelsDocument(program.DefaultLabels())),
-		program.PolicyFile: []byte(PolicyDocument(program.Defaults())),
+		program.PolicyFile: []byte(PolicyDocument(InitPolicy())),
 	}
+}
+
+// InitPolicy is the policy tpm init writes: the built-in defaults, and a
+// gate for the system's corpus release that is a peer read, since a
+// release of the system needs one (srd015 R1.2) and its documents have no
+// tests of their own.
+func InitPolicy() program.Policy {
+	p := program.Defaults()
+	p.DefinitionOfDone["corpus"] = []program.Check{{Kind: "peer-read"}}
+	return p
 }
 
 // requireRepository refuses a directory that is not a git repository

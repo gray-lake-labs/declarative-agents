@@ -82,6 +82,23 @@ func TestPopRefusesHeldOrUnadmitted(t *testing.T) {
 	}
 }
 
+// TestPopReportsUnadmittedManagementIssue pops a management issue that
+// fails admission, which admission does not gate, and reports why it fails
+// (srd013 R7.1).
+func TestPopReportsUnadmittedManagementIssue(t *testing.T) {
+	f, g := newPopFixture(t)
+	i, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Plan the next release", Description: goodBody,
+		Labels: []string{"plane::management"}})
+	r, err := Pop(f, g, "g/po-1", i.IID, ".", Defaults(), false)
+	if err != nil || !r.Assigned || len(r.NotAdmitted) != 1 || !strings.Contains(r.NotAdmitted[0], "component") {
+		t.Fatalf("r=%+v err=%v", r, err)
+	}
+	ok := admitted(f, "Admitted")
+	if r, err := Pop(f, g, "g/po-1", ok.IID, ".", Defaults(), false); err != nil || len(r.NotAdmitted) != 0 {
+		t.Fatalf("admitted issue: r=%+v err=%v", r, err)
+	}
+}
+
 func TestPopCreatesBranchAndWorktree(t *testing.T) {
 	f, g := newPopFixture(t)
 	i := admitted(f, "Score one agent: trajectories & rubric")
@@ -101,7 +118,8 @@ func TestPopCreatesBranchAndWorktree(t *testing.T) {
 	if r.Worktree != filepath.Join(filepath.Dir(g.root), "po-1-"+r.Branch) || !r.Added {
 		t.Fatalf("worktree %q", r.Worktree)
 	}
-	if !strings.Contains(strings.Join(g.calls, "\n"), "worktree add --track -b "+r.Branch+" "+r.Worktree+" origin/"+r.Branch) {
+	if calls := strings.Join(g.calls, "\n"); !strings.Contains(calls, "worktree add --no-checkout --track -b "+r.Branch+" "+r.Worktree+" origin/"+r.Branch) ||
+		!strings.HasSuffix(calls, "\ncheckout") {
 		t.Fatalf("git calls: %q", g.calls)
 	}
 
@@ -122,5 +140,23 @@ func TestSlug(t *testing.T) {
 		if got := Slug(in); got != want {
 			t.Errorf("Slug(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+// TestPopInAnotherRepository claims a status issue in the person's project
+// and opens the branch the issue names in the reports repository.
+func TestPopInAnotherRepository(t *testing.T) {
+	f, g := newPopFixture(t)
+	i, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Weekly status", Milestone: "m", Description: goodBody,
+		Labels: []string{"plane::data", "kind::review", "component::po-1"}})
+	r, err := PopIn(f, g, "g/reports", "g/po-1", i.IID, "2026-W42-po-1", ".", Defaults(), false)
+	if err != nil || r.Project != "g/reports" || r.IssueProject != "g/po-1" || r.Branch != "2026-W42-po-1" || !r.Assigned {
+		t.Fatalf("r=%+v err=%v", r, err)
+	}
+	if got, _ := f.GetIssue("g/po-1", i.IID); len(got.Assignees) != 1 {
+		t.Fatalf("the issue was not claimed: %v", got.Assignees)
+	}
+	if _, ok := f.Branches["g/reports@2026-W42-po-1"]; !ok {
+		t.Fatalf("branches %v, want 2026-W42-po-1 in g/reports", f.Branches)
 	}
 }

@@ -45,6 +45,21 @@ func system(t *testing.T) *fake.Fake {
 	return f
 }
 
+// TestRegistrationCarriesTheSystemComponent files the registration with the
+// system repository's component once the system SRD declares it.
+func TestRegistrationCarriesTheSystemComponent(t *testing.T) {
+	f := system(t)
+	f.AddFile("g/system", "main", systemSRDPath, []byte(strings.Replace(subsystemSRD, "srd010-ingest", "srd001-system", -1)+
+		"| system | https://git.example.invalid/g/system | / |\n"))
+	if _, err := Onboard(f, joining(repo(t))); err != nil {
+		t.Fatal(err)
+	}
+	issues, _ := f.ListIssues("g/system", tracker.IssueQuery{State: "opened"})
+	if len(issues) != 1 || !slices.Contains(issues[0].Labels, "component::system") || slices.Contains(issues[0].Labels, "needs-triage") {
+		t.Fatalf("registration issue: %+v", issues)
+	}
+}
+
 func joining(dir string) OnboardOptions {
 	return OnboardOptions{Dir: dir, System: "g/system", Ref: "main", Subsystem: "srd010-ingest", Repository: "https://git.example.invalid/g/store"}
 }
@@ -125,7 +140,8 @@ func TestOnboardFilesOneRegistration(t *testing.T) {
 		t.Fatalf("%d issues in the system repository, want 1", len(issues))
 	}
 	i := issues[0]
-	if !slices.Contains(i.Labels, "plane::management") || !strings.Contains(i.Title, "g/store") ||
+	if !slices.Contains(i.Labels, "plane::management") || !slices.Contains(i.Labels, "op::onboard") || !strings.Contains(i.Title, "g/store") ||
+		!strings.Contains(i.Description, "(test: mage audit; environment: local)") ||
 		!strings.Contains(i.Description, "srd010-ingest") || !strings.Contains(i.Description, registrationMarker("g/store")) || len(i.Assignees) != 0 {
 		t.Fatalf("registration issue: %+v", i)
 	}

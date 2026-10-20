@@ -81,6 +81,17 @@ func (s Subsystems) ComponentFor(repository string) (Component, Subsystem, bool)
 	return Component{}, Subsystem{}, false
 }
 
+// Components lists the name of every component the subsystems declare.
+func (s Subsystems) Components() []string {
+	var out []string
+	for _, sub := range s {
+		for _, c := range sub.Components {
+			out = append(out, c.Name)
+		}
+	}
+	return out
+}
+
 // Repositories lists every component repository the subsystems declare.
 func (s Subsystems) Repositories() []string {
 	var out []string

@@ -6,7 +6,7 @@ title: Label schema
 <!-- field: purpose -->
 ## Purpose
 
-Defines the labels a program creates in its tracker group so every issue can carry the five axes of the process: plane, type, kind, component, and state. The scripts create missing labels from this file and read it to check admission. Values for plane, type, kind, and state are fixed by srd001; component values come from the program.
+Defines the labels a program creates in its tracker group so every issue can carry the five axes of the process: plane, type, kind, component, and state. The scripts create missing labels from this file and read it to check admission. Values for plane, type, kind, op, and state are fixed by srd001; component values come from the program. When a newer tpm adds an axis or a value, tpm doctor adds it to the file and keeps everything the file already holds (srd043 R4.2).
 
 <!-- field: schema -->
 ## Schema
@@ -35,7 +35,7 @@ mapping of axis name to axis
 <!-- field: description -->
 #### Description
 
-One entry per axis: plane, type, kind, component, state. Each axis has prefix, exclusive, required, and values.
+One entry per axis: plane, type, kind, component, op, state. Each axis has prefix, exclusive, required, and values.
 
 <!-- schema_entry: axes.<axis>.prefix -->
 ### axes.<axis>.prefix
@@ -61,7 +61,7 @@ boolean
 <!-- field: description -->
 #### Description
 
-True when an issue may carry at most one value of the axis. True for plane, type, kind, and component. False for state, because the overlay states of srd041 R1–R32 combine.
+True when an issue may carry at most one value of the axis. True for plane, type, kind, component, and op. False for state, because the overlay states of srd041 R1–R32 combine.
 
 <!-- schema_entry: axes.<axis>.required -->
 ### axes.<axis>.required
@@ -74,7 +74,7 @@ string
 <!-- field: description -->
 #### Description
 
-Which issues must carry a value: all (plane, component except on a sprint issue), data (kind, on plane::data issues), or none (type, state).
+Which issues must carry a value: all (plane, component except on a sprint issue), data (kind, on plane::data issues), or none (type, op, state).
 
 <!-- schema_entry: axes.<axis>.values -->
 ### axes.<axis>.values
@@ -227,6 +227,37 @@ subsystem SRDs (srd001 R21.1)
 #### Color
 
 #7f8c8d
+
+<!-- field: op -->
+### Op
+
+<!-- field: prefix -->
+#### Prefix
+
+op::
+
+<!-- field: exclusive -->
+#### Exclusive
+
+true
+
+<!-- field: required -->
+#### Required
+
+none
+
+<!-- field: values -->
+#### Values
+
+| name | color | description |
+| --- | --- | --- |
+| file | #95a5a6 | Filed by tpm issue file |
+| plan | #95a5a6 | Filed by tpm plan push |
+| goals | #95a5a6 | Filed by tpm goals push |
+| onboard | #95a5a6 | Filed by tpm onboard |
+| report | #95a5a6 | Filed by tpm reports aggregate --push |
+| status | #95a5a6 | Filed by tpm reports status |
+| recur | #95a5a6 | Opened by tpm issue recur |
 
 <!-- field: state -->
 ### State

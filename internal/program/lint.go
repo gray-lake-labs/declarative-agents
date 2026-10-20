@@ -22,7 +22,8 @@ var (
 
 // Lint checks one issue against the label schema, admission policy, and its
 // link lines (srd013 R1.1, srd007 R8.1) and returns every reason it fails;
-// none means admitted.
+// none means admitted. A program whose subsystem SRDs declare no component
+// yet needs none on its issues (srd001 R21.2).
 func Lint(i tracker.Issue, p Policy) []string {
 	var reasons []string
 	axis := func(prefix string) []string {
@@ -56,10 +57,15 @@ func Lint(i tracker.Issue, p Policy) []string {
 	sprint := slices.Contains(types, "sprint")
 
 	components := axis("component::")
-	if !sprint && len(components) != 1 {
+	bootstrap := p.ComponentsRead && len(p.Components) == 0 && len(components) == 0
+	if !sprint && !bootstrap && len(components) != 1 {
 		reasons = append(reasons, fmt.Sprintf("needs exactly one component:: label, has %d", len(components)))
 	}
 	listed("component", components, p.Components)
+
+	if ops := axis("op::"); len(ops) > 1 {
+		reasons = append(reasons, fmt.Sprintf("has %d op:: labels, at most one", len(ops)))
+	}
 
 	kinds := axis("kind::")
 	data := slices.Contains(planes, "data")

@@ -57,6 +57,20 @@ func (r Ref) Pinned() error {
 	return nil
 }
 
+// CheckPinnedDocument is CheckPinned for a reference to a whole document,
+// such as a story's parent epic: the ref must be pinned, and an anchor is
+// optional.
+func CheckPinnedDocument(raw string) error {
+	r, err := Parse(raw)
+	if err != nil {
+		return err
+	}
+	if r.Anchor == "" {
+		r.Anchor = "document"
+	}
+	return r.Pinned()
+}
+
 // CheckPinned parses raw and reports any malformed or unpinned form.
 func CheckPinned(raw string) error {
 	r, err := Parse(raw)

@@ -32,6 +32,8 @@ title: "The label scheme: plane, type, kind, component, and state"
   1. R33
 - component:
   1. R21
+- op:
+  1. R34
 - state:
   1. srd041-states
 
@@ -425,12 +427,12 @@ The kind routes pull: it decides who takes an issue, whether it is offered, and 
 <!-- req: R21.1 -->
 ### R21.1
 
-Component values come from the subsystem SRDs in the system repository: each component a subsystem SRD declares (design.md subsystem_srd) is one label component::<name>. This corpus defines no value, and no policy file lists them a second time.
+Component values come from the subsystem SRDs in the system repository: each component a subsystem SRD declares (design.md subsystem_srd) is one label component::<name>. The system SRD tpm init writes declares the system repository the same way (srd043 R1.1). This corpus defines no value, and no policy file lists them a second time.
 
 <!-- req: R21.2 -->
 ### R21.2
 
-Every issue other than a sprint issue carries exactly one component label. An issue with none or with more than one is labelled needs-triage by admission (R23) and stays out of the backlog.
+Every issue other than a sprint issue carries exactly one component label. An issue with none or with more than one is labelled needs-triage by admission (R23) and stays out of the backlog. Until a subsystem SRD declares a component, as in a program tpm init has just laid down, there is no value to choose, and an issue with no component label is admitted.
 
 <!-- req: R21.3 -->
 ### R21.3
@@ -627,6 +629,24 @@ Any member of the program files it, and it is in the backlog like every other pl
 ### R33.3
 
 It carries Requirements and Acceptance Criteria, and its branch changes docs/ and merges only when the corpus audit passes (srd034 R2.2).
+
+<!-- req: R34 -->
+## R34 - The op axis
+
+<!-- req: R34.1 -->
+### R34.1
+
+Every issue tpm files carries one op::<operation> label naming the operation that filed it: op::file (tpm issue file), op::plan (tpm plan push), op::goals (tpm goals push), op::onboard (tpm onboard), op::report (an actionable signal from tpm reports), op::status (a weekly status issue), and op::recur (the next instance tpm issue recur opens).
+
+<!-- req: R34.2 -->
+### R34.2
+
+The label is set when the issue is created and never changed: an issue outlives the operation that filed it, so the operation is a label and the issue's ID stays opaque. A next instance is filed by recur, so it carries op::recur in place of the label its previous instance had.
+
+<!-- req: R34.3 -->
+### R34.3
+
+Admission fails an issue with more than one op:: label and requires none, so issues filed before the axis existed are still admitted. A program whose control/labels.md predates the axis gets it from tpm doctor (srd043 R4.2), and its labels in the tracker from tpm issue labels.
 
 <!-- field: goals -->
 ## Goals
@@ -969,3 +989,15 @@ A kind::spec issue filed by any member is admitted into the backlog with Require
 - [R33.1](#r331)
 - [R33.2](#r332)
 - [R33.3](#r333)
+
+<!-- ac: AC25 -->
+### AC25
+
+Each operation's filed issue carries its op:: label, a recurred instance carries op::recur and no other op:: label, and an issue with two op:: labels fails admission while one with none is admitted.
+
+<!-- field: traces -->
+#### Traces
+
+- [R34.1](#r341)
+- [R34.2](#r342)
+- [R34.3](#r343)

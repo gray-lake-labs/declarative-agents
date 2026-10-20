@@ -1,6 +1,7 @@
 package program
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
+	"github.com/gray-lake-labs/scrum-master/internal/events"
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
@@ -166,5 +169,70 @@ func TestMergeNeedsAnApprovalOfItsTip(t *testing.T) {
 	}
 	if m, err := statusMerge(); err != nil || !m.Merged {
 		t.Fatalf("merge of the unassigned issue with bob's approval = %+v, %v", m, err)
+	}
+}
+
+// TestSprintEndMergeRecordsReportedComplete is a sprint-end merge (srd038
+// R2): its summary must be in format, a Sprint Goal it closes gets a
+// reported_complete event on its ledger, and a --closes issue another merge
+// already closed is reported, not refused.
+func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
+	tr, checkout := newBeadsTracker(t, "alice")
+	goal, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Sprint Goal: scoring", Labels: []string{"plane::management"},
+		Description: "Goal\n\n" + sprintgoal.Marker("01.0", []string{"in001-scoring#R1"}) + "\n"})
+	done, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Closed earlier", Labels: []string{"plane::management"}})
+	closed := "close"
+	if _, err := tr.UpdateIssue("g/po-1", done.IID, tracker.IssueUpdate{State: &closed}); err != nil {
+		t.Fatal(err)
+	}
+	end, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: sprint end 01.0", Labels: []string{"plane::management"}})
+	p, err := Pop(tr, ExecGit{}, "g/po-1", end.IID, checkout, Defaults(), false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	summary := filepath.Join(p.Worktree, sprintgoal.SummaryDir, "01.0.md")
+	if err := os.MkdirAll(filepath.Dir(summary), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(summary, []byte("# Sprint end 01.0\n\nScoring shipped.\n\n## Stories done\n\n- st001\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	beadstest.Git(t, p.Worktree, "add", "-A")
+	beadstest.Git(t, p.Worktree, "commit", "-q", "-m", "Summary")
+	beadstest.Git(t, p.Worktree, "push", "-q", "-u", "origin", "HEAD")
+	bob := reviewer(t, tr, checkout, "bob")
+	if _, err := Approve(bob, ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, checkout); err != nil {
+		t.Fatal(err)
+	}
+	gate := AuditGate{Command: "true", Dir: p.Worktree}
+	closes := []string{fmt.Sprintf("g/po-1#%d", goal.IID), fmt.Sprintf("g/po-1#%d", done.IID)}
+	if _, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, p.Worktree, gate, closes, false); err == nil || !strings.Contains(err.Error(), "is not project#story") {
+		t.Fatalf("merge of a summary with a bare story id = %v, want a refusal", err)
+	}
+
+	if err := os.WriteFile(summary, []byte("# Sprint end 01.0\n\nScoring shipped.\n\n## Stories done\n\n- g/po-1#st001\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	beadstest.Git(t, p.Worktree, "commit", "-q", "-am", "Name the story's project")
+	beadstest.Git(t, p.Worktree, "push", "-q")
+	if _, err := Approve(bob, ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, checkout); err != nil {
+		t.Fatal(err)
+	}
+	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, p.Worktree, gate, closes, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(m.Reported) != 1 || m.Reported[0] != closes[0] || len(m.AlreadyClosed) != 1 || m.AlreadyClosed[0] != closes[1] {
+		t.Fatalf("merge = %+v", m)
+	}
+	notes, _ := tr.ListNotes("g/po-1", goal.IID)
+	found := false
+	for _, n := range notes {
+		if e, ok := events.Parse(n.Body); ok && e.Name == "reported_complete" && e.Values("commit")[0] == m.Commit {
+			found = true
+		}
+	}
+	if got, _ := tr.GetIssue("g/po-1", goal.IID); got.State != "closed" || !found {
+		t.Fatalf("Sprint Goal %s, notes %+v; want closed with a reported_complete event", got.State, notes)
 	}
 }

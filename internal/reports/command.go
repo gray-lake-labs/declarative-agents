@@ -6,24 +6,30 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
+	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 )
 
 func init() {
 	var initArgs struct {
 		dir, system, reminder string
-		members               []string
+		members, agents       []string
 	}
 	cli.Default.Register(&cli.Command{
 		Group: "reports", Name: "init", Summary: "scaffold a reports repository in a local checkout",
 		Flags: func(fs *flag.FlagSet) {
-			initArgs.members = nil
+			initArgs.members, initArgs.agents = nil, nil
 			fs.StringVar(&initArgs.dir, "dir", ".", "local checkout of the reports repository")
 			fs.StringVar(&initArgs.system, "system", "", "system repository project path")
 			fs.StringVar(&initArgs.reminder, "reminder", DefaultReminderWeekday, "reminder weekday")
 			fs.Func("member", "username=project of a person who reports (repeatable)", func(v string) error {
 				initArgs.members = append(initArgs.members, v)
+				return nil
+			})
+			fs.Func("agent", "install the skills for cursor, claude, copilot, or all (repeatable)", func(v string) error {
+				initArgs.agents = append(initArgs.agents, v)
 				return nil
 			})
 		},
@@ -39,6 +45,13 @@ func init() {
 			if _, err := Weekday(cfg.ReminderWeekday); err != nil {
 				return fmt.Errorf("%w: %v", cli.ErrUsage, err)
 			}
+			var agents []string
+			if len(initArgs.agents) > 0 {
+				var err error
+				if agents, err = install.ParseAgents(initArgs.agents); err != nil {
+					return fmt.Errorf("%w: %v", cli.ErrUsage, err)
+				}
+			}
 			res, err := Init(initArgs.dir, cfg, time.Now(), ctx.DryRun)
 			if err != nil {
 				return err
@@ -47,7 +60,21 @@ func init() {
 			for _, r := range res {
 				fmt.Fprintf(&b, "%-8s %s\n", r.Action, r.Path)
 			}
-			return ctx.Emit(res, b.String())
+			out := struct {
+				Files  []InitResult     `json:"files"`
+				Skills []install.Result `json:"skills,omitempty"`
+			}{Files: res}
+			if len(agents) > 0 {
+				skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+				if err != nil {
+					return err
+				}
+				if out.Skills, err = install.Install(initArgs.dir, agents, skills, install.Version(), false, ctx.DryRun); err != nil {
+					return err
+				}
+				fmt.Fprintf(&b, "skills: %d files for the named agents\n", len(out.Skills))
+			}
+			return ctx.Emit(out, b.String())
 		},
 	})
 
@@ -94,12 +121,13 @@ func init() {
 		},
 	})
 
-	var weekArgs struct{ project, user string }
+	var weekArgs struct{ project, user, date string }
 	cli.Default.Register(&cli.Command{
 		Group: "reports", Name: "week", Summary: "the open Sprint Goals and a person's activity this week",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&weekArgs.project, "project", "", "project path (required)")
 			fs.StringVar(&weekArgs.user, "user", "", "tracker username; empty is the caller")
+			fs.StringVar(&weekArgs.date, "date", "", "a day YYYY-MM-DD of the week to gather; empty is today")
 		},
 		Run: func(ctx *cli.Context) error {
 			if weekArgs.project == "" {
@@ -117,7 +145,13 @@ func init() {
 				}
 				user = me.Username
 			}
-			r, err := Week(t, weekArgs.project, user, time.Now())
+			day := time.Now()
+			if weekArgs.date != "" {
+				if day, err = time.Parse(time.DateOnly, weekArgs.date); err != nil {
+					return fmt.Errorf("%w: --date %q is not YYYY-MM-DD", cli.ErrUsage, weekArgs.date)
+				}
+			}
+			r, err := Week(t, weekArgs.project, user, day)
 			if err != nil {
 				return err
 			}

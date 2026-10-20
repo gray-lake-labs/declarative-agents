@@ -14,7 +14,7 @@ func TestRecurReopensWithNextDueDateAndPreviousRuns(t *testing.T) {
 	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
 		f := p.Tracker()
 		labels := []string{"plane::data", "type::recurring", "kind::review", "component::po-1"}
-		first, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: regression run", Labels: labels, DueDate: "2026-10-15", Milestone: "rig-01.0",
+		first, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: regression run", Labels: append(slices.Clone(labels), "op::status"), DueDate: "2026-10-15", Milestone: "rig-01.0",
 			Description: "Run the suite.\n\n## Recurrence\n\nWeekly.\n\n## Previous Runs\n\n- none\n"})
 		now := time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC)
 
@@ -28,7 +28,7 @@ func TestRecurReopensWithNextDueDateAndPreviousRuns(t *testing.T) {
 			t.Fatalf("previous instance %s, notes %+v", old.State, notes)
 		}
 		next, _ := f.GetIssue("g/po-1", r.Next)
-		if next.Title != first.Title || !slices.Equal(next.Labels, labels) || next.DueDate != "2026-10-22" || next.Milestone != "rig-01.0" {
+		if next.Title != first.Title || !slices.Equal(next.Labels, append(labels, "op::recur")) || next.DueDate != "2026-10-22" || next.Milestone != "rig-01.0" {
 			t.Fatalf("next instance %+v", next)
 		}
 		if !strings.Contains(next.Description, "## Recurrence") || !strings.Contains(next.Description, "- g/po-1#1 (due 2026-10-15): closed by tpm issue recur without its work.") || strings.Contains(next.Description, "- none") {
@@ -87,6 +87,29 @@ func TestRecurFindsEarlierMarker(t *testing.T) {
 		all, _ := f.ListIssues("g/po-1", tracker.IssueQuery{State: "all"})
 		if err != nil || !r.Existing || r.Next != earlier.IID || len(all) != 2 {
 			t.Fatalf("recur missed the earlier instance: %+v %v, %d issues", r, err, len(all))
+		}
+	})
+}
+
+// TestRecurCarriesTheRunsSummary closes an open instance with the run's
+// summary and writes it on the next instance's Previous Runs line.
+func TestRecurCarriesTheRunsSummary(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		f := p.Tracker()
+		first, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: Daily Scrum", Labels: []string{"type::recurring"}, DueDate: "2026-10-15",
+			Description: "Scrum.\n\n## Previous Runs\n\n- none\n"})
+		r, err := Recur(f, "g/po-1", first.IID, RecurOptions{Now: time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC),
+			Summary: "Day 3: the grader\nis blocked on trajectories."})
+		if err != nil || !r.Closed {
+			t.Fatalf("recur: %+v %v", r, err)
+		}
+		notes, _ := f.ListNotes("g/po-1", first.IID)
+		if len(notes) != 1 || !strings.HasPrefix(notes[0].Body, "Run summary: Day 3: the grader\nis blocked on trajectories.") {
+			t.Fatalf("notes %+v", notes)
+		}
+		next, _ := f.GetIssue("g/po-1", r.Next)
+		if !strings.Contains(next.Description, "closed by tpm issue recur without its work. Day 3: the grader is blocked on trajectories.\n") {
+			t.Fatalf("next body:\n%s", next.Description)
 		}
 	})
 }

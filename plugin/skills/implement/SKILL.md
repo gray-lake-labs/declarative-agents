@@ -9,9 +9,13 @@ Invoking this skill takes the issue. tpm decides whether it can be taken
 and does every step around the work; this skill asks nothing and closes
 nothing itself (design.md D10, srd036).
 
-Input: the project path of this repository and the issue number.
+Input: the project path of this repository, the issue number, and the
+program's system repository, whose control/ files hold the program's policy.
 
-1. Run `tpm issue pop --project <project> --issue <iid> --json`.
+1. Run `tpm issue pop --project <project> --issue <iid> --control <system> --json`.
+   When the issue's Requirements name `--issue-project` and `--branch` (a
+   weekly status issue, whose report lands in the reports repository),
+   pass them to pop, approve, and merge as written there.
    On a refusal, show its reason and stop.
 2. Work in the worktree pop returned, and nowhere else. The issue body is
    the instructions: its Requirements are the steps and its Acceptance
@@ -22,7 +26,7 @@ Input: the project path of this repository and the issue number.
    Acceptance Criteria and run
    `tpm issue approve --project <project> --issue <iid>` in their
    checkout. The approval names the commit they read.
-5. Run `tpm issue merge --project <project> --issue <iid> --json` from
+5. Run `tpm issue merge --project <project> --issue <iid> --control <system> --json` from
    the worktree, adding `--closes <project#iid>` for each issue the
    Requirements say the merge also closes. It runs the corpus audit for a
    change under docs/, then merges only a branch approved at its tip,
