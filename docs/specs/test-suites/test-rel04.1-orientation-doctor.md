@@ -109,7 +109,7 @@ mage integration:doctor
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/scaffold -run '^Test(Doctor(AddsMissing|RefreshesBlock|ReportsStaleSkills|DryRunWritesNothing|SecondRunChangesNothing|RefusesNonProgram|SubsystemGetsNoControl|ExtendsLabels)|ExtendLabelsLeavesACompleteFile)$'
+go test ./internal/scaffold -run '^Test(Doctor(AddsMissing|RefreshesBlock|ReportsStaleSkills|DryRunWritesNothing|SecondRunChangesNothing|RefusesNonProgram|SubsystemGetsNoControl|ExtendsLabels|UpgradesTheSystem)|ExtendLabelsLeavesACompleteFile|CorpusPeerReadKeepsTheProgramsGate)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
@@ -118,6 +118,7 @@ go test ./internal/scaffold -run '^Test(Doctor(AddsMissing|RefreshesBlock|Report
 - changed_block: refreshed, with the text around it kept
 - orientation_file_without_block: appended, with the owner's text first
 - labels_file_missing_axes: extended with the axis and values, a recolored value kept
+- system_srd_and_policy_from_an_older_init: extended with the context, the component row, and the corpus peer read, the owner's text kept
 - stale_skills: reported with tpm install as the fix, none installed
 - dry_run: the same report, and nothing written
 - second_run: nothing created, appended, refreshed, or repaired

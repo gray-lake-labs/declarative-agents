@@ -193,6 +193,9 @@ func Doctor(o DoctorOptions) (DoctorResult, error) {
 		if err := extendLabels(o.Dir, r.Files, o.DryRun); err != nil {
 			return r, err
 		}
+		if err := upgradeSystem(o.Dir, r.Files, o.DryRun); err != nil {
+			return r, err
+		}
 	}
 	r.Repair = repair(o.Dir, o.DryRun)
 	if agents := install.InstalledAgents(o.Dir); len(agents) > 0 {

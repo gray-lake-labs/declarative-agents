@@ -146,7 +146,7 @@ Runs in --dir, by default the root of the git repository holding the working dir
 <!-- req: R4.2 -->
 ### R4.2
 
-Writes every file init (at system level) or onboard (at subsystem level) writes that is missing, and appends or refreshes the orientation files' blocks (R3.5). At system level it extends control/labels.md with the axes and values tpm's defaults list that it lacks, keeping every value, color, and description it has and inserting rather than re-rendering, and names tpm issue labels as what creates them in the tracker. Every other existing file is kept; doctor offers no --force. It files no issue, installs no skill, and touches no tracker.
+Writes every file init (at system level) or onboard (at subsystem level) writes that is missing, and appends or refreshes the orientation files' blocks (R3.5). At system level it extends control/labels.md with the axes and values tpm's defaults list that it lacks, keeping every value, color, and description it has and inserting rather than re-rendering, and names tpm issue labels as what creates them in the tracker. It also adds what init now writes into the system SRD and control/policy.md when they lack it: the SRD's context first and its implementation_targets last (R1.1), keeping every line the owner wrote, and the corpus release's peer-read gate when the definition of done names no corpus gate (R1.3). Every other existing file is kept; doctor offers no --force. It files no issue, installs no skill, and touches no tracker.
 
 <!-- req: R4.3 -->
 ### R4.3
@@ -242,7 +242,7 @@ init writes README.md, AGENTS.md, and README.md in themes/, initiatives/, and ep
 <!-- ac: AC6 -->
 ### AC6
 
-On a repository an older tpm laid down, doctor adds exactly the missing files, refreshes a changed block and keeps the text around it, appends the block to an orientation file that has none, extends control/labels.md with the axes and values it lacks while keeping a recolored value and a program's own value, reports stale skills without installing them, refuses a directory that is not a program repository, writes nothing on a dry run, and changes nothing on a second run.
+On a repository an older tpm laid down, doctor adds exactly the missing files, refreshes a changed block and keeps the text around it, appends the block to an orientation file that has none, extends control/labels.md with the axes and values it lacks while keeping a recolored value and a program's own value, adds the system SRD's component and the corpus peer read an older init did not write, reports stale skills without installing them, refuses a directory that is not a program repository, writes nothing on a dry run, and changes nothing on a second run.
 
 <!-- field: traces -->
 #### Traces

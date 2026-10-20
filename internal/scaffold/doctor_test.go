@@ -377,3 +377,89 @@ func TestExtendLabelsLeavesACompleteFile(t *testing.T) {
 		t.Fatalf("added %v, err %v, changed %v", added, err, string(out) != string(doc))
 	}
 }
+
+// TestDoctorUpgradesTheSystem adds what tpm init now writes to a system
+// repository an older tpm laid down: the system SRD's context and its
+// component row, and the corpus release's peer read, keeping the owner's
+// text; a dry run writes nothing and a second run changes nothing.
+func TestDoctorUpgradesTheSystem(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	run(t, dir, "remote", "add", "origin", "https://git.example.invalid/g/system.git")
+	srdPath, policyPath := filepath.Join(dir, systemSRDPath), filepath.Join(dir, program.PolicyFile)
+	oldSRD := "---\nid: srd001-system\ntitle: \"System: what the system does\"\n---\n\n<!-- field: problem -->\n## Problem\n\nThe owner's problem.\n\n" +
+		"<!-- field: goals -->\n## Goals\n\n- G1: the owner's goal.\n"
+	oldPolicy := PolicyDocument(program.Defaults())
+	os.WriteFile(srdPath, []byte(oldSRD), 0o644)
+	os.WriteFile(policyPath, []byte(oldPolicy), 0o644)
+	result := func(r DoctorResult, path string) Result {
+		for _, f := range r.Files {
+			if f.Path == path {
+				return f
+			}
+		}
+		t.Fatalf("doctor reported no %s", path)
+		return Result{}
+	}
+
+	dry, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
+	if err != nil || result(dry, systemSRDPath).Action != "extended" || result(dry, program.PolicyFile).Action != "extended" {
+		t.Fatalf("dry run: %+v, %+v, %v", result(dry, systemSRDPath), result(dry, program.PolicyFile), err)
+	}
+	if b, _ := os.ReadFile(srdPath); string(b) != oldSRD {
+		t.Fatal("the dry run wrote the system SRD")
+	}
+
+	if _, err := Doctor(DoctorOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	srd, _ := os.ReadFile(srdPath)
+	got := string(srd)
+	if !strings.HasPrefix(got, "---\nid: srd001-system\ntitle: \"System: what the system does\"\n---\n\n"+systemContext+"\n<!-- field: problem -->") ||
+		!strings.Contains(got, "The owner's problem.") || !strings.HasSuffix(got, "| system | https://git.example.invalid/g/system.git | / |\n") {
+		t.Fatalf("system SRD:\n%s", got)
+	}
+	f := fake.New()
+	f.AddFile("g/system", "main", systemSRDPath, srd)
+	policy, _ := os.ReadFile(policyPath)
+	f.AddFile("g/system", "main", program.PolicyFile, policy)
+	subs, _ := program.LoadSubsystems(f, "g/system", "main")
+	if c, _, ok := subs.ComponentFor("g/system"); !ok || c.Name != "system" {
+		t.Fatalf("the system is no component: %+v", subs)
+	}
+	p, err := program.LoadPolicy(f, "g/system", "main")
+	if g := p.Gate("corpus"); err != nil || len(g) != 1 || g[0].Kind != "peer-read" || len(p.Gate("default")) != 1 || p.Gate("default")[0].Kind != "tests" {
+		t.Fatalf("policy gates: corpus %+v default %+v, %v", p.Gate("corpus"), p.Gate("default"), err)
+	}
+
+	again, err := Doctor(DoctorOptions{Dir: dir})
+	if err != nil || result(again, systemSRDPath).Action != "kept" || result(again, program.PolicyFile).Action != "kept" {
+		t.Fatalf("second run: %+v, %+v, %v", result(again, systemSRDPath), result(again, program.PolicyFile), err)
+	}
+}
+
+// TestCorpusPeerReadKeepsTheProgramsGate leaves a policy that names its own
+// corpus gate alone, and gives one with no definition of done init's whole
+// one.
+func TestCorpusPeerReadKeepsTheProgramsGate(t *testing.T) {
+	own := InitPolicy()
+	own.DefinitionOfDone["corpus"] = []program.Check{{Kind: "custom", Environment: "local", Command: "make check"}}
+	doc := []byte(PolicyDocument(own))
+	if out, changed, err := AddCorpusPeerRead(doc); err != nil || changed || string(out) != string(doc) {
+		t.Fatalf("own corpus gate: changed %v, %v", changed, err)
+	}
+	bare := PolicyDocument(program.Defaults())
+	bare = bare[:strings.Index(bare, "<!-- field: definition_of_done -->")]
+	out, changed, err := AddCorpusPeerRead([]byte(bare))
+	if err != nil || !changed {
+		t.Fatalf("no definition of done: changed %v, %v", changed, err)
+	}
+	f := fake.New()
+	f.AddFile("g/system", "main", program.PolicyFile, out)
+	p, err := program.LoadPolicy(f, "g/system", "main")
+	if err != nil || len(p.Gate("corpus")) != 1 || p.Gate("default")[0].Command != "go test ./..." {
+		t.Fatalf("policy from %q: %+v, %v", out, p.DefinitionOfDone, err)
+	}
+}
