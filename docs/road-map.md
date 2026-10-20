@@ -18,7 +18,9 @@ agent-legible CLI, ships before 01.3. Each use case cites only the
 requirement items its release delivers, so the SRDs it touches are partly
 delivered; the rest waits for 02.0. Release 04.0 aligns the planning
 documents with the agile hierarchy (theme, initiative, epic, feature,
-user story) and renames the Sprint Goal the Sprint Goal. Every release proves itself with mage
+user story) and renames the Sprint Goal the Sprint Goal. Release 04.1 makes a
+program repository explain itself and adds tpm doctor to bring one an
+older tpm laid down up to date. Every release proves itself with mage
 audit, which runs the parent's specification-critic corpus-audit agent
 (docs/guides/corpus-audit.md), and with its test suite.
 
@@ -527,3 +529,46 @@ ledger, cite the requirement items they touch.
 - mage integration:sprintPlanning
 - mage integration:program
 - mage integration:sprintEnd
+
+<!-- release: 04.1 | status: implemented -->
+## 04.1 - A repository that explains itself
+
+A first-time reader of a program repository learns from the repository
+what it is and how to read it. tpm init and tpm onboard write a root
+README, a README in each hierarchy folder the level holds, and an
+AGENTS.md naming the tpm commands and skills at that level and the
+working rules, every figure Mermaid in the Markdown among them. tpm
+doctor, run after tpm is upgraded, writes the files a newer tpm
+scaffolds, refreshes tpm's text inside the orientation files' managed
+blocks, reports stale skills, and repairs the documents to the pinned
+parent format with the spec tool, now shared by mage and tpm in
+internal/spectool. Planned and built on 2026-10-19 (design.md D12).
+
+<!-- field: srds -->
+### SRDs
+
+- srd040-format-tools
+- srd043-init-onboard
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md) | A first-time reader orients from the scaffolded READMEs and AGENTS.md; tpm doctor brings a repository an older tpm laid down up to date. | implemented | P1 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | init and onboard write the orientation files; doctor adds missing files, refreshes blocks, reports stale skills, and repairs documents at the pin. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:init
+- mage integration:onboard
+- mage integration:doctor

@@ -49,6 +49,42 @@ var skeleton = []string{
 	"docs/ARCHITECTURE.md", "docs/SPECIFICATIONS.md", "docs/VISION.md", "docs/constitutions/design.md",
 	"docs/corpus-charter.yaml", "docs/external-pins.yaml", "docs/road-map.md",
 	"docs/specs/software-requirements/srd001-system.md",
+	"AGENTS.md", "README.md", "docs/specs/epics/README.md", "docs/specs/initiatives/README.md", "docs/specs/themes/README.md",
+}
+
+// orientationMarkers are the begin and end lines every orientation file
+// carries around tpm's text (srd043 R3.5).
+var orientationMarkers = []string{"<!-- tpm:begin", "<!-- tpm:end -->"}
+
+func TestInitWritesOrientation(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	for f, want := range map[string]string{
+		"README.md":                        "# Program system repository",
+		"docs/specs/themes/README.md":      "`thNNN-short-name.md`",
+		"docs/specs/initiatives/README.md": "`inNNN-short-name.md`",
+		"docs/specs/epics/README.md":       "`epNNN-short-name.md`",
+	} {
+		b, err := os.ReadFile(filepath.Join(dir, f))
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, m := range append([]string{want}, orientationMarkers...) {
+			if !strings.Contains(string(b), m) {
+				t.Errorf("%s lacks %q", f, m)
+			}
+		}
+		if strings.Contains(string(b), "{{") {
+			t.Errorf("%s has an unfilled placeholder", f)
+		}
+	}
+	for _, f := range []string{"docs/specs/features/README.md", "docs/specs/stories/README.md"} {
+		if _, err := os.Stat(filepath.Join(dir, f)); err == nil {
+			t.Errorf("a system repository got %s", f)
+		}
+	}
 }
 
 func actions(rs []Result) map[string]string {

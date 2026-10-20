@@ -25,7 +25,7 @@ holds unless a gate does.
 <!-- req: R1.1 -->
 ### R1.1
 
-mage convert, fmt, and specCheck build one tool per pinned release from the release's source in the clone cache, against its Markdown library, and reuse it until the pin moves; this repository's go.mod gains no dependency.
+The spec tool, in internal/spectool, is built once per pinned release from the release's source in the clone cache, against its Markdown library, and reused until the pin moves. mage convert, fmt, and specCheck run it here, and tpm doctor runs it in a program repository at that repository's pin (srd043 R4.4); this repository's go.mod gains no dependency.
 
 <!-- req: R1.2 -->
 ### R1.2

@@ -28,8 +28,8 @@ var templates embed.FS
 // parentRepository is the parent whose format the templates follow.
 const parentRepository = "github.com/gray-lake-labs/declarative-agents"
 
-// Result is what happened to one file: created, kept, or overwritten
-// (srd043 R3.2).
+// Result is what happened to one file: created, kept, refreshed, or
+// overwritten (srd043 R3.2, R3.5).
 type Result struct {
 	Path   string `json:"path"`
 	Action string `json:"action"`
@@ -58,9 +58,9 @@ var levels = map[string]string{
 }
 
 // corpusFiles is the corpus skeleton every repository of a program carries
-// (design.md D7), for a repository at level: the templates with the level
-// and its owner filled in, the design constitution, the charter, and the
-// parent pin.
+// (design.md D7), for a repository at level: the common templates and the
+// level's own orientation files (srd043 R1.6, R2.4) with the level and its
+// owner filled in, the design constitution, the charter, and the parent pin.
 func corpusFiles(level string) (map[string][]byte, error) {
 	owner, ok := levels[level]
 	if !ok {
@@ -69,17 +69,18 @@ func corpusFiles(level string) (map[string][]byte, error) {
 	fill := strings.NewReplacer("{{level}}", level, "{{Level}}", strings.ToUpper(level[:1])+level[1:],
 		"{{owner}}", owner, "{{Owner}}", strings.ToUpper(owner[:1])+owner[1:])
 	files := map[string][]byte{}
-	root := path.Join("templates", "corpus")
-	err := fs.WalkDir(templates, root, func(p string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+	for _, root := range []string{path.Join("templates", "corpus"), path.Join("templates", level)} {
+		err := fs.WalkDir(templates, root, func(p string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return err
+			}
+			b, err := templates.ReadFile(p)
+			files[fill.Replace(strings.TrimSuffix(strings.TrimPrefix(p, root+"/"), ".tmpl"))] = []byte(fill.Replace(string(b)))
 			return err
+		})
+		if err != nil {
+			return nil, err
 		}
-		b, err := templates.ReadFile(p)
-		files[fill.Replace(strings.TrimSuffix(strings.TrimPrefix(p, root+"/"), ".tmpl"))] = []byte(fill.Replace(string(b)))
-		return err
-	})
-	if err != nil {
-		return nil, err
 	}
 	release, err := ParentRelease()
 	if err != nil {
@@ -89,6 +90,11 @@ func corpusFiles(level string) (map[string][]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	agents, err := agentsFile(level)
+	if err != nil {
+		return nil, err
+	}
+	files[AgentsFile] = agents
 	files["docs/constitutions/design.md"] = scrummaster.Constitution
 	files["docs/corpus-charter.yaml"] = charter
 	files["docs/external-pins.yaml"] = []byte("# The parent release this corpus's format follows (srd043 R3.3).\npins:\n  " + parentRepository + ": " + release + "\n")
@@ -144,7 +150,9 @@ func requireRepository(dir string) error {
 }
 
 // write lays files into dir. A file that exists is kept unless force
-// replaces it, so a second run changes nothing; a dry run writes nothing.
+// replaces it, so a second run changes nothing; an orientation file whose
+// managed block differs has the block refreshed and the rest kept (srd043
+// R3.5). A dry run writes nothing.
 func write(dir string, files map[string][]byte, force, dryRun bool) ([]Result, error) {
 	names := make([]string, 0, len(files))
 	for n := range files {
@@ -162,10 +170,17 @@ func write(dir string, files map[string][]byte, force, dryRun bool) ([]Result, e
 			return out, err
 		case bytes.Equal(cur, files[n]):
 			r.Action, r.Reason = "kept", "unchanged"
-		case !force:
-			r.Action, r.Reason = "kept", "edited; --force replaces it"
-		default:
+		case force:
 			r.Action = "overwritten"
+		default:
+			r.Action, r.Reason = "kept", "edited; --force replaces it"
+			if merged, ok := refreshManaged(cur, files[n]); ok {
+				if bytes.Equal(merged, cur) {
+					r.Reason = "unchanged; text outside the tpm block is yours"
+				} else {
+					r.Action, r.Reason, files[n] = "refreshed", "tpm block replaced; text outside it kept", merged
+				}
+			}
 		}
 		out = append(out, r)
 		if r.Action == "kept" || dryRun {
