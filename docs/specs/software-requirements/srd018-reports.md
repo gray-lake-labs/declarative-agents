@@ -34,7 +34,7 @@ prose.
 <!-- req: R1.1 -->
 ### R1.1
 
-Scaffolds a reports repository: a reports directory per quarter, the report schema, a summaries directory, the configuration reports.md (config format reports-config), and a deck template. The team runs tpm reports status-issues each week on a schedule of its own, and tpm reports validate before each report merges.
+Scaffolds a reports repository: a reports directory per quarter, the report schema, a summaries directory, the configuration reports.md (config format reports-config), and a deck template, and installs the skills for the agents --agent names, as tpm init does. The team runs tpm reports status-issues each week on a schedule of its own, and tpm reports validate before each report merges.
 
 <!-- req: R1.2 -->
 ### R1.2
@@ -70,7 +70,7 @@ For a week or a sprint, reads every report in it and groups items by component.
 <!-- req: R3.2 -->
 ### R3.2
 
-Computes signals: blockers shared by two or more reports, blockers older than policy.escalation.blocker_age_days, commitments that slipped in policy.escalation.slip_releases or more consecutive reports, components with an expected report missing, items that contradict the ledger (a report calling a Sprint Goal done that has no met event, srd006 R10, unless a sprint-end merge closed it as reported complete before track-goals runs, srd038 R2), and merged work in the tracker that no report mentions.
+Computes signals: blockers shared by two or more reports, blockers older than policy.escalation.blocker_age_days, commitments that slipped in policy.escalation.slip_releases or more consecutive reports, components with an expected report missing, items that contradict the ledger (a report calling a Sprint Goal done that has no met event, srd006 R10, unless a sprint-end merge closed it as reported complete before track-goals runs, srd038 R2), and merged work in the tracker that no report mentions. A cost overrun has no signal of its own: a report states it as a blocker naming the spend and the limit it passed.
 
 <!-- req: R3.3 -->
 ### R3.3
@@ -145,7 +145,7 @@ Is idempotent: a second run in the same week files nothing. The scheduled CI job
 <!-- req: R8.1 -->
 ### R8.1
 
-For a project and a person, returns the project's open Sprint Goal issues (Sprint Goals included) with their due dates and the person's activity since the ISO week began: branches merged and issues closed. These are the facts the status issue's guided script drafts from.
+For a project and a person, returns the project's open Sprint Goal issues (Sprint Goals included) with their due dates and the person's activity since the ISO week began, or since the start of the week --date names: branches merged and issues closed. A merge is the person's when its Merged-by trailer, which tpm issue merge writes, names them, whatever git identity made the commit. These are the facts the status issue's guided script drafts from.
 
 <!-- req: R9 -->
 ## R9 - Weekly status issue

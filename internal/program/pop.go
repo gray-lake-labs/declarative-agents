@@ -53,14 +53,16 @@ func Slug(title string) string {
 
 // PopResult is what pop reports.
 type PopResult struct {
-	Project  string `json:"project"`
-	IID      int    `json:"iid"`
-	Title    string `json:"title"`
-	WebURL   string `json:"web_url"`
-	Branch   string `json:"branch"`
-	Worktree string `json:"worktree"`
-	Checkout string `json:"checkout"`
-	Assigned bool   `json:"assigned"` // pop assigned the caller now
+	Project string `json:"project"`
+	// IssueProject holds the issue when it is not Project.
+	IssueProject string `json:"issue_project,omitempty"`
+	IID          int    `json:"iid"`
+	Title        string `json:"title"`
+	WebURL       string `json:"web_url"`
+	Branch       string `json:"branch"`
+	Worktree     string `json:"worktree"`
+	Checkout     string `json:"checkout"`
+	Assigned     bool   `json:"assigned"` // pop assigned the caller now
 	// Provisional is an assignment taken while the tracker repository was
 	// unreachable; tpm tracker reconcile confirms it or reports it lost.
 	Provisional bool `json:"provisional,omitempty"`
@@ -83,13 +85,24 @@ type PopResult struct {
 // place is reused, so a second pop changes nothing. dir is any directory in
 // the local checkout of the project.
 func Pop(t tracker.Tracker, git Git, project string, iid int, dir string, p Policy, dryRun bool) (PopResult, error) {
-	i, err := t.GetIssue(project, iid)
+	return PopIn(t, git, project, project, iid, "", dir, p, dryRun)
+}
+
+// PopIn is Pop for an issue whose work lands in another repository, as a
+// weekly status issue's report lands in the reports repository: the issue
+// is claimed in issueProject, and the branch, named branch when given, and
+// its worktree are opened in project.
+func PopIn(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, p Policy, dryRun bool) (PopResult, error) {
+	i, err := t.GetIssue(issueProject, iid)
 	if err != nil {
 		return PopResult{}, err
 	}
 	r := PopResult{Project: project, IID: iid, Title: i.Title, WebURL: i.WebURL, DryRun: dryRun}
+	if issueProject != project {
+		r.IssueProject = issueProject
+	}
 	if i.State == "closed" {
-		return r, fmt.Errorf("%s#%d is closed", project, iid)
+		return r, fmt.Errorf("%s#%d is closed", issueProject, iid)
 	}
 	me, err := t.CurrentUser()
 	if err != nil {
@@ -97,19 +110,19 @@ func Pop(t tracker.Tracker, git Git, project string, iid int, dir string, p Poli
 	}
 	for _, a := range i.Assignees {
 		if a != me.Username {
-			return r, fmt.Errorf("%s#%d is assigned to %s; only that person pops it", project, iid, a)
+			return r, fmt.Errorf("%s#%d is assigned to %s; only that person pops it", issueProject, iid, a)
 		}
 	}
 	if reasons := Lint(i, p); len(reasons) > 0 {
 		if i.HasLabel("plane::data") {
-			return r, fmt.Errorf("%s#%d is not admitted: %s", project, iid, strings.Join(reasons, "; "))
+			return r, fmt.Errorf("%s#%d is not admitted: %s", issueProject, iid, strings.Join(reasons, "; "))
 		}
 		r.NotAdmitted = reasons
 	}
 	if !slices.Contains(i.Assignees, me.Username) {
 		r.Assigned = true
 		if !dryRun {
-			if err := t.AssignIssue(project, iid, me); err != nil {
+			if err := t.AssignIssue(issueProject, iid, me); err != nil {
 				return r, err
 			}
 			if reader, ok := t.(tracker.Reader); ok {
@@ -119,7 +132,10 @@ func Pop(t tracker.Tracker, git Git, project string, iid int, dir string, p Poli
 		}
 	}
 
-	r.Branch = fmt.Sprintf("%d-%s", iid, Slug(i.Title))
+	r.Branch = branch
+	if r.Branch == "" {
+		r.Branch = fmt.Sprintf("%d-%s", iid, Slug(i.Title))
+	}
 	base, err := t.DefaultBranch(project)
 	if err != nil {
 		return r, err

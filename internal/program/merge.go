@@ -23,6 +23,11 @@ type MergeResult struct {
 	DryRun       bool     `json:"dry_run"`
 }
 
+// MergedByTrailer names, on a merge commit, the tracker user who ran the
+// merge, whatever git identity made the commit: reports attribute merges by
+// it (srd018).
+const MergedByTrailer = "Merged-by:"
+
 // Merge is delivery on the beads tracker, which delivers by local merge
 // (srd042 R2.3): it requires the issue open, each closes open, commits of
 // its own, the corpus audit passing when docs/ changes, and another person's approval
@@ -114,7 +119,7 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 			}
 		}
 		inMain("merge", "-q", "--ff-only", "refs/remotes/origin/"+base)
-		if _, err := inMain("merge", "-q", "--no-ff", branch, "-m", fmt.Sprintf("Merge %s (%s)", branch, cite)); err != nil {
+		if _, err := inMain("merge", "-q", "--no-ff", branch, "-m", fmt.Sprintf("Merge %s (%s)\n\n%s %s", branch, cite, MergedByTrailer, me.Username)); err != nil {
 			return r, err
 		}
 		if _, err := inMain("push", "-q", "origin", base); err != nil {

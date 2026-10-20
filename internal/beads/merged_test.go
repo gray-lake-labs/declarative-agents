@@ -66,3 +66,19 @@ func TestMergedHistoryFromMergeCommits(t *testing.T) {
 		t.Fatal("a since that is not a date was accepted")
 	}
 }
+
+// TestMergeIsAttributedByItsTrailer reads a merge's author from the
+// Merged-by trailer tpm issue merge writes, not from the git identity that
+// made the commit.
+func TestMergeIsAttributedByItsTrailer(t *testing.T) {
+	tr := newTestTracker(t, "alice")
+	dir := tr.checkout("g/po-1")
+	deliver(t, dir, "1-work", "Build Bot", "2026-10-14", "Merge 1-work (g/po-1#1)\n\nMerged-by: alice")
+	got, err := tr.Merges("g/po-1", "alice", "2026-10-12")
+	if err != nil || len(got) != 1 || got[0].Author != "alice" || strings.Contains(got[0].Description, "Merged-by") {
+		t.Fatalf("merges by alice = %+v, %v", got, err)
+	}
+	if bot, _ := tr.Merges("g/po-1", "Build Bot", "2026-10-12"); len(bot) != 0 {
+		t.Fatalf("the git identity still counts: %+v", bot)
+	}
+}

@@ -13,6 +13,9 @@ Input: the project path of this repository, the issue number, and the
 program's system repository, whose control/ files hold the program's policy.
 
 1. Run `tpm issue pop --project <project> --issue <iid> --control <system> --json`.
+   When the issue's Requirements name `--issue-project` and `--branch` (a
+   weekly status issue, whose report lands in the reports repository),
+   pass them to pop, approve, and merge as written there.
    On a refusal, show its reason and stop.
 2. Work in the worktree pop returned, and nowhere else. The issue body is
    the instructions: its Requirements are the steps and its Acceptance
