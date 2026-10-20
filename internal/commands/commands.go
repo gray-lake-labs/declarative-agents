@@ -3,6 +3,7 @@
 package commands
 
 import (
+	_ "github.com/gray-lake-labs/scrum-master/internal/backlog"
 	_ "github.com/gray-lake-labs/scrum-master/internal/goals"
 	_ "github.com/gray-lake-labs/scrum-master/internal/help"
 	_ "github.com/gray-lake-labs/scrum-master/internal/install"
