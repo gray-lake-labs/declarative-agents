@@ -41,16 +41,27 @@ func splitManaged(content []byte) (before, block, after []byte, ok bool) {
 	return bytes.Join(lines[:begin], nil), bytes.Join(lines[begin:end+1], nil), bytes.Join(lines[end+1:], nil), true
 }
 
-// refreshManaged is cur with its managed block replaced by fresh's. ok is
-// false when either has no whole block, so the file is not tpm's to refresh.
-func refreshManaged(cur, fresh []byte) ([]byte, bool) {
-	before, _, after, ok := splitManaged(cur)
-	if !ok {
-		return nil, false
-	}
+// refreshManaged is cur with fresh's managed block in it: replacing cur's
+// block, how "refreshed", or appended after cur's text and one blank line
+// when cur has none, how "appended" (srd043 R3.5). ok is false when fresh
+// has no whole block, so the file is not an orientation file.
+func refreshManaged(cur, fresh []byte) (merged []byte, how string, ok bool) {
 	_, block, _, ok := splitManaged(fresh)
 	if !ok {
-		return nil, false
+		return nil, "", false
 	}
-	return append(append(append([]byte{}, before...), block...), after...), true
+	before, _, after, ok := splitManaged(cur)
+	if !ok {
+		out := append([]byte{}, cur...)
+		if len(out) > 0 {
+			if !bytes.HasSuffix(out, []byte("\n")) {
+				out = append(out, '\n')
+			}
+			if !bytes.HasSuffix(out, []byte("\n\n")) {
+				out = append(out, '\n')
+			}
+		}
+		return append(out, block...), "appended", true
+	}
+	return append(append(append([]byte{}, before...), block...), after...), "refreshed", true
 }

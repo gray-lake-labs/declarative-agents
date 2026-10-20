@@ -16,7 +16,8 @@ them, and AGENTS.md tells an agent which tpm commands and skills operate
 there and that every figure is Mermaid inside the Markdown. Later the
 technical program manager upgrades tpm and runs tpm doctor in a
 repository an older tpm laid down: the files the newer tpm scaffolds
-appear, tpm's orientation text is refreshed around what people wrote,
+appear, tpm's orientation text is refreshed around what people wrote or
+appended to the README and AGENTS.md the repository already had,
 the documents are repaired to the pinned format, and the findings it
 cannot repair are listed with their fix hints.
 
@@ -42,10 +43,10 @@ A repository opened for the first time; then an upgraded tpm.
 
 - F1: The reader opens the system repository and reads README.md, then docs/specs/themes/README.md, initiatives/README.md, and epics/README.md, and learns each level's meaning, owner, timeframe, and parent before opening a numbered document.
 - F2: An agent reads AGENTS.md and learns the tpm command groups and skills at the repository's level, that intent changes through the gate and work enters as an issue, and that every figure is Mermaid in a fenced code block.
-- F3: The subsystem repository carries the same root files and a README.md in epics/, features/, and stories/, and none in themes/ or initiatives/.
+- F3: The subsystem repository carries the same root files and a README.md in epics/, features/, and stories/, and none in themes/ or initiatives/; the README.md and AGENTS.md it had before onboard keep their text, with tpm's block appended after it.
 - F4: The technical program manager upgrades tpm and runs tpm doctor --dry-run in a repository an older tpm laid down; tpm lists the files it would create, the blocks it would refresh, the documents it would repair, and the installed skills tpm install should update.
 - F5: tpm doctor writes the missing files, refreshes the blocks while keeping the text around them, repairs the documents, and lists each finding it cannot repair with its fix hint.
-- F6: Running tpm doctor again reports nothing created, refreshed, or repaired.
+- F6: Running tpm doctor again reports nothing created, appended, refreshed, or repaired.
 
 <!-- field: touchpoints -->
 ## Touchpoints
@@ -86,7 +87,7 @@ AGENTS.md names every tpm command group and skill at the repository's level, rea
 <!-- sc: S3 -->
 ### S3
 
-tpm doctor adds exactly the missing files, refreshes changed blocks and keeps the text around them, reports stale skills without installing them, writes nothing on a dry run, and changes nothing on a second run.
+tpm doctor adds exactly the missing files, refreshes changed blocks and keeps the text around them, appends the block to an orientation file that has none, reports stale skills without installing them, writes nothing on a dry run, and changes nothing on a second run.
 
 <!-- field: traces -->
 #### Traces

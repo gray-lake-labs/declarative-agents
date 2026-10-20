@@ -12,7 +12,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Onboard)
 }
 
-// Onboard onboards a new repository into the rig's program: its corpus passes the parent's corpus audit as written, the orientation files are written for the subsystem level, the system repository gets one registration issue and no commit, and a second onboard files none (test-rel01.4-agent-legible-cli, test-rel04.1-orientation-doctor).
+// Onboard onboards a new repository into the rig's program: its corpus passes the parent's corpus audit as written, the orientation files are written for the subsystem level with tpm's block appended to the README.md and AGENTS.md it already had, the system repository gets one registration issue and no commit, and a second onboard files none (test-rel01.4-agent-legible-cli, test-rel04.1-orientation-doctor).
 func (Integration) Onboard() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -40,6 +40,14 @@ func (Integration) Onboard() error {
 	if err := gitIn(store, "init", "-q", "-b", "main"); err != nil {
 		return err
 	}
+	// The joining repository already has its own README.md and AGENTS.md;
+	// onboard appends tpm's block after their text (srd043 R3.5).
+	own := map[string]string{"README.md": "# store\n\nThe team's own README.\n", scaffold.AgentsFile: "Run the linter before committing.\n"}
+	for f, text := range own {
+		if err := os.WriteFile(filepath.Join(store, f), []byte(text), 0o644); err != nil {
+			return err
+		}
+	}
 	head := func() (string, error) {
 		return gitOut(r.run.Dir, "--git-dir", r.origin(system), "rev-parse", "refs/heads/main")
 	}
@@ -65,6 +73,16 @@ func (Integration) Onboard() error {
 	}
 
 	expectOrientation(c, store, []string{"epics", "features", "stories"}, []string{"themes", "initiatives"})
+	for f, text := range own {
+		b, _ := os.ReadFile(filepath.Join(store, f))
+		action := ""
+		for _, res := range first.Files {
+			if res.Path == f {
+				action = res.Action
+			}
+		}
+		c.expect(action == "appended" && strings.HasPrefix(string(b), text+"\n<!-- tpm:begin"), "%s: %s, the team's text not first:\n%s", f, action, b)
+	}
 	if err := gitIn(store, "add", "-A"); err != nil {
 		return err
 	}

@@ -12,7 +12,8 @@ title: "Script: init, onboard, and doctor (tpm init, tpm onboard, tpm doctor)"
 - tpm reports init (srd018 R1) stays its own subcommand. The reports repository has its own layout and owner, and folding it into onboard would change an implemented command for no reader's benefit.
 - The templates are embedded in the binary beside the skills and written against the parent format release tpm was built with, so a tpm release and the corpus it scaffolds always agree.
 - doctor is its own command, not a second run of init or onboard. init is for an empty repository and onboard files a registration, so neither is the step to take after upgrading tpm; doctor reads the level from the files it finds, touches only what tpm owns or can repair without changing meaning, and files and commits nothing.
-- Only a tpm-managed block is refreshed. The orientation files are tpm's account of its own process, so a newer tpm updates them; text a person writes around the block is theirs. Every other skeleton file belongs to its owner once written, so it is never refreshed and R3.2 holds for it.
+- Only a tpm-managed block is refreshed. The orientation files are tpm's account of its own process, so a newer tpm updates them; text a person writes around the block is theirs.
+- A block is appended to an orientation file that has none, rather than the file being kept as edited. AGENTS.md at the top level is the one place every agent reads, so tpm stays agent-agnostic by writing there, and a repository that joins a program usually already has its own AGENTS.md and README.md; keeping them untouched would leave tpm's text out, and --force would replace the owner's. An owner who deletes the block gets it back on the next run. Every other skeleton file belongs to its owner once written, so it is never refreshed and R3.2 holds for it.
 - Repair builds the spec tool at run time. The formatter is the pinned parent release's own library, built from that release's source as mage fmt builds it (srd040 R1.1). Embedding the library would need a replace directive in tpm's go.mod, which go install does not honour, and would format every repository to tpm's release rather than to its own pin. The cost is a Go toolchain on the machine; without one, doctor skips repair and says so.
 
 <!-- field: problem -->
@@ -117,7 +118,7 @@ init, onboard, and doctor honour --json and --dry-run, never prompt (srd010 R1),
 <!-- req: R3.2 -->
 ### R3.2
 
-Each file is reported as created, kept, refreshed (R3.5), or overwritten. A file that exists is kept and reported unless --force replaces it, so a second run changes nothing.
+Each file is reported as created, kept, appended or refreshed (R3.5), or overwritten. A file that exists is kept and reported unless --force replaces it, so a second run changes nothing.
 
 <!-- req: R3.3 -->
 ### R3.3
@@ -132,7 +133,7 @@ The templates name no person, organization, product, or project (design.md D6); 
 <!-- req: R3.5 -->
 ### R3.5
 
-An orientation file holds tpm's text between a begin marker and an end marker. A run whose text for the block differs from the file's replaces the block, keeps every line outside it, and reports the file refreshed; a person's text outside the block is theirs. No other file carries a block.
+An orientation file holds tpm's text between a begin marker and an end marker. A run whose text for the block differs from the file's replaces the block, keeps every line outside it, and reports the file refreshed; a person's text outside the block is theirs. An orientation file that exists without a block gets the block appended after its text, separated by one blank line, and is reported appended. No other file carries a block.
 
 <!-- req: R4 -->
 ## R4 - tpm doctor
@@ -145,7 +146,7 @@ Runs in --dir, by default the root of the git repository holding the working dir
 <!-- req: R4.2 -->
 ### R4.2
 
-Writes every file init (at system level) or onboard (at subsystem level) writes that is missing, and refreshes the orientation files' blocks (R3.5). Every other existing file is kept; doctor offers no --force. It files no issue, installs no skill, and touches no tracker.
+Writes every file init (at system level) or onboard (at subsystem level) writes that is missing, and appends or refreshes the orientation files' blocks (R3.5). Every other existing file is kept; doctor offers no --force. It files no issue, installs no skill, and touches no tracker.
 
 <!-- req: R4.3 -->
 ### R4.3
@@ -165,7 +166,7 @@ Without a Go toolchain or the pinned release's source, skips the repair, says wh
 <!-- req: R4.6 -->
 ### R4.6
 
-A dry run reports what doctor would write, refresh, and repair and changes nothing. A second run reports nothing created, refreshed, or repaired.
+A dry run reports what doctor would write, append, refresh, and repair and changes nothing. A second run reports nothing created, appended, refreshed, or repaired.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -241,7 +242,7 @@ init writes README.md, AGENTS.md, and README.md in themes/, initiatives/, and ep
 <!-- ac: AC6 -->
 ### AC6
 
-On a repository an older tpm laid down, doctor adds exactly the missing files, refreshes a changed block and keeps the text around it, reports stale skills without installing them, refuses a directory that is not a program repository, writes nothing on a dry run, and changes nothing on a second run.
+On a repository an older tpm laid down, doctor adds exactly the missing files, refreshes a changed block and keeps the text around it, appends the block to an orientation file that has none, reports stale skills without installing them, refuses a directory that is not a program repository, writes nothing on a dry run, and changes nothing on a second run.
 
 <!-- field: traces -->
 #### Traces
