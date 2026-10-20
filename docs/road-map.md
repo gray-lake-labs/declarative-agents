@@ -530,7 +530,7 @@ ledger, cite the requirement items they touch.
 - mage integration:program
 - mage integration:sprintEnd
 
-<!-- release: 04.1 | status: specified -->
+<!-- release: 04.1 | status: implemented -->
 ## 04.1 - A repository that explains itself
 
 A first-time reader of a program repository learns from the repository
@@ -542,8 +542,7 @@ doctor, run after tpm is upgraded, writes the files a newer tpm
 scaffolds, refreshes tpm's text inside the orientation files' managed
 blocks, reports stale skills, and repairs the documents to the pinned
 parent format with the spec tool, now shared by mage and tpm in
-internal/spectool. Planned on 2026-10-19 as the next release (design.md
-D12).
+internal/spectool. Planned and built on 2026-10-19 (design.md D12).
 
 <!-- field: srds -->
 ### SRDs
@@ -556,14 +555,14 @@ D12).
 
 | id | summary | status | priority |
 | --- | --- | --- | --- |
-| [rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md) | A first-time reader orients from the scaffolded READMEs and AGENTS.md; tpm doctor brings a repository an older tpm laid down up to date. | specified | P1 |
+| [rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md) | A first-time reader orients from the scaffolded READMEs and AGENTS.md; tpm doctor brings a repository an older tpm laid down up to date. | implemented | P1 |
 
 <!-- field: test_suites -->
 ### Test suites
 
 | id | summary | status |
 | --- | --- | --- |
-| [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | init and onboard write the orientation files; doctor adds missing files, refreshes blocks, reports stale skills, and repairs documents at the pin. | specified |
+| [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | init and onboard write the orientation files; doctor adds missing files, refreshes blocks, reports stale skills, and repairs documents at the pin. | implemented |
 
 <!-- field: proof -->
 ### Proof

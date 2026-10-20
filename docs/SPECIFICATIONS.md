@@ -35,7 +35,7 @@ not yet planned holds its direction only (design.md D12): its items are
 retired, and an interim rule says what tpm does until they are rewritten.
 make-work, do-work, and release-push are still referenced as the existing
 skills. Every repository of a consuming program carries the same
-corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, and 04.0 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the Sprint Goal the Sprint Goal. Release 04.1, specified, makes a program repository explain itself and adds tpm doctor.
+corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 04.0, and 04.1 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the Sprint Goal the Sprint Goal. Release 04.1 makes a program repository explain itself and adds tpm doctor.
 
 Releases are planned by use case, and a use case cites only the
 requirement items its release delivers. Release 00 is the inner loop
@@ -67,7 +67,7 @@ docs/road-map.md.
 | "02.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
 | "03.0" | The tracker becomes beads | 2 | 2 | implemented |
 | "04.0" | The agile hierarchy | 3 | 3 | implemented |
-| "04.1" | A repository that explains itself | 0 | 1 | specified |
+| "04.1" | A repository that explains itself | 1 | 1 | implemented |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -170,7 +170,7 @@ docs/road-map.md.
 | [rel04.0-uc001-author-the-hierarchy](specs/use-cases/rel04.0-uc001-author-the-hierarchy.md) | The Technical Program Manager and a Product Owner Write the Backlog Hierarchy Through the Gate | 04.0 | implemented | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc001-author-the-hierarchy.md |
 | [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md) | A Product Owner Plans a Sprint From the Ranked Stories and the Sprint Goal Lists Them | 04.0 | implemented | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md |
 | [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md) | A Sprint Goal Closes at Sprint End With Its Stories Reported, and Old Objective Issues Read as Sprint Goals | 04.0 | implemented | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md |
-| [rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md) | A First-Time Reader Orients in a Program Repository and an Upgraded tpm Brings It Up to Date | 04.1 | specified | [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | docs/specs/use-cases/rel04.1-uc001-orient-and-repair.md |
+| [rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md) | A First-Time Reader Orients in a Program Repository and an Upgraded tpm Brings It Up to Date | 04.1 | implemented | [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | docs/specs/use-cases/rel04.1-uc001-orient-and-repair.md |
 
 <!-- field: test_suite_index | form: "typed table" -->
 ## Test suite index

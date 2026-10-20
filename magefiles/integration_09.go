@@ -12,7 +12,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Onboard)
 }
 
-// Onboard onboards a new repository into the rig's program: its corpus passes the parent's corpus audit as written, the system repository gets one registration issue and no commit, and a second onboard files none (test-rel01.4-agent-legible-cli).
+// Onboard onboards a new repository into the rig's program: its corpus passes the parent's corpus audit as written, the orientation files are written for the subsystem level, the system repository gets one registration issue and no commit, and a second onboard files none (test-rel01.4-agent-legible-cli, test-rel04.1-orientation-doctor).
 func (Integration) Onboard() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -64,6 +64,7 @@ func (Integration) Onboard() error {
 			"registration issue: %+v %v", i, err)
 	}
 
+	expectOrientation(c, store, []string{"epics", "features", "stories"}, []string{"themes", "initiatives"})
 	if err := gitIn(store, "add", "-A"); err != nil {
 		return err
 	}

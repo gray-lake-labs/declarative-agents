@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/scaffold"
 )
@@ -18,7 +19,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Init)
 }
 
-// Init builds tpm, inits an empty git repository with an empty tracker repository beside it, and proves the parent's corpus audit and the objective gate pass on the result as written, the tracker got its first commit and labels, and a second init changes nothing (test-rel01.4-agent-legible-cli). It needs no rig.
+// Init builds tpm, inits an empty git repository with an empty tracker repository beside it, and proves the parent's corpus audit, the objective gate, and the hierarchy gate pass on the result as written, the orientation files are written for the system level, the tracker got its first commit and labels, and a second init changes nothing (test-rel01.4-agent-legible-cli, test-rel04.1-orientation-doctor). It needs no rig.
 func (Integration) Init() error {
 	root, err := repositoryRoot()
 	if err != nil {
@@ -81,6 +82,7 @@ func (Integration) Init() error {
 	c.expect(created == len(first.Files) && created > 0, "first init: %+v", first.Files)
 	c.expect(len(first.Skills) > 0, "first init installed no skills")
 	c.expect(first.Tracker != nil && first.Tracker.Seeded && len(first.Tracker.Labels) > 0, "tracker not seeded: %+v", first.Tracker)
+	expectOrientation(c, repo, []string{"themes", "initiatives", "epics"}, []string{"features", "stories"})
 
 	if err := sh(repo, "git", "add", "-A"); err != nil {
 		return err
@@ -95,6 +97,9 @@ func (Integration) Init() error {
 		c.expect(len(objectives.Validate(d)) == 0, "objective gate fails on %s", d.Path)
 	}
 
+	hdocs, err := hierarchy.Load(repo)
+	c.expect(err == nil && len(hierarchy.Validate(hdocs)) == 0, "the hierarchy gate fails on the corpus tpm init wrote: %v", err)
+
 	second, err := initRepo()
 	if err != nil {
 		return err
@@ -104,4 +109,27 @@ func (Integration) Init() error {
 	}
 	c.expect(second.Tracker != nil && !second.Tracker.Seeded, "second init seeded the tracker again: %+v", second.Tracker)
 	return c.err("init")
+}
+
+// expectOrientation holds a repository tpm laid down to its orientation
+// files: README.md and AGENTS.md at the root, a README in each hierarchy
+// folder of has and in none of lacks, each one tpm block, and AGENTS.md
+// carrying the Mermaid figure rule (srd043 R1.6, R2.4).
+func expectOrientation(c *check, dir string, has, lacks []string) {
+	paths := []string{"README.md", scaffold.AgentsFile}
+	for _, f := range has {
+		paths = append(paths, filepath.Join("docs", "specs", f, "README.md"))
+	}
+	for _, p := range paths {
+		b, err := os.ReadFile(filepath.Join(dir, p))
+		c.expect(err == nil && strings.Contains(string(b), "<!-- tpm:begin") && strings.Contains(string(b), scaffold.BlockEnd),
+			"%s: no orientation file with a tpm block: %v", p, err)
+	}
+	for _, f := range lacks {
+		_, err := os.Stat(filepath.Join(dir, "docs", "specs", f, "README.md"))
+		c.expect(errors.Is(err, fs.ErrNotExist), "a %s README was written where the level holds no %s", f, f)
+	}
+	agents, _ := os.ReadFile(filepath.Join(dir, scaffold.AgentsFile))
+	c.expect(strings.Contains(string(agents), "Mermaid in a fenced code block") && strings.Contains(string(agents), "- tpm doctor: "),
+		"AGENTS.md lacks the figure rule or tpm doctor")
 }

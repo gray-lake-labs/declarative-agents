@@ -2,7 +2,7 @@
 id: test-rel04.1-orientation-doctor
 title: Test Suite for Release 04.1 A Repository That Explains Itself
 release: "04.1"
-status: specified
+status: implemented
 ---
 
 <!-- field: overview -->
@@ -30,7 +30,7 @@ again, and runs the parent's corpus audit over the result.
 <!-- field: test_cases -->
 ## Test cases
 
-<!-- case: init and onboard write the orientation files | status: specified -->
+<!-- case: init and onboard write the orientation files | status: implemented -->
 ### init and onboard write the orientation files
 
 <!-- field: use_case -->
@@ -61,7 +61,7 @@ go test ./internal/scaffold -run '^Test(InitWritesOrientation|OnboardWritesOrien
 
 - [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC5](../software-requirements/srd043-init-onboard.md#ac5)
 
-<!-- case: doctor brings an older repository up to date | status: specified -->
+<!-- case: doctor brings an older repository up to date | status: implemented -->
 ### doctor brings an older repository up to date
 
 <!-- field: use_case -->
@@ -94,7 +94,7 @@ go test ./internal/scaffold -run '^TestDoctor(AddsMissing|RefreshesBlock|Reports
 
 - [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC6](../software-requirements/srd043-init-onboard.md#ac6)
 
-<!-- case: doctor repairs documents at the pin | status: specified -->
+<!-- case: doctor repairs documents at the pin | status: implemented -->
 ### doctor repairs documents at the pin
 
 <!-- field: use_case -->

@@ -1,7 +1,7 @@
 ---
 id: rel04.1-uc001-orient-and-repair
 title: A First-Time Reader Orients in a Program Repository and an Upgraded tpm Brings It Up to Date
-status: specified
+status: implemented
 priority: P1
 test_suite: test-rel04.1-orientation-doctor
 ---
