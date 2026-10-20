@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master"
@@ -122,6 +123,36 @@ func Level(dir string) (string, error) {
 		dir, program.PolicyFile, systemSRDPath, subsystemSRDPath)
 }
 
+// extendLabels adds to a kept control/labels.md the axes and values tpm's
+// defaults list that it lacks, and reports the file extended with them; a
+// file that does not parse is kept and its reason reported (srd043 R4.2).
+// The tracker's labels come from tpm issue labels, which the reason names.
+func extendLabels(dir string, files []Result, dryRun bool) error {
+	i := slices.IndexFunc(files, func(f Result) bool { return f.Path == program.LabelsFile })
+	if i < 0 || files[i].Action != "kept" {
+		return nil
+	}
+	path := filepath.Join(dir, filepath.FromSlash(program.LabelsFile))
+	doc, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	out, added, err := ExtendLabels(doc, program.DefaultLabels())
+	if err != nil {
+		files[i].Reason = "does not parse, so doctor cannot add the labels tpm's defaults list: " + err.Error()
+		return nil
+	}
+	if len(added) == 0 {
+		return nil
+	}
+	files[i].Action, files[i].Labels = "extended", added
+	files[i].Reason = "adds " + strings.Join(added, ", ") + "; run tpm issue labels --control <system repository> to create them in the tracker"
+	if dryRun {
+		return nil
+	}
+	return os.WriteFile(path, out, 0o644)
+}
+
 // skillProblems are the install findings doctor reports (srd043 R4.3).
 var skillProblems = map[string]bool{"missing": true, "outdated": true, "edited": true, "stale": true}
 
@@ -156,6 +187,11 @@ func Doctor(o DoctorOptions) (DoctorResult, error) {
 	for i, f := range r.Files {
 		if f.Action == "kept" && f.Reason == "edited; --force replaces it" {
 			r.Files[i].Reason = "edited; doctor keeps it"
+		}
+	}
+	if level == "system" {
+		if err := extendLabels(o.Dir, r.Files, o.DryRun); err != nil {
+			return r, err
 		}
 	}
 	r.Repair = repair(o.Dir, o.DryRun)

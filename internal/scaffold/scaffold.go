@@ -34,6 +34,8 @@ type Result struct {
 	Path   string `json:"path"`
 	Action string `json:"action"`
 	Reason string `json:"reason,omitempty"`
+	// Labels are the labels doctor added to control/labels.md.
+	Labels []string `json:"labels,omitempty"`
 }
 
 // ParentRelease is the parent release the templates were written against,

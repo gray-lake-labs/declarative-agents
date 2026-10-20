@@ -6,7 +6,7 @@ title: Label schema
 <!-- field: purpose -->
 ## Purpose
 
-Defines the labels a program creates in its tracker group so every issue can carry the five axes of the process: plane, type, kind, component, and state. The scripts create missing labels from this file and read it to check admission. Values for plane, type, kind, and state are fixed by srd001; component values come from the program.
+Defines the labels a program creates in its tracker group so every issue can carry the five axes of the process: plane, type, kind, component, and state. The scripts create missing labels from this file and read it to check admission. Values for plane, type, kind, op, and state are fixed by srd001; component values come from the program. When a newer tpm adds an axis or a value, tpm doctor adds it to the file and keeps everything the file already holds (srd043 R4.2).
 
 <!-- field: schema -->
 ## Schema

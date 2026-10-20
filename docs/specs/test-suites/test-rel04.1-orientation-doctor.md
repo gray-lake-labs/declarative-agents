@@ -109,7 +109,7 @@ mage integration:doctor
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/scaffold -run '^TestDoctor(AddsMissing|RefreshesBlock|ReportsStaleSkills|DryRunWritesNothing|SecondRunChangesNothing|RefusesNonProgram|SubsystemGetsNoControl)$'
+go test ./internal/scaffold -run '^Test(Doctor(AddsMissing|RefreshesBlock|ReportsStaleSkills|DryRunWritesNothing|SecondRunChangesNothing|RefusesNonProgram|SubsystemGetsNoControl|ExtendsLabels)|ExtendLabelsLeavesACompleteFile)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
@@ -117,6 +117,7 @@ go test ./internal/scaffold -run '^TestDoctor(AddsMissing|RefreshesBlock|Reports
 - missing_files: created, and nothing else
 - changed_block: refreshed, with the text around it kept
 - orientation_file_without_block: appended, with the owner's text first
+- labels_file_missing_axes: extended with the axis and values, a recolored value kept
 - stale_skills: reported with tpm install as the fix, none installed
 - dry_run: the same report, and nothing written
 - second_run: nothing created, appended, refreshed, or repaired

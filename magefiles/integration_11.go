@@ -87,6 +87,20 @@ func (Integration) Doctor() error {
 	if err := os.WriteFile(vision, []byte(strings.Replace(string(canonical), "## Problem\n\n", "## Problem\n\n\n\n", 1)), 0o644); err != nil {
 		return err
 	}
+	// A control/labels.md from before the op axis, with a value recolored.
+	labelsPath := filepath.Join(repo, "control", "labels.md")
+	labels, err := os.ReadFile(labelsPath)
+	if err != nil {
+		return err
+	}
+	start, end := strings.Index(string(labels), "\n<!-- field: op -->"), strings.Index(string(labels), "\n<!-- field: state -->")
+	if start < 0 || end < start {
+		return fmt.Errorf("tpm init's control/labels.md has no op axis before state")
+	}
+	olderLabels := strings.Replace(string(labels[:start])+string(labels[end:]), "| build | #428bca |", "| build | #000000 |", 1)
+	if err := os.WriteFile(labelsPath, []byte(olderLabels), 0o644); err != nil {
+		return err
+	}
 
 	doctor := func(args ...string) (scaffold.DoctorResult, error) {
 		var r scaffold.DoctorResult
@@ -111,6 +125,7 @@ func (Integration) Doctor() error {
 		c.expect(got["README.md"] == "created" && got[scaffold.AgentsFile] == "appended", "%s: root files %v", run, got)
 		c.expect(got["docs/specs/epics/README.md"] == "refreshed", "%s: epics README %q", run, got["docs/specs/epics/README.md"])
 		c.expect(slices.Equal(r.Repair.Repaired, []string{"docs/VISION.md"}) && r.Repair.Skipped == "", "%s: repair %+v", run, r.Repair)
+		c.expect(got["control/labels.md"] == "extended", "%s: control/labels.md %q", run, got["control/labels.md"])
 	}
 
 	c := &check{}
@@ -123,7 +138,8 @@ func (Integration) Doctor() error {
 	b, _ := os.ReadFile(epics)
 	v, _ := os.ReadFile(vision)
 	ag, _ := os.ReadFile(filepath.Join(repo, scaffold.AgentsFile))
-	c.expect(errors.Is(statErr, os.ErrNotExist) && string(b) == older && string(v) != string(canonical) && string(ag) == ownAgents, "the dry run wrote")
+	lb, _ := os.ReadFile(labelsPath)
+	c.expect(errors.Is(statErr, os.ErrNotExist) && string(b) == older && string(v) != string(canonical) && string(ag) == ownAgents && string(lb) == olderLabels, "the dry run wrote")
 
 	first, err := doctor()
 	if err != nil {
@@ -139,6 +155,9 @@ func (Integration) Doctor() error {
 	c.expect(string(v) == string(canonical), "VISION not repaired to its canonical form")
 	a, _ := os.ReadFile(filepath.Join(repo, scaffold.AgentsFile))
 	c.expect(strings.HasPrefix(string(a), ownAgents+"\n<!-- tpm:begin"), "AGENTS.md: the owner's text not first:\n%s", a)
+	lb, _ = os.ReadFile(labelsPath)
+	c.expect(strings.Contains(string(lb), "<!-- field: op -->") && strings.Contains(string(lb), "| recur |") && strings.Contains(string(lb), "| build | #000000 |"),
+		"control/labels.md not extended, or the recolor lost:\n%s", lb)
 	if err := sh("git", "add", "-A"); err != nil {
 		return err
 	}

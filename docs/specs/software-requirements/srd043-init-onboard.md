@@ -146,7 +146,7 @@ Runs in --dir, by default the root of the git repository holding the working dir
 <!-- req: R4.2 -->
 ### R4.2
 
-Writes every file init (at system level) or onboard (at subsystem level) writes that is missing, and appends or refreshes the orientation files' blocks (R3.5). Every other existing file is kept; doctor offers no --force. It files no issue, installs no skill, and touches no tracker.
+Writes every file init (at system level) or onboard (at subsystem level) writes that is missing, and appends or refreshes the orientation files' blocks (R3.5). At system level it extends control/labels.md with the axes and values tpm's defaults list that it lacks, keeping every value, color, and description it has and inserting rather than re-rendering, and names tpm issue labels as what creates them in the tracker. Every other existing file is kept; doctor offers no --force. It files no issue, installs no skill, and touches no tracker.
 
 <!-- req: R4.3 -->
 ### R4.3
@@ -166,7 +166,7 @@ Without a Go toolchain or the pinned release's source, skips the repair, says wh
 <!-- req: R4.6 -->
 ### R4.6
 
-A dry run reports what doctor would write, append, refresh, and repair and changes nothing. A second run reports nothing created, appended, refreshed, or repaired.
+A dry run reports what doctor would write, append, refresh, extend, and repair and changes nothing. A second run reports nothing created, appended, refreshed, extended, or repaired.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -242,7 +242,7 @@ init writes README.md, AGENTS.md, and README.md in themes/, initiatives/, and ep
 <!-- ac: AC6 -->
 ### AC6
 
-On a repository an older tpm laid down, doctor adds exactly the missing files, refreshes a changed block and keeps the text around it, appends the block to an orientation file that has none, reports stale skills without installing them, refuses a directory that is not a program repository, writes nothing on a dry run, and changes nothing on a second run.
+On a repository an older tpm laid down, doctor adds exactly the missing files, refreshes a changed block and keeps the text around it, appends the block to an orientation file that has none, extends control/labels.md with the axes and values it lacks while keeping a recolored value and a program's own value, reports stale skills without installing them, refuses a directory that is not a program repository, writes nothing on a dry run, and changes nothing on a second run.
 
 <!-- field: traces -->
 #### Traces

@@ -6,8 +6,11 @@ repository's policy or SRD or a team's subsystem SRD, and writes every file
 that init or onboard now writes at that level and the repository lacks. It
 refreshes the text between the tpm:begin and tpm:end lines of README.md,
 AGENTS.md, and the hierarchy folders' READMEs, keeping the text around it,
-and appends that text to one of them that has none; every other file is the
-owner's and is kept. It rewrites the corpus
+and appends that text to one of them that has none. In the system
+repository it adds to control/labels.md the axes and values tpm's defaults
+list that it lacks, keeping every value, color, and description already
+there; tpm issue labels then creates them in the tracker. Every other file
+is the owner's and is kept. It rewrites the corpus
 documents in the canonical form of the parent release the repository pins,
 with that release's formatter, which it builds with Go, and lists what the
 formatter cannot repair with each fix hint. It lists the installed skills

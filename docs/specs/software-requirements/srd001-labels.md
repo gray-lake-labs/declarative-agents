@@ -646,7 +646,7 @@ The label is set when the issue is created and never changed: an issue outlives 
 <!-- req: R34.3 -->
 ### R34.3
 
-Admission fails an issue with more than one op:: label and requires none, so issues filed before the axis existed are still admitted.
+Admission fails an issue with more than one op:: label and requires none, so issues filed before the axis existed are still admitted. A program whose control/labels.md predates the axis gets it from tpm doctor (srd043 R4.2), and its labels in the tracker from tpm issue labels.
 
 <!-- field: goals -->
 ## Goals
