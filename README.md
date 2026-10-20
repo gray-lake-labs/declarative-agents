@@ -15,6 +15,82 @@ Most of what Scrum asks of people outside the work itself is moving facts the tr
 | `infra/` | Terraform module and the regression-rig root |
 | `magefiles/` | Build, gates, corpus audit, and integration targets |
 
+## Seed a program repository from an architecture document
+
+A program's system repository can be generated from one document that describes the system the program builds: its purpose, layers, parts, and a build order. `tpm init` lays down the corpus, and a coding agent given the brief below writes the program's intent on top of it. Keep the seed in the repository (for example under `seed/`), so the program can be regenerated whenever the seed or tpm changes.
+
+`tpm init` writes twelve files that need no further work: `AGENTS.md`, `control/labels.md`, `control/policy.md`, `docs/SPECIFICATIONS.md`, `docs/constitutions/design.md`, `docs/corpus-charter.yaml`, `docs/external-pins.yaml`, `docs/road-map.md`, `docs/specs/software-requirements/srd001-system.md`, and a `README.md` in each of `docs/specs/themes/`, `initiatives/`, and `epics/`. It writes `docs/VISION.md` and `docs/ARCHITECTURE.md` as templates, and appends a managed block between `tpm:begin` and `tpm:end` markers to the repository's `README.md`. The agent writes the two templates and the planning hierarchy.
+
+1. In the program's repository, with the seed committed:
+
+   ```bash
+   (cd <scrum-master checkout> && go build -o /tmp/tpm ./cmd/tpm)
+   /tmp/tpm init --dir .
+   ```
+
+2. Give a coding agent this brief, with the angle-bracket placeholders filled in:
+
+   > You are generating the program for `<program name>` in this repository, which `tpm init` has just laid down. Read `<seed path>` (the system description) and run `tpm help backlog` for the document formats; `docs/constitutions/design.md` declares the fields each document may hold. Write only the files listed here and change nothing else.
+   >
+   > **Files to write.**
+   > 1. `docs/VISION.md`: fill every field `tpm init` laid down (executive summary, problem, what this does, why we build this, success criteria as named `key: outcome` items, not).
+   > 2. `docs/ARCHITECTURE.md`: fill every field `tpm init` laid down. The overview has a summary and a layer diagram as an inline Mermaid block, marking each part built, partly built, or deferred in this program. Interfaces are `interface:` nodes for each interface the program owns. Components are `component:` nodes, one per layer and per service, each with capabilities and ownership, plus one for the deferred parts. Design decisions are numbered `decision:` nodes, each saying what it rejected. Also fill technology choices, project structure, implementation status, and related documents. Draw the delivery chain, if the program has one, as a second Mermaid block.
+   > 3. The planning hierarchy under `docs/specs/`: one theme (`themes/th001-<name>.md`), one initiative (`initiatives/in001-<name>.md`), and the epics (`epics/ep001-<name>.md` onward).
+   >
+   > **Program parameters (these are not in the seed).**
+   > - Platform and hosting: `<cloud and delivery tools; the interfaces the program owns>`.
+   > - Platforms to integrate rather than rebuild: `<existing systems, and the capabilities each already provides>`. Wherever a capability might duplicate one, a requirement item says that platform's coverage is confirmed first.
+   > - Teams that own epics: `<team names>`. An epic's owner is `Product Owner, <team>`; the theme's and initiative's owner is `technical program manager`.
+   > - Cadence: `<sprint length and alignment, weeks off>`. The theme's horizon is `<ISO week range>`. The initiative's horizon is `<ISO week range>`, and it has one requirement group per sprint, due on `<each sprint's due date>`.
+   > - Sprint milestones, following the seed's build order: `<one observable milestone per sprint>`.
+   > - Theme: `<the strategic area>`. Its requirement groups follow `<the seed's principles or practices>`.
+   > - Epics, platform setup first: `<one epic per major part of the system, each with its owning team>`. Each epic has a horizon longer than one sprint, `depends_on` links to the epics it needs, and acceptance criteria that name a test and an environment (`local`, `dev`, or `staging`).
+   > - Deferred: `<the parts of the system this program does not build>`, and the documents say so.
+   >
+   > **Rules.** Every hierarchy document has status `to_be_agreed`. Every acceptance criterion traces only to items in its own document. Leave `delivered_by` out until the teams' requirement documents exist. Diagrams are inline Mermaid, with no image files. Write no personal names and no links to private repositories. When the files are written, run the hierarchy gate and fix every finding.
+
+3. Run the hierarchy gate. `mage audit` runs it in this repository; until tpm exposes it to program repositories, build a checker from a clone of this one and run it from the program's root:
+
+   ```bash
+   G=$(mktemp -d) && git clone -q <scrum-master checkout> "$G/sm" && mkdir -p "$G/sm/cmd/hiercheck"
+   cat > "$G/sm/cmd/hiercheck/main.go" <<'EOF'
+   package main
+
+   import (
+   	"fmt"
+   	"os"
+
+   	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
+   )
+
+   func main() {
+   	docs, err := hierarchy.Load(os.Args[1])
+   	if err != nil {
+   		fmt.Println("load:", err)
+   		os.Exit(2)
+   	}
+   	findings := hierarchy.Validate(docs)
+   	for _, f := range findings {
+   		fmt.Println(f)
+   	}
+   	if len(findings) > 0 {
+   		os.Exit(1)
+   	}
+   	fmt.Println("hierarchy gate: pass,", len(docs), "documents")
+   }
+   EOF
+   (cd "$G/sm" && go build -o /tmp/hiercheck ./cmd/hiercheck) && /tmp/hiercheck .
+   ```
+
+4. Commit the generated program and tag it, so later runs and regenerations can be compared against it:
+
+   ```bash
+   git add -A && git commit -m "Generate the program from the seed"
+   git tag -a "baseline/$(date -u +%Y%m%dT%H%M%SZ)" -m "Program generated from the seed"
+   ```
+
+Every hierarchy document starts as `to_be_agreed`; agreeing them is the program's first planning decision, and `tpm plan` reads only agreed documents.
+
 ## Build and test
 
 ```
