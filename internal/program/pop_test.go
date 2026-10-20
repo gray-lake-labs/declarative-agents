@@ -118,7 +118,8 @@ func TestPopCreatesBranchAndWorktree(t *testing.T) {
 	if r.Worktree != filepath.Join(filepath.Dir(g.root), "po-1-"+r.Branch) || !r.Added {
 		t.Fatalf("worktree %q", r.Worktree)
 	}
-	if !strings.Contains(strings.Join(g.calls, "\n"), "worktree add --track -b "+r.Branch+" "+r.Worktree+" origin/"+r.Branch) {
+	if calls := strings.Join(g.calls, "\n"); !strings.Contains(calls, "worktree add --no-checkout --track -b "+r.Branch+" "+r.Worktree+" origin/"+r.Branch) ||
+		!strings.HasSuffix(calls, "\ncheckout") {
 		t.Fatalf("git calls: %q", g.calls)
 	}
 

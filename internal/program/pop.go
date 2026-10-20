@@ -2,6 +2,7 @@ package program
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -154,11 +155,40 @@ func Pop(t tracker.Tracker, git Git, project string, iid int, dir string, p Poli
 		return r, err
 	}
 	if _, err := git.Run(root, "rev-parse", "--verify", "--quiet", "refs/heads/"+r.Branch); err == nil {
-		_, err = git.Run(root, "worktree", "add", r.Worktree, r.Branch)
-		return r, err
+		return r, addWorktree(git, root, r.Worktree, r.Worktree, r.Branch)
 	}
-	_, err = git.Run(root, "worktree", "add", "--track", "-b", r.Branch, r.Worktree, "origin/"+r.Branch)
-	return r, err
+	return r, addWorktree(git, root, r.Worktree, "--track", "-b", r.Branch, r.Worktree, "origin/"+r.Branch)
+}
+
+// addWorktree adds worktree with the worktree add arguments args, then
+// checks it out. The checkout runs the repository's smudge filters, and
+// git-crypt reads its key from the worktree's own git dir, so the key
+// directory of the shared git dir is linked there first. Without git-crypt
+// this is a plain worktree add.
+func addWorktree(git Git, root, worktree string, args ...string) error {
+	if _, err := git.Run(root, append([]string{"worktree", "add", "--no-checkout"}, args...)...); err != nil {
+		return err
+	}
+	common, err := git.Run(root, "rev-parse", "--path-format=absolute", "--git-common-dir")
+	if err != nil {
+		return err
+	}
+	if key := filepath.Join(strings.TrimSpace(common), "git-crypt"); isDir(key) {
+		own, err := git.Run(worktree, "rev-parse", "--path-format=absolute", "--git-dir")
+		if err != nil {
+			return err
+		}
+		if err := os.Symlink(key, filepath.Join(strings.TrimSpace(own), "git-crypt")); err != nil && !errors.Is(err, os.ErrExist) {
+			return err
+		}
+	}
+	_, err = git.Run(worktree, "checkout")
+	return err
+}
+
+func isDir(p string) bool {
+	fi, err := os.Stat(p)
+	return err == nil && fi.IsDir()
 }
 
 // InstallSkills installs into worktree the skills of every agent installed

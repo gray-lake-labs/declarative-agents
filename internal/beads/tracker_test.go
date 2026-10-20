@@ -2,6 +2,7 @@ package beads
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"slices"
 	"testing"
@@ -100,5 +101,30 @@ func TestCreatesRenumberOnCollidingIIDs(t *testing.T) {
 	}
 	if iid["sm-aaaa"] != 1 || iid["sm-bbbb"] != 2 || iid["sm-cccc"] != 1 {
 		t.Fatalf("iids = %v, want theirs 1, ours renumbered to 2, the other repository untouched", iid)
+	}
+}
+
+// TestGetFileReadsThroughTextconv reads a file as the repository's textconv
+// shows it, as git-crypt decrypts, and a file with none as stored.
+func TestGetFileReadsThroughTextconv(t *testing.T) {
+	tr := newTestTracker(t, "alice")
+	code := tr.code
+	beadstest.Git(t, code, "config", "diff.upper.textconv", "tr a-z A-Z <")
+	for name, body := range map[string]string{".gitattributes": "policy.md diff=upper\n", "policy.md": "secret\n", "plain.md": "plain\n"} {
+		if err := os.WriteFile(filepath.Join(code, name), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	beadstest.Git(t, code, "add", "-A")
+	beadstest.Git(t, code, "commit", "-q", "-m", "files")
+	beadstest.Git(t, code, "push", "-q", "origin", "main")
+	if b, err := tr.GetFile("g/po-1", "policy.md", "main"); err != nil || string(b) != "SECRET\n" {
+		t.Fatalf("policy.md = %q, %v; want it through the textconv", b, err)
+	}
+	if b, err := tr.GetFile("g/po-1", "plain.md", "main"); err != nil || string(b) != "plain\n" {
+		t.Fatalf("plain.md = %q, %v", b, err)
+	}
+	if _, err := tr.GetFile("g/po-1", "missing.md", "main"); !errors.Is(err, tracker.ErrNotFound) {
+		t.Fatalf("missing file: %v", err)
 	}
 }
