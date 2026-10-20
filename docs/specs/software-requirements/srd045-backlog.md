@@ -169,6 +169,24 @@ Once track-goals runs (02.0), reports render a roadmap forecast, the remaining s
 
 Until then, reports render no forecast and no burn-up.
 
+<!-- req: R8 -->
+## R8 - Reading and checking the hierarchy
+
+<!-- req: R8.1 -->
+### R8.1
+
+tpm backlog list reads the hierarchy documents of the repository at --dir and prints each one's id, kind, title, status, parent, and path, and a story's points and rank; --kind keeps one kind. With --json it prints one object per document.
+
+<!-- req: R8.2 -->
+### R8.2
+
+tpm backlog check runs R6.1's checks on the repository at --dir through the same function the gate in mage audit calls, prints each finding with its file, field, and message, and exits non-zero when there is any; with --json it prints the document count and the findings.
+
+<!-- req: R8.3 -->
+### R8.3
+
+Both commands read only the directory: they open no tracker, use no network, and write nothing.
+
 <!-- field: non_goals -->
 ## Non-goals
 
@@ -265,3 +283,15 @@ Release 02.0's planning writes the forecast items from R7.1; until then the inte
 
 - [R7.1](#r71)
 - [R7.2](#r72)
+
+<!-- ac: AC8 -->
+### AC8
+
+tpm backlog list prints every hierarchy document with its id, kind, title, status, parent, path, and a story's points and rank, filtered by --kind; tpm backlog check reports exactly the gate's findings on the same documents and exits non-zero when there is any; neither opens a tracker, uses the network, or writes.
+
+<!-- field: traces -->
+#### Traces
+
+- [R8.1](#r81)
+- [R8.2](#r82)
+- [R8.3](#r83)

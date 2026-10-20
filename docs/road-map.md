@@ -572,3 +572,43 @@ internal/spectool. Planned and built on 2026-10-19 (design.md D12).
 - mage integration:init
 - mage integration:onboard
 - mage integration:doctor
+
+<!-- release: 04.2 | status: implemented -->
+## 04.2 - A planning document drafted in conversation
+
+An owner turns a description into one planning document at any level,
+theme to story, by talking it through. The draft skill reads the
+description and the repository's hierarchy, proposes a parent and an id,
+asks the few questions the description leaves open with a recommended
+answer each, then writes the document as to_be_agreed, checks it, revises
+it with the owner, and offers to draft its children. tpm backlog list
+gives the skill the hierarchy, and tpm backlog check runs the hierarchy
+gate in any repository, which until now ran only inside this repository's
+mage audit. Planned and built on 2026-10-20 (design.md D12).
+
+<!-- field: srds -->
+### SRDs
+
+- srd045-backlog
+- srd046-draft
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel04.2-uc001-draft-a-planning-document](specs/use-cases/rel04.2-uc001-draft-a-planning-document.md) | An owner drafts a planning document from a description in conversation: list, discuss, write, check, revise, and offer the children. | implemented | P1 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel04.2-draft](specs/test-suites/test-rel04.2-draft.md) | tpm backlog list names the hierarchy; tpm backlog check is the gate; the draft skill is installed within its limit. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage integration:backlog
+- mage integration:install

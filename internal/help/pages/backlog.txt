@@ -12,6 +12,14 @@ and implements. A team's Product Backlog is its agreed stories not yet
 done, by rank; velocity is the points of stories done per sprint, and
 progress rolls up from story points through parent links.
 
-Commands: tpm plan candidates, tpm plan backlog, tpm issue lint
+The draft skill turns a description into one document at any level,
+in conversation with its owner, reading and checking the hierarchy
+with this group.
 
-See: srd045, srd007, srd034, srd031
+Subcommands:
+  tpm backlog list    the repository's hierarchy documents, with id, kind, parent, and status (srd045)
+  tpm backlog check   the hierarchy gate on the repository's documents (srd045)
+
+Also: tpm plan candidates, tpm plan backlog, tpm issue lint
+
+See: srd045, srd046, srd007, srd034, srd031

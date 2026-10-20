@@ -28,14 +28,14 @@ documents (internal/corpus), srd040 the format tools and format gates in
 magefiles, and srd041 the states and transitions of an issue. srd043 is
 tpm init and tpm onboard, which lay down a program's corpus, and tpm
 doctor, which brings it up to date after tpm is upgraded, and srd044
-tpm help, which teaches the process from the binary. srd045 makes an epic document the Product Backlog for multi-sprint work, from which plan derives Sprint Goals at a velocity read from the ledger, and holds direction only until 02.0 is planned. srd039 and
+tpm help, which teaches the process from the binary. srd046 is the draft skill, which turns a description into one planning document at any level in conversation with its owner. srd045 makes an epic document the Product Backlog for multi-sprint work, from which plan derives Sprint Goals at a velocity read from the ledger, and holds direction only until 02.0 is planned. srd039 and
 srd040 specify shared code and tooling no use case cites, so the road map
 lists them under the release that built them. An SRD whose release is
 not yet planned holds its direction only (design.md D12): its items are
 retired, and an interim rule says what tpm does until they are rewritten.
 make-work, do-work, and release-push are still referenced as the existing
 skills. Every repository of a consuming program carries the same
-corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 04.0, and 04.1 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the Sprint Goal the Sprint Goal. Release 04.1 makes a program repository explain itself and adds tpm doctor.
+corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 04.0, 04.1, and 04.2 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the Sprint Goal the Sprint Goal. Release 04.1 makes a program repository explain itself and adds tpm doctor. Release 04.2 adds the draft skill and tpm backlog list and check.
 
 Releases are planned by use case, and a use case cites only the
 requirement items its release delivers. Release 00 is the inner loop
@@ -68,6 +68,7 @@ docs/road-map.md.
 | "03.0" | The tracker becomes beads | 2 | 2 | implemented |
 | "04.0" | The agile hierarchy | 3 | 3 | implemented |
 | "04.1" | A repository that explains itself | 1 | 1 | implemented |
+| "04.2" | A planning document drafted in conversation | 1 | 1 | implemented |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -122,6 +123,7 @@ docs/road-map.md.
 | [srd043-init-onboard](specs/software-requirements/srd043-init-onboard.md) | docs/specs/software-requirements/srd043-init-onboard.md | Script: init, onboard, and doctor (tpm init, tpm onboard, tpm doctor) | 01.4 |
 | [srd044-help](specs/software-requirements/srd044-help.md) | docs/specs/software-requirements/srd044-help.md | Script: help (tpm help) | 01.4 |
 | [srd045-backlog](specs/software-requirements/srd045-backlog.md) | docs/specs/software-requirements/srd045-backlog.md | The backlog hierarchy: themes, initiatives, epics, features, and stories | 04.0 |
+| [srd046-draft](specs/software-requirements/srd046-draft.md) | docs/specs/software-requirements/srd046-draft.md | Skill: draft | 04.2 |
 
 <!-- field: config_format_index -->
 ## Config format index
@@ -171,6 +173,7 @@ docs/road-map.md.
 | [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md) | A Product Owner Plans a Sprint From the Ranked Stories and the Sprint Goal Lists Them | 04.0 | implemented | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md |
 | [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md) | A Sprint Goal Closes at Sprint End With Its Stories Reported, and Old Objective Issues Read as Sprint Goals | 04.0 | implemented | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md |
 | [rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md) | A First-Time Reader Orients in a Program Repository and an Upgraded tpm Brings It Up to Date | 04.1 | implemented | [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | docs/specs/use-cases/rel04.1-uc001-orient-and-repair.md |
+| [rel04.2-uc001-draft-a-planning-document](specs/use-cases/rel04.2-uc001-draft-a-planning-document.md) | An Owner Drafts a Planning Document from a Description in Conversation | 04.2 | implemented | [test-rel04.2-draft](specs/test-suites/test-rel04.2-draft.md) | docs/specs/use-cases/rel04.2-uc001-draft-a-planning-document.md |
 
 <!-- field: test_suite_index | form: "typed table" -->
 ## Test suite index
@@ -189,6 +192,7 @@ docs/road-map.md.
 | [test-rel03.0-beads-tracker](specs/test-suites/test-rel03.0-beads-tracker.md) | Test Suite for Release 03.0 The Tracker Becomes Beads | "03.0" | 4 | [[rel03.0-uc001-pop-and-close-on-beads](specs/use-cases/rel03.0-uc001-pop-and-close-on-beads.md), [rel03.0-uc002-two-clones-synchronize](specs/use-cases/rel03.0-uc002-two-clones-synchronize.md)] | docs/specs/test-suites/test-rel03.0-beads-tracker.md |
 | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | Test Suite for Release 04.0 The Agile Hierarchy | "04.0" | 7 | [[rel04.0-uc001-author-the-hierarchy](specs/use-cases/rel04.0-uc001-author-the-hierarchy.md), [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md), [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md)] | docs/specs/test-suites/test-rel04.0-agile-hierarchy.md |
 | [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | Test Suite for Release 04.1 A Repository That Explains Itself | "04.1" | 4 | [[rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md)] | docs/specs/test-suites/test-rel04.1-orientation-doctor.md |
+| [test-rel04.2-draft](specs/test-suites/test-rel04.2-draft.md) | Test Suite for Release 04.2 A Planning Document Drafted in Conversation | "04.2" | 3 | [[rel04.2-uc001-draft-a-planning-document](specs/use-cases/rel04.2-uc001-draft-a-planning-document.md)] | docs/specs/test-suites/test-rel04.2-draft.md |
 
 <!-- field: coverage_gaps -->
 ## Coverage gaps

@@ -44,7 +44,7 @@ The tracker repository comes first, so every step after it is recorded there. `t
 
    ## Acceptance Criteria
 
-   - The hierarchy gate passes (test: hiercheck; environment: local)
+   - The hierarchy gate passes (test: tpm backlog check; environment: local)
    EOF
    /tmp/tpm issue file --project <program path> --system <program path> --title "Generate the program from the seed" \
      --body-file /tmp/generate.md --path docs/VISION.md --path docs/ARCHITECTURE.md --path docs/specs/themes/th001-<name>.md
@@ -72,47 +72,20 @@ The tracker repository comes first, so every step after it is recorded there. `t
    > - Epics, platform setup first: `<one epic per major part of the system, each with its owning team>`. Each epic has a horizon longer than one sprint, `depends_on` links to the epics it needs, and acceptance criteria that name a test and an environment (`local`, `dev`, or `staging`).
    > - Deferred: `<the parts of the system this program does not build>`, and the documents say so.
    >
-   > **Rules.** Every hierarchy document has status `to_be_agreed`. Every acceptance criterion traces only to items in its own document. Leave `delivered_by` out until the teams' requirement documents exist. Diagrams are inline Mermaid, with no image files. Write no personal names and no links to private repositories. When the files are written, run the hierarchy gate and fix every finding.
+   > **Rules.** Every hierarchy document has status `to_be_agreed`. Every acceptance criterion traces only to items in its own document. Leave `delivered_by` out until the teams' requirement documents exist. Diagrams are inline Mermaid, with no image files. Write no personal names and no links to private repositories. When the files are written, run `tpm backlog check` and fix every finding.
 
-4. Run the hierarchy gate. `mage audit` runs it in this repository; until tpm exposes it to program repositories, build a checker from a clone of this one and run it from the worktree's root:
+4. Run the hierarchy gate in the worktree, and fix every finding until it passes:
 
    ```bash
-   G=$(mktemp -d) && git clone -q <scrum-master checkout> "$G/sm" && mkdir -p "$G/sm/cmd/hiercheck"
-   cat > "$G/sm/cmd/hiercheck/main.go" <<'EOF'
-   package main
-
-   import (
-   	"fmt"
-   	"os"
-
-   	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
-   )
-
-   func main() {
-   	docs, err := hierarchy.Load(os.Args[1])
-   	if err != nil {
-   		fmt.Println("load:", err)
-   		os.Exit(2)
-   	}
-   	findings := hierarchy.Validate(docs)
-   	for _, f := range findings {
-   		fmt.Println(f)
-   	}
-   	if len(findings) > 0 {
-   		os.Exit(1)
-   	}
-   	fmt.Println("hierarchy gate: pass,", len(docs), "documents")
-   }
-   EOF
-   (cd "$G/sm" && go build -o /tmp/hiercheck ./cmd/hiercheck) && /tmp/hiercheck .
+   /tmp/tpm backlog check
    ```
 
-5. Commit the generated program and push its branch. Someone other than the issue's assignee approves the exact commit, and the merge runs the hierarchy checker as its gate, since a program repository has no `mage audit`:
+5. Commit the generated program and push its branch. Someone other than the issue's assignee approves the exact commit, and the merge runs the hierarchy gate as its audit, since a program repository has no `mage audit`:
 
    ```bash
    git add -A && git commit -m "Generate the program from the seed" && git push -u origin HEAD
    TPM_USER=<reviewer> /tmp/tpm issue approve --project <program path> --issue <issue number> --dir .   # the reviewer runs this
-   /tmp/tpm issue merge --project <program path> --issue <issue number> --dir . --audit "/tmp/hiercheck ."
+   /tmp/tpm issue merge --project <program path> --issue <issue number> --dir . --audit "/tmp/tpm backlog check"
    ```
 
    The merge pushes to `main` and closes the issue.
@@ -126,7 +99,7 @@ The tracker repository comes first, so every step after it is recorded there. `t
 
 Regenerating from a changed seed is the same loop from step 2: one issue, one branch, one merge.
 
-Every hierarchy document starts as `to_be_agreed`; agreeing them is the program's first planning decision, and `tpm plan` reads only agreed documents.
+Every hierarchy document starts as `to_be_agreed`; agreeing them is the program's first planning decision, and `tpm plan` reads only agreed documents. To add or rework one document at a time afterwards, use the `draft` skill, which drafts any level from a description in conversation with its owner.
 
 ## Build and test
 
