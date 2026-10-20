@@ -73,15 +73,22 @@ func Init(o InitOptions) (InitResult, error) {
 			return r, err
 		}
 	}
-	if o.Tracker != "" {
+	switch {
+	case o.Tracker != "":
 		tr, err := seedTracker(o)
 		r.Tracker = &tr
 		if err != nil {
 			return r, err
 		}
+	case !beads.Configured():
+		r.Tracker = &TrackerResult{Reason: NoTracker}
 	}
 	return r, nil
 }
+
+// NoTracker is what init reports when it is given no tracker repository and
+// TPM_TRACKER names none: the issue workflow cannot run until one exists.
+const NoTracker = "no tracker repository seeded; issues cannot be filed until one exists: rerun with --tracker and --group"
 
 // seedTracker makes an empty tracker repository's first commit, holding an
 // empty issues file, and creates the program's labels there. A tracker
