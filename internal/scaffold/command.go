@@ -123,6 +123,67 @@ func init() {
 	})
 }
 
+func init() {
+	var o DoctorOptions
+	cli.Default.Register(&cli.Command{
+		Group:   "doctor",
+		Summary: "bring a program repository up to date after an upgrade of tpm: missing files, tpm's text, installed skills",
+		Flags: func(fs *flag.FlagSet) {
+			o = DoctorOptions{}
+			fs.StringVar(&o.Dir, "dir", "", "the program repository's checkout (default: the git root)")
+		},
+		Run: func(ctx *cli.Context) error {
+			var err error
+			if o.Dir == "" {
+				if o.Dir, err = gitRoot(); err != nil {
+					return err
+				}
+			}
+			o.Version, o.DryRun = install.Version(), ctx.DryRun
+			r, err := Doctor(o)
+			if err != nil {
+				return err
+			}
+			return ctx.Emit(r, humanDoctor(r))
+		},
+	})
+}
+
+// humanDoctor names what doctor changed, or would change on a dry run, and
+// the skills tpm install would update; a file left as it was is counted,
+// not listed.
+func humanDoctor(r DoctorResult) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "%s repository %s\n", r.Level, r.Dir)
+	kept := 0
+	for _, f := range r.Files {
+		if f.Action == "kept" {
+			kept++
+			continue
+		}
+		fmt.Fprintf(&b, "%-12s %s", f.Action, f.Path)
+		if f.Reason != "" {
+			fmt.Fprintf(&b, " (%s)", f.Reason)
+		}
+		b.WriteString("\n")
+	}
+	fmt.Fprintf(&b, "%d files current\n", kept)
+	agents := map[string]bool{}
+	for _, f := range r.Skills {
+		fmt.Fprintf(&b, "skill %-9s %s %s\n", f.Problem, f.Agent, f.Path)
+		agents[f.Agent] = true
+	}
+	for _, a := range install.Agents {
+		if agents[a] {
+			fmt.Fprintf(&b, "run tpm install --agent %s to update its skills\n", a)
+		}
+	}
+	if r.DryRun {
+		b.WriteString("dry run: nothing written\n")
+	}
+	return b.String()
+}
+
 func humanFiles(files []Result) string {
 	var b strings.Builder
 	for _, f := range files {
