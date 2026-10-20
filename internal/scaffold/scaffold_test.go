@@ -182,6 +182,20 @@ func TestInitSeedsEmptyTracker(t *testing.T) {
 	if err != nil || len(labels) != len(program.DefaultLabels()) {
 		t.Fatalf("tracker labels: %d, %v; want %d", len(labels), err, len(program.DefaultLabels()))
 	}
+	if b, err := os.ReadFile(filepath.Join(clone, beads.ConfigFile)); err != nil || strings.TrimSpace(string(b)) != "issue-prefix: g" || r.Tracker.Prefix != "g" {
+		t.Fatalf("the first commit's %s = %q, %v; result prefix %q; want issue-prefix g", beads.ConfigFile, b, err, r.Tracker.Prefix)
+	}
+}
+
+func TestInitSetsAnExplicitPrefix(t *testing.T) {
+	remote, dir := bare(t, false), repo(t)
+	r, err := Init(InitOptions{Dir: dir, Tracker: remote, Group: "acme/program", Prefix: "aeop", User: "operator"})
+	if err != nil || r.Tracker == nil || r.Tracker.Prefix != "aeop" {
+		t.Fatalf("init --prefix aeop: %+v, %v", r.Tracker, err)
+	}
+	if out := humanInit(r); !strings.Contains(out, "issue prefix aeop") {
+		t.Fatalf("init does not name the prefix:\n%s", out)
+	}
 }
 
 func TestInitLeavesTrackerWithCommits(t *testing.T) {

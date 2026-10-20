@@ -28,6 +28,7 @@ func init() {
 			})
 			fs.StringVar(&o.Tracker, "tracker", "", "a tracker repository to seed when it has no commits")
 			fs.StringVar(&o.Group, "group", "", "the program group whose labels --tracker gets")
+			fs.StringVar(&o.Prefix, "prefix", "", "the issue ID prefix --tracker gets (default: the last segment of --group)")
 			fs.BoolVar(&o.Force, "force", false, "replace files a person edited")
 		},
 		Run: func(ctx *cli.Context) error {
@@ -218,7 +219,7 @@ func humanInit(r InitResult) string {
 	if t := r.Tracker; t != nil {
 		switch {
 		case t.Seeded:
-			fmt.Fprintf(&b, "tracker %s: first commit made, %d labels\n", t.Remote, len(t.Labels))
+			fmt.Fprintf(&b, "tracker %s: first commit made, issue prefix %s, %d labels\n", t.Remote, t.Prefix, len(t.Labels))
 		case t.Remote == "":
 			fmt.Fprintf(&b, "tracker: %s\n", t.Reason)
 		default:

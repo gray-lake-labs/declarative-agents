@@ -82,6 +82,9 @@ func (Integration) Init() error {
 	c.expect(created == len(first.Files) && created > 0, "first init: %+v", first.Files)
 	c.expect(len(first.Skills) > 0, "first init installed no skills")
 	c.expect(first.Tracker != nil && first.Tracker.Seeded && len(first.Tracker.Labels) > 0, "tracker not seeded: %+v", first.Tracker)
+	config, err := exec.Command("git", "--git-dir", tracker, "show", "main:.beads/config.yaml").Output()
+	c.expect(err == nil && string(config) == "issue-prefix: rig\n" && first.Tracker.Prefix == "rig",
+		"the tracker's first commit sets no issue prefix rig: %q, %v, result %+v", config, err, first.Tracker)
 	expectOrientation(c, repo, []string{"themes", "initiatives", "epics"}, []string{"features", "stories"})
 
 	if err := sh(repo, "git", "add", "-A"); err != nil {

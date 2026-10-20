@@ -304,10 +304,15 @@ func (s *Store) merge(base, remote string) error {
 
 // Create files a new issue in repository with the next IID there, and
 // returns it as the tracker repository holds it after the push: a create
-// that raced another clone's has been renumbered by the merge.
+// that raced another clone's has been renumbered by the merge. Its ID is the
+// tracker's issue prefix and eight hex digits.
 func (s *Store) Create(i Issue) (Issue, error) {
-	i.ID = "tpm-" + newID()[:8]
-	_, _, _, err := s.write("create "+i.ID, func(issues *[]Issue) (bool, error) {
+	prefix, err := s.prefix()
+	if err != nil {
+		return Issue{}, err
+	}
+	i.ID = prefix + "-" + newID()[:8]
+	_, _, _, err = s.write("create "+i.ID, func(issues *[]Issue) (bool, error) {
 		for _, x := range *issues {
 			if x.Repository == i.Repository {
 				i.IID = max(i.IID, x.IID)
