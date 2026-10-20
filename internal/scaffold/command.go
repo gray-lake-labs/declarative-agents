@@ -158,7 +158,7 @@ func humanDoctor(r DoctorResult) string {
 	fmt.Fprintf(&b, "%s repository %s\n", r.Level, r.Dir)
 	kept := 0
 	for _, f := range r.Files {
-		if f.Action == "kept" {
+		if f.Action == "kept" && !strings.HasPrefix(f.Reason, "does not parse") {
 			kept++
 			continue
 		}

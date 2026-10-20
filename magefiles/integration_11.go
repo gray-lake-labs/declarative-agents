@@ -87,6 +87,48 @@ func (Integration) Doctor() error {
 	if err := os.WriteFile(vision, []byte(strings.Replace(string(canonical), "## Problem\n\n", "## Problem\n\n\n\n", 1)), 0o644); err != nil {
 		return err
 	}
+	// A control/labels.md from before the op axis, with a value recolored.
+	labelsPath := filepath.Join(repo, "control", "labels.md")
+	labels, err := os.ReadFile(labelsPath)
+	if err != nil {
+		return err
+	}
+	start, end := strings.Index(string(labels), "\n<!-- field: op -->"), strings.Index(string(labels), "\n<!-- field: state -->")
+	if start < 0 || end < start {
+		return fmt.Errorf("tpm init's control/labels.md has no op axis before state")
+	}
+	olderLabels := strings.Replace(string(labels[:start])+string(labels[end:]), "| build | #428bca |", "| build | #000000 |", 1)
+	if err := os.WriteFile(labelsPath, []byte(olderLabels), 0o644); err != nil {
+		return err
+	}
+	// A system SRD with no context or implementation targets, and a policy
+	// with no corpus gate, as tpm init wrote them before #117.
+	srdPath := filepath.Join(repo, "docs", "specs", "software-requirements", "srd001-system.md")
+	srd, err := os.ReadFile(srdPath)
+	if err != nil {
+		return err
+	}
+	ctx, targets := strings.Index(string(srd), "<!-- field: context"), strings.Index(string(srd), "\n<!-- field: implementation_targets")
+	problem := strings.Index(string(srd), "<!-- field: problem")
+	if ctx < 0 || targets < 0 || problem < ctx {
+		return fmt.Errorf("tpm init's system SRD has no context before problem or no implementation targets")
+	}
+	olderSRD := string(srd[:ctx]) + string(srd[problem:targets])
+	policyPath := filepath.Join(repo, "control", "policy.md")
+	policy, err := os.ReadFile(policyPath)
+	if err != nil {
+		return err
+	}
+	corpusGate, defaultGate := strings.Index(string(policy), "\n<!-- field: corpus -->"), strings.Index(string(policy), "\n<!-- field: default -->")
+	if corpusGate < 0 || defaultGate < corpusGate {
+		return fmt.Errorf("tpm init's policy has no corpus gate before the default one")
+	}
+	olderPolicy := string(policy[:corpusGate]) + string(policy[defaultGate:])
+	for path, text := range map[string]string{srdPath: olderSRD, policyPath: olderPolicy} {
+		if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+			return err
+		}
+	}
 
 	doctor := func(args ...string) (scaffold.DoctorResult, error) {
 		var r scaffold.DoctorResult
@@ -111,6 +153,9 @@ func (Integration) Doctor() error {
 		c.expect(got["README.md"] == "created" && got[scaffold.AgentsFile] == "appended", "%s: root files %v", run, got)
 		c.expect(got["docs/specs/epics/README.md"] == "refreshed", "%s: epics README %q", run, got["docs/specs/epics/README.md"])
 		c.expect(slices.Equal(r.Repair.Repaired, []string{"docs/VISION.md"}) && r.Repair.Skipped == "", "%s: repair %+v", run, r.Repair)
+		c.expect(got["control/labels.md"] == "extended", "%s: control/labels.md %q", run, got["control/labels.md"])
+		c.expect(got["docs/specs/software-requirements/srd001-system.md"] == "extended" && got["control/policy.md"] == "extended",
+			"%s: system SRD %q, policy %q", run, got["docs/specs/software-requirements/srd001-system.md"], got["control/policy.md"])
 	}
 
 	c := &check{}
@@ -123,7 +168,8 @@ func (Integration) Doctor() error {
 	b, _ := os.ReadFile(epics)
 	v, _ := os.ReadFile(vision)
 	ag, _ := os.ReadFile(filepath.Join(repo, scaffold.AgentsFile))
-	c.expect(errors.Is(statErr, os.ErrNotExist) && string(b) == older && string(v) != string(canonical) && string(ag) == ownAgents, "the dry run wrote")
+	lb, _ := os.ReadFile(labelsPath)
+	c.expect(errors.Is(statErr, os.ErrNotExist) && string(b) == older && string(v) != string(canonical) && string(ag) == ownAgents && string(lb) == olderLabels, "the dry run wrote")
 
 	first, err := doctor()
 	if err != nil {
@@ -139,6 +185,12 @@ func (Integration) Doctor() error {
 	c.expect(string(v) == string(canonical), "VISION not repaired to its canonical form")
 	a, _ := os.ReadFile(filepath.Join(repo, scaffold.AgentsFile))
 	c.expect(strings.HasPrefix(string(a), ownAgents+"\n<!-- tpm:begin"), "AGENTS.md: the owner's text not first:\n%s", a)
+	srdAfter, _ := os.ReadFile(srdPath)
+	policyAfter, _ := os.ReadFile(policyPath)
+	c.expect(string(srdAfter) == string(srd) && string(policyAfter) == string(policy), "doctor did not restore what tpm init writes:\n%s\n%s", srdAfter, policyAfter)
+	lb, _ = os.ReadFile(labelsPath)
+	c.expect(strings.Contains(string(lb), "<!-- field: op -->") && strings.Contains(string(lb), "| recur |") && strings.Contains(string(lb), "| build | #000000 |"),
+		"control/labels.md not extended, or the recolor lost:\n%s", lb)
 	if err := sh("git", "add", "-A"); err != nil {
 		return err
 	}
