@@ -67,7 +67,7 @@ Every skeleton document is in the format of the parent release tpm was built wit
 <!-- req: R1.3 -->
 ### R1.3
 
-Writes control/labels.md and control/policy.md holding the built-in defaults, in the config formats labels and policy.
+Writes control/labels.md and control/policy.md holding the built-in defaults, in the config formats labels and policy. The policy's definition of done gives the system's corpus release a peer-read check (srd015 R1.2), so the system is never released on its author's word.
 
 <!-- req: R1.4 -->
 ### R1.4

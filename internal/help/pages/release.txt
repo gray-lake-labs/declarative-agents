@@ -5,7 +5,10 @@ definition of done declares have passed at that commit, with their evidence
 posted on the release issue (srd008). A release ends each three-week period
 at every level, and it is what other repositories pin their references to.
 A release of the system needs a peer read: someone other than the person
-running it approves.
+running it approves. tpm init's policy declares it for the corpus, and tag
+reads it again, so an approval after the gate counts. next recommends a
+version from the commits since the last tag, and tag closes a release issue
+still open.
 
 Subcommands:
   tpm release next      the latest version and the next candidates (srd015)

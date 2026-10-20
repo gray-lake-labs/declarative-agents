@@ -33,7 +33,9 @@ type TagResult struct {
 	Class    string `json:"class"`
 	GateRun  string `json:"gate_run"`
 	Pushed   bool   `json:"pushed"`
-	DryRun   bool   `json:"dry_run"`
+	// Closed is the release issue the tag closed, when it was still open.
+	Closed bool `json:"closed,omitempty"`
+	DryRun bool `json:"dry_run"`
 }
 
 // gateRun is the evidence one gate run posted for a candidate.
@@ -126,9 +128,23 @@ func ReleaseTag(t tracker.Tracker, in TagInput) (TagResult, error) {
 	if run.revision != rev {
 		return r, fmt.Errorf("the latest gate for %s ran at %s, not at HEAD %s; run tpm release gate again", tag, short(run.revision), short(rev))
 	}
+	issue, err := t.GetIssue(in.Project, in.Issue)
+	if err != nil {
+		return r, err
+	}
 	var failing []string
 	for _, c := range in.Policy.Gate(in.Artifact) {
-		if res := run.results[testName(c)]; res != ResultPass {
+		res := run.results[testName(c)]
+		if c.Kind == "peer-read" && res == ResultPending {
+			// An approval made after the gate ran counts: the peer read is
+			// read again now, not only at gate time.
+			if by, err := peerRead(t, in.Project, in.Issue, issue.Author); err != nil {
+				return r, err
+			} else if by != "" {
+				res = ResultPass
+			}
+		}
+		if res != ResultPass {
 			if res == "" {
 				res = "missing"
 			}
@@ -155,5 +171,17 @@ func ReleaseTag(t tracker.Tracker, in TagInput) (TagResult, error) {
 	}
 	r.Pushed = true
 	note := fmt.Sprintf("Tagged %s at %s: a %s release.", tag, short(rev), r.Class)
-	return r, t.CreateNote(in.Project, in.Issue, note)
+	if err := t.CreateNote(in.Project, in.Issue, note); err != nil {
+		return r, err
+	}
+	// A release issue filed for the release closes on its tag; a sprint-end
+	// or planning issue its merge closed stays as it is.
+	if issue.State != "closed" {
+		closed := "close"
+		if _, err := t.UpdateIssue(in.Project, in.Issue, tracker.IssueUpdate{State: &closed}); err != nil {
+			return r, fmt.Errorf("tagged %s, but %s#%d did not close: %w", tag, in.Project, in.Issue, err)
+		}
+		r.Closed = true
+	}
+	return r, nil
 }

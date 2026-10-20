@@ -34,7 +34,7 @@ For an artifact and a candidate revision, runs every check the policy declares f
 <!-- req: R1.2 -->
 ### R1.2
 
-A peer-read check passes when a person other than the release issue's author has approved the release issue, either with a thumbs-up award emoji, on a tracker that has awards, or with an approval comment carrying the marker `<!-- tpm release peer-read -->`, which tpm release approve posts as the person who runs it and refuses to post for the issue's author. On the beads tracker, which has no awards, the comment is the approval (srd042). The subcommand reports the check pending otherwise and does not wait.
+A peer-read check passes when a person other than the release issue's author has approved the release issue, either with a thumbs-up award emoji, on a tracker that has awards, or with an approval comment carrying the marker `<!-- tpm release peer-read -->`, which tpm release approve posts as the person who runs it and refuses to post for the issue's author. On the beads tracker, which has no awards, the comment is the approval (srd042). The subcommand reports the check pending otherwise and does not wait. tpm release tag reads a pending peer read again, so an approval made after the gate ran counts without running the gate again.
 
 <!-- req: R1.3 -->
 ### R1.3
@@ -57,7 +57,7 @@ A version that is not greater than the latest tag of the artifact under semantic
 <!-- req: R2.3 -->
 ### R2.3
 
-The release is classified as breaking or compatible by policy.releases.breaking, and the class is stated in the tag's message and on the release issue.
+The release is classified as breaking or compatible by policy.releases.breaking, and the class is stated in the tag's message and on the release issue. A release issue still open when its tag is pushed closes on it; one a merge already closed, such as a sprint-end issue, stays as it is.
 
 <!-- req: R2.4 -->
 ### R2.4
@@ -75,7 +75,7 @@ A declared check this tpm cannot run, a contract-tests or scorecard check or any
 <!-- req: R3.1 -->
 ### R3.1
 
-Reports the latest tag of an artifact and the next patch, minor, and major versions, with the class each would have.
+Reports the latest tag of an artifact and the next patch, minor, and major versions, with the class each would have, and recommends one from the commits since the latest tag: minor for a first release, major when a commit says BREAKING CHANGE, patch when every commit fixes something, minor for any other change, and none when nothing was committed since.
 
 <!-- req: R4 -->
 ## R4 - Test software ships with the release

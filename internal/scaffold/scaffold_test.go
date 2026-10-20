@@ -132,9 +132,13 @@ func TestInitWritesControlFiles(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(labels, program.DefaultLabels()) {
 		t.Fatalf("control/labels.md reads back as %v, %v; want the defaults", labels, err)
 	}
-	// The fresh program's subsystem SRDs declare no component yet.
-	want := program.Defaults()
+	// The fresh program's subsystem SRDs declare no component yet, and the
+	// system's corpus release needs a peer read.
+	want := InitPolicy()
 	want.ComponentsRead = true
+	if g := want.Gate("corpus"); len(g) != 1 || g[0].Kind != "peer-read" {
+		t.Fatalf("init's corpus gate = %+v, want a peer read", g)
+	}
 	policy, err := program.LoadPolicy(f, "g/system", "main")
 	if err != nil || !reflect.DeepEqual(policy, want) {
 		t.Fatalf("control/policy.md reads back as %+v, %v; want %+v", policy, err, want)

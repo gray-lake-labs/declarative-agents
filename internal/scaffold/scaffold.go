@@ -153,8 +153,18 @@ func charterFile() ([]byte, error) {
 func controlFiles() map[string][]byte {
 	return map[string][]byte{
 		program.LabelsFile: []byte(LabelsDocument(program.DefaultLabels())),
-		program.PolicyFile: []byte(PolicyDocument(program.Defaults())),
+		program.PolicyFile: []byte(PolicyDocument(InitPolicy())),
 	}
+}
+
+// InitPolicy is the policy tpm init writes: the built-in defaults, and a
+// gate for the system's corpus release that is a peer read, since a
+// release of the system needs one (srd015 R1.2) and its documents have no
+// tests of their own.
+func InitPolicy() program.Policy {
+	p := program.Defaults()
+	p.DefinitionOfDone["corpus"] = []program.Check{{Kind: "peer-read"}}
+	return p
 }
 
 // requireRepository refuses a directory that is not a git repository
