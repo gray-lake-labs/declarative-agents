@@ -78,6 +78,19 @@ sessions believe they both hold an assignment: an assignment taken
 offline is provisional, is marked so in the pop's own output, and
 confirms or reports as lost when tpm tracker reconcile runs back online; reconcile also lists the queued writes it pushed and names the tracker commit after the push. Every command's output names the tracker commit it read, and says when that was the cache.
 
+<!-- section: scale -->
+## Scale
+
+Every write reads the whole issues file and rewrites it, so a write's
+cost grows with the tracker, and every writer pushes the same branch, so
+contention grows with the number of people writing at once. Comments and
+ledger events live inside their issue, which makes a long-lived issue the
+largest line in the file. mage integration:beadsScale (eng01) measures
+both at thousands of issues and several writers. When its numbers call
+for it, the store moves to one file per issue under .beads/issues/, which
+keeps a write's diff to its own issue and limits conflicts to writers of
+the same issue; bd reads one JSONL file, so that layout would export it.
+
 <!-- section: choosing-the-backend -->
 ## Choosing the backend
 

@@ -110,6 +110,34 @@ regression left behind. Provisioning restores the Terraform release 03.0
 removed; provisioning through the GitLab API in Go was the alternative,
 rejected so that the rig builds a program the same way a program is built.
 
+<!-- section: beads-scale -->
+## The opt-in beads scale run
+
+The regression proves beads with a handful of issues. mage
+integration:beadsScale measures it at a program's size, and is opt-in for
+the same reason as the GitLab variant: it is slow, and it measures rather
+than proves, so it never joins mage regression or a release gate. It
+needs no rig; it builds tpm and works in a temporary directory.
+
+For each tracker size and each number of writers, it seeds a bare tracker
+repository with that many issues in one commit, each with five comments
+the size of ledger events and a fifth of them closed, in the file the
+store keeps. It times issue file, issue pop, issue lint --since with
+--dry-run, and sprint-end facts against it with one writer, three runs
+each, keeping the median. Then it starts the writers at once, each with
+its own tracker clone and code checkout, each filing new issues and
+popping its own ready ones through the tpm binary, and records each
+command's time. Afterwards it reads the tracker's main and counts the
+filed issues missing from it and the IDs and IIDs that repeat, packs the
+tracker repository, measures its size, and times a fresh clone.
+
+BEADS_SCALE_ISSUES (default 1000,5000,10000), BEADS_SCALE_WRITERS
+(default 2,5,10), and BEADS_SCALE_OPS (default 10 file-and-pop pairs per
+writer) set the sizes, each a comma-separated list. The report goes to
+.regression/beads-scale/<UTC stamp>.json and a Markdown table beside it.
+The run fails only on a lost write or a duplicate ID; times inform the
+storage decision eng04 describes, and fail nothing.
+
 <!-- field: references -->
 ## References
 
