@@ -30,9 +30,12 @@ type WeekResult struct {
 }
 
 // Week returns the project's open Sprint Goals with their due dates
-// and the person's activity since the ISO week began: branches they
-// merged and issues assigned to them that closed.
+// and the person's activity since the ISO week began, in UTC: branches
+// they merged and issues assigned to them that closed. A merge from before
+// the period's first Sprint Goal is not the period's work, so it does not
+// count even inside the week (periodStart).
 func Week(t tracker.Tracker, project, user string, now time.Time) (WeekResult, error) {
+	now = now.UTC()
 	start := WeekStart(now)
 	r := WeekResult{Project: project, User: user, Week: ISOWeek(now), Since: start.Format("2006-01-02"),
 		SprintGoals: []SprintGoal{}, Merged: []tracker.Merge{}, Closed: []SprintGoal{}}
@@ -45,21 +48,41 @@ func Week(t tracker.Tracker, project, user string, now time.Time) (WeekResult, e
 			r.SprintGoals = append(r.SprintGoals, sprintGoalOf(i))
 		}
 	}
-	merged, err := t.Merges(project, user, r.Since)
-	if err != nil {
-		return r, err
-	}
-	r.Merged = append(r.Merged, merged...)
 	closed, err := t.ListIssues(project, tracker.IssueQuery{State: "closed", UpdatedAfter: r.Since})
 	if err != nil {
 		return r, err
 	}
+	merged, err := t.Merges(project, user, periodStart(start, append(slices.Clone(open), closed...)))
+	if err != nil {
+		return r, err
+	}
+	r.Merged = append(r.Merged, merged...)
 	for _, i := range closed {
 		if slices.Contains(i.Assignees, user) {
 			r.Closed = append(r.Closed, sprintGoalOf(i))
 		}
 	}
 	return r, nil
+}
+
+// periodStart is the later of start and the creation of the earliest
+// Sprint Goal among issues, as an RFC 3339 instant: merges before the
+// period's first Sprint Goal, such as an earlier run's on the same days,
+// deliver nothing the period planned (srd018 R3.2, R8.1).
+func periodStart(start time.Time, issues []tracker.Issue) string {
+	first := time.Time{}
+	for _, i := range issues {
+		if !sprintgoal.Is(i.Description) {
+			continue
+		}
+		if at, err := time.Parse(time.RFC3339, i.CreatedAt); err == nil && (first.IsZero() || at.Before(first)) {
+			first = at
+		}
+	}
+	if first.After(start) {
+		start = first
+	}
+	return start.UTC().Format(time.RFC3339)
 }
 
 func sprintGoalOf(i tracker.Issue) SprintGoal {

@@ -48,7 +48,7 @@ func validateDoc(d *Doc, byID map[string]*Doc) []Finding {
 	v := checker{file: d.Path}
 	if d.ContextError != "" {
 		// One finding for the cause, not one per item it hides.
-		v.add("context", "does not parse (%s); quote a value that holds a colon", d.ContextError)
+		v.add("context", "does not parse (%s)", d.ContextError)
 		return v.findings
 	}
 	v.require("title", d.Title)

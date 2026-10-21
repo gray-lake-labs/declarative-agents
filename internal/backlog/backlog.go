@@ -26,10 +26,12 @@ type Entry struct {
 }
 
 // Report is what tpm backlog check prints: how many documents it read and
-// every finding the gate reports on them.
+// every finding the gate reports on them. SpecSkipped says why the parent
+// spec tool's shape check did not run, when it did not.
 type Report struct {
-	Documents int                 `json:"documents"`
-	Findings  []hierarchy.Finding `json:"findings"`
+	Documents   int                 `json:"documents"`
+	Findings    []hierarchy.Finding `json:"findings"`
+	SpecSkipped string              `json:"spec_check_skipped,omitempty"`
 }
 
 // List reads the hierarchy documents under dir, keeping one kind when kind
@@ -54,20 +56,29 @@ func List(dir, kind string) ([]Entry, error) {
 }
 
 // Check runs the hierarchy gate (srd045 R6.1) on the documents under dir,
-// through hierarchy.Validate, the function the mage audit gate calls.
+// through hierarchy.Validate, the function the mage audit gate calls; it
+// also reads the SRDs, refusing a requirement no criterion traces, and runs
+// the parent spec tool's shape check, so the gate refuses what tpm doctor
+// would (srd043 R4.4).
 func Check(dir string) (Report, error) {
 	docs, err := hierarchy.Load(dir)
 	if err != nil {
 		return Report{}, err
 	}
 	findings := hierarchy.Validate(docs)
+	srds, untraced, err := checkSRDs(dir)
+	if err != nil {
+		return Report{}, err
+	}
+	shapes, skipped := checkShapes(dir)
+	findings = append(append(findings, untraced...), shapes...)
 	for i := range findings {
 		findings[i].File = relative(dir, findings[i].File)
 	}
 	if findings == nil {
 		findings = []hierarchy.Finding{}
 	}
-	return Report{Documents: len(docs), Findings: findings}, nil
+	return Report{Documents: len(docs) + srds, Findings: findings, SpecSkipped: skipped}, nil
 }
 
 func relative(dir, path string) string {
@@ -129,6 +140,9 @@ func init() {
 			}
 			if len(r.Findings) == 0 {
 				fmt.Fprintf(&h, "hierarchy gate: pass, %d documents\n", r.Documents)
+			}
+			if r.SpecSkipped != "" {
+				fmt.Fprintf(&h, "spec shape check skipped: %s\n", r.SpecSkipped)
 			}
 			if err := ctx.Emit(r, h.String()); err != nil {
 				return err

@@ -32,7 +32,7 @@ A sprint-end issue is a recurring audit filed once per period in each repository
 <!-- req: R1.2 -->
 ### R1.2
 
-Popped, its Requirements direct the work in order: summarize the period from tpm sprint-end facts, which returns the period's aggregate (srd018 R3), each Sprint Goal's ledger, reported status, and listed stories (in the system repository, the Sprint Goals of every team repository the subsystem SRDs declare), and the recommended version (srd015 R4.1); ask the owner whether anything in the summary, the Sprint Goals, or the release should change, and which listed stories are done; apply the changes the owner names in the worktree; commit the summary at docs/sprint-ends/RELEASE.md; merge with tpm issue merge, listing each Sprint Goal the owner reports complete with Closes (R2.1); once it merges, push the release from main with tpm release gate and tpm release tag, the sprint-end issue being the release issue.
+Popped, its Requirements direct the work in order: summarize the period from tpm sprint-end facts, which returns the period's aggregate (srd018 R3), each Sprint Goal's ledger, reported status, and listed stories (in the system repository, the Sprint Goals of every team repository the subsystem SRDs declare), and the version tpm release next recommends from the checkout's commits since its latest tag, with its reason (srd015 R3.1); ask the owner whether anything in the summary, the Sprint Goals, or the release should change, and which listed stories are done; apply the changes the owner names in the worktree; commit the summary at docs/sprint-ends/RELEASE.md; merge with tpm issue merge, listing each Sprint Goal the owner reports complete with Closes (R2.1); once it merges, push the release from main with tpm release gate and tpm release tag, the sprint-end issue being the release issue.
 
 <!-- req: R1.3 -->
 ### R1.3
@@ -50,7 +50,7 @@ In a program that does not yet run track-goals, a Sprint Goal issue (or an objec
 <!-- req: R2.2 -->
 ### R2.2
 
-Such a close posts no met event; the merge posts a reported_complete event naming the release and the merge commit on the Sprint Goal's ledger instead, and tpm sprint-end facts reads it as reported complete. A Sprint Goal another sprint-end merge already closed, as a team's and the program's merges may both name, is reported and skipped, not refused. The roll-up states the Sprint Goal as reported complete, distinct from met (srd018 R3.5), so a reported close is never shown as evidence, and the aggregate does not count it as a contradiction of the ledger (srd018 R3.2).
+Such a close posts no met event; the merge posts a reported_complete event naming the release and the merge commit on the Sprint Goal's ledger instead, and tpm sprint-end facts reads it as reported complete. A Sprint Goal another sprint-end merge already closed, as a team's and the program's merges may both name, is reported and skipped, not refused, and is still listed as reported complete: its ledger keeps the event the first merge posted, or gets one now when it has neither that nor a met event. The roll-up states the Sprint Goal as reported complete, distinct from met (srd018 R3.5), so a reported close is never shown as evidence, and the aggregate does not count it as a contradiction of the ledger (srd018 R3.2).
 
 <!-- req: R2.3 -->
 ### R2.3

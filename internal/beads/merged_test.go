@@ -11,7 +11,8 @@ import (
 
 // deliver makes a branch with one commit in the checkout and merges it into
 // main with --no-ff as user on date, the local merge that delivers work on
-// beads (srd042 R2.3).
+// beads (srd042 R2.3). A date with a time and zone is used as it is; a bare
+// day is 10:00 UTC.
 func deliver(t *testing.T, dir, branch, user, date, message string) {
 	t.Helper()
 	beadstest.Git(t, dir, "checkout", "-q", "-b", branch, "main")
@@ -24,7 +25,10 @@ func deliver(t *testing.T, dir, branch, user, date, message string) {
 	cmd := exec.Command("git", "-c", "user.name="+user, "-c", "user.email="+user+"@example.com",
 		"merge", "-q", "--no-ff", branch, "-m", message)
 	cmd.Dir = dir
-	cmd.Env = append(os.Environ(), "GIT_AUTHOR_DATE="+date+"T10:00:00Z", "GIT_COMMITTER_DATE="+date+"T10:00:00Z")
+	if !strings.Contains(date, "T") {
+		date += "T10:00:00Z"
+	}
+	cmd.Env = append(os.Environ(), "GIT_AUTHOR_DATE="+date, "GIT_COMMITTER_DATE="+date)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("merge %s: %v: %s", branch, err, out)
 	}
@@ -80,5 +84,25 @@ func TestMergeIsAttributedByItsTrailer(t *testing.T) {
 	}
 	if bot, _ := tr.Merges("g/po-1", "Build Bot", "2026-10-12"); len(bot) != 0 {
 		t.Fatalf("the git identity still counts: %+v", bot)
+	}
+}
+
+// TestMergeDatesAreUTC reads a merge committed in a zone behind UTC on its
+// UTC day, and compares since as an instant: 03:40 UTC on 2026-10-21 is
+// 2026-10-21 whatever zone the committer or the reader is in (#147).
+func TestMergeDatesAreUTC(t *testing.T) {
+	t.Setenv("TZ", "America/Los_Angeles")
+	tr := newTestTracker(t, "alice")
+	dir := tr.checkout("g/po-1")
+	deliver(t, dir, "1-late", "alice", "2026-10-20T20:40:00-07:00", "Merge 1-late (g/po-1#1)")
+	got, err := tr.Merges("g/po-1", "", "2026-10-21")
+	if err != nil || len(got) != 1 || got[0].MergedAt != "2026-10-21" {
+		t.Fatalf("since 2026-10-21 = %+v, %v; want the merge, on 2026-10-21", got, err)
+	}
+	if after, _ := tr.Merges("g/po-1", "", "2026-10-21T03:41:00Z"); len(after) != 0 {
+		t.Fatalf("since a minute after the merge = %+v, want none", after)
+	}
+	if at, _ := tr.Merges("g/po-1", "", "2026-10-21T03:40:00Z"); len(at) != 1 {
+		t.Fatalf("since the merge's instant = %+v, want it", at)
 	}
 }

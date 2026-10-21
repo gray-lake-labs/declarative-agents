@@ -192,9 +192,13 @@ func (s *Section) Tree() map[string]any {
 }
 
 // TreeErr is Tree with the reason a tree that does not parse holds no map,
-// such as a value with a colon in it that is not quoted.
+// such as a value with a colon in it that is not quoted. A nested list
+// item written "- item" rather than "1. item" still reads, but is an
+// error: the parent spec tool's formatter refuses it as an entry with no
+// key, so the gate refuses it too (srd045 R6.1).
 func (s *Section) TreeErr() (map[string]any, error) {
 	var b strings.Builder
+	var keyless error
 	for _, line := range strings.Split(s.Text(), "\n") {
 		trimmed := strings.TrimLeft(line, " ")
 		indent := len(line) - len(trimmed)
@@ -204,14 +208,17 @@ func (s *Section) TreeErr() (map[string]any, error) {
 		case indent > 0 && orderedItem.MatchString(trimmed):
 			b.WriteString(strings.Repeat(" ", indent) + "- " + orderedItem.ReplaceAllString(trimmed, "") + "\n")
 		case indent > 0:
+			if item, ok := strings.CutPrefix(trimmed, "- "); ok && keyless == nil && !strings.Contains(item, ": ") {
+				keyless = fmt.Errorf("entry %q has no key; write a nested list item as \"1. %s\"", item, item)
+			}
 			b.WriteString(line + "\n")
 		}
 	}
 	out := map[string]any{}
 	if err := yaml.Unmarshal([]byte(b.String()), &out); err != nil {
-		return map[string]any{}, err
+		return map[string]any{}, fmt.Errorf("%w; quote a value that holds a colon", err)
 	}
-	return out, nil
+	return out, keyless
 }
 
 // TreeString returns a tree item's scalar value as text.

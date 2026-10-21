@@ -3,6 +3,8 @@ package program
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
@@ -97,6 +99,23 @@ func canonicalTypes(vals []string) []string {
 		}
 	}
 	return out
+}
+
+// BacklogAudit is the corpus gate a repository without mage runs: tpm's own
+// hierarchy gate (srd045 R8.2).
+const BacklogAudit = "tpm backlog check"
+
+// AuditFor is the audit a docs/ merge in the worktree at dir runs under p:
+// the policy's command, except that the built-in mage audit becomes tpm
+// backlog check in a repository with no magefiles, which could not run it
+// (srd013 R5.3).
+func AuditFor(p Policy, dir string) string {
+	if p.AuditCommand == Defaults().AuditCommand {
+		if _, err := os.Stat(filepath.Join(dir, "magefiles")); err != nil {
+			return BacklogAudit
+		}
+	}
+	return p.AuditCommand
 }
 
 // Defaults are the values srd001 fixes and the example policy uses.

@@ -459,7 +459,7 @@ func TestCorpusPeerReadKeepsTheProgramsGate(t *testing.T) {
 	f := fake.New()
 	f.AddFile("g/system", "main", program.PolicyFile, out)
 	p, err := program.LoadPolicy(f, "g/system", "main")
-	if err != nil || len(p.Gate("corpus")) != 2 || p.Gate("default")[0].Command != "go test ./..." {
+	if err != nil || len(p.Gate("corpus")) != 2 || p.Gate("default")[0].Command != ProgramAudit {
 		t.Fatalf("policy from %q: %+v, %v", out, p.DefinitionOfDone, err)
 	}
 }

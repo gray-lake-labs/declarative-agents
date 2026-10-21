@@ -102,6 +102,10 @@ type beadsProgram struct {
 	as      map[string]*beads.Tracker
 }
 
+// NewBeads is the beads program alone, for a test that sets the tracker
+// clone's clock or reads beads-only state.
+func NewBeads(t *testing.T) Program { return newBeadsProgram(t) }
+
 func newBeadsProgram(t *testing.T) *beadsProgram {
 	root := t.TempDir()
 	return &beadsProgram{t: t, root: root, remote: beadstest.TrackerRepository(t, root),

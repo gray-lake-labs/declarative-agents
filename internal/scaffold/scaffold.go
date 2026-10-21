@@ -161,16 +161,18 @@ func controlFiles() map[string][]byte {
 
 // ProgramAudit is the corpus gate a program repository runs: tpm's own
 // hierarchy gate, since a program repository has no mage.
-const ProgramAudit = "tpm backlog check"
+const ProgramAudit = program.BacklogAudit
 
 // InitPolicy is the policy tpm init writes: the built-in defaults, with
-// tpm backlog check as the audit a docs/ merge runs, and a gate for the
-// system's corpus release of that check and a peer read, since a release
-// of the system needs one (srd015 R1.2). Every command it names is one a
-// program repository can run.
+// tpm backlog check as the audit a docs/ merge runs and as the default
+// definition of done, and a gate for the system's corpus release of that
+// check and a peer read, since a release of the system needs one (srd015
+// R1.2). Every command it names is one a program repository can run: it
+// has no Go module, so go test ./... is not one.
 func InitPolicy() program.Policy {
 	p := program.Defaults()
 	p.AuditCommand = ProgramAudit
+	p.DefinitionOfDone["default"] = []program.Check{{Kind: "tests", Environment: "local", Suite: "hierarchy", Command: ProgramAudit}}
 	p.DefinitionOfDone["corpus"] = []program.Check{
 		{Kind: "tests", Environment: "local", Suite: "hierarchy", Command: ProgramAudit},
 		{Kind: "peer-read"},

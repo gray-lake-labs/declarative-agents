@@ -154,7 +154,7 @@ A team's velocity is the story points of its stories done per sprint, read from 
 <!-- req: R6.1 -->
 ### R6.1
 
-The corpus gate checks every hierarchy document against its type: the required fields and context items, a parent of the right kind that resolves, link targets that resolve (srd007 R8.2), no parent or blocked_by cycle, a story's points, and a criterion without a test or an environment. A context that does not parse, such as a value holding an unquoted colon, is one finding naming the parse error, not a finding for each item it hides. The parent's corpus audit does not read these directories, so a magefiles gate inside mage audit checks them, as it checks initiatives (srd034 R2.1).
+The corpus gate checks every hierarchy document against its type: the required fields and context items, a parent of the right kind that resolves, link targets that resolve (srd007 R8.2), no parent or blocked_by cycle, a story's points, and a criterion without a test or an environment. A context that does not parse, such as a value holding an unquoted colon, or a nested list item written "- item" rather than "1. item", which the parent's formatter refuses as an entry with no key, is one finding naming the cause, not a finding for each item it hides. The parent's corpus audit does not read these directories, so a magefiles gate inside mage audit checks them, as it checks initiatives (srd034 R2.1).
 
 <!-- req: R7 -->
 ## R7 - Forecasts (direction)
@@ -180,7 +180,7 @@ tpm backlog list reads the hierarchy documents of the repository at --dir and pr
 <!-- req: R8.2 -->
 ### R8.2
 
-tpm backlog check runs R6.1's checks on the repository at --dir through the same function the gate in mage audit calls, prints each finding with its file, field, and message, and exits non-zero when there is any; with --json it prints the document count and the findings.
+tpm backlog check runs R6.1's checks on the repository at --dir through the same function the gate in mage audit calls; it also reads the SRDs, counting them among the documents and refusing a requirement item no acceptance criterion traces, and runs the pinned parent spec tool's check, refusing each shape finding but formatting, which tpm doctor repairs, so the merge gate refuses what doctor would. It prints each finding with its file, field, and message, says when the spec tool could not run and why, and exits non-zero when there is any finding; with --json it prints the document count, the findings, and why the spec check was skipped.
 
 <!-- req: R8.3 -->
 ### R8.3

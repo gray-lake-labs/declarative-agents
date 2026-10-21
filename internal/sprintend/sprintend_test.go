@@ -14,6 +14,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
 
@@ -162,10 +163,29 @@ func TestSprintEndReleasesOnlyAfterConfirmation(t *testing.T) {
 		dir, f, cfg := period(t, p)
 		facts, err := MakeFacts(Input{Tracker: f, Project: po1, Aggregate: aggregate(t, dir, f, cfg), Releases: program.Defaults().Releases,
 			Artifact: "grader", Tags: []string{"grader/v0.1.0"}})
-		if err != nil || facts.Recommended != "0.2.0" || facts.Next.LatestTag != "grader/v0.1.0" {
+		if err != nil || facts.Recommended != "0.2.0" || facts.Next.LatestTag != "grader/v0.1.0" || facts.Next.Reason == "" {
 			t.Fatalf("recommendation = %q %+v %v", facts.Recommended, facts.Next, err)
 		}
 	})
+}
+
+// TestFactsRecommendFromTheArtifactsCommits reads the artifact's checkout:
+// fix-only commits since its latest tag recommend a patch over that tag,
+// with the reason, not the first-release minor (#151).
+func TestFactsRecommendFromTheArtifactsCommits(t *testing.T) {
+	dir := t.TempDir()
+	for _, args := range [][]string{{"init", "-q", "-b", "main"}, {"commit", "-q", "--allow-empty", "-m", "Score"},
+		{"tag", "grader/v0.3.1"}, {"commit", "-q", "--allow-empty", "-m", "Fix the rounding"}} {
+		cmd := exec.Command("git", append([]string{"-C", dir, "-c", "user.name=t", "-c", "user.email=t@example.com"}, args...)...)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v: %s", args, err, out)
+		}
+	}
+	facts, err := MakeFacts(Input{Tracker: fake.New(), Project: po1, Releases: program.Defaults().Releases,
+		Artifact: "grader", Tags: []string{"grader/v0.3.1"}, Dir: dir})
+	if err != nil || facts.Recommended != "0.3.2" || !strings.Contains(facts.Next.Reason, "fix") {
+		t.Fatalf("recommendation = %q, reason %q, %v", facts.Recommended, facts.Next.Reason, err)
+	}
 }
 
 // TestSystemFactsGatherTheTeams lists, for the system repository, the

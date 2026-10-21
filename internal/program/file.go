@@ -82,28 +82,69 @@ func File(t tracker.Tracker, project string, in tracker.NewIssue, p Policy, dryR
 
 // SprintMilestone is the active milestone of the project or its groups whose
 // start date is on or before today and whose due date is on or after it
-// (srd013 R3.3). With none, or more than one, it returns no title and the
-// reason; tpm never guesses between sprints.
+// (srd013 R3.3). A milestone whose sprint ended, its sprint-end issue in
+// the project closed, is not active: work filed after that, such as a
+// retrospective's actions, goes on the next milestone by start date. With
+// none, or more than one, it returns no title and the reason; tpm never
+// guesses between sprints.
 func SprintMilestone(t tracker.Tracker, project string, today time.Time) (string, string, error) {
 	ms, err := t.ActiveMilestones(project)
 	if err != nil {
 		return "", "", err
 	}
+	ended, err := endedSprints(t, project)
+	if err != nil {
+		return "", "", err
+	}
 	day := today.Format("2006-01-02")
-	var covering []string
+	var covering, closed []string
+	next := tracker.Milestone{}
 	for _, m := range ms {
-		if m.StartDate != "" && m.DueDate != "" && m.StartDate <= day && day <= m.DueDate && !slices.Contains(covering, m.Title) {
-			covering = append(covering, m.Title)
+		if m.StartDate == "" || m.DueDate == "" || slices.Contains(covering, m.Title) {
+			continue
 		}
+		switch {
+		case ended[m.Title]:
+			if m.StartDate <= day && day <= m.DueDate {
+				closed = append(closed, m.Title)
+			}
+		case m.StartDate <= day && day <= m.DueDate:
+			covering = append(covering, m.Title)
+		case m.StartDate > day && (next.Title == "" || m.StartDate < next.StartDate):
+			next = m
+		}
+	}
+	if len(covering) == 0 && len(closed) > 0 && next.Title != "" {
+		return next.Title, "", nil
 	}
 	switch len(covering) {
 	case 1:
 		return covering[0], "", nil
 	case 0:
+		if len(closed) > 0 {
+			return "", "the sprint of " + strings.Join(closed, ", ") + " has ended and no later milestone is dated; name one with --milestone", nil
+		}
 		return "", "no active milestone with a start and due date covers " + day, nil
 	default:
 		return "", "several active milestones cover " + day + ": " + strings.Join(covering, ", ") + "; name one with --milestone", nil
 	}
+}
+
+// endedSprints are the milestones whose sprint-end issue in project is
+// closed: the issue plan push files with SprintEndLabels' kind::release on
+// each sprint's milestone (srd038 R1.1).
+func endedSprints(t tracker.Tracker, project string) (map[string]bool, error) {
+	closed, err := t.ListIssues(project, tracker.IssueQuery{State: "closed", Labels: []string{"kind::release", "type::recurring"}})
+	if err != nil {
+		return nil, err
+	}
+	ended := map[string]bool{}
+	for _, i := range closed {
+		if i.Milestone != "" {
+			ended[i.Milestone] = true
+		}
+	}
+	return ended, nil
 }
 
 // mayFile refuses a plane::management issue from a caller the policy does

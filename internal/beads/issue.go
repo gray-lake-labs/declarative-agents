@@ -46,21 +46,24 @@ type Comment struct {
 // transition through the table (srd042 R1.2), and StateActor is the actor
 // that fired the transition into it.
 type Issue struct {
-	Type        string    `json:"_type,omitempty"`
-	ID          string    `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description,omitempty"`
-	Status      string    `json:"status"`
-	Priority    int       `json:"priority"`
-	IssueType   string    `json:"issue_type,omitempty"`
-	Assignee    string    `json:"assignee,omitempty"`
-	CreatedAt   string    `json:"created_at,omitempty"`
-	CreatedBy   string    `json:"created_by,omitempty"`
-	UpdatedAt   string    `json:"updated_at,omitempty"`
-	ClosedAt    string    `json:"closed_at,omitempty"`
-	CloseReason string    `json:"close_reason,omitempty"`
-	Labels      []string  `json:"labels,omitempty"`
-	Comments    []Comment `json:"comments,omitempty"`
+	Type        string   `json:"_type,omitempty"`
+	ID          string   `json:"id"`
+	Title       string   `json:"title"`
+	Description string   `json:"description,omitempty"`
+	Status      string   `json:"status"`
+	Priority    int      `json:"priority"`
+	IssueType   string   `json:"issue_type,omitempty"`
+	Assignee    string   `json:"assignee,omitempty"`
+	CreatedAt   string   `json:"created_at,omitempty"`
+	CreatedBy   string   `json:"created_by,omitempty"`
+	UpdatedAt   string   `json:"updated_at,omitempty"`
+	ClosedAt    string   `json:"closed_at,omitempty"`
+	CloseReason string   `json:"close_reason,omitempty"`
+	Labels      []string `json:"labels,omitempty"`
+	// Dependencies are the issue's edges in bd's form, from its link lines
+	// (srd007 R6.1).
+	Dependencies []Dependency `json:"dependencies,omitempty"`
+	Comments     []Comment    `json:"comments,omitempty"`
 
 	State      string `json:"state,omitempty"`
 	StateActor string `json:"state_actor,omitempty"`

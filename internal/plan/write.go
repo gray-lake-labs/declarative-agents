@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -91,15 +92,37 @@ func WriteRelease(dir string, r Release, c Candidates, t tracker.Tracker, issueP
 	return w, nil
 }
 
+// releaseFieldOrder is the order the parent schema gives a release
+// record's fields (agent-core design.yaml, release_field), which tpm doctor
+// checks: deliverables come before srds, and both before release.
+var releaseFieldOrder = []string{"capabilities", "numbering_note", "proof_commands", "title", "library_srds", "parent",
+	"related_agent_core_release", "application_srds", "planned_work", "relocated_to", "deliverables", "dependencies", "srds",
+	"semantic_models", "shared_requirements", "migration_note", "applicability", "external_requirements", "historical_aliases",
+	"specification", "config_formats", "migration", "use_cases", "implementation_sequence", "current_applications", "release",
+	"test_suites", "current_application_evidence", "follow_up", "evidence_status", "proof", "evidence", "implementation_evidence",
+	"evidence_boundary", "success_markers", "deferred", "post_merge", "non_runnable_modules"}
+
+// placeholder is a sentence tpm init's templates leave for an owner to
+// replace ("... writes here ...").
+var placeholder = regexp.MustCompile(`(?m)^[^\n]* writes here [^\n]*\.\n`)
+
 // putRelease replaces the release record of r's version, keeping its
-// heading line, or appends a new one after the last release record.
+// heading line, or appends a new one after the last release record. The
+// record's fields follow the parent schema's order, and a placeholder
+// sentence, in the record or in the road map's overview, becomes text that
+// says what the record holds (srd031 R4.1).
 func putRelease(doc string, r Release) (string, string) {
-	var body strings.Builder
-	body.WriteString("\n<!-- field: deliverables -->\n### Deliverables\n\n")
+	var deliverables strings.Builder
+	deliverables.WriteString("<!-- field: deliverables -->\n### Deliverables\n\n")
 	for _, id := range r.Items {
-		body.WriteString("- " + id + "\n")
+		deliverables.WriteString("- " + id + "\n")
 	}
-	fmt.Fprintf(&body, "\n<!-- field: release -->\n### Release\n\n<!-- field: publication | form: \"tree\" -->\n#### Publication\n\n- tag: %s\n- milestone: %s\n", treeValue(r.Tag), treeValue(r.Milestone))
+	owned := []recordPart{
+		{"deliverables", strings.TrimRight(deliverables.String(), "\n")},
+		{"release", fmt.Sprintf("<!-- field: release -->\n### Release\n\n<!-- field: publication | form: \"tree\" -->\n#### Publication\n\n- tag: %s\n- milestone: %s", treeValue(r.Tag), treeValue(r.Milestone))},
+	}
+	proves := fmt.Sprintf("Release %s delivers %s, on milestone %s, tagged %s.", r.Version, strings.Join(r.Items, ", "), r.Milestone, r.Tag)
+	doc = fillOverview(doc)
 	marks := releaseMarker.FindAllStringSubmatchIndex(doc, -1)
 	for i, m := range marks {
 		if doc[m[2]:m[3]] != r.Version {
@@ -118,10 +141,15 @@ func putRelease(doc string, r Release) (string, string) {
 		if tail != "" {
 			tail = "\n" + strings.TrimLeft(tail, "\n")
 		}
-		return doc[:headEnd] + kept(doc[headEnd:end]) + body.String() + tail, "replaced"
+		prose, fields := recordParts(doc[headEnd:end])
+		prose = placeholder.ReplaceAllString(prose+"\n", proves+"\n")
+		return doc[:headEnd] + assemble(prose, append(fields, owned...)) + tail, "replaced"
 	}
-	record := fmt.Sprintf("<!-- release: %s | status: specified -->\n## %s - Release %s\n\nThe technical program manager writes here what release %s proves.\n%s%s",
-		r.Version, r.Version, r.Version, r.Version, lastSRDs(doc), body.String())
+	fields := owned
+	if srds := lastSRDs(doc); srds != "" {
+		fields = append(fields, recordPart{"srds", strings.Trim(srds, "\n")})
+	}
+	record := fmt.Sprintf("<!-- release: %s | status: specified -->\n## %s - Release %s\n", r.Version, r.Version, r.Version) + assemble(proves, fields)
 	if len(marks) == 0 {
 		return strings.TrimRight(doc, "\n") + "\n\n" + record, "added"
 	}
@@ -139,34 +167,67 @@ func putRelease(doc string, r Release) (string, string) {
 
 var recordField = regexp.MustCompile(`(?m)^<!-- field: ([a-z_]+)[^\n]*-->\n### `)
 
-// kept is what a release record's body keeps when plan rewrites it: its
-// prose and every field but deliverables and release, which plan owns
-// (srd031 R4.1). The owned fields follow, deliverables before release
-// (design.md roadmap program_release_fields).
-func kept(record string) string {
+// recordPart is one field of a release record, its marker through its
+// content, trimmed.
+type recordPart struct{ name, text string }
+
+// recordParts splits a release record's body into its prose and every
+// field but deliverables and release, which plan owns (srd031 R4.1).
+func recordParts(record string) (string, []recordPart) {
 	marks := recordField.FindAllStringSubmatchIndex(record, -1)
 	end := len(record)
 	if len(marks) > 0 {
 		end = marks[0][0]
 	}
-	out := strings.Trim(record[:end], "\n")
+	prose := strings.Trim(record[:end], "\n")
+	var fields []recordPart
 	for i, m := range marks {
 		stop := len(record)
 		if i+1 < len(marks) {
 			stop = marks[i+1][0]
 		}
-		if name := record[m[2]:m[3]]; name == "deliverables" || name == "release" {
-			continue
+		if name := record[m[2]:m[3]]; name != "deliverables" && name != "release" {
+			fields = append(fields, recordPart{name, strings.Trim(record[m[0]:stop], "\n")})
 		}
-		if out != "" {
-			out += "\n\n"
+	}
+	return prose, fields
+}
+
+// assemble writes a record body: its prose, then its fields in the parent
+// schema's order, a field the schema does not name keeping its place after
+// the named ones.
+func assemble(prose string, fields []recordPart) string {
+	rank := func(name string) int {
+		if i := slices.Index(releaseFieldOrder, name); i >= 0 {
+			return i
 		}
-		out += strings.Trim(record[m[0]:stop], "\n")
+		return len(releaseFieldOrder)
 	}
-	if out == "" {
-		return ""
+	slices.SortStableFunc(fields, func(a, b recordPart) int { return rank(a.name) - rank(b.name) })
+	out := "\n" + strings.Trim(prose, "\n") + "\n"
+	if strings.Trim(prose, "\n") == "" {
+		out = ""
 	}
-	return "\n" + out + "\n"
+	for _, f := range fields {
+		out += "\n" + f.text + "\n"
+	}
+	return out
+}
+
+// overviewFill is the overview tpm writes in place of init's placeholder.
+const overviewFill = "Each release below names the objective items it delivers, in deliverables, and its milestone and tag, in release; tpm plan write keeps them.\n"
+
+// fillOverview replaces the overview field's placeholder sentence.
+func fillOverview(doc string) string {
+	start := strings.Index(doc, "<!-- field: overview -->")
+	if start < 0 {
+		return doc
+	}
+	end := len(doc)
+	if next := nextLevel2(doc, start+1); next >= 0 {
+		end = next
+	}
+	return doc[:start] + placeholder.ReplaceAllString(doc[start:end], overviewFill) + doc[end:]
 }
 
 // lastSRDs is the srds field of the road map's last release record, which a

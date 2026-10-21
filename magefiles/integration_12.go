@@ -72,7 +72,8 @@ func (Integration) Backlog() error {
 		return err
 	}
 	out, err = run("backlog", "check")
-	c.expect(err == nil && strings.HasPrefix(out, "hierarchy gate: pass, 9 documents"), "check on a valid hierarchy: %v: %s", err, out)
+	// Nine hierarchy documents and the repository's SRD (#149).
+	c.expect(err == nil && strings.HasPrefix(out, "hierarchy gate: pass, 10 documents"), "check on a valid hierarchy: %v: %s", err, out)
 	after, err := tree(repo)
 	if err != nil {
 		return err

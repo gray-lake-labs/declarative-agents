@@ -207,8 +207,8 @@ func TestGatePeerReadAcceptsAnotherPersonsApproval(t *testing.T) {
 			t.Fatalf("author's approval = %v, want a refusal naming the author", err)
 		}
 		r, err := g.run(p, "a", t0)
-		if err != nil || r.Passed || r.Checks[0].Result != ResultPending {
-			t.Fatalf("before approval: %+v %v", r, err)
+		if err != nil || r.Passed || r.Checks[0].Result != ResultPending || !r.AwaitingPeerRead {
+			t.Fatalf("before approval: %+v %v, want awaiting the peer read", r, err)
 		}
 
 		reviewer := tp.As("reviewer")
@@ -220,7 +220,7 @@ func TestGatePeerReadAcceptsAnotherPersonsApproval(t *testing.T) {
 			t.Fatalf("second approval = %+v, %v, want nothing posted", again, err)
 		}
 		r, err = g.run(p, "a", t0.Add(time.Minute))
-		if err != nil || !r.Passed || !strings.Contains(r.Checks[0].Reason, "reviewer") {
+		if err != nil || !r.Passed || r.AwaitingPeerRead || !strings.Contains(r.Checks[0].Reason, "reviewer") {
 			t.Fatalf("after approval: %+v %v", r, err)
 		}
 	})

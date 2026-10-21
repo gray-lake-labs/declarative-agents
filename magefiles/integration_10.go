@@ -122,7 +122,8 @@ func (Integration) SprintPlanning() error {
 	if err := r.tpmJSON(&pushed, append([]string{"goals", "push", "--plan", planFile}, base...)...); err != nil {
 		return err
 	}
-	c.expect(len(pushed) == 3 && pushed[0].IID != 0 && pushed[0].IID == pushed[1].IID && pushed[1].IID == pushed[2].IID,
+	// One result per outcome (#152): two outcomes, one Sprint Goal.
+	c.expect(len(pushed) == 2 && pushed[0].IID != 0 && pushed[0].IID == pushed[1].IID,
 		"two outcomes' three items for po-1 are not one Sprint Goal: %+v", pushed)
 	if len(pushed) == 0 {
 		return c.err("sprintPlanning")

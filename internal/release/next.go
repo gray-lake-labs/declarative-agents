@@ -13,6 +13,8 @@ type Candidate struct {
 	Version string `json:"version"`
 	Tag     string `json:"tag"`
 	Class   string `json:"class"`
+	// Label is Class as text says it, naming a pre-1.0 minor's break.
+	Label string `json:"-"`
 }
 
 // NextResult is what tpm release next reports (srd015 R3.1).
@@ -29,13 +31,14 @@ type NextResult struct {
 
 // Recommend picks the bump the commits since the latest release call for
 // (srd015 R3.1): a first release is minor; a commit that says BREAKING
-// CHANGE makes it major; commits that all fix something make it a patch;
-// any other change is minor. No commit since the latest release recommends
-// nothing.
-func (n *NextResult) Recommend(messages []string) {
+// CHANGE makes it major; commits that all fix something, or that change no
+// requirement of a corpus (requirementsUnchanged), a republish, make it a
+// patch; any other change is minor. No commit since the latest release
+// recommends nothing.
+func (n *NextResult) Recommend(messages []string, requirementsUnchanged bool) {
 	switch {
 	case n.Latest == "":
-		n.Recommended, n.Reason = "minor", "no release yet: the first release is minor"
+		n.Recommended, n.Reason = "minor", "no "+n.Artifact+" tag yet: the first release is minor"
 		return
 	case len(messages) == 0:
 		n.Recommended, n.Reason = "", "no commit since "+n.LatestTag+": nothing to release"
@@ -55,6 +58,10 @@ func (n *NextResult) Recommend(messages []string) {
 		n.Recommended, n.Reason = "patch", fmt.Sprintf("all %d commits since %s fix something", fixes, n.LatestTag)
 		return
 	}
+	if requirementsUnchanged {
+		n.Recommended, n.Reason = "patch", fmt.Sprintf("%d commits since %s change no requirement: a republish", len(messages), n.LatestTag)
+		return
+	}
 	n.Recommended, n.Reason = "minor", fmt.Sprintf("%d commits since %s change more than fixes", len(messages), n.LatestTag)
 }
 
@@ -69,7 +76,7 @@ func Next(r program.Releases, artifact string, tags []string) NextResult {
 	}
 	for _, bump := range []string{"patch", "minor", "major"} {
 		v := latest.Bump(bump)
-		out.Candidates = append(out.Candidates, Candidate{bump, v.String(), TagName(r.TagFormat, artifact, v), Class(r.Breaking, latest, v)})
+		out.Candidates = append(out.Candidates, Candidate{bump, v.String(), TagName(r.TagFormat, artifact, v), Class(r.Breaking, latest, v), ClassLabel(r.Breaking, latest, v)})
 	}
 	return out
 }
@@ -87,7 +94,7 @@ func (n NextResult) Human() string {
 		if c.Bump == n.Recommended {
 			mark = " (recommended)"
 		}
-		b.WriteString("  " + c.Bump + " " + c.Version + " " + c.Class + mark + "\n")
+		b.WriteString("  " + c.Bump + " " + c.Version + " " + c.Label + mark + "\n")
 	}
 	if n.Reason != "" {
 		b.WriteString("  " + n.Reason + "\n")

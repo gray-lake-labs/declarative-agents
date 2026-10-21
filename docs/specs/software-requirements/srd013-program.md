@@ -83,7 +83,7 @@ With a parent tracking issue given, appends the new issue to its Members section
 <!-- req: R3.3 -->
 ### R3.3
 
-A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins. tpm issue milestone puts an issue already filed in a milestone its project finds and lints it again. A kind given explicitly makes a data issue of that kind, whatever plane its paths alone would give.
+A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. A milestone whose sprint has ended, its sprint-end issue in the project closed, no longer counts: the issue goes on the next milestone by start date, so a retrospective's actions land in the next sprint. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins. tpm issue milestone puts an issue already filed in a milestone its project finds and lints it again. A kind given explicitly makes a data issue of that kind, whatever plane its paths alone would give.
 
 <!-- req: R4 -->
 ## R4 - tpm issue show
@@ -109,7 +109,7 @@ Refuses when the branch has no commits ahead of the default branch, when the iss
 <!-- req: R5.3 -->
 ### R5.3
 
-For a branch that changes docs/, runs the corpus gate, mage audit or the policy's audit_command, in the worktree first, and merges nothing when it fails (srd034 R2.2).
+For a branch that changes docs/, runs the corpus gate, the policy's audit_command, in the worktree first, and merges nothing when it fails (srd034 R2.2). Without --control the policy is read from the project's own control files; the built-in mage audit becomes tpm backlog check in a repository with no magefiles, which could not run it. The merge's output names the audit it ran, or says no docs/ change meant none.
 
 <!-- req: R5.4 -->
 ### R5.4

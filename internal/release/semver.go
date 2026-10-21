@@ -68,6 +68,16 @@ func Class(rule string, from, to Version) string {
 	return "compatible"
 }
 
+// ClassLabel is Class as a tag message, note, or command output says it: a
+// break that is only a minor bump before 1.0 says so, since the policy, not
+// the change, makes it breaking.
+func ClassLabel(rule string, from, to Version) string {
+	if Breaking(rule, from, to) && to.Major == from.Major {
+		return "breaking (minor before 1.0)"
+	}
+	return Class(rule, from, to)
+}
+
 // TagName is the tag for an artifact's version in tagFormat.
 func TagName(tagFormat, artifact string, v Version) string {
 	return strings.NewReplacer("{artifact}", artifact, "{version}", v.String()).Replace(tagFormat)

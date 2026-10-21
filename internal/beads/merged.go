@@ -20,13 +20,17 @@ var citation = regexp.MustCompile(`[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)*#\d+`)
 // commits on its default branch, which are its deliveries (srd042 R2.3). A merge is numbered by its place in the branch's
 // first-parent history, so the number is stable; its author is the tracker
 // user its Merged-by trailer names, which tpm issue merge writes, else the
-// merge commit's git author; its merge date is the commit date; and it closes every
+// merge commit's git author; its merge date is the commit's UTC day, and
+// since is compared with the commit's instant, never a local date; and it closes every
 // issue its message cites, written into the description as
 // Closes lines. The branch read is whichever of the local and origin
 // default branches is the newer.
 func (t *Tracker) Merges(project, author, since string) ([]tracker.Merge, error) {
-	if _, err := time.Parse("2006-01-02", since); err != nil {
-		return nil, fmt.Errorf("since %q is not YYYY-MM-DD", since)
+	from, err := time.Parse(time.RFC3339, since)
+	if err != nil {
+		if from, err = time.Parse("2006-01-02", since); err != nil {
+			return nil, fmt.Errorf("since %q is neither YYYY-MM-DD nor an RFC 3339 instant", since)
+		}
 	}
 	base, err := t.DefaultBranch(project)
 	if err != nil {
@@ -53,12 +57,16 @@ func (t *Tracker) Merges(project, author, since string) ([]tracker.Merge, error)
 			continue
 		}
 		n++
-		by, date, message := fields[0], fields[1][:10], strings.TrimSpace(fields[2])
+		at, err := time.Parse(time.RFC3339, fields[1])
+		if err != nil {
+			return nil, fmt.Errorf("merge commit date %q: %w", fields[1], err)
+		}
+		by, message := fields[0], strings.TrimSpace(fields[2])
 		if m := mergedBy.FindStringSubmatch(message); m != nil {
 			by = m[1]
 			message = strings.TrimSpace(mergedBy.ReplaceAllString(message, ""))
 		}
-		if date < since || (author != "" && by != author) {
+		if at.Before(from) || (author != "" && by != author) {
 			continue
 		}
 		title, body, _ := strings.Cut(message, "\n")
@@ -67,7 +75,7 @@ func (t *Tracker) Merges(project, author, since string) ([]tracker.Merge, error)
 			description += "\n\nCloses " + ref
 		}
 		out = append(out, tracker.Merge{IID: n, Title: title, Description: strings.TrimSpace(description),
-			TargetBranch: base, State: "merged", Author: by, MergedAt: date})
+			TargetBranch: base, State: "merged", Author: by, MergedAt: at.UTC().Format("2006-01-02")})
 	}
 	return out, nil
 }

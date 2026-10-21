@@ -184,7 +184,7 @@ func testPlanReleaseRanksSlippedFirst(t *testing.T, p trackertest.Program) {
 	if !c.Items[0].Slipped || c.Items[0].Placed != "01.0" {
 		t.Fatalf("slipped item = %+v", c.Items[0])
 	}
-	if c.Latest != "01.0" || c.Version != "01.1" || c.Tag != "corpus/v0.1.0" || c.EndDate != "2026-11-08" {
+	if c.Latest != "01.0" || c.Version != "01.1" || c.Tag != "corpus/v0.1.0" || c.EndDate != "2026-11-06" {
 		t.Fatalf("recommendations = %s %s %s %s", c.Latest, c.Version, c.Tag, c.EndDate)
 	}
 }
@@ -307,14 +307,19 @@ func TestPlanAFreshProgram(t *testing.T) {
 			t.Fatalf("write: %+v %v", w, err)
 		}
 		got := readFile(t, filepath.Join(dir, RoadMap))
-		for _, want := range []string{"## 01.0 - First release", "writes here what the first release proves", "<!-- field: srds -->\n### SRDs\n\n- srd001-system",
-			"<!-- field: deliverables -->", "- " + c.Items[0].ID, "- tag: " + c.Tag} {
+		for _, want := range []string{"## 01.0 - First release", "Release 01.0 delivers " + c.Items[0].ID, "<!-- field: srds -->\n### SRDs\n\n- srd001-system",
+			"<!-- field: deliverables -->", "- " + c.Items[0].ID, "- tag: " + c.Tag, overviewFill} {
 			if !strings.Contains(got, want) {
 				t.Errorf("road map lacks %q:\n%s", want, got)
 			}
 		}
-		if strings.Index(got, "### SRDs") > strings.Index(got, "### Deliverables") || strings.Index(got, "### Deliverables") > strings.Index(got, "### Release") {
-			t.Errorf("field order: want srds, deliverables, release:\n%s", got)
+		if strings.Contains(got, "writes here") {
+			t.Errorf("a placeholder sentence survived the write:\n%s", got)
+		}
+		// The parent schema's order, which tpm doctor checks: deliverables,
+		// then srds, then release (#148).
+		if strings.Index(got, "### Deliverables") > strings.Index(got, "### SRDs") || strings.Index(got, "### SRDs") > strings.Index(got, "### Release") {
+			t.Errorf("field order: want deliverables, srds, release:\n%s", got)
 		}
 		d, err := corpus.ParseMarkdown([]byte(got))
 		if err != nil {
@@ -327,19 +332,22 @@ func TestPlanAFreshProgram(t *testing.T) {
 		if err != nil || again.Version != "01.1" || again.Latest != "01.0" {
 			t.Fatalf("after planning 01.0: version %q latest %q, %v", again.Version, again.Latest, err)
 		}
-		// A new record is whole: status, title, prose, the last record's
-		// srds, then deliverables and release.
+		// A new record is whole: status, title, prose, then deliverables,
+		// the last record's srds, and release.
 		next := Release{Version: "01.1", Milestone: "01.1", Tag: "corpus/v0.2.0", Items: []string{again.Items[0].ID}}
 		if w, err := WriteRelease(dir, next, again, nil, "", 0); err != nil || w.Action != "added" {
 			t.Fatalf("write 01.1: %+v %v", w, err)
 		}
 		got = readFile(t, filepath.Join(dir, RoadMap))
 		added := got[strings.Index(got, "<!-- release: 01.1"):]
-		for _, want := range []string{"<!-- release: 01.1 | status: specified -->\n## 01.1 - Release 01.1\n\nThe technical program manager writes here what release 01.1 proves.\n",
+		for _, want := range []string{"<!-- release: 01.1 | status: specified -->\n## 01.1 - Release 01.1\n\nRelease 01.1 delivers " + again.Items[0].ID + ", on milestone 01.1, tagged corpus/v0.2.0.\n",
 			"<!-- field: srds -->\n### SRDs\n\n- srd001-system\n", "<!-- field: deliverables -->", "- tag: corpus/v0.2.0"} {
 			if !strings.Contains(added, want) {
 				t.Errorf("the 01.1 record lacks %q:\n%s", want, added)
 			}
+		}
+		if strings.Index(added, "### Deliverables") > strings.Index(added, "### SRDs") || strings.Index(added, "### SRDs") > strings.Index(added, "### Release") {
+			t.Errorf("01.1 field order: want deliverables, srds, release:\n%s", added)
 		}
 	})
 }
@@ -364,4 +372,52 @@ func TestTeamRepositoryIsKnownByItsSubsystemSRD(t *testing.T) {
 	if !teamRepository(dir) {
 		t.Fatal("a checkout with srd001-subsystem.md is not a team repository")
 	}
+}
+
+// TestEndDateIsTheLastWorkingDay recommends the Friday of the period's
+// third ISO week: from the Monday after the last milestone ends, or from
+// the current week, the next one on a weekend (#148).
+func TestEndDateIsTheLastWorkingDay(t *testing.T) {
+	for _, c := range []struct{ now, want string }{
+		{"2026-10-20", "2026-11-06"}, // a Tuesday of W43: W43 to W45
+		{"2026-10-19", "2026-11-06"}, // its Monday
+		{"2026-10-18", "2026-11-06"}, // the Sunday before: the period starts the next day
+		{"2026-10-24", "2026-11-13"}, // a Saturday: the next week
+	} {
+		now, _ := time.Parse(time.DateOnly, c.now)
+		if got := endDate(Input{Now: now}, nil); got != c.want {
+			t.Errorf("end date planned on %s = %s, want %s", c.now, got, c.want)
+		}
+		end, _ := time.Parse(time.DateOnly, c.want)
+		if start := periodStart(end); start.Weekday() != time.Monday || start.AddDate(0, 0, periodDays-3) != end {
+			t.Errorf("periodStart(%s) = %s does not read the period back", c.want, start.Format(time.DateOnly))
+		}
+	}
+}
+
+// TestOpenSprintGoalSlips ranks an outcome slipped when the period ended
+// with its Sprint Goal neither met nor reported complete, though no report
+// raised a slipped signal, and leaves a met one unslipped (#148).
+func TestOpenSprintGoalSlips(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		in, _ := input(t, system(t), p)
+		ref := in.Aggregate.Signals[0].Subject
+		in.Aggregate = &reports.Aggregation{Progress: []reports.Progress{{SprintGoal: ref, State: "at-risk"}}}
+		c, err := MakeCandidates(in)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(c.Items) == 0 || c.Items[0].ID != "obj001-reliable-agents#R2.1" || !c.Items[0].Slipped {
+			t.Fatalf("items = %+v, want obj001's R2.1 slipped first", c.Items)
+		}
+		in.Aggregate.Progress[0].State = "met"
+		if c, err = MakeCandidates(in); err != nil {
+			t.Fatal(err)
+		}
+		for _, it := range c.Items {
+			if it.Slipped {
+				t.Fatalf("a met Sprint Goal's outcome slipped: %+v", it)
+			}
+		}
+	})
 }

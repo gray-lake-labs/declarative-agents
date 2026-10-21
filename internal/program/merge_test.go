@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -185,6 +186,12 @@ func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 	if _, err := tr.UpdateIssue("g/po-1", done.IID, tracker.IssueUpdate{State: &closed}); err != nil {
 		t.Fatal(err)
 	}
+	// A team closed its own Sprint Goal before the program's merge names it.
+	teamGoal, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Sprint Goal: grading", Labels: []string{"plane::management"},
+		Description: "Goal\n\n" + sprintgoal.Marker("01.0", []string{"in001-scoring#R2"}) + "\n"})
+	if _, err := tr.UpdateIssue("g/po-1", teamGoal.IID, tracker.IssueUpdate{State: &closed}); err != nil {
+		t.Fatal(err)
+	}
 	end, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: sprint end 01.0", Labels: []string{"plane::management"}})
 	p, err := Pop(tr, ExecGit{}, "g/po-1", end.IID, checkout, Defaults(), false)
 	if err != nil {
@@ -205,7 +212,7 @@ func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 		t.Fatal(err)
 	}
 	gate := AuditGate{Command: "true", Dir: p.Worktree}
-	closes := []string{fmt.Sprintf("g/po-1#%d", goal.IID), fmt.Sprintf("g/po-1#%d", done.IID)}
+	closes := []string{fmt.Sprintf("g/po-1#%d", goal.IID), fmt.Sprintf("g/po-1#%d", done.IID), fmt.Sprintf("g/po-1#%d", teamGoal.IID)}
 	if _, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, p.Worktree, gate, closes, false); err == nil || !strings.Contains(err.Error(), "is not project#story") {
 		t.Fatalf("merge of a summary with a bare story id = %v, want a refusal", err)
 	}
@@ -222,8 +229,23 @@ func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(m.Reported) != 1 || m.Reported[0] != closes[0] || len(m.AlreadyClosed) != 1 || m.AlreadyClosed[0] != closes[1] {
+	// The team-closed Sprint Goal is reported complete too; the closed
+	// issue that is no Sprint Goal is not (#150).
+	if !slices.Equal(m.Reported, []string{closes[0], closes[2]}) || !slices.Equal(m.AlreadyClosed, []string{closes[1], closes[2]}) {
 		t.Fatalf("merge = %+v", m)
+	}
+	if !m.Audit || m.AuditCommand != "true" {
+		t.Fatalf("merge audit = %v %q, want the gate's command named", m.Audit, m.AuditCommand)
+	}
+	teamNotes, _ := tr.ListNotes("g/po-1", teamGoal.IID)
+	if n := countEvents(teamNotes, "reported_complete"); n != 1 {
+		t.Fatalf("the team-closed Sprint Goal has %d reported_complete events, want 1", n)
+	}
+	if again, err := reportClosed(tr, closes[2], "another-commit"); err != nil || !again {
+		t.Fatalf("reporting it again = %v, %v", again, err)
+	}
+	if teamNotes, _ = tr.ListNotes("g/po-1", teamGoal.IID); countEvents(teamNotes, "reported_complete") != 1 {
+		t.Fatal("a second report posted a second event")
 	}
 	notes, _ := tr.ListNotes("g/po-1", goal.IID)
 	found := false
@@ -275,4 +297,14 @@ func TestSprintEndMergeReadsTheSummaryThroughTextconv(t *testing.T) {
 	if err != nil || !m.Merged {
 		t.Fatalf("merge of a summary read through textconv = %+v, %v", m, err)
 	}
+}
+
+func countEvents(notes []tracker.Note, name string) int {
+	n := 0
+	for _, note := range notes {
+		if e, ok := events.Parse(note.Body); ok && e.Name == name {
+			n++
+		}
+	}
+	return n
 }

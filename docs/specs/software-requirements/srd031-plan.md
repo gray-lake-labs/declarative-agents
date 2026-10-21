@@ -54,7 +54,7 @@ The repository's SRDs, in the system repository the agreed initiatives (srd034 R
 <!-- req: R2.3 -->
 ### R2.3
 
-tpm goals status (srd019) for what is met, proving, or slipped, and the latest release tags. Before track-goals runs in the program, the period aggregate's slipped-commitment signal (srd018 R3.2) names what slipped.
+tpm goals status (srd019) for what is met, proving, or slipped, and the latest release tags. Before track-goals runs in the program, the period aggregate names what slipped: a Sprint Goal its slipped-commitment signal (srd018 R3.2) names, and one its progress shows neither met nor reported complete at the period's end.
 
 <!-- req: R2.4 -->
 ### R2.4
@@ -72,7 +72,7 @@ Asks the owner which requirements, or in the system repository which initiative 
 <!-- req: R3.2 -->
 ### R3.2
 
-Asks for the release's version and end date, recommending the next minor version and the end of the three-week period.
+Asks for the release's version and end date, recommending the next minor version and the end of the three-week period: the Friday of its third ISO week, the period starting the Monday after the last release's milestone ends, or else the Monday of the current week, of the next one on a weekend.
 
 <!-- req: R4 -->
 ## R4 - Pushes and posts
@@ -80,7 +80,7 @@ Asks for the release's version and end date, recommending the next minor version
 <!-- req: R4.1 -->
 ### R4.1
 
-The release entry in docs/road-map.md, listing its requirements by id, or in the system repository its initiative items in deliverables and its milestone and tag in release.publication, written by tpm plan write in the worktree of a plane::management issue filed with specify, and merged through the inner loop, so the plan is a reviewed change. A release plan write adds is a whole record: its status, a title, a line for what it proves, and the previous release's srds, before its deliverables and release. In a team's repository, candidates recommend no end date or tag, which are the system's.
+The release entry in docs/road-map.md, listing its requirements by id, or in the system repository its initiative items in deliverables and its milestone and tag in release.publication, written by tpm plan write in the worktree of a plane::management issue filed with specify, and merged through the inner loop, so the plan is a reviewed change. A release plan write adds is a whole record: its status, a title, a line saying what it delivers, on which milestone, under which tag, then its fields in the parent schema's order, deliverables, the previous release's srds, and release; a record it replaces keeps its other fields, reordered the same way. A placeholder sentence tpm init left, in the record or the road map's overview, is replaced with text that says what the road map holds. In a team's repository, candidates recommend no end date or tag, which are the system's.
 
 <!-- req: R4.2 -->
 ### R4.2

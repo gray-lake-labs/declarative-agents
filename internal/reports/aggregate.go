@@ -37,6 +37,8 @@ type Signal struct {
 	Week       string `json:"week"`
 	Detail     string `json:"detail"`
 	Actionable bool   `json:"actionable"`
+	// Blocked names the components a shared blocker holds up.
+	Blocked []string `json:"blocked,omitempty"`
 }
 
 // Key identifies a signal across runs, so a pushed signal is pushed once.
@@ -168,7 +170,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 				end, _ := ParseWeek(wr.week)
 				if age := int(end.AddDate(0, 0, 6).Sub(since).Hours() / 24); age > in.Policy.Escalation.BlockerAgeDays {
 					a.Signals = append(a.Signals, Signal{SignalAgingBlocker, e["component"], e["blocker"], wr.week,
-						fmt.Sprintf("%s has been blocked by %q for %d days, past the %d-day threshold", e["component"], e["blocker"], age, in.Policy.Escalation.BlockerAgeDays), true})
+						fmt.Sprintf("%s has been blocked by %q for %d days, past the %d-day threshold", e["component"], e["blocker"], age, in.Policy.Escalation.BlockerAgeDays), true, nil})
 				}
 			}
 		}
@@ -183,7 +185,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 		if len(names) == 0 {
 			text = fmt.Sprintf("%s is blocked on %s's own work in %d reports", waiting, waiting, countReports(reports, week, waiting))
 		}
-		a.Signals = append(a.Signals, Signal{SignalSharedBlocker, waiting, waiting, week, text, true})
+		a.Signals = append(a.Signals, Signal{SignalSharedBlocker, waiting, waiting, week, text, true, names})
 	}
 
 	for _, ref := range sortedKeys(goals) {
@@ -198,7 +200,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 		}
 		if limit := in.Policy.Escalation.SlipReleases; limit > 0 && run >= limit {
 			a.Signals = append(a.Signals, Signal{SignalSlipped, h.component, ref, in.To,
-				fmt.Sprintf("Sprint Goal %s (%s) has been at risk or blocked in %d consecutive reports", ref, h.component, run), true})
+				fmt.Sprintf("Sprint Goal %s (%s) has been at risk or blocked in %d consecutive reports", ref, h.component, run), true, nil})
 		}
 		met, err := hasEvent(t, ref, "met")
 		if err != nil {
@@ -227,7 +229,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 			}
 			if !closed {
 				a.Signals = append(a.Signals, Signal{SignalContradiction, h.component, ref, in.To,
-					fmt.Sprintf("Sprint Goal %s (%s) is reported complete but its ledger has no met event", ref, h.component), true})
+					fmt.Sprintf("Sprint Goal %s (%s) is reported complete but its ledger has no met event", ref, h.component), true, nil})
 			}
 		}
 		a.Progress = append(a.Progress, p)
@@ -241,7 +243,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 		for _, w := range weeks {
 			if !have[w+"\x00"+m.Username] {
 				a.Signals = append(a.Signals, Signal{SignalMissingReport, m.Project, m.Project, w,
-					fmt.Sprintf("no status report for %s in %s", m.Project, w), false})
+					fmt.Sprintf("no status report for %s in %s", m.Project, w), false, nil})
 			}
 		}
 	}
@@ -251,8 +253,17 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 		mentioned[ref] = true
 	}
 	end := to.AddDate(0, 0, 6).Format("2006-01-02")
+	var reported []tracker.Issue
+	for ref := range goals {
+		if i, ok, err := issueOf(t, ref); err != nil {
+			return a, err
+		} else if ok {
+			reported = append(reported, i)
+		}
+	}
+	since := periodStart(from, reported)
 	for _, m := range in.Config.Team {
-		merged, err := t.Merges(m.Project, "", from.Format("2006-01-02"))
+		merged, err := t.Merges(m.Project, "", since)
 		if err != nil {
 			return a, err
 		}
@@ -263,7 +274,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 				continue
 			}
 			a.Signals = append(a.Signals, Signal{SignalUnreportedWork, m.Project, fmt.Sprintf("%s!%d", m.Project, mr.IID), ISOWeek(mustDate(mr.MergedAt)),
-				fmt.Sprintf("%s!%d %q merged on %s and closes no reported Sprint Goal", m.Project, mr.IID, mr.Title, mr.MergedAt), false})
+				fmt.Sprintf("%s!%d %q merged on %s and closes no reported Sprint Goal", m.Project, mr.IID, mr.Title, mr.MergedAt), false, nil})
 		}
 	}
 	for c := range a.ByComponent {
@@ -315,20 +326,24 @@ func closesMentioned(project, description string, mentioned map[string]bool) boo
 // (srd006 R10).
 // isClosed reports whether the Sprint Goal ref is closed; an issue the
 // tracker cannot find is not.
-func isClosed(t tracker.Tracker, ref string) (bool, error) {
+// issueOf reads the issue a project#iid reference names; ok is false when
+// the reference is malformed or names no issue.
+func issueOf(t tracker.Tracker, ref string) (tracker.Issue, bool, error) {
 	project, n, ok := strings.Cut(ref, "#")
 	iid, err := strconv.Atoi(n)
 	if !ok || err != nil {
-		return false, nil
+		return tracker.Issue{}, false, nil
 	}
 	i, err := t.GetIssue(project, iid)
 	if errors.Is(err, tracker.ErrNotFound) {
-		return false, nil
+		return tracker.Issue{}, false, nil
 	}
-	if err != nil {
-		return false, err
-	}
-	return i.State == "closed", nil
+	return i, err == nil, err
+}
+
+func isClosed(t tracker.Tracker, ref string) (bool, error) {
+	i, ok, err := issueOf(t, ref)
+	return ok && i.State == "closed", err
 }
 
 // hasEvent reports whether the issue ref's ledger holds an event named name.

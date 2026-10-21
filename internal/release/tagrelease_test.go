@@ -2,6 +2,9 @@ package release
 
 import (
 	"io"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -129,7 +132,7 @@ func TestTagReadsAPeerReadMadeAfterTheGate(t *testing.T) {
 
 func TestNextRecommendsFromTheCommits(t *testing.T) {
 	first := NextResult{}
-	first.Recommend(nil)
+	first.Recommend(nil, false)
 	if first.Recommended != "minor" {
 		t.Errorf("first release: %+v", first)
 	}
@@ -140,9 +143,68 @@ func TestNextRecommendsFromTheCommits(t *testing.T) {
 		"major": {"Add v2 scoring\n\nBREAKING CHANGE: scores are now 0-100"},
 	} {
 		n := NextResult{Latest: "0.1.0", LatestTag: "corpus/v0.1.0"}
-		n.Recommend(messages)
+		n.Recommend(messages, false)
 		if n.Recommended != want || n.Reason == "" {
 			t.Errorf("%v: %+v, want %q", messages, n, want)
 		}
+	}
+	// A corpus whose requirements no commit changed republishes: a patch,
+	// unless a commit says it breaks (#151).
+	for want, messages := range map[string][]string{
+		"patch": {"Reword the overview", "Add a use case's diagram"},
+		"major": {"Drop R2\n\nBREAKING CHANGE: R2 is gone"},
+	} {
+		n := NextResult{Latest: "0.7.0", LatestTag: "corpus/v0.7.0"}
+		n.Recommend(messages, true)
+		if n.Recommended != want || (want == "patch" && !strings.Contains(n.Reason, "change no requirement")) {
+			t.Errorf("unchanged requirements %v: %+v, want %q", messages, n, want)
+		}
+	}
+}
+
+// TestRequirementsUnchangedReadsTheSRDs compares the SRD directory with the
+// latest tag, and never calls a checkout without SRDs a republish (#151).
+func TestRequirementsUnchangedReadsTheSRDs(t *testing.T) {
+	dir := t.TempDir()
+	git := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command("git", append([]string{"-C", dir, "-c", "user.name=t", "-c", "user.email=t@example.com"}, args...)...)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v: %s", args, err, out)
+		}
+	}
+	write := func(p, s string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(filepath.Join(dir, p)), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, p), []byte(s), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	git("init", "-q", "-b", "main")
+	write("README.md", "code\n")
+	git("add", "-A")
+	git("commit", "-q", "-m", "code")
+	git("tag", "grader/v0.1.0")
+	write("README.md", "more code\n")
+	git("commit", "-q", "-am", "more")
+	if same, err := RequirementsUnchanged(dir, "grader/v0.1.0"); err != nil || same {
+		t.Fatalf("a checkout with no SRDs = %v, %v; want never a republish", same, err)
+	}
+	write(SRDDir+"/srd001-x.md", "R1\n")
+	git("add", "-A")
+	git("commit", "-q", "-m", "srd")
+	git("tag", "corpus/v0.7.0")
+	write("docs/VISION.md", "words\n")
+	git("add", "-A")
+	git("commit", "-q", "-m", "vision")
+	if same, err := RequirementsUnchanged(dir, "corpus/v0.7.0"); err != nil || !same {
+		t.Fatalf("no SRD change since the tag = %v, %v; want a republish", same, err)
+	}
+	write(SRDDir+"/srd001-x.md", "R1 changed\n")
+	git("commit", "-q", "-am", "change R1")
+	if same, err := RequirementsUnchanged(dir, "corpus/v0.7.0"); err != nil || same {
+		t.Fatalf("an SRD change = %v, %v; want no republish", same, err)
 	}
 }

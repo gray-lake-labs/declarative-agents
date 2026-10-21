@@ -102,3 +102,49 @@ func TestFileReportsComponent(t *testing.T) {
 		t.Fatalf("derived: %+v %v", r, err)
 	}
 }
+
+// TestFileAfterSprintEndTakesTheNextMilestone files work on the next
+// milestone once the sprint's sprint-end issue has closed, though the
+// ended milestone's dates still cover today (#150).
+func TestFileAfterSprintEndTakesTheNextMilestone(t *testing.T) {
+	f := fake.New()
+	f.Milestones["01.0"] = tracker.Milestone{Title: "01.0", StartDate: day(-10), DueDate: day(2)}
+	f.Milestones["01.1"] = tracker.Milestone{Title: "01.1", StartDate: day(5), DueDate: day(25)}
+	f.Milestones["01.2"] = tracker.Milestone{Title: "01.2", StartDate: day(26), DueDate: day(46)}
+	end, err := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: sprint end 01.0", Milestone: "01.0",
+		Labels: []string{"plane::data", "type::recurring", "kind::release"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r, _ := fileWith(t, f); r.Milestone != "01.0" {
+		t.Fatalf("before the sprint ends: milestone %q, want 01.0", r.Milestone)
+	}
+	closed := "close"
+	if _, err := f.UpdateIssue("g/po-1", end.IID, tracker.IssueUpdate{State: &closed}); err != nil {
+		t.Fatal(err)
+	}
+	r, i := fileWith(t, f)
+	if r.Milestone != "01.1" || i.Milestone != "01.1" {
+		t.Fatalf("after the sprint ends: %+v, issue milestone %q; want 01.1", r, i.Milestone)
+	}
+}
+
+// TestAuditForARepositoryWithoutMage runs tpm backlog check where the
+// built-in mage audit could not run, and keeps a policy's own command.
+func TestAuditForARepositoryWithoutMage(t *testing.T) {
+	dir := t.TempDir()
+	if got := AuditFor(Defaults(), dir); got != BacklogAudit {
+		t.Fatalf("no magefiles: %q, want %q", got, BacklogAudit)
+	}
+	if err := os.MkdirAll(filepath.Join(dir, "magefiles"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if got := AuditFor(Defaults(), dir); got != "mage audit" {
+		t.Fatalf("with magefiles: %q, want mage audit", got)
+	}
+	own := Defaults()
+	own.AuditCommand = "make check"
+	if got := AuditFor(own, t.TempDir()); got != "make check" {
+		t.Fatalf("the policy's own command: %q", got)
+	}
+}

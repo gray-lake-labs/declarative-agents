@@ -20,6 +20,7 @@ type MergeResult struct {
 	Branch       string   `json:"branch"`
 	Commit       string   `json:"commit"`
 	Audit        bool     `json:"audit_run"` // the branch changes docs/, so the audit ran
+	AuditCommand string   `json:"audit_command,omitempty"`
 	ApprovedBy   string   `json:"approved_by,omitempty"`
 	Merged       bool     `json:"merged"` // merge made the merge commit now
 	Closed       []string `json:"closed,omitempty"`
@@ -115,6 +116,7 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 			}
 		}
 		if r.Audit {
+			r.AuditCommand = gate.Command
 			if err := gate.checkBefore("nothing merged"); err != nil {
 				return r, err
 			}
@@ -180,5 +182,56 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		}
 		r.Reported = append(r.Reported, p+"#"+strconv.Itoa(n))
 	}
+	// A Sprint Goal another merge closed first, as a team's sprint-end merge
+	// does before the program's, is still reported complete here: its
+	// ledger keeps the reported_complete event that merge posted, or gets
+	// one now; one closed as met is not (srd038 R2.2).
+	for _, ref := range r.AlreadyClosed {
+		reported, err := reportClosed(t, ref, r.Commit)
+		if err != nil {
+			return r, err
+		}
+		if reported {
+			r.Reported = append(r.Reported, ref)
+		}
+	}
 	return r, nil
+}
+
+// reportClosed reports whether the closed issue ref is a Sprint Goal
+// reported complete, posting its reported_complete event when its ledger
+// has neither that nor a met event.
+func reportClosed(t tracker.Tracker, ref, commit string) (bool, error) {
+	p, n, ok := strings.Cut(ref, "#")
+	iid, err := strconv.Atoi(n)
+	if !ok || err != nil {
+		return false, nil
+	}
+	i, err := t.GetIssue(p, iid)
+	if err != nil {
+		return false, err
+	}
+	m, ok := sprintgoal.Parse(i.Description)
+	if !ok {
+		return false, nil
+	}
+	notes, err := t.ListNotes(p, iid)
+	if err != nil {
+		return false, err
+	}
+	met, reported := false, false
+	for _, note := range notes {
+		if e, ok := events.Parse(note.Body); ok {
+			met = met || e.Name == "met"
+			reported = reported || e.Name == "reported_complete"
+		}
+	}
+	if met || reported {
+		return !met, nil
+	}
+	e, text := events.ReportedComplete(m.Release, commit)
+	if _, err := events.Post(t, p, iid, e, events.ReportedCompleteRequired, text, false); err != nil {
+		return false, fmt.Errorf("%s was closed, but its ledger has no reported_complete event: %w", ref, err)
+	}
+	return true, nil
 }
