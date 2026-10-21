@@ -137,6 +137,9 @@ func (f *Fake) UpdateIssue(project string, iid int, u tracker.IssueUpdate) (trac
 	if u.DueDate != nil {
 		i.DueDate = *u.DueDate
 	}
+	if u.Milestone != nil {
+		i.Milestone = *u.Milestone
+	}
 	for _, l := range u.AddLabels {
 		if !slices.Contains(i.Labels, l) {
 			i.Labels = append(i.Labels, l)

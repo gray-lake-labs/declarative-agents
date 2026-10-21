@@ -85,7 +85,7 @@ The release entry in docs/road-map.md, listing its requirements by id, or in the
 <!-- req: R4.2 -->
 ### R4.2
 
-The tracker milestone named for the release, with its ISO weeks in its description, its end date, and its start on the first working day of the period's first ISO week, created if missing and updated if present (srd001 R7.1).
+The tracker milestone named for the release, with its ISO weeks in its description, its end date, and its start on the first working day of the period's first ISO week, created if missing and updated if present (srd001 R7.1), in the program group and in the group of each releasing repository outside it, so every repository's issues find it.
 
 <!-- req: R4.3 -->
 ### R4.3

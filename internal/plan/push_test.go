@@ -170,3 +170,24 @@ func TestPushFilesTheSystemsSprintEnd(t *testing.T) {
 		}
 	})
 }
+
+// TestPushDatesTheMilestoneForTeamsInOtherGroups gives a releasing
+// repository outside the program group the milestone in its own group, so
+// its issues find it (srd031 R4.2).
+func TestPushDatesTheMilestoneForTeamsInOtherGroups(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		const team = "elsewhere/agent-ops"
+		srd := strings.NewReplacer("srd010-delivery", "srd011-agent-ops", "| fleet |", "| agent-ops |",
+			"/program/delivery/fleet", "/"+team).Replace(string(read(t, "../../testdata/system/srd010-delivery.md")))
+		p.AddFile(sys, "main", "docs/specs/software-requirements/srd011-agent-ops.md", []byte(srd))
+		in, f, _ := planned(t, p)
+		res, err := Push(f, in)
+		if err != nil || !slices.Equal(res.MilestoneGroups, []string{"elsewhere"}) {
+			t.Fatalf("push = %+v, %v", res, err)
+		}
+		ms, err := f.ActiveMilestones(team)
+		if err != nil || !slices.ContainsFunc(ms, func(m tracker.Milestone) bool { return m.Title == "01.1" && m.StartDate == "2026-11-09" }) {
+			t.Fatalf("%s finds milestones %+v, %v", team, ms, err)
+		}
+	})
+}

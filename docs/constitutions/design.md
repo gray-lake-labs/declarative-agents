@@ -118,7 +118,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
 - sprint_end_summary:
   - location: docs/sprint-ends/RELEASE.md in each repository whose sprint-end issue closes the period
   - sections: the period's summary in prose, then a Stories done section listing each story the owner reports done as project#story, or None.
-  - purpose: Closes a period. The sprint-end skill writes it in the sprint-end issue's worktree, tpm sprint-end stories writes its Stories done section, and tpm issue merge refuses a summary not in this format (srd038 R2.4). Its issue is a plane::management issue.
+  - purpose: Closes a period. The sprint-end skill writes it in the sprint-end issue's worktree, tpm sprint-end stories writes its Stories done section, and tpm issue merge refuses a summary not in this format (srd038 R2.4). Its issue is the sprint-end issue, plane::data with kind::release (srd038 R1.1).
 - roadmap:
   - location: docs/road-map.md
   - required_fields:

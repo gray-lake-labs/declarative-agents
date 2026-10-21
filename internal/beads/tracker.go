@@ -190,6 +190,9 @@ func (t *Tracker) UpdateIssue(project string, iid int, u tracker.IssueUpdate) (t
 		if u.DueDate != nil {
 			i.DueDate = *u.DueDate
 		}
+		if u.Milestone != nil {
+			i.Release = *u.Milestone
+		}
 		for _, l := range u.AddLabels {
 			if l == statusInProgress {
 				if i.State != InProgress {

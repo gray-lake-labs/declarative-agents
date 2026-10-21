@@ -83,7 +83,7 @@ With a parent tracking issue given, appends the new issue to its Members section
 <!-- req: R3.3 -->
 ### R3.3
 
-A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins.
+A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins. tpm issue milestone puts an issue already filed in a milestone its project finds and lints it again. A kind given explicitly makes a data issue of that kind, whatever plane its paths alone would give.
 
 <!-- req: R4 -->
 ## R4 - tpm issue show
