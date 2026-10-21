@@ -104,7 +104,8 @@ state is a cache. Its .beads/config.yaml sets the program's issue
 prefix, once, when tpm init seeds it: every issue's ID is that prefix and
 eight hex digits, and tpm when the file sets none. An ID is never renamed.
 The file's layout key names how issues are stored: files keeps each issue
-in .beads/issues/<id>.json, and without the key every issue is in
+in .beads/issues/<id>.json, with an index under .beads/index/ from each
+repository's IIDs to IDs, and without the key every issue is in
 .beads/issues.jsonl; both are read and written, and tpm tracker migrate
 moves the second to the first.
 

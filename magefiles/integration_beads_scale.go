@@ -43,6 +43,7 @@ type scaleCase struct {
 	WallSeconds  float64            `json:"contended_wall_seconds"`
 	Lost         int                `json:"lost_writes"`
 	Duplicates   int                `json:"duplicate_ids"`
+	BadIndex     int                `json:"bad_index_entries"`
 	RepoKB       int                `json:"tracker_repository_kb"`
 	CloneSeconds float64            `json:"fresh_clone_seconds"`
 }
@@ -103,8 +104,8 @@ func (Integration) BeadsScale() error {
 			if err := writeScaleReport(root, stamp, cases); err != nil {
 				return err
 			}
-			if c.Lost > 0 || c.Duplicates > 0 {
-				failures = append(failures, fmt.Sprintf("%d issues, %d writers: %d lost writes, %d duplicate IDs", n, k, c.Lost, c.Duplicates))
+			if c.Lost > 0 || c.Duplicates > 0 || c.BadIndex > 0 {
+				failures = append(failures, fmt.Sprintf("%d issues, %d writers: %d lost writes, %d duplicate IDs, %d bad index entries", n, k, c.Lost, c.Duplicates, c.BadIndex))
 			}
 		}
 	}
@@ -338,7 +339,8 @@ func scaleRun(dir, bin, layout string, n, k, ops int) (scaleCase, error) {
 	c.CloneSeconds = time.Since(cloneStart).Seconds()
 
 	// Correctness, read from the fresh clone: every filed issue is in the
-	// tracker once, and no ID or IID repeats.
+	// tracker once, no ID or IID repeats, and in the files layout the index
+	// names every issue at its IID.
 	all, err := readScaleIssues(fresh, layout)
 	if err != nil {
 		return c, fmt.Errorf("read the tracker after the run: %w", err)
@@ -358,6 +360,14 @@ func scaleRun(dir, bin, layout string, n, k, ops int) (scaleCase, error) {
 	for _, t := range filed {
 		if titles[t] != 1 {
 			c.Lost++
+		}
+	}
+	if layout == beads.LayoutFiles {
+		for _, i := range all {
+			b, err := os.ReadFile(filepath.Join(fresh, beads.IndexEntry(i.Repository, i.IID)))
+			if err != nil || strings.TrimSpace(string(b)) != i.ID {
+				c.BadIndex++
+			}
 		}
 	}
 	return c, nil
@@ -414,6 +424,13 @@ func writeScaleIssues(dir, layout string, n, reserved int) (int, error) {
 				return 0, err
 			}
 			if err := os.WriteFile(filepath.Join(dir, beads.IssuesDir, id+".json"), append(b, '\n'), 0o644); err != nil {
+				return 0, err
+			}
+			entry := filepath.Join(dir, beads.IndexEntry(scaleProject, iid))
+			if err := os.MkdirAll(filepath.Dir(entry), 0o755); err != nil {
+				return 0, err
+			}
+			if err := os.WriteFile(entry, []byte(id+"\n"), 0o644); err != nil {
 				return 0, err
 			}
 		}

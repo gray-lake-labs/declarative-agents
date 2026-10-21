@@ -125,6 +125,33 @@ func (s *Store) Issues() ([]Issue, Freshness, error) {
 	return issues, fr, err
 }
 
+// Find pulls the tracker repository and returns the issue numbered iid in
+// repository. In the files layout it reads the index entry and that one
+// issue; an entry that is missing or names another issue falls back to
+// reading them all, so a damaged index costs time, never the answer.
+func (s *Store) Find(repository string, iid int) (Issue, bool, error) {
+	if _, err := s.Sync(); err != nil {
+		return Issue{}, false, err
+	}
+	if s.files() {
+		if id := indexID(s.Dir, repository, iid); id != "" {
+			if i, err := s.issue(id); err == nil && i.Repository == repository && i.IID == iid {
+				return i, true, nil
+			}
+		}
+	}
+	issues, err := s.read()
+	if err != nil {
+		return Issue{}, false, err
+	}
+	for _, i := range issues {
+		if i.Repository == repository && i.IID == iid {
+			return i, true, nil
+		}
+	}
+	return Issue{}, false, nil
+}
+
 // Pop takes a ready issue for the store's user (srd041 R9.1). A second pop
 // by the same person changes nothing; a pop of someone else's issue is
 // refused.
@@ -353,9 +380,12 @@ func (s *Store) CreateWith(i Issue, finish func(*Issue) error) (Issue, error) {
 		return nil
 	}
 	if s.files() {
-		// One file per issue: the write reads only the IIDs and writes
-		// only the new issue's file.
+		// One file per issue: the write numbers the issue from the
+		// index and writes only its file and entry.
 		_, _, _, err = s.writeFiles("create "+i.ID, func() (bool, error) {
+			if _, err := ensureIndex(s.Dir); err != nil {
+				return false, err
+			}
 			top, err := topIID(s.Dir, i.Repository)
 			if err != nil {
 				return false, err

@@ -44,7 +44,7 @@ func init() {
 	var exportOut string
 	cli.Default.Register(&cli.Command{
 		Group: "tracker", Name: "migrate",
-		Summary: "move a tracker from one JSONL file to one file per issue, once, when no one is writing",
+		Summary: "move a tracker from one JSONL file to one file per issue with an IID index, once, when no one is writing",
 		Run: func(ctx *cli.Context) error {
 			b, err := beadsTracker(ctx)
 			if err != nil {
@@ -58,8 +58,11 @@ func init() {
 				return err
 			}
 			human := fmt.Sprintf("moved %d issues to one file each; the tracker is at %s", r.Issues, r.Commit)
-			if r.Already {
-				human = "the tracker already keeps one file per issue"
+			switch {
+			case r.Already && r.Indexed > 0:
+				human = fmt.Sprintf("indexed the tracker's %d issues; the tracker is at %s", r.Indexed, r.Commit)
+			case r.Already:
+				human = "the tracker already keeps one file per issue, with its index"
 			}
 			return ctx.Emit(r, human)
 		},
