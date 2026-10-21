@@ -210,9 +210,9 @@ func init() {
 			fs.IntVar(&mergeArgs.iid, "issue", 0, "issue IID (required)")
 			fs.StringVar(&mergeArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
 			fs.StringVar(&mergeArgs.branch, "branch", "", "branch to merge; empty uses the current branch of the working directory")
-			fs.StringVar(&mergeArgs.audit, "audit", "", "corpus gate command for a docs/ change; empty uses the policy's audit_command (mage audit)")
+			fs.StringVar(&mergeArgs.audit, "audit", "", "corpus gate command for a docs/ change; empty uses the policy's audit_command, tpm backlog check in a repository without magefiles")
 			fs.StringVar(&mergeArgs.dir, "dir", ".", "the worktree holding the branch, where the audit runs")
-			fs.StringVar(&mergeArgs.control, "control", "", "program repository holding control/ files; empty uses the defaults")
+			fs.StringVar(&mergeArgs.control, "control", "", "program repository holding control/ files; empty reads them from --project, else the defaults")
 			fs.StringVar(&mergeArgs.ref, "ref", "main", "ref of the control files")
 			fs.Var(&mergeArgs.closes, "closes", "another issue the merge closes, project#iid; repeat for each (srd038 R2.1)")
 		},
@@ -232,11 +232,15 @@ func init() {
 			if err != nil {
 				return err
 			}
-			p, err := LoadPolicy(t, mergeArgs.control, mergeArgs.ref)
+			control := mergeArgs.control
+			if control == "" {
+				control = mergeArgs.project
+			}
+			p, err := LoadPolicy(t, control, mergeArgs.ref)
 			if err != nil {
 				return err
 			}
-			gate := AuditGate{Command: p.AuditCommand, Dir: mergeArgs.dir}
+			gate := AuditGate{Command: AuditFor(p, mergeArgs.dir), Dir: mergeArgs.dir}
 			if mergeArgs.audit != "" {
 				gate.Command = mergeArgs.audit
 			}
@@ -248,7 +252,14 @@ func init() {
 			if err != nil {
 				return err
 			}
-			human := fmt.Sprintf("%s merged into %s on %s; closed %s", r.Branch, r.Project, r.Commit, strings.Join(r.Closed, ", "))
+			audit := "no docs/ change, so no audit ran"
+			if r.Audit {
+				audit = "audit " + r.AuditCommand + " passed"
+			}
+			human := fmt.Sprintf("%s merged into %s on %s; %s; closed %s", r.Branch, r.Project, r.Commit, audit, strings.Join(r.Closed, ", "))
+			if len(r.Reported) > 0 {
+				human += "; reported complete " + strings.Join(r.Reported, ", ")
+			}
 			if r.DryRun {
 				human = fmt.Sprintf("dry run: %s would merge into %s, approved by %s, closing %s#%d", r.Branch, r.Project, r.ApprovedBy, issueProject, r.IID)
 				if len(mergeArgs.closes) > 0 {

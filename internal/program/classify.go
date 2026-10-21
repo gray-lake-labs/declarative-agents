@@ -65,6 +65,8 @@ func Classify(paths []string, statedKind string, inSystem bool) (Classification,
 		return Classification{Plane: "management", Reason: plan + " is a planning document"}, nil
 	case control != "":
 		return Classification{Plane: "control", Reason: control + " is a policy file"}, nil
+	case docs != "" && statedKind != "":
+		return Classification{Plane: "data", Kind: statedKind, Reason: docs + " is a requirements or design document, and the stated kind is the work"}, nil
 	case docs != "":
 		return Classification{Plane: "data", Kind: "spec", Reason: docs + " is a requirements or design document"}, nil
 	case statedKind != "":

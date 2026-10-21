@@ -50,7 +50,7 @@ In a program that does not yet run track-goals, a Sprint Goal issue (or an objec
 <!-- req: R2.2 -->
 ### R2.2
 
-Such a close posts no met event; the merge posts a reported_complete event naming the release and the merge commit on the Sprint Goal's ledger instead, and tpm sprint-end facts reads it as reported complete. A Sprint Goal another sprint-end merge already closed, as a team's and the program's merges may both name, is reported and skipped, not refused. The roll-up states the Sprint Goal as reported complete, distinct from met (srd018 R3.5), so a reported close is never shown as evidence, and the aggregate does not count it as a contradiction of the ledger (srd018 R3.2).
+Such a close posts no met event; the merge posts a reported_complete event naming the release and the merge commit on the Sprint Goal's ledger instead, and tpm sprint-end facts reads it as reported complete. A Sprint Goal another sprint-end merge already closed, as a team's and the program's merges may both name, is reported and skipped, not refused, and is still listed as reported complete: its ledger keeps the event the first merge posted, or gets one now when it has neither that nor a met event. The roll-up states the Sprint Goal as reported complete, distinct from met (srd018 R3.5), so a reported close is never shown as evidence, and the aggregate does not count it as a contradiction of the ledger (srd018 R3.2).
 
 <!-- req: R2.3 -->
 ### R2.3

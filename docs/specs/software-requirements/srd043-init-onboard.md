@@ -67,7 +67,7 @@ Every skeleton document is in the format of the parent release tpm was built wit
 <!-- req: R1.3 -->
 ### R1.3
 
-Writes control/labels.md and control/policy.md holding the built-in defaults, in the config formats labels and policy. Every command the policy names is one a program repository can run: its audit_command is tpm backlog check, and its definition of done gives the system's corpus release that check and a peer-read check (srd015 R1.2), so the system is never released on its author's word.
+Writes control/labels.md and control/policy.md holding the built-in defaults, in the config formats labels and policy. Every command the policy names is one a program repository can run: its audit_command is tpm backlog check, its default definition of done is that check, not go test ./..., which a repository with no Go module cannot pass, and its definition of done gives the system's corpus release that check and a peer-read check (srd015 R1.2), so the system is never released on its author's word.
 
 <!-- req: R1.4 -->
 ### R1.4
