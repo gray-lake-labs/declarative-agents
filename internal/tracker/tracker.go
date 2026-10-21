@@ -146,6 +146,15 @@ type Triager interface {
 	Triage(project string, iid int, admitted bool) (bool, error)
 }
 
+// AdmittingCreator creates an issue and records its admission in the same
+// tracker write: admit sees the issue as created and returns lint's reasons
+// and the note to leave on a failing issue. A tracker whose writes are
+// costly offers it, so filing is one write and never leaves an issue
+// without its admission.
+type AdmittingCreator interface {
+	CreateAdmitted(project string, in NewIssue, admit func(Issue) (reasons []string, note string)) (Issue, error)
+}
+
 // Tracker is everything tpm asks of the tracker; a new need is a new method here.
 type Tracker interface {
 	GetFile(project, path, ref string) ([]byte, error)

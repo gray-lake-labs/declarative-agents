@@ -156,6 +156,28 @@ func (t *Tracker) ListIssues(project string, q tracker.IssueQuery) ([]tracker.Is
 	return out, nil
 }
 
+// CreateAdmitted creates the issue and records lint's verdict on it in one
+// tracker write: the srd041 triage rows and, on a failing issue, admit's
+// note as a comment.
+func (t *Tracker) CreateAdmitted(project string, in tracker.NewIssue, admit func(tracker.Issue) ([]string, string)) (tracker.Issue, error) {
+	me := t.Store.User
+	i, err := t.Store.CreateWith(Issue{Repository: project, Title: in.Title, Description: in.Description,
+		Labels: slices.Clone(in.Labels), DueDate: in.DueDate, Release: in.Milestone}, func(i *Issue) error {
+		reasons, note := admit(t.view(*i))
+		if _, err := triage(i, len(reasons) == 0, me); err != nil {
+			return err
+		}
+		if note != "" {
+			i.Comments = append(i.Comments, Comment{ID: newID(), IssueID: i.ID, Author: me, CreatedAt: t.Store.stamp(), Text: note})
+		}
+		return nil
+	})
+	if err != nil {
+		return tracker.Issue{}, err
+	}
+	return t.view(i), nil
+}
+
 func (t *Tracker) CreateIssue(project string, in tracker.NewIssue) (tracker.Issue, error) {
 	i, err := t.Store.Create(Issue{Repository: project, Title: in.Title, Description: in.Description,
 		Labels: slices.Clone(in.Labels), DueDate: in.DueDate, Release: in.Milestone})
@@ -280,33 +302,39 @@ func (t *Tracker) Triage(project string, iid int, admitted bool) (bool, error) {
 		return false, err
 	}
 	me := t.Store.User
-	_, written, _, err := t.Store.mutate(found.ID, "lint", func(i *Issue) (bool, error) {
-		data := i.HasLabel("plane::data")
-		switch {
-		case !data && admitted && i.HasLabel(NeedsTriage):
-			i.Labels = slices.DeleteFunc(i.Labels, func(l string) bool { return l == NeedsTriage })
-			return true, nil
-		case !data && !admitted && !i.HasLabel(NeedsTriage):
-			i.Labels = append(i.Labels, NeedsTriage)
-			return true, nil
-		case !data:
-			return false, nil
-		case admitted && (i.State == Open || i.State == NeedsTriage) && i.Assignee == "":
-			return true, transition(i, ActorLint, Ready, me)
-		case admitted && i.State == NeedsTriage:
-			return true, transition(i, ActorLint, Taken, me)
-		case admitted && i.HasLabel(NeedsTriage):
-			i.Labels = slices.DeleteFunc(i.Labels, func(l string) bool { return l == NeedsTriage })
-			return true, nil
-		case !admitted && i.State == Open:
-			return true, transition(i, ActorLint, NeedsTriage, me)
-		case !admitted && !i.HasLabel(NeedsTriage):
-			i.Labels = append(i.Labels, NeedsTriage)
-			return true, nil
-		}
-		return false, nil
-	})
+	_, written, _, err := t.Store.mutate(found.ID, "lint", func(i *Issue) (bool, error) { return triage(i, admitted, me) })
 	return written, err
+}
+
+// triage is lint's srd041 rows on one issue: an admitted open data issue
+// becomes ready, an admitted one in needs-triage ready or, already taken by
+// its author, taken; a failing open data issue goes to needs-triage, and an
+// issue on another plane carries the needs-triage label instead.
+func triage(i *Issue, admitted bool, me string) (bool, error) {
+	data := i.HasLabel("plane::data")
+	switch {
+	case !data && admitted && i.HasLabel(NeedsTriage):
+		i.Labels = slices.DeleteFunc(i.Labels, func(l string) bool { return l == NeedsTriage })
+		return true, nil
+	case !data && !admitted && !i.HasLabel(NeedsTriage):
+		i.Labels = append(i.Labels, NeedsTriage)
+		return true, nil
+	case !data:
+		return false, nil
+	case admitted && (i.State == Open || i.State == NeedsTriage) && i.Assignee == "":
+		return true, transition(i, ActorLint, Ready, me)
+	case admitted && i.State == NeedsTriage:
+		return true, transition(i, ActorLint, Taken, me)
+	case admitted && i.HasLabel(NeedsTriage):
+		i.Labels = slices.DeleteFunc(i.Labels, func(l string) bool { return l == NeedsTriage })
+		return true, nil
+	case !admitted && i.State == Open:
+		return true, transition(i, ActorLint, NeedsTriage, me)
+	case !admitted && !i.HasLabel(NeedsTriage):
+		i.Labels = append(i.Labels, NeedsTriage)
+		return true, nil
+	}
+	return false, nil
 }
 
 // CloseOnMerge closes an issue on the local merge that delivered it, citing

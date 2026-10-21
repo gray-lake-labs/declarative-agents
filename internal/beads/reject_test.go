@@ -2,10 +2,14 @@ package beads
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 // rejectPushes makes the fixture's tracker repository refuse every push, as
@@ -100,5 +104,52 @@ func TestRejectedWriteKeepsQueuedWrites(t *testing.T) {
 	}
 	if got := f.remoteIssue("sm-2"); got.Assignee != "" {
 		t.Fatalf("sm-2 assignee = %q, want none: its pop failed", got.Assignee)
+	}
+}
+
+// TestCreateAdmittedIsOneWrite files an issue and records its admission in
+// one commit: an admitted data issue arrives ready, a failing one in
+// needs-triage with lint's note, and a rejected push leaves no issue.
+func TestCreateAdmittedIsOneWrite(t *testing.T) {
+	f := newFixture(t)
+	alice := f.clone("alice")
+	alice.sleep = func(time.Duration) {}
+	tr := &Tracker{Store: alice}
+	count := func() int {
+		out, err := exec.Command("git", "--git-dir", f.remote, "rev-list", "--count", "main").Output()
+		if err != nil {
+			t.Fatal(err)
+		}
+		n, _ := strconv.Atoi(strings.TrimSpace(string(out)))
+		return n
+	}
+	before := count()
+	ok, err := tr.CreateAdmitted("g/po-1", tracker.NewIssue{Title: "admitted", Labels: []string{"plane::data"}},
+		func(tracker.Issue) ([]string, string) { return nil, "" })
+	if err != nil || count() != before+1 {
+		t.Fatalf("admitted create: %+v, %v; %d commits, want 1", ok, err, count()-before)
+	}
+	if got := f.remoteIssue(strings.TrimPrefix(ok.WebURL, "beads:")); got.State != Ready {
+		t.Fatalf("admitted issue is %s, want ready", got.State)
+	}
+	failing, err := tr.CreateAdmitted("g/po-1", tracker.NewIssue{Title: "failing", Labels: []string{"plane::data"}},
+		func(tracker.Issue) ([]string, string) { return []string{"needs a milestone"}, "Admission failed" })
+	if err != nil || count() != before+2 {
+		t.Fatalf("failing create: %+v, %v; %d commits, want 2", failing, err, count()-before)
+	}
+	got := f.remoteIssue(strings.TrimPrefix(failing.WebURL, "beads:"))
+	if got.State != NeedsTriage || len(got.Comments) != 1 || got.Comments[0].Text != "Admission failed" {
+		t.Fatalf("failing issue = %s with %+v", got.State, got.Comments)
+	}
+
+	f.rejectPushes(true)
+	if _, err := tr.CreateAdmitted("g/po-1", tracker.NewIssue{Title: "rejected", Labels: []string{"plane::data"}},
+		func(tracker.Issue) ([]string, string) { return nil, "" }); err == nil {
+		t.Fatal("a rejected create reported success")
+	}
+	f.rejectPushes(false)
+	out, _ := exec.Command("git", "--git-dir", f.remote, "show", "main:"+IssuesFile).Output()
+	if count() != before+2 || strings.Contains(string(out), `"rejected"`) {
+		t.Fatalf("a rejected create left %d commits or the issue in the tracker", count()-before)
 	}
 }

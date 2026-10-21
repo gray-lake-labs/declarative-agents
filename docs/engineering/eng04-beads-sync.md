@@ -85,7 +85,9 @@ Every write reads the whole issues file and rewrites it, so a write's
 cost grows with the tracker, and every writer pushes the same branch, so
 contention grows with the number of people writing at once. Comments and
 ledger events live inside their issue, which makes a long-lived issue the
-largest line in the file. mage integration:beadsScale (eng01) measures
+largest line in the file. tpm issue file records a new issue and its
+admission, the lint state and any note, in one write, so filing races
+once. mage integration:beadsScale (eng01) measures
 both at thousands of issues and several writers. When its numbers call
 for it, the store moves to one file per issue under .beads/issues/, which
 keeps a write's diff to its own issue and limits conflicts to writers of

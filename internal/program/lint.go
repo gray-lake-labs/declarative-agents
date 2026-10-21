@@ -161,6 +161,15 @@ type LintResult struct {
 	Changed  bool     `json:"changed"`
 }
 
+// lintNote is the comment lint leaves on a failing issue.
+func lintNote(reasons []string) string {
+	body := lintMarker + "\nAdmission failed:\n"
+	for _, reason := range reasons {
+		body += "- " + reason + "\n"
+	}
+	return body
+}
+
 // Apply sets needs-triage with a comment listing the reasons on a failing
 // issue and clears it on a passing one. It changes no other label and never
 // the assignee (srd013 R1.2, srd041 R9.4). A dry run writes nothing.
@@ -187,10 +196,7 @@ func Apply(t tracker.Tracker, i tracker.Issue, reasons []string, p Policy, dryRu
 		}
 		return r, nil
 	}
-	body := lintMarker + "\nAdmission failed:\n"
-	for _, reason := range reasons {
-		body += "- " + reason + "\n"
-	}
+	body := lintNote(reasons)
 	notes, err := t.ListNotes(i.Project, i.IID)
 	if err != nil {
 		return r, err

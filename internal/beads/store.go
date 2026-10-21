@@ -324,7 +324,11 @@ func (s *Store) merge(base, remote string) error {
 // returns it as the tracker repository holds it after the push: a create
 // that raced another clone's has been renumbered by the merge. Its ID is the
 // tracker's issue prefix and eight hex digits.
-func (s *Store) Create(i Issue) (Issue, error) {
+func (s *Store) Create(i Issue) (Issue, error) { return s.CreateWith(i, nil) }
+
+// CreateWith is Create with finish applied to the new issue in the same
+// write, after its ID, IID, author, and first state are set.
+func (s *Store) CreateWith(i Issue, finish func(*Issue) error) (Issue, error) {
 	prefix, err := s.prefix()
 	if err != nil {
 		return Issue{}, err
@@ -341,6 +345,11 @@ func (s *Store) Create(i Issue) (Issue, error) {
 		i.CreatedAt, i.UpdatedAt, i.CreatedBy = now, now, s.User
 		if i.State == "" {
 			i.State, i.Status = Open, StatusOpen
+		}
+		if finish != nil {
+			if err := finish(&i); err != nil {
+				return false, err
+			}
 		}
 		*issues = append(*issues, i)
 		return true, nil
