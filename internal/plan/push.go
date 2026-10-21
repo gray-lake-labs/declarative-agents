@@ -41,8 +41,9 @@ type PushInput struct {
 type PushResult struct {
 	Release   Release `json:"release"`
 	Milestone string  `json:"milestone"` // created, updated, unchanged
-	// MilestoneGroups are the releasing repositories' groups outside the
-	// program group that got the milestone too, so their issues find it.
+	// MilestoneGroups are the groups the milestone was written under: the
+	// program group first, then each releasing repository's group outside
+	// it, so its issues find the milestone.
 	MilestoneGroups []string         `json:"milestone_groups,omitempty"`
 	Sprint          IssueAction      `json:"sprint_issue"`
 	SprintEnds      []IssueAction    `json:"sprint_end_issues"`
@@ -104,6 +105,8 @@ func Push(t tracker.Tracker, in PushInput) (PushResult, error) {
 		res.Milestone = "dry-run"
 	} else if res.Milestone, err = t.EnsureMilestone(in.Group, m); err != nil {
 		return res, err
+	} else {
+		res.MilestoneGroups = []string{in.Group}
 	}
 
 	if res.Sprint, err = pushSprint(t, in, r, groups); err != nil {

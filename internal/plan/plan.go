@@ -94,7 +94,7 @@ func MakeCandidates(in Input) (Candidates, error) {
 	if err != nil {
 		return c, err
 	}
-	var items []Item
+	items := []Item{}
 	c.agreed = map[string]bool{}
 	for _, d := range docs {
 		if d.Status != "agreed" {
@@ -195,25 +195,35 @@ func missing(d *objectives.Document, group, item string) []string {
 	return out
 }
 
-// slippedGroups maps each initiative outcome whose Sprint Goal the aggregate
-// names in a slipped-commitment signal; the Sprint Goal's tasks marker names
-// the outcomes it serves (srd018 R3.2, srd031 R2.3).
+// slippedGroups maps each initiative outcome whose Sprint Goal slipped: the
+// aggregate names it in a slipped-commitment signal, or the period ended
+// with it neither met nor reported complete, as a Sprint Goal its team
+// carries to the next sprint is. The Sprint Goal's tasks marker names the
+// outcomes it serves (srd018 R3.2, srd031 R2.3).
 func slippedGroups(in Input) (map[string]bool, error) {
 	out := map[string]bool{}
 	if in.Aggregate == nil || in.Tracker == nil {
 		return out, nil
 	}
+	var refs []string
 	for _, s := range in.Aggregate.Signals {
-		if s.Kind != reports.SignalSlipped {
-			continue
+		if s.Kind == reports.SignalSlipped && !slices.Contains(refs, s.Subject) {
+			refs = append(refs, s.Subject)
 		}
-		project, iid, err := release.ParseIssueRef(s.Subject)
+	}
+	for _, p := range in.Aggregate.Progress {
+		if p.State != "met" && p.State != "reported complete" && !slices.Contains(refs, p.SprintGoal) {
+			refs = append(refs, p.SprintGoal)
+		}
+	}
+	for _, ref := range refs {
+		project, iid, err := release.ParseIssueRef(ref)
 		if err != nil {
 			continue
 		}
 		issue, err := in.Tracker.GetIssue(project, iid)
 		if err != nil {
-			return nil, fmt.Errorf("slipped Sprint Goal %s: %w", s.Subject, err)
+			return nil, fmt.Errorf("slipped Sprint Goal %s: %w", ref, err)
 		}
 		if m, ok := sprintgoal.Parse(issue.Description); ok {
 			for _, key := range m.Serves {
@@ -246,17 +256,33 @@ func nextVersion(latest string) string {
 	return fmt.Sprintf("%s.%0*d", major, len(minor), n+1)
 }
 
-// endDate recommends the end of the next three-week period: three weeks
-// after the latest release's milestone ends, else three weeks from now.
+// endDate recommends the end of the next three-week period: the Friday of
+// its third ISO week, the last working day the period has. The period
+// starts on the Monday after the latest release's milestone ends, else on
+// the Monday of the current week, or of the next one on a weekend (srd031
+// R3.2); periodStart reads it back.
 func endDate(in Input, releases []goals.Release) string {
+	weekend := in.Now.Weekday() == time.Saturday || in.Now.Weekday() == time.Sunday
+	start := monday(in.Now, weekend)
 	if len(releases) > 0 && in.Tracker != nil && in.System != "" {
 		if name := releases[len(releases)-1].Milestone; name != "" {
 			if m, err := in.Tracker.FindMilestone(in.System, name); err == nil && m.DueDate != "" {
 				if due, err := time.Parse(time.DateOnly, m.DueDate); err == nil {
-					return due.AddDate(0, 0, periodDays).Format(time.DateOnly)
+					start = monday(due.AddDate(0, 0, 1), true)
 				}
 			}
 		}
 	}
-	return in.Now.AddDate(0, 0, periodDays).Format(time.DateOnly)
+	return start.AddDate(0, 0, periodDays-3).Format(time.DateOnly)
+}
+
+// monday is the Monday of d's ISO week or, with after, the first Monday on
+// or after d.
+func monday(d time.Time, after bool) time.Time {
+	d = time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, time.UTC)
+	back := (int(d.Weekday()) + 6) % 7 // days since Monday
+	if after && back > 0 {
+		return d.AddDate(0, 0, 7-back)
+	}
+	return d.AddDate(0, 0, -back)
 }

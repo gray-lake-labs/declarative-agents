@@ -182,7 +182,7 @@ func TestPushDatesTheMilestoneForTeamsInOtherGroups(t *testing.T) {
 		p.AddFile(sys, "main", "docs/specs/software-requirements/srd011-agent-ops.md", []byte(srd))
 		in, f, _ := planned(t, p)
 		res, err := Push(f, in)
-		if err != nil || !slices.Equal(res.MilestoneGroups, []string{"elsewhere"}) {
+		if err != nil || !slices.Equal(res.MilestoneGroups, []string{in.Group, "elsewhere"}) {
 			t.Fatalf("push = %+v, %v", res, err)
 		}
 		ms, err := f.ActiveMilestones(team)
