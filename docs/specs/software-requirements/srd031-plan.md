@@ -80,7 +80,7 @@ Asks for the release's version and end date, recommending the next minor version
 <!-- req: R4.1 -->
 ### R4.1
 
-The release entry in docs/road-map.md, listing its requirements by id, or in the system repository its initiative items in deliverables and its milestone and tag in release.publication, written by tpm plan write in the worktree of a plane::management issue filed with specify, and merged through the inner loop, so the plan is a reviewed change.
+The release entry in docs/road-map.md, listing its requirements by id, or in the system repository its initiative items in deliverables and its milestone and tag in release.publication, written by tpm plan write in the worktree of a plane::management issue filed with specify, and merged through the inner loop, so the plan is a reviewed change. A release plan write adds is a whole record: its status, a title, a line for what it proves, and the previous release's srds, before its deliverables and release. In a team's repository, candidates recommend no end date or tag, which are the system's.
 
 <!-- req: R4.2 -->
 ### R4.2

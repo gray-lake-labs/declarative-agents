@@ -3,6 +3,7 @@ package goals
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/links"
@@ -56,7 +57,7 @@ func MakePlan(t tracker.Tracker, s Sources) (Plan, error) {
 		key := doc + "#" + group
 		po := PlannedObjective{Key: key, Document: doc, Group: group, Title: obj.Title, Items: []string{item}, Due: obj.Due, Candidates: candidates}
 		po.Repository = recommendRepository(s, obj)
-		po.Environment = recommendEnvironment(d, group)
+		po.Environment = recommendEnvironment(d, group, item)
 		if po.Repository != "" {
 			goal, legacy, err := findExisting(t, po.Repository, p.Release)
 			if err != nil {
@@ -97,11 +98,18 @@ func recommendRepository(s Sources, o objectives.Objective) string {
 	return ""
 }
 
-// recommendEnvironment is the environment the objective's first
-// acceptance criterion names, else dev (srd022 R3.2).
-func recommendEnvironment(d *objectives.Document, group string) string {
-	if c := d.CriteriaFor(group); len(c) > 0 && c[0].Environment != "" {
-		return c[0].Environment
+// recommendEnvironment is the environment of the first acceptance
+// criterion tracing item, else of the group's first criterion, else dev
+// (srd022 R3.2).
+func recommendEnvironment(d *objectives.Document, group, item string) string {
+	criteria := d.CriteriaFor(group)
+	for _, c := range criteria {
+		if slices.Contains(c.Traces, item) && c.Environment != "" {
+			return c.Environment
+		}
+	}
+	if len(criteria) > 0 && criteria[0].Environment != "" {
+		return criteria[0].Environment
 	}
 	return "dev"
 }

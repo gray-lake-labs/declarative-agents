@@ -120,7 +120,8 @@ func putRelease(doc string, r Release) (string, string) {
 		}
 		return doc[:headEnd] + kept(doc[headEnd:end]) + body.String() + tail, "replaced"
 	}
-	record := fmt.Sprintf("<!-- release: %s -->\n## %s\n%s", r.Version, r.Version, body.String())
+	record := fmt.Sprintf("<!-- release: %s | status: specified -->\n## %s - Release %s\n\nThe technical program manager writes here what release %s proves.\n%s%s",
+		r.Version, r.Version, r.Version, r.Version, lastSRDs(doc), body.String())
 	if len(marks) == 0 {
 		return strings.TrimRight(doc, "\n") + "\n\n" + record, "added"
 	}
@@ -166,6 +167,31 @@ func kept(record string) string {
 		return ""
 	}
 	return "\n" + out + "\n"
+}
+
+// lastSRDs is the srds field of the road map's last release record, which a
+// new record starts from, as the SRDs a release names change by decision,
+// not by default; empty when there is none.
+func lastSRDs(doc string) string {
+	marks := releaseMarker.FindAllStringIndex(doc, -1)
+	if len(marks) == 0 {
+		return ""
+	}
+	record := doc[marks[len(marks)-1][0]:]
+	if next := nextLevel2(record, len(record[:strings.Index(record, "\n")+1])); next >= 0 {
+		record = record[:next]
+	}
+	for i, m := range recordField.FindAllStringSubmatchIndex(record, -1) {
+		if record[m[2]:m[3]] != "srds" {
+			continue
+		}
+		end := len(record)
+		if all := recordField.FindAllStringIndex(record, -1); i+1 < len(all) {
+			end = all[i+1][0]
+		}
+		return "\n" + strings.Trim(record[m[0]:end], "\n") + "\n"
+	}
+	return ""
 }
 
 // treeValue writes a tree item's value so it reads back as the same text:

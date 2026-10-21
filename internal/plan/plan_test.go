@@ -327,6 +327,20 @@ func TestPlanAFreshProgram(t *testing.T) {
 		if err != nil || again.Version != "01.1" || again.Latest != "01.0" {
 			t.Fatalf("after planning 01.0: version %q latest %q, %v", again.Version, again.Latest, err)
 		}
+		// A new record is whole: status, title, prose, the last record's
+		// srds, then deliverables and release.
+		next := Release{Version: "01.1", Milestone: "01.1", Tag: "corpus/v0.2.0", Items: []string{again.Items[0].ID}}
+		if w, err := WriteRelease(dir, next, again, nil, "", 0); err != nil || w.Action != "added" {
+			t.Fatalf("write 01.1: %+v %v", w, err)
+		}
+		got = readFile(t, filepath.Join(dir, RoadMap))
+		added := got[strings.Index(got, "<!-- release: 01.1"):]
+		for _, want := range []string{"<!-- release: 01.1 | status: specified -->\n## 01.1 - Release 01.1\n\nThe technical program manager writes here what release 01.1 proves.\n",
+			"<!-- field: srds -->\n### SRDs\n\n- srd001-system\n", "<!-- field: deliverables -->", "- tag: corpus/v0.2.0"} {
+			if !strings.Contains(added, want) {
+				t.Errorf("the 01.1 record lacks %q:\n%s", want, added)
+			}
+		}
 	})
 }
 
@@ -336,5 +350,18 @@ func TestPeriodStartsOnTheFirstWorkingDay(t *testing.T) {
 		if got := periodStart(e).Format(time.DateOnly); got != want {
 			t.Errorf("periodStart(%s) = %s, want %s", end, got, want)
 		}
+	}
+}
+
+func TestTeamRepositoryIsKnownByItsSubsystemSRD(t *testing.T) {
+	dir := t.TempDir()
+	if teamRepository(dir) {
+		t.Fatal("an empty checkout is a team repository")
+	}
+	srds := filepath.Join(dir, "docs", "specs", "software-requirements")
+	os.MkdirAll(srds, 0o755)
+	os.WriteFile(filepath.Join(srds, "srd001-subsystem.md"), []byte("x"), 0o644)
+	if !teamRepository(dir) {
+		t.Fatal("a checkout with srd001-subsystem.md is not a team repository")
 	}
 }

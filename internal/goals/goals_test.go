@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
+	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
@@ -319,9 +320,27 @@ func TestOneOutcomeAcrossTwoTeams(t *testing.T) {
 			}
 			body := issues[0].Description
 			other := map[string]string{"#R1.1": "#R1.2", "#R1.2": "#R1.1"}[want]
-			if !strings.Contains(body, want) || strings.Contains(body, other) || !strings.Contains(body, "serves=obj001-reliable-agents#R1 ") {
+			if !strings.Contains(body, want) || strings.Contains(body, "#"+other[1:]+"\n") || !strings.Contains(body, "serves=obj001-reliable-agents#R1 ") ||
+				!strings.Contains(body, "[this Sprint Goal: "+want[1:]+" of R1.1, R1.2]") {
 				t.Errorf("%s Sprint Goal:\n%s", repo, body)
 			}
 		}
 	})
+}
+
+// TestItemEnvironmentFromItsCriterion takes an item's environment from the
+// criterion tracing it, then the group's first, then dev.
+func TestItemEnvironmentFromItsCriterion(t *testing.T) {
+	d := &objectives.Document{AcceptanceCriteria: []objectives.Criterion{
+		{ID: "AC1", Traces: []string{"R1.1"}, Environment: "dev"},
+		{ID: "AC2", Traces: []string{"R1.2"}, Environment: "local"},
+	}}
+	for item, want := range map[string]string{"R1.1": "dev", "R1.2": "local", "R1.3": "dev"} {
+		if got := recommendEnvironment(d, "R1", item); got != want {
+			t.Errorf("%s: %s, want %s", item, got, want)
+		}
+	}
+	if got := recommendEnvironment(&objectives.Document{}, "R2", "R2.1"); got != "dev" {
+		t.Errorf("no criteria: %s", got)
+	}
 }
