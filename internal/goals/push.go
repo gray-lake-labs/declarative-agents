@@ -80,7 +80,23 @@ func Push(t tracker.Tracker, s Sources, p Plan, webBase string, policy program.P
 			return out, err
 		}
 	}
-	return out, nil
+	return distinct(out), nil
+}
+
+// distinct keeps one result per outcome and issue: a team's items of one
+// outcome are one plan entry each but share its Sprint Goal, so push
+// reports that Sprint Goal once (srd022 R4.3).
+func distinct(results []Pushed) []Pushed {
+	seen := map[string]bool{}
+	var out []Pushed
+	for _, r := range results {
+		k := fmt.Sprintf("%s\x00%s\x00%d\x00%s\x00%v", r.Key, r.Project, r.IID, r.Action, r.Reasons)
+		if !seen[k] {
+			seen[k] = true
+			out = append(out, r)
+		}
+	}
+	return out
 }
 
 // outcomes gathers a team's plan entries into one per outcome, in plan

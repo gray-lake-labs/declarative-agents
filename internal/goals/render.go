@@ -56,7 +56,8 @@ func Render(webBase string, p Plan, team []PlannedObjective, docs map[string]*ob
 				continue
 			}
 			// A criterion that also traces other teams' items says which
-			// part is this Sprint Goal's.
+			// part is this Sprint Goal's, naming only its own items: the
+			// other teams' work is theirs to name (srd022 R3.2).
 			part := ""
 			var mine []string
 			for _, t := range c.Traces {
@@ -65,7 +66,7 @@ func Render(webBase string, p Plan, team []PlannedObjective, docs map[string]*ob
 				}
 			}
 			if len(mine) < len(c.Traces) {
-				part = " [this Sprint Goal: " + strings.Join(mine, ", ") + " of " + strings.Join(c.Traces, ", ") + "]"
+				part = " [this Sprint Goal: " + strings.Join(mine, ", ") + "]"
 			}
 			fmt.Fprintf(&b, "- %s%s (test: %s; environment: %s)\n", strings.TrimSpace(c.Criterion), part, strings.Join(c.Tests, ", "), c.Environment)
 		}

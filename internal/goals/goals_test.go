@@ -107,8 +107,9 @@ func testPushFilesOneDatedPinnedObjectiveIssue(t *testing.T, tp trackertest.Prog
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res[0].Action != "created" || res[1].Action != "created" || res[0].IID != res[1].IID || res[2].Action != "refused" ||
-		!strings.Contains(strings.Join(res[2].Reasons, ";"), "no repository confirmed") {
+	// R1's two items share one Sprint Goal, reported once (#152).
+	if len(res) != 2 || res[0].Action != "created" || res[0].Key != "obj001-reliable-agents#R1" || res[1].Action != "refused" ||
+		!strings.Contains(strings.Join(res[1].Reasons, ";"), "no repository confirmed") {
 		t.Fatalf("res = %+v", res)
 	}
 	issues, _ := f.ListIssues(fleet, openIssues())
@@ -180,7 +181,7 @@ func TestSprintGoalPerTeam(t *testing.T) {
 		p, _ := MakePlan(f, s)
 		p.Objectives[2].Repository = fleet
 		res, err := Push(f, s, p, web, program.Defaults(), false)
-		if err != nil || res[0].Action != "created" || res[2].Action != "created" || res[0].IID != res[2].IID {
+		if err != nil || len(res) != 2 || res[0].Action != "created" || res[1].Action != "created" || res[0].IID != res[1].IID {
 			t.Fatalf("res=%+v err=%v", res, err)
 		}
 		issues := fleetIssues(t, f)
@@ -297,7 +298,8 @@ func TestLoadRefusesADocumentThatIsNotAgreed(t *testing.T) {
 
 // TestOneOutcomeAcrossTwoTeams confirms an outcome's two items for two
 // teams: each team's Sprint Goal serves the outcome and cites only its own
-// item (srd022, srd034 R3.2).
+// item, and a criterion both trace names only its own item, not the other
+// team's (srd022, srd034 R3.2, #152).
 func TestOneOutcomeAcrossTwoTeams(t *testing.T) {
 	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
 		const scoring = "program/delivery/scoring"
@@ -321,7 +323,7 @@ func TestOneOutcomeAcrossTwoTeams(t *testing.T) {
 			body := issues[0].Description
 			other := map[string]string{"#R1.1": "#R1.2", "#R1.2": "#R1.1"}[want]
 			if !strings.Contains(body, want) || strings.Contains(body, "#"+other[1:]+"\n") || !strings.Contains(body, "serves=obj001-reliable-agents#R1 ") ||
-				!strings.Contains(body, "[this Sprint Goal: "+want[1:]+" of R1.1, R1.2]") {
+				!strings.Contains(body, "[this Sprint Goal: "+want[1:]+"]") || strings.Contains(body, " of R1.1") {
 				t.Errorf("%s Sprint Goal:\n%s", repo, body)
 			}
 		}

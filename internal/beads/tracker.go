@@ -156,11 +156,17 @@ func (t *Tracker) ListIssues(project string, q tracker.IssueQuery) ([]tracker.Is
 
 // CreateAdmitted creates the issue and records lint's verdict on it in one
 // tracker write: the srd041 triage rows and, on a failing issue, admit's
-// note as a comment.
+// note as a comment. The dependencies its link lines name go in the same
+// write; a Blocks line's target records its edge in a write of its own.
 func (t *Tracker) CreateAdmitted(project string, in tracker.NewIssue, admit func(tracker.Issue) ([]string, string)) (tracker.Issue, error) {
 	me := t.Store.User
+	own, blocks, err := t.linked(in.Description)
+	if err != nil {
+		return tracker.Issue{}, err
+	}
 	i, err := t.Store.CreateWith(Issue{Repository: project, Title: in.Title, Description: in.Description,
 		Labels: slices.Clone(in.Labels), DueDate: in.DueDate, Release: in.Milestone}, func(i *Issue) error {
+		t.Store.depend(i, own)
 		reasons, note := admit(t.view(*i))
 		if _, err := triage(i, len(reasons) == 0, me); err != nil {
 			return err
@@ -173,13 +179,26 @@ func (t *Tracker) CreateAdmitted(project string, in tracker.NewIssue, admit func
 	if err != nil {
 		return tracker.Issue{}, err
 	}
+	if err := t.blockOn(blocks, i.ID); err != nil {
+		return tracker.Issue{}, err
+	}
 	return t.view(i), nil
 }
 
 func (t *Tracker) CreateIssue(project string, in tracker.NewIssue) (tracker.Issue, error) {
-	i, err := t.Store.Create(Issue{Repository: project, Title: in.Title, Description: in.Description,
-		Labels: slices.Clone(in.Labels), DueDate: in.DueDate, Release: in.Milestone})
+	own, blocks, err := t.linked(in.Description)
 	if err != nil {
+		return tracker.Issue{}, err
+	}
+	i, err := t.Store.CreateWith(Issue{Repository: project, Title: in.Title, Description: in.Description,
+		Labels: slices.Clone(in.Labels), DueDate: in.DueDate, Release: in.Milestone}, func(i *Issue) error {
+		t.Store.depend(i, own)
+		return nil
+	})
+	if err != nil {
+		return tracker.Issue{}, err
+	}
+	if err := t.blockOn(blocks, i.ID); err != nil {
 		return tracker.Issue{}, err
 	}
 	return t.view(i), nil
@@ -194,7 +213,17 @@ func (t *Tracker) UpdateIssue(project string, iid int, u tracker.IssueUpdate) (t
 		return tracker.Issue{}, err
 	}
 	me := t.Store.User
+	var own []Dependency
+	var blocks []string
+	if u.Description != nil {
+		// A description's link lines add the edges they name; an edge
+		// is never removed here, as a Blocks line elsewhere may have made it.
+		if own, blocks, err = t.linked(*u.Description); err != nil {
+			return tracker.Issue{}, err
+		}
+	}
 	_, _, _, err = t.Store.mutate(found.ID, "update", func(i *Issue) (bool, error) {
+		t.Store.depend(i, own)
 		if u.State != nil {
 			to := map[string]string{"close": Closed, "reopen": Open}[*u.State]
 			if to == "" {
@@ -238,6 +267,9 @@ func (t *Tracker) UpdateIssue(project string, iid int, u tracker.IssueUpdate) (t
 		return true, nil
 	})
 	if err != nil {
+		return tracker.Issue{}, err
+	}
+	if err := t.blockOn(blocks, found.ID); err != nil {
 		return tracker.Issue{}, err
 	}
 	return t.GetIssue(project, iid)

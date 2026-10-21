@@ -123,6 +123,7 @@ func mergeIssue(b, o, t Issue, now string) Issue {
 	}
 
 	m.Labels = mergeSet(b.Labels, o.Labels, t.Labels)
+	m.Dependencies = mergeDependencies(b.Dependencies, o.Dependencies, t.Dependencies)
 	m.Comments = mergeComments(o.Comments, m.Comments)
 	return m
 }

@@ -65,7 +65,11 @@ platform Terraform, and the rig's GitLab dependency are removed.
 ### R2.1
 
 A GitLab issue maps to a beads issue: title, description, state, one
-assignee, labels, and comments carry over one to one. The scoped labels
+assignee, labels, and comments carry over one to one. Its link lines
+(srd007 R6.1) also become bd's dependency records on the dependent
+issue, so bd sees the edges: Blocked-by as blocks, Depends-on and
+Relates-to as related, and Blocks as a blocks record on its target; the
+lines stay in the description, and two clones' records merge as a set. The scoped labels
 of srd001 become beads labels with the same axis grammar; the lint of
 srd013 enforces exclusivity exactly as it does on GitLab Free.
 
