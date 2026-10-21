@@ -55,7 +55,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			in := Input{Tracker: t, Project: a.project, Aggregate: agg, Releases: p.Releases, Artifact: a.artifact, Tags: tags}
+			in := Input{Tracker: t, Project: a.project, Aggregate: agg, Releases: p.Releases, Artifact: a.artifact, Tags: tags, Dir: a.dir}
 			if a.control != "" && program.ProjectPath(a.control) == program.ProjectPath(a.project) {
 				subs, err := program.LoadSubsystems(t, a.control, a.ref)
 				if err != nil && !errors.Is(err, tracker.ErrNotFound) {
@@ -68,7 +68,7 @@ func init() {
 				return err
 			}
 			var h strings.Builder
-			fmt.Fprintf(&h, "%s, %s to %s: %d reports, %d signals; recommended version %s\n", f.Project, a.from, a.to, agg.Reports, len(agg.Signals), f.Recommended)
+			fmt.Fprintf(&h, "%s, %s to %s: %d reports, %d signals; recommended version %s: %s\n", f.Project, a.from, a.to, agg.Reports, len(agg.Signals), orNothing(f.Recommended), f.Next.Reason)
 			for _, o := range f.SprintGoals {
 				fmt.Fprintf(&h, "  %s %s (%s): %s, reported %q, complete=%v, met=%v\n", o.Issue, strings.Join(o.Serves, ","), o.Release, o.State, o.Reported, o.ReportedComplete, o.Met)
 			}
@@ -115,4 +115,11 @@ func init() {
 			return ctx.Emit(res, fmt.Sprintf("%s: %d stories done, changed=%v", path, len(ids), changed))
 		},
 	})
+}
+
+func orNothing(v string) string {
+	if v == "" {
+		return "none"
+	}
+	return v
 }

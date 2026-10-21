@@ -1,10 +1,13 @@
 package release
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -12,9 +15,9 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 )
 
-// commitsSince returns the messages of the commits in dir since tag, or of
+// CommitsSince returns the messages of the commits in dir since tag, or of
 // every commit when there is no tag yet.
-func commitsSince(dir, tag string) ([]string, error) {
+func CommitsSince(dir, tag string) ([]string, error) {
 	args := []string{"-C", dir, "log", "--format=%B%x1e"}
 	if tag != "" {
 		args = append(args, tag+"..HEAD")
@@ -30,6 +33,48 @@ func commitsSince(dir, tag string) ([]string, error) {
 		}
 	}
 	return messages, nil
+}
+
+// SRDDir holds a corpus's requirements.
+const SRDDir = "docs/specs/software-requirements"
+
+// RequirementsUnchanged reports whether the checkout at dir holds a corpus
+// whose requirements no commit since tag changed: a republish of the same
+// requirements. A checkout with no SRDs, such as a code repository, or no
+// tag yet, is never one.
+func RequirementsUnchanged(dir, tag string) (bool, error) {
+	if tag == "" {
+		return false, nil
+	}
+	if _, err := os.Stat(filepath.Join(dir, SRDDir)); err != nil {
+		return false, nil
+	}
+	cmd := exec.Command("git", "-C", dir, "diff", "--quiet", tag+"..HEAD", "--", SRDDir)
+	err := cmd.Run()
+	var exit *exec.ExitError
+	switch {
+	case err == nil:
+		return true, nil
+	case errors.As(err, &exit) && exit.ExitCode() == 1:
+		return false, nil
+	}
+	return false, fmt.Errorf("compare %s with %s: %w", SRDDir, tag, err)
+}
+
+// Recommendation is Next for the checkout at dir with its recommendation
+// from the commits since the latest tag (srd015 R3.1).
+func Recommendation(r program.Releases, artifact, dir string, tags []string) (NextResult, error) {
+	n := Next(r, artifact, tags)
+	messages, err := CommitsSince(dir, n.LatestTag)
+	if err != nil {
+		return n, err
+	}
+	unchanged, err := RequirementsUnchanged(dir, n.LatestTag)
+	if err != nil {
+		return n, err
+	}
+	n.Recommend(messages, unchanged)
+	return n, nil
 }
 
 // RepoTags are the tags in the checkout at dir and on its origin.
@@ -115,10 +160,13 @@ func init() {
 			for _, c := range r.Checks {
 				fmt.Fprintf(&b, "  %-8s %s in %s %s\n", c.Result, c.Test, c.Environment, c.Reason)
 			}
+			if r.AwaitingPeerRead {
+				fmt.Fprintf(&b, "every check but the peer read passed; %s is tagged after tpm release approve\n", r.Tag)
+			}
 			if err := ctx.Emit(r, b.String()); err != nil {
 				return err
 			}
-			if !r.Passed && !r.DryRun {
+			if !r.Passed && !r.DryRun && !r.AwaitingPeerRead {
 				return fmt.Errorf("the gate for %s did not pass; no tag follows it", r.Tag)
 			}
 			return nil
@@ -155,9 +203,9 @@ func init() {
 			if err != nil {
 				return err
 			}
-			human := fmt.Sprintf("tagged and pushed %s at %s: %s", r.Tag, short(r.Revision), r.Class)
+			human := fmt.Sprintf("tagged and pushed %s at %s: %s", r.Tag, short(r.Revision), r.Label)
 			if r.DryRun {
-				human = fmt.Sprintf("would tag %s at %s: %s", r.Tag, short(r.Revision), r.Class)
+				human = fmt.Sprintf("would tag %s at %s: %s", r.Tag, short(r.Revision), r.Label)
 			}
 			return ctx.Emit(r, human)
 		},
@@ -175,12 +223,10 @@ func init() {
 			if err != nil {
 				return err
 			}
-			n := Next(p.Releases, args.artifact, tags)
-			messages, err := commitsSince(args.dir, n.LatestTag)
+			n, err := Recommendation(p.Releases, args.artifact, args.dir, tags)
 			if err != nil {
 				return err
 			}
-			n.Recommend(messages)
 			return ctx.Emit(n, n.Human())
 		},
 	})

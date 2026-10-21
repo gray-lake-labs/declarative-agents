@@ -14,9 +14,9 @@ func TestNextReportsLatestAndCandidates(t *testing.T) {
 		t.Fatalf("latest %+v", n)
 	}
 	want := []Candidate{
-		{"patch", "0.2.4", "a/v0.2.4", "compatible"},
-		{"minor", "0.3.0", "a/v0.3.0", "breaking"},
-		{"major", "1.0.0", "a/v1.0.0", "breaking"},
+		{"patch", "0.2.4", "a/v0.2.4", "compatible", "compatible"},
+		{"minor", "0.3.0", "a/v0.3.0", "breaking", "breaking (minor before 1.0)"},
+		{"major", "1.0.0", "a/v1.0.0", "breaking", "breaking"},
 	}
 	for i, c := range want {
 		if n.Candidates[i] != c {

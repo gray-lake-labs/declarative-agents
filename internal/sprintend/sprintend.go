@@ -40,7 +40,10 @@ type Facts struct {
 	Aggregate   reports.Aggregation `json:"aggregate"`
 	SprintGoals []SprintGoal        `json:"sprint_goals"`
 	Next        release.NextResult  `json:"next"`
-	Recommended string              `json:"recommended_version"` // the next minor version (srd015 R4.1)
+	// Recommended is the version release next recommends from the
+	// checkout's commits since its latest tag, Next.Reason saying why
+	// (srd015 R3.1); empty when nothing changed since that tag.
+	Recommended string `json:"recommended_version"`
 }
 
 // Input is one sprint-end facts run.
@@ -55,6 +58,9 @@ type Input struct {
 	Releases  program.Releases
 	Artifact  string
 	Tags      []string
+	// Dir is the artifact's checkout, whose commits since its latest tag
+	// the recommendation reads; empty recommends the next minor.
+	Dir string
 }
 
 // MakeFacts lists the repository's Sprint Goals with their ledger and
@@ -80,8 +86,17 @@ func MakeFacts(in Input) (Facts, error) {
 		f.SprintGoals = append(f.SprintGoals, goals...)
 	}
 	f.Next = release.Next(in.Releases, in.Artifact, in.Tags)
+	if in.Dir != "" {
+		next, err := release.Recommendation(in.Releases, in.Artifact, in.Dir, in.Tags)
+		if err != nil {
+			return f, err
+		}
+		f.Next = next
+	} else {
+		f.Next.Recommended, f.Next.Reason = "minor", "no checkout to read commits from: a period's release is minor"
+	}
 	for _, c := range f.Next.Candidates {
-		if c.Bump == "minor" {
+		if c.Bump == f.Next.Recommended {
 			f.Recommended = c.Version
 		}
 	}

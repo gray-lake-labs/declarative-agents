@@ -31,16 +31,20 @@ type CheckResult struct {
 
 // ReleaseGateResult is what tpm release gate reports (srd015 R1).
 type ReleaseGateResult struct {
-	Project  string        `json:"project"`
-	Issue    int           `json:"issue"`
-	Artifact string        `json:"artifact"`
-	Version  string        `json:"version"`
-	Tag      string        `json:"tag"`
-	Revision string        `json:"revision"`
-	Run      string        `json:"run"`
-	Passed   bool          `json:"passed"`
-	Checks   []CheckResult `json:"checks"`
-	DryRun   bool          `json:"dry_run"`
+	Project  string `json:"project"`
+	Issue    int    `json:"issue"`
+	Artifact string `json:"artifact"`
+	Version  string `json:"version"`
+	Tag      string `json:"tag"`
+	Revision string `json:"revision"`
+	Run      string `json:"run"`
+	Passed   bool   `json:"passed"`
+	// AwaitingPeerRead is a gate whose every other check passed and whose
+	// peer read is pending: the state before tpm release approve, not a
+	// failure (srd015 R1.3).
+	AwaitingPeerRead bool          `json:"awaiting_peer_read"`
+	Checks           []CheckResult `json:"checks"`
+	DryRun           bool          `json:"dry_run"`
 }
 
 // ReleaseGateInput is one gate run: the release issue, the candidate, and the
@@ -104,6 +108,7 @@ func RunGate(t tracker.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) 
 	}
 
 	r.Passed = true
+	awaiting, others := false, true
 	for _, c := range checks {
 		res := CheckResult{Test: testName(c), Environment: c.Environment}
 		if !in.DryRun {
@@ -113,8 +118,15 @@ func RunGate(t tracker.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) 
 			res.Environment = "none"
 		}
 		r.Passed = r.Passed && res.Result == ResultPass
+		switch {
+		case c.Kind == "peer-read" && res.Result == ResultPending:
+			awaiting = true
+		case res.Result != ResultPass:
+			others = false
+		}
 		r.Checks = append(r.Checks, res)
 	}
+	r.AwaitingPeerRead = awaiting && others && !r.Passed
 	if in.DryRun {
 		r.Passed = false
 		return r, nil

@@ -31,8 +31,10 @@ type TagResult struct {
 	Revision string `json:"revision"`
 	Previous string `json:"previous,omitempty"`
 	Class    string `json:"class"`
-	GateRun  string `json:"gate_run"`
-	Pushed   bool   `json:"pushed"`
+	// Label is Class as the tag message and note say it.
+	Label   string `json:"-"`
+	GateRun string `json:"gate_run"`
+	Pushed  bool   `json:"pushed"`
 	// Closed is the release issue the tag closed, when it was still open.
 	Closed bool `json:"closed,omitempty"`
 	DryRun bool `json:"dry_run"`
@@ -156,12 +158,13 @@ func ReleaseTag(t tracker.Tracker, in TagInput) (TagResult, error) {
 	}
 
 	r.Class = Class(in.Policy.Releases.Breaking, latest, in.Version)
+	r.Label = ClassLabel(in.Policy.Releases.Breaking, latest, in.Version)
 	if in.DryRun {
 		return r, nil
 	}
-	message := fmt.Sprintf("Release %s, %s\n\nGate run %s passed at %s on %s#%d.", tag, r.Class, run.run, rev, in.Project, in.Issue)
+	message := fmt.Sprintf("Release %s, %s\n\nGate run %s passed at %s on %s#%d.", tag, r.Label, run.run, rev, in.Project, in.Issue)
 	if r.Previous != "" {
-		message = fmt.Sprintf("Release %s, %s (previous %s)\n\nGate run %s passed at %s on %s#%d.", tag, r.Class, r.Previous, run.run, rev, in.Project, in.Issue)
+		message = fmt.Sprintf("Release %s, %s (previous %s)\n\nGate run %s passed at %s on %s#%d.", tag, r.Label, r.Previous, run.run, rev, in.Project, in.Issue)
 	}
 	if _, err := in.Git("tag", "-a", tag, rev, "-m", message); err != nil {
 		return r, err
@@ -170,7 +173,7 @@ func ReleaseTag(t tracker.Tracker, in TagInput) (TagResult, error) {
 		return r, fmt.Errorf("created %s but could not push it: %w", tag, err)
 	}
 	r.Pushed = true
-	note := fmt.Sprintf("Tagged %s at %s: a %s release.", tag, short(rev), r.Class)
+	note := fmt.Sprintf("Tagged %s at %s: a %s release.", tag, short(rev), r.Label)
 	if err := t.CreateNote(in.Project, in.Issue, note); err != nil {
 		return r, err
 	}
