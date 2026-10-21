@@ -93,6 +93,12 @@ func Derive(t tracker.Tracker, project, system, ref string, paths []string, give
 		out.Plane, out.Derived = c.Plane, &c
 		if out.Kind == "" {
 			out.Kind = c.Kind
+		} else if out.Plane != "data" {
+			// A stated kind is work: it makes a data issue whatever plane
+			// the paths alone would give, as tpm's own sprint-end issues
+			// are plane::data, kind::release on a planning document.
+			out.Plane = "data"
+			c.Plane, c.Kind, c.Reason = "data", out.Kind, "a stated kind makes a data issue; "+c.Reason
 		}
 	}
 	if out.Plane == "" {

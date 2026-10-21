@@ -12,6 +12,7 @@ Subcommands:
   tpm issue file      file an unassigned issue and lint it (srd013 R3)
   tpm issue lint      admit or triage issues against policy (srd013 R1)
   tpm issue labels    create the label schema in the tracker (srd013 R6)
+  tpm issue milestone put a filed issue in a milestone, lint it again (srd001 R7)
   tpm issue pop       claim an issue, open its branch and worktree (srd013 R7)
   tpm issue approve   approve a branch as a reviewer (srd013 R5.6)
   tpm issue merge     merge a branch, close its issues (srd013 R5)

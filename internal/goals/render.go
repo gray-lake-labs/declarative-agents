@@ -55,7 +55,19 @@ func Render(webBase string, p Plan, team []PlannedObjective, docs map[string]*ob
 			if !tracesAny(c, o.Items) {
 				continue
 			}
-			fmt.Fprintf(&b, "- %s (test: %s; environment: %s)\n", strings.TrimSpace(c.Criterion), strings.Join(c.Tests, ", "), c.Environment)
+			// A criterion that also traces other teams' items says which
+			// part is this Sprint Goal's.
+			part := ""
+			var mine []string
+			for _, t := range c.Traces {
+				if contains(o.Items, t) {
+					mine = append(mine, t)
+				}
+			}
+			if len(mine) < len(c.Traces) {
+				part = " [this Sprint Goal: " + strings.Join(mine, ", ") + " of " + strings.Join(c.Traces, ", ") + "]"
+			}
+			fmt.Fprintf(&b, "- %s%s (test: %s; environment: %s)\n", strings.TrimSpace(c.Criterion), part, strings.Join(c.Tests, ", "), c.Environment)
 		}
 	}
 	b.WriteString("\n## Notes\n\n## Sprint Backlog\n\n")

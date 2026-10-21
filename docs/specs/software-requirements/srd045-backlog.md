@@ -154,7 +154,7 @@ A team's velocity is the story points of its stories done per sprint, read from 
 <!-- req: R6.1 -->
 ### R6.1
 
-The corpus gate checks every hierarchy document against its type: the required fields and context items, a parent of the right kind that resolves, link targets that resolve (srd007 R8.2), no parent or blocked_by cycle, a story's points, and a criterion without a test or an environment. The parent's corpus audit does not read these directories, so a magefiles gate inside mage audit checks them, as it checks initiatives (srd034 R2.1).
+The corpus gate checks every hierarchy document against its type: the required fields and context items, a parent of the right kind that resolves, link targets that resolve (srd007 R8.2), no parent or blocked_by cycle, a story's points, and a criterion without a test or an environment. A context that does not parse, such as a value holding an unquoted colon, is one finding naming the parse error, not a finding for each item it hides. The parent's corpus audit does not read these directories, so a magefiles gate inside mage audit checks them, as it checks initiatives (srd034 R2.1).
 
 <!-- req: R7 -->
 ## R7 - Forecasts (direction)

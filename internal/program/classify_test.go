@@ -1,6 +1,7 @@
 package program
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -180,5 +181,38 @@ func TestManagementIssueRefusedForNonLead(t *testing.T) {
 	f.Me = tracker.User{ID: 1, Username: "tpm-lead"}
 	if _, err := File(f, "g/system", in, p, false); err != nil {
 		t.Fatalf("lead refused: %v", err)
+	}
+}
+
+// TestStatedKindMakesADataIssue files a data issue of the stated kind on a
+// planning document, as tpm's own sprint-end issues are.
+func TestStatedKindMakesADataIssue(t *testing.T) {
+	l, err := Derive(fake.New(), "g/po-1", "", "main", []string{"docs/sprint-ends/01.0.md"}, Labelling{Kind: "release"})
+	if err != nil || l.Plane != "data" || l.Kind != "release" || l.Derived == nil || !strings.Contains(l.Derived.Reason, "stated kind") {
+		t.Fatalf("derived %+v (%+v), %v", l, l.Derived, err)
+	}
+	if r := Lint(tracker.Issue{Labels: Labels(l.Plane, "", l.Kind, "po-1"), Milestone: "01.0"}, Defaults()); slices.Contains(r, "only data issues carry a kind:: label") {
+		t.Fatalf("lint: %v", r)
+	}
+}
+
+// TestSetMilestoneAdmitsAFiledIssue puts a data issue refused for lacking a
+// sprint milestone in one, and lint admits it.
+func TestSetMilestoneAdmitsAFiledIssue(t *testing.T) {
+	f := fake.New()
+	f.EnsureMilestone("g", tracker.Milestone{Title: "01.0", StartDate: "2026-10-19", DueDate: "2026-11-06"})
+	i, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Score", Description: goodBody, Labels: []string{"plane::data", "kind::build", "component::po-1"}})
+	if r := Lint(i, Defaults()); !slices.Contains(r, "a data issue needs a sprint milestone") {
+		t.Fatalf("before: %v", r)
+	}
+	r, err := SetMilestone(f, "g/po-1", i.IID, "01.0", Defaults(), false)
+	if err != nil || !r.Admitted {
+		t.Fatalf("set milestone = %+v, %v", r, err)
+	}
+	if got, _ := f.GetIssue("g/po-1", i.IID); got.Milestone != "01.0" {
+		t.Fatalf("milestone %q", got.Milestone)
+	}
+	if _, err := SetMilestone(f, "g/po-1", i.IID, "09.9", Defaults(), false); err == nil {
+		t.Fatal("a milestone the project cannot find was set")
 	}
 }

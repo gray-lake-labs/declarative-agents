@@ -83,7 +83,7 @@ With a parent tracking issue given, appends the new issue to its Members section
 <!-- req: R3.3 -->
 ### R3.3
 
-A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins.
+A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins. tpm issue milestone puts an issue already filed in a milestone its project finds and lints it again. A kind given explicitly makes a data issue of that kind, whatever plane its paths alone would give.
 
 <!-- req: R4 -->
 ## R4 - tpm issue show
@@ -173,7 +173,7 @@ Installs into the worktree the skills of every agent installed in the checkout (
 <!-- req: R8.1 -->
 ### R8.1
 
-tpm issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). With --summary (or --summary-file), the run's result is the run summary it closes the issue with and follows the outcome on the Previous Runs line, so a run that merges no file still carries its result forward. An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists.
+tpm issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). With --summary (or --summary-file), the run's result is the run summary it closes the issue with and the Previous Runs line in place of the outcome, with how the instance closed after it, so a run that merges no file still carries its result forward. An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists.
 
 <!-- req: R8.2 -->
 ### R8.2

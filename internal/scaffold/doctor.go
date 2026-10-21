@@ -43,6 +43,9 @@ type RepairResult struct {
 	Repaired []string `json:"repaired,omitempty"`
 	Findings []string `json:"findings,omitempty"`
 	Skipped  string   `json:"skipped,omitempty"`
+	// Untracked are documents under docs/ git does not track: the spec
+	// tool reads only tracked ones, so they were not checked.
+	Untracked []string `json:"untracked,omitempty"`
 }
 
 // specTool runs the spec tool at a repository's pin, and lookGo finds the Go
@@ -61,6 +64,13 @@ const notCanonical = ": not-canonical: run mage fmt"
 // then reports what the formatter cannot repair. A dry run only checks.
 func repair(dir string, dryRun bool) RepairResult {
 	var r RepairResult
+	if out, err := exec.Command("git", "-C", dir, "ls-files", "--others", "--exclude-standard", "--", "docs").Output(); err == nil {
+		for _, p := range strings.Fields(string(out)) {
+			if strings.HasSuffix(p, ".md") {
+				r.Untracked = append(r.Untracked, p)
+			}
+		}
+	}
 	if lookGo() != nil {
 		r.Skipped = "no Go toolchain on PATH; the repair builds the pinned release's formatter with it"
 		return r

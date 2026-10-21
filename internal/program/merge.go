@@ -103,7 +103,9 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 				r.Audit = true
 			}
 			if path.Dir(p) == sprintgoal.SummaryDir && path.Ext(p) == ".md" {
-				summary, err := inMain("show", "refs/heads/"+branch+":"+p)
+				// Through textconv, as GetFile reads: in a git-crypt
+				// repository the blob is ciphertext.
+				summary, err := inMain("cat-file", "--textconv", "refs/heads/"+branch+":"+p)
 				if err != nil {
 					continue // the branch deletes it
 				}

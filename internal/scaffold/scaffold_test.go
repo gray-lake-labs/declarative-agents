@@ -136,8 +136,8 @@ func TestInitWritesControlFiles(t *testing.T) {
 	// system's corpus release needs a peer read.
 	want := InitPolicy()
 	want.ComponentsRead = true
-	if g := want.Gate("corpus"); len(g) != 1 || g[0].Kind != "peer-read" {
-		t.Fatalf("init's corpus gate = %+v, want a peer read", g)
+	if g := want.Gate("corpus"); len(g) != 2 || g[0].Command != ProgramAudit || g[1].Kind != "peer-read" || want.AuditCommand != ProgramAudit {
+		t.Fatalf("init's corpus gate = %+v, audit %q; want tpm backlog check and a peer read", g, want.AuditCommand)
 	}
 	policy, err := program.LoadPolicy(f, "g/system", "main")
 	if err != nil || !reflect.DeepEqual(policy, want) {

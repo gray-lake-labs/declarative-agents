@@ -63,6 +63,11 @@ func init() {
 		}
 		in.Tags = tags
 		c, err := MakeCandidates(in)
+		if err == nil && teamRepository(a.dir) {
+			// A team's repository does not date or tag the system's
+			// release: its sprint is the system's period (srd031 R6.4).
+			c.EndDate, c.Tag = "", ""
+		}
 		if err == nil && hasStories(a.dir) {
 			b, berr := MakeBacklog(a.dir, velocity)
 			if berr != nil {

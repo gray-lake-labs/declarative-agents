@@ -419,6 +419,13 @@ func (s *Store) writeFiles(what string, fn func() (bool, error)) (fr Freshness, 
 		}
 		return fr, false, false, err
 	}
+	if !queued {
+		// The read a command reports is now its own write, not the pull
+		// before it.
+		if head, err := s.git("rev-parse", "HEAD"); err == nil {
+			s.last = &Freshness{Commit: head, At: s.Now().UTC()}
+		}
+	}
 	return fr, true, queued, nil
 }
 

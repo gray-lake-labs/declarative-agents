@@ -430,7 +430,7 @@ func TestDoctorUpgradesTheSystem(t *testing.T) {
 		t.Fatalf("the system is no component: %+v", subs)
 	}
 	p, err := program.LoadPolicy(f, "g/system", "main")
-	if g := p.Gate("corpus"); err != nil || len(g) != 1 || g[0].Kind != "peer-read" || len(p.Gate("default")) != 1 || p.Gate("default")[0].Kind != "tests" {
+	if g := p.Gate("corpus"); err != nil || len(g) != 2 || g[0].Command != ProgramAudit || g[1].Kind != "peer-read" || len(p.Gate("default")) != 1 || p.Gate("default")[0].Kind != "tests" {
 		t.Fatalf("policy gates: corpus %+v default %+v, %v", p.Gate("corpus"), p.Gate("default"), err)
 	}
 
@@ -459,7 +459,26 @@ func TestCorpusPeerReadKeepsTheProgramsGate(t *testing.T) {
 	f := fake.New()
 	f.AddFile("g/system", "main", program.PolicyFile, out)
 	p, err := program.LoadPolicy(f, "g/system", "main")
-	if err != nil || len(p.Gate("corpus")) != 1 || p.Gate("default")[0].Command != "go test ./..." {
+	if err != nil || len(p.Gate("corpus")) != 2 || p.Gate("default")[0].Command != "go test ./..." {
 		t.Fatalf("policy from %q: %+v, %v", out, p.DefinitionOfDone, err)
+	}
+}
+
+// TestDoctorReportsUntrackedDocuments names documents git does not track,
+// which the spec tool does not read, instead of passing them silently.
+func TestDoctorReportsUntrackedDocuments(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	run(t, dir, "add", "-A")
+	run(t, dir, "-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "-m", "init")
+	os.WriteFile(filepath.Join(dir, "docs", "specs", "epics", "ep099-new.md"), []byte("# new\n"), 0o644)
+	r, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
+	if err != nil || !slices.Equal(r.Repair.Untracked, []string{"docs/specs/epics/ep099-new.md"}) {
+		t.Fatalf("untracked = %v, %v", r.Repair.Untracked, err)
+	}
+	if out := humanDoctor(r); !strings.Contains(out, "git does not track them") {
+		t.Fatalf("doctor's text does not say so:\n%s", out)
 	}
 }

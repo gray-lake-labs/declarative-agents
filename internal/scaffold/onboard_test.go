@@ -132,7 +132,7 @@ func TestOnboardFilesOneRegistration(t *testing.T) {
 	f := system(t)
 	before := len(f.Files)
 	r, err := Onboard(f, joining(repo(t)))
-	if err != nil || !r.Registration.Filed || r.Registration.Issue == nil {
+	if err != nil || !r.Registration.Filed || r.Registration.Issue == nil || r.Registration.Issue.Plane != "management" {
 		t.Fatalf("registration: %+v, %v", r.Registration, err)
 	}
 	issues, _ := f.ListIssues("g/system", tracker.IssueQuery{State: "opened"})

@@ -45,8 +45,8 @@ type Item struct {
 type Candidates struct {
 	Latest          string `json:"latest_release,omitempty"`
 	Version         string `json:"recommended_version"`
-	EndDate         string `json:"recommended_end_date"`
-	Tag             string `json:"recommended_tag"`
+	EndDate         string `json:"recommended_end_date,omitempty"`
+	Tag             string `json:"recommended_tag,omitempty"`
 	Items           []Item `json:"items"`
 	WithoutEvidence []Item `json:"without_evidence,omitempty"`
 	// Backlog is the team's Product Backlog, when the checkout holds stories
@@ -222,6 +222,13 @@ func slippedGroups(in Input) (map[string]bool, error) {
 		}
 	}
 	return out, nil
+}
+
+// teamRepository reports whether the checkout at dir is a team's
+// repository, by the subsystem SRD tpm onboard writes there.
+func teamRepository(dir string) bool {
+	_, err := os.Stat(filepath.Join(dir, "docs", "specs", "software-requirements", "srd001-subsystem.md"))
+	return err == nil
 }
 
 // unplanned reports whether a release record names no items and no tag:

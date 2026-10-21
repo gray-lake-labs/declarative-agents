@@ -68,7 +68,7 @@ Takes the owner tpm recommends for each initiative item: the Product Owner whose
 <!-- req: R3.2 -->
 ### R3.2
 
-Takes the environment the initiative's acceptance criteria name, else dev, and asks nothing about it.
+Takes, for each item, the environment of the acceptance criterion tracing it, else of its requirement group's first criterion, else dev, and asks nothing about it. A criterion that also traces items another team serves is copied with a note naming this Sprint Goal's part.
 
 <!-- req: R3.3 -->
 ### R3.3

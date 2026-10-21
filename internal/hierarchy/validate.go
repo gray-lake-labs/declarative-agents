@@ -46,6 +46,11 @@ func Validate(docs []*Doc) []Finding {
 
 func validateDoc(d *Doc, byID map[string]*Doc) []Finding {
 	v := checker{file: d.Path}
+	if d.ContextError != "" {
+		// One finding for the cause, not one per item it hides.
+		v.add("context", "does not parse (%s); quote a value that holds a colon", d.ContextError)
+		return v.findings
+	}
 	v.require("title", d.Title)
 	v.require("problem", d.Problem)
 	v.require("owner", d.Owner)

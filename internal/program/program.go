@@ -108,7 +108,10 @@ func init() {
 			if err != nil {
 				return err
 			}
-			human := fmt.Sprintf("%s#%d on %s in %s", r.Project, r.IID, r.Branch, r.Worktree)
+			human := fmt.Sprintf("%s#%d on %s in %s", issueProject, r.IID, r.Branch, r.Worktree)
+			if issueProject != r.Project {
+				human = fmt.Sprintf("%s#%d on %s of %s in %s", issueProject, r.IID, r.Branch, r.Project, r.Worktree)
+			}
 			if len(r.NotAdmitted) > 0 {
 				human += "\nnot admitted, which does not block a non-data issue: " + strings.Join(r.NotAdmitted, "; ")
 			}
@@ -246,7 +249,12 @@ func init() {
 				return err
 			}
 			human := fmt.Sprintf("%s merged into %s on %s; closed %s", r.Branch, r.Project, r.Commit, strings.Join(r.Closed, ", "))
-			if !r.Merged && !r.DryRun {
+			if r.DryRun {
+				human = fmt.Sprintf("dry run: %s would merge into %s, approved by %s, closing %s#%d", r.Branch, r.Project, r.ApprovedBy, issueProject, r.IID)
+				if len(mergeArgs.closes) > 0 {
+					human += " and " + strings.Join(mergeArgs.closes, ", ")
+				}
+			} else if !r.Merged {
 				human = fmt.Sprintf("%s was already merged on %s; closed %s", r.Branch, r.Commit, strings.Join(r.Closed, ", "))
 			}
 			return ctx.Emit(r, human)

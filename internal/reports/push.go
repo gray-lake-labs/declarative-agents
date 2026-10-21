@@ -14,6 +14,9 @@ type PushResult struct {
 	Action string `json:"action"` // filed, exists
 	IID    int    `json:"iid,omitempty"`
 	WebURL string `json:"web_url,omitempty"`
+	// Admitted and Reasons are lint's result on the issue filed now.
+	Admitted bool     `json:"admitted,omitempty"`
+	Reasons  []string `json:"reasons,omitempty"`
 }
 
 func signalMarker(s Signal) string {
@@ -66,6 +69,7 @@ func PushSignals(t tracker.Tracker, system string, signals []Signal, p program.P
 				return out, err
 			}
 			r.IID, r.WebURL = fr.IID, fr.WebURL
+			r.Admitted, r.Reasons = fr.Lint.Admitted, fr.Lint.Reasons
 		}
 		out = append(out, r)
 	}

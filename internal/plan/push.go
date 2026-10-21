@@ -2,6 +2,7 @@ package plan
 
 import (
 	"fmt"
+	"path"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -38,12 +39,15 @@ type PushInput struct {
 
 // PushResult is what tpm plan push did.
 type PushResult struct {
-	Release    Release          `json:"release"`
-	Milestone  string           `json:"milestone"` // created, updated, unchanged
-	Sprint     IssueAction      `json:"sprint_issue"`
-	SprintEnds []IssueAction    `json:"sprint_end_issues"`
-	Planned    []PlannedOnIssue `json:"planned_events"`
-	Skipped    []string         `json:"skipped,omitempty"`
+	Release   Release `json:"release"`
+	Milestone string  `json:"milestone"` // created, updated, unchanged
+	// MilestoneGroups are the releasing repositories' groups outside the
+	// program group that got the milestone too, so their issues find it.
+	MilestoneGroups []string         `json:"milestone_groups,omitempty"`
+	Sprint          IssueAction      `json:"sprint_issue"`
+	SprintEnds      []IssueAction    `json:"sprint_end_issues"`
+	Planned         []PlannedOnIssue `json:"planned_events"`
+	Skipped         []string         `json:"skipped,omitempty"`
 }
 
 // IssueAction is one issue push filed, updated, or found unchanged.
@@ -110,6 +114,21 @@ func Push(t tracker.Tracker, in PushInput) (PushResult, error) {
 		return res, err
 	}
 	repos := subs.Repositories()
+	if !in.DryRun {
+		// A milestone is found in a project's own group and its ancestors:
+		// a releasing repository outside the program group gets it in its
+		// own group too (srd031 R4.2).
+		for _, repo := range repos {
+			group := path.Dir(repo)
+			if group == "." || group == in.Group || strings.HasPrefix(group, in.Group+"/") || slices.Contains(res.MilestoneGroups, group) {
+				continue
+			}
+			if _, err := t.EnsureMilestone(group, m); err != nil {
+				return res, err
+			}
+			res.MilestoneGroups = append(res.MilestoneGroups, group)
+		}
+	}
 	if !slices.Contains(repos, program.ProjectPath(in.System)) {
 		res.Skipped = append(res.Skipped, in.System+": no subsystem SRD declares it as a component, so it has no sprint-end issue")
 	}

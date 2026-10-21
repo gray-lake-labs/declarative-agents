@@ -115,6 +115,7 @@ func register(t tracker.Tracker, o OnboardOptions) (Registration, error) {
 	if err != nil {
 		return Registration{}, err
 	}
+	res.Plane, res.Component = "management", component.Name
 	return Registration{Filed: !o.DryRun, Issue: &res}, nil
 }
 

@@ -41,7 +41,9 @@ func TestAgentsFile(t *testing.T) {
 	}
 	for _, s := range skills {
 		listed := strings.Contains(agents, "- "+s.Name+": ")
-		if listed != (s.Name != "sprint-end") {
+		// Every skill but none serves the system: sprint-end too, since the
+		// system repository has its own sprint-end issue.
+		if !listed {
 			t.Errorf("skill %s listed %v at the system level", s.Name, listed)
 		}
 	}

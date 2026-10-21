@@ -98,7 +98,13 @@ func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurRes
 	summary := strings.Join(strings.Fields(o.Summary), " ")
 	run := fmt.Sprintf("- %s#%d (due %s): %s.", project, iid, orNone(i.DueDate), outcome)
 	if summary != "" {
-		run += " " + strings.TrimSuffix(summary, ".") + "."
+		// The run's result is what the line records; closed by recur, the
+		// instance merged no work of its own.
+		how := "closed by its merge"
+		if r.Closed {
+			how = "closed by tpm issue recur"
+		}
+		run = fmt.Sprintf("- %s#%d (due %s): %s (%s).", project, iid, orNone(i.DueDate), strings.TrimSuffix(summary, "."), how)
 	}
 	body := nextBody(i.Description, o.Body, run) + "\n\n" + marker + "\n"
 	if o.DryRun {

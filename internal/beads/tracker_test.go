@@ -128,3 +128,16 @@ func TestGetFileReadsThroughTextconv(t *testing.T) {
 		t.Fatalf("missing file: %v", err)
 	}
 }
+
+// TestReadNamesTheCommitAfterAWrite reports, after a write, the tracker
+// commit that write made, not the pull before it.
+func TestReadNamesTheCommitAfterAWrite(t *testing.T) {
+	tr := newTestTracker(t, "alice")
+	if _, err := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "first"}); err != nil {
+		t.Fatal(err)
+	}
+	remote := beadstest.Git(t, tr.Store.Dir, "rev-parse", "origin/main")
+	if read, ok := tr.LastRead(); !ok || read.Commit != remote {
+		t.Fatalf("read %+v after the write; the tracker is at %s", read, remote)
+	}
+}

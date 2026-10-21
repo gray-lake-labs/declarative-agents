@@ -108,7 +108,7 @@ func TestRecurCarriesTheRunsSummary(t *testing.T) {
 			t.Fatalf("notes %+v", notes)
 		}
 		next, _ := f.GetIssue("g/po-1", r.Next)
-		if !strings.Contains(next.Description, "closed by tpm issue recur without its work. Day 3: the grader is blocked on trajectories.\n") {
+		if !strings.Contains(next.Description, ": Day 3: the grader is blocked on trajectories (closed by tpm issue recur).\n") || strings.Contains(next.Description, "without its work") {
 			t.Fatalf("next body:\n%s", next.Description)
 		}
 	})

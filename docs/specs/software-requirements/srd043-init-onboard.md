@@ -67,7 +67,7 @@ Every skeleton document is in the format of the parent release tpm was built wit
 <!-- req: R1.3 -->
 ### R1.3
 
-Writes control/labels.md and control/policy.md holding the built-in defaults, in the config formats labels and policy. The policy's definition of done gives the system's corpus release a peer-read check (srd015 R1.2), so the system is never released on its author's word.
+Writes control/labels.md and control/policy.md holding the built-in defaults, in the config formats labels and policy. Every command the policy names is one a program repository can run: its audit_command is tpm backlog check, and its definition of done gives the system's corpus release that check and a peer-read check (srd015 R1.2), so the system is never released on its author's word.
 
 <!-- req: R1.4 -->
 ### R1.4
@@ -166,7 +166,7 @@ Without a Go toolchain or the pinned release's source, skips the repair, says wh
 <!-- req: R4.6 -->
 ### R4.6
 
-A dry run reports what doctor would write, append, refresh, extend, and repair and changes nothing. A second run reports nothing created, appended, refreshed, extended, or repaired.
+A dry run reports what doctor would write, append, refresh, extend, and repair and changes nothing. Both runs name the documents under docs/ git does not track, which the format check cannot read. A second run reports nothing created, appended, refreshed, extended, or repaired.
 
 <!-- field: non_goals -->
 ## Non-goals
