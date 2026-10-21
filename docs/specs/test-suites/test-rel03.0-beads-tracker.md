@@ -151,3 +151,34 @@ go test ./internal/beads -run '^TestOfflineReadNamesTheLastPulledCommit$'
 #### Traces
 
 - [srd042-beads-tracker](../software-requirements/srd042-beads-tracker.md) [AC3](../software-requirements/srd042-beads-tracker.md#ac3)
+
+<!-- case: The tracker holds at a program's size | status: implemented -->
+### The tracker holds at a program's size
+
+<!-- field: use_case -->
+#### Use case
+
+[rel03.0-uc002-two-clones-synchronize](../use-cases/rel03.0-uc002-two-clones-synchronize.md)
+
+<!-- field: integration_target -->
+#### Integration target
+
+mage integration:beadsScale
+
+<!-- field: go_test -->
+#### Go test
+
+go test ./magefiles -run '^TestScale(SeedIsATrackerFile|SizesReadsTheEnvironment)$'
+
+<!-- field: expected_outputs | form: "tree" -->
+#### Expected outputs
+
+- sizes: 1000, 5000, and 10000 issues, each under 2, 5, and 10 concurrent writers
+- report: command times alone and under contention, failures, the tracker repository's size, and a fresh clone's time, under .regression/beads-scale
+- lost_writes: none; every filed issue is in the tracker once
+- duplicate_ids: none; no ID or IID repeats
+
+<!-- field: traces -->
+#### Traces
+
+- [srd042-beads-tracker](../software-requirements/srd042-beads-tracker.md) [AC3](../software-requirements/srd042-beads-tracker.md#ac3)
