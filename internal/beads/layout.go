@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -16,6 +18,14 @@ import (
 // cost does not grow with the tracker, and writers of different issues
 // change different files, which git merges by itself (eng04).
 const IssuesDir = ".beads/issues"
+
+// IndexDir maps each repository's IIDs to issue IDs in the files layout:
+// .beads/index/<repository>/<iid> holds the ID, with the repository's path
+// escaped into one directory name. A lookup by IID reads one entry and a
+// create numbers its issue from the entries' names, so neither reads the
+// issues. Entries only appear, as an IID is never reused, so git merges two
+// clones' entries by themselves, except where both created the same IID.
+const IndexDir = ".beads/index"
 
 // LayoutFiles is the config's layout value for one file per issue. Without
 // it the tracker keeps every issue in IssuesFile, bd's JSONL.
@@ -79,10 +89,20 @@ func readIssueDir(dir string) ([]Issue, error) {
 	return issues, nil
 }
 
-// topIID is the highest IID among dir's issues in repository, reading only
-// each issue's repository and IID.
+// IndexEntry is the path, within a tracker checkout, of the index entry for
+// iid in repository.
+func IndexEntry(repository string, iid int) string {
+	return filepath.Join(IndexDir, url.PathEscape(repository), strconv.Itoa(iid))
+}
+
+func indexPath(dir, repository string, iid int) string {
+	return filepath.Join(dir, IndexEntry(repository, iid))
+}
+
+// topIID is the highest IID in repository, read from the names of its
+// index entries.
 func topIID(dir, repository string) (int, error) {
-	entries, err := os.ReadDir(filepath.Join(dir, IssuesDir))
+	entries, err := os.ReadDir(filepath.Join(dir, IndexDir, url.PathEscape(repository)))
 	if errors.Is(err, os.ErrNotExist) {
 		return 0, nil
 	}
@@ -91,25 +111,61 @@ func topIID(dir, repository string) (int, error) {
 	}
 	top := 0
 	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
-			continue
-		}
-		b, err := os.ReadFile(filepath.Join(dir, IssuesDir, e.Name()))
-		if err != nil {
-			return 0, err
-		}
-		var head struct {
-			Repository string `json:"repository"`
-			IID        int    `json:"iid"`
-		}
-		if err := json.Unmarshal(b, &head); err != nil {
-			return 0, fmt.Errorf("%s: %w", e.Name(), err)
-		}
-		if head.Repository == repository {
-			top = max(top, head.IID)
+		if n, err := strconv.Atoi(e.Name()); err == nil {
+			top = max(top, n)
 		}
 	}
 	return top, nil
+}
+
+// indexID is the ID the index names for iid in repository, or "" when it
+// names none.
+func indexID(dir, repository string, iid int) string {
+	b, err := os.ReadFile(indexPath(dir, repository, iid))
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(b))
+}
+
+// writeIndex records i's entry unless it already names i.
+func writeIndex(dir string, i Issue) error {
+	if i.IID == 0 || i.Repository == "" {
+		return nil
+	}
+	if indexID(dir, i.Repository, i.IID) == i.ID {
+		return nil
+	}
+	p := indexPath(dir, i.Repository, i.IID)
+	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(p, []byte(i.ID+"\n"), 0o644)
+}
+
+// ensureIndex builds the index of a tracker that keeps issues as files but
+// has none, one written before the index existed, and reports how many
+// entries it wrote. A tracker with an index directory has a whole one: every
+// write since keeps it.
+func ensureIndex(dir string) (int, error) {
+	if _, err := os.Stat(filepath.Join(dir, IndexDir)); err == nil {
+		return 0, nil
+	}
+	issues, err := readIssueDir(dir)
+	if err != nil {
+		return 0, err
+	}
+	n := 0
+	for _, i := range issues {
+		if i.IID == 0 || i.Repository == "" {
+			continue
+		}
+		if err := writeIndex(dir, i); err != nil {
+			return n, err
+		}
+		n++
+	}
+	return n, nil
 }
 
 // encodedAll is each issue's file content by ID, what a write compares
@@ -127,9 +183,13 @@ func encodedAll(issues []Issue) (map[string][]byte, error) {
 }
 
 // writeChanged writes the files of the issues whose content differs from
-// before, and reports whether it wrote any.
+// before, with their index entries, and reports whether it wrote any. A
+// tracker without an index gets one first, so no write leaves a partial one.
 func writeChanged(dir string, before map[string][]byte, issues []Issue) (bool, error) {
 	if err := os.MkdirAll(filepath.Join(dir, IssuesDir), 0o755); err != nil {
+		return false, err
+	}
+	if _, err := ensureIndex(dir); err != nil {
 		return false, err
 	}
 	wrote := false
@@ -144,6 +204,9 @@ func writeChanged(dir string, before map[string][]byte, issues []Issue) (bool, e
 		if err := os.WriteFile(issuePath(dir, i.ID), b, 0o644); err != nil {
 			return false, err
 		}
+		if err := writeIndex(dir, i); err != nil {
+			return false, err
+		}
 		wrote = true
 	}
 	return wrote, nil
@@ -153,19 +216,38 @@ func writeChanged(dir string, before map[string][]byte, issues []Issue) (bool, e
 // layout. git merges the issues only one side changed; an issue both sides
 // changed conflicts, as its file is one line, and merges by mergeIssue; an
 // issue each side created with the same IID in the same repository is
-// renumbered on ours, as mergeIssues does; the record files merge by their
-// own rules (eng04).
+// renumbered on ours, as mergeIssues does, its index entry keeps theirs and
+// ours gets a new one; a record file both sides changed merges by its own
+// rules (eng04). It runs while a rejected writer retries, and every other
+// writer's push in that time rejects it again, so it does only what both
+// sides' changes call for.
 func (s *Store) mergeFiles(base, remote string) error {
+	ours, err := s.changed(base, "HEAD")
+	if err != nil {
+		return err
+	}
+	theirs, err := s.changed(base, remote)
+	if err != nil {
+		return err
+	}
+	conflicted := ""
 	if _, err := s.git("merge", "-q", "--no-ff", "--no-commit", remote); err != nil {
 		if _, herr := s.git("rev-parse", "-q", "--verify", "MERGE_HEAD"); herr != nil {
 			return err
 		}
-	}
-	conflicted, err := s.git("diff", "--name-only", "--diff-filter=U")
-	if err != nil {
-		return err
+		if conflicted, err = s.git("diff", "--name-only", "--diff-filter=U"); err != nil {
+			return err
+		}
 	}
 	for _, p := range strings.Fields(conflicted) {
+		if strings.HasPrefix(p, IndexDir+"/") {
+			// Both sides created this IID: theirs keeps it, and
+			// renumberNew gives ours the next one.
+			if _, err := s.git("checkout", "--theirs", "--", p); err != nil {
+				return err
+			}
+			continue
+		}
 		if !strings.HasPrefix(p, IssuesDir+"/") {
 			continue // a record file, merged below
 		}
@@ -187,14 +269,18 @@ func (s *Store) mergeFiles(base, remote string) error {
 			return err
 		}
 	}
-	if err := s.renumberNew(base, remote); err != nil {
+	if err := s.renumberNew(added(ours), added(theirs)); err != nil {
 		return err
 	}
-	if err := mergeRecordFile[Milestone](s, MilestonesFile, base, remote); err != nil {
-		return err
+	if ours[MilestonesFile] != "" && theirs[MilestonesFile] != "" {
+		if err := mergeRecordFile[Milestone](s, MilestonesFile, base, remote); err != nil {
+			return err
+		}
 	}
-	if err := mergeRecordFile[Label](s, LabelsFile, base, remote); err != nil {
-		return err
+	if ours[LabelsFile] != "" && theirs[LabelsFile] != "" {
+		if err := mergeRecordFile[Label](s, LabelsFile, base, remote); err != nil {
+			return err
+		}
 	}
 	if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
 		return err
@@ -203,22 +289,41 @@ func (s *Store) mergeFiles(base, remote string) error {
 	return err
 }
 
+// changed is the tracker files rev changed since base, each with its git
+// status letter.
+func (s *Store) changed(base, rev string) (map[string]string, error) {
+	out, err := s.git("diff", "--name-status", "--no-renames", base, rev, "--", ".beads")
+	if err != nil {
+		return nil, err
+	}
+	files := map[string]string{}
+	for _, line := range strings.Split(out, "\n") {
+		if status, path, ok := strings.Cut(line, "\t"); ok {
+			files[path] = status
+		}
+	}
+	return files, nil
+}
+
+// added is the issue files among changed that are new, in path order.
+func added(changed map[string]string) []string {
+	var paths []string
+	for p, status := range changed {
+		if status == "A" && strings.HasPrefix(p, IssuesDir+"/") {
+			paths = append(paths, p)
+		}
+	}
+	slices.Sort(paths)
+	return paths
+}
+
 // renumberNew gives each issue ours created since base that collides with
 // one theirs created the next free IID in its repository. Only issues
 // created on both sides can collide: an existing issue's IID is at most
 // base's highest, and a new one is above it.
-func (s *Store) renumberNew(base, remote string) error {
-	added := func(rev string) ([]string, error) {
-		out, err := s.git("diff", "--name-only", "--diff-filter=A", base, rev, "--", IssuesDir)
-		return strings.Fields(out), err
-	}
-	ours, err := added("HEAD")
-	if err != nil || len(ours) == 0 {
-		return err
-	}
-	theirs, err := added(remote)
-	if err != nil || len(theirs) == 0 {
-		return err
+func (s *Store) renumberNew(ours, theirs []string) error {
+	if len(ours) == 0 || len(theirs) == 0 {
+		return nil
 	}
 	var issues []Issue
 	for _, p := range append(slices.Clone(theirs), ours...) {
@@ -250,12 +355,16 @@ type MigrateResult struct {
 	Issues  int    `json:"issues"`
 	Commit  string `json:"tracker_commit,omitempty"`
 	Already bool   `json:"already"`
+	// Indexed counts the index entries built for a tracker that already
+	// kept one file per issue but had no index.
+	Indexed int `json:"indexed"`
 }
 
-// Migrate moves a tracker from IssuesFile to one file per issue, in one
-// commit that also sets the config's layout. It is meant to run once, when
-// no one is writing: a tracker that moved while it ran is left as it was,
-// and the command asks to be run again.
+// Migrate moves a tracker from IssuesFile to one file per issue, with its
+// index, in one commit that also sets the config's layout; a tracker that
+// already keeps one file per issue but has no index gets one. It is meant to
+// run once, when no one is writing: a tracker that moved while it ran is
+// left as it was, and the command asks to be run again.
 func (s *Store) Migrate() (MigrateResult, error) {
 	var r MigrateResult
 	fr, err := s.Sync()
@@ -265,15 +374,18 @@ func (s *Store) Migrate() (MigrateResult, error) {
 	if fr.Offline {
 		return r, errors.New("the tracker repository is unreachable; migrate needs it")
 	}
-	if s.files() {
-		r.Already = true
-		return r, nil
-	}
-	issues, err := s.read()
+	before, err := s.git("rev-parse", "HEAD")
 	if err != nil {
 		return r, err
 	}
-	before, err := s.git("rev-parse", "HEAD")
+	if s.files() {
+		r.Already = true
+		if r.Indexed, err = ensureIndex(s.Dir); err != nil || r.Indexed == 0 {
+			return r, err
+		}
+		return r, s.commitMigration(&r, before, fmt.Sprintf("tpm: index the tracker's %d issues (%s)", r.Indexed, s.User))
+	}
+	issues, err := s.read()
 	if err != nil {
 		return r, err
 	}
@@ -291,21 +403,28 @@ func (s *Store) Migrate() (MigrateResult, error) {
 	if err := WriteConfig(s.Dir, c); err != nil {
 		return r, err
 	}
+	r.Issues = len(issues)
+	return r, s.commitMigration(&r, before, fmt.Sprintf("tpm: migrate the tracker to one file per issue, %d issues (%s)", len(issues), s.User))
+}
+
+// commitMigration commits and pushes what Migrate wrote, once: a rejected
+// push resets the clone to before and asks for another run.
+func (s *Store) commitMigration(r *MigrateResult, before, message string) error {
 	if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
-		return r, err
+		return err
 	}
-	if _, err := s.git("commit", "-q", "-m", fmt.Sprintf("tpm: migrate the tracker to one file per issue, %d issues (%s)", len(issues), s.User)); err != nil {
-		return r, err
+	if _, err := s.git("commit", "-q", "-m", message); err != nil {
+		return err
 	}
 	if _, err := s.git("push", "-q", "origin", "HEAD:main"); err != nil {
 		if _, rerr := s.git("reset", "-q", "--hard", before); rerr != nil {
-			return r, errors.Join(err, rerr)
+			return errors.Join(err, rerr)
 		}
-		return r, fmt.Errorf("the tracker repository moved while migrating, so nothing was written; run tpm tracker migrate again when no one is writing: %w", err)
+		return fmt.Errorf("the tracker repository moved while migrating, so nothing was written; run tpm tracker migrate again when no one is writing: %w", err)
 	}
-	r.Issues = len(issues)
+	var err error
 	r.Commit, err = s.git("rev-parse", "HEAD")
-	return r, err
+	return err
 }
 
 // Export writes every issue as bd's JSONL, one line per issue sorted by

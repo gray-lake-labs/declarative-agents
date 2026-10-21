@@ -95,16 +95,14 @@ func FromEnv() (*Tracker, error) {
 }
 
 func (t *Tracker) find(project string, iid int) (Issue, error) {
-	issues, _, err := t.Store.Issues()
+	i, ok, err := t.Store.Find(project, iid)
 	if err != nil {
 		return Issue{}, err
 	}
-	for _, i := range issues {
-		if i.Repository == project && i.IID == iid {
-			return i, nil
-		}
+	if !ok {
+		return Issue{}, fmt.Errorf("%s#%d: %w", project, iid, tracker.ErrNotFound)
 	}
-	return Issue{}, fmt.Errorf("%s#%d: %w", project, iid, tracker.ErrNotFound)
+	return i, nil
 }
 
 func (t *Tracker) view(i Issue) tracker.Issue {

@@ -49,6 +49,11 @@ func TestScaleSeedIsATrackerFile(t *testing.T) {
 			if b, err := os.ReadFile(filepath.Join(dir, beads.ConfigFile)); err != nil || !strings.Contains(string(b), "layout: files") {
 				t.Errorf("the files seed's config = %q, %v", b, err)
 			}
+			for _, i := range issues {
+				if b, err := os.ReadFile(filepath.Join(dir, beads.IndexEntry(i.Repository, i.IID))); err != nil || strings.TrimSpace(string(b)) != i.ID {
+					t.Fatalf("the index entry for IID %d = %q, %v; want %s", i.IID, b, err, i.ID)
+				}
+			}
 		}
 	}
 }

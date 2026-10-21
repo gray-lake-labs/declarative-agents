@@ -89,16 +89,24 @@ its own issue, and two writers of different issues change different
 files, which git merges by itself. Two writers of the same issue conflict
 on its one line, and that file merges by the rules above; an issue each
 side created with the same IID is renumbered on the side that pushes
-second. Without the key the tracker keeps bd's JSONL in
+second. Beside the issues, .beads/index/<repository>/<iid> holds the ID
+of the issue numbered iid there, the repository path escaped into one
+directory name. A command that names an issue reads its entry and then
+that one file, and a create numbers its issue from the entries' names, so
+neither reads the other issues; an entry that is missing or names another
+issue sends the lookup back to reading them all. Entries only appear, so
+git merges them, and when both sides created the same IID the entry keeps
+theirs and the renumbered issue gets a new one. Without the key the
+tracker keeps bd's JSONL in
 .beads/issues.jsonl and every write rewrites the whole file, so a write's
 cost grows with the tracker. tpm tracker migrate moves a JSONL tracker to
-the files layout in one commit, and is run once, when no one is writing;
+the files layout, with its index, in one commit, and is run once, when
+no one is writing; on a files tracker that has no index it builds one;
 tpm tracker export writes either layout as JSONL for bd.
 
 tpm issue file records a new issue and its admission, the lint state and
 any note, in one write, so filing races once. In the files layout an
-update reads and writes only its issue, and a create reads only each
-issue's repository and IID to number the new one. Every writer still
+update reads and writes only its issue and its index entry. Every writer still
 pushes the same branch, so a rejected push pulls and retries, up to 60
 times with a jittered delay that starts at 0.2 seconds and doubles to at
 most 2, about two minutes in all. mage integration:beadsScale (eng01)
