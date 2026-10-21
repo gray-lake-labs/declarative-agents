@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
+	"github.com/gray-lake-labs/scrum-master/internal/events"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
@@ -162,4 +163,54 @@ func testAggregateHonoursJSONAndDryRun(t *testing.T, p trackertest.Program) {
 func configDocument(c Config) (string, error) {
 	b, err := corpus.FormatConfig("reports", "Reports configuration", c)
 	return string(b), err
+}
+
+// TestAggregateReadsTheLedgerAndOnlyDeliveries shows a Sprint Goal a
+// sprint-end merge closed as reported complete in progress though its last
+// report said blocked, counts only merges that close an issue as unreported
+// work, and words a blocker a component reports on itself.
+func TestAggregateReadsTheLedgerAndOnlyDeliveries(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		dir := t.TempDir()
+		for _, week := range []string{"2026-W41", "2026-W42"} {
+			start, _ := ParseWeek(week)
+			writeReport(t, dir, ReportPath(start, "carol"), Render("carol", week, []Entry{work("g/po-3#1", "platform", "blocked", "no")},
+				[]Entry{block("own migration", "platform", "2026-10-05", "platform")}))
+		}
+		start, _ := ParseWeek("2026-W42")
+		writeReport(t, dir, ReportPath(start, "dave"), Render("dave", "2026-W42", []Entry{work("g/po-3#1", "platform", "blocked", "no")},
+			[]Entry{block("own migration", "platform", "2026-10-12", "platform")}))
+		p.AddMerge("g/po-3", tracker.Merge{IID: 1, Title: "Merge pull request #12 from a fork", Author: "carol", MergedAt: "2026-10-14", Description: "From a pull request"})
+		f := p.Tracker()
+		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "goal"})
+		e, text := events.ReportedComplete("01.0", "abc123")
+		if _, err := events.Post(f, "g/po-3", 1, e, events.ReportedCompleteRequired, text, false); err != nil {
+			t.Fatal(err)
+		}
+		cfg := Config{Team: []Member{{"carol", "g/po-3"}, {"dave", "g/po-3"}}, System: "g/system"}
+		cfg.defaults()
+
+		a, err := Aggregate(f, AggregateInput{Dir: dir, Config: cfg, Policy: program.Defaults(), From: "2026-W41", To: "2026-W42"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(a.Progress) != 1 || a.Progress[0].State != "reported complete" || !a.Progress[0].Complete {
+			t.Errorf("progress = %+v, want g/po-3#1 reported complete", a.Progress)
+		}
+		shared := false
+		for _, s := range a.Signals {
+			if s.Kind == SignalUnreportedWork {
+				t.Errorf("a merge closing no issue counts as unreported work: %+v", s)
+			}
+			if s.Kind == SignalSharedBlocker {
+				shared = true
+				if strings.Contains(s.Detail, "platform blocks platform") {
+					t.Errorf("shared blocker on itself reads %q", s.Detail)
+				}
+			}
+		}
+		if !shared {
+			t.Errorf("no shared-blocker signal: %+v", a.Signals)
+		}
+	})
 }

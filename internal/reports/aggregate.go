@@ -178,9 +178,12 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 		if countReports(reports, week, waiting) < 2 {
 			continue
 		}
-		names := sortedKeys(comps)
-		a.Signals = append(a.Signals, Signal{SignalSharedBlocker, waiting, waiting, week,
-			fmt.Sprintf("%s blocks %s in %d reports", waiting, strings.Join(names, ", "), countReports(reports, week, waiting)), true})
+		names := slices.DeleteFunc(sortedKeys(comps), func(c string) bool { return c == waiting })
+		text := fmt.Sprintf("%s blocks %s in %d reports", waiting, strings.Join(names, ", "), countReports(reports, week, waiting))
+		if len(names) == 0 {
+			text = fmt.Sprintf("%s is blocked on %s's own work in %d reports", waiting, waiting, countReports(reports, week, waiting))
+		}
+		a.Signals = append(a.Signals, Signal{SignalSharedBlocker, waiting, waiting, week, text, true})
 	}
 
 	for _, ref := range sortedKeys(goals) {
@@ -197,14 +200,22 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 			a.Signals = append(a.Signals, Signal{SignalSlipped, h.component, ref, in.To,
 				fmt.Sprintf("Sprint Goal %s (%s) has been at risk or blocked in %d consecutive reports", ref, h.component, run), true})
 		}
-		met, err := hasMet(t, ref)
+		met, err := hasEvent(t, ref, "met")
 		if err != nil {
 			return a, err
 		}
-		p := Progress{SprintGoal: ref, Component: h.component, Reported: h.latest, Complete: h.complete, Met: met, State: h.latest}
+		closedComplete, err := hasEvent(t, ref, "reported_complete")
+		if err != nil {
+			return a, err
+		}
+		p := Progress{SprintGoal: ref, Component: h.component, Reported: h.latest, Complete: h.complete || closedComplete, Met: met, State: h.latest}
 		switch {
 		case met:
 			p.State = "met"
+		case closedComplete:
+			// A sprint-end merge closed it as reported complete, after the
+			// last report that named its status (srd038 R2.2).
+			p.State = "reported complete"
 		case h.complete || h.latest == "done":
 			p.State = "reported complete"
 			// Closed without met, the Sprint Goal closed as reported complete
@@ -246,7 +257,9 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 			return a, err
 		}
 		for _, mr := range merged {
-			if mr.MergedAt > end || closesMentioned(m.Project, mr.Description, mentioned) {
+			// A delivery closes an issue it cites; a merge citing none,
+			// such as a pull request's, is not work the reports account for.
+			if mr.MergedAt > end || !strings.Contains(mr.Description, "Closes ") || closesMentioned(m.Project, mr.Description, mentioned) {
 				continue
 			}
 			a.Signals = append(a.Signals, Signal{SignalUnreportedWork, m.Project, fmt.Sprintf("%s!%d", m.Project, mr.IID), ISOWeek(mustDate(mr.MergedAt)),
@@ -318,7 +331,8 @@ func isClosed(t tracker.Tracker, ref string) (bool, error) {
 	return i.State == "closed", nil
 }
 
-func hasMet(t tracker.Tracker, ref string) (bool, error) {
+// hasEvent reports whether the issue ref's ledger holds an event named name.
+func hasEvent(t tracker.Tracker, ref, name string) (bool, error) {
 	project, n, ok := strings.Cut(ref, "#")
 	iid, err := strconv.Atoi(n)
 	if !ok || err != nil {
@@ -332,7 +346,7 @@ func hasMet(t tracker.Tracker, ref string) (bool, error) {
 		return false, err
 	}
 	for _, note := range notes {
-		if e, ok := events.Parse(note.Body); ok && e.Name == "met" {
+		if e, ok := events.Parse(note.Body); ok && e.Name == name {
 			return true, nil
 		}
 	}

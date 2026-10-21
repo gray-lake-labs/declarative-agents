@@ -187,6 +187,13 @@ func (s *Section) List() []string {
 // a nested list under a key, as the map it holds. A field with no tree
 // holds an empty map.
 func (s *Section) Tree() map[string]any {
+	out, _ := s.TreeErr()
+	return out
+}
+
+// TreeErr is Tree with the reason a tree that does not parse holds no map,
+// such as a value with a colon in it that is not quoted.
+func (s *Section) TreeErr() (map[string]any, error) {
 	var b strings.Builder
 	for _, line := range strings.Split(s.Text(), "\n") {
 		trimmed := strings.TrimLeft(line, " ")
@@ -201,10 +208,10 @@ func (s *Section) Tree() map[string]any {
 		}
 	}
 	out := map[string]any{}
-	if yaml.Unmarshal([]byte(b.String()), &out) != nil {
-		return map[string]any{}
+	if err := yaml.Unmarshal([]byte(b.String()), &out); err != nil {
+		return map[string]any{}, err
 	}
-	return out
+	return out, nil
 }
 
 // TreeString returns a tree item's scalar value as text.

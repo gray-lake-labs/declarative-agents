@@ -59,18 +59,21 @@ var LinkKeys = []string{"blocked_by", "depends_on", "relates_to", "duplicates"}
 
 // Doc is one hierarchy document.
 type Doc struct {
-	Path     string
-	ID       string
-	Kind     Kind
-	Title    string
-	Status   string
-	Owner    string
-	Horizon  string
-	Parent   string
-	Links    map[string][]string
-	Problem  string
-	Goals    []string
-	NonGoals []string
+	// ContextError is why the context field does not parse, when it does
+	// not; every item it holds then reads as missing.
+	ContextError string
+	Path         string
+	ID           string
+	Kind         Kind
+	Title        string
+	Status       string
+	Owner        string
+	Horizon      string
+	Parent       string
+	Links        map[string][]string
+	Problem      string
+	Goals        []string
+	NonGoals     []string
 	// Groups maps each requirement group to its item ids, in document order.
 	Groups   map[string][]string
 	Due      map[string]string
@@ -171,7 +174,10 @@ func Parse(path string, data []byte) (*Doc, error) {
 	d.Kind, _ = KindOf(strings.TrimSuffix(filepath.Base(path), ".md"))
 	d.Title, _ = md.Front["title"].(string)
 	d.Status, _ = md.Front["status"].(string)
-	context := md.Field("context").Tree()
+	context, err := md.Field("context").TreeErr()
+	if err != nil {
+		d.ContextError = err.Error()
+	}
 	d.Owner = corpus.TreeString(context, "owner")
 	d.Horizon = corpus.TreeString(context, "horizon")
 	d.Parent = corpus.TreeString(context, "parent")

@@ -154,3 +154,31 @@ func TestStoryParentMayNameTheWholeEpic(t *testing.T) {
 		}
 	}
 }
+
+// TestUnparseableContextIsOneFinding reports a context with an unquoted
+// colon in a value as a parse error, not as every item missing.
+func TestUnparseableContextIsOneFinding(t *testing.T) {
+	src := filepath.Join(fixtures, "malformed", "unpinned-parent", "docs", "specs", "stories", "st001-on-a-branch.md")
+	b, err := os.ReadFile(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	doc := string(b)
+	i := strings.Index(doc, "- owner: ")
+	if i < 0 {
+		t.Fatalf("fixture has no owner item:\n%s", doc)
+	}
+	doc = doc[:i] + "- as_a: product owner: operations\n" + doc[i:]
+	dir := t.TempDir()
+	stories := filepath.Join(dir, "docs", "specs", "stories")
+	os.MkdirAll(stories, 0o755)
+	os.WriteFile(filepath.Join(stories, "st001-on-a-branch.md"), []byte(doc), 0o644)
+	docs, err := Load(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := Validate(docs)
+	if len(f) != 1 || f[0].Field != "context" || !strings.Contains(f[0].Message, "does not parse") {
+		t.Fatalf("findings %v, want one context parse finding", f)
+	}
+}

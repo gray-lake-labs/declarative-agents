@@ -70,7 +70,7 @@ For a week or a sprint, reads every report in it and groups items by component.
 <!-- req: R3.2 -->
 ### R3.2
 
-Computes signals: blockers shared by two or more reports, blockers older than policy.escalation.blocker_age_days, commitments that slipped in policy.escalation.slip_releases or more consecutive reports, components with an expected report missing, items that contradict the ledger (a report calling a Sprint Goal done that has no met event, srd006 R10, unless a sprint-end merge closed it as reported complete before track-goals runs, srd038 R2), and merged work in the tracker that no report mentions. A cost overrun has no signal of its own: a report states it as a blocker naming the spend and the limit it passed.
+Computes signals: blockers shared by two or more reports, blockers older than policy.escalation.blocker_age_days, commitments that slipped in policy.escalation.slip_releases or more consecutive reports, components with an expected report missing, items that contradict the ledger (a report calling a Sprint Goal done that has no met event, srd006 R10, unless a sprint-end merge closed it as reported complete before track-goals runs, srd038 R2), and merged work in the tracker that no report mentions. Merged work counts only deliveries, merges that close an issue they cite. A Sprint Goal a sprint-end merge closed as reported complete reads so in progress whatever its last report said, and a blocker a component reports on its own work is named as such, not as the component blocking itself. A cost overrun has no signal of its own: a report states it as a blocker naming the spend and the limit it passed.
 
 <!-- req: R3.3 -->
 ### R3.3
