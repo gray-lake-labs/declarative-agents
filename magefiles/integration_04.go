@@ -104,8 +104,11 @@ major-and-minor-before-1.0
 
 	_, err = r.runTPM("release", "approve", "--project", po1, "--issue", fmt.Sprint(issue.IID))
 	c.expect(err != nil && strings.Contains(err.Error(), "author"), "the author approved their own release: %v", err)
-	_, err = r.runTPM(append([]string{"release", "gate", "--artifact", "reviewed", "--version", "0.1.0", "--issue", ref}, common...)...)
-	c.expect(err != nil && strings.Contains(err.Error(), "did not pass"), "peer-read with no approval from anyone else: %v", err)
+	// A pending peer read alone is the state before release approve, not a
+	// failure: the gate exits zero, does not pass, and says it waits (#151).
+	var awaiting release.ReleaseGateResult
+	err = r.tpmJSON(&awaiting, append([]string{"release", "gate", "--artifact", "reviewed", "--version", "0.1.0", "--issue", ref}, common...)...)
+	c.expect(err == nil && !awaiting.Passed && awaiting.AwaitingPeerRead, "peer-read with no approval from anyone else: %+v, %v", awaiting, err)
 
 	var tagged release.TagResult
 	if err := r.tpmJSON(&tagged, append([]string{"release", "tag", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...); err != nil {

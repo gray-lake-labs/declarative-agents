@@ -184,7 +184,10 @@ func (Integration) Tasks() error {
 	if err := r.tpmJSON(&refused, push...); err != nil {
 		return err
 	}
-	c.expect(len(refused) == 3 && refused[r2].Action == "refused", "missing environment not refused: %+v", refused)
+	// One result per outcome and issue (#152): the refused outcome is found
+	// by its key, not by its plan entry's index.
+	refusedR2 := slices.ContainsFunc(refused, func(p goals.Pushed) bool { return p.Key == plan.Objectives[r2].Key && p.Action == "refused" })
+	c.expect(len(refused) < len(plan.Objectives) && refusedR2, "missing environment not refused: %+v", refused)
 	return c.err("tasks")
 }
 
