@@ -18,8 +18,7 @@ const AgentsFile = "AGENTS.md"
 // skillLevels names the level a skill serves when it serves only one; every
 // other skill serves both.
 var skillLevels = map[string]string{
-	"tasks":      "system",
-	"sprint-end": "subsystem",
+	"tasks": "system",
 }
 
 // agentsFile renders AGENTS.md for a repository at level from the binary's

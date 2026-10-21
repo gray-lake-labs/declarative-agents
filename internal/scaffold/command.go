@@ -179,6 +179,9 @@ func humanDoctor(r DoctorResult) string {
 	for _, f := range r.Repair.Findings {
 		fmt.Fprintf(&b, "finding      %s\n", f)
 	}
+	if len(r.Repair.Untracked) > 0 {
+		fmt.Fprintf(&b, "not checked, git does not track them (git add them first): %s\n", strings.Join(r.Repair.Untracked, ", "))
+	}
 	if r.Repair.Skipped != "" {
 		fmt.Fprintf(&b, "repair skipped: %s\n", r.Repair.Skipped)
 	}
