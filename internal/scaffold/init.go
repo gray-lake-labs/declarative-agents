@@ -93,8 +93,8 @@ func Init(o InitOptions) (InitResult, error) {
 // TPM_TRACKER names none: the issue workflow cannot run until one exists.
 const NoTracker = "no tracker repository seeded; issues cannot be filed until one exists: rerun with --tracker and --group"
 
-// seedTracker makes an empty tracker repository's first commit, holding an
-// empty issues file and the config file with the issue prefix, and creates the program's labels there. A tracker
+// seedTracker makes an empty tracker repository's first commit, holding the
+// config file with the issue prefix and the files layout, and creates the program's labels there. A tracker
 // repository that already has commits is left as it is.
 func seedTracker(o InitOptions) (TrackerResult, error) {
 	r := TrackerResult{Remote: o.Tracker}
@@ -115,21 +115,19 @@ func seedTracker(o InitOptions) (TrackerResult, error) {
 		r.Seeded, r.Reason = true, "dry run: would make the first commit and create the labels"
 		return r, nil
 	}
-	if err := os.MkdirAll(filepath.Join(clone, filepath.Dir(beads.IssuesFile)), 0o755); err != nil {
-		return r, err
-	}
-	if err := os.WriteFile(filepath.Join(clone, beads.IssuesFile), nil, 0o644); err != nil {
+	if err := os.MkdirAll(filepath.Join(clone, filepath.Dir(beads.ConfigFile)), 0o755); err != nil {
 		return r, err
 	}
 	r.Prefix = o.Prefix
 	if r.Prefix == "" {
 		r.Prefix = beads.PrefixFor(o.Group)
 	}
-	if err := beads.WriteConfig(clone, beads.Config{IssuePrefix: r.Prefix}); err != nil {
+	// A new tracker keeps one file per issue (srd042 R3.1, eng04).
+	if err := beads.WriteConfig(clone, beads.Config{IssuePrefix: r.Prefix, Layout: beads.LayoutFiles}); err != nil {
 		return r, err
 	}
 	for _, args := range [][]string{
-		{"add", beads.IssuesFile, beads.ConfigFile},
+		{"add", beads.ConfigFile},
 		{"commit", "-q", "-m", "tpm init: the tracker repository's first commit"},
 		{"push", "-q", "origin", "HEAD:main"},
 	} {

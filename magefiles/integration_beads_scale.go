@@ -23,12 +23,14 @@ const (
 	scaleIssuesEnv  = "BEADS_SCALE_ISSUES"  // default 1000,5000,10000
 	scaleWritersEnv = "BEADS_SCALE_WRITERS" // default 2,5,10
 	scaleOpsEnv     = "BEADS_SCALE_OPS"     // default 10: file and pop pairs per writer
+	scaleLayoutEnv  = "BEADS_SCALE_LAYOUT"  // files (default) or jsonl
 	scaleProject    = "g/po-1"
 )
 
 // scaleCase is one tracker size measured alone and under one number of
 // concurrent writers.
 type scaleCase struct {
+	Layout       string             `json:"layout"`
 	Issues       int                `json:"issues"`
 	FileBytes    int                `json:"issues_file_bytes"`
 	Sequential   map[string]float64 `json:"sequential_seconds"` // median of three runs per command
@@ -63,6 +65,13 @@ func (Integration) BeadsScale() error {
 	if err != nil {
 		return err
 	}
+	layout := strings.TrimSpace(os.Getenv(scaleLayoutEnv))
+	if layout == "" {
+		layout = beads.LayoutFiles
+	}
+	if layout != beads.LayoutFiles && layout != "jsonl" {
+		return fmt.Errorf("%s=%q: want files or jsonl", scaleLayoutEnv, layout)
+	}
 	tmp, err := os.MkdirTemp("", "tpm-beads-scale-")
 	if err != nil {
 		return err
@@ -80,7 +89,7 @@ func (Integration) BeadsScale() error {
 	stamp := time.Now().UTC().Format("20060102T150405Z")
 	for _, n := range issues {
 		for _, k := range writers {
-			c, err := scaleRun(filepath.Join(tmp, fmt.Sprintf("n%d-k%d", n, k)), bin, n, k, ops[0])
+			c, err := scaleRun(filepath.Join(tmp, fmt.Sprintf("n%d-k%d", n, k)), bin, layout, n, k, ops[0])
 			if err != nil {
 				return err
 			}
@@ -126,8 +135,8 @@ func scaleSizes(env, def string) ([]int, error) {
 // scaleRun seeds a tracker of n issues under dir, times the commands with
 // one writer, then runs k writers doing ops file-and-pop pairs each, and
 // checks the tracker afterwards.
-func scaleRun(dir, bin string, n, k, ops int) (scaleCase, error) {
-	c := scaleCase{Issues: n, Writers: k, Ops: k * ops * 2, Sequential: map[string]float64{},
+func scaleRun(dir, bin, layout string, n, k, ops int) (scaleCase, error) {
+	c := scaleCase{Layout: layout, Issues: n, Writers: k, Ops: k * ops * 2, Sequential: map[string]float64{},
 		Latency: map[string]float64{}, LatencyP95: map[string]float64{}}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return c, err
@@ -164,7 +173,7 @@ func scaleRun(dir, bin string, n, k, ops int) (scaleCase, error) {
 		return c, err
 	}
 	reserved := k * ops * 2
-	size, err := writeScaleIssues(filepath.Join(seed, beads.IssuesFile), n, reserved)
+	size, err := writeScaleIssues(seed, layout, n, reserved)
 	if err != nil {
 		return c, err
 	}
@@ -313,18 +322,29 @@ func scaleRun(dir, bin string, n, k, ops int) (scaleCase, error) {
 		c.LatencyP95[op] = ts[min(len(ts)-1, len(ts)*95/100)]
 	}
 
-	// Correctness: every filed issue is in the tracker once, and no ID or
-	// IID repeats.
-	out, err := exec.Command("git", "--git-dir", tracker, "show", "main:"+beads.IssuesFile).Output()
+	// The tracker repository's size, packed as a remote would hold it, and
+	// a fresh clone's time.
+	if err := git(dir, "--git-dir", tracker, "gc", "-q"); err != nil {
+		return c, err
+	}
+	if kb, err := dirKB(tracker); err == nil {
+		c.RepoKB = kb
+	}
+	fresh := filepath.Join(dir, "fresh")
+	cloneStart := time.Now()
+	if err := git(dir, "clone", "-q", tracker, fresh); err != nil {
+		return c, err
+	}
+	c.CloneSeconds = time.Since(cloneStart).Seconds()
+
+	// Correctness, read from the fresh clone: every filed issue is in the
+	// tracker once, and no ID or IID repeats.
+	all, err := readScaleIssues(fresh, layout)
 	if err != nil {
 		return c, fmt.Errorf("read the tracker after the run: %w", err)
 	}
 	ids, iids, titles := map[string]int{}, map[int]int{}, map[string]int{}
-	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
-		var i beads.Issue
-		if err := json.Unmarshal([]byte(line), &i); err != nil {
-			return c, fmt.Errorf("the tracker after the run: %w", err)
-		}
+	for _, i := range all {
 		ids[i.ID]++
 		iids[i.IID]++
 		titles[i.Title]++
@@ -340,20 +360,6 @@ func scaleRun(dir, bin string, n, k, ops int) (scaleCase, error) {
 			c.Lost++
 		}
 	}
-
-	// The tracker repository's size, packed as a remote would hold it, and
-	// a fresh clone's time.
-	if err := git(dir, "--git-dir", tracker, "gc", "-q"); err != nil {
-		return c, err
-	}
-	if kb, err := dirKB(tracker); err == nil {
-		c.RepoKB = kb
-	}
-	cloneStart := time.Now()
-	if err := git(dir, "clone", "-q", tracker, filepath.Join(dir, "fresh")); err != nil {
-		return c, err
-	}
-	c.CloneSeconds = time.Since(cloneStart).Seconds()
 	return c, nil
 }
 
@@ -376,11 +382,12 @@ const scaleBody = `Score one agent's trajectories against the written rubric and
 - One agent's trajectories are scored and stored with its version (test: grader_scores_fixture_agent; environment: local)
 `
 
-// writeScaleIssues writes n issues to path, the first reserved of them
-// ready for pops, a fifth of the rest closed, each with five comments the
-// size of ledger events, and returns the file's size.
-func writeScaleIssues(path string, n, reserved int) (int, error) {
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+// writeScaleIssues seeds the tracker checkout at dir with n issues in the
+// layout, the first reserved of them ready for pops, a fifth of the rest
+// closed, each with five comments the size of ledger events, and returns
+// the issues' total size.
+func writeScaleIssues(dir, layout string, n, reserved int) (int, error) {
+	if err := os.MkdirAll(filepath.Join(dir, ".beads"), 0o755); err != nil {
 		return 0, err
 	}
 	var lines []string
@@ -397,15 +404,63 @@ func writeScaleIssues(path string, n, reserved int) (int, error) {
 				CreatedAt: "2026-10-02T09:00:00Z",
 				Text:      fmt.Sprintf("Planned for release 01.0; evidence counts in local for 1 requirement(s).\n\n<!-- tpm program event=planned release=01.0 requirement=https://example.invalid/g/system/-/blob/corpus/v0.1.0/docs/specs/initiatives/in001-x.md#R1.%d environment=local -->", e)})
 		}
+		i.Type = "issue"
 		b, err := json.Marshal(i)
 		if err != nil {
 			return 0, err
 		}
+		if layout == beads.LayoutFiles {
+			if err := os.MkdirAll(filepath.Join(dir, beads.IssuesDir), 0o755); err != nil {
+				return 0, err
+			}
+			if err := os.WriteFile(filepath.Join(dir, beads.IssuesDir, id+".json"), append(b, '\n'), 0o644); err != nil {
+				return 0, err
+			}
+		}
 		lines = append(lines, string(b))
 	}
-	slices.Sort(lines) // the store keeps the file sorted by ID, and every ID starts its line
 	data := []byte(strings.Join(lines, "\n") + "\n")
-	return len(data), os.WriteFile(path, data, 0o644)
+	if layout == beads.LayoutFiles {
+		return len(data), beads.WriteConfig(dir, beads.Config{Layout: beads.LayoutFiles})
+	}
+	slices.Sort(lines) // the store keeps the file sorted by ID, and every ID starts its line
+	data = []byte(strings.Join(lines, "\n") + "\n")
+	return len(data), os.WriteFile(filepath.Join(dir, beads.IssuesFile), data, 0o644)
+}
+
+// readScaleIssues reads every issue in the tracker checkout at dir.
+func readScaleIssues(dir, layout string) ([]beads.Issue, error) {
+	var raw [][]byte
+	if layout == beads.LayoutFiles {
+		entries, err := os.ReadDir(filepath.Join(dir, beads.IssuesDir))
+		if err != nil {
+			return nil, err
+		}
+		for _, e := range entries {
+			b, err := os.ReadFile(filepath.Join(dir, beads.IssuesDir, e.Name()))
+			if err != nil {
+				return nil, err
+			}
+			raw = append(raw, b)
+		}
+	} else {
+		b, err := os.ReadFile(filepath.Join(dir, beads.IssuesFile))
+		if err != nil {
+			return nil, err
+		}
+		for _, line := range strings.Split(strings.TrimSpace(string(b)), "\n") {
+			raw = append(raw, []byte(line))
+		}
+	}
+	var out []beads.Issue
+	for _, b := range raw {
+		var i beads.Issue
+		if err := json.Unmarshal(b, &i); err != nil {
+			return nil, err
+		}
+		out = append(out, i)
+	}
+	return out, nil
 }
 
 // scaleReports lays down the reports checkout sprint-end facts reads.
@@ -439,8 +494,8 @@ func scaleRow(c scaleCase) string {
 	for _, op := range scaleOps {
 		seq = append(seq, fmt.Sprintf("%s %.2fs", op, c.Sequential[op]))
 	}
-	return fmt.Sprintf("%d issues (%d KB file), %d writers: sequential [%s]; contended file p50 %.2fs p95 %.2fs, pop p50 %.2fs p95 %.2fs, wall %.1fs, %d/%d failed; repository %d KB, clone %.2fs; lost %d, duplicates %d",
-		c.Issues, c.FileBytes/1024, c.Writers, strings.Join(seq, ", "), c.Latency["issue file"], c.LatencyP95["issue file"],
+	return fmt.Sprintf("%s layout, %d issues (%d KB), %d writers: sequential [%s]; contended file p50 %.2fs p95 %.2fs, pop p50 %.2fs p95 %.2fs, wall %.1fs, %d/%d failed; repository %d KB, clone %.2fs; lost %d, duplicates %d",
+		c.Layout, c.Issues, c.FileBytes/1024, c.Writers, strings.Join(seq, ", "), c.Latency["issue file"], c.LatencyP95["issue file"],
 		c.Latency["issue pop"], c.LatencyP95["issue pop"], c.WallSeconds, c.Failed, c.Ops, c.RepoKB, c.CloneSeconds, c.Lost, c.Duplicates)
 }
 
@@ -459,11 +514,11 @@ func writeScaleReport(root, stamp string, cases []scaleCase) error {
 		return err
 	}
 	var md strings.Builder
-	md.WriteString("| issues | file KB | writers | file | pop | lint --since | facts | file p50/p95 contended | pop p50/p95 contended | wall s | failed | repo KB | clone s | lost | dup |\n")
-	md.WriteString("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
+	md.WriteString("| layout | issues | file KB | writers | file | pop | lint --since | facts | file p50/p95 contended | pop p50/p95 contended | wall s | failed | repo KB | clone s | lost | dup |\n")
+	md.WriteString("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
 	for _, c := range cases {
-		fmt.Fprintf(&md, "| %d | %d | %d | %.2f | %.2f | %.2f | %.2f | %.2f / %.2f | %.2f / %.2f | %.1f | %d/%d | %d | %.2f | %d | %d |\n",
-			c.Issues, c.FileBytes/1024, c.Writers, c.Sequential["issue file"], c.Sequential["issue pop"], c.Sequential["issue lint --since --dry-run"],
+		fmt.Fprintf(&md, "| %s | %d | %d | %d | %.2f | %.2f | %.2f | %.2f | %.2f / %.2f | %.2f / %.2f | %.1f | %d/%d | %d | %.2f | %d | %d |\n",
+			c.Layout, c.Issues, c.FileBytes/1024, c.Writers, c.Sequential["issue file"], c.Sequential["issue pop"], c.Sequential["issue lint --since --dry-run"],
 			c.Sequential["sprint-end facts"], c.Latency["issue file"], c.LatencyP95["issue file"], c.Latency["issue pop"], c.LatencyP95["issue pop"],
 			c.WallSeconds, c.Failed, c.Ops, c.RepoKB, c.CloneSeconds, c.Lost, c.Duplicates)
 	}

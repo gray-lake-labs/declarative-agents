@@ -81,15 +81,28 @@ confirms or reports as lost when tpm tracker reconcile runs back online; reconci
 <!-- section: scale -->
 ## Scale
 
-Every write reads the whole issues file and rewrites it, so a write's
-cost grows with the tracker, and every writer pushes the same branch, so
-contention grows with the number of people writing at once. Comments and
-ledger events live inside their issue, which makes a long-lived issue the
-largest line in the file. mage integration:beadsScale (eng01) measures
-both at thousands of issues and several writers. When its numbers call
-for it, the store moves to one file per issue under .beads/issues/, which
-keeps a write's diff to its own issue and limits conflicts to writers of
-the same issue; bd reads one JSONL file, so that layout would export it.
+The tracker keeps its issues in one of two layouts, which
+.beads/config.yaml names. With layout: files, the layout tpm init seeds,
+each issue is one line of JSON in .beads/issues/<id>.json. A write
+rewrites only the files of the issues it changes, so its diff stays with
+its own issue, and two writers of different issues change different
+files, which git merges by itself. Two writers of the same issue conflict
+on its one line, and that file merges by the rules above; an issue each
+side created with the same IID is renumbered on the side that pushes
+second. Without the key the tracker keeps bd's JSONL in
+.beads/issues.jsonl and every write rewrites the whole file, so a write's
+cost grows with the tracker. tpm tracker migrate moves a JSONL tracker to
+the files layout in one commit, and is run once, when no one is writing;
+tpm tracker export writes either layout as JSONL for bd.
+
+tpm issue file records a new issue and its admission, the lint state and
+any note, in one write, so filing races once. In the files layout an
+update reads and writes only its issue, and a create reads only each
+issue's repository and IID to number the new one. Every writer still
+pushes the same branch, so a rejected push pulls and retries, up to 60
+times with a jittered delay that starts at 0.2 seconds and doubles to at
+most 2, about two minutes in all. mage integration:beadsScale (eng01)
+measures both layouts at thousands of issues and several writers.
 
 <!-- section: choosing-the-backend -->
 ## Choosing the backend

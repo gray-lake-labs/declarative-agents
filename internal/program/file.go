@@ -53,6 +53,22 @@ func File(t tracker.Tracker, project string, in tracker.NewIssue, p Policy, dryR
 		reasons := Lint(would, p)
 		return FileResult{Project: project, DryRun: true, Lint: LintResult{Project: project, Admitted: len(reasons) == 0, Reasons: reasons}}, nil
 	}
+	if c, ok := t.(tracker.AdmittingCreator); ok {
+		var r LintResult
+		issue, err := c.CreateAdmitted(project, in, func(i tracker.Issue) ([]string, string) {
+			reasons := Lint(i, p)
+			r = LintResult{Project: project, Admitted: len(reasons) == 0, Reasons: reasons, Changed: true}
+			if len(reasons) == 0 {
+				return nil, ""
+			}
+			return reasons, lintNote(reasons)
+		})
+		if err != nil {
+			return FileResult{}, err
+		}
+		r.IID = issue.IID
+		return FileResult{Project: project, IID: issue.IID, WebURL: issue.WebURL, Lint: r}, nil
+	}
 	issue, err := t.CreateIssue(project, in)
 	if err != nil {
 		return FileResult{}, err

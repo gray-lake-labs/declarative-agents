@@ -22,6 +22,9 @@ const DefaultPrefix = "tpm"
 // Config is the tracker repository's config file.
 type Config struct {
 	IssuePrefix string `yaml:"issue-prefix"`
+	// Layout is how the tracker keeps its issues: LayoutFiles for one file
+	// per issue, empty for bd's single JSONL file.
+	Layout string `yaml:"layout,omitempty"`
 }
 
 var notPrefix = regexp.MustCompile(`[^a-z0-9-]+`)
@@ -49,19 +52,29 @@ func WriteConfig(dir string, c Config) error {
 // prefix is the issue prefix the clone's config file sets, DefaultPrefix
 // when it sets none.
 func (s *Store) prefix() (string, error) {
-	b, err := os.ReadFile(filepath.Join(s.Dir, ConfigFile))
-	if errors.Is(err, os.ErrNotExist) {
-		return DefaultPrefix, nil
-	}
+	c, err := s.config()
 	if err != nil {
 		return "", err
-	}
-	var c Config
-	if err := yaml.Unmarshal(b, &c); err != nil {
-		return "", fmt.Errorf("%s: %w", ConfigFile, err)
 	}
 	if c.IssuePrefix == "" {
 		return DefaultPrefix, nil
 	}
 	return c.IssuePrefix, nil
+}
+
+// config is the clone's config file; a tracker without one has the zero
+// config.
+func (s *Store) config() (Config, error) {
+	var c Config
+	b, err := os.ReadFile(filepath.Join(s.Dir, ConfigFile))
+	if errors.Is(err, os.ErrNotExist) {
+		return c, nil
+	}
+	if err != nil {
+		return c, err
+	}
+	if err := yaml.Unmarshal(b, &c); err != nil {
+		return c, fmt.Errorf("%s: %w", ConfigFile, err)
+	}
+	return c, nil
 }
