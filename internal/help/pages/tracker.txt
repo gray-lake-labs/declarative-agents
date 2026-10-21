@@ -9,6 +9,8 @@ read. A clone that is offline queues its writes and makes its pops
 provisional; reconcile pushes them once the tracker is reachable.
 
 Subcommands:
+  tpm tracker export      write every issue as bd's JSONL, for bd import (srd042)
+  tpm tracker migrate     move a tracker to one file per issue, once (srd042)
   tpm tracker reconcile   push queued writes, confirm or lose provisional pops (srd042)
 
 See: srd042

@@ -18,10 +18,13 @@ import (
 // pushAttempts bounds how often a write re-synchronizes after its push is
 // rejected by a newer tracker repository; between attempts it waits a
 // growing, jittered delay so contending writers stop colliding in lockstep.
+// A writer that keeps losing needs many quick retries more than long
+// waits, so the delay is capped low and the attempts are many: the bound on
+// a write's wait is about two minutes (mage integration:beadsScale, eng04).
 const (
-	pushAttempts  = 20
+	pushAttempts  = 60
 	pushBaseDelay = 200 * time.Millisecond
-	pushMaxDelay  = 8 * time.Second
+	pushMaxDelay  = 2 * time.Second
 )
 
 // Store is one working clone of the tracker repository, used on behalf of
@@ -288,6 +291,9 @@ func (s *Store) Sync() (Freshness, error) {
 // merge records a merge with the tracker repository whose content is the
 // eng04 merge of the tracker file, not git's line merge.
 func (s *Store) merge(base, remote string) error {
+	if s.files() {
+		return s.mergeFiles(base, remote)
+	}
 	b, err := s.show(base)
 	if err != nil {
 		return err
@@ -334,26 +340,46 @@ func (s *Store) CreateWith(i Issue, finish func(*Issue) error) (Issue, error) {
 		return Issue{}, err
 	}
 	i.ID = prefix + "-" + newID()[:8]
-	_, _, _, err = s.write("create "+i.ID, func(issues *[]Issue) (bool, error) {
-		for _, x := range *issues {
-			if x.Repository == i.Repository {
-				i.IID = max(i.IID, x.IID)
-			}
-		}
-		i.IID++
+	start := func(top int) error {
+		i.IID = top + 1
 		now := s.stamp()
 		i.CreatedAt, i.UpdatedAt, i.CreatedBy = now, now, s.User
 		if i.State == "" {
 			i.State, i.Status = Open, StatusOpen
 		}
 		if finish != nil {
-			if err := finish(&i); err != nil {
+			return finish(&i)
+		}
+		return nil
+	}
+	if s.files() {
+		// One file per issue: the write reads only the IIDs and writes
+		// only the new issue's file.
+		_, _, _, err = s.writeFiles("create "+i.ID, func() (bool, error) {
+			top, err := topIID(s.Dir, i.Repository)
+			if err != nil {
 				return false, err
 			}
-		}
-		*issues = append(*issues, i)
-		return true, nil
-	})
+			if err := start(top); err != nil {
+				return false, err
+			}
+			return writeChanged(s.Dir, nil, []Issue{i})
+		})
+	} else {
+		_, _, _, err = s.write("create "+i.ID, func(issues *[]Issue) (bool, error) {
+			top := 0
+			for _, x := range *issues {
+				if x.Repository == i.Repository {
+					top = max(top, x.IID)
+				}
+			}
+			if err := start(top); err != nil {
+				return false, err
+			}
+			*issues = append(*issues, i)
+			return true, nil
+		})
+	}
 	if err != nil {
 		return Issue{}, err
 	}
@@ -362,6 +388,21 @@ func (s *Store) CreateWith(i Issue, finish func(*Issue) error) (Issue, error) {
 
 // mutate is every write to one issue: pull, apply fn, commit, push.
 func (s *Store) mutate(id, what string, fn func(*Issue) (bool, error)) (fr Freshness, written, queued bool, err error) {
+	if s.files() {
+		// One file per issue: the write reads and rewrites only this one.
+		return s.writeFiles(what+" "+id, func() (bool, error) {
+			i, err := s.issue(id)
+			if err != nil {
+				return false, err
+			}
+			changed, err := fn(&i)
+			if err != nil || !changed {
+				return false, err
+			}
+			i.UpdatedAt = s.stamp()
+			return writeChanged(s.Dir, nil, []Issue{i})
+		})
+	}
 	return s.write(what+" "+id, func(issues *[]Issue) (bool, error) {
 		for k := range *issues {
 			if (*issues)[k].ID == id {
@@ -383,9 +424,19 @@ func (s *Store) write(what string, fn func(*[]Issue) (bool, error)) (fr Freshnes
 		if err != nil {
 			return false, err
 		}
+		files := s.files()
+		var before map[string][]byte
+		if files {
+			if before, err = encodedAll(issues); err != nil {
+				return false, err
+			}
+		}
 		changed, err := fn(&issues)
 		if err != nil || !changed {
 			return false, err
+		}
+		if files {
+			return writeChanged(s.Dir, before, issues)
 		}
 		return true, writeIssues(filepath.Join(s.Dir, IssuesFile), issues)
 	})
@@ -472,6 +523,9 @@ func (s *Store) wait(d time.Duration) {
 }
 
 func (s *Store) read() ([]Issue, error) {
+	if s.files() {
+		return readIssueDir(s.Dir)
+	}
 	b, err := os.ReadFile(filepath.Join(s.Dir, IssuesFile))
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, nil
@@ -483,6 +537,16 @@ func (s *Store) read() ([]Issue, error) {
 }
 
 func (s *Store) issue(id string) (Issue, error) {
+	if s.files() {
+		b, err := os.ReadFile(issuePath(s.Dir, id))
+		if errors.Is(err, os.ErrNotExist) {
+			return Issue{}, fmt.Errorf("issue %s: %w", id, ErrNotFound)
+		}
+		if err != nil {
+			return Issue{}, err
+		}
+		return decodeIssue(issuePath(s.Dir, id), b)
+	}
 	issues, err := s.read()
 	if err != nil {
 		return Issue{}, err

@@ -161,7 +161,7 @@ func buildRig(dir string) error {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}
-	if err := bareWithFirstCommit(dir, filepath.Join(dir, "tracker.git"), map[string]string{beads.IssuesFile: ""}); err != nil {
+	if err := bareWithFirstCommit(dir, filepath.Join(dir, "tracker.git"), map[string]string{beads.ConfigFile: "layout: " + beads.LayoutFiles + "\n"}); err != nil {
 		return err
 	}
 	for _, name := range append([]string{"work"}, projectNames()...) {

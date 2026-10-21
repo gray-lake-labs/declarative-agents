@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -148,8 +149,8 @@ func TestCreateAdmittedIsOneWrite(t *testing.T) {
 		t.Fatal("a rejected create reported success")
 	}
 	f.rejectPushes(false)
-	out, _ := exec.Command("git", "--git-dir", f.remote, "show", "main:"+IssuesFile).Output()
-	if count() != before+2 || strings.Contains(string(out), `"rejected"`) {
+	rejected := slices.ContainsFunc(f.remoteIssues(), func(i Issue) bool { return i.Title == "rejected" })
+	if count() != before+2 || rejected {
 		t.Fatalf("a rejected create left %d commits or the issue in the tracker", count()-before)
 	}
 }

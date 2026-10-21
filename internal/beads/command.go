@@ -1,7 +1,9 @@
 package beads
 
 import (
+	"flag"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
@@ -38,4 +40,70 @@ func init() {
 			return ctx.Emit(r, strings.Join(lines, "\n"))
 		},
 	})
+
+	var exportOut string
+	cli.Default.Register(&cli.Command{
+		Group: "tracker", Name: "migrate",
+		Summary: "move a tracker from one JSONL file to one file per issue, once, when no one is writing",
+		Run: func(ctx *cli.Context) error {
+			b, err := beadsTracker(ctx)
+			if err != nil {
+				return err
+			}
+			if ctx.DryRun {
+				return fmt.Errorf("%w: migrate has no dry run; tpm tracker export shows the issues it would move", cli.ErrUsage)
+			}
+			r, err := b.Store.Migrate()
+			if err != nil {
+				return err
+			}
+			human := fmt.Sprintf("moved %d issues to one file each; the tracker is at %s", r.Issues, r.Commit)
+			if r.Already {
+				human = "the tracker already keeps one file per issue"
+			}
+			return ctx.Emit(r, human)
+		},
+	})
+	cli.Default.Register(&cli.Command{
+		Group: "tracker", Name: "export",
+		Summary: "write every issue as bd's JSONL, for bd import",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&exportOut, "out", "", "the file to write; empty writes to standard output")
+		},
+		Run: func(ctx *cli.Context) error {
+			b, err := beadsTracker(ctx)
+			if err != nil {
+				return err
+			}
+			data, err := b.Store.Export()
+			if err != nil {
+				return err
+			}
+			if exportOut == "" {
+				_, err := ctx.Out.Write(data)
+				return err
+			}
+			if err := os.WriteFile(exportOut, data, 0o644); err != nil {
+				return err
+			}
+			return ctx.Emit(struct {
+				Path  string `json:"path"`
+				Bytes int    `json:"bytes"`
+			}{exportOut, len(data)}, fmt.Sprintf("wrote %s", exportOut))
+		},
+	})
+}
+
+// beadsTracker is the context's tracker as the beads tracker the tracker
+// commands serve.
+func beadsTracker(ctx *cli.Context) (*Tracker, error) {
+	t, err := ctx.Tracker()
+	if err != nil {
+		return nil, err
+	}
+	b, ok := t.(*Tracker)
+	if !ok {
+		return nil, fmt.Errorf("the tracker commands serve the beads tracker; set TPM_TRACKER")
+	}
+	return b, nil
 }

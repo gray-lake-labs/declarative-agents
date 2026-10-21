@@ -179,15 +179,12 @@ func TestInitSeedsEmptyTracker(t *testing.T) {
 	}
 	clone := filepath.Join(t.TempDir(), "check")
 	run(t, filepath.Dir(clone), "clone", "-q", remote, clone)
-	if _, err := os.Stat(filepath.Join(clone, beads.IssuesFile)); err != nil {
-		t.Fatalf("the first commit holds no %s: %v", beads.IssuesFile, err)
-	}
 	labels, err := beads.NewTracker(clone, "operator", dir).GroupLabels("g")
 	if err != nil || len(labels) != len(program.DefaultLabels()) {
 		t.Fatalf("tracker labels: %d, %v; want %d", len(labels), err, len(program.DefaultLabels()))
 	}
-	if b, err := os.ReadFile(filepath.Join(clone, beads.ConfigFile)); err != nil || strings.TrimSpace(string(b)) != "issue-prefix: g" || r.Tracker.Prefix != "g" {
-		t.Fatalf("the first commit's %s = %q, %v; result prefix %q; want issue-prefix g", beads.ConfigFile, b, err, r.Tracker.Prefix)
+	if b, err := os.ReadFile(filepath.Join(clone, beads.ConfigFile)); err != nil || string(b) != "issue-prefix: g\nlayout: files\n" || r.Tracker.Prefix != "g" {
+		t.Fatalf("the first commit's %s = %q, %v; result prefix %q; want issue-prefix g and the files layout", beads.ConfigFile, b, err, r.Tracker.Prefix)
 	}
 }
 

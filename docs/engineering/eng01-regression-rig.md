@@ -121,8 +121,8 @@ needs no rig; it builds tpm and works in a temporary directory.
 
 For each tracker size and each number of writers, it seeds a bare tracker
 repository with that many issues in one commit, each with five comments
-the size of ledger events and a fifth of them closed, in the file the
-store keeps. It times issue file, issue pop, issue lint --since with
+the size of ledger events and a fifth of them closed, in the layout
+BEADS_SCALE_LAYOUT names, files by default or jsonl. It times issue file, issue pop, issue lint --since with
 --dry-run, and sprint-end facts against it with one writer, three runs
 each, keeping the median. Then it starts the writers at once, each with
 its own tracker clone and code checkout, each filing new issues and
@@ -131,6 +131,7 @@ command's time. Afterwards it reads the tracker's main and counts the
 filed issues missing from it and the IDs and IIDs that repeat, packs the
 tracker repository, measures its size, and times a fresh clone.
 
+BEADS_SCALE_LAYOUT (files or jsonl),
 BEADS_SCALE_ISSUES (default 1000,5000,10000), BEADS_SCALE_WRITERS
 (default 2,5,10), and BEADS_SCALE_OPS (default 10 file-and-pop pairs per
 writer) set the sizes, each a comma-separated list. The report goes to

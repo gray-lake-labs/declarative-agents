@@ -96,6 +96,18 @@ func parseIssues(b []byte) ([]Issue, error) {
 // writeIssues writes one issue per line sorted by id, so a change to one
 // issue is a change to one line and git's diff and merge base stay exact.
 func writeIssues(path string, issues []Issue) error {
+	b, err := encodeJSONL(issues)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(path, b, 0o644)
+}
+
+// encodeJSONL is bd's JSONL of the issues: one line each, sorted by ID.
+func encodeJSONL(issues []Issue) ([]byte, error) {
 	sorted := slices.Clone(issues)
 	slices.SortFunc(sorted, func(a, b Issue) int { return strings.Compare(a.ID, b.ID) })
 	var buf bytes.Buffer
@@ -105,13 +117,10 @@ func writeIssues(path string, issues []Issue) error {
 		}
 		line, err := json.Marshal(i)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		buf.Write(line)
 		buf.WriteByte('\n')
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return err
-	}
-	return os.WriteFile(path, buf.Bytes(), 0o644)
+	return buf.Bytes(), nil
 }
