@@ -236,3 +236,43 @@ func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 		t.Fatalf("Sprint Goal %s, notes %+v; want closed with a reported_complete event", got.State, notes)
 	}
 }
+
+// TestSprintEndMergeReadsTheSummaryThroughTextconv reads the summary on the
+// branch as its textconv shows it, as git-crypt decrypts: stored reversed,
+// line by line, it is only in format once read through rev.
+func TestSprintEndMergeReadsTheSummaryThroughTextconv(t *testing.T) {
+	tr, checkout := newBeadsTracker(t, "alice")
+	// As in a git-crypt repository, the attributes are on main already.
+	beadstest.Git(t, checkout, "config", "diff.rev.textconv", "rev <")
+	os.WriteFile(filepath.Join(checkout, ".gitattributes"), []byte("docs/sprint-ends/*.md diff=rev\n"), 0o644)
+	beadstest.Git(t, checkout, "add", ".gitattributes")
+	beadstest.Git(t, checkout, "commit", "-q", "-m", "attributes")
+	beadstest.Git(t, checkout, "push", "-q", "origin", "main")
+	end, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: sprint end 01.0", Labels: []string{"plane::management"}})
+	p, err := Pop(tr, ExecGit{}, "g/po-1", end.IID, checkout, Defaults(), false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	summary := filepath.Join(p.Worktree, sprintgoal.SummaryDir, "01.0.md")
+	os.MkdirAll(filepath.Dir(summary), 0o755)
+	plain := []string{"# Sprint end 01.0", "", "## Stories done", "", "- g/po-1#st001"}
+	var stored []string
+	for _, l := range plain {
+		r := []rune(l)
+		for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
+			r[i], r[j] = r[j], r[i]
+		}
+		stored = append(stored, string(r))
+	}
+	os.WriteFile(summary, []byte(strings.Join(stored, "\n")+"\n"), 0o644)
+	beadstest.Git(t, p.Worktree, "add", "-A")
+	beadstest.Git(t, p.Worktree, "commit", "-q", "-m", "Summary")
+	beadstest.Git(t, p.Worktree, "push", "-q", "-u", "origin", "HEAD")
+	if _, err := Approve(reviewer(t, tr, checkout, "bob"), ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, checkout); err != nil {
+		t.Fatal(err)
+	}
+	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, p.Worktree, AuditGate{Command: "true", Dir: p.Worktree}, nil, false)
+	if err != nil || !m.Merged {
+		t.Fatalf("merge of a summary read through textconv = %+v, %v", m, err)
+	}
+}
