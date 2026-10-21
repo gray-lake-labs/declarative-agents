@@ -23,6 +23,7 @@ type Issue struct {
 	Milestone   string   `json:"milestone,omitempty"`
 	Assignees   []string `json:"assignees,omitempty"`
 	Author      string   `json:"author,omitempty"`
+	CreatedAt   string   `json:"created_at,omitempty"`
 	UpdatedAt   string   `json:"updated_at,omitempty"`
 }
 
@@ -178,8 +179,9 @@ type Tracker interface {
 	// twice leaves one milestone (srd001 R7.1, srd031 R4.2). It returns
 	// MilestoneCreated, MilestoneUpdated, or MilestoneUnchanged.
 	EnsureMilestone(group string, m Milestone) (string, error)
-	// Merges lists the merges into the project
-	// since a YYYY-MM-DD date, by author or, with author empty, by anyone
+	// Merges lists the merges into the project since a YYYY-MM-DD day,
+	// from its midnight UTC, or since an RFC 3339 instant, by author or,
+	// with author empty, by anyone. A merge's MergedAt is its UTC day
 	// (srd018 R3.2, R8.1).
 	Merges(project, author, since string) ([]Merge, error)
 	// IssueAwards lists the award emoji on an issue (srd015 R1.2).

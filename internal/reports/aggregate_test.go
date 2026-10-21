@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
+	"slices"
 	"strings"
 	"testing"
 
@@ -113,8 +114,8 @@ func systemIssues(t *testing.T, f tracker.Tracker) []tracker.Issue {
 func testActionableSignalIsPushedAsIssue(t *testing.T, p trackertest.Program) {
 	f := p.Tracker()
 	signals := []Signal{
-		{SignalSharedBlocker, "scoring-api", "scoring-api", "2026-W42", "scoring-api blocks fleet, grader in 2 reports", true},
-		{SignalMissingReport, "g/po-3", "g/po-3", "2026-W42", "no status report for g/po-3 in 2026-W42", false},
+		{SignalSharedBlocker, "scoring-api", "scoring-api", "2026-W42", "scoring-api blocks fleet, grader in 2 reports", true, []string{"fleet", "grader"}},
+		{SignalMissingReport, "g/po-3", "g/po-3", "2026-W42", "no status report for g/po-3 in 2026-W42", false, nil},
 	}
 	res, err := PushSignals(f, "g/system", signals, program.Defaults(), false)
 	if err != nil || len(res) != 1 || res[0].Action != "filed" || len(systemIssues(t, f)) != 1 {
@@ -130,9 +131,31 @@ func testActionableSignalIsPushedAsIssue(t *testing.T, p trackertest.Program) {
 		!strings.Contains(strings.Join(i.Labels, ","), "op::report") {
 		t.Fatalf("labels %v", i.Labels)
 	}
+	me, err := f.CurrentUser()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Contains(i.Assignees, me.Username) {
+		t.Fatalf("the filed signal is not taken by the person pushing it, %s: assignees %v", me.Username, i.Assignees)
+	}
 	again, err := PushSignals(f, "g/system", signals, program.Defaults(), false)
 	if err != nil || again[0].Action != "exists" || len(systemIssues(t, f)) != 1 {
 		t.Fatalf("second push: %+v %v", again, err)
+	}
+
+	// A blocker that is not a listed component files under the first
+	// component it holds up, so lint admits it.
+	listed := program.Defaults()
+	listed.Components, listed.ComponentsRead = []string{"fleet", "grader"}, true
+	vendor := []Signal{{SignalSharedBlocker, "vendor-x", "vendor-x", "2026-W42", "vendor-x blocks fleet, grader in 2 reports", true, []string{"fleet", "grader"}}}
+	res, err = PushSignals(f, "g/system", vendor, listed, false)
+	if err != nil || len(res) != 1 || res[0].Action != "filed" || !res[0].Admitted {
+		t.Fatalf("vendor push: %+v %v", res, err)
+	}
+	for _, j := range systemIssues(t, f) {
+		if j.IID == res[0].IID && !slices.Contains(j.Labels, "component::fleet") {
+			t.Fatalf("vendor signal labels %v, want component::fleet", j.Labels)
+		}
 	}
 }
 

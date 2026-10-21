@@ -217,7 +217,7 @@ func (f *Fake) CreateBranch(project, branch, ref string) error {
 func (f *Fake) Merges(project, author, since string) ([]tracker.Merge, error) {
 	var out []tracker.Merge
 	for _, m := range f.MRs[project] {
-		if m.State == "merged" && (author == "" || m.Author == author) && m.MergedAt >= since {
+		if m.State == "merged" && (author == "" || m.Author == author) && m.MergedAt >= since[:min(len(since), 10)] {
 			out = append(out, *m)
 		}
 	}

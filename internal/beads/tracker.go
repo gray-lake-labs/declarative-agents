@@ -120,7 +120,7 @@ func (t *Tracker) view(i Issue) tracker.Issue {
 	}
 	return tracker.Issue{Project: i.Repository, IID: i.IID, Title: i.Title, Description: i.Description, Labels: labels,
 		State: state, WebURL: "beads:" + i.ID, DueDate: i.DueDate, Milestone: i.Release, Assignees: assignees,
-		Author: i.CreatedBy, UpdatedAt: i.UpdatedAt}
+		Author: i.CreatedBy, CreatedAt: i.CreatedAt, UpdatedAt: i.UpdatedAt}
 }
 
 func (t *Tracker) GetIssue(project string, iid int) (tracker.Issue, error) {

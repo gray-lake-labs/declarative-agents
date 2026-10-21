@@ -2,6 +2,7 @@ package reports
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/program"
@@ -43,13 +44,33 @@ func SignalIssue(s Signal) tracker.NewIssue {
 		Labels: append(program.Labels("management", "", "", s.Component), program.Op(program.OpReport))}
 }
 
+// signalComponent is the component a signal's issue carries: the signal's
+// own when the program lists it or lists none, else the first component a
+// shared blocker holds up.
+func signalComponent(s Signal, p program.Policy) string {
+	if !p.ComponentsRead || len(p.Components) == 0 || slices.Contains(p.Components, s.Component) || len(s.Blocked) == 0 {
+		return s.Component
+	}
+	return s.Blocked[0]
+}
+
 // PushSignals files each actionable signal as an issue in the system
 // repository, once: an open issue already carrying the signal is kept
-// (srd018 R3.6, R6.3).
+// (srd018 R3.6, R6.3). A filed signal is linted in the same write and
+// taken by the person pushing it, the program manager, as srd041's open to
+// taken row allows its author; its component is one the program lists, the
+// first component a shared blocker holds up when the blocker itself is not
+// one.
 func PushSignals(t tracker.Tracker, system string, signals []Signal, p program.Policy, dryRun bool) ([]PushResult, error) {
 	open, err := t.ListIssues(system, tracker.IssueQuery{State: "opened"})
 	if err != nil {
 		return nil, err
+	}
+	var me tracker.User
+	if !dryRun {
+		if me, err = t.CurrentUser(); err != nil {
+			return nil, err
+		}
 	}
 	var out []PushResult
 	for _, s := range signals {
@@ -64,12 +85,22 @@ func PushSignals(t tracker.Tracker, system string, signals []Signal, p program.P
 			}
 		}
 		if r.Action == "filed" {
-			fr, err := program.File(t, system, SignalIssue(s), p, dryRun)
+			in := SignalIssue(s)
+			if c := signalComponent(s, p); c != s.Component {
+				in.Labels = slices.DeleteFunc(in.Labels, func(l string) bool { return strings.HasPrefix(l, "component::") })
+				in.Labels = append(in.Labels, "component::"+c)
+			}
+			fr, err := program.File(t, system, in, p, dryRun)
 			if err != nil {
 				return out, err
 			}
 			r.IID, r.WebURL = fr.IID, fr.WebURL
 			r.Admitted, r.Reasons = fr.Lint.Admitted, fr.Lint.Reasons
+			if !dryRun {
+				if err := t.AssignIssue(system, fr.IID, me); err != nil {
+					return out, err
+				}
+			}
 		}
 		out = append(out, r)
 	}

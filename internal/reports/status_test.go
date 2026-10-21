@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
@@ -141,8 +142,15 @@ func testWeekListsOpenObjectivesAndActivity(t *testing.T, p trackertest.Program)
 		p.AddMerge(po1, mr)
 	}
 	f := p.Tracker()
+	bt, isBeads := f.(*beads.Tracker)
+	if isBeads {
+		bt.Store.Now = func() time.Time { return monday.AddDate(0, 0, -7) } // the period began the week before
+	}
 	obj, _ := f.CreateIssue(po1, tracker.NewIssue{Title: "Score one agent", DueDate: "2026-11-06",
 		Description: "Body\n\n<!-- tpm goals objective=obj001-a:R1 release=01.0 -->"})
+	if isBeads {
+		bt.Store.Now = time.Now
+	}
 	f.CreateIssue(po1, tracker.NewIssue{Title: "Ad hoc", Description: "not an objective"})
 	done, _ := f.CreateIssue(po1, tracker.NewIssue{Title: "Grader notes"})
 	if err := p.As("po-1").AssignIssue(po1, done.IID, tracker.User{Username: "po-1"}); err != nil {
@@ -161,5 +169,27 @@ func testWeekListsOpenObjectivesAndActivity(t *testing.T, p trackertest.Program)
 	}
 	if len(r.Merged) != 1 || r.Merged[0].IID != 1 || len(r.Closed) != 1 || r.Closed[0].Title != "Grader notes" {
 		t.Fatalf("activity merged=%+v closed=%+v", r.Merged, r.Closed)
+	}
+}
+
+// TestWeekCountsOnlyThePeriodsMerges leaves out a merge inside the week
+// that landed before the period's first Sprint Goal existed, such as an
+// earlier run's on the same days (#147).
+func TestWeekCountsOnlyThePeriodsMerges(t *testing.T) {
+	p := trackertest.NewBeads(t)
+	p.AddMerge(po1, tracker.Merge{IID: 1, Title: "An earlier run's work", Author: "po-1", MergedAt: "2026-10-12"})
+	p.AddMerge(po1, tracker.Merge{IID: 2, Title: "This period's work", Author: "po-1", MergedAt: "2026-10-14"})
+	f := p.Tracker().(*beads.Tracker)
+	f.Store.Now = func() time.Time { return time.Date(2026, 10, 13, 9, 0, 0, 0, time.UTC) }
+	if _, err := f.CreateIssue(po1, tracker.NewIssue{Title: "Score one agent", DueDate: "2026-11-06",
+		Description: "Body\n\n<!-- tpm goals objective=obj001-a:R1 release=01.0 -->"}); err != nil {
+		t.Fatal(err)
+	}
+	r, err := Week(f, po1, "po-1", monday.AddDate(0, 0, 3))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(r.Merged) != 1 || r.Merged[0].Title != "This period's work" {
+		t.Fatalf("merged %+v, want only this period's", r.Merged)
 	}
 }
