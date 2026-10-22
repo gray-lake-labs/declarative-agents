@@ -28,6 +28,10 @@ type Policy struct {
 	// Acceptance Criteria; any issue with a Cites line must carry them too.
 	RequireAC        []string
 	RequireMilestone bool
+	// RequireApproval makes tpm issue merge refuse a branch without another
+	// person's approval of its tip (srd013 R5.5); off, merge records an
+	// approval when one exists and merges without one.
+	RequireApproval  bool
 	ManagementFilers []string // usernames; empty or ["leads"]: not checked
 	TriageLabel      string
 	// AuditCommand is the corpus gate tpm issue merge runs, in the worktree, on a
@@ -145,6 +149,7 @@ type policyFile struct {
 	Admission struct {
 		RequireMilestone          *bool  `yaml:"require_milestone"`
 		RequireAcceptanceCriteria *bool  `yaml:"require_acceptance_criteria"`
+		RequireApproval           *bool  `yaml:"require_approval"`
 		ManagementFilers          any    `yaml:"management_filers"`
 		AuditCommand              string `yaml:"audit_command"`
 	} `yaml:"admission"`
@@ -175,6 +180,9 @@ func LoadPolicy(t tracker.Tracker, project, ref string) (Policy, error) {
 		}
 		if f.Admission.RequireMilestone != nil {
 			p.RequireMilestone = *f.Admission.RequireMilestone
+		}
+		if f.Admission.RequireApproval != nil {
+			p.RequireApproval = *f.Admission.RequireApproval
 		}
 		if f.Admission.RequireAcceptanceCriteria != nil && !*f.Admission.RequireAcceptanceCriteria {
 			p.RequireAC = nil

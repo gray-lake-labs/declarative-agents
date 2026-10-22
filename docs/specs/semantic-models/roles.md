@@ -15,7 +15,7 @@ Defines the four roles of the process by the level each owns, what each writes, 
 | --- | --- | --- | --- |
 | system | technical_program_manager | System SRDs and interface YAMLs in the system repository, and the subsystem SRDs that declare each subsystem's owner and components. | System tests pass on the pinned set in the final environment before customer handoff (srd008). |
 | subsystem | product_owner | The subsystem's epics, features, and stories, the requirements its stories cite, and the subsystem's road-map. | Its stories' criteria pass in the environment each names (srd008). |
-| component | developer | Issues from chosen stories with tasks, then code and documents through specify and implement. | Component tests pass in the local environment and the branch is approved and merged (srd008). |
+| component | developer | Issues from chosen stories with tasks, then code and documents through specify and implement. | Component tests pass in the local environment and the branch is reviewed and merged (srd008). |
 | test_subsystem | scrum_master | Environment SRDs, pipeline SRDs, and test-suite SRDs in the test-subsystem repository. | Known-good sets pass and known-bad sets fail in every environment that runs them (srd008). |
 
 <!-- field: roles | form: "keyed table" -->

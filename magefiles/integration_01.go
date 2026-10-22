@@ -100,13 +100,27 @@ func (Integration) Pop() error {
 	if err := r.commitPush(popped.Worktree, "Add grader notes", "GRADER.md"); err != nil {
 		return err
 	}
-	_, err = r.runTPM("issue", "merge", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", popped.Worktree)
-	c.expect(err != nil && strings.Contains(err.Error(), "no approval"), "merge with no approval: %v", err)
+	// The default policy merges without an approval; one that requires
+	// approval refuses until a reviewer gives one (srd013 R5.5).
+	var unapproved program.MergeResult
+	err = r.tpmJSON(&unapproved, "issue", "merge", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", popped.Worktree, "--dry-run")
+	c.expect(err == nil && unapproved.DryRun && unapproved.ApprovedBy == "", "dry-run merge under the default policy: %+v, %v", unapproved, err)
+	system, err := r.project("system")
+	if err != nil {
+		return err
+	}
+	if err := r.seed(system, map[string]string{program.PolicyFile: "---\nid: policy\ntitle: Rig policy\n---\n\n<!-- field: admission -->\n## Admission\n\n" +
+		"<!-- field: require_approval -->\n### Require approval\n\ntrue\n"}); err != nil {
+		return err
+	}
+	requiring := []string{"issue", "merge", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", popped.Worktree, "--control", system, "--ref", seedBranch}
+	_, err = r.runTPM(requiring...)
+	c.expect(err != nil && strings.Contains(err.Error(), "no approval"), "merge with no approval under require_approval: %v", err)
 	if err := r.approve(po1, po1, work.IID, ""); err != nil {
 		return err
 	}
 	var merged program.MergeResult
-	if err := r.tpmJSON(&merged, "issue", "merge", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", popped.Worktree); err != nil {
+	if err := r.tpmJSON(&merged, requiring...); err != nil {
 		return err
 	}
 	c.expect(merged.Merged && merged.Commit != "" && merged.ApprovedBy == rigReviewer, "merge: %+v", merged)

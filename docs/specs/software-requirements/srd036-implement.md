@@ -58,7 +58,7 @@ The worktree carries the skills of every agent installed in the checkout pop ran
 <!-- req: R3.1 -->
 ### R3.1
 
-When the work is committed and pushed and a reviewer has approved its tip with tpm issue approve, runs tpm issue merge (srd013 R5), which runs the corpus gate for a docs/ change, merges the branch, and closes the issue; without the approval it refuses, and the skill asks for one.
+When the work is committed and pushed, runs tpm issue merge (srd013 R5), which runs the corpus gate for a docs/ change, merges the branch, and closes the issue. When the program's policy requires approval, the skill first asks a reviewer to approve the tip with tpm issue approve, and asks again when merge refuses an approval of an earlier commit.
 
 <!-- req: R3.2 -->
 ### R3.2
@@ -99,7 +99,7 @@ tpm issue pop --worktree claims an issue into a worktree an earlier pop opened, 
 <!-- req: R5.3 -->
 ### R5.3
 
-Given a story, implement pops its first listed issue, claims each further one into the same worktree, builds them in order, each committed separately with its record, and finishes with one approved merge of that branch whose --closes names every other claimed issue, so the one merge closes them all.
+Given a story, implement pops its first listed issue, claims each further one into the same worktree, builds them in order, each committed separately with its record, and finishes with one merge of that branch whose --closes names every other claimed issue, so the one merge closes them all.
 
 <!-- req: R5.4 -->
 ### R5.4
@@ -163,7 +163,7 @@ A worktree pop creates from a checkout with installed skills holds the same agen
 <!-- ac: AC5 -->
 ### AC5
 
-A story's open issues list in order with a blocked one apart; the second is claimed into the first's worktree on its branch with no branch opened, an issue someone else holds is refused, and one approved merge closes every claimed issue.
+A story's open issues list in order with a blocked one apart; the second is claimed into the first's worktree on its branch with no branch opened, an issue someone else holds is refused, and one merge closes every claimed issue.
 
 <!-- field: traces -->
 #### Traces

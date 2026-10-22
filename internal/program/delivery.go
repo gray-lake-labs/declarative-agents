@@ -153,7 +153,7 @@ func (d reviewDelivery) merge(main, base, branch, message string) (string, error
 	}
 	commit, err := d.rv.Merge(d.project, branch, strings.TrimSpace(tip), message)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("the host refused to merge %s; if its branch protection requires a review, ask for one with tpm issue approve: %w", branch, err)
 	}
 	run := func(args ...string) (string, error) {
 		out, err := d.git.Run(main, args...)

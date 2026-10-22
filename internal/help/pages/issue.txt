@@ -4,8 +4,8 @@ The issue is the one unit of work, and this group is how every repository
 moves one (formerly named program). An issue is filed unassigned and linted;
 admission decides whether it is ready. Nobody assigns work: the person who
 takes an issue pops it, which claims it and opens its branch and worktree.
-A merge needs another person's approval of the exact commit it merges, and
-it closes the issue. Developers, Product Owners, and the technical program
+A merge closes the issue; under a policy that requires approval, it needs
+another person's approval of the exact commit it merges first. Developers, Product Owners, and the technical program
 manager all run the same loop, through the specify and implement skills.
 
 Subcommands:

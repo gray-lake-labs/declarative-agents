@@ -24,8 +24,9 @@ import (
 // TPM_TRACKER=glab it builds tpm and proves tpm issue labels writes the
 // schema as group labels, tpm issue file files an admitted issue on a
 // dated group milestone, tpm issue pop opens the branch with a draft merge
-// request, and tpm issue merge refuses an unapproved head. It closes what
-// it opened. A second person's approval and the merge are proven offline
+// request, and under the default policy tpm issue merge merges the author's
+// own merge request and closes the issue. A second person's approval, and
+// the refusals of a policy that requires one, are proven offline
 // (internal/gitlab), since the rig has one identity. It never joins mage
 // regression (srd042, #132).
 func (Integration) Glab() error {
@@ -170,16 +171,32 @@ func (Integration) Glab() error {
 			return err
 		}
 	}
-	_, err = tpm(popped.Worktree, "issue", "merge", "--project", project, "--issue", fmt.Sprint(filed.IID), "--dir", popped.Worktree)
-	c.expect(err != nil && strings.Contains(err.Error(), "no approval"), "merge with no approval: %v", err)
-
-	for _, m := range mrs {
-		api.Do("PUT", fmt.Sprintf("projects/%s/merge_requests/%d", url.PathEscape(project), m.IID), map[string]string{"state_event": "close"})
+	// The default policy requires no approval, so the one identity merges
+	// its own merge request (srd013 R5.5).
+	var merged program.MergeResult
+	if out, err = tpm(popped.Worktree, "issue", "merge", "--project", project, "--issue", fmt.Sprint(filed.IID), "--dir", popped.Worktree, "--json"); err != nil {
+		c.expect(false, "merge of the author's own merge request under the default policy: %v", err)
+		for _, m := range mrs {
+			api.Do("PUT", fmt.Sprintf("projects/%s/merge_requests/%d", url.PathEscape(project), m.IID), map[string]string{"state_event": "close"})
+		}
+		exec.Command("git", "-C", clone, "push", "-q", "origin", "--delete", popped.Branch).Run()
+		closed := "close"
+		gl.UpdateIssue(project, filed.IID, tracker.IssueUpdate{State: &closed})
+		return c.err("glab")
 	}
-	exec.Command("git", "-C", clone, "push", "-q", "origin", "--delete", popped.Branch).Run()
-	closed := "close"
-	if _, err := gl.UpdateIssue(project, filed.IID, tracker.IssueUpdate{State: &closed}); err != nil {
+	if err := json.Unmarshal(out, &merged); err != nil {
 		return err
 	}
+	c.expect(merged.Merged && merged.Commit != "" && merged.ApprovedBy == "", "merge: %+v", merged)
+	var after struct {
+		State string `json:"state"`
+	}
+	if len(mrs) == 1 {
+		err := get(fmt.Sprintf("projects/%s/merge_requests/%d", url.PathEscape(project), mrs[0].IID), &after)
+		c.expect(err == nil && after.State == "merged", "the merge request for %s is %q (%v), want merged", popped.Branch, after.State, err)
+	}
+	issue, err := gl.GetIssue(project, filed.IID)
+	c.expect(err == nil && issue.State == "closed", "issue #%d after its merge: %+v, %v", filed.IID, issue.State, err)
+	exec.Command("git", "-C", clone, "push", "-q", "origin", "--delete", popped.Branch).Run()
 	return c.err("glab")
 }

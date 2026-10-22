@@ -97,7 +97,7 @@ flowchart LR
   end
   subgraph DATA[Data plane: the work, continuous]
     S5["5 tasks: each chosen story becomes issues"]
-    S6["6 specify and implement: an agent builds, a person approves the merge"]
+    S6["6 specify and implement: an agent builds, a person reviews the merge"]
     S7["7 release: the release is tagged behind its gate"]
   end
   subgraph TEST[Test subsystem: evidence]

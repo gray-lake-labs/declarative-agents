@@ -135,7 +135,7 @@ func TestDeliveryThroughMergeRequests(t *testing.T) {
 		beadstest.Git(t, dir, "push", "-q", "-u", "origin", "HEAD")
 	}
 	commit(p.Worktree, "GRADER.md")
-	gate := program.AuditGate{Command: "true", Dir: p.Worktree}
+	gate := program.MergeGate{Command: "true", Dir: p.Worktree, RequireApproval: true}
 	if _, err := program.Merge(alice, program.ExecGit{}, fleet, fleet, work.IID, p.Branch, p.Worktree, gate, nil, false); err == nil || !strings.Contains(err.Error(), "no approval") {
 		t.Fatalf("merge without approval = %v, want a refusal", err)
 	}
@@ -168,7 +168,16 @@ func TestDeliveryThroughMergeRequests(t *testing.T) {
 		t.Fatal(err)
 	}
 	commit(q.Worktree, "MORE.md")
-	if _, err := program.Merge(alice, program.ExecGit{}, fleet, fleet, moved.IID, q.Branch, q.Worktree, program.AuditGate{Command: "true", Dir: q.Worktree}, nil, false); err == nil || !strings.Contains(err.Error(), "now at") {
+	if _, err := program.Merge(alice, program.ExecGit{}, fleet, fleet, moved.IID, q.Branch, q.Worktree, program.MergeGate{Command: "true", Dir: q.Worktree, RequireApproval: true}, nil, false); err == nil || !strings.Contains(err.Error(), "now at") {
 		t.Fatalf("merge after the head moved = %v, want a refusal naming the stale approval", err)
+	}
+	// Without the policy's requirement, the author merges their own merge request:
+	// the stale approval is not reported, and the issue closes.
+	m, err = program.Merge(alice, program.ExecGit{}, fleet, fleet, moved.IID, q.Branch, q.Worktree, program.MergeGate{Command: "true", Dir: q.Worktree}, nil, false)
+	if err != nil || !m.Merged || m.ApprovedBy != "" {
+		t.Fatalf("merge under the default policy = %+v, %v; want merged with no approver", m, err)
+	}
+	if got, _ := alice.GetIssue(fleet, moved.IID); got.State != "closed" {
+		t.Fatalf("issue %s after the default-policy merge", got.State)
 	}
 }

@@ -119,7 +119,7 @@ With --issue-project, merges in the given project and closes the issue in the ot
 <!-- req: R5.5 -->
 ### R5.5
 
-Refuses unless the issue carries an approval of the exact commit it would merge, from a person other than the issue's assignee, or, for an issue nobody took, other than the person merging (srd008 R1.4). An approval names the commit its reviewer read, so a commit made after it needs a new one. On a tracking system whose host reviews branches, such as gh, the approval is the host's review of that commit, and the host merges.
+With the policy's admission.require_approval set, refuses unless the issue carries an approval of the exact commit it would merge, from a person other than the issue's assignee, or, for an issue nobody took, other than the person merging (srd008 R1.4). The default policy requires none: merge merges without an approval and names the approver when the tip carries one. An approval names the commit its reviewer read, so a commit made after it needs a new one. On a tracking system whose host reviews branches, such as gh, the approval is the host's review of that commit, and the host merges; a review the host's own branch protection requires still applies.
 
 <!-- req: R5.6 -->
 ### R5.6
@@ -277,7 +277,7 @@ pop assigns only the caller, refuses an issue assigned to someone else, a closed
 <!-- ac: AC8 -->
 ### AC8
 
-merge refuses with no approval, with only the assignee's, and with an approval of an earlier commit, and merges with another person's approval of the tip; approve refuses the assignee and posts once per commit.
+Under a policy with require_approval, merge refuses with no approval, with only the assignee's, and with an approval of an earlier commit, and merges with another person's approval of the tip; under the default policy it merges an unapproved branch, closes its issue, and names an approver only of the tip; approve refuses the assignee and posts once per commit.
 
 <!-- field: traces -->
 #### Traces

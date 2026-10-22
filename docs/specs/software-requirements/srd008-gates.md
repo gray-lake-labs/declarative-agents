@@ -18,8 +18,9 @@ We define done as evidence: a named test passed in a named environment on
 a recorded version. Each level of the program has its own done, the
 environments form one chain from a developer's machine to a customer's
 R&D environment, and promotion along that chain is automation in the test
-subsystem. Two gates remain where people judge: a person reviews every
-merge, and a person approves every handoff to a customer.
+subsystem. Two gates remain where people judge: a person reviews a
+merge, required when the program's policy says so, and a person approves
+every handoff to a customer.
 
 <!-- field: goals -->
 ## Goals
@@ -50,7 +51,7 @@ Retired in 01.2 (design.md D12).
 <!-- req: R1.4 -->
 ### R1.4
 
-The reviewer looks for what passes the checks and is still wrong: scaling, security, drift from the architecture, a shortcut the acceptance criteria did not forbid. The reviewer reads the branch against the issue's Acceptance Criteria, and approves its tip with tpm issue approve, without which tpm issue merge refuses (srd013 R5.5, R5.6).
+The reviewer looks for what passes the checks and is still wrong: scaling, security, drift from the architecture, a shortcut the acceptance criteria did not forbid. The reviewer reads the branch against the issue's Acceptance Criteria, and approves its tip with tpm issue approve. Whether a merge waits for that approval is the program's choice: with the policy's admission.require_approval set, tpm issue merge refuses without it; by default it merges without one and records the approval when one was given (srd013 R5.5, R5.6).
 
 <!-- req: R2 -->
 ## R2 - Release gate
@@ -264,7 +265,7 @@ Gate definitions exist only in policy and environment SRDs, a gate change goes t
 <!-- ac: AC7 -->
 ### AC7
 
-tpm merges no change without another person's approval of the exact commit it merges (srd013 R5.5).
+Under a policy with require_approval, tpm merges no change without another person's approval of the exact commit it merges; under the default policy it merges without one and reports the approver when the tip carries an approval (srd013 R5.5).
 
 <!-- field: traces -->
 #### Traces

@@ -90,8 +90,9 @@ group's milestones and labels as GitLab's own group milestones and group
 labels; due dates and start dates are GitLab's fields. A branch is
 reviewed as a merge request pop opens as a draft, an approval is GitLab's
 approval pinned to the head commit with a note naming that commit, since
-GitLab's approvals do not record one, and merge merges it on GitLab and
-closes the issue on that merge commit.
+GitLab's approvals do not record one, and merge merges it on GitLab,
+waiting while GitLab still checks one that just left draft, and closes
+the issue on that merge commit.
 
 <!-- req: R2 -->
 ## R2 - Mapping
@@ -256,9 +257,11 @@ a rig that provisions fixture tracker repositories.
 
 On the gh system an issue files, lints, and closes in GitHub with its due
 date and milestone read back; pop opens the branch with a draft pull
-request; the author cannot approve it, another person's approval of the
-head lets merge land it on GitHub and close the issue on that commit, and
-an approval of an earlier commit is refused.
+request; the author cannot approve it; under the default policy merge
+lands the author's own pull request on GitHub and closes the issue on that
+commit; under a policy with require_approval, another person's approval
+of the head lets merge land it, and an approval of an earlier commit is
+refused.
 
 <!-- field: traces -->
 #### Traces
@@ -270,9 +273,10 @@ an approval of an earlier commit is refused.
 
 On the glab system an issue files, lints, and closes in GitLab under a
 group milestone its project finds; pop opens the branch with a draft
-merge request; another person's approval of the head lets merge land it
-on GitLab and close the issue on that commit, and an approval of an
-earlier commit is refused.
+merge request; under the default policy merge lands the author's own
+merge request on GitLab and closes the issue on that commit; under a
+policy with require_approval, another person's approval of the head lets
+merge land it, and an approval of an earlier commit is refused.
 
 <!-- field: traces -->
 #### Traces

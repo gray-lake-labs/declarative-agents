@@ -24,11 +24,12 @@ const githubRigRepo = "gray-lake-labs/tpm-gh-rig"
 // builds tpm, and with TPM_TRACKER=gh in a checkout of the rig repository
 // proves tpm issue labels writes the schema into the repository, tpm issue
 // file files an admitted issue on a dated milestone, tpm issue pop opens
-// the branch with a draft pull request, tpm issue merge refuses an
-// unapproved head, and GitHub itself refuses the author's own approval.
-// It closes what it opened. The second person's approval and the merge are
-// proven offline (internal/github), since the rig has one identity. It
-// never joins mage regression (srd042, #133).
+// the branch with a draft pull request, GitHub itself refuses the author's
+// own approval, and under the default policy tpm issue merge merges the
+// author's own pull request and closes the issue. A second person's
+// approval, and the refusals of a policy that requires one, are proven
+// offline (internal/github), since the rig has one identity. It never joins
+// mage regression (srd042, #133).
 func (Integration) Github() error {
 	repo := githubRigRepo
 	if r := strings.TrimSpace(os.Getenv("GITHUB_RIG_REPO")); r != "" {
@@ -133,17 +134,29 @@ func (Integration) Github() error {
 			return err
 		}
 	}
-	_, err = tpm(popped.Worktree, "issue", "merge", "--project", repo, "--issue", fmt.Sprint(filed.IID), "--dir", popped.Worktree)
-	c.expect(err != nil && strings.Contains(err.Error(), "no approval"), "merge with no approval: %v", err)
 	tip, _ := exec.Command("git", "-C", popped.Worktree, "rev-parse", "HEAD").Output()
 	_, err = gh.Approve(repo, popped.Branch, strings.TrimSpace(string(tip)))
 	// gh api reports GitHub's refusal of an author's own review as 422.
 	c.expect(err != nil && (strings.Contains(err.Error(), "422") || strings.Contains(strings.ToLower(err.Error()), "own pull request")), "GitHub let the author approve: %v", err)
 
-	exec.Command("gh", "pr", "close", popped.Branch, "--repo", repo, "--delete-branch").Run()
-	closed := "close"
-	if _, err := gh.UpdateIssue(repo, filed.IID, tracker.IssueUpdate{State: &closed}); err != nil {
+	// The default policy requires no approval, so the one identity merges
+	// its own pull request (srd013 R5.5).
+	var merged program.MergeResult
+	if out, err = tpm(popped.Worktree, "issue", "merge", "--project", repo, "--issue", fmt.Sprint(filed.IID), "--dir", popped.Worktree, "--json"); err != nil {
+		c.expect(false, "merge of the author's own pull request under the default policy: %v", err)
+		exec.Command("gh", "pr", "close", popped.Branch, "--repo", repo, "--delete-branch").Run()
+		closed := "close"
+		gh.UpdateIssue(repo, filed.IID, tracker.IssueUpdate{State: &closed})
+		return c.err("github")
+	}
+	if err := json.Unmarshal(out, &merged); err != nil {
 		return err
 	}
+	c.expect(merged.Merged && merged.Commit != "" && merged.ApprovedBy == "", "merge: %+v", merged)
+	state, _ := exec.Command("gh", "pr", "view", popped.Branch, "--repo", repo, "--json", "state", "-q", ".state").Output()
+	c.expect(strings.TrimSpace(string(state)) == "MERGED", "the pull request for %s is %q, want MERGED", popped.Branch, state)
+	issue, err := gh.GetIssue(repo, filed.IID)
+	c.expect(err == nil && issue.State == "closed", "issue #%d after its merge: %+v, %v", filed.IID, issue.State, err)
+	exec.Command("git", "-C", clone, "push", "-q", "origin", "--delete", popped.Branch).Run()
 	return c.err("github")
 }

@@ -44,7 +44,7 @@ Table 2: What this process covers that Spec Kit does not.
 |---|---|---|
 | Who decides | One developer and an agent | Four roles, each owning a level: the technical program manager the system, the Product Owner a subsystem, the Developers the components, the Scrum Master the test subsystem |
 | Who takes work | Whoever runs `/implement` | Pull, never push: an item gets an assignee only when that person pops it |
-| Review | Left to the user | Every merge is approved by a person other than its author; the Definition of Done says so |
+| Review | Left to the user | A person other than the author reviews a merge; with the policy's `require_approval`, merge waits for that approval |
 | Scope | One feature in one repository | A system of subsystems across repositories, linked by URLs pinned to a release tag |
 | Done | The tasks are implemented | The named tests pass in the named environment |
 | Environments | None | local, dev, staging, production proof of concept, then customer R&D, each declared as an SRD with its trigger and suites |
@@ -78,7 +78,7 @@ Table 3: What any inner loop must provide.
 | Requirements cite upstream requirements by URL pinned to a release tag | track-goals follows the citation to decide which Sprint Goal a requirement serves |
 | Each acceptance criterion names its test and its environment | Evidence can be collected without a person interpreting the spec |
 | Work is visible as tracker issues | daily-scrum, sprint-review, and track-goals read the tracker, not files on a branch |
-| A person other than the author reviews every merge | The Definition of Done |
+| A person other than the author reviews a merge, and approves it first when the policy requires approval | The Definition of Done |
 | Releases are tags | Promotion pins sets of tags |
 
 A Spec Kit repository meets the first two by writing them into `spec.md`,

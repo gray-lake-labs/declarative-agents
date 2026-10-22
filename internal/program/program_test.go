@@ -217,6 +217,11 @@ title: Policy
 
 false
 
+<!-- field: require_approval -->
+### Require approval
+
+true
+
 <!-- field: management_filers -->
 ### Management filers
 
@@ -241,10 +246,10 @@ title: Labels
 | build |
 `))
 	p, err := LoadPolicy(f, "g/system", "main")
-	if err != nil || p.RequireMilestone || p.ManagementFilers[0] != "lead-a" || len(p.Kinds) != 1 {
+	if err != nil || p.RequireMilestone || !p.RequireApproval || p.ManagementFilers[0] != "lead-a" || len(p.Kinds) != 1 {
 		t.Fatalf("p=%+v err=%v", p, err)
 	}
-	if p, err := LoadPolicy(f, "g/other", "main"); err != nil || !p.RequireMilestone {
+	if p, err := LoadPolicy(f, "g/other", "main"); err != nil || !p.RequireMilestone || p.RequireApproval {
 		t.Fatalf("absent control files: p=%+v err=%v", p, err)
 	}
 }

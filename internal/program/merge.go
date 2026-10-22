@@ -39,13 +39,14 @@ const MergedByTrailer = "Merged-by:"
 
 // Merge is delivery on the beads tracker, which delivers by local merge
 // (srd042 R2.3): it requires the issue open, each closes open, commits of
-// its own, the corpus audit passing when docs/ changes, and another person's approval
-// of the commit it merges (srd013 R5.5), then merges the branch --no-ff
-// into the default branch of the repository's main checkout with a message
+// its own, the corpus audit passing when docs/ changes, and, when the gate
+// requires it, another person's approval of the commit it merges (srd013
+// R5.5); an approval given without the requirement is still reported. It
+// then merges the branch --no-ff into the default branch of the repository's main checkout with a message
 // citing the issue and each issue it closes, pushes it, and closes each on
 // that merge. A branch already merged is not merged again; its issues
 // still close.
-func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, gate AuditGate, closes []string, dryRun bool) (MergeResult, error) {
+func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, gate MergeGate, closes []string, dryRun bool) (MergeResult, error) {
 	r := MergeResult{Project: project, IID: iid, Branch: branch, DryRun: dryRun}
 	if _, ok := tracker.For(t, issueProject).(MergeCloser); !ok {
 		return r, fmt.Errorf("this tracker does not close issues on a local merge; tpm issue merge serves the beads tracker")
@@ -137,8 +138,12 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 			return r, err
 		}
 		d := deliveryFor(t, git, project)
-		if r.ApprovedBy, err = d.approval(issueProject, iid, branch, tip, me.Username); err != nil {
+		by, err := d.approval(issueProject, iid, branch, tip, me.Username)
+		if err != nil && gate.RequireApproval {
 			return r, err
+		}
+		if err == nil {
+			r.ApprovedBy = by
 		}
 		if dryRun {
 			return r, nil
