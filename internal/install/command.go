@@ -63,7 +63,15 @@ func init() {
 			if withRuntime {
 				return installRuntime(ctx)
 			}
-			skills, err := Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+			embedded, err := Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+			if err != nil {
+				return err
+			}
+			rendered, err := ProfileSkills(scrummaster.Plugin, scrummaster.AgentsDir)
+			if err != nil {
+				return err
+			}
+			skills, err := MergeSkills(embedded, rendered)
 			if err != nil {
 				return err
 			}

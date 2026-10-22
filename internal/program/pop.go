@@ -11,7 +11,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
@@ -58,11 +57,15 @@ type PopResult struct {
 	IssueProject string `json:"issue_project,omitempty"`
 	IID          int    `json:"iid"`
 	Title        string `json:"title"`
-	WebURL       string `json:"web_url"`
-	Branch       string `json:"branch"`
-	Worktree     string `json:"worktree"`
-	Checkout     string `json:"checkout"`
-	Assigned     bool   `json:"assigned"` // pop assigned the caller now
+	// Body is the issue body: its Requirements are the work's steps and its
+	// Acceptance Criteria what must hold, so the worker needs no tracker
+	// round-trip after the pop (srd036 R6.3).
+	Body     string `json:"body,omitempty"`
+	WebURL   string `json:"web_url"`
+	Branch   string `json:"branch"`
+	Worktree string `json:"worktree"`
+	Checkout string `json:"checkout"`
+	Assigned bool   `json:"assigned"` // pop assigned the caller now
 	// Provisional is an assignment taken while the tracker repository was
 	// unreachable; tpm tracker reconcile confirms it or reports it lost.
 	Provisional bool `json:"provisional,omitempty"`
@@ -183,7 +186,7 @@ func claim(t tracker.Tracker, project, issueProject string, iid int, p Policy, d
 	if err != nil {
 		return PopResult{}, i, err
 	}
-	r := PopResult{Project: project, IID: iid, Title: i.Title, WebURL: i.WebURL, DryRun: dryRun}
+	r := PopResult{Project: project, IID: iid, Title: i.Title, Body: i.Description, WebURL: i.WebURL, DryRun: dryRun}
 	if issueProject != project {
 		r.IssueProject = issueProject
 	}
@@ -261,7 +264,7 @@ func InstallSkills(checkout, worktree string) ([]string, error) {
 	if len(agents) == 0 {
 		return nil, nil
 	}
-	skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+	skills, err := install.EmbeddedSkills()
 	if err != nil {
 		return nil, err
 	}
