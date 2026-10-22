@@ -1,6 +1,8 @@
 package scaffold
 
 import (
+	scrummaster "github.com/gray-lake-labs/scrum-master"
+	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"os"
 	"path/filepath"
 	"slices"
@@ -107,6 +109,18 @@ func TestOnboardWritesOrientation(t *testing.T) {
 	for _, f := range []string{"docs/specs/themes/README.md", "docs/specs/initiatives/README.md"} {
 		if _, ok := got[f]; ok {
 			t.Errorf("a member repository got %s", f)
+		}
+	}
+	// A team's AGENTS.md names every skill onboarding installs, tasks among
+	// them: Sprint Planning hands off to it (#188).
+	agents, _ := os.ReadFile(filepath.Join(dir, AgentsFile))
+	skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, s := range skills {
+		if !strings.Contains(string(agents), "- "+s.Name+": ") {
+			t.Errorf("the subsystem AGENTS.md does not name the %s skill", s.Name)
 		}
 	}
 }

@@ -28,8 +28,8 @@ takes `--project <project> --json`; pop and merge also take
    its Acceptance Criteria what must hold; a question they ask is part of
    the work (srd036 R4.1). Commit each issue separately, its message
    holding its Requirements and Acceptance Criteria and ending
-   `Closes <project#iid>`, and comment on it an `Actual LOC:` line against
-   its `Estimated LOC:`. An issue too big for one pass is split into
+   `Closes <project#iid>`, and post its `Actual LOC:` line against its
+   `Estimated LOC:` with `tpm issue comment --issue <iid> --body "..."`. An issue too big for one pass is split into
    sibling issues with `tasks`, never nested.
 4. Push (`git push -u origin HEAD`). When the policy requires approval
    (`require_approval`; merge `--dry-run` refuses without one), ask a

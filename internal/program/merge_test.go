@@ -285,8 +285,8 @@ func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 	if !slices.Equal(m.Reported, []string{closes[0], closes[2]}) || !slices.Equal(m.AlreadyClosed, []string{closes[1], closes[2]}) {
 		t.Fatalf("merge = %+v", m)
 	}
-	if !m.Audit || m.AuditCommand != "true" {
-		t.Fatalf("merge audit = %v %q, want the gate's command named", m.Audit, m.AuditCommand)
+	if !m.Audit || m.AuditCommand != "true" || m.AuditReason != "docs/ changed" {
+		t.Fatalf("merge audit = %v %q %q, want the gate's command and reason named", m.Audit, m.AuditCommand, m.AuditReason)
 	}
 	teamNotes, _ := tr.ListNotes("g/po-1", teamGoal.IID)
 	if n := countEvents(teamNotes, "reported_complete"); n != 1 {
@@ -403,7 +403,7 @@ func TestMergeReadsTheBranchAgainstOrigin(t *testing.T) {
 		t.Fatal(err)
 	}
 	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, MergeGate{Command: "false", Dir: p.Worktree}, nil, false)
-	if err != nil || m.Audit || !m.Merged {
-		t.Fatalf("merge = %+v, %v; want merged with no audit, as the branch changes no docs/", m, err)
+	if err != nil || m.Audit || !m.Merged || m.AuditCommand != "false" || m.AuditReason != "no docs/ change" {
+		t.Fatalf("merge = %+v, %v; want merged with no audit, the command and the reason named, as the branch changes no docs/", m, err)
 	}
 }

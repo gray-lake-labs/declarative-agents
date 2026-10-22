@@ -16,6 +16,7 @@ Subcommands:
   tpm issue list      a story's open issues, in the order implement works them (srd036 R5)
   tpm issue pop       claim an issue, open its branch and worktree, or join one with --worktree (srd013 R7, srd036 R5)
   tpm issue approve   approve a branch as a reviewer (srd013 R5.6)
+  tpm issue comment   post a comment on an issue, such as its Actual LOC line (srd013 R9)
   tpm issue merge     merge a branch, close its issues (srd013 R5)
   tpm issue close     close an issue on the merge that delivered it (srd013)
   tpm issue recur     open a recurring issue's next instance (srd013 R8)

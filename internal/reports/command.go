@@ -231,7 +231,15 @@ func init() {
 				fmt.Fprintf(&b, "  progress %s (%s): %s\n", pr.SprintGoal, pr.Component, pr.State)
 			}
 			for _, pr := range a.Pushed {
-				fmt.Fprintf(&b, "  pushed %s: %s #%d\n", pr.Key, pr.Action, pr.IID)
+				line := fmt.Sprintf("  pushed %s: %s #%d", pr.Key, pr.Action, pr.IID)
+				// An issue filed now says how admission went, as tpm issue
+				// file does (srd018 R3.6).
+				if pr.Action == "filed" && pr.Admitted {
+					line += ", admitted"
+				} else if pr.Action == "filed" {
+					line += ", needs-triage: " + strings.Join(pr.Reasons, "; ")
+				}
+				fmt.Fprintln(&b, line)
 			}
 			return ctx.Emit(a, b.String())
 		},

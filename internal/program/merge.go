@@ -15,16 +15,19 @@ import (
 
 // MergeResult is what merge reports.
 type MergeResult struct {
-	Project      string   `json:"project"`
-	IssueProject string   `json:"issue_project,omitempty"`
-	IID          int      `json:"issue"`
-	Branch       string   `json:"branch"`
-	Commit       string   `json:"commit"`
-	Audit        bool     `json:"audit_run"` // the branch changes docs/, so the audit ran
-	AuditCommand string   `json:"audit_command,omitempty"`
-	ApprovedBy   string   `json:"approved_by,omitempty"`
-	Merged       bool     `json:"merged"` // merge made the merge commit now
-	Closed       []string `json:"closed,omitempty"`
+	Project      string `json:"project"`
+	IssueProject string `json:"issue_project,omitempty"`
+	IID          int    `json:"issue"`
+	Branch       string `json:"branch"`
+	Commit       string `json:"commit"`
+	Audit        bool   `json:"audit_run"` // the branch changes docs/, so the audit ran
+	AuditCommand string `json:"audit_command"`
+	// AuditReason says why the audit ran or did not: "docs/ changed" or
+	// "no docs/ change" (srd013 R5.3).
+	AuditReason string   `json:"audit_reason"`
+	ApprovedBy  string   `json:"approved_by,omitempty"`
+	Merged      bool     `json:"merged"` // merge made the merge commit now
+	Closed      []string `json:"closed,omitempty"`
 	// AlreadyClosed are --closes issues another merge closed first.
 	AlreadyClosed []string `json:"already_closed,omitempty"`
 	// Reported are the Sprint Goals the merge closed as reported complete,
@@ -128,8 +131,9 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 				}
 			}
 		}
+		r.AuditCommand, r.AuditReason = gate.Command, "no docs/ change"
 		if r.Audit {
-			r.AuditCommand = gate.Command
+			r.AuditReason = "docs/ changed"
 			if err := gate.checkBefore("nothing merged"); err != nil {
 				return r, err
 			}

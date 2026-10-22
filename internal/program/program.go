@@ -209,6 +209,52 @@ func init() {
 		},
 	})
 
+	var commentArgs struct {
+		project, body, bodyFile string
+		iid                     int
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "issue", Name: "comment", Summary: "post a comment on an issue, such as a completed issue's Actual LOC line",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&commentArgs.project, "project", "", "project holding the issue (required)")
+			fs.IntVar(&commentArgs.iid, "issue", 0, "issue IID (required)")
+			fs.StringVar(&commentArgs.body, "body", "", "the comment's text")
+			fs.StringVar(&commentArgs.bodyFile, "body-file", "", "a file holding the comment's text, in place of --body")
+		},
+		Run: func(ctx *cli.Context) error {
+			if commentArgs.project == "" || commentArgs.iid == 0 {
+				return fmt.Errorf("%w: comment needs --project and --issue", cli.ErrUsage)
+			}
+			body := commentArgs.body
+			if commentArgs.bodyFile != "" {
+				if body != "" {
+					return fmt.Errorf("%w: give --body or --body-file, not both", cli.ErrUsage)
+				}
+				b, err := os.ReadFile(commentArgs.bodyFile)
+				if err != nil {
+					return err
+				}
+				body = string(b)
+			}
+			if strings.TrimSpace(body) == "" {
+				return fmt.Errorf("%w: comment needs a non-empty --body or --body-file", cli.ErrUsage)
+			}
+			t, err := ctx.Tracker()
+			if err != nil {
+				return err
+			}
+			r, err := Comment(t, commentArgs.project, commentArgs.iid, body, ctx.DryRun)
+			if err != nil {
+				return err
+			}
+			human := fmt.Sprintf("commented on %s#%d", r.Project, r.IID)
+			if r.DryRun {
+				human = fmt.Sprintf("dry run: would comment on %s#%d", r.Project, r.IID)
+			}
+			return ctx.Emit(r, human)
+		},
+	})
+
 	var approveArgs struct {
 		project, issueProject, branch, dir string
 		iid                                int

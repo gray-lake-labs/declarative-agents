@@ -15,12 +15,6 @@ import (
 // R1.6).
 const AgentsFile = "AGENTS.md"
 
-// skillLevels names the level a skill serves when it serves only one; every
-// other skill serves both.
-var skillLevels = map[string]string{
-	"tasks": "system",
-}
-
 // agentsFile renders AGENTS.md for a repository at level from the binary's
 // dispatch table, its help pages, and its embedded skills, so it names what
 // this tpm runs and cannot drift from it.
@@ -50,10 +44,9 @@ func agentsFile(level string) ([]byte, error) {
 		"- Every document follows docs/constitutions/design.md: Markdown with marker tags, in the format of the parent release docs/external-pins.yaml pins. After upgrading tpm, run tpm doctor to add missing files and repair the format.\n" +
 		"- Every figure is Mermaid in a fenced code block inside the Markdown document that shows it. Put no generated image file, and no other diagram source, under docs/.\n\n")
 	b.WriteString("## Skills\n\nInstall them for your agent with tpm install --agent <agent>.\n\n")
+	// Every skill serves both levels: tasks files a release's Sprint Goals
+	// at the system and a story's issues in a team's repository (#188).
 	for _, s := range skills {
-		if l, ok := skillLevels[s.Name]; ok && l != level {
-			continue
-		}
 		desc, _, _ := strings.Cut(s.Description, " Use when")
 		fmt.Fprintf(&b, "- %s: %s\n", s.Name, desc)
 	}

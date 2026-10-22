@@ -90,7 +90,7 @@ States progress as the ledger state of each Sprint Goal (srd006 R11) and its lat
 <!-- req: R3.6 -->
 ### R3.6
 
-With --push, files each signal that needs action as an issue in the issue body's work format in the system repository the configuration names (R6.3), unassigned, its body mentioning the person who pushed it (srd041 R9.2).
+With --push, files each signal that needs action as an issue in the issue body's work format in the system repository the configuration names (R6.3), unassigned, its body mentioning the person who pushed it (srd041 R9.2), and reports each issue it files with its admission, as tpm issue file does.
 
 <!-- req: R4 -->
 ## R4 - tpm reports deck
