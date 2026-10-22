@@ -19,6 +19,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/checkout"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
@@ -637,14 +638,36 @@ func (t *Tracker) Merge(project, branch, tip, message string) (string, error) {
 			return "", err
 		}
 	}
-	b, err := t.API.Do("PUT", fmt.Sprintf("projects/%s/merge_requests/%d/merge", id(project), m.IID),
-		map[string]string{"sha": tip, "merge_commit_message": message})
-	if err != nil {
-		return "", err
+	at := fmt.Sprintf("projects/%s/merge_requests/%d", id(project), m.IID)
+	for try := 1; ; try++ {
+		b, err := t.API.Do("PUT", at+"/merge", map[string]string{"sha": tip, "merge_commit_message": message})
+		if err == nil {
+			var merged glMR
+			if err := json.Unmarshal(b, &merged); err != nil {
+				return "", err
+			}
+			return merged.MergeCommitSHA, nil
+		}
+		var s struct {
+			Status string `json:"detailed_merge_status"`
+		}
+		if t.get(at, &s) != nil || !slices.Contains(mergeChecking, s.Status) || try == mergeTries {
+			if s.Status != "" {
+				return "", fmt.Errorf("%w (GitLab reports the merge request %s)", err, s.Status)
+			}
+			return "", err
+		}
+		time.Sleep(mergeWait)
 	}
-	var merged glMR
-	if err := json.Unmarshal(b, &merged); err != nil {
-		return "", err
-	}
-	return merged.MergeCommitSHA, nil
 }
+
+// mergeChecking are the detailed_merge_status values under which GitLab's
+// refusal of a merge is its own lag: one that just left draft refuses with
+// 405 until its check ends, and may already read mergeable while the merge
+// endpoint still refuses. Merge tries again, mergeWait apart, up to
+// mergeTries times.
+var (
+	mergeChecking = []string{"checking", "unchecked", "preparing", "approvals_syncing", "mergeable"}
+	mergeWait     = time.Second
+	mergeTries    = 30
+)

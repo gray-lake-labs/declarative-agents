@@ -81,7 +81,7 @@ docs/ directory with SRDs and a road-map, checked by the same audit.
 |---|---|---|---|
 | System | Technical program manager | System SRDs, interface YAMLs, and the subsystem SRDs in the system repository | System tests pass on the pinned set in the final environment |
 | Subsystem | Product Owner | Requirements that satisfy its Sprint Goals; the local road-map | Its requirements' tests pass in the environment each Sprint Goal names |
-| Component | Developers | Issues from chosen stories with tasks, then code through specify and implement | Component tests pass; the branch is approved and merged |
+| Component | Developers | Issues from chosen stories with tasks, then code through specify and implement | Component tests pass; the branch is reviewed and merged |
 | Test subsystem | Scrum Master | SRDs for environments, pipelines, and suites | Known-good sets pass and known-bad sets fail |
 
 Layout is declared, not inferred. A subsystem SRD in the system repository
@@ -107,8 +107,8 @@ What is left for people runs in two loops. The inner loop is how any one
 item gets done, the same for every role and every kind of work: `tasks`
 turns a chosen story into issues, `specify` files an issue with its
 Requirements, Acceptance Criteria, and Design Decisions, `implement`
-takes it into a worktree and builds it, a merge approved by
-another person closes it, and `tpm release tag` tags a release once its
+takes it into a worktree and builds it, a merge, approved by
+another person when the policy requires it, closes it, and `tpm release tag` tags a release once its
 gate passed. The inner
 loop is described in [ai-native-sdlc.md](ai-native-sdlc.md). Audits are
 recurring items the same loop works on a schedule; `track-goals` is the

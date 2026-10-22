@@ -218,6 +218,7 @@ func PolicyDocument(p program.Policy) string {
 	b.WriteString("<!-- field: admission -->\n## Admission\n\n")
 	fmt.Fprintf(&b, "<!-- field: require_milestone -->\n### Require milestone\n\n%t\n\n", p.RequireMilestone)
 	fmt.Fprintf(&b, "<!-- field: require_acceptance_criteria -->\n### Require acceptance criteria\n\n%t\n\n", len(p.RequireAC) > 0)
+	fmt.Fprintf(&b, "<!-- field: require_approval -->\n### Require approval\n\n%t\n\n", p.RequireApproval)
 	fmt.Fprintf(&b, "<!-- field: audit_command -->\n### Audit command\n\n%s\n\n", p.AuditCommand)
 	b.WriteString("<!-- field: escalation -->\n## Escalation\n\n")
 	for _, e := range []struct {

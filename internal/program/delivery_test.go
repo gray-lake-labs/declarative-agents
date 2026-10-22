@@ -59,7 +59,7 @@ func TestApproveAndMergeGoThroughTheDelivery(t *testing.T) {
 	if _, err := Approve(reviewer(t, tr, checkout, "bob"), ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, checkout); err != nil {
 		t.Fatal(err)
 	}
-	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, AuditGate{Command: "true", Dir: p.Worktree}, nil, false)
+	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, MergeGate{Command: "true", Dir: p.Worktree}, nil, false)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -51,7 +51,7 @@ it. The tracker holds the plan, so no window has to.
 | Push | Anyone, or an outer-loop skill on their answer | `specify` | One item with plane, kind, component, Requirements, Acceptance Criteria, Design Decisions, and an estimate, filed unassigned |
 | Pop | The person who will do it | `implement` | The item assigned to that person and no one else, a fresh worktree from the default branch, and sub-issues when the item is larger than one pass |
 | Work | The assignee, driving an agent | `implement` | Each unit built against its Acceptance Criteria and committed with its requirements; actual size logged against the estimate |
-| Gate | Another person | approval, then merge | Review against the definition of done |
+| Gate | Another person, when the policy requires it | approval, then merge | Review against the definition of done |
 | Close | The merge | closing lines | The item and its sub-issues closed; cycle time recorded |
 | Release | The producer, when others depend on it | `tpm release gate`, then `tpm release tag` | A version tag behind the release gate, which handoff routes downstream |
 
@@ -80,8 +80,11 @@ person the findings that landed on their work overnight.
 
 ## The definition of done
 
-Every merge is approved by a person other than its author. No kind
-and no size is exempt. The reviewer is not checking what the tests check; the
+Whether a merge waits for a person other than its author is the program's
+choice. With `require_approval` in its policy, no kind and no size is
+exempt, and `tpm issue merge` refuses a branch without that person's
+approval of its tip; by default review is the team's practice, and an
+approval given is recorded on the merge. The reviewer is not checking what the tests check; the
 reviewer looks for what passes the tests and is still wrong: a pattern that
 will not scale, a security hole, drift from the architecture, a shortcut the
 acceptance criteria did not forbid. The issue's Requirements and

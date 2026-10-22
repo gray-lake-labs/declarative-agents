@@ -284,7 +284,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			gate := AuditGate{Command: AuditFor(p, mergeArgs.dir), Dir: mergeArgs.dir}
+			gate := MergeGate{Command: AuditFor(p, mergeArgs.dir), Dir: mergeArgs.dir, RequireApproval: p.RequireApproval}
 			if mergeArgs.audit != "" {
 				gate.Command = mergeArgs.audit
 			}
@@ -305,7 +305,11 @@ func init() {
 				human += "; reported complete " + strings.Join(r.Reported, ", ")
 			}
 			if r.DryRun {
-				human = fmt.Sprintf("dry run: %s would merge into %s, approved by %s, closing %s#%d", r.Branch, r.Project, r.ApprovedBy, issueProject, r.IID)
+				approved := "with no approval"
+				if r.ApprovedBy != "" {
+					approved = "approved by " + r.ApprovedBy
+				}
+				human = fmt.Sprintf("dry run: %s would merge into %s, %s, closing %s#%d", r.Branch, r.Project, approved, issueProject, r.IID)
 				if len(mergeArgs.closes) > 0 {
 					human += " and " + strings.Join(mergeArgs.closes, ", ")
 				}

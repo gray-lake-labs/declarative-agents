@@ -24,13 +24,16 @@ func ShellAudit(dir, command string) (string, error) {
 	return out.String(), err
 }
 
-// AuditGate is the corpus gate merge runs on a branch that changes docs/:
-// the command (mage audit by default, policy admission.audit_command) run
-// in Dir, the worktree holding the branch.
-type AuditGate struct {
-	Command string
-	Dir     string
-	Run     AuditRunner
+// MergeGate is what merge checks before merging. The corpus gate runs on a
+// branch that changes docs/: the command (mage audit by default, policy
+// admission.audit_command) run in Dir, the worktree holding the branch.
+// RequireApproval (policy admission.require_approval) refuses a branch
+// without another person's approval of its tip.
+type MergeGate struct {
+	Command         string
+	Dir             string
+	Run             AuditRunner
+	RequireApproval bool
 }
 
 // checkCloses parses each --closes reference, project#iid, and refuses one
@@ -58,7 +61,7 @@ func checkCloses(t tracker.Tracker, closes []string) (open [][2]any, closed []st
 }
 
 // checkBefore runs the gate, naming what was withheld when it fails.
-func (g AuditGate) checkBefore(withheld string) error {
+func (g MergeGate) checkBefore(withheld string) error {
 	if g.Command == "" {
 		return fmt.Errorf("the branch changes docs/ and no audit command is configured")
 	}

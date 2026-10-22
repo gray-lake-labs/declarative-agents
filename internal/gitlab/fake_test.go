@@ -13,6 +13,10 @@ import (
 	"sync"
 )
 
+// The fake finishes its merge check at once, so a retried merge need not
+// wait.
+func init() { mergeWait = 0 }
+
 // lab is a GitLab in memory, enough of its REST API v4 for the tracker:
 // projects' issues, notes, award emoji and merge requests with approvals
 // and notes, and groups' milestones and labels. A merge request merged here
@@ -97,6 +101,9 @@ func (c labClient) Run(args ...string) ([]byte, error) {
 		}
 		m["draft"] = false
 		m["title"] = strings.TrimPrefix(m["title"].(string), "Draft: ")
+		// GitLab checks a merge request that left draft before it lets
+		// one merge, and refuses a merge meanwhile.
+		m["checks"] = 1
 		return nil, nil
 	}
 	return nil, fmt.Errorf("fake glab: no command %v", args)
@@ -286,10 +293,22 @@ func (c labClient) route(method string, seg []string, q url.Values, in map[strin
 		n := pr.nextMR
 		pr.nextMR++
 		m := map[string]any{"iid": n, "state": "opened", "title": in["title"], "draft": strings.HasPrefix(fmt.Sprint(in["title"]), "Draft: "),
-			"source_branch": in["source_branch"], "target_branch": in["target_branch"], "author": c.login,
+			"source_branch": in["source_branch"], "target_branch": in["target_branch"], "author": c.login, "checks": 0,
 			"web_url": fmt.Sprintf("https://gitlab.com/%s/-/merge_requests/%d", name, n)}
 		pr.mrs[n] = m
 		return m, nil
+	case rest[0] == "merge_requests" && len(rest) == 2 && method == "GET":
+		m := pr.mrs[num(1)]
+		if m == nil {
+			return nil, apiError{404, "Not Found"}
+		}
+		// Reading it while it checks ends the check.
+		status := "mergeable"
+		if m["checks"].(int) > 0 {
+			status = "checking"
+			m["checks"] = m["checks"].(int) - 1
+		}
+		return map[string]any{"iid": m["iid"], "detailed_merge_status": status}, nil
 	case rest[0] == "merge_requests" && len(rest) == 3:
 		n := num(1)
 		m := pr.mrs[n]
@@ -322,6 +341,9 @@ func (c labClient) route(method string, seg []string, q url.Values, in map[strin
 		case rest[2] == "merge" && method == "PUT":
 			if m["draft"] == true {
 				return nil, apiError{405, "Method Not Allowed: draft"}
+			}
+			if m["checks"].(int) > 0 {
+				return nil, apiError{405, "Method Not Allowed"}
 			}
 			sha, err := c.l.mergeInOrigin(name, m["source_branch"].(string), m["target_branch"].(string), in["sha"].(string), in["merge_commit_message"].(string))
 			if err != nil {

@@ -31,14 +31,15 @@ takes `--project <project> --json`; pop and merge also take
    `Closes <project#iid>`, and comment on it an `Actual LOC:` line against
    its `Estimated LOC:`. An issue too big for one pass is split into
    sibling issues with `tasks`, never nested.
-4. Push (`git push -u origin HEAD`). Ask a reviewer, not you, to read the
-   branch against the Acceptance Criteria and run
-   `tpm issue approve --project <project> --issue <first iid>` in their
-   checkout; the approval names the commit they read.
+4. Push (`git push -u origin HEAD`). When the policy requires approval
+   (`require_approval`; merge `--dry-run` refuses without one), ask a
+   reviewer, not you, to read the branch against the Acceptance Criteria
+   and run `tpm issue approve --project <project> --issue <first iid>` in
+   their checkout; the approval names the commit they read.
 5. From the worktree, run `tpm issue merge --issue <first iid>` with
    `--closes <project#iid>` for every other claimed issue and any issue
    the Requirements say the merge closes. It audits a docs/ change, merges
-   only a branch approved at its tip, pushes, and closes each issue
-   (srd013 R5.5). On a refusal, show the reason and stop; after a new
-   commit, ask for approval again.
+   (under `require_approval`, only a branch approved at its tip), pushes,
+   and closes each issue (srd013 R5.5). On a refusal, show the reason and
+   stop; after a new commit, ask for approval again.
 6. Show the merge commit and the issues it closed.

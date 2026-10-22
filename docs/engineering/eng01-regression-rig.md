@@ -121,10 +121,11 @@ created on first use and reused, since the organization's token may create
 repositories but not delete them; GITHUB_RIG_REPO names another. With
 TPM_TRACKER=gh it builds tpm and proves tpm issue labels writes the schema
 into the repository, tpm issue file files an admitted issue on a dated
-milestone, tpm issue pop opens the branch with a draft pull request, tpm
-issue merge refuses an unapproved head, and GitHub refuses the author's own
-approval. It closes what it opened. A second person's approval and the
-merge are proven offline in internal/github, against a fake GitHub with two
+milestone, tpm issue pop opens the branch with a draft pull request,
+GitHub refuses the author's own approval, and under the default policy tpm
+issue merge merges the author's own pull request and closes the issue. A
+second person's approval, and the refusals of a policy that requires one,
+are proven offline in internal/github, against a fake GitHub with two
 logins that merges in a real git origin, as the rig has one identity.
 
 <!-- section: glab-rig -->
@@ -137,8 +138,9 @@ the group as a subgroup of its parent and the project on first use and
 reusing them after. With TPM_TRACKER=glab it proves tpm issue labels writes
 the schema as group labels, tpm issue file files an admitted issue on a
 dated group milestone, tpm issue pop opens the branch with a draft merge
-request, and tpm issue merge refuses an unapproved head, and closes what it
-opened. A second person's approval and the merge are proven offline in
+request, and under the default policy tpm issue merge merges the author's
+own merge request and closes the issue. A second person's approval, and
+the refusals of a policy that requires one, are proven offline in
 internal/gitlab.
 
 <!-- section: beads-scale -->

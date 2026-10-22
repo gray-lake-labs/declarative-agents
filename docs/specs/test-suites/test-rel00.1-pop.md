@@ -77,12 +77,12 @@ mage integration:pop
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/program -run '^TestMerge(DeliversOnBeads|NeedsAnApprovalOfItsTip)$'
+go test ./internal/program -run '^TestMerge(DeliversOnBeads|NeedsAnApprovalOfItsTip|WithoutApprovalByDefault)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- merge: refused without another person's approval of the tip; then one --no-ff merge commit on the default branch, citing the issue, pushed
+- merge: under the default policy, no approval needed; under require_approval, refused without another person's approval of the tip; then one --no-ff merge commit on the default branch, citing the issue, pushed
 - after_merge: issue closed
 - skill: asks nothing, closes nothing itself, at most 50 lines
 

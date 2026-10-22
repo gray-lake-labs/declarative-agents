@@ -112,11 +112,11 @@ The tracker repository comes first, so every step after it is recorded there. `t
    /tmp/tpm backlog check
    ```
 
-5. Commit the generated program and push its branch. Someone other than the issue's assignee approves the exact commit, and the merge runs the hierarchy gate as its audit, since a program repository has no `mage audit`:
+5. Commit the generated program and push its branch. The merge runs the hierarchy gate as its audit, since a program repository has no `mage audit`. When the program's policy sets `require_approval`, someone other than the issue's assignee first approves the exact commit:
 
    ```bash
    git add -A && git commit -m "Generate the program from the seed" && git push -u origin HEAD
-   TPM_USER=<reviewer> /tmp/tpm issue approve --project <program path> --issue <issue number> --dir .   # the reviewer runs this
+   TPM_USER=<reviewer> /tmp/tpm issue approve --project <program path> --issue <issue number> --dir .   # the reviewer, under require_approval
    /tmp/tpm issue merge --project <program path> --issue <issue number> --dir . --audit "/tmp/tpm backlog check"
    ```
 

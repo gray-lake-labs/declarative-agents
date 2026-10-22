@@ -98,7 +98,7 @@ func TestImplementAStory(t *testing.T) {
 	if _, err := Approve(bob, ExecGit{}, "g/po-1", "g/po-1", first.IID, p.Branch, checkout); err != nil {
 		t.Fatal(err)
 	}
-	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", first.IID, p.Branch, p.Worktree, AuditGate{Command: "true", Dir: p.Worktree},
+	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", first.IID, p.Branch, p.Worktree, MergeGate{Command: "true", Dir: p.Worktree},
 		[]string{fmt.Sprintf("g/po-1#%d", second.IID)}, false)
 	if err != nil {
 		t.Fatal(err)

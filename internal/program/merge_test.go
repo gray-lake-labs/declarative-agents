@@ -40,7 +40,7 @@ func TestMergeDeliversOnBeads(t *testing.T) {
 	}
 	beadstest.Git(t, p.Worktree, "add", "-A")
 	beadstest.Git(t, p.Worktree, "commit", "-q", "-m", "Change the use case")
-	gate := AuditGate{Command: "test ! -e docs/BROKEN", Dir: p.Worktree}
+	gate := MergeGate{Command: "test ! -e docs/BROKEN", Dir: p.Worktree}
 	closes := []string{"g/po-1#1"}
 
 	if _, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, gate, closes, false); err == nil || !strings.Contains(err.Error(), "nothing merged") {
@@ -83,7 +83,7 @@ func TestMergeDeliversOnBeads(t *testing.T) {
 func TestMergeNeedsTheBeadsTracker(t *testing.T) {
 	f := fake.New()
 	i := admitted(f, "Score one agent")
-	if _, err := Merge(f, ExecGit{}, "g/po-1", "g/po-1", i.IID, "1-score-one-agent", ".", AuditGate{}, nil, false); err == nil || !strings.Contains(err.Error(), "tpm issue merge serves the beads tracker") {
+	if _, err := Merge(f, ExecGit{}, "g/po-1", "g/po-1", i.IID, "1-score-one-agent", ".", MergeGate{}, nil, false); err == nil || !strings.Contains(err.Error(), "tpm issue merge serves the beads tracker") {
 		t.Fatalf("merge on a tracker without local merges = %v, want a refusal naming the beads tracker", err)
 	}
 }
@@ -98,8 +98,8 @@ func reviewer(t *testing.T, tr *beads.Tracker, checkout, user string) *beads.Tra
 	return beads.NewTracker(clone, user, checkout)
 }
 
-// TestMergeNeedsAnApprovalOfItsTip holds merge to srd013 R5.5 and R5.6: no
-// merge without an approval, none on the assignee's own, none on an
+// TestMergeNeedsAnApprovalOfItsTip holds merge to srd013 R5.5 and R5.6 under
+// a policy that requires approval: no merge without an approval, none on the assignee's own, none on an
 // approval of an earlier commit; another person's approval of the tip
 // merges. For an issue nobody took, the approver must not be the person
 // merging.
@@ -122,7 +122,7 @@ func TestMergeNeedsAnApprovalOfItsTip(t *testing.T) {
 		beadstest.Git(t, p.Worktree, "push", "-q", "-u", "origin", "HEAD")
 	}
 	merge := func() (MergeResult, error) {
-		return Merge(alice, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, AuditGate{}, nil, false)
+		return Merge(alice, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, MergeGate{RequireApproval: true}, nil, false)
 	}
 	commit("score.go")
 
@@ -157,7 +157,7 @@ func TestMergeNeedsAnApprovalOfItsTip(t *testing.T) {
 	beadstest.Git(t, checkout, "push", "-q", "-u", "origin", "status-week")
 	beadstest.Git(t, checkout, "checkout", "-q", "main")
 	statusMerge := func() (MergeResult, error) {
-		return Merge(alice, ExecGit{}, "g/po-1", "g/po-1", status.IID, "status-week", checkout, AuditGate{}, nil, false)
+		return Merge(alice, ExecGit{}, "g/po-1", "g/po-1", status.IID, "status-week", checkout, MergeGate{RequireApproval: true}, nil, false)
 	}
 	if _, err := Approve(alice, ExecGit{}, "g/po-1", "g/po-1", status.IID, "status-week", checkout); err != nil {
 		t.Fatal(err)
@@ -170,6 +170,44 @@ func TestMergeNeedsAnApprovalOfItsTip(t *testing.T) {
 	}
 	if m, err := statusMerge(); err != nil || !m.Merged {
 		t.Fatalf("merge of the unassigned issue with bob's approval = %+v, %v", m, err)
+	}
+}
+
+// TestMergeWithoutApprovalByDefault is srd013 R5.5 under the default
+// policy: an unapproved branch merges and closes its issue, and an
+// approval of the tip, when one was given, is still reported.
+func TestMergeWithoutApprovalByDefault(t *testing.T) {
+	alice, checkout := newBeadsTracker(t, "alice")
+	bob := reviewer(t, alice, checkout, "bob")
+	deliver := func(title string, approve bool) MergeResult {
+		t.Helper()
+		work, _ := alice.CreateIssue("g/po-1", tracker.NewIssue{Title: title, Milestone: "m", Description: goodBody,
+			Labels: []string{"plane::data", "kind::build", "component::po-1"}})
+		p, err := Pop(alice, ExecGit{}, "g/po-1", work.IID, checkout, Defaults(), false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		beadstest.Git(t, p.Worktree, "commit", "-q", "--allow-empty", "-m", title)
+		beadstest.Git(t, p.Worktree, "push", "-q", "-u", "origin", "HEAD")
+		if approve {
+			if _, err := Approve(bob, ExecGit{}, "g/po-1", "g/po-1", work.IID, "", checkout); err != nil {
+				t.Fatal(err)
+			}
+		}
+		m, err := Merge(alice, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, MergeGate{}, nil, false)
+		if err != nil || !m.Merged {
+			t.Fatalf("merge of %q = %+v, %v", title, m, err)
+		}
+		if got, _ := alice.GetIssue("g/po-1", work.IID); got.State != "closed" {
+			t.Fatalf("%q is %s after its merge", title, got.State)
+		}
+		return m
+	}
+	if m := deliver("Score one agent", false); m.ApprovedBy != "" {
+		t.Fatalf("unapproved merge reports approver %q", m.ApprovedBy)
+	}
+	if m := deliver("Score a batch", true); m.ApprovedBy != "bob" {
+		t.Fatalf("approved merge reports approver %q, want bob", m.ApprovedBy)
 	}
 }
 
@@ -211,7 +249,7 @@ func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 	if _, err := Approve(bob, ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, checkout); err != nil {
 		t.Fatal(err)
 	}
-	gate := AuditGate{Command: "true", Dir: p.Worktree}
+	gate := MergeGate{Command: "true", Dir: p.Worktree}
 	closes := []string{fmt.Sprintf("g/po-1#%d", goal.IID), fmt.Sprintf("g/po-1#%d", done.IID), fmt.Sprintf("g/po-1#%d", teamGoal.IID)}
 	if _, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, p.Worktree, gate, closes, false); err == nil || !strings.Contains(err.Error(), "is not project#story") {
 		t.Fatalf("merge of a summary with a bare story id = %v, want a refusal", err)
@@ -293,7 +331,7 @@ func TestSprintEndMergeReadsTheSummaryThroughTextconv(t *testing.T) {
 	if _, err := Approve(reviewer(t, tr, checkout, "bob"), ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, checkout); err != nil {
 		t.Fatal(err)
 	}
-	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, p.Worktree, AuditGate{Command: "true", Dir: p.Worktree}, nil, false)
+	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", end.IID, p.Branch, p.Worktree, MergeGate{Command: "true", Dir: p.Worktree}, nil, false)
 	if err != nil || !m.Merged {
 		t.Fatalf("merge of a summary read through textconv = %+v, %v", m, err)
 	}
@@ -347,7 +385,7 @@ func TestMergeReadsTheBranchAgainstOrigin(t *testing.T) {
 	if _, err := Approve(reviewer(t, tr, checkout, "bob"), ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, checkout); err != nil {
 		t.Fatal(err)
 	}
-	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, AuditGate{Command: "false", Dir: p.Worktree}, nil, false)
+	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, MergeGate{Command: "false", Dir: p.Worktree}, nil, false)
 	if err != nil || m.Audit || !m.Merged {
 		t.Fatalf("merge = %+v, %v; want merged with no audit, as the branch changes no docs/", m, err)
 	}
