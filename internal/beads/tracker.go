@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"slices"
 	"strings"
 	"time"
 
+	"github.com/gray-lake-labs/scrum-master/internal/checkout"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
@@ -27,10 +27,9 @@ const statusInProgress = "status::in-progress"
 // serves its one checkout whatever project it is asked about.
 type Tracker struct {
 	Store *Store
-	code  string
-	// fetched records the projects whose origin this command has fetched,
-	// so files read reflect what other clones pushed, at one fetch each.
-	fetched map[string]bool
+	// Code is the code half: each project's checkout and its origin, which
+	// every tracking system reads the same way.
+	*checkout.Code
 }
 
 var (
@@ -51,7 +50,7 @@ func (t *Tracker) LastRead() (tracker.Read, bool) {
 // NewTracker serves the tracker repository cloned at clone, as user, with
 // the code half answered by the checkout at code.
 func NewTracker(clone, user, code string) *Tracker {
-	return &Tracker{Store: NewStore(clone, user), code: code}
+	return &Tracker{Store: NewStore(clone, user), Code: &checkout.Code{Dir: code}}
 }
 
 // Configured reports whether TPM_TRACKER names a tracker repository.
@@ -62,7 +61,13 @@ func Configured() bool { return strings.TrimSpace(os.Getenv("TPM_TRACKER")) != "
 // use; the person is TPM_USER, else git's user.name; the code half serves
 // the checkout around the working directory.
 func FromEnv() (*Tracker, error) {
-	remote := strings.TrimSpace(os.Getenv("TPM_TRACKER"))
+	return OpenRepository(strings.TrimSpace(os.Getenv("TPM_TRACKER")))
+}
+
+// OpenRepository opens the beads tracker whose tracker repository is remote, cloned
+// at TPM_TRACKER_CLONE or under the user cache directory, for TPM_USER or
+// git's user.name.
+func OpenRepository(remote string) (*Tracker, error) {
 	clone := strings.TrimSpace(os.Getenv("TPM_TRACKER_CLONE"))
 	if clone == "" {
 		cache, err := os.UserCacheDir()
@@ -378,95 +383,6 @@ func (t *Tracker) CloseOnMerge(project string, iid int, commit string) (bool, er
 	return r.Changed, err
 }
 
-// The code half: each project's checkout and its origin. A project's
-// checkout is the sibling of the command's checkout named for the project's
-// last path segment, as repositories sit side by side under their owner;
-// a project with no such sibling is the command's own checkout.
-
-func (t *Tracker) checkout(project string) string {
-	if project != "" {
-		sib := filepath.Join(filepath.Dir(t.code), path.Base(project))
-		if _, err := os.Stat(filepath.Join(sib, ".git")); err == nil {
-			return sib
-		}
-	}
-	return t.code
-}
-
-func (t *Tracker) git(project string, args ...string) (string, error) {
-	out, err := t.raw(project, args...)
-	return strings.TrimSpace(string(out)), err
-}
-
-func (t *Tracker) raw(project string, args ...string) ([]byte, error) {
-	cmd := exec.Command("git", args...)
-	cmd.Dir = t.checkout(project)
-	out, err := cmd.Output()
-	if err != nil {
-		return nil, fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
-	}
-	return out, nil
-}
-
-func (t *Tracker) DefaultBranch(project string) (string, error) {
-	ref, err := t.git(project, "symbolic-ref", "--short", "refs/remotes/origin/HEAD")
-	if err != nil {
-		return "main", nil
-	}
-	return strings.TrimPrefix(ref, "origin/"), nil
-}
-
-func (t *Tracker) BranchExists(project, branch string) (bool, error) {
-	out, err := t.git(project, "ls-remote", "--heads", "origin", "refs/heads/"+branch)
-	return out != "", err
-}
-
-func (t *Tracker) CreateBranch(project, branch, ref string) error {
-	if _, err := t.git(project, "fetch", "-q", "origin", ref); err != nil {
-		return err
-	}
-	_, err := t.git(project, "push", "-q", "origin", "refs/remotes/origin/"+ref+":refs/heads/"+branch)
-	return err
-}
-
-func (t *Tracker) rev(project, ref string) string {
-	if !t.fetched[project] {
-		if t.fetched == nil {
-			t.fetched = map[string]bool{}
-		}
-		t.fetched[project] = true
-		t.git(project, "fetch", "-q", "origin")
-	}
-	if _, err := t.git(project, "rev-parse", "--verify", "-q", "refs/remotes/origin/"+ref); err == nil {
-		return "origin/" + ref
-	}
-	return ref
-}
-
-// GetFile reads p at ref as text: through the repository's textconv, so a
-// git-crypt repository's files come back decrypted, and as stored where no
-// textconv is configured.
-func (t *Tracker) GetFile(project, p, ref string) ([]byte, error) {
-	out, err := t.raw(project, "cat-file", "--textconv", t.rev(project, ref)+":"+p)
-	if err != nil {
-		return nil, fmt.Errorf("%s at %s: %w", p, ref, tracker.ErrNotFound)
-	}
-	return out, nil
-}
-
-func (t *Tracker) ListDir(project, dir, ref string) ([]string, error) {
-	out, err := t.git(project, "ls-tree", "--name-only", t.rev(project, ref), strings.TrimSuffix(dir, "/")+"/")
-	if err != nil || out == "" {
-		return nil, fmt.Errorf("%s at %s: %w", dir, ref, tracker.ErrNotFound)
-	}
-	return strings.Split(out, "\n"), nil
-}
-
-func (t *Tracker) TagExists(project, tag string) (bool, error) {
-	out, err := t.git(project, "ls-remote", "--tags", "origin", "refs/tags/"+tag)
-	return out != "", err
-}
-
 // FindMilestone looks in the project, then in its ancestor groups.
 func (t *Tracker) FindMilestone(project, title string) (tracker.Milestone, error) {
 	ms, _, err := t.Store.Milestones()
@@ -541,4 +457,10 @@ func (t *Tracker) UpdateGroupLabel(group string, l tracker.Label) error {
 		return fmt.Errorf("%w: %v", tracker.ErrNotFound, err)
 	}
 	return err
+}
+
+func (t *Tracker) checkout(project string) string { return t.Code.Checkout(project) }
+
+func (t *Tracker) git(project string, args ...string) (string, error) {
+	return t.Code.Git(project, args...)
 }

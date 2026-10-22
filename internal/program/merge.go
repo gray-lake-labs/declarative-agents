@@ -47,7 +47,7 @@ const MergedByTrailer = "Merged-by:"
 // still close.
 func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, gate AuditGate, closes []string, dryRun bool) (MergeResult, error) {
 	r := MergeResult{Project: project, IID: iid, Branch: branch, DryRun: dryRun}
-	if _, ok := t.(MergeCloser); !ok {
+	if _, ok := tracker.For(t, issueProject).(MergeCloser); !ok {
 		return r, fmt.Errorf("this tracker does not close issues on a local merge; tpm issue merge serves the beads tracker")
 	}
 	if issueProject != project {
@@ -81,9 +81,16 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		cite += ", closes " + ref
 	}
 	inMain("fetch", "-q", "origin", base)
-	if _, err := inMain("merge-base", "--is-ancestor", "refs/heads/"+branch, "refs/heads/"+base); err == nil {
+	// The base is what origin holds now: the main checkout's own branch may
+	// be behind it, and a diff against that would count others' merges as
+	// this branch's changes.
+	upstream := "refs/heads/" + base
+	if _, err := inMain("rev-parse", "--verify", "-q", "refs/remotes/origin/"+base); err == nil {
+		upstream = "refs/remotes/origin/" + base
+	}
+	if _, err := inMain("merge-base", "--is-ancestor", "refs/heads/"+branch, upstream); err == nil {
 		exact := "--grep=" + regexp.QuoteMeta(fmt.Sprintf("%s#%d", issueProject, iid)) + "([^0-9]|$)"
-		r.Commit, _ = inMain("rev-list", "-1", "--merges", "-E", exact, "refs/heads/"+base)
+		r.Commit, _ = inMain("rev-list", "-1", "--merges", "-E", exact, upstream)
 		if r.Commit == "" {
 			return r, fmt.Errorf("%s has no commits over %s; commit the work first", branch, base)
 		}
@@ -95,7 +102,7 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		if i.State == "closed" {
 			return r, fmt.Errorf("%s#%d is closed", issueProject, iid)
 		}
-		paths, err := inMain("diff", "--name-only", "refs/heads/"+base+"...refs/heads/"+branch)
+		paths, err := inMain("diff", "--name-only", upstream+"...refs/heads/"+branch)
 		if err != nil {
 			return r, err
 		}
@@ -121,7 +128,7 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 				return r, err
 			}
 		}
-		me, err := t.CurrentUser()
+		me, err := tracker.UserIn(t, issueProject)
 		if err != nil {
 			return r, err
 		}
@@ -129,28 +136,17 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		if err != nil {
 			return r, err
 		}
-		if r.ApprovedBy, err = approval(t, issueProject, iid, branch, tip, me.Username); err != nil {
+		d := deliveryFor(t, git, project)
+		if r.ApprovedBy, err = d.approval(issueProject, iid, branch, tip, me.Username); err != nil {
 			return r, err
 		}
 		if dryRun {
 			return r, nil
 		}
-		if current, _ := inMain("branch", "--show-current"); current != base {
-			if _, err := inMain("checkout", "-q", base); err != nil {
-				return r, err
-			}
-		}
-		inMain("merge", "-q", "--ff-only", "refs/remotes/origin/"+base)
-		if _, err := inMain("merge", "-q", "--no-ff", branch, "-m", fmt.Sprintf("Merge %s (%s)\n\n%s %s", branch, cite, MergedByTrailer, me.Username)); err != nil {
+		if r.Commit, err = d.merge(main, base, branch, fmt.Sprintf("Merge %s (%s)\n\n%s %s", branch, cite, MergedByTrailer, me.Username)); err != nil {
 			return r, err
-		}
-		if _, err := inMain("push", "-q", "origin", base); err != nil {
-			return r, fmt.Errorf("merged locally but could not push %s: %w", base, err)
 		}
 		r.Merged = true
-		if r.Commit, err = inMain("rev-parse", "HEAD"); err != nil {
-			return r, err
-		}
 	}
 	if dryRun {
 		return r, nil

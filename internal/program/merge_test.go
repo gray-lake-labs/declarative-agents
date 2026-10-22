@@ -308,3 +308,47 @@ func countEvents(notes []tracker.Note, name string) int {
 	}
 	return n
 }
+
+// TestMergeReadsTheBranchAgainstOrigin merges a branch that changes no
+// docs/, popped from origin's main after another checkout pushed a docs/
+// change there, while the main checkout's own main is still behind: the
+// branch's changes are read against origin, so no audit runs for the other
+// change (#156).
+func TestMergeReadsTheBranchAgainstOrigin(t *testing.T) {
+	tr, checkout := newBeadsTracker(t, "alice")
+	work, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Build the reader", Milestone: "m", Description: goodBody,
+		Labels: []string{"plane::data", "kind::build", "component::po-1"}})
+	other := filepath.Join(filepath.Dir(checkout), "elsewhere")
+	beadstest.Git(t, filepath.Dir(checkout), "clone", "-q", filepath.Join(filepath.Dir(checkout), "po-1.git"), other)
+	beadstest.Identity(t, other, "carol")
+	if err := os.MkdirAll(filepath.Join(other, "docs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(other, "docs", "VISION.md"), []byte("# Vision\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	beadstest.Git(t, other, "add", "-A")
+	beadstest.Git(t, other, "commit", "-q", "-m", "Someone else's docs change")
+	beadstest.Git(t, other, "push", "-q", "origin", "HEAD:main")
+
+	// pop branches from origin's main, which now has the docs change, while
+	// the main checkout's own main stays behind it.
+	p, err := Pop(tr, ExecGit{}, "g/po-1", work.IID, checkout, Defaults(), false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(p.Worktree, "reader.go"), []byte("package reader\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	beadstest.Git(t, p.Worktree, "add", "-A")
+	beadstest.Git(t, p.Worktree, "commit", "-q", "-m", "Build the reader")
+	beadstest.Git(t, p.Worktree, "push", "-q", "-u", "origin", "HEAD")
+	if _, err := Approve(reviewer(t, tr, checkout, "bob"), ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, checkout); err != nil {
+		t.Fatal(err)
+	}
+	m, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, AuditGate{Command: "false", Dir: p.Worktree}, nil, false)
+	if err != nil || m.Audit || !m.Merged {
+		t.Fatalf("merge = %+v, %v; want merged with no audit, as the branch changes no docs/", m, err)
+	}
+}

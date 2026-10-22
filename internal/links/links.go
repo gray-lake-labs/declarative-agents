@@ -44,7 +44,7 @@ func ParseCites(body string) []Cite {
 // Resolve reports why a pinned reference does not resolve, or nil when its
 // tag exists, its path exists at the tag, and its anchor names an entry of
 // the file there (srd007 R5.2). The reference must already be pinned.
-func Resolve(t tracker.Tracker, r Ref) error {
+func Resolve(t tracker.Forge, r Ref) error {
 	if err := r.Pinned(); err != nil {
 		return err
 	}

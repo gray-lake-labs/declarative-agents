@@ -39,10 +39,15 @@ tracker boundary the GitLab client serves today.
 <!-- req: R1.1 -->
 ### R1.1
 
-tpm's commands reach the tracker only through the tracker interface the
-GitLab client implements today. The beads backend is a second
-implementation of that interface; no command, skill, or gate knows which
-backend serves it.
+tpm's commands reach a tracking system only through the tracker
+interface, in two halves every tracking system supplies as one package:
+the issue half (issues, their notes and the ledger events in them,
+milestones, labels, the current user, assignment) and the code half (a
+project's files, tags, branches, and merged history). A branch's approval
+and merge go through one delivery; beads' is the local one, an approval
+comment naming the commit and a --no-ff merge in the project's checkout
+(srd013 R5.5). No command, skill, or gate knows which tracking system
+serves it.
 
 <!-- req: R1.2 -->
 ### R1.2
@@ -54,9 +59,39 @@ fields, never inferred.
 <!-- req: R1.3 -->
 ### R1.3
 
-While both backends exist, a program names its backend in its
-configuration document; 03.0 completes when the GitLab client, the
-platform Terraform, and the rig's GitLab dependency are removed.
+A program names each repository's tracking system in control/trackers.md
+(config format trackers): a default, bd with its tracker repository, gh,
+or glab, and overrides for the projects or groups that use another. A
+repository has exactly one system, so project#iid names one issue; a
+group's entry serves every project under it that no closer entry names.
+TPM_TRACKER replaces the default for one person's run, never an override,
+and with no such file it alone names the system every project uses.
+
+<!-- req: R1.4 -->
+### R1.4
+
+The gh system serves a repository's issues, notes, labels, and milestones
+from GitHub through the gh CLI and the person's existing login; tpm keeps
+no token. GitHub has no due date on an issue and no start date on a
+milestone, so each is a Due: or Start: line of the description. A group's
+labels and milestones go to each of its repositories, as GitHub has none
+of its own. A branch is reviewed as a pull request pop opens as a draft
+with one empty commit, an approval is the pull request's review of the
+head commit, and merge merges it on GitHub and closes the issue on that
+merge commit. Files, tags, branches, and merged history come from the
+local checkout, as for bd.
+
+<!-- req: R1.5 -->
+### R1.5
+
+The glab system serves a repository's issues, notes, and award emoji from
+GitLab through the glab CLI and the person's existing login, and its
+group's milestones and labels as GitLab's own group milestones and group
+labels; due dates and start dates are GitLab's fields. A branch is
+reviewed as a merge request pop opens as a draft, an approval is GitLab's
+approval pinned to the head commit with a note naming that commit, since
+GitLab's approvals do not record one, and merge merges it on GitLab and
+closes the issue on that merge commit.
 
 <!-- req: R2 -->
 ## R2 - Mapping
@@ -215,3 +250,31 @@ a rig that provisions fixture tracker repositories.
 
 - [R4.1](#r41)
 - [R4.2](#r42)
+
+<!-- ac: AC5 -->
+### AC5
+
+On the gh system an issue files, lints, and closes in GitHub with its due
+date and milestone read back; pop opens the branch with a draft pull
+request; the author cannot approve it, another person's approval of the
+head lets merge land it on GitHub and close the issue on that commit, and
+an approval of an earlier commit is refused.
+
+<!-- field: traces -->
+#### Traces
+
+- [R1.4](#r14)
+
+<!-- ac: AC6 -->
+### AC6
+
+On the glab system an issue files, lints, and closes in GitLab under a
+group milestone its project finds; pop opens the branch with a draft
+merge request; another person's approval of the head lets merge land it
+on GitLab and close the issue on that commit, and an approval of an
+earlier commit is refused.
+
+<!-- field: traces -->
+#### Traces
+
+- [R1.5](#r15)

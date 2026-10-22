@@ -108,7 +108,7 @@ func TestCreatesRenumberOnCollidingIIDs(t *testing.T) {
 // shows it, as git-crypt decrypts, and a file with none as stored.
 func TestGetFileReadsThroughTextconv(t *testing.T) {
 	tr := newTestTracker(t, "alice")
-	code := tr.code
+	code := tr.Code.Dir
 	beadstest.Git(t, code, "config", "diff.upper.textconv", "tr a-z A-Z <")
 	for name, body := range map[string]string{".gitattributes": "policy.md diff=upper\n", "policy.md": "secret\n", "plain.md": "plain\n"} {
 		if err := os.WriteFile(filepath.Join(code, name), []byte(body), 0o644); err != nil {

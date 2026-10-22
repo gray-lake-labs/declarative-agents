@@ -108,7 +108,7 @@ The merge tpm makes closes the issue; the skill closes nothing itself and asks n
 <!-- field: out_of_scope -->
 ## Out of scope
 
-- Working a story's issues in one branch; that is planned for implement at the story level.
+- Working a story's issues in one branch; that is implement at the story level (srd036 R5).
 - The corpus gate on a docs/ change; that is release 00.2.
 
 <!-- field: assumptions -->

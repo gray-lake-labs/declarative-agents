@@ -52,7 +52,7 @@ func recursMarker(project string, iid int) string {
 // appended to Previous Runs. An open issue is closed first with a run
 // summary; one a merge closed is left as it is. When the next
 // instance already exists, nothing is written.
-func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurResult, error) {
+func Recur(t tracker.Issues, project string, iid int, o RecurOptions) (RecurResult, error) {
 	r := RecurResult{Project: project, Previous: iid, DryRun: o.DryRun}
 	i, err := t.GetIssue(project, iid)
 	if err != nil {

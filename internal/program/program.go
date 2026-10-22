@@ -73,9 +73,44 @@ func init() {
 		},
 	})
 
+	var listArgs struct{ project, dir, story, epic string }
+	cli.Default.Register(&cli.Command{
+		Group: "issue", Name: "list", Summary: "the open issues implementing a story, or every story under an epic, in the order implement works them",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&listArgs.project, "project", "", "project path (required)")
+			fs.StringVar(&listArgs.story, "implements", "", "the story the issues implement, by id")
+			fs.StringVar(&listArgs.epic, "epic", "", "every story under this epic, by id, read from --dir's hierarchy")
+			fs.StringVar(&listArgs.dir, "dir", ".", "the checkout holding the stories, for --epic")
+		},
+		Run: func(ctx *cli.Context) error {
+			if listArgs.project == "" || (listArgs.story == "") == (listArgs.epic == "") {
+				return fmt.Errorf("%w: list needs --project and one of --implements or --epic", cli.ErrUsage)
+			}
+			t, err := ctx.Tracker()
+			if err != nil {
+				return err
+			}
+			r, err := ListImplementing(t, listArgs.project, listArgs.dir, listArgs.story, listArgs.epic)
+			if err != nil {
+				return err
+			}
+			var b strings.Builder
+			for _, i := range r.Issues {
+				fmt.Fprintf(&b, "%s  %-12s %s  %s\n", i.Ref, i.Story, orNone(strings.Join(i.Assignees, ",")), i.Title)
+			}
+			for _, i := range r.Blocked {
+				fmt.Fprintf(&b, "%s  %-12s blocked by %s  %s\n", i.Ref, i.Story, strings.Join(i.BlockedBy, ", "), i.Title)
+			}
+			if len(r.Issues)+len(r.Blocked) == 0 {
+				fmt.Fprintf(&b, "no open issue implements %s\n", strings.Join(r.Stories, ", "))
+			}
+			return ctx.Emit(r, b.String())
+		},
+	})
+
 	var popArgs struct {
-		project, issueProject, branch, dir, control, ref string
-		iid                                              int
+		project, issueProject, branch, dir, control, ref, worktree string
+		iid                                                        int
 	}
 	cli.Default.Register(&cli.Command{
 		Group: "issue", Name: "pop", Summary: "claim an issue and open its own branch and worktree",
@@ -85,6 +120,7 @@ func init() {
 			fs.StringVar(&popArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
 			fs.StringVar(&popArgs.branch, "branch", "", "the branch to open; empty names it from the issue")
 			fs.StringVar(&popArgs.dir, "dir", ".", "a directory in the local checkout of the project")
+			fs.StringVar(&popArgs.worktree, "worktree", "", "claim the issue into this worktree another pop opened, on its branch, so a story's issues share one branch (srd036)")
 			fs.StringVar(&popArgs.control, "control", "", "program repository holding control/ files; empty uses the defaults")
 			fs.StringVar(&popArgs.ref, "ref", "main", "ref of the control files")
 		},
@@ -104,7 +140,15 @@ func init() {
 			if issueProject == "" {
 				issueProject = popArgs.project
 			}
-			r, err := PopIn(t, ExecGit{}, popArgs.project, issueProject, popArgs.iid, popArgs.branch, popArgs.dir, p, ctx.DryRun)
+			if popArgs.worktree != "" && popArgs.branch != "" {
+				return fmt.Errorf("%w: --worktree takes the worktree's branch; give --branch or --worktree, not both", cli.ErrUsage)
+			}
+			var r PopResult
+			if popArgs.worktree != "" {
+				r, err = PopInto(t, ExecGit{}, popArgs.project, issueProject, popArgs.iid, popArgs.worktree, p, ctx.DryRun)
+			} else {
+				r, err = PopIn(t, ExecGit{}, popArgs.project, issueProject, popArgs.iid, popArgs.branch, popArgs.dir, p, ctx.DryRun)
+			}
 			if err != nil {
 				return err
 			}

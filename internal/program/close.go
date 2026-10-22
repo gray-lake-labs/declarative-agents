@@ -34,7 +34,7 @@ type CloseResult struct {
 // changes nothing.
 func Close(t tracker.Tracker, git Git, project string, iid int, dir string, dryRun bool) (CloseResult, error) {
 	r := CloseResult{Project: project, IID: iid, DryRun: dryRun}
-	c, ok := t.(MergeCloser)
+	c, ok := tracker.For(t, project).(MergeCloser)
 	if !ok {
 		return r, fmt.Errorf("%s#%d closes on its merge only on a tracker that records it; tpm issue close serves the beads tracker", project, iid)
 	}

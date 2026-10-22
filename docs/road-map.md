@@ -68,7 +68,7 @@ tpm picks the labels, files, and lints.
 
 implement claims an issue for the person who works it, on its own
 branch in its own worktree, and the merge request tpm opens closes it.
-Working a story's issues in one branch is planned for implement.
+implement also works a story's issues in one branch (srd036 R5).
 
 <!-- field: srds -->
 ### SRDs

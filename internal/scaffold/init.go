@@ -12,6 +12,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/routing"
 )
 
 // InitOptions are what tpm init is given.
@@ -63,6 +64,13 @@ func Init(o InitOptions) (InitResult, error) {
 	}
 	for n, b := range controlFiles() {
 		files[n] = b
+	}
+	// The program's tracking system, when init knows it: the tracker
+	// repository it seeds, else the one TPM_TRACKER names (srd042).
+	if s, ok := routing.Override(o.Tracker); ok {
+		files[routing.File] = routing.Document(routing.Config{Default: s})
+	} else if s, ok := routing.Override(os.Getenv("TPM_TRACKER")); ok {
+		files[routing.File] = routing.Document(routing.Config{Default: s})
 	}
 	if r.Files, err = write(o.Dir, files, o.Force, o.DryRun); err != nil {
 		return r, err

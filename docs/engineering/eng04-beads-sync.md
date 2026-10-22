@@ -123,7 +123,10 @@ measures both layouts at thousands of issues and several writers.
 ## Choosing the backend
 
 TPM_TRACKER, set to the tracker repository's URL, selects the beads
-backend, and tpm requires it. The tracker clone lives at
+backend, and tpm requires it. In tpm's code a tracking system is the two
+halves of the tracker interface, tracker.Issues and tracker.Forge, and
+program's delivery holds a branch's approval and merge; beads supplies
+both halves and the local delivery. The tracker clone lives at
 TPM_TRACKER_CLONE, or under the user cache directory, cloned on first use.
 The person is TPM_USER, or git's user.name. TPM_WEB_BASE is the web root repositories are cited under, which goals and plan need to write a pinned citation. Issues come from the tracker
 repository; files, branches, tags, and comparisons come from git: a

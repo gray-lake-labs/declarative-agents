@@ -60,7 +60,7 @@ implement takes it into its own branch and worktree and builds it
 against its Requirements and Acceptance Criteria, tpm issue merge
 delivers it and closes it, and tpm release tag tags a release once its gate passed. specify and
 implement are commands in this repository over tpm (srd035, srd036,
-release 00.0); tasks at the story level, and implement working a story's issues in one branch, are planned. The outer loops are the five Scrum
+release 00.0); tasks at the story level and implement working a story's issues in one branch are srd022 R6 and srd036 R5. The outer loops are the five Scrum
 skills (srd020 to srd033): each reads the tracker, asks people bounded
 questions, and pushes issues or posts ledger events.
 
@@ -488,7 +488,7 @@ Two alternatives were rejected. A single intent- type for every level would hide
 | docs/road-map.md | releases of this corpus, each listing its SRDs, config formats, and semantic models |
 | docs/constitutions/ | design.md, the document registry and writing rules |
 | docs/specs/software-requirements/ | srd001-srd008 control plane and gates; srd010-srd019 one per script (tpm subcommand group), srd019 the track-goals audit; srd020-srd033 one per outer-loop skill (command); srd034 initiatives and the dated Sprint Goals; srd035-srd036 the specify and implement skills (the inner loop on GitLab); srd037 tpm install, of the skills and of the declarative-agents runtime; srd038 the sprint-end skill; srd039 the corpus and config document reader (internal/corpus); srd040 the format tools and format gates (magefiles); srd041 issue states and transitions; srd042 the beads tracker; srd043 tpm init, onboard, and doctor; srd044 tpm help; srd045 the backlog hierarchy and tpm backlog; srd046 the draft skill. An SRD of an unplanned release holds its direction only (design.md D12) |
-| docs/specs/config-formats/ | labels, policy, person-config, issue-body, report, reports-config |
+| docs/specs/config-formats/ | labels, policy, person-config, issue-body, report, reports-config, trackers |
 | docs/specs/themes/, initiatives/, epics/, features/, stories/ | the backlog hierarchy (srd034, srd045): themes, initiatives, and cross-team epics in a consuming program's system repository, a team's epics, features, and stories in its own; none in this corpus. docs/specs/objectives/ is read as initiatives |
 | docs/specs/semantic-models/ | planes, roles, objects, agents |
 | docs/specs/use-cases/ | one use case per path through a release, citing the requirement items it delivers; release 01 has eight |

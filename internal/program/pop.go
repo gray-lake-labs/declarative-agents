@@ -68,7 +68,10 @@ type PopResult struct {
 	Provisional bool `json:"provisional,omitempty"`
 	Created     bool `json:"branch_created"` // pop created the branch now
 	Added       bool `json:"worktree_added"` // pop added the worktree now
-	DryRun      bool `json:"dry_run"`
+	// Review is the URL of the pull or merge request pop opened, or found,
+	// on a tracking system whose host reviews the branch.
+	Review string `json:"review,omitempty"`
+	DryRun bool   `json:"dry_run"`
 	// Installed are the agents whose skills were installed into the worktree
 	// (srd036 R2.3); InstallError says why that failed, without undoing pop.
 	Installed    []string `json:"installed,omitempty"`
@@ -93,43 +96,9 @@ func Pop(t tracker.Tracker, git Git, project string, iid int, dir string, p Poli
 // is claimed in issueProject, and the branch, named branch when given, and
 // its worktree are opened in project.
 func PopIn(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, p Policy, dryRun bool) (PopResult, error) {
-	i, err := t.GetIssue(issueProject, iid)
-	if err != nil {
-		return PopResult{}, err
-	}
-	r := PopResult{Project: project, IID: iid, Title: i.Title, WebURL: i.WebURL, DryRun: dryRun}
-	if issueProject != project {
-		r.IssueProject = issueProject
-	}
-	if i.State == "closed" {
-		return r, fmt.Errorf("%s#%d is closed", issueProject, iid)
-	}
-	me, err := t.CurrentUser()
+	r, i, err := claim(t, project, issueProject, iid, p, dryRun)
 	if err != nil {
 		return r, err
-	}
-	for _, a := range i.Assignees {
-		if a != me.Username {
-			return r, fmt.Errorf("%s#%d is assigned to %s; only that person pops it", issueProject, iid, a)
-		}
-	}
-	if reasons := Lint(i, p); len(reasons) > 0 {
-		if i.HasLabel("plane::data") {
-			return r, fmt.Errorf("%s#%d is not admitted: %s", issueProject, iid, strings.Join(reasons, "; "))
-		}
-		r.NotAdmitted = reasons
-	}
-	if !slices.Contains(i.Assignees, me.Username) {
-		r.Assigned = true
-		if !dryRun {
-			if err := t.AssignIssue(issueProject, iid, me); err != nil {
-				return r, err
-			}
-			if reader, ok := t.(tracker.Reader); ok {
-				read, _ := reader.LastRead()
-				r.Provisional = read.Offline
-			}
-		}
 	}
 
 	r.Branch = branch
@@ -150,6 +119,13 @@ func PopIn(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 			if err := t.CreateBranch(project, r.Branch, base); err != nil {
 				return r, err
 			}
+		}
+	}
+
+	if rv, ok := tracker.For(t, project).(tracker.Reviewer); ok && !dryRun {
+		ref := fmt.Sprintf("%s#%d", issueProject, iid)
+		if r.Review, err = rv.OpenReview(project, r.Branch, base, i.Title, "Delivers "+ref+".\n\nCloses "+ref); err != nil {
+			return r, fmt.Errorf("opened %s, but not its review: %w", r.Branch, err)
 		}
 	}
 
@@ -174,6 +150,74 @@ func PopIn(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		return r, addWorktree(git, root, r.Worktree, r.Worktree, r.Branch)
 	}
 	return r, addWorktree(git, root, r.Worktree, "--track", "-b", r.Branch, r.Worktree, "origin/"+r.Branch)
+}
+
+// PopInto claims an issue into a worktree another pop opened, so a
+// story's issues are built on one branch and close in one merge (srd036):
+// the same refusals as Pop, and no branch or worktree of its own.
+func PopInto(t tracker.Tracker, git Git, project, issueProject string, iid int, worktree string, p Policy, dryRun bool) (PopResult, error) {
+	r, _, err := claim(t, project, issueProject, iid, p, dryRun)
+	if err != nil {
+		return r, err
+	}
+	branch, err := git.Run(worktree, "branch", "--show-current")
+	if err != nil || strings.TrimSpace(branch) == "" {
+		return r, fmt.Errorf("%s is not a worktree on a branch: %v", worktree, err)
+	}
+	top, err := git.Run(worktree, "rev-parse", "--show-toplevel")
+	if err != nil {
+		return r, err
+	}
+	r.Branch, r.Worktree = strings.TrimSpace(branch), strings.TrimSpace(top)
+	if common, err := git.Run(worktree, "rev-parse", "--path-format=absolute", "--git-common-dir"); err == nil {
+		r.Checkout = strings.TrimSuffix(strings.TrimSuffix(strings.TrimSpace(common), "/"), "/.git")
+	}
+	return r, nil
+}
+
+// claim is pop's claim: it refuses a closed issue, an issue assigned to
+// anyone else, and a data issue admission does not admit, and assigns the
+// caller (srd013 R7.1, srd041 R9.1).
+func claim(t tracker.Tracker, project, issueProject string, iid int, p Policy, dryRun bool) (PopResult, tracker.Issue, error) {
+	i, err := t.GetIssue(issueProject, iid)
+	if err != nil {
+		return PopResult{}, i, err
+	}
+	r := PopResult{Project: project, IID: iid, Title: i.Title, WebURL: i.WebURL, DryRun: dryRun}
+	if issueProject != project {
+		r.IssueProject = issueProject
+	}
+	if i.State == "closed" {
+		return r, i, fmt.Errorf("%s#%d is closed", issueProject, iid)
+	}
+	me, err := tracker.UserIn(t, issueProject)
+	if err != nil {
+		return r, i, err
+	}
+	for _, a := range i.Assignees {
+		if a != me.Username {
+			return r, i, fmt.Errorf("%s#%d is assigned to %s; only that person pops it", issueProject, iid, a)
+		}
+	}
+	if reasons := Lint(i, p); len(reasons) > 0 {
+		if i.HasLabel("plane::data") {
+			return r, i, fmt.Errorf("%s#%d is not admitted: %s", issueProject, iid, strings.Join(reasons, "; "))
+		}
+		r.NotAdmitted = reasons
+	}
+	if !slices.Contains(i.Assignees, me.Username) {
+		r.Assigned = true
+		if !dryRun {
+			if err := t.AssignIssue(issueProject, iid, me); err != nil {
+				return r, i, err
+			}
+			if reader, ok := tracker.For(t, issueProject).(tracker.Reader); ok {
+				read, _ := reader.LastRead()
+				r.Provisional = read.Offline
+			}
+		}
+	}
+	return r, i, nil
 }
 
 // addWorktree adds worktree with the worktree add arguments args, then

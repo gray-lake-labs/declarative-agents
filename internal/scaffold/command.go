@@ -3,8 +3,10 @@ package scaffold
 import (
 	"flag"
 	"fmt"
+	"maps"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
@@ -181,6 +183,16 @@ func humanDoctor(r DoctorResult) string {
 	}
 	if len(r.Repair.Untracked) > 0 {
 		fmt.Fprintf(&b, "not checked, git does not track them (git add them first): %s\n", strings.Join(r.Repair.Untracked, ", "))
+	}
+	if tr := r.Trackers; tr != nil {
+		fmt.Fprintf(&b, "tracking systems (%s): default %s", tr.File, tr.Default.Name)
+		for _, p := range slices.Sorted(maps.Keys(tr.Overrides)) {
+			fmt.Fprintf(&b, ", %s %s", p, tr.Overrides[p])
+		}
+		b.WriteString("\n")
+		for _, problem := range tr.Problems {
+			fmt.Fprintf(&b, "  %s\n", problem)
+		}
 	}
 	if r.Repair.Skipped != "" {
 		fmt.Fprintf(&b, "repair skipped: %s\n", r.Repair.Skipped)

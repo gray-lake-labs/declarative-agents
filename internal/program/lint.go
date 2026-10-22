@@ -176,7 +176,7 @@ func lintNote(reasons []string) string {
 func Apply(t tracker.Tracker, i tracker.Issue, reasons []string, p Policy, dryRun bool) (LintResult, error) {
 	r := LintResult{Project: i.Project, IID: i.IID, Admitted: len(reasons) == 0, Reasons: reasons}
 	triaged := i.HasLabel(p.TriageLabel)
-	triager, byState := t.(tracker.Triager)
+	triager, byState := tracker.For(t, i.Project).(tracker.Triager)
 	if r.Admitted && byState {
 		if dryRun {
 			r.Changed = triaged
