@@ -106,10 +106,17 @@ tpm tracker export writes either layout as JSONL for bd.
 
 tpm issue file records a new issue and its admission, the lint state and
 any note, in one write, so filing races once. In the files layout an
-update reads and writes only its issue and its index entry. Every writer still
-pushes the same branch, so a rejected push pulls and retries, up to 60
-times with a jittered delay that starts at 0.2 seconds and doubles to at
-most 2, about two minutes in all. mage integration:beadsScale (eng01)
+update reads and writes only its issue and its index entry. Every writer
+pushes the same branch, so a push can be rejected because another writer
+pushed first. A rejected write is not merged: its commit is dropped and
+the write replays on the newer tracker, reading it afresh, so a create
+numbers its issue after the other writer's instead of colliding with it,
+and a pop that finds the issue taken reports the race lost. Each replay
+takes the same path as a first try, up to 60 times with a jittered delay
+that starts at 0.2 seconds and doubles to at most 2, about two minutes in
+all. Only a write committed offline, which cannot replay against a
+repository it cannot reach, merges by the rules above when it syncs.
+mage integration:beadsScale (eng01)
 measures both layouts at thousands of issues and several writers.
 
 <!-- section: choosing-the-backend -->
