@@ -8,6 +8,7 @@ package sprintgoal
 
 import (
 	"fmt"
+	"path"
 	"strings"
 )
 
@@ -64,6 +65,25 @@ func markerFields(rest string) map[string]string {
 	for _, f := range strings.Fields(body) {
 		if k, v, ok := strings.Cut(f, "="); ok {
 			out[k] = v
+		}
+	}
+	return out
+}
+
+// CitedItems are the initiative items a Sprint Goal promised, as doc#item,
+// from its Cites lines: a pinned URL's file name without .md and its
+// anchor. Plan's slipped items and goals plan's carried items read the same
+// list, so the two never disagree (srd031 R2.3, srd022 R2.3).
+func CitedItems(description string) []string {
+	var out []string
+	for _, line := range strings.Split(description, "\n") {
+		rest, ok := strings.CutPrefix(strings.TrimSpace(line), "Cites:")
+		if !ok {
+			continue
+		}
+		url, _, _ := strings.Cut(rest, "|")
+		if u, item, ok := strings.Cut(strings.TrimSpace(url), "#"); ok {
+			out = append(out, strings.TrimSuffix(path.Base(u), ".md")+"#"+item)
 		}
 	}
 	return out

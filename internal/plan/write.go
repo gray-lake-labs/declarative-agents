@@ -143,6 +143,10 @@ func putRelease(doc string, r Release) (string, string) {
 		}
 		prose, fields := recordParts(doc[headEnd:end])
 		prose = placeholder.ReplaceAllString(prose+"\n", proves+"\n")
+		// The sentence tpm wrote for an earlier write follows the record:
+		// a republish moves the tag, so the prose moves with it (#188).
+		own := regexp.MustCompile(`(?m)^Release ` + regexp.QuoteMeta(r.Version) + ` delivers [^\n]*, tagged [^\n]*\.\n`)
+		prose = own.ReplaceAllLiteralString(prose, proves+"\n")
 		return doc[:headEnd] + assemble(prose, append(fields, owned...)) + tail, "replaced"
 	}
 	fields := owned

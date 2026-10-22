@@ -55,7 +55,7 @@ The subsystem SRDs (design.md subsystem_srd) for the downstream owners and their
 <!-- req: R2.3 -->
 ### R2.3
 
-Open Sprint Goal issues (and objective issues, read as Sprint Goals) already in the downstream repositories for this release, so a Sprint Goal is updated, not duplicated.
+Open Sprint Goal issues (and objective issues, read as Sprint Goals) already in the downstream repositories for this release, so a Sprint Goal is updated, not duplicated; and an open Sprint Goal of an earlier release whose Cites lines name an item of this one, which carries that item on: the plan marks the item carried in that goal's repository, and push files nothing for it.
 
 <!-- req: R3 -->
 ## R3 - Asks only what is not computed
@@ -142,7 +142,7 @@ Files each agreed issue with tpm issue file under the Sprint Goal's milestone, a
 <!-- ac: AC1 -->
 ### AC1
 
-Facts come from the planned release, subsystem and environment SRDs, and existing Sprint Goals; the recommended owner and the environment are taken without asking; only an initiative item with no recommended owner is asked about; no confirmation is asked before the push.
+Facts come from the planned release, subsystem and environment SRDs, and existing Sprint Goals; the recommended owner and the environment are taken without asking; only an initiative item with no recommended owner is asked about; no confirmation is asked before the push. An item an open Sprint Goal of an earlier release cites is marked carried, and push files no second goal for it.
 
 <!-- field: traces -->
 #### Traces

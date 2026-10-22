@@ -55,7 +55,11 @@ func init() {
 			}
 			var h strings.Builder
 			for _, o := range p.Objectives {
-				fmt.Fprintf(&h, "%s %q items=%s -> repository=%q environment=%s due=%s existing=%s\n", o.Key, o.Title, strings.Join(o.Items, ","), o.Repository, o.Environment, o.Due, o.Existing)
+				line := fmt.Sprintf("%s %q items=%s -> repository=%q environment=%s due=%s existing=%s", o.Key, o.Title, strings.Join(o.Items, ","), o.Repository, o.Environment, o.Due, o.Existing)
+				if o.Carried != "" {
+					line += " carried by " + o.Carried
+				}
+				fmt.Fprintln(&h, line)
 			}
 			return ctx.Emit(p, h.String())
 		},

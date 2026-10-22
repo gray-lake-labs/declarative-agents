@@ -1,7 +1,10 @@
 package goals
 
 import (
+	"fmt"
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 
@@ -321,6 +324,11 @@ func TestOneOutcomeAcrossTwoTeams(t *testing.T) {
 				t.Fatalf("%s has %d issues", repo, len(issues))
 			}
 			body := issues[0].Description
+			// A team serving part of the group names its items in the title
+			// (srd034 R3.2), so the two teams' Sprint Goals read apart.
+			if !strings.Contains(issues[0].Title, "("+want[1:]+")") {
+				t.Errorf("%s Sprint Goal title %q does not name %s", repo, issues[0].Title, want[1:])
+			}
 			other := map[string]string{"#R1.1": "#R1.2", "#R1.2": "#R1.1"}[want]
 			if !strings.Contains(body, want) || strings.Contains(body, "#"+other[1:]+"\n") || !strings.Contains(body, "serves=obj001-reliable-agents#R1 ") ||
 				!strings.Contains(body, "[this Sprint Goal: "+want[1:]+"]") || strings.Contains(body, " of R1.1") {
@@ -345,4 +353,48 @@ func TestItemEnvironmentFromItsCriterion(t *testing.T) {
 	if got := recommendEnvironment(&objectives.Document{}, "R2", "R2.1"); got != "dev" {
 		t.Errorf("no criteria: %s", got)
 	}
+}
+
+// TestCarriedItemsAreNotFiledTwice is srd022 R2.3 for an item an open Sprint
+// Goal of an earlier release already cites: goals plan marks it carried in
+// that goal's repository, and goals push files nothing for it, so the team
+// keeps one Sprint Goal for the item (#188).
+func TestCarriedItemsAreNotFiledTwice(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
+		f, s := fixture(t, tp)
+		old, err := f.CreateIssue(fleet, tracker.NewIssue{Title: "Sprint Goal: carried", Labels: []string{"plane::management"},
+			Description: "Goal\n\nCites: " + web + "/" + system + "/-/blob/v0.0.9/docs/specs/initiatives/obj001-reliable-agents.md#R1.1\n\n" +
+				sprintgoal.Marker("00.9", []string{"obj001-reliable-agents#R1"}) + "\n"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		p, err := MakePlan(f, s)
+		if err != nil {
+			t.Fatal(err)
+		}
+		carriedRef := fmt.Sprintf("%s#%d", fleet, old.IID)
+		var carried int
+		for i, o := range p.Objectives {
+			if slices.Contains(o.Items, "R1.1") {
+				carried = i
+				if o.Carried != carriedRef || o.Repository != fleet {
+					t.Fatalf("R1.1 = %+v, want carried by %s in %s", o, carriedRef, fleet)
+				}
+			} else if o.Carried != "" {
+				t.Errorf("%s marked carried by %s", o.Items, o.Carried)
+			}
+		}
+		res, err := Push(f, s, p, web, program.Defaults(), false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, r := range res {
+			if r.Key == p.Objectives[carried].Key && r.Action == "created" && r.Project == fleet {
+				issue, _ := f.GetIssue(fleet, r.IID)
+				if strings.Contains(issue.Description, "#R1.1\n") {
+					t.Fatalf("push filed a second Sprint Goal citing the carried R1.1:\n%s", issue.Description)
+				}
+			}
+		}
+	})
 }

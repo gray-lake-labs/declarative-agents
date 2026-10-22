@@ -97,7 +97,7 @@ plan (srd031) reads the agreed initiatives with the system SRDs when the technic
 <!-- req: R3.2 -->
 ### R3.2
 
-tasks (srd022) renders one Sprint Goal issue per team for the release from the initiatives: each initiative item is confirmed for a team on its own, so one requirement group's items can go to different teams, and a team's Sprint Goal has one Cites line per initiative item it serves, pinned to the system release tag, the Environment line, Requirements and Acceptance Criteria copied from the document, and the due date set to the requirement group's due field or, without one, the milestone end date plan recorded (srd031 R4.2).
+tasks (srd022) renders one Sprint Goal issue per team for the release from the initiatives: each initiative item is confirmed for a team on its own, so one requirement group's items can go to different teams, and a team's Sprint Goal has one Cites line per initiative item it serves, pinned to the system release tag, the Environment line, Requirements and Acceptance Criteria copied from the document, and the due date set to the requirement group's due field or, without one, the milestone end date plan recorded (srd031 R4.2). A team serving part of a split group titles its Sprint Goal with the group's title and the items it serves, so the teams' goals for one outcome read apart.
 
 <!-- req: R3.3 -->
 ### R3.3
@@ -288,7 +288,7 @@ The corpus audit fails on a malformed initiative document, runs before every mer
 <!-- ac: AC3 -->
 ### AC3
 
-plan places initiative items by id; tasks files one Sprint Goal per team with pinned Cites lines, an Environment line, the document's Requirements and Acceptance Criteria as ordered steps, a due date from the document or the milestone, empty Notes and Sprint Backlog sections; admission refuses one without Requirements and Acceptance Criteria.
+plan places initiative items by id; tasks files one Sprint Goal per team with pinned Cites lines, an Environment line, the document's Requirements and Acceptance Criteria as ordered steps, a due date from the document or the milestone, empty Notes and Sprint Backlog sections; admission refuses one without Requirements and Acceptance Criteria. Two teams serving one split group get Sprint Goal titles that name their items.
 
 <!-- field: traces -->
 #### Traces
