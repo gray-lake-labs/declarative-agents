@@ -30,7 +30,7 @@ func Approve(t tracker.Tracker, project string, iid int) (ApproveResult, error) 
 	if err != nil {
 		return r, err
 	}
-	me, err := t.CurrentUser()
+	me, err := tracker.UserIn(t, project)
 	if err != nil {
 		return r, err
 	}

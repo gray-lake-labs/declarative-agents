@@ -47,7 +47,7 @@ const MergedByTrailer = "Merged-by:"
 // still close.
 func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, gate AuditGate, closes []string, dryRun bool) (MergeResult, error) {
 	r := MergeResult{Project: project, IID: iid, Branch: branch, DryRun: dryRun}
-	if _, ok := t.(MergeCloser); !ok {
+	if _, ok := tracker.For(t, issueProject).(MergeCloser); !ok {
 		return r, fmt.Errorf("this tracker does not close issues on a local merge; tpm issue merge serves the beads tracker")
 	}
 	if issueProject != project {
@@ -121,7 +121,7 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 				return r, err
 			}
 		}
-		me, err := t.CurrentUser()
+		me, err := tracker.UserIn(t, issueProject)
 		if err != nil {
 			return r, err
 		}

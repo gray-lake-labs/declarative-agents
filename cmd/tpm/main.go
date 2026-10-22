@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
+	"github.com/gray-lake-labs/scrum-master/internal/routing"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 
 	_ "github.com/gray-lake-labs/scrum-master/internal/commands"
@@ -21,10 +21,11 @@ func main() {
 		return
 	}
 	tracker := func() (tracker.Tracker, error) {
-		if !beads.Configured() {
-			return nil, errors.New("no tracker: set TPM_TRACKER to the tracker repository (eng04-beads-sync)")
+		dir, err := os.Getwd()
+		if err != nil {
+			return nil, err
 		}
-		return beads.FromEnv()
+		return routing.Open(dir)
 	}
 	err := cli.Default.Run(os.Args[1:], os.Stdout, tracker)
 	switch {

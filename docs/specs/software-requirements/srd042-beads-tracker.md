@@ -59,9 +59,13 @@ fields, never inferred.
 <!-- req: R1.3 -->
 ### R1.3
 
-While both backends exist, a program names its backend in its
-configuration document; 03.0 completes when the GitLab client, the
-platform Terraform, and the rig's GitLab dependency are removed.
+A program names each repository's tracking system in control/trackers.md
+(config format trackers): a default, bd with its tracker repository, gh,
+or glab, and overrides for the projects or groups that use another. A
+repository has exactly one system, so project#iid names one issue; a
+group's entry serves every project under it that no closer entry names.
+TPM_TRACKER replaces the default for one person's run, never an override,
+and with no such file it alone names the system every project uses.
 
 <!-- req: R2 -->
 ## R2 - Mapping

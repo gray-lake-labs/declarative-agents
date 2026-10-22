@@ -13,6 +13,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/routing"
 	"github.com/gray-lake-labs/scrum-master/internal/spectool"
 )
 
@@ -32,7 +33,10 @@ type DoctorResult struct {
 	Files  []Result          `json:"files"`
 	Skills []install.Finding `json:"skills,omitempty"`
 	Repair RepairResult      `json:"repair"`
-	DryRun bool              `json:"dry_run"`
+	// Trackers is the program's tracking systems, per control/trackers.md,
+	// and each problem reaching them (srd042).
+	Trackers *routing.Report `json:"trackers,omitempty"`
+	DryRun   bool            `json:"dry_run"`
 }
 
 // RepairResult is what the repair did to the corpus documents: those
@@ -182,6 +186,9 @@ func Doctor(o DoctorOptions) (DoctorResult, error) {
 		return r, err
 	}
 	r.Level = level
+	if r.Trackers, err = routing.Check(o.Dir); err != nil {
+		return r, err
+	}
 	files, err := corpusFiles(level, o.Dir)
 	if err != nil {
 		return r, err

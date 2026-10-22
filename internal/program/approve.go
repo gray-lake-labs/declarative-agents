@@ -42,7 +42,7 @@ func Approve(t tracker.Tracker, git Git, project, issueProject string, iid int, 
 	if i.State == "closed" {
 		return r, fmt.Errorf("%s#%d is closed", issueProject, iid)
 	}
-	me, err := t.CurrentUser()
+	me, err := tracker.UserIn(t, issueProject)
 	if err != nil {
 		return r, err
 	}

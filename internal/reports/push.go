@@ -68,7 +68,7 @@ func PushSignals(t tracker.Tracker, system string, signals []Signal, p program.P
 	}
 	var me tracker.User
 	if !dryRun {
-		if me, err = t.CurrentUser(); err != nil {
+		if me, err = tracker.UserIn(t, system); err != nil {
 			return nil, err
 		}
 	}

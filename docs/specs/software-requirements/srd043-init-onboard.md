@@ -77,7 +77,7 @@ Installs the skills for the agents --agent names, through tpm install (srd037).
 <!-- req: R1.5 -->
 ### R1.5
 
-With --tracker naming a tracker repository that has no commits, makes its first commit holding the config file, which sets the files layout and the program's issue prefix, --prefix or else the last segment of --group (srd042 R3.1), and creates the program's labels there (srd013 R6). A tracker repository that already has commits is left as it is. Without --tracker, and with no tracker repository TPM_TRACKER names, reports that no tracker was seeded, so the operator knows no issue can be filed yet.
+Writes control/trackers.md naming bd with the tracker repository --tracker or TPM_TRACKER names, when either does (config format trackers). With --tracker naming a tracker repository that has no commits, makes its first commit holding the config file, which sets the files layout and the program's issue prefix, --prefix or else the last segment of --group (srd042 R3.1), and creates the program's labels there (srd013 R6). A tracker repository that already has commits is left as it is. Without --tracker, and with no tracker repository TPM_TRACKER names, reports that no tracker was seeded, so the operator knows no issue can be filed yet.
 
 <!-- req: R1.6 -->
 ### R1.6

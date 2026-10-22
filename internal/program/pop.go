@@ -104,7 +104,7 @@ func PopIn(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 	if i.State == "closed" {
 		return r, fmt.Errorf("%s#%d is closed", issueProject, iid)
 	}
-	me, err := t.CurrentUser()
+	me, err := tracker.UserIn(t, issueProject)
 	if err != nil {
 		return r, err
 	}
@@ -125,7 +125,7 @@ func PopIn(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 			if err := t.AssignIssue(issueProject, iid, me); err != nil {
 				return r, err
 			}
-			if reader, ok := t.(tracker.Reader); ok {
+			if reader, ok := tracker.For(t, issueProject).(tracker.Reader); ok {
 				read, _ := reader.LastRead()
 				r.Provisional = read.Offline
 			}

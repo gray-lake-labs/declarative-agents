@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func init() {
@@ -103,6 +104,9 @@ func beadsTracker(ctx *cli.Context) (*Tracker, error) {
 	t, err := ctx.Tracker()
 	if err != nil {
 		return nil, err
+	}
+	if r, routed := t.(*tracker.Router); routed {
+		t = r.Default
 	}
 	b, ok := t.(*Tracker)
 	if !ok {

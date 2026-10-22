@@ -45,7 +45,7 @@ func Labels(plane, typ, kind, component string) []string {
 // File creates the issue unassigned and lints it before returning (srd013
 // R3.1). A dry run creates nothing and reports how the issue would lint.
 func File(t tracker.Tracker, project string, in tracker.NewIssue, p Policy, dryRun bool) (FileResult, error) {
-	if err := mayFile(t, in, p); err != nil {
+	if err := mayFile(t, project, in, p); err != nil {
 		return FileResult{}, err
 	}
 	if dryRun {
@@ -53,7 +53,7 @@ func File(t tracker.Tracker, project string, in tracker.NewIssue, p Policy, dryR
 		reasons := Lint(would, p)
 		return FileResult{Project: project, DryRun: true, Lint: LintResult{Project: project, Admitted: len(reasons) == 0, Reasons: reasons}}, nil
 	}
-	if c, ok := t.(tracker.AdmittingCreator); ok {
+	if c, ok := tracker.For(t, project).(tracker.AdmittingCreator); ok {
 		var r LintResult
 		issue, err := c.CreateAdmitted(project, in, func(i tracker.Issue) ([]string, string) {
 			reasons := Lint(i, p)
@@ -150,7 +150,7 @@ func endedSprints(t tracker.Tracker, project string) (map[string]bool, error) {
 // mayFile refuses a plane::management issue from a caller the policy does
 // not list as a filer (srd001 R1.2, srd035 R5.2). With no usernames listed,
 // or the value leads, nothing is checked.
-func mayFile(t tracker.Tracker, in tracker.NewIssue, p Policy) error {
+func mayFile(t tracker.Tracker, project string, in tracker.NewIssue, p Policy) error {
 	if len(p.ManagementFilers) == 0 || p.ManagementFilers[0] == "leads" {
 		return nil
 	}
@@ -161,7 +161,7 @@ func mayFile(t tracker.Tracker, in tracker.NewIssue, p Policy) error {
 	if !management {
 		return nil
 	}
-	me, err := t.CurrentUser()
+	me, err := tracker.UserIn(t, project)
 	if err != nil {
 		return err
 	}

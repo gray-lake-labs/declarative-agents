@@ -62,7 +62,13 @@ func Configured() bool { return strings.TrimSpace(os.Getenv("TPM_TRACKER")) != "
 // use; the person is TPM_USER, else git's user.name; the code half serves
 // the checkout around the working directory.
 func FromEnv() (*Tracker, error) {
-	remote := strings.TrimSpace(os.Getenv("TPM_TRACKER"))
+	return OpenRepository(strings.TrimSpace(os.Getenv("TPM_TRACKER")))
+}
+
+// OpenRepository opens the beads tracker whose tracker repository is remote, cloned
+// at TPM_TRACKER_CLONE or under the user cache directory, for TPM_USER or
+// git's user.name.
+func OpenRepository(remote string) (*Tracker, error) {
 	clone := strings.TrimSpace(os.Getenv("TPM_TRACKER_CLONE"))
 	if clone == "" {
 		cache, err := os.UserCacheDir()

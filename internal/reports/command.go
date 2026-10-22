@@ -10,6 +10,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
 func init() {
@@ -139,7 +140,7 @@ func init() {
 			}
 			user := weekArgs.user
 			if user == "" {
-				me, err := t.CurrentUser()
+				me, err := tracker.UserIn(t, weekArgs.project)
 				if err != nil {
 					return err
 				}
