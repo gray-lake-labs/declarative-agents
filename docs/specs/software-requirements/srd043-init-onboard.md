@@ -14,7 +14,8 @@ title: "Script: init, onboard, and doctor (tpm init, tpm onboard, tpm doctor)"
 - doctor is its own command, not a second run of init or onboard. init is for an empty repository and onboard files a registration, so neither is the step to take after upgrading tpm; doctor reads the level from the files it finds, touches only what tpm owns or can repair without changing meaning, and files and commits nothing.
 - Only a tpm-managed block is refreshed. The orientation files are tpm's account of its own process, so a newer tpm updates them; text a person writes around the block is theirs.
 - A block is appended to an orientation file that has none, rather than the file being kept as edited. AGENTS.md at the top level is the one place every agent reads, so tpm stays agent-agnostic by writing there, and a repository that joins a program usually already has its own AGENTS.md and README.md; keeping them untouched would leave tpm's text out, and --force would replace the owner's. An owner who deletes the block gets it back on the next run. Every other skeleton file belongs to its owner once written, so it is never refreshed and R3.2 holds for it.
-- Repair builds the spec tool at run time. The formatter is the pinned parent release's own library, built from that release's source as mage fmt builds it (srd040 R1.1). Embedding the library would need a replace directive in tpm's go.mod, which go install does not honour, and would format every repository to tpm's release rather than to its own pin. The cost is a Go toolchain on the machine; without one, doctor skips repair and says so.
+- Repair builds the spec tool at run time. The formatter is the pinned parent release's own library, built from that release's source as mage fmt builds it (srd040 R1.1). Embedding the library would need a replace directive in tpm's go.mod, which go install does not honour, and would format every repository to tpm's release rather than to its own pin. The cost is a Go toolchain on the machine, or a spec tool already built at the repository's pin, which tpm install --runtime builds at tpm's own pin (srd037 R7.3) and the container image carries (eng03); with neither, doctor skips repair and says so.
+- doctor reports the declarative-agents runtime rather than fetching it. Repair changes only documents in the repository; fetching a runtime writes outside it and is tpm install --runtime's step (srd037 R7), so doctor names that step as the fix.
 
 <!-- field: problem -->
 ## Problem
@@ -161,12 +162,17 @@ Repairs the corpus documents, the hierarchy documents among them: rewrites each 
 <!-- req: R4.5 -->
 ### R4.5
 
-Without a Go toolchain or the pinned release's source, skips the repair, says which is missing, and does the rest.
+Uses a spec tool already built at the pin in that release's cache directory (srd037 R7.3) without building it. With no such tool, and without a Go toolchain or the pinned release's source, skips the repair, says which is missing, and does the rest.
 
 <!-- req: R4.6 -->
 ### R4.6
 
 A dry run reports what doctor would write, append, refresh, extend, and repair and changes nothing. Both runs name the documents under docs/ git does not track, which the format check cannot read. A second run reports nothing created, appended, refreshed, extended, or repaired.
+
+<!-- req: R4.7 -->
+### R4.7
+
+Reports, without fetching it, the declarative-agents runtime at the release tpm pins (srd037 R7): the agent tpm would use, TPM_AGENT or the cached one, with its path and whether it matches the release's checksums, or that none is there, with tpm install --runtime as the fix. A runtime the checksums refuse is reported the same way. The report changes nothing, so a dry run gives it too.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -263,3 +269,14 @@ doctor rewrites a document whose fields stray from canonical form so the audit p
 
 - [R4.4](#r44)
 - [R4.5](#r45)
+
+<!-- ac: AC8 -->
+### AC8
+
+With no Go on PATH and a spec tool built at the pin in the cache, doctor repairs a document to canonical form; with neither, it skips the repair and says why. doctor names a missing runtime with tpm install --runtime as the fix, names a cached or TPM_AGENT runtime with its path when the checksums match, reports one they refuse, and fetches nothing.
+
+<!-- field: traces -->
+#### Traces
+
+- [R4.5](#r45)
+- [R4.7](#r47)

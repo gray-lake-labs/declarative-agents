@@ -78,6 +78,11 @@ type Release struct {
 	Now      func() time.Time
 	Confirm  func(question string) (bool, error) // nil reads a y/N answer from stdin
 	LockName string                              // under the git dir; empty is scrum-master-release.lock
+	// Preflight checks what publishing the tag needs before the gates run;
+	// nil checks nothing.
+	Preflight func() error
+	// Publish publishes a tag once it is on origin; nil publishes nothing.
+	Publish func(tag string) error
 }
 
 // Tag runs the gates and, when every gate passed, creates the next
@@ -101,6 +106,11 @@ func (r Release) run(dryRun bool) error {
 	commit, err := r.preflight()
 	if err != nil {
 		return err
+	}
+	if r.Preflight != nil {
+		if err := r.Preflight(); err != nil {
+			return fmt.Errorf("preflight: %w", err)
+		}
 	}
 	if tagged, err := r.Git("tag", "--points-at", commit, "--list", DatePrefix+"*"); err != nil {
 		return err
@@ -144,7 +154,15 @@ func (r Release) run(dryRun bool) error {
 		return err
 	}
 	fmt.Fprintf(r.Out, "release: created %s\n\n%s\n", tag, message)
-	return r.push(gates.Push, tag)
+	pushed, err := r.push(gates.Push, tag)
+	if err != nil || r.Publish == nil {
+		return err
+	}
+	if !pushed {
+		fmt.Fprintf(r.Out, "release: after pushing %s, run mage publish\n", tag)
+		return nil
+	}
+	return r.Publish(tag)
 }
 
 // preflight returns HEAD when the release branch is checked out and the
@@ -196,7 +214,8 @@ func (r Release) message(tag, commit string, results []GateResult) (string, erro
 	return strings.TrimRight(b.String(), "\n"), nil
 }
 
-func (r Release) push(mode, tag string) error {
+// push pushes tag to origin as mode says and reports whether it did.
+func (r Release) push(mode, tag string) (bool, error) {
 	push := mode == PushAuto
 	if !push {
 		confirm := r.Confirm
@@ -205,18 +224,18 @@ func (r Release) push(mode, tag string) error {
 		}
 		var err error
 		if push, err = confirm(fmt.Sprintf("push %s to origin? [y/N] ", tag)); err != nil {
-			return err
+			return false, err
 		}
 	}
 	if !push {
 		fmt.Fprintf(r.Out, "release: %s stays local; push it with git push origin %s\n", tag, tag)
-		return nil
+		return false, nil
 	}
 	if _, err := r.Git("push", "origin", "refs/tags/"+tag); err != nil {
-		return err
+		return false, err
 	}
 	fmt.Fprintf(r.Out, "release: pushed %s\n", tag)
-	return nil
+	return true, nil
 }
 
 func stdinConfirm(question string) (bool, error) {

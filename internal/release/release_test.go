@@ -286,7 +286,7 @@ func TestRepositoryGatesFileLoads(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if g.Push != PushAsk || len(g.Stages) != 2 || g.Stages[0].Gates[0].Command != "mage audit" || len(g.Stages[1].Gates) != 2 {
+	if g.Push != PushAsk || len(g.Stages) != 2 || g.Stages[0].Gates[0].Command != "mage audit" || len(g.Stages[1].Gates) != 3 || g.Stages[1].Gates[2].Command != "mage crossBuild" {
 		t.Fatalf("gates = %+v", g)
 	}
 }

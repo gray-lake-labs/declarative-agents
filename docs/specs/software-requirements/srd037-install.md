@@ -25,12 +25,24 @@ edited. The installed files belong to the tpm each developer has
 installed, not to the repository, so git ignores them, and tpm install
 --check tells the developer when they no longer match the local binary.
 
+The skills will run as declarative-agent workflows, and a profile runs
+only against the declarative-agents runtime it was written for: the
+agent binary and the agent-core tree its paths resolve against. Today
+only this repository's mage audit fetches that runtime, so a developer's
+machine or a CI job has no way to get the release tpm's profiles need.
+tpm already embeds the parent release its corpus pins, the one tpm init
+writes into a new corpus (srd043 R3.3), so tpm install --runtime can fetch
+exactly that release, verified, into the cache mage audit and the spec
+tool already use, and leave the runtime a separate binary so tpm keeps its
+small dependency set.
+
 <!-- field: goals -->
 ## Goals
 
 - G1: A tpm release carries exactly the skills written against its subcommands, as a conforming Agent Plugins 1.0 package.
 - G2: One command places the skills where Cursor, Claude Code, or GitHub Copilot reads them.
 - G3: The installed skills never enter the repository; git ignores them, and the developer learns of drift locally.
+- G4: One command readies the declarative-agents runtime at the release tpm pins, verified against the release's checksums, on any machine tpm runs on.
 
 <!-- req: R1 -->
 ## R1 - Embedding
@@ -120,10 +132,40 @@ Each install rewrites the block from the files tpm owns after the run, drops a r
 
 The installed files are untracked, so a new worktree of the clone has none; tpm issue pop installs the checkout's agents into each worktree it creates (srd013 R7.4), and the shared exclude block already lists their paths.
 
+<!-- req: R7 -->
+## R7 - Runtime
+
+<!-- req: R7.1 -->
+### R7.1
+
+tpm install --runtime fetches the release of github.com/gray-lake-labs/declarative-agents that tpm's own docs/external-pins.yaml pins, embedded when tpm is built: the release's agent binary for the host's operating system and architecture, and the release's source, laid out as the spec tool lays it out (srd040 R1.1). It writes them into that release's directory under the user cache directory, scrum-master/release/<tag>/, the directory mage audit and the spec tool use, so each part is downloaded once per tag on a machine. It needs no git repository and writes nothing in --dir.
+
+<!-- req: R7.2 -->
+### R7.2
+
+Every downloaded binary is held to the SHA-256 the release's SHA256SUMS lists for it before it is written executable, and a cached one is reused only while it still matches; a mismatch is refused naming the asset and both checksums. A host the release publishes no agent for is refused naming the platforms it publishes.
+
+<!-- req: R7.3 -->
+### R7.3
+
+With a Go toolchain on PATH, tpm install --runtime also builds the spec tool at the release into the same directory (srd040 R1.1), so tpm doctor repairs a corpus at that pin later without Go (srd043 R4.5). Without Go it reports the spec tool as not built and why, and fetches the rest.
+
+<!-- req: R7.4 -->
+### R7.4
+
+TPM_AGENT names an agent binary already on the machine, for an offline or pinned environment. tpm uses it in place of the cached agent only when its SHA-256 is the one the pinned release's SHA256SUMS lists for the host, since the published binaries report no version of their own; any other binary is refused naming the pinned release. The checksums come from the release's directory when cached, and are downloaded otherwise; offline with neither, the binary is refused and the missing checksums are named.
+
+<!-- req: R7.5 -->
+### R7.5
+
+tpm install --runtime reports the release, the agent's path and where it came from (TPM_AGENT or the cache), the source root a profile runs against (the agent's --core-root), and the spec tool's path or why it is absent. It honours --json and --dry-run; a dry run names what it would download and writes nothing.
+
 <!-- field: non_goals -->
 ## Non-goals
 
-- Distributing the tpm binary itself; that is the release of tpm.
+- Distributing the tpm binary itself; that is the release of tpm, its binaries and container image (eng03).
+- Embedding the runtime in tpm; it stays a separate binary, so tpm depends on none of agent-core's packages.
+- Model credentials; the profiles that need them name them (GH-135), and tpm stores none.
 - Agents other than Cursor, Claude Code, and GitHub Copilot.
 - Per-repository templating; repository-specific values come from tpm at run time.
 
@@ -197,3 +239,17 @@ After an install, git ignores every installed file and nothing else: git status 
 - [R6.1](#r61)
 - [R6.2](#r62)
 - [R6.3](#r63)
+
+<!-- ac: AC7 -->
+### AC7
+
+On a machine with no runtime, tpm install --runtime leaves a verified agent for the host and the release's source in the cache directory mage audit uses, builds the spec tool when Go is on PATH and says why not otherwise, and reports their paths; a second run downloads nothing; a tampered cached binary is fetched again, a tampered download is refused naming both checksums, an unpublished platform is refused naming the published ones, and a TPM_AGENT that is not the pinned release's binary is refused naming the release.
+
+<!-- field: traces -->
+#### Traces
+
+- [R7.1](#r71)
+- [R7.2](#r72)
+- [R7.3](#r73)
+- [R7.4](#r74)
+- [R7.5](#r75)

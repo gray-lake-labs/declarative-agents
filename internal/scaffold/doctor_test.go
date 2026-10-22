@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/runtime"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
 )
@@ -176,10 +177,15 @@ func TestDoctorSubsystemGetsNoControl(t *testing.T) {
 }
 
 // The tests run offline: the spec tool finds nothing unless a test says
-// otherwise, and a Go toolchain is on PATH.
+// otherwise, a Go toolchain is on PATH, no spec tool is prebuilt, and no
+// runtime is on the machine.
 func init() {
 	specTool = func(string, string, string) ([]string, error) { return nil, nil }
 	lookGo = func() error { return nil }
+	built = func(string) bool { return false }
+	inspectRuntime = func(tag string) runtime.Status {
+		return runtime.Status{Release: tag, Problem: "the checksums of " + tag + " are not cached; run tpm install --runtime"}
+	}
 }
 
 // stubTool replaces the spec tool for one test with one that answers each
@@ -480,5 +486,58 @@ func TestDoctorReportsUntrackedDocuments(t *testing.T) {
 	}
 	if out := humanDoctor(r); !strings.Contains(out, "git does not track them") {
 		t.Fatalf("doctor's text does not say so:\n%s", out)
+	}
+}
+
+func TestRepairPrebuiltWithoutGo(t *testing.T) {
+	dir := repo(t)
+	if _, err := Init(InitOptions{Dir: dir}); err != nil {
+		t.Fatal(err)
+	}
+	lookGo = func() error { return errors.New("not found") }
+	built = func(string) bool { return true }
+	t.Cleanup(func() {
+		lookGo = func() error { return nil }
+		built = func(string) bool { return false }
+	})
+	ran := stubTool(t, map[string][]string{"fmt": {"formatted docs/VISION.md"}}, nil)
+	r, err := Doctor(DoctorOptions{Dir: dir})
+	if err != nil || r.Repair.Skipped != "" || len(r.Repair.Repaired) != 1 || strings.Join(*ran, ",") != "fmt,check" {
+		t.Fatalf("repair with a prebuilt spec tool and no Go: %+v, ran %v, %v", r.Repair, *ran, err)
+	}
+	built = func(string) bool { return false }
+	*ran = nil
+	r, err = Doctor(DoctorOptions{Dir: dir})
+	if err != nil || !strings.Contains(r.Repair.Skipped, "no spec tool built") || len(*ran) != 0 {
+		t.Fatalf("repair with neither: %+v, ran %v, %v", r.Repair, *ran, err)
+	}
+}
+
+func TestDoctorRuntime(t *testing.T) {
+	dir := older(t)
+	pin, err := runtime.Pin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
+	if err != nil || r.Runtime.Release != pin || r.Runtime.Agent != "" || !strings.Contains(r.Runtime.Problem, "tpm install --runtime") {
+		t.Fatalf("no runtime: %+v, %v", r.Runtime, err)
+	}
+	if h := humanDoctor(r); !strings.Contains(h, "runtime "+pin+": ") || !strings.Contains(h, "tpm install --runtime") {
+		t.Errorf("report without a runtime:\n%s", h)
+	}
+	var asked string
+	prev := inspectRuntime
+	inspectRuntime = func(tag string) runtime.Status {
+		asked = tag
+		return runtime.Status{Release: tag, Agent: "/cache/agent", From: runtime.FromCache}
+	}
+	t.Cleanup(func() { inspectRuntime = prev })
+	r, err = Doctor(DoctorOptions{Dir: dir})
+	if err != nil || asked != pin || r.Runtime.Agent != "/cache/agent" || r.Runtime.Problem != "" {
+		t.Fatalf("a cached runtime: %+v, asked %q, %v", r.Runtime, asked, err)
+	}
+	if h := humanDoctor(r); !strings.Contains(h, "runtime "+pin+": /cache/agent (cache)") {
+		t.Errorf("report with a runtime:\n%s", h)
 	}
 }

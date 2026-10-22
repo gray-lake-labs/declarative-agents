@@ -14,6 +14,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/routing"
+	"github.com/gray-lake-labs/scrum-master/internal/runtime"
 	"github.com/gray-lake-labs/scrum-master/internal/spectool"
 )
 
@@ -26,13 +27,15 @@ type DoctorOptions struct {
 
 // DoctorResult is what tpm doctor reports: the repository's level, what
 // happened to each file tpm scaffolds there, the installed skills that
-// differ from this tpm, and the repair of the documents' format.
+// differ from this tpm, the repair of the documents' format, and the
+// declarative-agents runtime at the release tpm pins.
 type DoctorResult struct {
-	Dir    string            `json:"dir"`
-	Level  string            `json:"level"`
-	Files  []Result          `json:"files"`
-	Skills []install.Finding `json:"skills,omitempty"`
-	Repair RepairResult      `json:"repair"`
+	Dir     string            `json:"dir"`
+	Level   string            `json:"level"`
+	Files   []Result          `json:"files"`
+	Skills  []install.Finding `json:"skills,omitempty"`
+	Repair  RepairResult      `json:"repair"`
+	Runtime runtime.Status    `json:"runtime"`
 	// Trackers is the program's tracking systems, per control/trackers.md,
 	// and each problem reaching them (srd042).
 	Trackers *routing.Report `json:"trackers,omitempty"`
@@ -52,11 +55,14 @@ type RepairResult struct {
 	Untracked []string `json:"untracked,omitempty"`
 }
 
-// specTool runs the spec tool at a repository's pin, and lookGo finds the Go
-// toolchain the tool is built with; tests replace both.
+// specTool runs the spec tool at a repository's pin, lookGo finds the Go
+// toolchain the tool is built with, built reports a tool already built at a
+// release, and inspectRuntime reads the runtime at one; tests replace them.
 var (
-	specTool = spectool.Run
-	lookGo   = func() error { _, err := exec.LookPath("go"); return err }
+	specTool       = spectool.Run
+	lookGo         = func() error { _, err := exec.LookPath("go"); return err }
+	built          = runtime.Built
+	inspectRuntime = runtime.Inspect
 )
 
 // notCanonical ends the line the tool's check prints for a document fmt
@@ -76,8 +82,11 @@ func repair(dir string, dryRun bool) RepairResult {
 		}
 	}
 	if lookGo() != nil {
-		r.Skipped = "no Go toolchain on PATH; the repair builds the pinned release's formatter with it"
-		return r
+		tag, err := spectool.Pinned(dir)
+		if err != nil || !built(tag) {
+			r.Skipped = "no Go toolchain on PATH and no spec tool built at the pinned release; install Go, or run tpm install --runtime with Go where tpm pins the same release"
+			return r
+		}
 	}
 	skip := func(err error) {
 		r.Skipped = err.Error()
@@ -174,7 +183,8 @@ var skillProblems = map[string]bool{"missing": true, "outdated": true, "edited":
 // the files this tpm scaffolds at the repository's level that are missing,
 // refreshes the orientation files' managed blocks, keeps every other file,
 // repairs the documents to the pinned format, and reports the installed
-// skills tpm install would change (srd043 R4).
+// skills tpm install would change and the runtime at the release tpm pins
+// (srd043 R4).
 // It files nothing and touches no tracker.
 func Doctor(o DoctorOptions) (DoctorResult, error) {
 	r := DoctorResult{Dir: o.Dir, DryRun: o.DryRun}
@@ -215,6 +225,11 @@ func Doctor(o DoctorOptions) (DoctorResult, error) {
 		}
 	}
 	r.Repair = repair(o.Dir, o.DryRun)
+	tag, err := runtime.Pin()
+	if err != nil {
+		return r, err
+	}
+	r.Runtime = inspectRuntime(tag)
 	if agents := install.InstalledAgents(o.Dir); len(agents) > 0 {
 		skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
 		if err != nil {
