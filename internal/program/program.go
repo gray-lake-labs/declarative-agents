@@ -373,6 +373,121 @@ func init() {
 		},
 	})
 
+	var mbArgs struct {
+		project, issueProject, branch, audit, dir, control, ref string
+		iid                                                     int
+		closes                                                  cli.Strings
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "issue", Name: "merge-branch", Summary: "the merge word: gates, the --no-ff merge, and the push, closing nothing (GH-201)",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&mbArgs.project, "project", "", "project path (required)")
+			fs.IntVar(&mbArgs.iid, "issue", 0, "issue IID (required)")
+			fs.StringVar(&mbArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
+			fs.StringVar(&mbArgs.branch, "branch", "", "branch to merge; empty uses the current branch of the working directory")
+			fs.StringVar(&mbArgs.audit, "audit", "", "corpus gate command for a docs/ change; empty uses the policy's audit_command")
+			fs.StringVar(&mbArgs.dir, "dir", ".", "the worktree holding the branch, where the audit runs")
+			fs.StringVar(&mbArgs.control, "control", "", "program repository holding control/ files; empty reads them from --project, else the defaults")
+			fs.StringVar(&mbArgs.ref, "ref", "main", "ref of the control files")
+			fs.Var(&mbArgs.closes, "closes", "another issue the merge cites and close-delivered closes, project#iid; repeat for each")
+		},
+		Run: func(ctx *cli.Context) error {
+			if mbArgs.project == "" || mbArgs.iid == 0 {
+				return fmt.Errorf("%w: merge-branch needs --project and --issue", cli.ErrUsage)
+			}
+			branch := mbArgs.branch
+			if branch == "" {
+				out, err := ExecGit{}.Run(mbArgs.dir, "rev-parse", "--abbrev-ref", "HEAD")
+				if err != nil {
+					return err
+				}
+				branch = strings.TrimSpace(out)
+			}
+			t, err := ctx.Tracker()
+			if err != nil {
+				return err
+			}
+			control := mbArgs.control
+			if control == "" {
+				control = mbArgs.project
+			}
+			p, err := LoadPolicy(t, control, mbArgs.ref)
+			if err != nil {
+				return err
+			}
+			gate := MergeGate{Command: AuditFor(p, mbArgs.dir), Dir: mbArgs.dir, RequireApproval: p.RequireApproval}
+			if mbArgs.audit != "" {
+				gate.Command = mbArgs.audit
+			}
+			issueProject := mbArgs.issueProject
+			if issueProject == "" {
+				issueProject = mbArgs.project
+			}
+			r, err := MergeBranch(t, ExecGit{}, mbArgs.project, issueProject, mbArgs.iid, branch, mbArgs.dir, gate, mbArgs.closes, ctx.DryRun)
+			if err != nil {
+				return err
+			}
+			human := fmt.Sprintf("%s merged into %s on %s; nothing closed: run tpm issue close-delivered --commit %s", r.Branch, r.Project, r.Commit, r.Commit)
+			if r.DryRun {
+				human = fmt.Sprintf("dry run: %s would merge into %s", r.Branch, r.Project)
+			} else if !r.Merged {
+				human = fmt.Sprintf("%s was already merged on %s; nothing closed", r.Branch, r.Commit)
+			}
+			return ctx.Emit(r, human)
+		},
+	})
+
+	var cdArgs struct {
+		project, issueProject, commit, closes, dir string
+		iid                                        int
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "issue", Name: "close-delivered", Summary: "the close word: close the issue and each --closes on the merge commit, and report complete each closed Sprint Goal (GH-201)",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&cdArgs.project, "project", "", "project path (required)")
+			fs.IntVar(&cdArgs.iid, "issue", 0, "issue IID (required)")
+			fs.StringVar(&cdArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
+			fs.StringVar(&cdArgs.commit, "commit", "", "the merge commit merge-branch reported (required)")
+			fs.StringVar(&cdArgs.closes, "closes", "", "the other issues the merge closes, project#iid comma-separated")
+			fs.StringVar(&cdArgs.dir, "dir", ".", "a directory in the local checkout")
+		},
+		Run: func(ctx *cli.Context) error {
+			if cdArgs.project == "" || cdArgs.iid == 0 || cdArgs.commit == "" {
+				return fmt.Errorf("%w: close-delivered needs --project, --issue, and --commit", cli.ErrUsage)
+			}
+			if ctx.DryRun {
+				return fmt.Errorf("close-delivered has no dry run; tpm issue merge --dry-run shows the whole delivery")
+			}
+			t, err := ctx.Tracker()
+			if err != nil {
+				return err
+			}
+			issueProject := cdArgs.issueProject
+			if issueProject == "" {
+				issueProject = cdArgs.project
+			}
+			var closes []string
+			for _, ref := range strings.Split(cdArgs.closes, ",") {
+				if ref = strings.TrimSpace(ref); ref != "" {
+					closes = append(closes, ref)
+				}
+			}
+			closed, reported, already, err := CloseDelivered(t, ExecGit{}, cdArgs.dir, cdArgs.commit, issueProject, cdArgs.iid, closes)
+			r := MergeResult{Project: cdArgs.project, IID: cdArgs.iid, Commit: cdArgs.commit, Closed: closed, Reported: reported, AlreadyClosed: already}
+			if issueProject != cdArgs.project {
+				r.IssueProject = issueProject
+			}
+			if err != nil {
+				return err
+			}
+			human := fmt.Sprintf("closed %s on %s", strings.Join(closed, ", "), cdArgs.commit)
+			if len(reported) > 0 {
+				human += "; reported complete " + strings.Join(reported, ", ")
+			}
+			return ctx.Emit(r, human)
+		},
+	})
+
 	var lintArgs struct {
 		project, control, ref, since string
 		iid                          int
