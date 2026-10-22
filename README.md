@@ -33,7 +33,7 @@ tpm install --runtime
 
 ## Run tpm in CI
 
-Each release also publishes an image, `ghcr.io/gray-lake-labs/tpm:<tag>`, for linux/amd64 and linux/arm64: tpm, the declarative-agents runtime at the release tpm pins, the spec tool, git, and git-crypt, with no Go toolchain, running as a non-root user. Pin it by the digest the release's notes list, and verify it against `cosign.pub` at the repository root with `cosign verify --key cosign.pub ghcr.io/gray-lake-labs/tpm@<digest>`. A GitLab CI job uses it directly:
+Each release also publishes an image, `ghcr.io/gray-lake-labs/tpm:<tag>`, for linux/amd64 and linux/arm64: tpm, the declarative-agents runtime at the release tpm pins, the spec tool, git, and git-crypt, with no Go toolchain, running as a non-root user. Pin it by the digest the release's notes list. A GitLab CI job uses it directly:
 
 ```yaml
 tpm-check:

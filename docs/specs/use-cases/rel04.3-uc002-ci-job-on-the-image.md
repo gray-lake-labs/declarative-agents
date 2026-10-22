@@ -29,14 +29,14 @@ A pipeline in a program repository starts a job on the image.
 <!-- field: preconditions -->
 ## Preconditions
 
-- A scrum-master release whose image is published and signed (eng03), pulled from ghcr or from the program's registry mirror.
+- A scrum-master release whose image is published (eng03), pulled from ghcr or from the program's registry mirror.
 - Tracker credentials, and any model credentials a profile names, in masked CI variables.
 - A program repository at the parent release the image's tpm pins, for the repair step.
 
 <!-- field: flow -->
 ## Flow
 
-- F1: The runner verifies the image's signature against cosign.pub and starts the job on it.
+- F1: The runner pulls the image by the digest the release's notes list and starts the job on it.
 - F2: The job runs tpm backlog check over its checkout.
 - F3: tpm doctor --dry-run reports the runtime it found in the image's cache, checked against the release's checksums, and the repair it would make with the image's spec tool, with no Go toolchain.
 - F4: The job runs agent --validate-config on a profile against the image's runtime and source root.
@@ -81,7 +81,7 @@ On the image, with no Go toolchain, tpm doctor reports the runtime with its path
 <!-- field: out_of_scope -->
 ## Out of scope
 
-- Building, signing, and publishing the image; that is the release of tpm (eng03).
+- Building and publishing the image; that is the release of tpm (eng03).
 - The profiles a job runs; tpm ships them once the skills become declarative-agent workflows (GH-135).
 - Repairing a corpus pinned to another parent release on the image; that needs Go, which the image does not carry.
 

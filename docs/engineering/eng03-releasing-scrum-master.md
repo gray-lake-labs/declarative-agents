@@ -49,7 +49,7 @@ creates nothing.
 | Step | What happens |
 |---|---|
 | Lock | A directory under the git dir (scrum-master-release.lock) holds the release, so two releases of one clone cannot overlap |
-| Preflight | The release runs on main with a clean worktree; a HEAD already carrying a v0.* tag has nothing to release; gh answers as the organization account, and docker buildx and cosign are on PATH, so a tag never lands without the means to publish it |
+| Preflight | The release runs on main with a clean worktree; a HEAD already carrying a v0.* tag has nothing to release; gh answers as the organization account and docker buildx is on PATH, so a tag never lands without the means to publish it |
 | Gates | Stages run in order and the gates of a stage at the same time, each line of output prefixed with the gate's name; the first stage with a failed gate stops the release and names every failed gate |
 | Recheck | HEAD and the worktree must be unchanged after the gates; a gate that commits or edits files voids the run |
 | Tag | v0.YYYYMMDD.N, N one past the highest revision for the day across local tags and origin's; the annotation lists the gates that passed and git log --oneline since the previous release |
@@ -108,18 +108,22 @@ checkout into. A job on the image therefore never runs a profile against
 a runtime it was not written for.
 
 The push logs in to ghcr.io as the organization account with its gh
-token, which needs the write:packages scope. The image is signed with
-cosign using the organization's key pair: the private key and its
-password come from the organization's secret store at release time, in
-COSIGN_PRIVATE_KEY and COSIGN_PASSWORD, and cosign.pub at the repository
-root is what a runner verifies against. Keyless signing is not used, because outside a hosted
-CI identity it would record a person's identity in the public
-transparency log. buildx attaches an SBOM attestation to the image index
-the signature covers, and its provenance is recorded at mode=min so it
-names no machine or person. The image is published after the tag is
-pushed, so its digest cannot be in the tag annotation; mage publish adds
-it to the GitHub release's notes, which pipelines pin from; latest is for
-people. An image already at the tag is kept, and signed if it is not.
+token, which needs the write:packages scope. buildx attaches an SBOM
+attestation to the image index, and its provenance is recorded at
+mode=min so it names no machine or person. The image is published after
+the tag is pushed, so its digest cannot be in the tag annotation; mage
+publish adds it to the GitHub release's notes, which pipelines pin from;
+latest is for people. An image already at the tag is kept.
+
+The image is not signed. Pinning by digest already holds a job to the
+image that was published, and the digest's trust is the GitHub release,
+the same trust the release binaries and their SHA256SUMS rest on. A
+signature adds only a key held apart from the GitHub account, which one
+maintainer holding both does not give, and no consumer verifies one yet.
+Signing from a person's machine would also need a key pair to keep
+secret, since keyless signing there records that person's identity in a
+public transparency log. Signing returns when a consumer requires it,
+keyless from a CI identity once releases publish from a pipeline.
 
 A CI job reads tracker and model credentials from masked CI variables
 (TPM_TRACKER, TPM_USER, and what each profile names), and its writes are
@@ -168,7 +172,6 @@ tpm release (srd015) reuses the tagging for program repositories.
 - release-gates.md
 - Dockerfile
 - install.sh
-- cosign.pub
 - internal/release
 - docs/specs/software-requirements/srd015-release.md (a program repository's release)
 - docs/specs/software-requirements/srd037-install.md (the version tpm install stamps)

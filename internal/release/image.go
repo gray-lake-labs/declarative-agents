@@ -13,8 +13,6 @@ import (
 // it is built for, and the buildx builder that can push them all (eng03).
 const (
 	Dockerfile     = "Dockerfile"
-	CosignKeyFile  = "cosign.pub"
-	CosignKeyEnv   = "COSIGN_PRIVATE_KEY"
 	imageBuilder   = "scrum-master-publish"
 	imageMetadata  = "image-metadata.json"
 	imageLatestTag = "latest"
@@ -82,31 +80,17 @@ func (p Publisher) BuildImage(b ImageBuild) (string, error) {
 	return meta.Digest, nil
 }
 
-// CheckImageTools fails unless what publishing the image needs is here:
-// docker buildx, cosign, the organization's public key, and its private key
-// in the environment.
+// CheckImageTools fails unless docker buildx, which builds and pushes the
+// image, is here.
 func (p Publisher) CheckImageTools() error {
-	var missing []string
 	if _, err := p.Run(p.Root, nil, "docker", "buildx", "version"); err != nil {
-		missing = append(missing, "docker buildx")
-	}
-	if _, err := p.Run(p.Root, nil, "cosign", "version"); err != nil {
-		missing = append(missing, "cosign")
-	}
-	if _, err := os.Stat(filepath.Join(p.Root, CosignKeyFile)); err != nil {
-		missing = append(missing, CosignKeyFile+" at the repository root")
-	}
-	if os.Getenv(CosignKeyEnv) == "" {
-		missing = append(missing, CosignKeyEnv+" (the organization's signing key, from its secret store)")
-	}
-	if len(missing) > 0 {
-		return fmt.Errorf("publishing the image needs %s", strings.Join(missing, ", "))
+		return fmt.Errorf("publishing the image needs docker buildx: %w", err)
 	}
 	return nil
 }
 
-// Check is the release preflight: the organization account and the image's
-// tools.
+// Check is the release preflight: the organization account and docker
+// buildx.
 func (p Publisher) Check() error {
 	if err := p.CheckAccount(); err != nil {
 		return err
@@ -115,14 +99,13 @@ func (p Publisher) Check() error {
 }
 
 // PublishImage builds the image for every image platform from the release
-// binaries Binaries built, pushes it as ImageRepo:tag and latest, signs its
-// digest with the organization's key, and adds the digest to the GitHub
-// release's notes. An image already at tag is kept, and signed if it is
-// not. A dry run names the build and runs nothing.
+// binaries Binaries built, pushes it as ImageRepo:tag and latest, and adds
+// its digest to the GitHub release's notes, which pipelines pin from. An
+// image already at tag is kept. A dry run names the build and runs nothing.
 func (p Publisher) PublishImage(tag string) error {
 	ref := p.ImageRepo + ":" + tag
 	if p.DryRun {
-		fmt.Fprintf(p.Out, "publish: would build and push %s for %s, sign it with %s, and list its digest on the release\n", ref, platformList(ImagePlatforms), CosignKeyFile)
+		fmt.Fprintf(p.Out, "publish: would build and push %s for %s and list its digest on the release\n", ref, platformList(ImagePlatforms))
 		return nil
 	}
 	dist, err := p.dist(tag)
@@ -159,16 +142,7 @@ func (p Publisher) PublishImage(tag string) error {
 		}
 		fmt.Fprintf(p.Out, "publish: pushed %s@%s\n", ref, digest)
 	}
-	pinned := p.ImageRepo + "@" + digest
-	key := filepath.Join(p.Root, CosignKeyFile)
-	if _, err := p.Run(p.Root, nil, "cosign", "verify", "--key", key, pinned); err == nil {
-		fmt.Fprintf(p.Out, "publish: kept the signature of %s\n", pinned)
-	} else if _, err := p.Run(p.Root, nil, "cosign", "sign", "--yes", "--key", "env://"+CosignKeyEnv, pinned); err != nil {
-		return fmt.Errorf("sign %s: %w", pinned, err)
-	} else {
-		fmt.Fprintf(p.Out, "publish: signed %s\n", pinned)
-	}
-	return p.noteDigest(tag, env, pinned)
+	return p.noteDigest(tag, env, p.ImageRepo+"@"+digest)
 }
 
 // noteDigest adds the image's pinned reference to the release's notes, once.

@@ -21,7 +21,7 @@ documents with the agile hierarchy (theme, initiative, epic, feature,
 user story) and renames the objective issue the Sprint Goal. Release 04.1 makes a
 program repository explain itself and adds tpm doctor to bring one an
 older tpm laid down up to date. Release 04.3 ships tpm to machines
-and to CI: release binaries, a signed container image, and the
+and to CI: release binaries, a container image, and the
 declarative-agents runtime at the release tpm pins. Every release proves itself with mage
 audit, which runs the parent's specification-critic corpus-audit agent
 (docs/guides/corpus-audit.md), and with its test suite.
@@ -620,7 +620,7 @@ mage audit. Planned and built on 2026-10-20 (design.md D12).
 
 tpm and the declarative-agents runtime reach the two places they run:
 people's machines and CI jobs. Each tag publishes tpm binaries with
-checksums on its GitHub release and a signed multi-arch container image
+checksums on its GitHub release and a multi-arch container image
 (eng03). tpm install --runtime fetches the runtime at the release tpm's
 own corpus pins, verified against the release's checksums, into the cache
 mage audit uses, and builds the spec tool there when Go is present; tpm
