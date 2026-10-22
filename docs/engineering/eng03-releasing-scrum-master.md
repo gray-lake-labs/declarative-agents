@@ -29,7 +29,7 @@ root.
 | Stage | Gates |
 |---|---|
 | audit | mage audit: the repository gate tests, then the specification-critic corpus audit |
-| test | go test ./... and mage integration:install |
+| test | go test ./..., mage integration:install, and mage crossBuild, which builds tpm for every release platform |
 
 Table: scrum-master's release gates.
 
@@ -70,7 +70,8 @@ release the green main.
 <!-- section: release-binaries -->
 ## Release binaries
 
-The first part of mage publish builds ./cmd/tpm at the tag with
+mage publishDryRun builds the binaries and names what mage publish would
+upload, creating nothing. The first part of mage publish builds ./cmd/tpm at the tag with
 CGO_ENABLED=0 for linux, darwin, and windows on amd64 and arm64, writes
 SHA256SUMS over them, creates the tag's GitHub release, and uploads the
 six binaries and SHA256SUMS to it. The assets are named tpm_<os>_<arch>,

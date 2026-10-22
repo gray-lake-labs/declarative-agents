@@ -71,7 +71,7 @@ docs/road-map.md.
 | "04.0" | The agile hierarchy | 3 | 3 | implemented |
 | "04.1" | A repository that explains itself | 1 | 1 | implemented |
 | "04.2" | A planning document drafted in conversation | 1 | 1 | implemented |
-| "04.3" | tpm ships to machines and to CI | 0 | 2 | specified |
+| "04.3" | tpm ships to machines and to CI | 1 | 2 | specified |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -177,7 +177,7 @@ docs/road-map.md.
 | [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md) | A Sprint Goal Closes at Sprint End With Its Stories Reported, and Old Objective Issues Read as Sprint Goals | 04.0 | implemented | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md |
 | [rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md) | A First-Time Reader Orients in a Program Repository and an Upgraded tpm Brings It Up to Date | 04.1 | implemented | [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | docs/specs/use-cases/rel04.1-uc001-orient-and-repair.md |
 | [rel04.2-uc001-draft-a-planning-document](specs/use-cases/rel04.2-uc001-draft-a-planning-document.md) | An Owner Drafts a Planning Document from a Description in Conversation | 04.2 | implemented | [test-rel04.2-draft](specs/test-suites/test-rel04.2-draft.md) | docs/specs/use-cases/rel04.2-uc001-draft-a-planning-document.md |
-| [rel04.3-uc001-install-without-go](specs/use-cases/rel04.3-uc001-install-without-go.md) | A Developer with No Go Toolchain Installs tpm and Readies the Pinned Runtime | 04.3 | specified | [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | docs/specs/use-cases/rel04.3-uc001-install-without-go.md |
+| [rel04.3-uc001-install-without-go](specs/use-cases/rel04.3-uc001-install-without-go.md) | A Developer with No Go Toolchain Installs tpm and Readies the Pinned Runtime | 04.3 | implemented | [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | docs/specs/use-cases/rel04.3-uc001-install-without-go.md |
 | [rel04.3-uc002-ci-job-on-the-image](specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md) | A CI Job Runs tpm and the Pinned Runtime on the Release's Image | 04.3 | specified | [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | docs/specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md |
 
 <!-- field: test_suite_index | form: "typed table" -->

@@ -31,3 +31,4 @@ ask
 | --- | --- |
 | unit tests | go test ./... |
 | install integration | mage integration:install |
+| cross build | mage crossBuild |

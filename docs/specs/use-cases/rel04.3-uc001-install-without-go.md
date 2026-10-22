@@ -1,7 +1,7 @@
 ---
 id: rel04.3-uc001-install-without-go
 title: A Developer with No Go Toolchain Installs tpm and Readies the Pinned Runtime
-status: specified
+status: implemented
 priority: P1
 test_suite: test-rel04.3-distribution
 ---

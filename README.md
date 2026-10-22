@@ -15,6 +15,22 @@ Most of what Scrum asks of people outside the work itself is moving facts the tr
 | `infra/` | Terraform module and the regression-rig root |
 | `magefiles/` | Build, gates, corpus audit, and integration targets |
 
+## Install
+
+Each release publishes tpm for Linux, macOS, and Windows on amd64 and arm64, with a `SHA256SUMS` file, on its [GitHub release](https://github.com/gray-lake-labs/scrum-master/releases). Install the latest, or name a tag, with the script, which checks the binary against `SHA256SUMS` and installs it in `$HOME/.local/bin` (`TPM_PREFIX` changes that):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gray-lake-labs/scrum-master/main/install.sh | sh
+```
+
+Or download `tpm_<os>_<arch>` (`.exe` on Windows) and `SHA256SUMS` from the release and check them with `sha256sum -c --ignore-missing SHA256SUMS`, or, with a Go toolchain, `go install github.com/gray-lake-labs/scrum-master/cmd/tpm@<tag>`.
+
+Then fetch the declarative-agents runtime the skills' profiles run on, at the release tpm pins; with Go on the machine this also builds the spec tool `tpm doctor` repairs documents with:
+
+```bash
+tpm install --runtime
+```
+
 ## Seed a program repository from an architecture document
 
 A program's system repository can be generated from one document that describes the system the program builds: its purpose, layers, parts, and a build order. `tpm init` lays down the corpus, and a coding agent given the brief below writes the program's intent on top of it. Keep the seed in the repository (for example under `seed/`), so the program can be regenerated whenever the seed or tpm changes.
@@ -109,7 +125,7 @@ go test ./...
 mage -d magefiles -l
 ```
 
-Releases are cut by `mage -d magefiles tag`, which runs the gates in `release-gates.md` and tags `v0.YYYYMMDD.N`. The corpus audit requires a clone cache of the parent specification repository; `docs/guides/corpus-audit.md` describes it.
+Releases are cut by `mage -d magefiles tag`, which runs the gates in `release-gates.md`, tags `v0.YYYYMMDD.N`, and once the tag is pushed publishes its binaries with `mage -d magefiles publish` (`docs/engineering/eng03-releasing-scrum-master.md`). The corpus audit requires a clone cache of the parent specification repository; `docs/guides/corpus-audit.md` describes it.
 
 Issue tracking lives in the repository via [beads](https://github.com/steveyegge/beads); the GitHub tracker is unused.
 

@@ -639,7 +639,7 @@ profile with no install step. Planned on 2026-10-21 (design.md D12).
 
 | id | summary | status | priority |
 | --- | --- | --- | --- |
-| [rel04.3-uc001-install-without-go](specs/use-cases/rel04.3-uc001-install-without-go.md) | A developer with no Go toolchain installs tpm from a release and readies the pinned runtime with tpm install --runtime. | specified | P1 |
+| [rel04.3-uc001-install-without-go](specs/use-cases/rel04.3-uc001-install-without-go.md) | A developer with no Go toolchain installs tpm from a release and readies the pinned runtime with tpm install --runtime. | implemented | P1 |
 | [rel04.3-uc002-ci-job-on-the-image](specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md) | A CI job runs tpm and the pinned runtime on the release's image with no install step and no Go toolchain. | specified | P2 |
 
 <!-- field: test_suites -->
