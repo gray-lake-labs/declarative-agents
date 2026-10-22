@@ -262,3 +262,26 @@ func TestOfflineReadNamesTheLastPulledCommit(t *testing.T) {
 		t.Fatalf("sm-1 assignee = %q, want alice kept", got.Assignee)
 	}
 }
+
+// TestOfflineReadAfterAWrite is srd042 R3.3 after a write: the commit a
+// clone pushed is what it and its origin last agreed on, so a later read
+// that cannot reach the origin names that commit, not the pull before it.
+func TestOfflineReadAfterAWrite(t *testing.T) {
+	f := newFixture(t, ready("sm-1"))
+	bob := f.clone("bob")
+	if _, _, err := bob.Issues(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := bob.Pop("sm-1"); err != nil {
+		t.Fatal(err)
+	}
+	pushed, err := bob.git("rev-parse", "origin/main")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.offline(bob)
+	_, cached, err := bob.Issues()
+	if err != nil || !cached.Offline || cached.Commit != pushed {
+		t.Fatalf("offline read after a write = %+v, %v; want the pushed commit %s", cached, err, pushed)
+	}
+}

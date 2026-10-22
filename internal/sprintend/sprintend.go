@@ -67,7 +67,7 @@ type Input struct {
 // reported status, beside the period's aggregate and the version tpm
 // release next recommends.
 func MakeFacts(in Input) (Facts, error) {
-	f := Facts{Project: in.Project, Aggregate: in.Aggregate}
+	f := Facts{Project: in.Project, Aggregate: in.Aggregate, SprintGoals: []SprintGoal{}}
 	progress := map[string]reports.Progress{}
 	for _, p := range in.Aggregate.Progress {
 		progress[p.SprintGoal] = p

@@ -161,7 +161,8 @@ behavior are eng04-beads-sync.
 ### R3.3
 
 A report produced from a clone that could not synchronize says so,
-naming the time of its last successful synchronization.
+naming the time of its last successful synchronization: the last pull, or
+the last push of its own writes, whichever came later.
 
 <!-- req: R4 -->
 ## R4 - What leaves

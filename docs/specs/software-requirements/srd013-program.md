@@ -132,7 +132,7 @@ tpm issue approve posts the approval as the person running it: a comment on the 
 <!-- req: R6.1 -->
 ### R6.1
 
-Creates or updates the program's group labels from control/labels.md in the program repository (config format labels), or from the built-in defaults when the file is absent: every plane, type, kind, and state value, with its color and description.
+Creates or updates the program's group labels from control/labels.md in the program repository (config format labels), or from the built-in defaults when the file is absent: every plane, type, kind, and state value, with its color and description. With --control it also creates one component::<name> label per component the control project's subsystem SRDs declare (srd001 R21.1).
 
 <!-- req: R6.2 -->
 ### R6.2
@@ -252,7 +252,7 @@ A merge of a branch that changes docs/ runs mage audit first and merges nothing 
 <!-- ac: AC6 -->
 ### AC6
 
-labels creates every listed label once, from control/labels.md or the defaults; a second run changes nothing; no label is deleted or renamed; with --migrate, issues labelled type::epic in the system repository and its subsystems' repositories are relabelled type::tracking once, nothing is written on a dry run, and a control/labels.md that still lists epic is reported, not edited.
+labels creates every listed label once, from control/labels.md or the defaults, and with --control each declared component's label; a second run changes nothing; no label is deleted or renamed; with --migrate, issues labelled type::epic in the system repository and its subsystems' repositories are relabelled type::tracking once, nothing is written on a dry run, and a control/labels.md that still lists epic is reported, not edited.
 
 <!-- field: traces -->
 #### Traces

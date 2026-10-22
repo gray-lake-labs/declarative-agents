@@ -16,6 +16,10 @@ The draft skill turns a description into one document at any level,
 in conversation with its owner, reading and checking the hierarchy
 with this group.
 
+Where each level lives and the fields its document carries are in
+docs/constitutions/design.md, under Schema; tpm init writes that file
+into a program repository.
+
 Subcommands:
   tpm backlog list    the repository's hierarchy documents, with id, kind, parent, and status (srd045)
   tpm backlog check   the hierarchy gate on the repository's documents (srd045)

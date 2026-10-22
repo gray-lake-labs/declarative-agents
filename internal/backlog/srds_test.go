@@ -3,6 +3,7 @@ package backlog
 import (
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -86,4 +87,35 @@ func stubSpec(t *testing.T, lines []string, err error) {
 	prev := specCheck
 	specCheck = func(string, string, string) ([]string, error) { return lines, err }
 	t.Cleanup(func() { specCheck = prev })
+}
+
+// TestBacklogCheckNamesUntrackedDocuments is srd045 R8.2 for a document git
+// does not track: the shape check cannot read it, so the gate names it
+// until it is staged.
+func TestBacklogCheckNamesUntrackedDocuments(t *testing.T) {
+	dir := t.TempDir()
+	git := func(args ...string) {
+		t.Helper()
+		if out, err := exec.Command("git", append([]string{"-C", dir}, args...)...).CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v: %s", args, err, out)
+		}
+	}
+	git("init", "-q", "-b", "main")
+	epic := filepath.Join(dir, "docs", "specs", "epics", "ep001-scoring.md")
+	if err := os.MkdirAll(filepath.Dir(epic), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(epic, []byte("not an epic\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if f := untracked(dir); len(f) != 1 || f[0].File != epic || f[0].Field != "untracked" {
+		t.Fatalf("untracked epic = %+v, want one finding naming it", f)
+	}
+	git("add", "-A")
+	if f := untracked(dir); len(f) != 0 {
+		t.Fatalf("a staged epic = %+v, want none", f)
+	}
+	if f := untracked(t.TempDir()); f != nil {
+		t.Fatalf("a directory git does not manage = %+v, want none", f)
+	}
 }

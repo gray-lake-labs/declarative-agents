@@ -262,7 +262,9 @@ func (s *Store) Reconcile() (ReconcileResult, error) {
 	if r.Commit, err = s.git("rev-parse", "HEAD"); err != nil {
 		return r, err
 	}
-	s.last = &Freshness{Commit: r.Commit, At: s.Now().UTC()}
+	if err := s.synced(r.Commit); err != nil {
+		return r, err
+	}
 	st, err := s.state()
 	if err != nil {
 		return r, err
@@ -279,6 +281,15 @@ func (s *Store) Reconcile() (ReconcileResult, error) {
 		r.Reconciled = append(r.Reconciled, Reconciled{ID: p.ID, Outcome: outcome})
 	}
 	return r, s.update(func(st *syncState) { st.Provisional = nil })
+}
+
+// synced records commit, which the clone just pushed, as both this command's
+// read and the last commit the clone and its origin agree on, so a later
+// command that cannot reach the origin names it (srd042 R3.3).
+func (s *Store) synced(commit string) error {
+	at := s.Now().UTC()
+	s.last = &Freshness{Commit: commit, At: at}
+	return s.update(func(st *syncState) { st.Commit, st.At = commit, at })
 }
 
 // Sync pulls the tracker repository into the clone, merging by the eng04
@@ -533,7 +544,9 @@ func (s *Store) writeFiles(what string, fn func() (bool, error)) (fr Freshness, 
 			// The read a command reports is now its own write, not the
 			// pull before it.
 			if head, err := s.git("rev-parse", "HEAD"); err == nil {
-				s.last = &Freshness{Commit: head, At: s.Now().UTC()}
+				if err := s.synced(head); err != nil {
+					return fr, true, false, err
+				}
 			}
 			return fr, true, false, nil
 		}

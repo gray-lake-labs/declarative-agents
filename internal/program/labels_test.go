@@ -1,6 +1,8 @@
 package program
 
 import (
+	"bytes"
+	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"os"
 	"strings"
 	"testing"
@@ -191,4 +193,30 @@ func specExample(t *testing.T, format string) []byte {
 	_, rest, _ = strings.Cut(rest, "```markdown\n")
 	doc, _, _ := strings.Cut(rest, "\n```")
 	return []byte(doc + "\n")
+}
+
+// TestLabelsRegistersComponents is srd013 R6.1 with --control: each
+// component the system's subsystem SRDs declare gets its component:: label
+// once, so a tracker keeping a label registry holds what issues carry.
+func TestLabelsRegistersComponents(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		p.AddFile("g/system", "main", "docs/specs/software-requirements/srd010-po-1.md", []byte(subsystemFixture))
+		f := p.Tracker()
+		run := func() {
+			t.Helper()
+			var out bytes.Buffer
+			if err := cli.Default.Run([]string{"issue", "labels", "--group", "g", "--control", "g/system", "--json"}, &out, func() (tracker.Tracker, error) { return f, nil }); err != nil {
+				t.Fatalf("labels: %v: %s", err, out.String())
+			}
+		}
+		run()
+		if l := groupLabels(t, f)["component::po-1"]; l.Name == "" {
+			t.Fatalf("component::po-1 not registered: %v", groupLabels(t, f))
+		}
+		writes := p.Writes()
+		run()
+		if p.Writes() != writes {
+			t.Fatalf("a second run wrote %d times", p.Writes()-writes)
+		}
+	})
 }

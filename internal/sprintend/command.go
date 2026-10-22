@@ -98,7 +98,7 @@ func init() {
 			if st.release == "" {
 				return fmt.Errorf("%w: stories needs --release", cli.ErrUsage)
 			}
-			var ids []string
+			ids := []string{}
 			for _, id := range strings.Split(st.done, ",") {
 				if id = strings.TrimSpace(id); id == "" {
 					continue

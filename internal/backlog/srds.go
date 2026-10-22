@@ -2,6 +2,7 @@ package backlog
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -59,6 +60,25 @@ var specCheck = spectool.Run
 // notCanonical ends a spec tool line that only asks for formatting, which
 // tpm doctor repairs; the gate reports the shape findings it cannot.
 const notCanonical = ": not-canonical: run mage fmt"
+
+// untracked names each document under docs/ that git does not track: the
+// shape check reads only what git tracks, so such a document would pass
+// unchecked until staged (srd045 R8.2). A directory git does not manage
+// has none.
+func untracked(dir string) []hierarchy.Finding {
+	out, err := exec.Command("git", "-C", dir, "ls-files", "--others", "--exclude-standard", "--", "docs").Output()
+	if err != nil {
+		return nil
+	}
+	var findings []hierarchy.Finding
+	for _, p := range strings.Fields(string(out)) {
+		if strings.HasSuffix(p, ".md") {
+			findings = append(findings, hierarchy.Finding{File: filepath.Join(dir, p), Field: "untracked",
+				Message: "git does not track it, so the shape check cannot read it; git add it"})
+		}
+	}
+	return findings
+}
 
 // checkShapes runs the pinned parent spec tool's check over the corpus at
 // dir and reports every finding but formatting, so a document doctor

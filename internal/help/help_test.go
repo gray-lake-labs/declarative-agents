@@ -51,6 +51,10 @@ func TestHelpGroupPages(t *testing.T) {
 			t.Errorf("tpm help %s: %v\n%s", g, err, out)
 		}
 	}
+	// The backlog page says where the document formats are (#166).
+	if out, _ := tpm(t, "help", "backlog"); !strings.Contains(out, "docs/constitutions/design.md") {
+		t.Errorf("tpm help backlog names no format document:\n%s", out)
+	}
 }
 
 func TestHelpConceptPages(t *testing.T) {

@@ -52,6 +52,10 @@ func (Integration) Backlog() error {
 	if err := copyTree(filepath.Join(root, "testdata", "hierarchy", "valid"), repo); err != nil {
 		return err
 	}
+	// The gate reads only what git tracks and names what it does not.
+	if out, err := exec.Command("git", "-C", repo, "add", "-A").CombinedOutput(); err != nil {
+		return fmt.Errorf("git add: %w: %s", err, out)
+	}
 
 	out, err := run("backlog", "list", "--json")
 	var entries []struct {
