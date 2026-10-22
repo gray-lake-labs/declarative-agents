@@ -81,9 +81,16 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		cite += ", closes " + ref
 	}
 	inMain("fetch", "-q", "origin", base)
-	if _, err := inMain("merge-base", "--is-ancestor", "refs/heads/"+branch, "refs/heads/"+base); err == nil {
+	// The base is what origin holds now: the main checkout's own branch may
+	// be behind it, and a diff against that would count others' merges as
+	// this branch's changes.
+	upstream := "refs/heads/" + base
+	if _, err := inMain("rev-parse", "--verify", "-q", "refs/remotes/origin/"+base); err == nil {
+		upstream = "refs/remotes/origin/" + base
+	}
+	if _, err := inMain("merge-base", "--is-ancestor", "refs/heads/"+branch, upstream); err == nil {
 		exact := "--grep=" + regexp.QuoteMeta(fmt.Sprintf("%s#%d", issueProject, iid)) + "([^0-9]|$)"
-		r.Commit, _ = inMain("rev-list", "-1", "--merges", "-E", exact, "refs/heads/"+base)
+		r.Commit, _ = inMain("rev-list", "-1", "--merges", "-E", exact, upstream)
 		if r.Commit == "" {
 			return r, fmt.Errorf("%s has no commits over %s; commit the work first", branch, base)
 		}
@@ -95,7 +102,7 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		if i.State == "closed" {
 			return r, fmt.Errorf("%s#%d is closed", issueProject, iid)
 		}
-		paths, err := inMain("diff", "--name-only", "refs/heads/"+base+"...refs/heads/"+branch)
+		paths, err := inMain("diff", "--name-only", upstream+"...refs/heads/"+branch)
 		if err != nil {
 			return r, err
 		}
