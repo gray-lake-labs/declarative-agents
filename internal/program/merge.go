@@ -159,7 +159,7 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 	targets := append([][2]any{{issueProject, iid}}, others...)
 	for _, tgt := range targets {
 		p, n := tgt[0].(string), tgt[1].(int)
-		c, err := Close(t, git, p, n, main, false)
+		c, err := Close(t, git, p, n, main, r.Commit, false)
 		if err != nil {
 			return r, fmt.Errorf("merged %s, but %s#%d did not close: %w", r.Commit, p, n, err)
 		}

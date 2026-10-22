@@ -170,43 +170,59 @@ func lintNote(reasons []string) string {
 	return body
 }
 
+// admittedNote is the comment lint leaves when an issue that failed
+// admission passes, so the failure above it reads as resolved.
+const admittedNote = lintMarker + "\nAdmitted: the issue now passes every admission check.\n"
+
+// lastLint is the body of the latest admission comment in notes, or "".
+func lastLint(notes []tracker.Note) string {
+	last := ""
+	for _, n := range notes {
+		if strings.HasPrefix(strings.TrimSpace(n.Body), lintMarker) {
+			last = strings.TrimSpace(n.Body)
+		}
+	}
+	return last
+}
+
 // Apply sets needs-triage with a comment listing the reasons on a failing
-// issue and clears it on a passing one. It changes no other label and never
-// the assignee (srd013 R1.2, srd041 R9.4). A dry run writes nothing.
+// issue and clears it on a passing one, recording the admission under a
+// failure comment. It changes no other label and never the assignee
+// (srd013 R1.2, srd041 R9.4). A dry run writes nothing.
 func Apply(t tracker.Tracker, i tracker.Issue, reasons []string, p Policy, dryRun bool) (LintResult, error) {
 	r := LintResult{Project: i.Project, IID: i.IID, Admitted: len(reasons) == 0, Reasons: reasons}
 	triaged := i.HasLabel(p.TriageLabel)
 	triager, byState := tracker.For(t, i.Project).(tracker.Triager)
-	if r.Admitted && byState {
-		if dryRun {
+	if r.Admitted {
+		var err error
+		switch {
+		case dryRun:
 			r.Changed = triaged
 			return r, nil
-		}
-		var err error
-		r.Changed, err = triager.Triage(i.Project, i.IID, true)
-		return r, err
-	}
-	if r.Admitted {
-		if triaged {
+		case byState:
+			r.Changed, err = triager.Triage(i.Project, i.IID, true)
+		case triaged:
 			r.Changed = true
-			if !dryRun {
-				_, err := t.UpdateIssue(i.Project, i.IID, tracker.IssueUpdate{RemoveLabels: []string{p.TriageLabel}})
-				return r, err
-			}
+			_, err = t.UpdateIssue(i.Project, i.IID, tracker.IssueUpdate{RemoveLabels: []string{p.TriageLabel}})
 		}
-		return r, nil
+		if err != nil || !r.Changed {
+			return r, err
+		}
+		notes, err := t.ListNotes(i.Project, i.IID)
+		if err != nil {
+			return r, err
+		}
+		if strings.Contains(lastLint(notes), "Admission failed") {
+			err = t.CreateNote(i.Project, i.IID, admittedNote)
+		}
+		return r, err
 	}
 	body := lintNote(reasons)
 	notes, err := t.ListNotes(i.Project, i.IID)
 	if err != nil {
 		return r, err
 	}
-	posted := false
-	for _, n := range notes {
-		if strings.TrimSpace(n.Body) == strings.TrimSpace(body) {
-			posted = true
-		}
-	}
+	posted := lastLint(notes) == strings.TrimSpace(body)
 	r.Changed = !triaged || !posted
 	if dryRun {
 		return r, nil

@@ -47,7 +47,7 @@ Checks one issue, or every issue changed since a date, against the label schema 
 <!-- req: R1.2 -->
 ### R1.2
 
-Sets needs-triage on an issue that fails, with a comment listing each failure; clears needs-triage on an issue that passes. It changes no other label and never the assignee (srd041 R9.4).
+Sets needs-triage on an issue that fails, with a comment listing each failure unless its latest admission comment lists the same; clears needs-triage on an issue that passes, and when its latest admission comment is a failure, comments that it is now admitted. It changes no other label and never the assignee (srd041 R9.4).
 
 <!-- req: R1.3 -->
 ### R1.3
@@ -99,7 +99,7 @@ Returns one issue with its labels, its state per srd041 R1–R32, its sub-issues
 <!-- req: R5.1 -->
 ### R5.1
 
-Merges a worktree branch into the default branch of the repository's main checkout with a merge commit whose message cites the issue and every issue named with --closes, pushes it, and closes each issue on that merge (srd042 R2.3).
+Merges a worktree branch into the default branch of the repository's main checkout with a merge commit whose message cites the issue and every issue named with --closes, pushes it, and closes each issue on that merge: the merge it made is the one each records, though an earlier merge cites the same reference. tpm issue close, which is not shown the merge, takes the first merge citing the issue made after the issue was created (srd042 R2.3).
 
 <!-- req: R5.2 -->
 ### R5.2
@@ -194,7 +194,7 @@ The marker recur writes into the next instance's body, naming the issue it recur
 <!-- ac: AC1 -->
 ### AC1
 
-lint sets needs-triage with a listed reason on each failing issue, including a criterion without test or environment and an unpinned Cites line, clears it on passing ones, changes nothing else, and runs on creation or on a schedule.
+lint sets needs-triage with a listed reason on each failing issue, including a criterion without test or environment and an unpinned Cites line, clears it on passing ones, comments the admission of one that failed before and posts a failure again after it, changes nothing else, and runs on creation or on a schedule.
 
 <!-- field: traces -->
 #### Traces
@@ -230,7 +230,7 @@ file creates an unassigned, linted issue (or a tracking-issue member, or a sub-i
 <!-- ac: AC4 -->
 ### AC4
 
-merge merges the branch with a merge commit citing the issue and named sub-issues, pushes it, and closes each on it, runs the corpus gate first for a docs/ change, and refuses an empty branch or a closed issue; with --issue-project it merges in one project and closes the issue in another.
+merge merges the branch with a merge commit citing the issue and named sub-issues, pushes it, and closes each on it, recording that merge though an earlier one cites the same reference, runs the corpus gate first for a docs/ change, and refuses an empty branch or a closed issue; with --issue-project it merges in one project and closes the issue in another.
 
 <!-- field: traces -->
 #### Traces

@@ -190,7 +190,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			r, err := Close(t, ExecGit{}, closeArgs.project, closeArgs.iid, closeArgs.dir, ctx.DryRun)
+			r, err := Close(t, ExecGit{}, closeArgs.project, closeArgs.iid, closeArgs.dir, "", ctx.DryRun)
 			if err != nil {
 				return err
 			}

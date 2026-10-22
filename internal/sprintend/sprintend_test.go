@@ -141,7 +141,7 @@ func localMergeCloses(t *testing.T, f tracker.Tracker, checkout string) {
 	git("merge", "-q", "--no-ff", branch, "-m", fmt.Sprintf("Merge %s (%s#2, closes %s#1)", branch, po1, po1))
 	merge := git("rev-parse", "HEAD")
 	for _, iid := range []int{2, 1} {
-		c, err := program.Close(f, program.ExecGit{}, po1, iid, checkout, false)
+		c, err := program.Close(f, program.ExecGit{}, po1, iid, checkout, "", false)
 		if err != nil || !c.Closed || c.Commit != merge {
 			t.Fatalf("close %s#%d = %+v, %v, want closed on %s", po1, iid, c, err, merge)
 		}
