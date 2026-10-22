@@ -1,0 +1,4 @@
+# The build context is the release binaries' directory; only the Linux
+# binaries enter the image.
+*
+!tpm_linux_*

@@ -20,6 +20,7 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/runtime"
 )
 
 //go:embed templates
@@ -40,18 +41,7 @@ type Result struct {
 
 // ParentRelease is the parent release the templates were written against,
 // the one this tpm's own corpus pins.
-func ParentRelease() (string, error) {
-	var pins struct {
-		Pins map[string]string `yaml:"pins"`
-	}
-	if err := yaml.Unmarshal(scrummaster.Pins, &pins); err != nil {
-		return "", err
-	}
-	if pins.Pins[parentRepository] == "" {
-		return "", fmt.Errorf("tpm was built without a pin of %s", parentRepository)
-	}
-	return pins.Pins[parentRepository], nil
-}
+func ParentRelease() (string, error) { return runtime.Pin() }
 
 // implementationTargets is the system SRD's implementation_targets field
 // for the repository in dir: one row naming the repository, at its origin's

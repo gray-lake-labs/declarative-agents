@@ -23,8 +23,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ReleaseURL is where the parent publishes each tag's binaries and source.
-const ReleaseURL = "https://github.com/gray-lake-labs/declarative-agents"
+// ReleaseURL is where the parent publishes each tag's binaries and source;
+// tests point it at a local server.
+var ReleaseURL = "https://github.com/gray-lake-labs/declarative-agents"
 
 // ParentRepository is the parent a corpus's docs/external-pins.yaml pins.
 const ParentRepository = "github.com/gray-lake-labs/declarative-agents"
