@@ -13,8 +13,8 @@ a fresh rig run on local disk and ends with mage regression:down removing them.
 The sprint-end stage works a sprint-end issue in the rig to a
 confirmed release behind a passing gate, and proves reported-complete
 Sprint Goals close without a met event. The planning stage runs plan
-for the next period. The tag-triggered stages are release 01.3's
-(test-rel01.3-tag-triggered).
+for the next period. The tag-triggered stages are release 05.0's
+(test-rel05.0-tag-triggered).
 
 <!-- field: traces -->
 ## Traces

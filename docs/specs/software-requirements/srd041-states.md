@@ -271,7 +271,7 @@ Every row of the transitions table names exactly one actor and an assignee effec
 <!-- ac: AC6 -->
 ### AC6
 
-Release 02.0's planning writes waiting and needs-run from R10; until then the interim rule of R10.3 holds.
+Release 06.0's planning writes waiting and needs-run from R10; until then the interim rule of R10.3 holds.
 
 <!-- field: traces -->
 #### Traces

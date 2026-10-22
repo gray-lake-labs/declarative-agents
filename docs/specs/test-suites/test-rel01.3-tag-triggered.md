@@ -2,11 +2,15 @@
 id: test-rel01.3-tag-triggered
 title: Test Suite for Release 01.3 Tags Trigger Handoff and the Summary
 release: "01.3"
-status: specified
+status: retired
+retired_in: "5.0"
+replaced_by: ["test-rel05.0-tag-triggered"]
 ---
 
 <!-- field: overview -->
 ## Overview
+
+Retired in 05.0: release 01.3 was renumbered 05.0 on 2026-10-22, and this document continues as test-rel05.0-tag-triggered. This file stays so that pinned references to it resolve.
 
 Each run starts with mage regression:up creating the repositories below in
 a fresh rig run on local disk and ends with mage regression:down removing them.

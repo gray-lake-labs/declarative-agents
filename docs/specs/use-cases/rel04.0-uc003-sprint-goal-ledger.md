@@ -103,7 +103,7 @@ An objective issue filed before release 04.0 is listed, closed, and replayed as 
 <!-- field: out_of_scope -->
 ## Out of scope
 
-- Evidence events and met; those are track-goals (02.0).
+- Evidence events and met; those are track-goals (06.0).
 - Forecasts and burn-ups (srd045 R7).
 
 <!-- field: assumptions -->

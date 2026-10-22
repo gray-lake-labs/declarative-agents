@@ -194,7 +194,7 @@ Run twice on the same tag, the pipeline pushes no second branch and files no sec
 <!-- req: R11.1 -->
 ### R11.1
 
-Once track-goals runs (02.0), the system release's aggregate also renders a roadmap forecast, the remaining stories of each epic spread over future sprints at velocity in Blocked-by order, and a burn-up per epic and initiative, story points done against total points, from the hierarchy documents and the ledger alone (srd045 R7.1). Both are committed beside the dashboard, regenerated each run, never edited, and labelled as forecasts, not baselines.
+Once track-goals runs (06.0), the system release's aggregate also renders a roadmap forecast, the remaining stories of each epic spread over future sprints at velocity in Blocked-by order, and a burn-up per epic and initiative, story points done against total points, from the hierarchy documents and the ledger alone (srd045 R7.1). Both are committed beside the dashboard, regenerated each run, never edited, and labelled as forecasts, not baselines.
 
 <!-- req: R11.2 -->
 ### R11.2
@@ -311,7 +311,7 @@ A system release tag runs aggregate and deck in CI and pushes one branch with th
 <!-- ac: AC9 -->
 ### AC9
 
-Release 02.0's planning writes the forecast requirement items from R11.1; until then the interim rule of R11.2 holds.
+Release 06.0's planning writes the forecast requirement items from R11.1; until then the interim rule of R11.2 holds.
 
 <!-- field: traces -->
 #### Traces

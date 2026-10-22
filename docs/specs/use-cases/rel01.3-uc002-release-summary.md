@@ -1,13 +1,17 @@
 ---
 id: rel01.3-uc002-release-summary
 title: A System Release Drafts the Summary for Review
-status: specified
+status: retired
+retired_in: "5.0"
+replaced_by: ["rel05.0-uc002-release-summary"]
 priority: P2
 test_suite: test-rel01.3-tag-triggered
 ---
 
 <!-- field: summary -->
 ## Summary
+
+Retired in 05.0: release 01.3 was renumbered 05.0 on 2026-10-22, and this document continues as rel05.0-uc002-release-summary. This file stays so that pinned references to it resolve.
 
 When the system repository tags a release, a CI pipeline runs tpm reports
 aggregate over the reports since the previous system release and tpm

@@ -299,7 +299,7 @@ Retired in 01.2 (design.md D12).
 <!-- ac: AC8 -->
 ### AC8
 
-Release 02.0's planning writes track-goals' requirements from R9; until then the interim rule of R9.3 holds.
+Release 06.0's planning writes track-goals' requirements from R9; until then the interim rule of R9.3 holds.
 
 <!-- field: traces -->
 #### Traces

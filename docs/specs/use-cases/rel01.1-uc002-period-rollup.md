@@ -104,7 +104,7 @@ An actionable signal becomes a pushed issue, not prose in a report.
 ## Out of scope
 
 - Dashboard signals from track-goals (srd018 R3.3); track-goals is not running in stage one.
-- Rendering the deck and the stakeholder update; that is rel01.3-uc002-release-summary.
+- Rendering the deck and the stakeholder update; that is rel05.0-uc002-release-summary.
 
 <!-- field: assumptions -->
 ## Assumptions

@@ -6,24 +6,34 @@ title: AI-Native Scrum Release Road Map
 <!-- field: overview -->
 ## Overview
 
-Release 00 is the inner loop on GitLab in four dot releases: 00.0 labels
-and push, 00.1 pop and merge, 00.2 changes under docs/ through the audit
-gate, and 00.3 tpm install for Cursor, Claude Code, and GitHub Copilot.
-Every issue, project work, a design change, or a planning change, has one
-path to a merged change. Release 01 builds the interaction between the technical program manager
-and the Product Owners (srd034) in three dot releases: 01.0 Sprint Goals
-reach the Product Owner as dated issues, 01.1 status comes back weekly,
-and 01.2 the sprint end releases and plans the next period. 01.4, the
-agent-legible CLI, ships before 01.3. Each use case cites only the
-requirement items its release delivers, so the SRDs it touches are partly
-delivered; the rest waits for 02.0. Release 04.0 aligns the planning
-documents with the agile hierarchy (theme, initiative, epic, feature,
-user story) and renames the objective issue the Sprint Goal. Release 04.1 makes a
-program repository explain itself and adds tpm doctor to bring one an
-older tpm laid down up to date. Release 04.3 ships tpm to machines
-and to CI: release binaries, a container image, and the
-declarative-agents runtime at the release tpm pins. Every release proves itself with mage
-audit, which runs the parent's specification-critic corpus-audit agent
+A release's major number names its theme, not its place in the order:
+00 the inner loop, 01 the loop between the technical program manager and
+the Product Owners (srd034), 03 the tracker, 04 the agile hierarchy and
+how tpm reaches people, 05 tags that trigger handoff and the summary, and
+06 evidence and cadence. Release 00 is the inner loop in four dot
+releases: 00.0 labels and push, 00.1 pop and merge, 00.2 changes under
+docs/ through the audit gate, and 00.3 tpm install for Cursor, Claude
+Code, and GitHub Copilot. Every issue, project work, a design change, or
+a planning change, has one path to a merged change. Release 01 builds the
+interaction between the technical program manager and the Product Owners:
+01.0 Sprint Goals reach the Product Owner as dated issues, 01.1 status
+comes back weekly, 01.2 the sprint end releases and plans the next
+period, and 01.4 the agent-legible CLI. Release 03.0 moves the tracker to
+beads, and 03.1 lets each repository name its tracking system, bd, gh, or
+glab. Release 04.0 aligns the planning documents with the agile hierarchy
+(theme, initiative, epic, feature, user story) and names the per-period
+issue the Sprint Goal, 04.1 makes a program repository explain itself
+with tpm doctor to bring one up to date, 04.2 drafts any planning
+document in conversation, 04.3 ships tpm to machines and to CI, and 04.4
+works a story end to end in one worktree and one merge.
+
+The releases were built in this order: 00.0 to 00.3, 01.0 to 01.2, 03.0,
+01.4, 04.0 to 04.3, then 03.1 and 04.4 together. 05.0 and 06.0, specified and
+not built, come next in that order; they were numbered 01.3 and 02.0
+until 2026-10-22. Each use case cites only the requirement items its
+release delivers, so the SRDs it touches are partly delivered; the rest
+waits for 06.0. Every release proves itself with mage audit, which runs
+the parent's specification-critic corpus-audit agent
 (docs/guides/corpus-audit.md), and with its test suite.
 
 <!-- release: 00.0 | status: implemented -->
@@ -312,48 +322,6 @@ issue, and files the next period's sprint-end issues.
 - mage integration:sprintEnd
 - mage integration:plan
 
-<!-- release: 01.3 | status: specified -->
-## 01.3 - Tags trigger handoff and the summary
-
-A downstream release tag files one reference-update issue upstream, and
-a system release tag opens the computed aggregate for the lead's review.
-Moved from 01.2 on 2026-10-18 so the period loop ships first. Open before
-planning: the deck renders from an approved summary (srd018 R4.1, R6.2)
-but the tag pipeline renders it from the raw aggregate; the pipeline and
-the lead each open a change for review for the stakeholder update; the
-reports configuration has no slide limit; and aggregation runs over ISO
-weeks, not a tag range.
-
-<!-- field: srds -->
-### SRDs
-
-- srd007-links
-- srd014-handoff
-- srd018-reports
-
-<!-- field: use_cases -->
-### Use cases
-
-| id | summary | status | priority |
-| --- | --- | --- | --- |
-| [rel01.3-uc001-reference-update](specs/use-cases/rel01.3-uc001-reference-update.md) | A downstream release tag files one reference-update issue upstream. | specified | P2 |
-| [rel01.3-uc002-release-summary](specs/use-cases/rel01.3-uc002-release-summary.md) | A system release tag opens one summary for review with the computed aggregate and deck; the model drafts the prose during the lead's review. | specified | P2 |
-
-<!-- field: test_suites -->
-### Test suites
-
-| id | summary | status |
-| --- | --- | --- |
-| [test-rel01.3-tag-triggered](specs/test-suites/test-rel01.3-tag-triggered.md) | Idempotent tag-triggered reference-update issues and summaries for review. | specified |
-
-<!-- field: proof -->
-### Proof
-
-- mage audit
-- mage regression:all
-- mage integration:referenceUpdate
-- mage integration:releaseSummary
-
 <!-- release: 01.4 | status: implemented -->
 ## 01.4 - The agent-legible CLI
 
@@ -363,7 +331,7 @@ each load-bearing concept; the program group becomes the issue group,
 named for what every subcommand acts on, with recur moved in from
 standup; tpm init lays down a system repository's corpus, control files,
 and skills, and tpm onboard adds a repository to the program and files
-its registration. Planned on 2026-10-18 to ship before 01.3, so it is the
+its registration. Planned on 2026-10-18 to ship before what was then 01.3 (now 05.0), so it is the
 next release (design.md D12): every later release's skills then call the
 renamed commands, and the help is written once against them.
 
@@ -396,28 +364,6 @@ renamed commands, and the help is written once against them.
 - mage integration:init
 - mage integration:onboard
 - mage integration:issueGroup
-
-<!-- release: 02.0 | status: specified -->
-## 02.0 - Evidence, handoff, and cadence
-
-What the TPM-to-Product-Owner loop does not need yet: done as evidence
-in a named environment and track-goals closing Sprint Goals on it, the
-full handoff and release fan-out, the daily standup and Daily Scrum,
-the sprint review and retrospective as skills, forecasts and
-burn-ups rolled up from story evidence, and the requirement
-items of earlier releases' SRDs that their use cases do not cite. Use
-cases are written when the release is planned.
-
-<!-- field: srds -->
-### SRDs
-
-- srd008-gates
-- srd019-track-goals
-- srd020-daily-scrum
-- srd032-sprint-review
-- srd033-sprint-retrospective
-- srd041-states
-- srd045-backlog
 
 <!-- release: 03.0 | status: implemented -->
 ## 03.0 - The tracker becomes beads
@@ -458,6 +404,56 @@ fixture tracker repositories. srd042 holds the direction.
 - mage integration:beadsSync
 - mage integration:beadsOffline
 
+<!-- release: 03.1 | status: implemented -->
+## 03.1 - One tracking system per repository
+
+A program names each repository's tracking system in control/trackers.md
+(config format trackers): a default, bd with its tracker repository, gh,
+or glab, and overrides for the projects or groups that use another,
+matched by the longest path. tpm routes every command to the system
+serving its project, so file, pop, and merge work the same everywhere.
+The gh and glab systems serve issues, notes, labels, and milestones
+through the gh and glab CLIs and the person's own login; pop opens a
+draft pull or merge request, and merge lands it on the host and closes
+the issue on that merge commit. Approval before merge is the policy's
+admission.require_approval, off by default, so a program with one
+identity merges its own pull request. Built on 2026-10-21 and 2026-10-22
+(GH-156, GH-168) and recorded as a release on 2026-10-22.
+
+<!-- field: srds -->
+### SRDs
+
+- srd042-beads-tracker
+- srd013-program
+
+<!-- field: config_formats -->
+### Config formats
+
+- trackers
+- policy
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel03.1-uc001-choose-the-tracking-system](specs/use-cases/rel03.1-uc001-choose-the-tracking-system.md) | A program names each repository's tracking system and files, pops, and merges through it, on gh a one-identity program merging its own pull request. | implemented | P2 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel03.1-tracking-systems](specs/test-suites/test-rel03.1-tracking-systems.md) | Routing by control/trackers.md, and file, pop, approve, and merge against a fake GitHub and GitLab and, opt-in, the hosts themselves. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:github (opt-in, dev)
+- mage integration:glab (opt-in, dev)
+
 <!-- release: 04.0 | status: implemented -->
 ## 04.0 - The agile hierarchy
 
@@ -467,13 +463,13 @@ an optional feature, and user story are document types the corpus gate
 checks, each with at most one parent, and the issue that executes a
 story and its tasks stay in the tracker. Links between them are the
 agile set: parent, blocks and blocked by, depends on, relates to,
-duplicates, and implements. The initiative becomes the
+duplicates, and implements. The objective document becomes the
 initiative and the per-period Sprint Goal becomes the team's Sprint
 Goal, which lists the stories its Sprint Planning selected and carries
 the ledger, with evidence anchored to the story criterion it proves.
 Story points and velocity live on stories. Released behaviour stays
 readable: objective documents, issues, and markers are read as their
-new names. Until track-goals runs (02.0), a Sprint Goal closes at the
+new names. Until track-goals runs (06.0), a Sprint Goal closes at the
 sprint end as reported complete (srd038 R2). Its use cases, authoring
 the hierarchy, planning a sprint from stories, and the Sprint Goal
 ledger, cite the requirement items they touch.
@@ -657,3 +653,112 @@ profile with no install step. Planned on 2026-10-21 and built on
 - mage integration:runtime
 - mage integration:doctor
 - mage integration:image
+
+<!-- release: 04.4 | status: implemented -->
+## 04.4 - Work a story end to end
+
+A story chosen at Sprint Planning is delivered as one change. tasks
+files the issues the story needs, each with an Implements line naming
+it; tpm issue list --implements lists them in order with a blocked one
+apart; implement pops the first, claims each further one into the same
+worktree with tpm issue pop --worktree, builds them one commit each, and
+finishes with one merge whose --closes closes them all. Built on
+2026-10-21 and 2026-10-22 with 03.1 (GH-155, under GH-156) and recorded
+as a release on 2026-10-22.
+
+<!-- field: srds -->
+### SRDs
+
+- srd022-tasks
+- srd036-implement
+- srd013-program
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel04.4-uc001-work-a-story](specs/use-cases/rel04.4-uc001-work-a-story.md) | A Developer lists a story's issues, works them in one worktree, and closes them all with one merge. | implemented | P1 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel04.4-story-loop](specs/test-suites/test-rel04.4-story-loop.md) | A story's issues listed in order, claimed into one worktree, and closed by one merge; tasks filing them. | implemented |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage integration:story
+
+<!-- release: 05.0 | status: specified -->
+## 05.0 - Tags trigger handoff and the summary
+
+A downstream release tag files one reference-update issue upstream, and
+a system release tag opens the computed aggregate for the lead's review.
+Moved from 01.2 on 2026-10-18 so the period loop ships first, and renumbered from 01.3 on 2026-10-22, after the releases numbered 03 and 04 shipped before it. Open before
+planning: the deck renders from an approved summary (srd018 R4.1, R6.2)
+but the tag pipeline renders it from the raw aggregate; the pipeline and
+the lead each open a change for review for the stakeholder update; the
+reports configuration has no slide limit; and aggregation runs over ISO
+weeks, not a tag range.
+
+<!-- field: srds -->
+### SRDs
+
+- srd007-links
+- srd014-handoff
+- srd018-reports
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel05.0-uc001-reference-update](specs/use-cases/rel05.0-uc001-reference-update.md) | A downstream release tag files one reference-update issue upstream. | specified | P2 |
+| [rel05.0-uc002-release-summary](specs/use-cases/rel05.0-uc002-release-summary.md) | A system release tag opens one summary for review with the computed aggregate and deck; the model drafts the prose during the lead's review. | specified | P2 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel05.0-tag-triggered](specs/test-suites/test-rel05.0-tag-triggered.md) | Idempotent tag-triggered reference-update issues and summaries for review. | specified |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage regression:all
+- mage integration:referenceUpdate
+- mage integration:releaseSummary
+
+<!-- release: 06.0 | status: specified -->
+## 06.0 - Evidence, handoff, and cadence
+
+What the TPM-to-Product-Owner loop does not need yet: done as evidence
+in a named environment and track-goals closing Sprint Goals on it, the
+handoff on merge and the release fan-out (srd014 R1 to R4), the
+stakeholder update as its own artifact (srd018 R6.2) and the roadmap
+forecast (srd018 R11), the daily standup and Daily Scrum, the sprint
+review and retrospective as skills, the waiting and needs-run states
+(srd041 R10), forecasts rolled up from story evidence (srd045 R7), and
+the requirement items of earlier releases' SRDs that their use cases do
+not cite. Renumbered from 02.0 on 2026-10-22; 04.0 and 04.2 delivered
+the rest of srd041 and srd045. Use cases are written when the release is
+planned.
+
+<!-- field: srds -->
+### SRDs
+
+- srd008-gates
+- srd014-handoff
+- srd018-reports
+- srd019-track-goals
+- srd020-daily-scrum
+- srd032-sprint-review
+- srd033-sprint-retrospective
+- srd041-states
+- srd045-backlog
