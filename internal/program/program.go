@@ -44,6 +44,13 @@ func init() {
 			if err != nil {
 				return err
 			}
+			if labelArgs.control != "" {
+				components, err := ComponentLabels(t, labelArgs.control, labelArgs.ref)
+				if err != nil {
+					return err
+				}
+				want = append(want, components...)
+			}
 			res, err := SyncLabels(t, labelArgs.group, want, labelArgs.update, ctx.DryRun)
 			if err != nil {
 				return err
@@ -190,7 +197,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			r, err := Close(t, ExecGit{}, closeArgs.project, closeArgs.iid, closeArgs.dir, ctx.DryRun)
+			r, err := Close(t, ExecGit{}, closeArgs.project, closeArgs.iid, closeArgs.dir, "", ctx.DryRun)
 			if err != nil {
 				return err
 			}
@@ -420,7 +427,7 @@ func init() {
 			}
 			milestone, reason := fileArgs.milestone, ""
 			if milestone == "" && l.Plane == "data" && fileArgs.typ == "" {
-				if milestone, reason, err = SprintMilestone(t, fileArgs.project, time.Now()); err != nil {
+				if milestone, reason, err = SprintMilestone(t, fileArgs.project, time.Now(), l.Kind == "release"); err != nil {
 					return err
 				}
 			}

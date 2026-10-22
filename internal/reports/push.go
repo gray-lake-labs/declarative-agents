@@ -57,20 +57,19 @@ func signalComponent(s Signal, p program.Policy) string {
 // PushSignals files each actionable signal as an issue in the system
 // repository, once: an open issue already carrying the signal is kept
 // (srd018 R3.6, R6.3). A filed signal is linted in the same write and
-// taken by the person pushing it, the program manager, as srd041's open to
-// taken row allows its author; its component is one the program lists, the
-// first component a shared blocker holds up when the blocker itself is not
-// one.
+// left unassigned, since only pop sets an assignee (srd041 R9.2): its body
+// opens by mentioning the person pushing it, the program manager, as a
+// status issue mentions its author. Its component is one the program
+// lists, the first component a shared blocker holds up when the blocker
+// itself is not one.
 func PushSignals(t tracker.Tracker, system string, signals []Signal, p program.Policy, dryRun bool) ([]PushResult, error) {
 	open, err := t.ListIssues(system, tracker.IssueQuery{State: "opened"})
 	if err != nil {
 		return nil, err
 	}
-	var me tracker.User
-	if !dryRun {
-		if me, err = tracker.UserIn(t, system); err != nil {
-			return nil, err
-		}
+	me, err := tracker.UserIn(t, system)
+	if err != nil && !dryRun {
+		return nil, err
 	}
 	var out []PushResult
 	for _, s := range signals {
@@ -86,6 +85,9 @@ func PushSignals(t tracker.Tracker, system string, signals []Signal, p program.P
 		}
 		if r.Action == "filed" {
 			in := SignalIssue(s)
+			if me.Username != "" {
+				in.Description = "@" + me.Username + ": " + in.Description
+			}
 			if c := signalComponent(s, p); c != s.Component {
 				in.Labels = slices.DeleteFunc(in.Labels, func(l string) bool { return strings.HasPrefix(l, "component::") })
 				in.Labels = append(in.Labels, "component::"+c)
@@ -96,11 +98,6 @@ func PushSignals(t tracker.Tracker, system string, signals []Signal, p program.P
 			}
 			r.IID, r.WebURL = fr.IID, fr.WebURL
 			r.Admitted, r.Reasons = fr.Lint.Admitted, fr.Lint.Reasons
-			if !dryRun {
-				if err := t.AssignIssue(system, fr.IID, me); err != nil {
-					return out, err
-				}
-			}
 		}
 		out = append(out, r)
 	}

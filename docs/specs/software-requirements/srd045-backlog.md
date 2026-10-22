@@ -180,7 +180,7 @@ tpm backlog list reads the hierarchy documents of the repository at --dir and pr
 <!-- req: R8.2 -->
 ### R8.2
 
-tpm backlog check runs R6.1's checks on the repository at --dir through the same function the gate in mage audit calls; it also reads the SRDs, counting them among the documents and refusing a requirement item no acceptance criterion traces, and runs the pinned parent spec tool's check, refusing each shape finding but formatting, which tpm doctor repairs, so the merge gate refuses what doctor would. It prints each finding with its file, field, and message, says when the spec tool could not run and why, and exits non-zero when there is any finding; with --json it prints the document count, the findings, and why the spec check was skipped.
+tpm backlog check runs R6.1's checks on the repository at --dir through the same function the gate in mage audit calls; it also reads the SRDs, counting them among the documents and refusing a requirement item no acceptance criterion traces, and runs the pinned parent spec tool's check, refusing each shape finding but formatting, which tpm doctor repairs, so the merge gate refuses what doctor would; the spec tool reads only what git tracks, so the gate also refuses each document under docs/ git does not track, naming it, rather than passing it unchecked. It prints each finding with its file, field, and message, says when the spec tool could not run and why, and exits non-zero when there is any finding; with --json it prints the document count, the findings, and why the spec check was skipped.
 
 <!-- req: R8.3 -->
 ### R8.3
@@ -287,7 +287,7 @@ Release 02.0's planning writes the forecast items from R7.1; until then the inte
 <!-- ac: AC8 -->
 ### AC8
 
-tpm backlog list prints every hierarchy document with its id, kind, title, status, parent, path, and a story's points and rank, filtered by --kind; tpm backlog check reports exactly the gate's findings on the same documents and exits non-zero when there is any; neither opens a tracker, uses the network, or writes.
+tpm backlog list prints every hierarchy document with its id, kind, title, status, parent, path, and a story's points and rank, filtered by --kind; tpm backlog check reports exactly the gate's findings on the same documents, and names a document git does not track, and exits non-zero when there is any; neither opens a tracker, uses the network, or writes.
 
 <!-- field: traces -->
 #### Traces

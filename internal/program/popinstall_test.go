@@ -60,8 +60,10 @@ func TestPopInstallsSkillsIntoWorktree(t *testing.T) {
 	if status := git(worktree, "status", "--porcelain", "--untracked-files=all"); status != "" {
 		t.Fatalf("worktree status %q", status)
 	}
-	if again, err := InstallSkills(checkout, worktree); err != nil || !slices.Equal(again, agents) {
-		t.Fatalf("a second pop: agents=%v err=%v", again, err)
+	// A second pop into the same worktree writes nothing, so it reports no
+	// agent installed.
+	if again, err := InstallSkills(checkout, worktree); err != nil || len(again) != 0 {
+		t.Fatalf("a second pop: agents=%v err=%v, want none", again, err)
 	}
 }
 

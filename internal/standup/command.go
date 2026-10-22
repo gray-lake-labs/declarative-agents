@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
+	"github.com/gray-lake-labs/scrum-master/internal/program"
 )
 
 func init() {
 	var args struct {
-		project, due, title, summary, summaryFile string
-		iid                                       int
+		project, control, ref, due, title, summary, summaryFile string
+		iid                                                     int
 	}
 	cli.Default.Register(&cli.Command{
 		Group: "issue", Name: "recur", Summary: "open the next instance of a recurring issue",
@@ -23,6 +24,8 @@ func init() {
 			fs.StringVar(&args.title, "title", "", "the next title; empty keeps the issue's")
 			fs.StringVar(&args.summary, "summary", "", "the run's result: closes an open instance and goes on the Previous Runs line")
 			fs.StringVar(&args.summaryFile, "summary-file", "", "a file holding the run's result, in place of --summary")
+			fs.StringVar(&args.control, "control", "", "project holding control/policy.md, which admits the next instance; empty is --project")
+			fs.StringVar(&args.ref, "ref", "main", "ref of the control files")
 		},
 		Run: func(ctx *cli.Context) error {
 			if args.project == "" || args.iid == 0 {
@@ -43,7 +46,15 @@ func init() {
 			if err != nil {
 				return err
 			}
-			r, err := Recur(t, args.project, args.iid, RecurOptions{Title: args.title, DueDate: args.due, Summary: summary, Now: time.Now(), DryRun: ctx.DryRun})
+			control := args.control
+			if control == "" {
+				control = args.project
+			}
+			p, err := program.LoadPolicy(t, control, args.ref)
+			if err != nil {
+				return err
+			}
+			r, err := Recur(t, args.project, args.iid, RecurOptions{Title: args.title, DueDate: args.due, Summary: summary, Policy: p, Now: time.Now(), DryRun: ctx.DryRun})
 			if err != nil {
 				return err
 			}

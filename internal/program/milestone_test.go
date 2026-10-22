@@ -148,3 +148,27 @@ func TestAuditForARepositoryWithoutMage(t *testing.T) {
 		t.Fatalf("the policy's own command: %q", got)
 	}
 }
+
+// TestReleaseIssueKeepsItsEndedSprint is srd013 R3.3's exception: after a
+// sprint's sprint-end merged and before a later milestone is dated, an
+// issue that cuts the release (kind::release) is filed on the ended
+// sprint's milestone, while other work still is not.
+func TestReleaseIssueKeepsItsEndedSprint(t *testing.T) {
+	f := fake.New()
+	f.Milestones["01.0"] = tracker.Milestone{Title: "01.0", StartDate: day(-10), DueDate: day(2)}
+	end, err := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: sprint end 01.0", Milestone: "01.0",
+		Labels: []string{"plane::data", "type::recurring", "kind::release"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	closed := "close"
+	if _, err := f.UpdateIssue("g/po-1", end.IID, tracker.IssueUpdate{State: &closed}); err != nil {
+		t.Fatal(err)
+	}
+	if r, i := fileWith(t, f, "--kind", "release"); r.Milestone != "01.0" || i.Milestone != "01.0" || !r.Lint.Admitted {
+		t.Fatalf("release issue after its sprint ended: %+v, issue milestone %q; want 01.0, admitted", r, i.Milestone)
+	}
+	if r, i := fileWith(t, f); r.Milestone != "" || i.Milestone != "" || r.Lint.Admitted {
+		t.Fatalf("build issue after the sprint ended with no later milestone: %+v; want no milestone, not admitted", r)
+	}
+}

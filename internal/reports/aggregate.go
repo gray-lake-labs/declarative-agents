@@ -247,6 +247,35 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 			}
 		}
 	}
+	// A team whose reports name no Sprint Goal of its own is as missing as
+	// one that sent none: nothing of it reaches the aggregate. The system
+	// repository holds no Sprint Goal (srd018 R3.2).
+	var projects []string
+	sent := map[string]bool{}
+	for _, m := range in.Config.Team {
+		if !slices.Contains(projects, m.Project) {
+			projects = append(projects, m.Project)
+		}
+		for _, w := range weeks {
+			sent[m.Project] = sent[m.Project] || have[w+"\x00"+m.Username]
+		}
+	}
+	for _, project := range projects {
+		if project == in.Config.System || !sent[project] {
+			continue
+		}
+		named := false
+		for ref := range goals {
+			if strings.HasPrefix(ref, project+"#") {
+				named = true
+				break
+			}
+		}
+		if !named {
+			a.Signals = append(a.Signals, Signal{SignalMissingReport, project, project, weeks[len(weeks)-1],
+				fmt.Sprintf("no report from %s to %s names a Sprint Goal of %s", in.From, in.To, project), false, nil})
+		}
+	}
 
 	mentioned := map[string]bool{}
 	for ref := range goals {
@@ -262,19 +291,26 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 		}
 	}
 	since := periodStart(from, reported)
-	for _, m := range in.Config.Team {
-		merged, err := t.Merges(m.Project, "", since)
+	for _, project := range projects {
+		merged, err := t.Merges(project, "", since)
 		if err != nil {
 			return a, err
 		}
 		for _, mr := range merged {
 			// A delivery closes an issue it cites; a merge citing none,
-			// such as a pull request's, is not work the reports account for.
-			if mr.MergedAt > end || !strings.Contains(mr.Description, "Closes ") || closesMentioned(m.Project, mr.Description, mentioned) {
+			// such as a pull request's, is not work the reports account for,
+			// and neither is one closing only recurring issues, such as a
+			// sprint-end or a status report.
+			if mr.MergedAt > end || !strings.Contains(mr.Description, "Closes ") || closesMentioned(project, mr.Description, mentioned) {
 				continue
 			}
-			a.Signals = append(a.Signals, Signal{SignalUnreportedWork, m.Project, fmt.Sprintf("%s!%d", m.Project, mr.IID), ISOWeek(mustDate(mr.MergedAt)),
-				fmt.Sprintf("%s!%d %q merged on %s and closes no reported Sprint Goal", m.Project, mr.IID, mr.Title, mr.MergedAt), false, nil})
+			if routine, err := closesOnlyRecurring(t, project, mr.Description); err != nil {
+				return a, err
+			} else if routine {
+				continue
+			}
+			a.Signals = append(a.Signals, Signal{SignalUnreportedWork, project, fmt.Sprintf("%s!%d", project, mr.IID), ISOWeek(mustDate(mr.MergedAt)),
+				fmt.Sprintf("%s!%d %q merged on %s and closes no reported Sprint Goal", project, mr.IID, mr.Title, mr.MergedAt), false, nil})
 		}
 	}
 	for c := range a.ByComponent {
@@ -320,6 +356,23 @@ func closesMentioned(project, description string, mentioned map[string]bool) boo
 		}
 	}
 	return false
+}
+
+// closesOnlyRecurring reports whether every issue the merge closes is a
+// recurring one (type::recurring): routine, not planned work.
+func closesOnlyRecurring(t tracker.Tracker, project, description string) (bool, error) {
+	refs := closesPattern.FindAllStringSubmatch(description, -1)
+	for _, m := range refs {
+		ref := m[1]
+		if strings.HasPrefix(ref, "#") {
+			ref = project + ref
+		}
+		i, ok, err := issueOf(t, ref)
+		if err != nil || !ok || !i.HasLabel("type::recurring") {
+			return false, err
+		}
+	}
+	return len(refs) > 0, nil
 }
 
 // hasMet reports whether the Sprint Goal's ledger holds a met event

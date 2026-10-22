@@ -13,6 +13,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/reports"
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
@@ -418,6 +419,36 @@ func TestOpenSprintGoalSlips(t *testing.T) {
 			if it.Slipped {
 				t.Fatalf("a met Sprint Goal's outcome slipped: %+v", it)
 			}
+		}
+	})
+}
+
+// TestSlippedIsPerItem is srd031 R2.3 per item: an open Sprint Goal that
+// serves an outcome and cites one of its items slips that item only, so an
+// item of the same outcome another goal delivered is not carried over.
+func TestSlippedIsPerItem(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		in, f := input(t, system(t), p)
+		goal, err := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Sprint Goal: reliable agents",
+			Description: "Goal\n\nCites: https://gitlab.example/g/system/-/blob/corpus/v0.1.0/docs/specs/objectives/obj001-reliable-agents.md#R1.1\n\n" +
+				sprintgoal.Marker("01.0", []string{"obj001-reliable-agents#R1"}) + "\n"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		in.Aggregate = &reports.Aggregation{Progress: []reports.Progress{{SprintGoal: fmt.Sprintf("g/po-1#%d", goal.IID), State: "at-risk"}}}
+		c, err := MakeCandidates(in)
+		if err != nil {
+			t.Fatal(err)
+		}
+		slipped := map[string]bool{}
+		for _, it := range c.Items {
+			slipped[it.ID] = it.Slipped
+		}
+		if !slipped["obj001-reliable-agents#R1.1"] {
+			t.Fatalf("the cited item did not slip: %+v", c.Items)
+		}
+		if _, back := slipped["obj001-reliable-agents#R1.2"]; back {
+			t.Fatalf("an item of the same outcome the goal did not cite came back: %+v", c.Items)
 		}
 	})
 }

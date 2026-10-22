@@ -22,8 +22,10 @@ type RecurOptions struct {
 	// Summary is the run's result: it closes an open instance as its run
 	// summary and follows the outcome on the Previous Runs line.
 	Summary string
-	Now     time.Time
-	DryRun  bool
+	// Policy admits the next instance, as tpm issue file admits an issue.
+	Policy program.Policy
+	Now    time.Time
+	DryRun bool
 }
 
 // RecurResult is what recur reports.
@@ -36,7 +38,9 @@ type RecurResult struct {
 	NextURL  string `json:"next_url,omitempty"`
 	Title    string `json:"title"`
 	DueDate  string `json:"due_date"`
-	DryRun   bool   `json:"dry_run"`
+	// Admitted is whether the next instance passed admission.
+	Admitted bool `json:"admitted"`
+	DryRun   bool `json:"dry_run"`
 }
 
 // The marker keeps the text tpm standup recur wrote: it is tracker data that
@@ -49,10 +53,10 @@ func recursMarker(project string, iid int) string {
 
 // Recur opens the next instance of a recurring issue (srd013 R8.1, srd001
 // R8.3): same labels and milestone, the next due date, and the run
-// appended to Previous Runs. An open issue is closed first with a run
+// appended to Previous Runs, admitted under the policy as a filed issue is. An open issue is closed first with a run
 // summary; one a merge closed is left as it is. When the next
 // instance already exists, nothing is written.
-func Recur(t tracker.Issues, project string, iid int, o RecurOptions) (RecurResult, error) {
+func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurResult, error) {
 	r := RecurResult{Project: project, Previous: iid, DryRun: o.DryRun}
 	i, err := t.GetIssue(project, iid)
 	if err != nil {
@@ -130,11 +134,11 @@ func Recur(t tracker.Issues, project string, iid int, o RecurOptions) (RecurResu
 		}
 	}
 	labels = append(labels, program.Op(program.OpRecur))
-	next, err := t.CreateIssue(project, tracker.NewIssue{Title: r.Title, Description: body, Labels: labels, DueDate: r.DueDate, Milestone: i.Milestone})
+	next, err := program.CreateLinted(t, project, tracker.NewIssue{Title: r.Title, Description: body, Labels: labels, DueDate: r.DueDate, Milestone: i.Milestone}, o.Policy)
 	if err != nil {
 		return r, err
 	}
-	r.Next, r.NextURL = next.IID, next.WebURL
+	r.Next, r.NextURL, r.Admitted = next.IID, next.WebURL, next.Lint.Admitted
 	return r, nil
 }
 

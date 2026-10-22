@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/scrum-master/internal/events"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
@@ -135,8 +136,15 @@ func testActionableSignalIsPushedAsIssue(t *testing.T, p trackertest.Program) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Contains(i.Assignees, me.Username) {
-		t.Fatalf("the filed signal is not taken by the person pushing it, %s: assignees %v", me.Username, i.Assignees)
+	// Only pop sets an assignee (srd041 R9.2): the signal names the person
+	// pushing it and waits, open, for whoever takes it.
+	if len(i.Assignees) != 0 || i.State != "opened" || !strings.HasPrefix(i.Description, "@"+me.Username+": ") {
+		t.Fatalf("the filed signal: assignees %v, state %s, body %q; want unassigned, open, mentioning %s", i.Assignees, i.State, i.Description, me.Username)
+	}
+	if bt, ok := f.(*beads.Tracker); ok {
+		if b, _, err := bt.Store.Find("g/system", i.IID); err != nil || b.State == beads.Taken {
+			t.Fatalf("the filed signal on beads is %s (%v), not taken by a pop", b.State, err)
+		}
 	}
 	again, err := PushSignals(f, "g/system", signals, program.Defaults(), false)
 	if err != nil || again[0].Action != "exists" || len(systemIssues(t, f)) != 1 {
@@ -234,6 +242,51 @@ func TestAggregateReadsTheLedgerAndOnlyDeliveries(t *testing.T) {
 		}
 		if !shared {
 			t.Errorf("no shared-blocker signal: %+v", a.Signals)
+		}
+	})
+}
+
+// TestAggregateSeesATeamWithoutAGoal is srd018 R3.2 for a team whose reports
+// name no Sprint Goal of its own: it is reported missing, not left out, and
+// its sprint-end merge, which closes only its recurring sprint-end issue,
+// is not unreported work, while a merge closing other work still is.
+func TestAggregateSeesATeamWithoutAGoal(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		dir := t.TempDir()
+		for _, week := range []string{"2026-W41", "2026-W42"} {
+			start, _ := ParseWeek(week)
+			writeReport(t, dir, ReportPath(start, "carol"), Render("carol", week, []Entry{work("g/po-3#1", "platform", "on-track", "no")}, nil))
+			writeReport(t, dir, ReportPath(start, "erin"), Render("erin", week, nil, nil))
+		}
+		p.AddMerge("g/po-4", tracker.Merge{IID: 1, Title: "Sprint end 01.0", Author: "erin", MergedAt: "2026-10-14", Description: "Closes g/po-4#1"})
+		p.AddMerge("g/po-4", tracker.Merge{IID: 2, Title: "Unplanned work", Author: "erin", MergedAt: "2026-10-14", Description: "Closes g/po-4#2"})
+		f := p.Tracker()
+		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "goal"})
+		f.CreateIssue("g/po-4", tracker.NewIssue{Title: "Recurring: sprint end 01.0", Labels: []string{"plane::data", "type::recurring", "kind::release"}})
+		f.CreateIssue("g/po-4", tracker.NewIssue{Title: "Unplanned", Labels: []string{"plane::data", "kind::build"}})
+		cfg := Config{Team: []Member{{"carol", "g/po-3"}, {"erin", "g/po-4"}, {"tpm", "g/system"}}, System: "g/system"}
+		cfg.defaults()
+
+		a, err := Aggregate(f, AggregateInput{Dir: dir, Config: cfg, Policy: program.Defaults(), From: "2026-W41", To: "2026-W42"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var missing, unreported []string
+		for _, s := range a.Signals {
+			switch s.Kind {
+			case SignalMissingReport:
+				if strings.Contains(s.Detail, "names a Sprint Goal") {
+					missing = append(missing, s.Subject)
+				}
+			case SignalUnreportedWork:
+				unreported = append(unreported, s.Subject)
+			}
+		}
+		if !slices.Equal(missing, []string{"g/po-4"}) {
+			t.Errorf("teams reported without a Sprint Goal = %v, want g/po-4 only", missing)
+		}
+		if !slices.Equal(unreported, []string{"g/po-4!2"}) {
+			t.Errorf("unreported work = %v, want only the merge closing non-recurring work", unreported)
 		}
 	})
 }

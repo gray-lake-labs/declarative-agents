@@ -54,7 +54,7 @@ The repository's SRDs, in the system repository the agreed initiatives (srd034 R
 <!-- req: R2.3 -->
 ### R2.3
 
-tpm goals status (srd019) for what is met, proving, or slipped, and the latest release tags. Before track-goals runs in the program, the period aggregate names what slipped: a Sprint Goal its slipped-commitment signal (srd018 R3.2) names, and one its progress shows neither met nor reported complete at the period's end.
+tpm goals status (srd019) for what is met, proving, or slipped, and the latest release tags. Before track-goals runs in the program, the period aggregate names what slipped: a Sprint Goal its slipped-commitment signal (srd018 R3.2) names, and one its progress shows neither met nor reported complete at the period's end. What slips is each item such a goal cites; a goal that cites no item of an outcome it serves slips the whole outcome, so an item another goal of the same outcome delivered is not carried over.
 
 <!-- req: R2.4 -->
 ### R2.4
@@ -165,7 +165,7 @@ tpm plan backlog writes the chosen stories, with their points, into the Sprint B
 <!-- ac: AC1 -->
 ### AC1
 
-Facts come from the road-map, the SRDs, open Sprint Goals with pinned citations, the team's stories, track-goals status, and dependency explanations; the requirements and the version are asked with recommendations; the skill runs at system and subsystem level alike.
+Facts come from the road-map, the SRDs, open Sprint Goals with pinned citations (an open goal slips the items it cites, not the rest of their outcome), the team's stories, track-goals status, and dependency explanations; the requirements and the version are asked with recommendations; the skill runs at system and subsystem level alike.
 
 <!-- field: traces -->
 #### Traces

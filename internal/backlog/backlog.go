@@ -71,7 +71,7 @@ func Check(dir string) (Report, error) {
 		return Report{}, err
 	}
 	shapes, skipped := checkShapes(dir)
-	findings = append(append(findings, untraced...), shapes...)
+	findings = append(append(append(findings, untraced...), shapes...), untracked(dir)...)
 	for i := range findings {
 		findings[i].File = relative(dir, findings[i].File)
 	}

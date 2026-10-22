@@ -1,7 +1,11 @@
 package sprintend
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/gray-lake-labs/scrum-master/internal/cli"
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -141,7 +145,7 @@ func localMergeCloses(t *testing.T, f tracker.Tracker, checkout string) {
 	git("merge", "-q", "--no-ff", branch, "-m", fmt.Sprintf("Merge %s (%s#2, closes %s#1)", branch, po1, po1))
 	merge := git("rev-parse", "HEAD")
 	for _, iid := range []int{2, 1} {
-		c, err := program.Close(f, program.ExecGit{}, po1, iid, checkout, false)
+		c, err := program.Close(f, program.ExecGit{}, po1, iid, checkout, "", false)
 		if err != nil || !c.Closed || c.Commit != merge {
 			t.Fatalf("close %s#%d = %+v, %v, want closed on %s", po1, iid, c, err, merge)
 		}
@@ -216,4 +220,33 @@ func TestSystemFactsGatherTheTeams(t *testing.T) {
 			t.Fatalf("team goal = %+v", g)
 		}
 	})
+}
+
+// TestEmptyListsAreEmpty holds the JSON results to [] for an empty list, not
+// null: stories with no story done, and facts for a team with no Sprint Goal
+// (srd038 R1.2, R2.4).
+func TestEmptyListsAreEmpty(t *testing.T) {
+	facts, err := MakeFacts(Input{Tracker: fake.New(), Project: po1, Releases: program.Defaults().Releases, Artifact: "grader"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := json.Marshal(facts); !strings.Contains(string(b), `"sprint_goals":[]`) {
+		t.Fatalf("facts with no Sprint Goal = %s", b)
+	}
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, sprintgoal.SummaryDir), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, sprintgoal.SummaryDir, "01.0.md"), []byte("# Sprint end 01.0\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var out bytes.Buffer
+	if err := cli.Default.Run([]string{"sprint-end", "stories", "--dir", dir, "--release", "01.0", "--done", "", "--json"}, &out,
+		func() (tracker.Tracker, error) { return fake.New(), nil }); err != nil {
+		t.Fatalf("stories: %v: %s", err, out.String())
+	}
+	var got map[string]any
+	if err := json.Unmarshal(out.Bytes(), &got); err != nil || got["done"] == nil {
+		t.Fatalf("stories with none done = %s, want \"done\": []", out.String())
+	}
 }

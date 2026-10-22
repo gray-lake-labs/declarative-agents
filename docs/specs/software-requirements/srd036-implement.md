@@ -50,7 +50,7 @@ Every change for the issue is made in that worktree.
 <!-- req: R2.3 -->
 ### R2.3
 
-The worktree carries the skills of every agent installed in the checkout pop ran from (srd037), so a person or agent working there can finish the issue with implement.
+The worktree carries the skills of every agent installed in the checkout pop ran from (srd037), so a person or agent working there can finish the issue with implement. Pop reports as installed only the agents whose files it wrote, none on a worktree that already had them.
 
 <!-- req: R3 -->
 ## R3 - Finish

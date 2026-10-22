@@ -7,6 +7,7 @@ package plan
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
+	"github.com/gray-lake-labs/scrum-master/internal/links"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/release"
@@ -86,7 +88,7 @@ func MakeCandidates(in Input) (Candidates, error) {
 			placed[id] = r.Version
 		}
 	}
-	slipped, err := slippedGroups(in)
+	slipped, err := slippedOutcomes(in)
 	if err != nil {
 		return c, err
 	}
@@ -105,7 +107,7 @@ func MakeCandidates(in Input) (Candidates, error) {
 			group := d.ID + "#" + gid
 			for _, it := range o.ItemsOf() {
 				item := Item{ID: d.ID + "#" + it.ID, Group: group, Title: o.Title, Text: it.Text, Due: o.Due,
-					Slipped: slipped[group], Placed: placed[d.ID+"#"+it.ID], Missing: missing(d, gid, it.ID)}
+					Slipped: slipped[group] || slipped[d.ID+"#"+it.ID], Placed: placed[d.ID+"#"+it.ID], Missing: missing(d, gid, it.ID)}
 				c.agreed[item.ID] = true
 				switch {
 				case item.Placed != "" && !item.Slipped:
@@ -195,12 +197,15 @@ func missing(d *objectives.Document, group, item string) []string {
 	return out
 }
 
-// slippedGroups maps each initiative outcome whose Sprint Goal slipped: the
-// aggregate names it in a slipped-commitment signal, or the period ended
-// with it neither met nor reported complete, as a Sprint Goal its team
-// carries to the next sprint is. The Sprint Goal's tasks marker names the
-// outcomes it serves (srd018 R3.2, srd031 R2.3).
-func slippedGroups(in Input) (map[string]bool, error) {
+// slippedOutcomes maps each item whose Sprint Goal slipped: the aggregate
+// names it in a slipped-commitment signal, or the period ended with it
+// neither met nor reported complete, as a Sprint Goal its team carries to
+// the next sprint is. The Sprint Goal's tasks marker names the outcomes it
+// serves and its Cites lines the items it promised, so of each outcome only
+// the cited items slip, and other goals' items of the same outcome do not;
+// a goal citing no item of an outcome it serves marks the whole outcome
+// (srd018 R3.2, srd031 R2.3).
+func slippedOutcomes(in Input) (map[string]bool, error) {
 	out := map[string]bool{}
 	if in.Aggregate == nil || in.Tracker == nil {
 		return out, nil
@@ -225,9 +230,23 @@ func slippedGroups(in Input) (map[string]bool, error) {
 		if err != nil {
 			return nil, fmt.Errorf("slipped Sprint Goal %s: %w", ref, err)
 		}
-		if m, ok := sprintgoal.Parse(issue.Description); ok {
-			for _, key := range m.Serves {
-				out[key] = true
+		m, ok := sprintgoal.Parse(issue.Description)
+		if !ok {
+			continue
+		}
+		var cited []string
+		for _, c := range links.ParseCites(issue.Description) {
+			if u, item, ok := strings.Cut(c.URL, "#"); ok {
+				cited = append(cited, strings.TrimSuffix(path.Base(u), ".md")+"#"+item)
+			}
+		}
+		for _, key := range m.Serves {
+			items := slices.DeleteFunc(slices.Clone(cited), func(c string) bool { return !strings.HasPrefix(c, key+".") })
+			if len(items) == 0 {
+				items = []string{key}
+			}
+			for _, it := range items {
+				out[it] = true
 			}
 		}
 	}

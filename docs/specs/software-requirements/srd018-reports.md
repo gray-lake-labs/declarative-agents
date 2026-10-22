@@ -70,7 +70,7 @@ For a week or a sprint, reads every report in it and groups items by component.
 <!-- req: R3.2 -->
 ### R3.2
 
-Computes signals: blockers shared by two or more reports, blockers older than policy.escalation.blocker_age_days, commitments that slipped in policy.escalation.slip_releases or more consecutive reports, components with an expected report missing, items that contradict the ledger (a report calling a Sprint Goal done that has no met event, srd006 R10, unless a sprint-end merge closed it as reported complete before track-goals runs, srd038 R2), and merged work in the tracker that no report mentions. Merged work counts only deliveries, merges that close an issue they cite, landed no earlier than the creation of the first Sprint Goal the range's reports name: a merge from before the period began, such as an earlier run's on the same days, is not the period's work. Merge times compare as instants in UTC. A Sprint Goal a sprint-end merge closed as reported complete reads so in progress whatever its last report said, and a blocker a component reports on its own work is named as such, not as the component blocking itself. A cost overrun has no signal of its own: a report states it as a blocker naming the spend and the limit it passed.
+Computes signals: blockers shared by two or more reports, blockers older than policy.escalation.blocker_age_days, commitments that slipped in policy.escalation.slip_releases or more consecutive reports, components with an expected report missing, or whose reports name no Sprint Goal of theirs (the system repository, which holds none, aside), items that contradict the ledger (a report calling a Sprint Goal done that has no met event, srd006 R10, unless a sprint-end merge closed it as reported complete before track-goals runs, srd038 R2), and merged work in the tracker that no report mentions. Merged work counts only deliveries, merges that close an issue they cite other than a recurring one (a sprint-end or status issue), landed no earlier than the creation of the first Sprint Goal the range's reports name: a merge from before the period began, such as an earlier run's on the same days, is not the period's work. Merge times compare as instants in UTC. A Sprint Goal a sprint-end merge closed as reported complete reads so in progress whatever its last report said, and a blocker a component reports on its own work is named as such, not as the component blocking itself. A cost overrun has no signal of its own: a report states it as a blocker naming the spend and the limit it passed.
 
 <!-- req: R3.3 -->
 ### R3.3
@@ -90,7 +90,7 @@ States progress as the ledger state of each Sprint Goal (srd006 R11) and its lat
 <!-- req: R3.6 -->
 ### R3.6
 
-With --push, files each signal that needs action as an issue in the issue body's work format in the system repository the configuration names (R6.3).
+With --push, files each signal that needs action as an issue in the issue body's work format in the system repository the configuration names (R6.3), unassigned, its body mentioning the person who pushed it (srd041 R9.2).
 
 <!-- req: R4 -->
 ## R4 - tpm reports deck
@@ -145,7 +145,7 @@ Is idempotent: a second run in the same week files nothing. The scheduled CI job
 <!-- req: R8.1 -->
 ### R8.1
 
-For a project and a person, returns the project's open Sprint Goal issues (Sprint Goals included) with their due dates and the person's activity since the ISO week began, or since the start of the week --date names, the week taken in UTC: branches merged and issues closed. A merge counts from the later of the week's start and the creation of the project's earliest open or recently closed Sprint Goal, so an earlier run's merges in the same week do not. A merge is the person's when its Merged-by trailer, which tpm issue merge writes, names them, whatever git identity made the commit. These are the facts the status issue's guided script drafts from.
+For a project and a person, returns the project's open Sprint Goal issues (Sprint Goals included) with their due dates and the person's activity since the ISO week began, or since the start of the week --date names, the week taken in UTC: branches merged and issues closed. A merge counts from the later of the week's start and the creation of the project's earliest open or recently closed Sprint Goal, so an earlier run's merges in the same week do not; a project holding no Sprint Goal of its own, the system repository, takes the teams' earliest instead, the teams being those --control's subsystem SRDs name. A merge is the person's when its Merged-by trailer, which tpm issue merge writes, names them, whatever git identity made the commit. These are the facts the status issue's guided script drafts from.
 
 <!-- req: R9 -->
 ## R9 - Weekly status issue
@@ -236,7 +236,7 @@ validate passes a well-formed report and fails, non-zero, any report whose front
 <!-- ac: AC3 -->
 ### AC3
 
-aggregate groups a week's or sprint's items by component and reports every listed signal, adds dashboard signals for a sprint, phrases no signal as a comparison of people, and with --push files each actionable signal as an issue.
+aggregate groups a week's or sprint's items by component and reports every listed signal, adds dashboard signals for a sprint, phrases no signal as a comparison of people, reports a team whose reports name no Sprint Goal of its own, counts no merge closing only recurring issues as unreported work, and with --push files each actionable signal as an unassigned issue.
 
 <!-- field: traces -->
 #### Traces
@@ -274,7 +274,7 @@ The sprint update and the stakeholder update exist only as recurring issues whos
 <!-- ac: AC6 -->
 ### AC6
 
-status-issues leaves exactly one status issue per listed person for the coming week, recurring the last closed one or filing a fresh one, and files nothing on a second run; week returns the open Sprint Goal issues with due dates and the person's activity since the week began.
+status-issues leaves exactly one status issue per listed person for the coming week, recurring the last closed one or filing a fresh one, and files nothing on a second run; week returns the open Sprint Goal issues with due dates and the person's activity since the week began, the system repository's from the teams' first Sprint Goal.
 
 <!-- field: traces -->
 #### Traces

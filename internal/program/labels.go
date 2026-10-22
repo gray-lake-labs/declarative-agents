@@ -106,6 +106,27 @@ func LoadLabels(t tracker.Tracker, project, ref string) ([]tracker.Label, error)
 	return out, nil
 }
 
+// ComponentLabels are one component::<name> label per component the
+// control project's subsystem SRDs declare (srd001 R21.1), so a tracker
+// that keeps a label registry, as beads does, holds the components issues
+// carry. A project with no SRDs declares none.
+func ComponentLabels(t tracker.Tracker, control, ref string) ([]tracker.Label, error) {
+	subs, err := LoadSubsystems(t, control, ref)
+	if errors.Is(err, tracker.ErrNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var out []tracker.Label
+	for _, c := range subs.Components() {
+		if !slices.ContainsFunc(out, func(l tracker.Label) bool { return l.Name == "component::"+c }) {
+			out = append(out, tracker.Label{Name: "component::" + c, Color: "#7f8c8d", Description: "A component a subsystem SRD declares"})
+		}
+	}
+	return out, nil
+}
+
 // LabelResult is what labels reports for one label.
 type LabelResult struct {
 	Name   string `json:"name"`

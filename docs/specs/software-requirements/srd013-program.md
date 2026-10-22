@@ -47,7 +47,7 @@ Checks one issue, or every issue changed since a date, against the label schema 
 <!-- req: R1.2 -->
 ### R1.2
 
-Sets needs-triage on an issue that fails, with a comment listing each failure; clears needs-triage on an issue that passes. It changes no other label and never the assignee (srd041 R9.4).
+Sets needs-triage on an issue that fails, with a comment listing each failure unless its latest admission comment lists the same; clears needs-triage on an issue that passes, and when its latest admission comment is a failure, comments that it is now admitted. It changes no other label and never the assignee (srd041 R9.4).
 
 <!-- req: R1.3 -->
 ### R1.3
@@ -83,7 +83,7 @@ With a parent tracking issue given, appends the new issue to its Members section
 <!-- req: R3.3 -->
 ### R3.3
 
-A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. A milestone whose sprint has ended, its sprint-end issue in the project closed, no longer counts: the issue goes on the next milestone by start date, so a retrospective's actions land in the next sprint. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins. tpm issue milestone puts an issue already filed in a milestone its project finds and lints it again. A kind given explicitly makes a data issue of that kind, whatever plane its paths alone would give.
+A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. A milestone whose sprint has ended, its sprint-end issue in the project closed, no longer counts: the issue goes on the next milestone by start date, so a retrospective's actions land in the next sprint. An issue that cuts a release (kind::release) is the exception: it belongs to the sprint whose release it cuts, so that sprint's milestone still counts for it after the sprint-end. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins. tpm issue milestone puts an issue already filed in a milestone its project finds and lints it again. A kind given explicitly makes a data issue of that kind, whatever plane its paths alone would give.
 
 <!-- req: R4 -->
 ## R4 - tpm issue show
@@ -99,7 +99,7 @@ Returns one issue with its labels, its state per srd041 R1–R32, its sub-issues
 <!-- req: R5.1 -->
 ### R5.1
 
-Merges a worktree branch into the default branch of the repository's main checkout with a merge commit whose message cites the issue and every issue named with --closes, pushes it, and closes each issue on that merge (srd042 R2.3).
+Merges a worktree branch into the default branch of the repository's main checkout with a merge commit whose message cites the issue and every issue named with --closes, pushes it, and closes each issue on that merge: the merge it made is the one each records, though an earlier merge cites the same reference. tpm issue close, which is not shown the merge, takes the first merge citing the issue made after the issue was created (srd042 R2.3).
 
 <!-- req: R5.2 -->
 ### R5.2
@@ -132,7 +132,7 @@ tpm issue approve posts the approval as the person running it: a comment on the 
 <!-- req: R6.1 -->
 ### R6.1
 
-Creates or updates the program's group labels from control/labels.md in the program repository (config format labels), or from the built-in defaults when the file is absent: every plane, type, kind, and state value, with its color and description.
+Creates or updates the program's group labels from control/labels.md in the program repository (config format labels), or from the built-in defaults when the file is absent: every plane, type, kind, and state value, with its color and description. With --control it also creates one component::<name> label per component the control project's subsystem SRDs declare (srd001 R21.1).
 
 <!-- req: R6.2 -->
 ### R6.2
@@ -173,7 +173,7 @@ Installs into the worktree the skills of every agent installed in the checkout (
 <!-- req: R8.1 -->
 ### R8.1
 
-tpm issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). With --summary (or --summary-file), the run's result is the run summary it closes the issue with and the Previous Runs line in place of the outcome, with how the instance closed after it, so a run that merges no file still carries its result forward. An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists.
+tpm issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). With --summary (or --summary-file), the run's result is the run summary it closes the issue with and the Previous Runs line in place of the outcome, with how the instance closed after it, so a run that merges no file still carries its result forward. An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists. The next instance is admitted as tpm issue file admits an issue, under the policy of --control (the project's own by default), so a recurred data issue starts ready like a freshly filed one.
 
 <!-- req: R8.2 -->
 ### R8.2
@@ -194,7 +194,7 @@ The marker recur writes into the next instance's body, naming the issue it recur
 <!-- ac: AC1 -->
 ### AC1
 
-lint sets needs-triage with a listed reason on each failing issue, including a criterion without test or environment and an unpinned Cites line, clears it on passing ones, changes nothing else, and runs on creation or on a schedule.
+lint sets needs-triage with a listed reason on each failing issue, including a criterion without test or environment and an unpinned Cites line, clears it on passing ones, comments the admission of one that failed before and posts a failure again after it, changes nothing else, and runs on creation or on a schedule.
 
 <!-- field: traces -->
 #### Traces
@@ -217,7 +217,7 @@ Every issue subcommand honours --json and --dry-run and never prompts; tpm progr
 <!-- ac: AC3 -->
 ### AC3
 
-file creates an unassigned, linted issue (or a tracking-issue member, or a sub-issue of a parent issue) and never sets an assignee; show returns the issue with state, sub-issues, explained links, tracking issue, and events; a data issue filed without a milestone carries the one active sprint covering today, or none with the reason.
+file creates an unassigned, linted issue (or a tracking-issue member, or a sub-issue of a parent issue) and never sets an assignee; show returns the issue with state, sub-issues, explained links, tracking issue, and events; a data issue filed without a milestone carries the one active sprint covering today, or none with the reason, and a release issue filed after its sprint-end still carries that sprint.
 
 <!-- field: traces -->
 #### Traces
@@ -230,7 +230,7 @@ file creates an unassigned, linted issue (or a tracking-issue member, or a sub-i
 <!-- ac: AC4 -->
 ### AC4
 
-merge merges the branch with a merge commit citing the issue and named sub-issues, pushes it, and closes each on it, runs the corpus gate first for a docs/ change, and refuses an empty branch or a closed issue; with --issue-project it merges in one project and closes the issue in another.
+merge merges the branch with a merge commit citing the issue and named sub-issues, pushes it, and closes each on it, recording that merge though an earlier one cites the same reference, runs the corpus gate first for a docs/ change, and refuses an empty branch or a closed issue; with --issue-project it merges in one project and closes the issue in another.
 
 <!-- field: traces -->
 #### Traces
@@ -252,7 +252,7 @@ A merge of a branch that changes docs/ runs mage audit first and merges nothing 
 <!-- ac: AC6 -->
 ### AC6
 
-labels creates every listed label once, from control/labels.md or the defaults; a second run changes nothing; no label is deleted or renamed; with --migrate, issues labelled type::epic in the system repository and its subsystems' repositories are relabelled type::tracking once, nothing is written on a dry run, and a control/labels.md that still lists epic is reported, not edited.
+labels creates every listed label once, from control/labels.md or the defaults, and with --control each declared component's label; a second run changes nothing; no label is deleted or renamed; with --migrate, issues labelled type::epic in the system repository and its subsystems' repositories are relabelled type::tracking once, nothing is written on a dry run, and a control/labels.md that still lists epic is reported, not edited.
 
 <!-- field: traces -->
 #### Traces
@@ -288,7 +288,7 @@ Under a policy with require_approval, merge refuses with no approval, with only 
 <!-- ac: AC9 -->
 ### AC9
 
-recur closes a recurring issue with its run logged and Requires updated and opens the next instance once, closes again nothing a merge closed, and finds an instance whose marker an earlier tpm standup recur wrote.
+recur closes a recurring issue with its run logged and Requires updated and opens the next instance once, admitted as a filed issue is, closes again nothing a merge closed, and finds an instance whose marker an earlier tpm standup recur wrote.
 
 <!-- field: traces -->
 #### Traces

@@ -157,7 +157,7 @@ func testWeekListsOpenObjectivesAndActivity(t *testing.T, p trackertest.Program)
 		t.Fatal(err)
 	}
 	f.UpdateIssue(po1, done.IID, tracker.IssueUpdate{State: ptr("close")})
-	r, err := Week(f, po1, "po-1", monday.AddDate(0, 0, 2))
+	r, err := Week(f, po1, "po-1", monday.AddDate(0, 0, 2), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,11 +185,37 @@ func TestWeekCountsOnlyThePeriodsMerges(t *testing.T) {
 		Description: "Body\n\n<!-- tpm goals objective=obj001-a:R1 release=01.0 -->"}); err != nil {
 		t.Fatal(err)
 	}
-	r, err := Week(f, po1, "po-1", monday.AddDate(0, 0, 3))
+	r, err := Week(f, po1, "po-1", monday.AddDate(0, 0, 3), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(r.Merged) != 1 || r.Merged[0].Title != "This period's work" {
 		t.Fatalf("merged %+v, want only this period's", r.Merged)
+	}
+}
+
+// TestWeekOfTheSystemTakesTheTeamsPeriod is srd018 R8.1 for a project with
+// no Sprint Goal of its own: the system repository's week starts at the
+// teams' first Sprint Goal, so an earlier run's merges there do not count.
+func TestWeekOfTheSystemTakesTheTeamsPeriod(t *testing.T) {
+	const system = "g/system"
+	p := trackertest.NewBeads(t)
+	p.AddMerge(system, tracker.Merge{IID: 1, Title: "An earlier run's plan", Author: "tpm", MergedAt: "2026-10-12"})
+	p.AddMerge(system, tracker.Merge{IID: 2, Title: "This period's registration", Author: "tpm", MergedAt: "2026-10-14"})
+	f := p.Tracker().(*beads.Tracker)
+	f.Store.Now = func() time.Time { return time.Date(2026, 10, 13, 9, 0, 0, 0, time.UTC) }
+	if _, err := f.CreateIssue(po1, tracker.NewIssue{Title: "Score one agent", DueDate: "2026-11-06",
+		Description: "Body\n\n<!-- tpm goals objective=obj001-a:R1 release=01.0 -->"}); err != nil {
+		t.Fatal(err)
+	}
+	r, err := Week(f, system, "tpm", monday.AddDate(0, 0, 3), []string{po1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(r.Merged) != 1 || r.Merged[0].Title != "This period's registration" {
+		t.Fatalf("merged %+v, want only this period's", r.Merged)
+	}
+	if r, _ = Week(f, system, "tpm", monday.AddDate(0, 0, 3), nil); len(r.Merged) != 2 {
+		t.Fatalf("without the teams, merged %+v; want the whole week", r.Merged)
 	}
 }

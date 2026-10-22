@@ -218,3 +218,51 @@ func TestSetMilestoneAdmitsAFiledIssue(t *testing.T) {
 		t.Fatal("a milestone the project cannot find was set")
 	}
 }
+
+// TestAdmissionAfterAFailureIsRecorded holds lint to srd013 R1.2: an issue
+// that failed admission and then passes gets a comment recording it, so the
+// failure reads as resolved, and a failure after that is posted again.
+func TestAdmissionAfterAFailureIsRecorded(t *testing.T) {
+	f := fake.New()
+	f.EnsureMilestone("g", tracker.Milestone{Title: "01.0", StartDate: "2026-10-19", DueDate: "2026-11-06"})
+	i, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Score", Description: goodBody, Labels: []string{"plane::data", "kind::build", "component::po-1"}})
+	lint := func() LintResult {
+		t.Helper()
+		got, _ := f.GetIssue("g/po-1", i.IID)
+		r, err := Apply(f, got, Lint(got, Defaults()), Defaults(), false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return r
+	}
+	lints := func() []string {
+		notes, _ := f.ListNotes("g/po-1", i.IID)
+		var out []string
+		for _, n := range notes {
+			if strings.HasPrefix(n.Body, lintMarker) {
+				out = append(out, strings.SplitN(n.Body, "\n", 3)[1])
+			}
+		}
+		return out
+	}
+	if r := lint(); r.Admitted {
+		t.Fatalf("lint without a milestone = %+v", r)
+	}
+	if r, err := SetMilestone(f, "g/po-1", i.IID, "01.0", Defaults(), false); err != nil || !r.Admitted || !r.Changed {
+		t.Fatalf("set milestone = %+v, %v", r, err)
+	}
+	if got := lints(); !slices.Equal(got, []string{"Admission failed:", "Admitted: the issue now passes every admission check."}) {
+		t.Fatalf("admission comments = %q", got)
+	}
+	if r := lint(); !r.Admitted || r.Changed || len(lints()) != 2 {
+		t.Fatalf("a second lint of the admitted issue = %+v, comments %q", r, lints())
+	}
+	none := ""
+	if _, err := f.UpdateIssue("g/po-1", i.IID, tracker.IssueUpdate{Milestone: &none}); err != nil {
+		t.Fatal(err)
+	}
+	lint()
+	if got := lints(); len(got) != 3 || got[2] != "Admission failed:" {
+		t.Fatalf("the same failure after an admission = %q, want it posted again", got)
+	}
+}

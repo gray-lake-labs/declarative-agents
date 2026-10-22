@@ -254,7 +254,8 @@ func isDir(p string) bool {
 // InstallSkills installs into worktree the skills of every agent installed
 // in checkout (srd036 R2.3). The installed files are untracked, so a new
 // worktree has none, and an agent started there could not finish the issue.
-// A checkout with no installed agent installs nothing.
+// A checkout with no installed agent installs nothing. It returns the agents
+// whose skills it wrote, none when the worktree already had them.
 func InstallSkills(checkout, worktree string) ([]string, error) {
 	agents := install.InstalledAgents(checkout)
 	if len(agents) == 0 {
@@ -264,8 +265,20 @@ func InstallSkills(checkout, worktree string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if _, err := install.Install(worktree, agents, skills, install.Version(), false, false); err != nil {
+	results, err := install.Install(worktree, agents, skills, install.Version(), false, false)
+	if err != nil {
 		return nil, err
 	}
-	return agents, nil
+	// Only the agents whose files this install wrote are reported: a pop
+	// into a worktree that already has them changes nothing.
+	var changed []string
+	for _, r := range results {
+		switch r.Action {
+		case "created", "updated", "replaced", "removed":
+			if r.Agent != "" && !slices.Contains(changed, r.Agent) {
+				changed = append(changed, r.Agent)
+			}
+		}
+	}
+	return changed, nil
 }

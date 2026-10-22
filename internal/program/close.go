@@ -3,6 +3,7 @@ package program
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
@@ -29,10 +30,13 @@ type CloseResult struct {
 // a merge commit on the default branch of the checkout around dir that
 // cites project#iid. When the issue has a pop branch, the merge must bring
 // that branch in, so a fast-forward or a branch with nothing of its own is
-// not a delivery; an issue never popped, such as an objective a sprint-end
-// merge closes, closes on the first merge that cites it. A second close
-// changes nothing.
-func Close(t tracker.Tracker, git Git, project string, iid int, dir string, dryRun bool) (CloseResult, error) {
+// not a delivery. at, when set, is the merge that delivered it, as tpm
+// issue merge knows the merge it made, and must be one of those merges;
+// otherwise an issue never popped, such as an objective a sprint-end merge
+// closes, closes on the first merge citing it made after the issue was
+// created, so an earlier merge citing the same reference is not taken for
+// its delivery (srd013 R5.1). A second close changes nothing.
+func Close(t tracker.Tracker, git Git, project string, iid int, dir, at string, dryRun bool) (CloseResult, error) {
 	r := CloseResult{Project: project, IID: iid, DryRun: dryRun}
 	c, ok := tracker.For(t, project).(MergeCloser)
 	if !ok {
@@ -58,12 +62,26 @@ func Close(t tracker.Tracker, git Git, project string, iid int, dir string, dryR
 	grep := "--grep=" + regexp.QuoteMeta(cite) + "([^0-9]|$)"
 	merges, err := git.Run(dir, "rev-list", "--ancestry-path", "--merges", "--reverse", "-E", grep, path)
 	if r.Branch == "" {
-		merges, err = git.Run(dir, "rev-list", "--first-parent", "--merges", "--reverse", "-E", grep, path)
+		args := []string{"rev-list", "--first-parent", "--merges", "--reverse", "-E", grep}
+		if at == "" && i.CreatedAt != "" {
+			args = append(args, "--since="+i.CreatedAt)
+		}
+		merges, err = git.Run(dir, append(args, path)...)
 	}
 	if err != nil {
 		return r, err
 	}
-	first, _, _ := strings.Cut(strings.TrimSpace(merges), "\n")
+	list := strings.Fields(merges)
+	first := ""
+	if len(list) > 0 {
+		first = list[0]
+	}
+	if at != "" {
+		if !slices.Contains(list, at) {
+			return r, fmt.Errorf("the merge %s does not deliver %s on %s", at, cite, base)
+		}
+		first = at
+	}
 	switch {
 	case first == "" && r.Branch != "":
 		return r, fmt.Errorf("%s is not merged into %s by a merge commit citing %s (git merge --no-ff)", r.Branch, base, cite)

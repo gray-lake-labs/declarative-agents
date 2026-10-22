@@ -1,6 +1,7 @@
 package reports
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -122,13 +123,15 @@ func init() {
 		},
 	})
 
-	var weekArgs struct{ project, user, date string }
+	var weekArgs struct{ project, user, date, control, ref string }
 	cli.Default.Register(&cli.Command{
 		Group: "reports", Name: "week", Summary: "the open Sprint Goals and a person's activity this week",
 		Flags: func(fs *flag.FlagSet) {
 			fs.StringVar(&weekArgs.project, "project", "", "project path (required)")
 			fs.StringVar(&weekArgs.user, "user", "", "tracker username; empty is the caller")
 			fs.StringVar(&weekArgs.date, "date", "", "a day YYYY-MM-DD of the week to gather; empty is today")
+			fs.StringVar(&weekArgs.control, "control", "", "the system repository, whose subsystem SRDs name the teams whose Sprint Goals bound a project holding none of its own")
+			fs.StringVar(&weekArgs.ref, "ref", "main", "ref of the control files")
 		},
 		Run: func(ctx *cli.Context) error {
 			if weekArgs.project == "" {
@@ -152,7 +155,15 @@ func init() {
 					return fmt.Errorf("%w: --date %q is not YYYY-MM-DD", cli.ErrUsage, weekArgs.date)
 				}
 			}
-			r, err := Week(t, weekArgs.project, user, day)
+			var teams []string
+			if weekArgs.control != "" {
+				subs, err := program.LoadSubsystems(t, weekArgs.control, weekArgs.ref)
+				if err != nil && !errors.Is(err, tracker.ErrNotFound) {
+					return err
+				}
+				teams = subs.Repositories()
+			}
+			r, err := Week(t, weekArgs.project, user, day, teams)
 			if err != nil {
 				return err
 			}

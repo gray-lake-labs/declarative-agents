@@ -38,6 +38,11 @@ func CommitsSince(dir, tag string) ([]string, error) {
 // SRDDir holds a corpus's requirements.
 const SRDDir = "docs/specs/software-requirements"
 
+// RequirementPaths are where a corpus holds its requirements: the SRDs, the
+// initiatives and objectives a system plans from, and the road map a plan
+// writes (srd015 R3.1).
+var RequirementPaths = []string{SRDDir, "docs/specs/initiatives", "docs/specs/objectives", "docs/road-map.md"}
+
 // RequirementsUnchanged reports whether the checkout at dir holds a corpus
 // whose requirements no commit since tag changed: a republish of the same
 // requirements. A checkout with no SRDs, such as a code repository, or no
@@ -49,7 +54,7 @@ func RequirementsUnchanged(dir, tag string) (bool, error) {
 	if _, err := os.Stat(filepath.Join(dir, SRDDir)); err != nil {
 		return false, nil
 	}
-	cmd := exec.Command("git", "-C", dir, "diff", "--quiet", tag+"..HEAD", "--", SRDDir)
+	cmd := exec.Command("git", append([]string{"-C", dir, "diff", "--quiet", tag + "..HEAD", "--"}, RequirementPaths...)...)
 	err := cmd.Run()
 	var exit *exec.ExitError
 	switch {
@@ -58,7 +63,7 @@ func RequirementsUnchanged(dir, tag string) (bool, error) {
 	case errors.As(err, &exit) && exit.ExitCode() == 1:
 		return false, nil
 	}
-	return false, fmt.Errorf("compare %s with %s: %w", SRDDir, tag, err)
+	return false, fmt.Errorf("compare the requirements with %s: %w", tag, err)
 }
 
 // Recommendation is Next for the checkout at dir with its recommendation

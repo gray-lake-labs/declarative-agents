@@ -213,8 +213,9 @@ func TestMergeWithoutApprovalByDefault(t *testing.T) {
 
 // TestSprintEndMergeRecordsReportedComplete is a sprint-end merge (srd038
 // R2): its summary must be in format, a Sprint Goal it closes gets a
-// reported_complete event on its ledger, and a --closes issue another merge
-// already closed is reported, not refused.
+// reported_complete event on its ledger, a --closes issue another merge
+// already closed is reported, not refused, and each issue it closes
+// records this merge, though an earlier merge cites it too (srd013 R5.1).
 func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 	tr, checkout := newBeadsTracker(t, "alice")
 	goal, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Sprint Goal: scoring", Labels: []string{"plane::management"},
@@ -231,6 +232,12 @@ func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 		t.Fatal(err)
 	}
 	end, _ := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: sprint end 01.0", Labels: []string{"plane::management"}})
+	beadstest.Git(t, checkout, "checkout", "-q", "-b", "earlier", "main")
+	beadstest.Git(t, checkout, "commit", "-q", "--allow-empty", "-m", "earlier work")
+	beadstest.Git(t, checkout, "checkout", "-q", "main")
+	beadstest.Git(t, checkout, "merge", "-q", "--no-ff", "earlier", "-m", fmt.Sprintf("Merge earlier (g/po-1#%d)", goal.IID))
+	beadstest.Git(t, checkout, "push", "-q", "origin", "main")
+	earlier := beadstest.Git(t, checkout, "rev-parse", "HEAD")
 	p, err := Pop(tr, ExecGit{}, "g/po-1", end.IID, checkout, Defaults(), false)
 	if err != nil {
 		t.Fatal(err)
@@ -286,6 +293,10 @@ func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 		t.Fatal("a second report posted a second event")
 	}
 	notes, _ := tr.ListNotes("g/po-1", goal.IID)
+	if !slices.ContainsFunc(notes, func(n tracker.Note) bool { return strings.Contains(n.Body, "Closed by merge commit "+m.Commit) }) ||
+		slices.ContainsFunc(notes, func(n tracker.Note) bool { return strings.Contains(n.Body, earlier) }) {
+		t.Fatalf("the Sprint Goal does not record the merge %s that closed it (earlier merge %s)", m.Commit, earlier)
+	}
 	found := false
 	for _, n := range notes {
 		if e, ok := events.Parse(n.Body); ok && e.Name == "reported_complete" && e.Values("commit")[0] == m.Commit {
