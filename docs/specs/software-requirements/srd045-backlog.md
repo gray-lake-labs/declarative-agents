@@ -162,7 +162,7 @@ The corpus gate checks every hierarchy document against its type: the required f
 <!-- req: R7.1 -->
 ### R7.1
 
-Once track-goals runs (02.0), reports render a roadmap forecast, the remaining stories of each epic spread over future sprints at velocity in Blocked-by order, and a burn-up per epic and initiative, story points done against total points; both are committed beside the dashboard, regenerated each run, never edited, and labelled forecasts, not baselines (srd018 R11).
+Once track-goals runs (06.0), reports render a roadmap forecast, the remaining stories of each epic spread over future sprints at velocity in Blocked-by order, and a burn-up per epic and initiative, story points done against total points; both are committed beside the dashboard, regenerated each run, never edited, and labelled forecasts, not baselines (srd018 R11).
 
 <!-- req: R7.2 -->
 ### R7.2
@@ -276,7 +276,7 @@ mage audit fails on a hierarchy document with a missing field, a parent of the w
 <!-- ac: AC7 -->
 ### AC7
 
-Release 02.0's planning writes the forecast items from R7.1; until then the interim rule of R7.2 holds.
+Release 06.0's planning writes the forecast items from R7.1; until then the interim rule of R7.2 holds.
 
 <!-- field: traces -->
 #### Traces

@@ -6,7 +6,7 @@
 #
 # Left out, with the reason:
 # - orphaned-srd and uncovered-ac: use cases and test suites exist for
-#   release 01 (01.0 to 01.3) only (SPECIFICATIONS GAP1, GAP2). The 02.0 SRDs
+#   implemented releases and 05.0 only (SPECIFICATIONS GAP1, GAP2). The 06.0 SRDs
 #   have no use case and their acceptance criteria no test case, so both
 #   checks would report them. They join when every release has use cases.
 # - tool-* and machine-* checks: this corpus specifies no agent machines or

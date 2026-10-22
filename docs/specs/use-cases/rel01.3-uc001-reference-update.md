@@ -1,13 +1,17 @@
 ---
 id: rel01.3-uc001-reference-update
 title: A Downstream Release Files a Reference-Update Issue Upstream
-status: specified
+status: retired
+retired_in: "5.0"
+replaced_by: ["rel05.0-uc001-reference-update"]
 priority: P2
 test_suite: test-rel01.3-tag-triggered
 ---
 
 <!-- field: summary -->
 ## Summary
+
+Retired in 05.0: release 01.3 was renumbered 05.0 on 2026-10-22, and this document continues as rel05.0-uc001-reference-update. This file stays so that pinned references to it resolve.
 
 When a Product Owner's repository tags a release, CI files one issue in
 each upstream repository whose initiatives list that repository in

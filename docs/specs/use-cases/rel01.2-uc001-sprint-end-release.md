@@ -117,7 +117,7 @@ A Sprint Goal reported complete closes by the sprint-end merge with no met event
 ## Out of scope
 
 - Ticking the sprint issue's exit checklist; the program lead does that (srd001 R7.3).
-- Routing the release to consumers; rel01.3-uc001-reference-update covers the slice stage one needs.
+- Routing the release to consumers; rel05.0-uc001-reference-update covers the slice stage one needs.
 - The sprint review and retrospective as skills (srd032, srd033).
 
 <!-- field: assumptions -->

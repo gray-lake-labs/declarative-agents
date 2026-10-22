@@ -164,7 +164,7 @@ A scorecard check names its evaluator and threshold in policy; the evaluator is 
 <!-- req: R7.1 -->
 ### R7.1
 
-Done is decided by level from evidence events alone: a component, a subsystem Sprint Goal, a system release, and the test subsystem each get a done rule when release 02.0 is planned.
+Done is decided by level from evidence events alone: a component, a subsystem Sprint Goal, a system release, and the test subsystem each get a done rule when release 06.0 is planned.
 
 <!-- req: R7.2 -->
 ### R7.2
@@ -275,7 +275,7 @@ Under a policy with require_approval, tpm merges no change without another perso
 <!-- ac: AC8 -->
 ### AC8
 
-Release 02.0's planning writes done by level, promotion, handoff, and the merge approvals from R7; until then the interim rule of R7.3 holds.
+Release 06.0's planning writes done by level, promotion, handoff, and the merge approvals from R7; until then the interim rule of R7.3 holds.
 
 <!-- field: traces -->
 #### Traces

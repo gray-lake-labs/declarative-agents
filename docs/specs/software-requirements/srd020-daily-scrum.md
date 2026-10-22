@@ -169,7 +169,7 @@ Retired in 01.2 (design.md D12).
 <!-- ac: AC4 -->
 ### AC4
 
-Release 02.0's planning writes this skill's requirements from R6; until then the interim rule of R6.2 holds.
+Release 06.0's planning writes this skill's requirements from R6; until then the interim rule of R6.2 holds.
 
 <!-- field: traces -->
 #### Traces

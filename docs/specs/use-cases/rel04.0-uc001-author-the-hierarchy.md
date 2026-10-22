@@ -118,7 +118,7 @@ An initiative, and an objective document read as one, passes the gate with its o
 ## Out of scope
 
 - Roll-up across repositories (srd045 R3.4); the gate checks each repository's own documents.
-- Evidence on story criteria; that is track-goals (02.0).
+- Evidence on story criteria; that is track-goals (06.0).
 
 <!-- field: assumptions -->
 ## Assumptions

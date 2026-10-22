@@ -127,7 +127,7 @@ Each issue tasks creates for a chosen story carries one Implements line naming i
 ## Out of scope
 
 - Ranking people or assigning issues; nobody is assigned (srd041 R9.1).
-- Evidence on the chosen stories; that is track-goals (02.0).
+- Evidence on the chosen stories; that is track-goals (06.0).
 
 <!-- field: assumptions -->
 ## Assumptions

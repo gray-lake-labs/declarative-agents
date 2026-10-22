@@ -114,7 +114,7 @@ tpm issue recur opens the next instance of a recurring issue exactly once, inclu
 <!-- field: out_of_scope -->
 ## Out of scope
 
-- The rest of the subcommand groups' rationalization, which stays with 02.0 (SPECIFICATIONS GAP6).
+- The rest of the subcommand groups' rationalization, which stays with 06.0 (SPECIFICATIONS GAP6).
 
 <!-- field: assumptions -->
 ## Assumptions
