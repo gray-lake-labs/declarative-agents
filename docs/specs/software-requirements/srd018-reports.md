@@ -145,7 +145,7 @@ Is idempotent: a second run in the same week files nothing. The scheduled CI job
 <!-- req: R8.1 -->
 ### R8.1
 
-For a project and a person, returns the project's open Sprint Goal issues (Sprint Goals included) with their due dates and the person's activity since the ISO week began, or since the start of the week --date names, the week taken in UTC: branches merged and issues closed. A merge counts from the later of the week's start and the creation of the project's earliest open or recently closed Sprint Goal, so an earlier run's merges in the same week do not; a project holding no Sprint Goal of its own, the system repository, takes the teams' earliest instead, the teams being those --control's subsystem SRDs name. A merge is the person's when its Merged-by trailer, which tpm issue merge writes, names them, whatever git identity made the commit. These are the facts the status issue's guided script drafts from.
+For a project and a person, returns the project's open Sprint Goal issues (Sprint Goals included) with their due dates and the person's activity since the ISO week began, or since the start of the week --date names, the week taken in UTC: branches merged and issues closed. A merge counts from the later of the week's start and the creation of the project's earliest open or recently closed Sprint Goal, so an earlier run's merges in the same week do not; a project holding no Sprint Goal of its own, the system repository, starts at its own earliest open or recently closed issue, so its planning and registration merges count, and only with no issue of its own takes the teams' earliest instead, the teams being those --control's subsystem SRDs name. The issues closed are those assigned to the person and those a counted merge closes. A merge is the person's when its Merged-by trailer, which tpm issue merge writes, names them, whatever git identity made the commit. These are the facts the status issue's guided script drafts from.
 
 <!-- req: R9 -->
 ## R9 - Weekly status issue
@@ -274,7 +274,7 @@ The sprint update and the stakeholder update exist only as recurring issues whos
 <!-- ac: AC6 -->
 ### AC6
 
-status-issues leaves exactly one status issue per listed person for the coming week, recurring the last closed one or filing a fresh one, and files nothing on a second run; week returns the open Sprint Goal issues with due dates and the person's activity since the week began, the system repository's from the teams' first Sprint Goal.
+status-issues leaves exactly one status issue per listed person for the coming week, recurring the last closed one or filing a fresh one, and files nothing on a second run; week returns the open Sprint Goal issues with due dates and the person's activity since the week began, the system repository's from its own first issue, with the issues its counted merges closed.
 
 <!-- field: traces -->
 #### Traces

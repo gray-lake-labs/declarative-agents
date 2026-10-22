@@ -15,6 +15,7 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/events"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
@@ -290,7 +291,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 			reported = append(reported, i)
 		}
 	}
-	since := periodStart(from, reported)
+	since := periodStart(from, reported, sprintgoal.Is).Format(time.RFC3339)
 	for _, project := range projects {
 		merged, err := t.Merges(project, "", since)
 		if err != nil {

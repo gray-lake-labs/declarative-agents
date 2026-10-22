@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -77,9 +78,13 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		return strings.TrimSpace(out), err
 	}
 
+	// A reference already closed is reported, not cited: the merge closes
+	// only what is open, and every cited reference reads as closed by it.
 	cite := fmt.Sprintf("%s#%d", issueProject, iid)
 	for _, ref := range closes {
-		cite += ", closes " + ref
+		if !slices.Contains(already, ref) {
+			cite += ", closes " + ref
+		}
 	}
 	inMain("fetch", "-q", "origin", base)
 	// The base is what origin holds now: the main checkout's own branch may

@@ -72,12 +72,9 @@ func init() {
 			for _, o := range f.SprintGoals {
 				// Reported complete is not met: only track-goals decides met
 				// (srd038 R2.2), so the line names which one holds.
-				outcome := "not complete"
-				switch {
-				case o.Met:
-					outcome = "met"
-				case o.ReportedComplete:
-					outcome = "reported complete, not yet met"
+				outcome := o.Outcome
+				if outcome == "reported complete" {
+					outcome += ", not yet met"
 				}
 				fmt.Fprintf(&h, "  %s %s (%s): %s, reported %q, %s\n", o.Issue, strings.Join(o.Serves, ","), o.Release, o.State, o.Reported, outcome)
 			}

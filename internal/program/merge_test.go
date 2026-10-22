@@ -276,6 +276,12 @@ func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 	}
 	// The team-closed Sprint Goal is reported complete too; the closed
 	// issue that is no Sprint Goal is not (#150).
+	// The subject cites only what the merge closes: the issues another
+	// merge closed are reported, not cited (#188).
+	subject := beadstest.Git(t, checkout, "log", "-1", "--format=%s", m.Commit)
+	if !strings.Contains(subject, "closes "+closes[0]) || strings.Contains(subject, closes[1]+")") || strings.Contains(subject, closes[1]+",") || strings.Contains(subject, closes[2]) {
+		t.Fatalf("merge subject %q: want %s cited and the already-closed %s and %s left out", subject, closes[0], closes[1], closes[2])
+	}
 	if !slices.Equal(m.Reported, []string{closes[0], closes[2]}) || !slices.Equal(m.AlreadyClosed, []string{closes[1], closes[2]}) {
 		t.Fatalf("merge = %+v", m)
 	}

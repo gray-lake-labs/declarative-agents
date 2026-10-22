@@ -76,7 +76,7 @@ func testReportedCompleteClosesWithoutMet(t *testing.T, p trackertest.Program) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(facts.SprintGoals) != 1 || !facts.SprintGoals[0].ReportedComplete || facts.SprintGoals[0].Met || !facts.SprintGoals[0].Legacy || len(facts.SprintGoals[0].Serves) != 1 || facts.SprintGoals[0].Serves[0] != "obj001-reliable-agents#R1" {
+	if len(facts.SprintGoals) != 1 || !facts.SprintGoals[0].ReportedComplete || facts.SprintGoals[0].Met || facts.SprintGoals[0].Outcome != "reported complete" || !facts.SprintGoals[0].Legacy || len(facts.SprintGoals[0].Serves) != 1 || facts.SprintGoals[0].Serves[0] != "obj001-reliable-agents#R1" {
 		t.Fatalf("facts = %+v", facts.SprintGoals)
 	}
 	if contradictions(before) != 1 {

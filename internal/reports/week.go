@@ -2,6 +2,7 @@ package reports
 
 import (
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
@@ -31,11 +32,14 @@ type WeekResult struct {
 
 // Week returns the project's open Sprint Goals with their due dates
 // and the person's activity since the ISO week began, in UTC: branches
-// they merged and issues assigned to them that closed. A merge from before
-// the period's first Sprint Goal is not the period's work, so it does not
-// count even inside the week (periodStart). A project holding no Sprint
-// Goal of its own, such as the system repository, takes the period from
-// the Sprint Goals of teams, the program's team repositories.
+// they merged and the issues that closed, assigned to them or closed by a
+// merge counted here. A merge from before the period's first Sprint Goal is
+// not the period's work, so it does not count even inside the week
+// (periodStart). A project holding no Sprint Goal of its own, such as the
+// system repository, starts its period at its own earliest open or
+// recently closed issue, so its planning and registration merges count
+// while an earlier run's do not; with no issue of its own, it takes the
+// Sprint Goals of teams, the program's team repositories (srd018 R8.1).
 func Week(t tracker.Tracker, project, user string, now time.Time, teams []string) (WeekResult, error) {
 	now = now.UTC()
 	start := WeekStart(now)
@@ -54,8 +58,15 @@ func Week(t tracker.Tracker, project, user string, now time.Time, teams []string
 	if err != nil {
 		return r, err
 	}
-	goals := append(slices.Clone(open), closed...)
-	if !slices.ContainsFunc(goals, func(i tracker.Issue) bool { return sprintgoal.Is(i.Description) }) {
+	own := append(slices.Clone(open), closed...)
+	bound := start
+	switch {
+	case slices.ContainsFunc(own, func(i tracker.Issue) bool { return sprintgoal.Is(i.Description) }):
+		bound = periodStart(start, own, sprintgoal.Is)
+	case len(own) > 0:
+		bound = periodStart(start, own, nil)
+	default:
+		var goals []tracker.Issue
 		for _, team := range teams {
 			for _, q := range []tracker.IssueQuery{{State: "opened"}, {State: "closed", UpdatedAfter: r.Since}} {
 				issues, err := t.ListIssues(team, q)
@@ -65,14 +76,25 @@ func Week(t tracker.Tracker, project, user string, now time.Time, teams []string
 				goals = append(goals, issues...)
 			}
 		}
+		bound = periodStart(start, goals, sprintgoal.Is)
 	}
-	merged, err := t.Merges(project, user, periodStart(start, goals))
+	merged, err := t.Merges(project, user, bound.Format(time.RFC3339))
 	if err != nil {
 		return r, err
 	}
 	r.Merged = append(r.Merged, merged...)
+	byMerge := map[string]bool{}
+	for _, mr := range merged {
+		for _, m := range closesPattern.FindAllStringSubmatch(mr.Description, -1) {
+			ref := m[1]
+			if strings.HasPrefix(ref, "#") {
+				ref = project + ref
+			}
+			byMerge[ref] = true
+		}
+	}
 	for _, i := range closed {
-		if slices.Contains(i.Assignees, user) {
+		if slices.Contains(i.Assignees, user) || byMerge[i.Project+"#"+itoa(i.IID)] {
 			r.Closed = append(r.Closed, sprintGoalOf(i))
 		}
 	}
@@ -80,13 +102,13 @@ func Week(t tracker.Tracker, project, user string, now time.Time, teams []string
 }
 
 // periodStart is the later of start and the creation of the earliest
-// Sprint Goal among issues, as an RFC 3339 instant: merges before the
-// period's first Sprint Goal, such as an earlier run's on the same days,
-// deliver nothing the period planned (srd018 R3.2, R8.1).
-func periodStart(start time.Time, issues []tracker.Issue) string {
+// issue among issues that counts (all of them when counts is nil), in UTC:
+// merges before the period's first Sprint Goal, such as an earlier run's on
+// the same days, deliver nothing the period planned (srd018 R3.2, R8.1).
+func periodStart(start time.Time, issues []tracker.Issue, counts func(string) bool) time.Time {
 	first := time.Time{}
 	for _, i := range issues {
-		if !sprintgoal.Is(i.Description) {
+		if counts != nil && !counts(i.Description) {
 			continue
 		}
 		if at, err := time.Parse(time.RFC3339, i.CreatedAt); err == nil && (first.IsZero() || at.Before(first)) {
@@ -96,7 +118,7 @@ func periodStart(start time.Time, issues []tracker.Issue) string {
 	if first.After(start) {
 		start = first
 	}
-	return start.UTC().Format(time.RFC3339)
+	return start.UTC()
 }
 
 func sprintGoalOf(i tracker.Issue) SprintGoal {

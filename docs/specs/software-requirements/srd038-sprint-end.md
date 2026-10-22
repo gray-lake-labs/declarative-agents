@@ -50,7 +50,7 @@ In a program that does not yet run track-goals, a Sprint Goal issue (or an objec
 <!-- req: R2.2 -->
 ### R2.2
 
-Such a close posts no met event; the merge posts a reported_complete event naming the release and the merge commit on the Sprint Goal's ledger instead, and tpm sprint-end facts reads it as reported complete. A Sprint Goal another sprint-end merge already closed, as a team's and the program's merges may both name, is reported and skipped, not refused, and is still listed as reported complete: its ledger keeps the event the first merge posted, or gets one now when it has neither that nor a met event. The roll-up states the Sprint Goal as reported complete, distinct from met (srd018 R3.5), so a reported close is never shown as evidence, and the aggregate does not count it as a contradiction of the ledger (srd018 R3.2).
+Such a close posts no met event; the merge posts a reported_complete event naming the release and the merge commit on the Sprint Goal's ledger instead, and tpm sprint-end facts reads it as reported complete, its outcome field naming which holds: met, reported complete, or not complete. A Sprint Goal another sprint-end merge already closed, as a team's and the program's merges may both name, is reported and skipped, not refused, and is still listed as reported complete: its ledger keeps the event the first merge posted, or gets one now when it has neither that nor a met event. The roll-up states the Sprint Goal as reported complete, distinct from met (srd018 R3.5), so a reported close is never shown as evidence, and the aggregate does not count it as a contradiction of the ledger (srd018 R3.2).
 
 <!-- req: R2.3 -->
 ### R2.3
@@ -86,7 +86,7 @@ Each releasing repository has one sprint-end issue per period, filed by tpm plan
 <!-- ac: AC2 -->
 ### AC2
 
-Without track-goals, a reported-complete Sprint Goal closes by the sprint-end merge, carries no met event, appears in the roll-up as reported complete, not met, and raises no contradiction signal; the summary records which listed stories are done, and the others return to the Product Backlog; with track-goals it closes only on met.
+Without track-goals, a reported-complete Sprint Goal closes by the sprint-end merge, carries no met event, appears in the roll-up and in the facts' outcome field as reported complete, not met, and raises no contradiction signal; the summary records which listed stories are done, and the others return to the Product Backlog; with track-goals it closes only on met.
 
 <!-- field: traces -->
 #### Traces

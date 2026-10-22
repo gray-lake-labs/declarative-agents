@@ -99,7 +99,7 @@ Returns one issue with its labels, its state per srd041 R1–R32, its sub-issues
 <!-- req: R5.1 -->
 ### R5.1
 
-Merges a worktree branch into the default branch of the repository's main checkout with a merge commit whose message cites the issue and every issue named with --closes, pushes it, and closes each issue on that merge: the merge it made is the one each records, though an earlier merge cites the same reference. tpm issue close, which is not shown the merge, takes the first merge citing the issue made after the issue was created (srd042 R2.3).
+Merges a worktree branch into the default branch of the repository's main checkout with a merge commit whose message cites the issue and every open issue named with --closes (one another merge already closed is reported, not cited, since every cited issue reads as closed by the merge), pushes it, and closes each issue on that merge: the merge it made is the one each records, though an earlier merge cites the same reference. tpm issue close, which is not shown the merge, takes the first merge citing the issue made after the issue was created (srd042 R2.3).
 
 <!-- req: R5.2 -->
 ### R5.2
@@ -230,7 +230,7 @@ file creates an unassigned, linted issue (or a tracking-issue member, or a sub-i
 <!-- ac: AC4 -->
 ### AC4
 
-merge merges the branch with a merge commit citing the issue and named sub-issues, pushes it, and closes each on it, recording that merge though an earlier one cites the same reference, runs the corpus gate first for a docs/ change, and refuses an empty branch or a closed issue; with --issue-project it merges in one project and closes the issue in another.
+merge merges the branch with a merge commit citing the issue and the named issues still open, pushes it, and closes each on it, recording that merge though an earlier one cites the same reference, runs the corpus gate first for a docs/ change, and refuses an empty branch or a closed issue; with --issue-project it merges in one project and closes the issue in another.
 
 <!-- field: traces -->
 #### Traces
