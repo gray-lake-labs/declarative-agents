@@ -16,7 +16,7 @@ running.
 The reports subcommands keep each report in a fixed, checkable shape and
 aggregate a week or a sprint of them against the tracker. The weekly
 sprint update and the stakeholder update are recurring audit issues worked
-by the inner loop (implement, do-work, merge); these
+by the inner loop (implement and the reviewed merge); these
 subcommands are what those issues read and what their acceptance criteria
 check, so a roll-up starts from computed candidates instead of a pile of
 prose.
@@ -90,7 +90,7 @@ States progress as the ledger state of each Sprint Goal (srd006 R11) and its lat
 <!-- req: R3.6 -->
 ### R3.6
 
-With --push, files each signal that needs action as an issue in do-work's input format in the system repository the configuration names (R6.3).
+With --push, files each signal that needs action as an issue in the issue body's work format in the system repository the configuration names (R6.3).
 
 <!-- req: R4 -->
 ## R4 - tpm reports deck
@@ -124,7 +124,7 @@ The stakeholder update is a recurring issue per lead per period. Its Requirement
 <!-- req: R6.3 -->
 ### R6.3
 
-A signal from aggregate that needs action is pushed as an issue in do-work's input format, not carried in the prose of a report.
+A signal from aggregate that needs action is pushed as an issue in the issue body's work format, not carried in the prose of a report.
 
 <!-- req: R7 -->
 ## R7 - tpm reports status-issues

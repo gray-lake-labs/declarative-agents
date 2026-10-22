@@ -39,7 +39,7 @@ A week or a period of reports has merged in the reports repository.
 - F2: tpm reads every report in range and groups their items by component.
 - F3: tpm computes the signals and checks each report against the tracker, including a report calling a Sprint Goal complete with no met event.
 - F4: tpm states each Sprint Goal's progress from its ledger and its reported status, and expresses no signal as a comparison of people.
-- F5: With --push, tpm reports aggregate files each signal that needs action as an issue in do-work's input format in the system repository.
+- F5: With --push, tpm reports aggregate files each signal that needs action as an issue in the issue body's work format in the system repository.
 
 <!-- field: touchpoints -->
 ## Touchpoints

@@ -351,7 +351,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
   - numbering: same as srd; one requirement group holds the story's detail, and its acceptance criteria are the story's own
   - acceptance_criteria_fields: same as srd
   - acceptance_criteria_note: tests and applicability are required (D8). An evidence event proves one criterion; it is posted on the team's Sprint Goal and names the criterion by pinned URL (srd006).
-  - purpose: The unit of value in the Product Backlog, sized to fit one sprint and owned by the team's Product Owner. Its parent is a feature or an epic. Sprint Planning selects stories onto the team's Sprint Goal, and make-work turns each into the issues that execute it, each with an Implements line (srd045). It is not a unit of work (D4); the issue that executes it is.
+  - purpose: The unit of value in the Product Backlog, sized to fit one sprint and owned by the team's Product Owner. Its parent is a feature or an epic. Sprint Planning selects stories onto the team's Sprint Goal, and tasks turns each into the issues that execute it, each with an Implements line (srd045). It is not a unit of work (D4); the issue that executes it is.
 - objective:
   - status: retired
   - replaced_by: initiative

@@ -11,7 +11,7 @@ test_suite: test-rel00.0-push
 
 The program's labels exist first, created from control/labels.md. A
 Developer asks for a piece of project work; specify turns the request
-into one admitted, unassigned plane::data issue in do-work's input format,
+into one admitted, unassigned plane::data issue in the issue body's work format,
 with its kind and component, in the backlog. The model writes the body and
 nothing else; tpm picks the labels, files, and lints.
 

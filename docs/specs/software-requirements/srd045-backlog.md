@@ -128,7 +128,7 @@ A story's acceptance criteria are its own, and each names its test and, as appli
 <!-- req: R4.3 -->
 ### R4.3
 
-make-work turns a story selected onto a Sprint Goal into the issues that execute it, each with an Implements line naming the story.
+tasks turns a story selected onto a Sprint Goal into the issues that execute it, each with an Implements line naming the story.
 
 <!-- req: R5 -->
 ## R5 - Product Backlog and Sprint Planning
@@ -242,7 +242,7 @@ A story is done only when every criterion has passing evidence, or before track-
 <!-- ac: AC4 -->
 ### AC4
 
-Every story has a statement, points, and criteria naming a test and an environment, and its cites are pinned; make-work's issues for a selected story carry Implements naming it.
+Every story has a statement, points, and criteria naming a test and an environment, and its cites are pinned; the issues tasks files for a selected story carry Implements naming it.
 
 <!-- field: traces -->
 #### Traces

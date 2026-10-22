@@ -81,8 +81,8 @@ corpus claiming a provenance nobody checked.
    An empty worklist needs no epic: commit the pin bump with the mechanical
    re-pins, then verify.
 
-7. **Work the epic** through the inner loop like any other: pop it, work each
-   sub-issue with do-work, merge. The audit after the merge shows no stale
+7. **Work the epic** through the inner loop like any other: pop it with implement,
+   build each issue, merge. The audit after the merge shows no stale
    finding.
 
 8. **Verify.** A green audit is not green tests: run `go test ./...` and

@@ -21,26 +21,26 @@ A change the Retrospective keeps is a plane::control issue worked against policy
 <!-- field: overall_findings -->
 ## Overall findings
 
-Two earlier rosters named role-specific agents: first twelve, one per role, plane, and time scale, then five, one per role and plane. Both re-specified, under each role's name, what push, pop, do-work, and release-push already do, and both needed artifact handoffs between agents to explain work that the tracker already moves. Once every unit of work is an issue carrying its own requirements and acceptance criteria, the role decides only which issues a person pulls, which kind already records. The roster collapses to the two loops and the outer-loop skills that feed them.
+Two earlier rosters named role-specific agents: first twelve, one per role, plane, and time scale, then five, one per role and plane. Both re-specified, under each role's name, what specify, implement, and tpm release already do, and both needed artifact handoffs between agents to explain work that the tracker already moves. Once every unit of work is an issue carrying its own requirements and acceptance criteria, the role decides only which issues a person pulls, which kind already records. The roster collapses to the two loops and the outer-loop skills that feed them.
 
 <!-- field: operations | form: "tree" -->
 ## Operations
 
 - inner_loop:
   - steps:
-    1. - skill: make-work
-       - does: turns a planned release into issues for its components
-       - "each in do-work's input format": null
+    1. - skill: tasks
+       - does: turns each chosen story into the issues that execute it
+       - "each in the issue body's work format": null
     1. - skill: specify
-       - does: files an issue in do-work's input format (config format issue-body)
+       - does: files an issue in the issue body's work format (config format issue-body)
     1. - skill: implement
        - does: takes the issue
        - "assigning only the person who runs it": null
-       - "and opens its own branch and worktree (srd036); splitting it into sub-issues arrives with tracking issues": null
-    1. - skill: do-work
-       - does: works each unit against its Requirements and Acceptance Criteria
+       - "and opens its own branch and worktree (srd036); a story's issues share one branch, as planned": null
+    1. - skill: implement (build)
+       - does: builds each issue against its Requirements and Acceptance Criteria
        - "commits with the unit's record embedded": null
-       - "and logs actual against estimated size; on GitLab it arrives with tracking issues after release 00.0": null
+       - "and logs actual against estimated size": null
     1. - skill: implement (finish)
        - does: merges the branch, which closes the issue
        - "gated by mage audit for a change under docs/; a reviewer merges it": null
@@ -60,7 +60,7 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
     1. the program dashboard (tpm goals status, srd019)
     1. the weekly sprint update and the stakeholder update (srd018 R6)
 - outer_loops:
-  - definition: The Scrum skills, for the workflows where people decide together. Each reads the tracker, asks people bounded questions, and pushes issues in do-work's input format for the inner loop to work.
+  - definition: The Scrum skills, for the workflows where people decide together. Each reads the tracker, asks people bounded questions, and pushes issues in the issue body's work format for the inner loop to work.
   - skills:
     1. - skill: plan
        - srd: srd031
@@ -93,7 +93,7 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
 
 | id | rule |
 | --- | --- |
-| A1 | One inner loop for all work. Code, architecture documents, OpenAPI schemas, infrastructure (Terraform, Helm), papers, research, and reviews all run push, pop, do-work, merge. The issue states the deliverable and its acceptance criteria; do-work needs no extension per kind of deliverable. |
+| A1 | One inner loop for all work. Code, architecture documents, OpenAPI schemas, infrastructure (Terraform, Helm), papers, research, and reviews all run specify, implement, and the reviewed merge. The issue states the deliverable and its acceptance criteria; implement needs no extension per kind of deliverable. |
 | A2 | Scripts (tpm subcommands) are tools the loops call, not agents. Event-driven scripts (lint, track-goals, handoff) run in CI on tracker events; they are tools the loops depend on, not agents either. |
 | A3 | People direct agents; agents never direct other agents. Work moves between sessions only through the tracker, as issues, comments, links, and tags, under the same rules as everyone else. |
 | A4 | An agent never assigns work to anyone but the person who ran implement, never approves anything, and never changes a rule except by a merge a person approves. Taking, approving, and rule changes are the three acts the process reserves for people. |

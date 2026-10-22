@@ -39,8 +39,8 @@ The data plane is the work itself, flowing continuously: issues popped by
 the people who pull them, built in worktrees, closed by the reviewed merge
 that delivers them, and handed downstream when an artifact is released.
 
-Work runs in two loops. The inner loop (push an issue, pop it into a
-worktree, work it with do-work, merge, release) is the same for every role
+Work runs in two loops. The inner loop (specify an issue, implement it
+in its own worktree, merge, release) is the same for every role
 and every kind of work, because every issue states its own requirements
 and acceptance criteria. Audits are recurring issues the same loop works
 on a schedule; track-goals is the audit that follows pinned references,
@@ -96,9 +96,9 @@ flowchart LR
     RULES["labels, states, admission, gates"]
   end
   subgraph DATA[Data plane: the work, continuous]
-    S5["5 make-work: the planned release becomes issues"]
-    S6["6 push, pop, do-work: an agent builds, a person approves the merge"]
-    S7["7 release-push: the release is tagged behind its gate"]
+    S5["5 tasks: each chosen story becomes issues"]
+    S6["6 specify and implement: an agent builds, a person approves the merge"]
+    S7["7 release: the release is tagged behind its gate"]
   end
   subgraph TEST[Test subsystem: evidence]
     S8["8 promotion: the pinned set runs in dev, staging, production PoC"]
@@ -155,13 +155,13 @@ The process defines, and tpm and the skills implement:
   makes every issue self-describing, and a state machine over it that says
   which transitions are legal and who may make them.
 - An inner loop every role uses for every kind of work: specify,
-  implement, do-work, the reviewed merge, and tpm release. Audits
+  implement, the reviewed merge, and tpm release. Audits
   (regression tests, contract checks, the sprint and stakeholder updates)
   are recurring issues worked by the same loop.
 - Outer-loop skills for the decisions people make together: plan a
   release, push Sprint Goals downstream, run the Daily Scrum, review the
   Increment against evidence, and change the rules at the Retrospective.
-  Each pushes issues in do-work's input format.
+  Each pushes issues in the issue body's work format.
 - Pull, not assignment: open, unassigned, admitted issues are ready, and
   only a person's own implement assigns anything.
 - Handoff: when an artifact is released, a script creates the downstream

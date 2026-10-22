@@ -419,7 +419,7 @@ A producer may decline a defect, request, or question. Declining closes the issu
 <!-- req: R20.4 -->
 ### R20.4
 
-The kind routes pull: it decides who takes an issue, whether it is offered, and how it is counted. It does not change how the work runs. Every kind is popped, worked by do-work against the issue's Requirements and Acceptance Criteria, and closed by one merge or one recorded answer.
+The kind routes pull: it decides who takes an issue, whether it is offered, and how it is counted. It does not change how the work runs. Every kind is popped, built by implement against the issue's Requirements and Acceptance Criteria, and closed by one merge or one recorded answer.
 
 <!-- req: R21 -->
 ## R21 - The component axis
@@ -654,7 +654,7 @@ Admission fails an issue with more than one op:: label and requires none, so iss
 - G1: Every issue declares its plane, kind, and component with exactly one label each; type and state are set only where they apply.
 - G2: Each plane has its own filing and closing rules, and information crosses planes in one direction per kind.
 - G3: The objects that are not plain work are recognizable from one type label, and the hierarchy stays flat at tracking issue, issue, and task.
-- G4: Every kind of work travels the same inner loop (push, pop, do-work, merge); the kind decides who pulls it and what finishing means, not how it runs.
+- G4: Every kind of work travels the same inner loop (specify, implement, and the reviewed merge); the kind decides who pulls it and what finishing means, not how it runs.
 - G5: The process reads component values without defining them.
 
 <!-- field: non_goals -->
@@ -866,7 +866,7 @@ A question issue is filed by a person, never ready, and closed by its asker afte
 <!-- ac: AC15 -->
 ### AC15
 
-Every data-plane issue has exactly one kind or is labelled needs-triage; no defect, request, or question has a script as its author; issues of every kind are popped, worked by do-work, and closed the same way, and differ only in who is offered them and how they are counted.
+Every data-plane issue has exactly one kind or is labelled needs-triage; no defect, request, or question has a script as its author; issues of every kind are popped, built by implement, and closed the same way, and differ only in who is offered them and how they are counted.
 
 <!-- field: traces -->
 #### Traces

@@ -37,4 +37,4 @@ Sprint Planning, in a team's repository once tasks filed its Sprint Goal:
 2. Ask which stories enter the sprint. Ask nothing else.
 3. Run `tpm plan backlog --project <team repository> --release <version> --stories <a,b> --dir . --json`
    and show the Sprint Goal it updated.
-4. Run make-work for each chosen story; each issue carries `Implements: <story>`.
+4. Run tasks for each chosen story; each issue carries `Implements: <story>`.

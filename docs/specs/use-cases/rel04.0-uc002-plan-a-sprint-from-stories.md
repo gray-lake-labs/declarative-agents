@@ -14,7 +14,7 @@ Owner runs plan in the team's repository. tpm lists the team's Product
 Backlog, its agreed stories that are not done, by rank with their points,
 with the team's velocity and the stories that fit it. The Product Owner
 chooses; tpm writes the chosen stories into the Sprint Goal's Sprint
-Backlog section and posts a planned event naming them. make-work turns each
+Backlog section and posts a planned event naming them. tasks turns each
 story into issues that name it in an Implements line.
 
 <!-- field: actor -->
@@ -41,7 +41,7 @@ tasks filed the team's Sprint Goal for the release.
 - F3: tpm plan candidates returns the Product Backlog: the agreed stories not yet done, by rank, with points, the team's velocity, and the stories in rank order whose points fit it.
 - F4: The skill takes the recommendation or the Product Owner's choice, and asks for an assumed velocity only when the team has finished no sprint.
 - F5: tpm plan backlog writes the chosen stories with their points into the Sprint Goal's Sprint Backlog section and posts a planned event naming each story; a second push with the same stories changes nothing.
-- F6: make-work turns each chosen story into issues, each with an Implements line naming the story.
+- F6: tasks turns each chosen story into issues, each with an Implements line naming the story.
 
 <!-- field: touchpoints -->
 ## Touchpoints
@@ -51,7 +51,7 @@ tasks filed the team's Sprint Goal for the release.
 | T1 | [srd022-tasks](../software-requirements/srd022-tasks.md) [R4.1](../software-requirements/srd022-tasks.md#r41), [R4.3](../software-requirements/srd022-tasks.md#r43) | S1 traces the Sprint Goal tasks files. |
 | T2 | [srd034-initiatives](../software-requirements/srd034-initiatives.md) [R3.2](../software-requirements/srd034-initiatives.md#r32), [R3.5](../software-requirements/srd034-initiatives.md#r35) | S1 and S3 trace the Sprint Goal's body and its Sprint Backlog. |
 | T3 | [srd031-plan](../software-requirements/srd031-plan.md) [R6.2](../software-requirements/srd031-plan.md#r62), [R6.4](../software-requirements/srd031-plan.md#r64), [R6.5](../software-requirements/srd031-plan.md#r65), [R6.6](../software-requirements/srd031-plan.md#r66) | S2 and S3 trace Sprint Planning from stories. |
-| T4 | [srd045-backlog](../software-requirements/srd045-backlog.md) [R5.1](../software-requirements/srd045-backlog.md#r51), [R5.2](../software-requirements/srd045-backlog.md#r52), [R5.3](../software-requirements/srd045-backlog.md#r53), [R4.3](../software-requirements/srd045-backlog.md#r43) | S2, S3, and S4 trace the backlog, velocity, and make-work. |
+| T4 | [srd045-backlog](../software-requirements/srd045-backlog.md) [R5.1](../software-requirements/srd045-backlog.md#r51), [R5.2](../software-requirements/srd045-backlog.md#r52), [R5.3](../software-requirements/srd045-backlog.md#r53), [R4.3](../software-requirements/srd045-backlog.md#r43) | S2, S3, and S4 trace the backlog, velocity, and tasks at the story level. |
 | T5 | [srd006-events](../software-requirements/srd006-events.md) [R8.1](../software-requirements/srd006-events.md#r81), [R8.2](../software-requirements/srd006-events.md#r82) | S3 traces the planned event naming the stories. |
 | T6 | [srd007-links](../software-requirements/srd007-links.md) [R6.1](../software-requirements/srd007-links.md#r61), [R6.5](../software-requirements/srd007-links.md#r65) | S4 traces the Implements line. |
 | T7 | [srd022-tasks](../software-requirements/srd022-tasks.md) [AC2](../software-requirements/srd022-tasks.md#ac2) | S1 traces this acceptance criterion. |
@@ -112,7 +112,7 @@ The chosen stories appear in the Sprint Goal's Sprint Backlog with their points 
 <!-- sc: S4 -->
 ### S4
 
-Each issue make-work creates for a chosen story carries one Implements line naming it.
+Each issue tasks creates for a chosen story carries one Implements line naming it.
 
 <!-- field: traces -->
 #### Traces

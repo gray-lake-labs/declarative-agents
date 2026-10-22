@@ -24,11 +24,11 @@ Table 1: Spec Kit commands and their counterparts here.
 |---|---|---|
 | `/constitution` | Governing principles | `docs/constitutions/design.md`, written once with `bootstrap` |
 | `/specify` | What to build and why | SRDs: problem, goals, requirements, acceptance criteria |
-| `/clarify` | Structured questions about what is unclear | Skills ask bounded questions; make-work proposes and people agree before anything is filed |
+| `/clarify` | Structured questions about what is unclear | Skills ask bounded questions; tasks proposes and people agree before anything is filed |
 | `/plan` | Technology and architecture | `ARCHITECTURE.md` and each issue's Design Decisions |
-| `/tasks` | A breakdown into steps | `make-work`, filing issues with `specify` |
+| `/tasks` | A breakdown into steps | `tasks`: a release into Sprint Goals, a story into issues |
 | `/analyze` | Consistency and coverage across artifacts | The audit |
-| `/implement` | Build the tasks | `implement` and `do-work` |
+| `/implement` | Build the tasks | `implement` |
 
 If the inner loop were all we needed, we would adopt Spec Kit and stop.
 
@@ -99,7 +99,7 @@ Table 4: Practices to borrow from the Spec Kit template.
 | Assumptions | Defaults chosen where the input was silent | A reviewer can challenge a default instead of discovering it in the code |
 
 Spec Kit also runs `/analyze` before `/implement` as a required step. We run
-the audit, but nothing yet blocks do-work on it; that ordering is worth
+the audit, but nothing yet blocks implement on it; that ordering is worth
 copying.
 
 ## What it costs us
@@ -107,8 +107,8 @@ copying.
 Maintaining our own process is not free. Spec Kit has a large community,
 support for many agents, and maintainers whose job it is; ours has one
 corpus and the people who use it. We keep that cost down in two ways. The
-inner loop is not ours to reinvent: push, pop, and do-work already exist in
-coding-skills, and Spec Kit is an acceptable substitute inside any
+inner loop is not ours to reinvent: specify and implement are thin scripts
+over tpm, and Spec Kit is an acceptable substitute inside any
 repository. What this corpus specifies is only the layer Spec Kit does not
 attempt: levels, Sprint Goals, evidence, environments, and review. If Spec
 Kit grows that layer, we should read it closely and drop whatever of ours it

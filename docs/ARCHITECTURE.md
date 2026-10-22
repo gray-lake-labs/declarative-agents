@@ -53,14 +53,14 @@ to a customer as a human approval. The test software ships with every
 release.
 
 Skills implement the process in two loops. The inner loop is the same
-for every role and every kind of work: make-work turns a plan into
-issues, specify files an issue in do-work's input format with the
+for every role and every kind of work: tasks turns a chosen story into
+issues, specify files an issue in the issue body's work format with the
 plane that says whether it is project work or a requirements change,
-implement takes it into its own branch and worktree, do-work builds it
+implement takes it into its own branch and worktree and builds it
 against its Requirements and Acceptance Criteria, tpm issue merge
 delivers it and closes it, and tpm release tag tags a release once its gate passed. specify and
 implement are commands in this repository over tpm (srd035, srd036,
-release 00.0); do-work and sub-issues arrive with tracking issues later. The outer loops are the five Scrum
+release 00.0); tasks at the story level, and implement working a story's issues in one branch, are planned. The outer loops are the five Scrum
 skills (srd020 to srd033): each reads the tracker, asks people bounded
 questions, and pushes issues or posts ledger events.
 
@@ -90,9 +90,9 @@ flowchart TB
   end
 
   subgraph DATA[Data plane]
-    MAKE[make-work]
-    POP[implement]
-    WORK[do-work]
+    MAKE[tasks: a story to issues]
+    POP[implement: pop]
+    WORK[implement: build]
     MR[reviewed merge: tpm issue merge]
     RELEASE[tpm release: gate, then tag]
     HANDOFF[handoff: notify up, fan out to citing repositories]
@@ -147,9 +147,9 @@ flowchart TB
   subsystem owner and one to the test subsystem, each citing its system
   requirements pinned to the release tag and naming its environment. Each
   Product Owner writes the stories and the requirements they cite for their Sprint Goals with
-  do-work, runs plan for the subsystem, and, with downstream
-  repositories, tasks for them. Developers turn each subsystem plan
-  into issues with make-work.
+  draft and implement, runs plan for the subsystem, and, with downstream
+  repositories, tasks for them. Developers turn each chosen story
+  into issues with tasks.
 - evidence:
   Each branch runs component tests in the local environment as
   evidence. A subsystem release tag starts the test subsystem's pipelines:
@@ -180,7 +180,7 @@ flowchart TB
   for each. The person takes a ready issue with implement.
 - weekly:
   The sprint update and the stakeholder update are recurring audit issues:
-  each is popped, worked by do-work from tpm standup and tpm reports
+  each is popped, built by implement from tpm standup and tpm reports
   output, closed by its merge, and re-created for the next week.
 - period_end:
   sprint-review shows each Sprint Goal's ledger state and evidence; the
@@ -240,7 +240,7 @@ the issue that produced the artifact this issue consumes;
 `Cites: <url pinned to a tag>#<anchor>`, an upstream requirement or
 interface; `Environment: <name>`, where a Sprint Goal's evidence counts; the
 `## Requirements`, `## Acceptance Criteria`, and `## Design Decisions`
-sections, do-work's input; the `## Downstream` section, the artifacts this
+sections, the issue body's work format; the `## Downstream` section, the artifacts this
 issue's merge produces and who should review them;
 `<!-- handoff: <project>!<mr> -->`, the idempotency marker on a generated
 issue; and `<!-- tpm program event=<name> ... -->`, the marker on an event
@@ -311,11 +311,10 @@ Only implement assigns. Only a person files an upstream defect or request. Only 
 <!-- field: capabilities -->
 #### Capabilities
 
-- make-work: turn a planned release into issues for its components
+- tasks: turn a planned release into a Sprint Goal per team, and a chosen story into the issues that execute it
 - daily-scrum: in-progress items, overnight evidence findings, waiting items; pushes blocker and interrupt issues
 - specify: file an issue, with the Downstream section when it produces a shared artifact
-- implement: take an issue into a worktree, splitting it into sub-issues when needed
-- do-work: build each unit against its Requirements and Acceptance Criteria; one merge closes the issue
+- implement: take an issue into a worktree and build it against its Requirements and Acceptance Criteria, or a story's issues in one branch; one merge closes them
 - tpm release: gate an artifact on its declared checks and tag it once the evidence passed (srd015)
 - handoff: on merge, notify upstream; on release, fan out to citing repositories and comment on subscriptions
 - audits: recurring issues for regression tests, contract checks, and the sprint and stakeholder updates
@@ -348,7 +347,7 @@ Render the ledger into the repository: Sprint Goals by state, evidence per requi
 <!-- component: artifact_kinds -->
 ### artifact_kinds
 
-Let non-code work travel the same loop. The kind label routes pull and says what finishing means; do-work runs every kind unchanged against the issue's Acceptance Criteria.
+Let non-code work travel the same loop. The kind label routes pull and says what finishing means; implement runs every kind unchanged against the issue's Acceptance Criteria.
 
 <!-- field: capabilities -->
 #### Capabilities
@@ -509,7 +508,7 @@ Two alternatives were rejected. A single intent- type for every level would hide
 <!-- field: current_focus -->
 ### Current focus
 
-The requirements are complete and release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, and release 03.0 are implemented; 01.3 and 02.0 are specified. The corpus specifies the control plane and evidence (srd001-srd008), every script as a tpm subcommand group (srd010-srd019), the five outer-loop skills as commands (srd020-srd033), the six config formats, and the four semantic models. The inner loop reuses make-work, specify, implement, do-work, and gh-release-push. Use cases and test suites exist for releases 00, 01 (01.0 to 01.4), and 03.0; implementation in Go follows the road map's releases.
+The requirements are complete and release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, and release 03.0 are implemented; 01.3 and 02.0 are specified. The corpus specifies the control plane and evidence (srd001-srd008), every script as a tpm subcommand group (srd010-srd019), the five outer-loop skills as commands (srd020-srd033), the six config formats, and the four semantic models. The inner loop is specify, tasks, and implement, with tpm release for the tag. Use cases and test suites exist for releases 00, 01 (01.0 to 01.4), and 03.0; implementation in Go follows the road map's releases.
 
 <!-- field: progress -->
 ### Progress

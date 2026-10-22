@@ -81,7 +81,7 @@ Asks nothing the road-map, the SRDs, or the tracker already answers, and asks fo
 <!-- req: R4.1 -->
 ### R4.1
 
-One Sprint Goal issue per downstream team and release, filed with specify in the team's repository, in do-work's input format, with one Cites line per initiative item it serves pinned to the release tag (srd007 R5), one Environment line, and an empty Sprint Backlog section (srd034 R3.5).
+One Sprint Goal issue per downstream team and release, filed with specify in the team's repository, in the issue body's work format, with one Cites line per initiative item it serves pinned to the release tag (srd007 R5), one Environment line, and an empty Sprint Backlog section (srd034 R3.5).
 
 <!-- req: R4.2 -->
 ### R4.2
@@ -104,7 +104,7 @@ Refuses to file a Sprint Goal with an unpinned citation or without an environmen
 <!-- req: R5.2 -->
 ### R5.2
 
-Refuses to write the downstream owner's requirements; the owner writes those with do-work and places them with plan.
+Refuses to write the downstream owner's requirements; the owner writes those with draft and places them with plan.
 
 <!-- req: R5.3 -->
 ### R5.3

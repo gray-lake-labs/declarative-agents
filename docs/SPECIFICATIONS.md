@@ -33,9 +33,10 @@ srd040 specify shared code and tooling no use case cites, so the road map
 lists them under the release that built them. An SRD whose release is
 not yet planned holds its direction only (design.md D12): its items are
 retired, and an interim rule says what tpm does until they are rewritten.
-make-work, do-work, and release-push are still referenced as the existing
-skills. Every repository of a consuming program carries the same
-corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 04.0, 04.1, and 04.2 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the Sprint Goal the Sprint Goal. Release 04.1 makes a program repository explain itself and adds tpm doctor. Release 04.2 adds the draft skill and tpm backlog list and check.
+The skills take Spec Kit's names (specify, plan, tasks, implement): tasks
+breaks a level into the units below it, down to a story's issues, and
+implement builds them. Every repository of a consuming program carries the same
+corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 04.0, 04.1, and 04.2 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the objective issue the Sprint Goal. Release 04.1 makes a program repository explain itself and adds tpm doctor. Release 04.2 adds the draft skill and tpm backlog list and check.
 
 Releases are planned by use case, and a use case cites only the
 requirement items its release delivers. Release 00 is the inner loop
