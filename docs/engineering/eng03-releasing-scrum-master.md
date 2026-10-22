@@ -110,7 +110,10 @@ a runtime it was not written for.
 The push logs in to ghcr.io as the organization account with its gh
 token, which needs the write:packages scope. buildx attaches an SBOM
 attestation to the image index, and its provenance is recorded at
-mode=min so it names no machine or person. The image is published after
+mode=min so it names no machine or person. The index carries the source,
+description, and license annotations, which link the package to this
+repository on ghcr; the Dockerfile's labels repeat them on each
+platform's image. The image is published after
 the tag is pushed, so its digest cannot be in the tag annotation; mage
 publish adds it to the GitHub release's notes, which pipelines pin from;
 latest is for people. An image already at the tag is kept.

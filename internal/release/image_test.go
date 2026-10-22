@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -78,7 +79,10 @@ func TestPublishPushesAndListsTheImage(t *testing.T) {
 		t.Fatalf("no image built:\n%s", strings.Join(f.ran, "\n"))
 	}
 	build := f.ran[i]
-	for _, want := range []string{"--platform linux/amd64,linux/arm64", "--sbom=true", "--provenance=mode=min", "--tag ghcr.io/org/tpm:v0.20261015.1", "--tag ghcr.io/org/tpm:latest", "--push", "--build-arg VERSION=v0.20261015.1"} {
+	for _, want := range []string{"--platform linux/amd64,linux/arm64", "--sbom=true", "--provenance=mode=min", "--tag ghcr.io/org/tpm:v0.20261015.1", "--tag ghcr.io/org/tpm:latest", "--push", "--build-arg VERSION=v0.20261015.1",
+		"--annotation index:org.opencontainers.image.source=https://github.com/org/repo",
+		"--annotation index:org.opencontainers.image.description=" + ImageDescription,
+		"--annotation index:org.opencontainers.image.licenses=" + ImageLicenses} {
 		if !strings.Contains(build, want) {
 			t.Errorf("the build lacks %q: %s", want, build)
 		}
@@ -128,5 +132,38 @@ func TestImageDryRunRunsNothing(t *testing.T) {
 	}
 	if f.count("docker") != 0 || f.count("sh") != 0 {
 		t.Fatalf("a dry run ran:\n%s", strings.Join(f.ran, "\n"))
+	}
+}
+
+func TestLoadedImageCarriesNoIndexAnnotation(t *testing.T) {
+	dist := t.TempDir()
+	platform := Platform{"linux", "arm64"}
+	os.WriteFile(filepath.Join(dist, AssetName("tpm", platform)), []byte("tpm"), 0o755)
+	var ran string
+	p := Publisher{Root: t.TempDir(), Repo: "org/repo", Run: func(_ string, _ []string, name string, args ...string) (string, error) {
+		ran = name + " " + strings.Join(args, " ")
+		return "", nil
+	}}
+	if _, err := p.BuildImage(ImageBuild{Dist: dist, Platforms: []Platform{platform}, Refs: []string{"tpm:test"}}); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(ran, "--load") || strings.Contains(ran, "index:") {
+		t.Fatalf("a loaded image was built with %s", ran)
+	}
+}
+
+func TestDockerfileLabelsMatchTheIndexAnnotations(t *testing.T) {
+	b, err := os.ReadFile(filepath.Join("..", "..", Dockerfile))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		`org.opencontainers.image.description="` + ImageDescription + `"`,
+		`org.opencontainers.image.licenses="` + ImageLicenses + `"`,
+		`org.opencontainers.image.source="https://github.com/gray-lake-labs/scrum-master"`,
+	} {
+		if !strings.Contains(string(b), want) {
+			t.Errorf("the Dockerfile's labels lack %s", want)
+		}
 	}
 }

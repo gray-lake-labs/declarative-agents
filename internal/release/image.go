@@ -18,6 +18,13 @@ const (
 	imageLatestTag = "latest"
 )
 
+// The image's description and license, which the Dockerfile's labels
+// repeat on each platform's image.
+const (
+	ImageDescription = "tpm and the declarative-agents runtime it pins"
+	ImageLicenses    = "MIT-0"
+)
+
 // ImagePlatforms are the platforms the image is built for.
 var ImagePlatforms = []Platform{{"linux", "amd64"}, {"linux", "arm64"}}
 
@@ -35,7 +42,9 @@ type ImageBuild struct {
 
 // BuildImage builds the image as b says and returns its digest when pushed.
 // The SBOM is attached to the image index, and provenance is kept to
-// mode=min so it names no machine or person.
+// mode=min so it names no machine or person. A pushed image's index carries
+// the source, description, and license annotations, which ghcr reads to link
+// the package to its repository; a loaded image has no index.
 func (p Publisher) BuildImage(b ImageBuild) (string, error) {
 	var platforms []string
 	for _, pl := range b.Platforms {
@@ -57,6 +66,13 @@ func (p Publisher) BuildImage(b ImageBuild) (string, error) {
 		args = append(args, "--tag", ref)
 	}
 	if b.Push {
+		for _, a := range []string{
+			"org.opencontainers.image.source=https://github.com/" + p.Repo,
+			"org.opencontainers.image.description=" + ImageDescription,
+			"org.opencontainers.image.licenses=" + ImageLicenses,
+		} {
+			args = append(args, "--annotation", "index:"+a)
+		}
 		args = append(args, "--builder", imageBuilder, "--push")
 	} else {
 		args = append(args, "--load")
