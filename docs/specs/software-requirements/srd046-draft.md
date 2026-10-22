@@ -40,7 +40,7 @@ asks the person nothing.
 <!-- req: R1.1 -->
 ### R1.1
 
-Started by the person who owns the level: the technical program manager for a theme, an initiative, or an epic that spans teams, in the system repository; a Product Owner for an epic, a feature, or a story, in the team's repository (srd045 R2.2).
+Started by the person who owns the level: the technical program manager for a theme, an initiative, or an epic that spans teams, in the system repository; a Product Owner for an epic, a feature, or a story, in the team's repository (srd045 R2.2). An engineering document is started by the owner of the repository it describes: the technical program manager in the system repository, a Product Owner in a team's.
 
 <!-- req: R1.2 -->
 ### R1.2
@@ -71,7 +71,7 @@ Model step (structure): states in a few lines what it understood the item to be,
 <!-- req: R3.2 -->
 ### R3.2
 
-Asks the person only what the description and the repository do not settle and the level needs: for a theme, its horizon and the outcomes that show progress; for an initiative, its horizon, one requirement group per milestone with its due date, and the owning teams; for an epic, its owner, a horizon longer than one sprint, its dependencies, and its non-goals; for a feature, its owner, its boundary, and its tests; for a story, its as a, I want, and so that, its points and rank, each criterion's test and environment, and its cites.
+Asks the person only what the description and the repository do not settle and the level needs: for a theme, its horizon and the outcomes that show progress; for an initiative, its horizon, one requirement group per milestone with its due date, and the owning teams; for an epic, its owner, a horizon longer than one sprint, its dependencies, and its non-goals; for a feature, its owner, its boundary, and its tests; for a story, its as a, I want, and so that, its points and rank, each criterion's test and environment, and its cites; for an engineering document, the part it describes, its structure, runtime, and deployment, and the decisions it explains, one section each.
 
 <!-- req: R3.3 -->
 ### R3.3
@@ -94,7 +94,7 @@ Writes nothing until the person answers or tells it to use its recommendations, 
 <!-- req: R4.1 -->
 ### R4.1
 
-Model step (structure): writes the document at its level's location in the parent release's format, with status to_be_agreed.
+Model step (structure): writes the document at its level's location in the parent release's format, with status to_be_agreed; an engineering document, whose format carries no status, is written at docs/engineering/engNN-short-name.md and named in ARCHITECTURE.md's related documents.
 
 <!-- req: R4.2 -->
 ### R4.2
@@ -174,7 +174,7 @@ Before writing, the skill states its understanding, proposes an id, title, and p
 <!-- ac: AC3 -->
 ### AC3
 
-The document is written at its level's location as to_be_agreed, passes tpm backlog check before it is shown, is revised with the person with a check after each revision, and the skill offers to draft its children with the same skill.
+The document is written at its level's location as to_be_agreed (an engineering document at docs/engineering/ with no status, named in ARCHITECTURE's related documents), passes tpm backlog check before it is shown, is revised with the person with a check after each revision, and the skill offers to draft its children with the same skill.
 
 <!-- field: traces -->
 #### Traces

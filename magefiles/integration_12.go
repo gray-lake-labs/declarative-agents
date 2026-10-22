@@ -15,7 +15,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Backlog)
 }
 
-// Backlog builds tpm, inits a system repository, lays a theme, initiatives, an epic, a feature, and stories into it, and proves tpm backlog list names them all with their kinds and a story's points and rank, tpm backlog check passes them and fails once a story loses its points, neither writes to the repository, and AGENTS.md lists the draft skill (test-rel04.2-draft). It needs no rig and no network.
+// Backlog builds tpm, inits a system repository, lays a theme, initiatives, an epic, a feature, stories, and an engineering document into it, and proves tpm backlog list names them all with their kinds and a story's points and rank, tpm backlog check passes them and fails once a story loses its points, neither writes to the repository, and AGENTS.md lists the draft skill (test-rel04.2-draft). It needs no rig and no network.
 func (Integration) Backlog() error {
 	root, err := repositoryRoot()
 	if err != nil {
@@ -52,6 +52,28 @@ func (Integration) Backlog() error {
 	if err := copyTree(filepath.Join(root, "testdata", "hierarchy", "valid"), repo); err != nil {
 		return err
 	}
+	// An engineering document beside the hierarchy: the gate checks its
+	// format, and the folder README init wrote is not read as one (#181).
+	writeFileTo(filepath.Join(repo, "docs", "engineering", "eng01-scoring-runtime.md"), `---
+id: eng01-scoring-runtime
+title: How the scoring subsystem runs
+---
+
+<!-- field: introduction -->
+## Introduction
+
+How the scoring subsystem is structured, run, and deployed.
+
+<!-- section: processes -->
+## Processes
+
+Ingest reads trajectories from the queue, and grading scores each one.
+
+<!-- field: references -->
+## References
+
+- docs/ARCHITECTURE.md
+`)
 	// The gate reads only what git tracks and names what it does not.
 	if out, err := exec.Command("git", "-C", repo, "add", "-A").CombinedOutput(); err != nil {
 		return fmt.Errorf("git add: %w: %s", err, out)

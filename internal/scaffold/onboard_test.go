@@ -97,6 +97,7 @@ func TestOnboardWritesOrientation(t *testing.T) {
 		"docs/specs/epics/README.md":    "`epNNN-short-name.md`",
 		"docs/specs/features/README.md": "`ftNNN-short-name.md`",
 		"docs/specs/stories/README.md":  "`stNNN-short-name.md`",
+		"docs/engineering/README.md":    "`engNN-short-name.md`",
 	} {
 		b, _ := os.ReadFile(filepath.Join(dir, f))
 		if got[f] != "created" || !strings.Contains(string(b), want) || !strings.Contains(string(b), orientationMarkers[0]) {

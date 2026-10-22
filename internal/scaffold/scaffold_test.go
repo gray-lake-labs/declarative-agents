@@ -50,6 +50,7 @@ var skeleton = []string{
 	"docs/corpus-charter.yaml", "docs/external-pins.yaml", "docs/road-map.md",
 	"docs/specs/software-requirements/srd001-system.md",
 	"AGENTS.md", "README.md", "docs/specs/epics/README.md", "docs/specs/initiatives/README.md", "docs/specs/themes/README.md",
+	"docs/engineering/README.md",
 }
 
 // orientationMarkers are the begin and end lines every orientation file
@@ -66,6 +67,7 @@ func TestInitWritesOrientation(t *testing.T) {
 		"docs/specs/themes/README.md":      "`thNNN-short-name.md`",
 		"docs/specs/initiatives/README.md": "`inNNN-short-name.md`",
 		"docs/specs/epics/README.md":       "`epNNN-short-name.md`",
+		"docs/engineering/README.md":       "`engNN-short-name.md`",
 	} {
 		b, err := os.ReadFile(filepath.Join(dir, f))
 		if err != nil {

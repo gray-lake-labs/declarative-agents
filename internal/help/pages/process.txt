@@ -26,7 +26,8 @@ The Sprint Goal is the ledger: planned, evidence, met (srd006).
 
 Where things live in every repository of a program: docs/ holds the corpus
 (VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test
-suites); the system repository also holds control/labels.md and
+suites) and docs/engineering/ the engineering documents that describe how
+the repository's part is built; the system repository also holds control/labels.md and
 control/policy.md, the themes, initiatives, and cross-team epics; a team's
 repository holds its epics, features, and stories (srd034, srd045). The tracker is a
 repository of its own, served by beads (srd042).
