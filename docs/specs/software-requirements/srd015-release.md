@@ -75,7 +75,7 @@ A declared check this tpm cannot run, a contract-tests or scorecard check or any
 <!-- req: R3.1 -->
 ### R3.1
 
-Reports the latest tag of an artifact and the next patch, minor, and major versions, with the class each would have, and recommends one from the commits since the latest tag: minor for a first release, major when a commit says BREAKING CHANGE, patch when every commit fixes something or when the checkout is a corpus whose SRDs no commit since the tag changed, a republish, minor for any other change, and none when nothing was committed since.
+Reports the latest tag of an artifact and the next patch, minor, and major versions, with the class each would have, and recommends one from the commits since the latest tag: minor for a first release, major when a commit says BREAKING CHANGE, patch when every commit fixes something or when the checkout is a corpus whose requirements (its SRDs, initiatives, objectives, and road map) no commit since the tag changed, a republish, minor for any other change, and none when nothing was committed since.
 
 <!-- req: R4 -->
 ## R4 - Test software ships with the release
@@ -132,7 +132,7 @@ tpm release tag tags and pushes only after a passing gate for the same artifact,
 <!-- ac: AC3 -->
 ### AC3
 
-next reports the latest tag and the three candidate versions with their classes; the release names the test-subsystem release that produced its evidence; all subcommands honour --json and --dry-run and never prompt.
+next reports the latest tag and the three candidate versions with their classes, recommending no republish after a change to the road map or an initiative; the release names the test-subsystem release that produced its evidence; all subcommands honour --json and --dry-run and never prompt.
 
 <!-- field: traces -->
 #### Traces

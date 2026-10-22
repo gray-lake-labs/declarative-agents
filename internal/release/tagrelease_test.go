@@ -1,6 +1,7 @@
 package release
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -162,8 +163,10 @@ func TestNextRecommendsFromTheCommits(t *testing.T) {
 	}
 }
 
-// TestRequirementsUnchangedReadsTheSRDs compares the SRD directory with the
+// TestRequirementsUnchangedReadsTheSRDs compares the requirements with the
 // latest tag, and never calls a checkout without SRDs a republish (#151).
+// A plan's road map and the initiatives are requirements too, so plan
+// write's merge is not a republish (srd015 R3.1).
 func TestRequirementsUnchangedReadsTheSRDs(t *testing.T) {
 	dir := t.TempDir()
 	git := func(args ...string) {
@@ -206,5 +209,15 @@ func TestRequirementsUnchangedReadsTheSRDs(t *testing.T) {
 	git("commit", "-q", "-am", "change R1")
 	if same, err := RequirementsUnchanged(dir, "corpus/v0.7.0"); err != nil || same {
 		t.Fatalf("an SRD change = %v, %v; want no republish", same, err)
+	}
+	for i, p := range []string{"docs/road-map.md", "docs/specs/initiatives/in001-scoring.md", "docs/specs/objectives/obj001-agents.md"} {
+		tag := fmt.Sprintf("corpus/v0.8.%d", i)
+		git("tag", tag)
+		write(p, "planned\n")
+		git("add", "-A")
+		git("commit", "-q", "-m", "plan "+p)
+		if same, err := RequirementsUnchanged(dir, tag); err != nil || same {
+			t.Fatalf("a change to %s = %v, %v; want no republish", p, same, err)
+		}
 	}
 }
