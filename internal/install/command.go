@@ -8,7 +8,6 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/scrum-master/internal/runtime"
 )
@@ -63,15 +62,7 @@ func init() {
 			if withRuntime {
 				return installRuntime(ctx)
 			}
-			embedded, err := Skills(scrummaster.Plugin, scrummaster.SkillsDir)
-			if err != nil {
-				return err
-			}
-			rendered, err := ProfileSkills(scrummaster.Plugin, scrummaster.AgentsDir)
-			if err != nil {
-				return err
-			}
-			skills, err := MergeSkills(embedded, rendered)
+			skills, err := EmbeddedSkills()
 			if err != nil {
 				return err
 			}

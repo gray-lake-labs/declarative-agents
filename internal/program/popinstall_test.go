@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 )
 
@@ -34,7 +33,7 @@ func checkoutWithWorktree(t *testing.T) (checkout, worktree string, git func(dir
 
 func TestPopInstallsSkillsIntoWorktree(t *testing.T) {
 	checkout, worktree, git := checkoutWithWorktree(t)
-	skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+	skills, err := install.EmbeddedSkills()
 	if err != nil {
 		t.Fatal(err)
 	}

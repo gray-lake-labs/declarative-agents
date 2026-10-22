@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
@@ -67,7 +66,7 @@ func init() {
 				Skills []install.Result `json:"skills,omitempty"`
 			}{Files: res}
 			if len(agents) > 0 {
-				skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+				skills, err := install.EmbeddedSkills()
 				if err != nil {
 					return err
 				}

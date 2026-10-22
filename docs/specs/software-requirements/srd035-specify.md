@@ -97,6 +97,14 @@ Refuses to file a plane::management issue for a person who is not a lead (srd001
 
 As a skill, is at most 50 lines (design.md D10).
 
+<!-- req: R6 -->
+## R6 - The workflow as a profile
+
+<!-- req: R6.1 -->
+### R6.1
+
+The workflow is a declarative-agents profile, plugin/agents/specify/ (design.md D14): the machine's states carry the skill's steps, the tpm commands are model-dispatched tools with typed parameters, and the model acts only in the Draft state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and tpm install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
+
 <!-- field: non_goals -->
 ## Non-goals
 
@@ -152,3 +160,13 @@ No issue is assigned; a non-lead's management issue is refused; the skill is at 
 - [R5.1](#r51)
 - [R5.2](#r52)
 - [R5.3](#r53)
+
+<!-- ac: AC5 -->
+### AC5
+
+The specify profile validates with the pinned runtime, and the installed SKILL.md presents its machine's states as its steps.
+
+<!-- field: traces -->
+#### Traces
+
+- [R6.1](#r61)

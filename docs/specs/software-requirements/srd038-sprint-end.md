@@ -62,6 +62,14 @@ Once track-goals runs in the program, R2.1 no longer applies and Sprint Goals cl
 
 The sprint-end summary records, for each Sprint Goal it closes, which of the stories listed in its Sprint Backlog the owner reports done, in a Stories done section tpm sprint-end stories writes, each story as project#story, since story ids repeat across teams. The summary is in the format design.md sprint_end_summary declares, and tpm issue merge refuses one that is not. Until track-goals runs, those stories are done for roll-up and velocity (srd045 R3.2, R5.3), and the rest return to the Product Backlog.
 
+<!-- req: R3 -->
+## R3 - The workflow as a profile
+
+<!-- req: R3.1 -->
+### R3.1
+
+The workflow is a declarative-agents profile, plugin/agents/sprint-end/ (design.md D14): the machine's states carry the skill's steps, the tpm commands are model-dispatched tools with typed parameters, and the model acts only in the Summarize state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and tpm install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
+
 <!-- field: non_goals -->
 ## Non-goals
 
@@ -95,3 +103,13 @@ Without track-goals, a reported-complete Sprint Goal closes by the sprint-end me
 - [R2.2](#r22)
 - [R2.3](#r23)
 - [R2.4](#r24)
+
+<!-- ac: AC3 -->
+### AC3
+
+The sprint-end profile validates with the pinned runtime, and the installed SKILL.md presents its machine's states as its steps.
+
+<!-- field: traces -->
+#### Traces
+
+- [R3.1](#r31)

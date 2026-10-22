@@ -7,8 +7,6 @@ import (
 	"strings"
 	"testing"
 	"testing/fstest"
-
-	"github.com/gray-lake-labs/scrum-master"
 )
 
 var testFS = fstest.MapFS{
@@ -64,7 +62,7 @@ func install(t *testing.T, dir string, agents []string, skills []Skill, version 
 }
 
 func TestEmbeddedSkillsParse(t *testing.T) {
-	skills, err := Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+	skills, err := EmbeddedSkills()
 	if err != nil || len(skills) == 0 {
 		t.Fatalf("skills=%v err=%v", skills, err)
 	}
