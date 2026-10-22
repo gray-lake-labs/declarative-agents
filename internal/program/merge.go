@@ -129,7 +129,7 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		if err != nil {
 			return r, err
 		}
-		d := deliveryFor(t, git)
+		d := deliveryFor(t, git, project)
 		if r.ApprovedBy, err = d.approval(issueProject, iid, branch, tip, me.Username); err != nil {
 			return r, err
 		}

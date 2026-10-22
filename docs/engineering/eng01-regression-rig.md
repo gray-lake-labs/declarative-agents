@@ -110,6 +110,23 @@ regression left behind. Provisioning restores the Terraform release 03.0
 removed; provisioning through the GitLab API in Go was the alternative,
 rejected so that the rig builds a program the same way a program is built.
 
+<!-- section: github-rig -->
+## The opt-in GitHub rig
+
+mage integration:github proves the gh tracking system against GitHub
+itself, and is opt-in like the GitLab variant: it needs gh logged in as
+the organization (GH_TOKEN) and the network, so it never joins mage
+regression. It works in one private repository, gray-lake-labs/tpm-gh-rig,
+created on first use and reused, since the organization's token may create
+repositories but not delete them; GITHUB_RIG_REPO names another. With
+TPM_TRACKER=gh it builds tpm and proves tpm issue labels writes the schema
+into the repository, tpm issue file files an admitted issue on a dated
+milestone, tpm issue pop opens the branch with a draft pull request, tpm
+issue merge refuses an unapproved head, and GitHub refuses the author's own
+approval. It closes what it opened. A second person's approval and the
+merge are proven offline in internal/github, against a fake GitHub with two
+logins that merges in a real git origin, as the rig has one identity.
+
 <!-- section: beads-scale -->
 ## The opt-in beads scale run
 

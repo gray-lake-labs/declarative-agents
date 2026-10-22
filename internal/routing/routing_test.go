@@ -48,12 +48,12 @@ func TestParseReadsTheDocument(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c.Default != (System{Beads, "https://github.com/acme/program-tracker.git"}) || len(c.Overrides) != 2 ||
+	if c.Default.Name != Beads || c.Default.TrackerRepository != "https://github.com/acme/program-tracker.git" || len(c.Overrides) != 2 ||
 		c.Overrides["acme/delivery/fleet"] != GitHub || c.Overrides["acme/scoring"] != GitLab {
 		t.Fatalf("config = %+v", c)
 	}
 	again, err := Parse(Document(c))
-	if err != nil || again.Default != c.Default || len(again.Overrides) != 2 || again.Overrides["acme/scoring"] != GitLab {
+	if err != nil || again.Default.Name != c.Default.Name || again.Default.TrackerRepository != c.Default.TrackerRepository || len(again.Overrides) != 2 || again.Overrides["acme/scoring"] != GitLab {
 		t.Fatalf("round trip = %+v, %v", again, err)
 	}
 }
@@ -83,7 +83,7 @@ func TestOverrideReadsTPMTracker(t *testing.T) {
 		"https://x/tracker.git": {Name: Beads, TrackerRepository: "https://x/tracker.git"},
 	} {
 		got, ok := Override(env)
-		if got != want || ok != (env != "") {
+		if got.Name != want.Name || got.TrackerRepository != want.TrackerRepository || ok != (env != "") {
 			t.Errorf("Override(%q) = %+v, %v", env, got, ok)
 		}
 	}

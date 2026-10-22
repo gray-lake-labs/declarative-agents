@@ -34,6 +34,8 @@ The tracker repository comes first, so every step after it is recorded there. `t
 
    `tpm init` makes the tracker's first commit and creates the program's labels there. Without `--tracker` it says that no tracker was seeded, and no issue can be filed until one is.
 
+   A repository can use GitHub instead of a tracker repository: name it `gh` in the system repository's `control/trackers.md`, or run with `TPM_TRACKER=gh`. tpm then drives the `gh` CLI with your existing login, whose token needs the `repo` and `read:org` scopes (`gh auth status` shows them); `tpm doctor` reports a missing or logged-out `gh`.
+
 2. File the generation issue and pop it into its own branch and worktree. Name the documents it changes with `--path`; a planning document among them makes it a `plane::management` issue:
 
    ```bash

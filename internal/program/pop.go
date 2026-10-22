@@ -68,7 +68,10 @@ type PopResult struct {
 	Provisional bool `json:"provisional,omitempty"`
 	Created     bool `json:"branch_created"` // pop created the branch now
 	Added       bool `json:"worktree_added"` // pop added the worktree now
-	DryRun      bool `json:"dry_run"`
+	// Review is the URL of the pull or merge request pop opened, or found,
+	// on a tracking system whose host reviews the branch.
+	Review string `json:"review,omitempty"`
+	DryRun bool   `json:"dry_run"`
 	// Installed are the agents whose skills were installed into the worktree
 	// (srd036 R2.3); InstallError says why that failed, without undoing pop.
 	Installed    []string `json:"installed,omitempty"`
@@ -116,6 +119,13 @@ func PopIn(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 			if err := t.CreateBranch(project, r.Branch, base); err != nil {
 				return r, err
 			}
+		}
+	}
+
+	if rv, ok := tracker.For(t, project).(tracker.Reviewer); ok && !dryRun {
+		ref := fmt.Sprintf("%s#%d", issueProject, iid)
+		if r.Review, err = rv.OpenReview(project, r.Branch, base, i.Title, "Delivers "+ref+".\n\nCloses "+ref); err != nil {
+			return r, fmt.Errorf("opened %s, but not its review: %w", r.Branch, err)
 		}
 	}
 

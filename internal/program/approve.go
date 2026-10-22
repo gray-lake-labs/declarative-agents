@@ -64,6 +64,6 @@ func Approve(t tracker.Tracker, git Git, project, issueProject string, iid int, 
 	if r.Commit == "" {
 		return r, fmt.Errorf("no branch %s to approve in %s", r.Branch, project)
 	}
-	r.Posted, err = deliveryFor(t, git).approve(issueProject, iid, r.Branch, r.Commit, me.Username)
+	r.Posted, err = deliveryFor(t, git, project).approve(issueProject, iid, r.Branch, r.Commit, me.Username)
 	return r, err
 }

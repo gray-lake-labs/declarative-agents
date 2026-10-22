@@ -15,6 +15,7 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
+	"github.com/gray-lake-labs/scrum-master/internal/github"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
@@ -34,6 +35,10 @@ const (
 type System struct {
 	Name              string `json:"system"`
 	TrackerRepository string `json:"tracker_repository,omitempty"`
+	// Dir is the command's checkout, and Paths the projects and groups
+	// routed to the system, empty for the default.
+	Dir   string   `json:"-"`
+	Paths []string `json:"-"`
 }
 
 // Config is control/trackers.md: the program's default system and the
@@ -129,7 +134,14 @@ var openers = map[string]Opener{
 		}
 		return beads.OpenRepository(s.TrackerRepository)
 	},
+	GitHub: func(s System) (tracker.Tracker, error) {
+		return github.New(s.Dir, github.CLI{}, s.Paths), nil
+	},
 }
+
+// cli is the command each hosted system drives, which doctor checks is
+// installed and logged in.
+var cli = map[string]string{GitHub: "gh", GitLab: "glab"}
 
 // Register makes a tracking system available by name.
 func Register(name string, open Opener) { openers[name] = open }
@@ -169,6 +181,7 @@ func Open(dir string) (tracker.Tracker, error) {
 		if !set {
 			return nil, errors.New("no tracker: set TPM_TRACKER to the tracker repository, or write " + File + " in the system repository (eng04-beads-sync)")
 		}
+		env.Dir = dir
 		return open(env)
 	}
 	b, err := os.ReadFile(path)
@@ -185,6 +198,7 @@ func Open(dir string) (tracker.Tracker, error) {
 		}
 		c.Default = env
 	}
+	c.Default.Dir = dir
 	def, err := open(c.Default)
 	if err != nil {
 		return nil, err
@@ -193,10 +207,15 @@ func Open(dir string) (tracker.Tracker, error) {
 		return def, nil
 	}
 	r := &tracker.Router{Default: def, Systems: map[string]tracker.Tracker{}}
+	paths := map[string][]string{}
+	for p, name := range c.Overrides {
+		paths[name] = append(paths[name], p)
+	}
 	opened := map[string]tracker.Tracker{}
 	for p, name := range c.Overrides {
 		if opened[name] == nil {
-			if opened[name], err = open(System{Name: name}); err != nil {
+			slices.Sort(paths[name])
+			if opened[name], err = open(System{Name: name, Dir: dir, Paths: paths[name]}); err != nil {
 				return nil, fmt.Errorf("%s: %w", p, err)
 			}
 		}
@@ -263,6 +282,14 @@ func Check(dir string) (*Report, error) {
 	for _, n := range names {
 		if _, ok := openers[n]; !ok {
 			r.Problems = append(r.Problems, fmt.Sprintf("tpm has no %s tracking system yet", n))
+			continue
+		}
+		if bin := cli[n]; bin != "" {
+			if _, err := exec.LookPath(bin); err != nil {
+				r.Problems = append(r.Problems, fmt.Sprintf("%s serves through the %s CLI, which is not installed", n, bin))
+			} else if out, err := exec.Command(bin, "auth", "status").CombinedOutput(); err != nil {
+				r.Problems = append(r.Problems, fmt.Sprintf("%s is not logged in: run %s auth login (%s)", bin, bin, firstLine(string(out))))
+			}
 		}
 	}
 	if c.Default.Name == Beads {
@@ -271,4 +298,9 @@ func Check(dir string) (*Report, error) {
 		}
 	}
 	return r, nil
+}
+
+func firstLine(s string) string {
+	s, _, _ = strings.Cut(strings.TrimSpace(s), "\n")
+	return s
 }

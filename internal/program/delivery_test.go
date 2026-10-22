@@ -38,7 +38,7 @@ func (r recording) merge(main, base, branch, message string) (string, error) {
 func TestApproveAndMergeGoThroughTheDelivery(t *testing.T) {
 	var calls []string
 	prev := deliveryFor
-	deliveryFor = func(t tracker.Tracker, git Git) delivery {
+	deliveryFor = func(t tracker.Tracker, git Git, _ string) delivery {
 		return recording{local: localDelivery{t: t, git: git}, calls: &calls}
 	}
 	t.Cleanup(func() { deliveryFor = prev })

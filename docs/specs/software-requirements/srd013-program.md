@@ -119,7 +119,7 @@ With --issue-project, merges in the given project and closes the issue in the ot
 <!-- req: R5.5 -->
 ### R5.5
 
-Refuses unless the issue carries an approval of the exact commit it would merge, from a person other than the issue's assignee, or, for an issue nobody took, other than the person merging (srd008 R1.4). An approval names the commit its reviewer read, so a commit made after it needs a new one.
+Refuses unless the issue carries an approval of the exact commit it would merge, from a person other than the issue's assignee, or, for an issue nobody took, other than the person merging (srd008 R1.4). An approval names the commit its reviewer read, so a commit made after it needs a new one. On a tracking system whose host reviews branches, such as gh, the approval is the host's review of that commit, and the host merges.
 
 <!-- req: R5.6 -->
 ### R5.6

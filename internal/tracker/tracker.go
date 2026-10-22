@@ -156,6 +156,27 @@ type AdmittingCreator interface {
 	CreateAdmitted(project string, in NewIssue, admit func(Issue) (reasons []string, note string)) (Issue, error)
 }
 
+// Reviewer is a tracking system whose host reviews and merges a branch, as
+// a GitHub pull request or a GitLab merge request does (srd013 R5.5). pop
+// opens the review, a reviewer approves the head commit there, and merge
+// merges it there; a tracking system without one approves by comment and
+// merges in the local checkout.
+type Reviewer interface {
+	// OpenReview opens the review of branch into base, or returns the one
+	// already open, and reports its URL.
+	OpenReview(project, branch, base, title, body string) (string, error)
+	// Approve approves the review of branch at commit as the current user,
+	// and reports whether it approved now: an approval of the same commit
+	// by the same person is not repeated. The host refuses the author.
+	Approve(project, branch, commit string) (bool, error)
+	// Approval names who approved the review of branch at tip, other than
+	// excluded, and the commit an earlier approval named, if any.
+	Approval(project, branch, tip string, excluded []string) (by, stale string, err error)
+	// Merge merges the review of branch at tip with message, and returns
+	// the merge commit.
+	Merge(project, branch, tip, message string) (string, error)
+}
+
 // Issues is the issue half of a tracking system: the issues, their notes
 // and the ledger events in them, milestones, labels, and the people who
 // pop and approve (srd042). Every tracking system supplies it, beads from

@@ -27,8 +27,13 @@ type delivery interface {
 	merge(main, base, branch, message string) (string, error)
 }
 
-// deliveryFor is t's delivery; tests replace it to watch the calls.
-var deliveryFor = func(t tracker.Tracker, git Git) delivery {
+// deliveryFor is the delivery of the system serving project: its host's
+// review when it offers one, else the local one. Tests replace it to watch
+// the calls.
+var deliveryFor = func(t tracker.Tracker, git Git, project string) delivery {
+	if rv, ok := tracker.For(t, project).(tracker.Reviewer); ok {
+		return reviewDelivery{t: t, rv: rv, git: git, project: project}
+	}
 	return localDelivery{t: t, git: git}
 }
 
@@ -103,4 +108,65 @@ func (d localDelivery) merge(main, base, branch, message string) (string, error)
 		return "", fmt.Errorf("merged locally but could not push %s: %w", base, err)
 	}
 	return run("rev-parse", "HEAD")
+}
+
+// reviewDelivery approves and merges through the host's review: a review
+// approves the head commit, and the host merges, after which the local
+// checkout is brought level so the merge can be read and closed on.
+type reviewDelivery struct {
+	t       tracker.Issues
+	rv      tracker.Reviewer
+	git     Git
+	project string
+}
+
+func (d reviewDelivery) approve(_ string, _ int, branch, commit, _ string) (bool, error) {
+	return d.rv.Approve(d.project, branch, commit)
+}
+
+func (d reviewDelivery) approval(issueProject string, iid int, branch, tip, merger string) (string, error) {
+	i, err := d.t.GetIssue(issueProject, iid)
+	if err != nil {
+		return "", err
+	}
+	excluded := i.Assignees
+	if len(excluded) == 0 {
+		excluded = []string{merger}
+	}
+	by, stale, err := d.rv.Approval(d.project, branch, tip, excluded)
+	if err != nil || by != "" {
+		return by, err
+	}
+	short := func(c string) string { return c[:min(12, len(c))] }
+	if stale != "" {
+		return "", fmt.Errorf("the review of %s approved %s, and it is now at %s; ask for a new approval with tpm issue approve (srd013 R5.5)",
+			branch, short(stale), short(tip))
+	}
+	return "", fmt.Errorf("no approval of %s at %s from someone other than %s; ask a reviewer to run tpm issue approve (srd013 R5.5)",
+		branch, short(tip), strings.Join(excluded, ", "))
+}
+
+func (d reviewDelivery) merge(main, base, branch, message string) (string, error) {
+	tip, err := d.git.Run(main, "rev-parse", "refs/heads/"+branch)
+	if err != nil {
+		return "", err
+	}
+	commit, err := d.rv.Merge(d.project, branch, strings.TrimSpace(tip), message)
+	if err != nil {
+		return "", err
+	}
+	run := func(args ...string) (string, error) {
+		out, err := d.git.Run(main, args...)
+		return strings.TrimSpace(out), err
+	}
+	if _, err := run("fetch", "-q", "origin", base); err != nil {
+		return commit, err
+	}
+	if current, _ := run("branch", "--show-current"); current != base {
+		if _, err := run("checkout", "-q", base); err != nil {
+			return commit, err
+		}
+	}
+	_, err = run("merge", "-q", "--ff-only", "refs/remotes/origin/"+base)
+	return commit, err
 }

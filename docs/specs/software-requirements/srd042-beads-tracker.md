@@ -67,6 +67,20 @@ group's entry serves every project under it that no closer entry names.
 TPM_TRACKER replaces the default for one person's run, never an override,
 and with no such file it alone names the system every project uses.
 
+<!-- req: R1.4 -->
+### R1.4
+
+The gh system serves a repository's issues, notes, labels, and milestones
+from GitHub through the gh CLI and the person's existing login; tpm keeps
+no token. GitHub has no due date on an issue and no start date on a
+milestone, so each is a Due: or Start: line of the description. A group's
+labels and milestones go to each of its repositories, as GitHub has none
+of its own. A branch is reviewed as a pull request pop opens as a draft
+with one empty commit, an approval is the pull request's review of the
+head commit, and merge merges it on GitHub and closes the issue on that
+merge commit. Files, tags, branches, and merged history come from the
+local checkout, as for bd.
+
 <!-- req: R2 -->
 ## R2 - Mapping
 
@@ -224,3 +238,17 @@ a rig that provisions fixture tracker repositories.
 
 - [R4.1](#r41)
 - [R4.2](#r42)
+
+<!-- ac: AC5 -->
+### AC5
+
+On the gh system an issue files, lints, and closes in GitHub with its due
+date and milestone read back; pop opens the branch with a draft pull
+request; the author cannot approve it, another person's approval of the
+head lets merge land it on GitHub and close the issue on that commit, and
+an approval of an earlier commit is refused.
+
+<!-- field: traces -->
+#### Traces
+
+- [R1.4](#r14)
