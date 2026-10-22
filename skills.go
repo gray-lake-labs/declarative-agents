@@ -13,6 +13,11 @@ var Plugin embed.FS
 // SkillsDir is where the skills sit in Plugin.
 const SkillsDir = "plugin/skills"
 
+// AgentsDir is where the declarative-agents profiles sit in Plugin: one
+// directory per skill whose workflow is a profile (GH-135, design.md D14).
+// tpm install renders such a skill's SKILL.md from its machine.
+const AgentsDir = "plugin/agents"
+
 // Constitution is the design constitution every repository of a program
 // carries (design.md D7); tpm init and onboard write it (srd043).
 //

@@ -21,6 +21,10 @@ var notMarkdown = []string{
 	"plugin/plugin.json",           // the Agent Plugins 1.0 standard
 }
 
+// agentsDir holds the declarative-agents profiles, which the pinned runtime
+// reads as YAML (design.md D2, D14; GH-135).
+const agentsDir = "plugin/agents/"
+
 // yamlOutsideAllowed returns the YAML and JSON files among paths that D2
 // does not allow.
 func yamlOutsideAllowed(paths []string) []string {
@@ -29,6 +33,7 @@ func yamlOutsideAllowed(paths []string) []string {
 		switch {
 		case !strings.HasSuffix(p, ".yaml") && !strings.HasSuffix(p, ".yml") && !strings.HasSuffix(p, ".json"):
 		case slices.Contains(notMarkdown, p):
+		case strings.HasPrefix(p, agentsDir) && strings.HasSuffix(p, ".yaml"):
 		default:
 			out = append(out, p)
 		}
@@ -48,8 +53,8 @@ func TestNoYAMLOutsideTheAllowedFiles(t *testing.T) {
 	for _, p := range yamlOutsideAllowed(strings.Split(strings.TrimSpace(string(out)), "\n")) {
 		t.Errorf("%s is not Markdown; design.md D2 allows only %s", p, strings.Join(notMarkdown, ", "))
 	}
-	planted := []string{"docs/VISION.md", "control/policy.yaml", "ci/code.gitlab-ci.yml", "plugin/plugin.json", "x/settings.json"}
-	if got := yamlOutsideAllowed(planted); !slices.Equal(got, []string{"control/policy.yaml", "ci/code.gitlab-ci.yml", "x/settings.json"}) {
+	planted := []string{"docs/VISION.md", "control/policy.yaml", "ci/code.gitlab-ci.yml", "plugin/plugin.json", "x/settings.json", "plugin/agents/implement/machine.yaml", "plugin/agents/implement/plugin.json"}
+	if got := yamlOutsideAllowed(planted); !slices.Equal(got, []string{"control/policy.yaml", "ci/code.gitlab-ci.yml", "x/settings.json", "plugin/agents/implement/plugin.json"}) {
 		t.Fatalf("planted files found as %v", got)
 	}
 }

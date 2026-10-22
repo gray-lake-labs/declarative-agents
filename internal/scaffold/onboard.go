@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
@@ -71,7 +70,7 @@ func Onboard(t tracker.Tracker, o OnboardOptions) (OnboardResult, error) {
 		return r, err
 	}
 	if len(o.Agents) > 0 {
-		skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+		skills, err := install.EmbeddedSkills()
 		if err != nil {
 			return r, err
 		}
