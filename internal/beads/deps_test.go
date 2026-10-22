@@ -93,7 +93,7 @@ func TestDependenciesMergeAsASet(t *testing.T) {
 	ours := Issue{ID: "sm-1", Dependencies: []Dependency{edge("sm-2"), edge("sm-3"), edge("sm-4")}}
 	theirs := Issue{ID: "sm-1", Dependencies: []Dependency{edge("sm-2"), edge("sm-5")}}
 	var got []string
-	for _, d := range mergeIssue(base, ours, theirs, "2026-11-02T09:00:00Z").Dependencies {
+	for _, d := range mergeIssue(Table, base, ours, theirs, "2026-11-02T09:00:00Z").Dependencies {
 		got = append(got, d.DependsOnID)
 	}
 	if !slices.Equal(got, []string{"sm-2", "sm-5", "sm-4"}) {

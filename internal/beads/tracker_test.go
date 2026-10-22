@@ -94,7 +94,7 @@ func TestCreatesRenumberOnCollidingIIDs(t *testing.T) {
 	theirs := Issue{ID: "sm-aaaa", IID: 1, Repository: "g/po-1", Title: "theirs"}
 	ours := Issue{ID: "sm-bbbb", IID: 1, Repository: "g/po-1", Title: "ours"}
 	elsewhere := Issue{ID: "sm-cccc", IID: 1, Repository: "g/po-2", Title: "elsewhere"}
-	merged := mergeIssues(nil, []Issue{ours, elsewhere}, []Issue{theirs}, "2026-11-02T09:00:00Z")
+	merged := mergeIssues(Table, nil, []Issue{ours, elsewhere}, []Issue{theirs}, "2026-11-02T09:00:00Z")
 	iid := map[string]int{}
 	for _, i := range merged {
 		iid[i.ID] = i.IID

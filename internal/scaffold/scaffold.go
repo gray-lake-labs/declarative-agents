@@ -18,6 +18,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/gray-lake-labs/scrum-master/internal/beads"
+
 	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/runtime"
@@ -140,12 +142,13 @@ func charterFile() ([]byte, error) {
 	return []byte(b.String()), nil
 }
 
-// controlFiles are control/labels.md and control/policy.md holding the
-// built-in defaults (srd043 R1.3).
+// controlFiles are control/labels.md, control/policy.md, and
+// control/states.md holding the built-in defaults (srd043 R1.3).
 func controlFiles() map[string][]byte {
 	return map[string][]byte{
 		program.LabelsFile: []byte(LabelsDocument(program.DefaultLabels())),
 		program.PolicyFile: []byte(PolicyDocument(InitPolicy())),
+		beads.StatesFile:   []byte(StatesDocument(beads.Table)),
 	}
 }
 

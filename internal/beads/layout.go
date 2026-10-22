@@ -261,7 +261,11 @@ func (s *Store) mergeFiles(base, remote string) error {
 				return err
 			}
 		}
-		b, err := encodeIssue(mergeIssue(sides[0], sides[1], sides[2], s.stamp()))
+		rows, err := s.states()
+		if err != nil {
+			return err
+		}
+		b, err := encodeIssue(mergeIssue(rows, sides[0], sides[1], sides[2], s.stamp()))
 		if err != nil {
 			return err
 		}

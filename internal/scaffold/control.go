@@ -3,9 +3,11 @@ package scaffold
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
+	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
@@ -211,7 +213,9 @@ func appendRow(text, axis string, cells []string) (string, error) {
 }
 
 // PolicyDocument renders p as control/policy.md in the policy config format:
-// the settings tpm's policy reader takes from the file.
+// the settings tpm's policy reader takes from the file, the named admission
+// rules among them, so removing a rule from the file disables it (srd013
+// R1.1).
 func PolicyDocument(p program.Policy) string {
 	var b strings.Builder
 	b.WriteString("---\nid: policy\ntitle: Policy\n---\n\n<!-- field: version -->\n## Version\n\n1\n\n")
@@ -220,6 +224,15 @@ func PolicyDocument(p program.Policy) string {
 	fmt.Fprintf(&b, "<!-- field: require_acceptance_criteria -->\n### Require acceptance criteria\n\n%t\n\n", len(p.RequireAC) > 0)
 	fmt.Fprintf(&b, "<!-- field: require_approval -->\n### Require approval\n\n%t\n\n", p.RequireApproval)
 	fmt.Fprintf(&b, "<!-- field: audit_command -->\n### Audit command\n\n%s\n\n", p.AuditCommand)
+	b.WriteString("<!-- field: rules -->\n### Rules\n\n")
+	admissionRules := p.AdmissionRules
+	if admissionRules == nil {
+		admissionRules = program.RuleNames()
+	}
+	for _, r := range admissionRules {
+		b.WriteString("- " + r + "\n")
+	}
+	b.WriteString("\n")
 	b.WriteString("<!-- field: escalation -->\n## Escalation\n\n")
 	for _, e := range []struct {
 		field string
@@ -254,4 +267,24 @@ func PolicyDocument(p program.Policy) string {
 func heading(field string) string {
 	s := strings.ReplaceAll(field, "_", " ")
 	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+// StatesDocument renders rows as control/states.md in the states config
+// format, so the beads tracker reads back exactly rows (srd041 R8): one
+// table row per transition, from as a comma-separated list with any-open
+// for every state but closed.
+func StatesDocument(rows []beads.Row) string {
+	var b strings.Builder
+	b.WriteString("---\nid: states\ntitle: Issue states\n---\n\n")
+	b.WriteString("<!-- field: version -->\n## Version\n\n1\n\n")
+	b.WriteString("<!-- field: rows -->\n## Rows\n\n")
+	b.WriteString("| from | to | actor | assignee | requires | kind |\n| --- | --- | --- | --- | --- | --- |\n")
+	for _, r := range rows {
+		from := strings.Join(r.From, ", ")
+		if slices.Equal(r.From, beads.AnyOpen) {
+			from = "any-open"
+		}
+		fmt.Fprintf(&b, "| %s | %s | %s | %s | %s | %s |\n", from, r.To, r.Actor, r.Assignee, r.Requires, r.Kind)
+	}
+	return b.String()
 }

@@ -10,7 +10,7 @@ import (
 // merge base. theirs is the tracker repository's side, so its writes were
 // pushed first. Issues only one side changed merge trivially; an issue both
 // changed merges field-wise by mergeIssue.
-func mergeIssues(base, ours, theirs []Issue, now string) []Issue {
+func mergeIssues(rows []Row, base, ours, theirs []Issue, now string) []Issue {
 	index := func(issues []Issue) map[string]Issue {
 		m := make(map[string]Issue, len(issues))
 		for _, i := range issues {
@@ -40,7 +40,7 @@ func mergeIssues(base, ours, theirs []Issue, now string) []Issue {
 		case !inTheirs:
 			merged = append(merged, oi)
 		default:
-			merged = append(merged, mergeIssue(b[id], oi, ti, now))
+			merged = append(merged, mergeIssue(rows, b[id], oi, ti, now))
 		}
 	}
 	renumber(merged, func(id string) bool {
@@ -89,7 +89,7 @@ func renumber(issues []Issue, oursNew func(id string) bool) {
 // through the srd041 table, and a replay the table refuses is dropped with
 // the refusal recorded as a comment. Labels merge as sets; comments are
 // append-only and union.
-func mergeIssue(b, o, t Issue, now string) Issue {
+func mergeIssue(rows []Row, b, o, t Issue, now string) Issue {
 	oursLater := o.UpdatedAt > t.UpdatedAt
 	m := t
 	m.Title = lww(b.Title, o.Title, t.Title, oursLater)
@@ -111,7 +111,7 @@ func mergeIssue(b, o, t Issue, now string) Issue {
 		setState(&m, o)
 	}
 	if oursMoved && theirsMoved && o.State != t.State {
-		if _, ok := row(m, o.StateActor, o.State); ok {
+		if _, ok := row(rows, m, o.StateActor, o.State); ok {
 			setState(&m, o)
 		} else {
 			m.Comments = append(m.Comments, Comment{

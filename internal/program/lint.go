@@ -22,84 +22,27 @@ var (
 
 // Lint checks one issue against the label schema, admission policy, and its
 // link lines (srd013 R1.1, srd007 R8.1) and returns every reason it fails;
-// none means admitted. A program whose subsystem SRDs declare no component
+// none means admitted. The named rules are the ones the policy declares
+// (config format policy, admission.rules; all of them when it declares
+// none), so a program disables one by removing its name; the link-line
+// checks always apply. A program whose subsystem SRDs declare no component
 // yet needs none on its issues (srd001 R21.2).
 func Lint(i tracker.Issue, p Policy) []string {
 	var reasons []string
-	axis := func(prefix string) []string {
-		var vals []string
-		for _, l := range i.Labels {
-			if v, ok := strings.CutPrefix(l, prefix); ok {
-				vals = append(vals, v)
-			}
+	names := p.AdmissionRules
+	if names == nil {
+		names = RuleNames()
+	}
+	for _, name := range names {
+		n := slices.IndexFunc(rules, func(r rule) bool { return r.name == name })
+		if n < 0 {
+			reasons = append(reasons, fmt.Sprintf("admission rule %q is not one tpm implements, so it cannot apply (config format policy)", name))
+			continue
 		}
-		return vals
-	}
-	listed := func(name string, vals, allowed []string) {
-		for _, v := range vals {
-			if len(allowed) > 0 && !slices.Contains(allowed, v) {
-				reasons = append(reasons, fmt.Sprintf("%s::%s is not a listed %s", name, v, name))
-			}
-		}
+		reasons = append(reasons, rules[n].check(i, p)...)
 	}
 
-	planes := axis("plane::")
-	if len(planes) != 1 {
-		reasons = append(reasons, fmt.Sprintf("needs exactly one plane:: label, has %d", len(planes)))
-	}
-	listed("plane", planes, p.Planes)
-
-	types := canonicalTypes(axis("type::"))
-	if len(types) > 1 {
-		reasons = append(reasons, fmt.Sprintf("has %d type:: labels, at most one", len(types)))
-	}
-	listed("type", types, p.Types)
-	sprint := slices.Contains(types, "sprint")
-
-	components := axis("component::")
-	bootstrap := p.ComponentsRead && len(p.Components) == 0 && len(components) == 0
-	if !sprint && !bootstrap && len(components) != 1 {
-		reasons = append(reasons, fmt.Sprintf("needs exactly one component:: label, has %d", len(components)))
-	}
-	listed("component", components, p.Components)
-
-	if ops := axis("op::"); len(ops) > 1 {
-		reasons = append(reasons, fmt.Sprintf("has %d op:: labels, at most one", len(ops)))
-	}
-
-	kinds := axis("kind::")
-	data := slices.Contains(planes, "data")
-	if data && len(types) == 0 && len(kinds) != 1 {
-		reasons = append(reasons, fmt.Sprintf("a data issue needs exactly one kind:: label, has %d", len(kinds)))
-	}
-	if !data && len(kinds) > 0 {
-		reasons = append(reasons, "only data issues carry a kind:: label")
-	}
-	listed("kind", kinds, p.Kinds)
-
-	if data && len(types) == 0 && p.RequireMilestone && i.Milestone == "" {
-		reasons = append(reasons, "a data issue needs a sprint milestone")
-	}
-
-	cites := links.ParseCites(i.Description)
-	needAC := len(cites) > 0
-	for _, k := range kinds {
-		needAC = needAC || slices.Contains(p.RequireAC, k)
-	}
-	reqs, haveReqs := section(i.Description, "Requirements")
-	criteria, haveAC := section(i.Description, "Acceptance Criteria")
-	if needAC && (!haveReqs || len(reqs) == 0) {
-		reasons = append(reasons, "needs a ## Requirements section with at least one entry")
-	}
-	if needAC && (!haveAC || len(criteria) == 0) {
-		reasons = append(reasons, "needs a ## Acceptance Criteria section with at least one entry")
-	}
-	for _, c := range criteria {
-		if !evidencePattern.MatchString(c) {
-			reasons = append(reasons, fmt.Sprintf("criterion %q names no (test: T; environment: E)", shorten(c)))
-		}
-	}
-	for _, c := range cites {
+	for _, c := range links.ParseCites(i.Description) {
 		if err := links.CheckPinned(c.URL); err != nil {
 			reasons = append(reasons, "Cites line is not pinned: "+err.Error())
 		}
@@ -114,12 +57,6 @@ func Lint(i tracker.Issue, p Policy) []string {
 	for _, k := range []string{links.Duplicates, links.Implements} {
 		if count[k] > 1 {
 			reasons = append(reasons, fmt.Sprintf("has %d %s lines, at most one", count[k], k))
-		}
-	}
-
-	if slices.Contains(planes, "management") || slices.Contains(planes, "control") {
-		if len(p.ManagementFilers) > 0 && p.ManagementFilers[0] != "leads" && !slices.Contains(p.ManagementFilers, i.Author) {
-			reasons = append(reasons, fmt.Sprintf("%s may not file a %s issue", i.Author, planes[0]))
 		}
 	}
 	return reasons

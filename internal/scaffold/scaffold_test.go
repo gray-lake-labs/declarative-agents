@@ -45,7 +45,7 @@ func repo(t *testing.T) string {
 
 // skeleton is every file init writes, less the skills.
 var skeleton = []string{
-	"control/labels.md", "control/policy.md",
+	"control/labels.md", "control/policy.md", "control/states.md",
 	"docs/ARCHITECTURE.md", "docs/SPECIFICATIONS.md", "docs/VISION.md", "docs/constitutions/design.md",
 	"docs/corpus-charter.yaml", "docs/external-pins.yaml", "docs/road-map.md",
 	"docs/specs/software-requirements/srd001-system.md",
@@ -138,6 +138,9 @@ func TestInitWritesControlFiles(t *testing.T) {
 	// system's corpus release needs a peer read.
 	want := InitPolicy()
 	want.ComponentsRead = true
+	// The written policy declares the default admission rules by name, so
+	// removing one from the file disables it (GH-130).
+	want.AdmissionRules = program.RuleNames()
 	if g := want.Gate("corpus"); len(g) != 2 || g[0].Command != ProgramAudit || g[1].Kind != "peer-read" || want.AuditCommand != ProgramAudit {
 		t.Fatalf("init's corpus gate = %+v, audit %q; want tpm backlog check and a peer read", g, want.AuditCommand)
 	}

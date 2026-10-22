@@ -35,7 +35,7 @@ mapping
 <!-- field: description -->
 #### Description
 
-require_milestone (boolean, data issues must carry a sprint milestone), require_acceptance_criteria (boolean, build, experiment, research, and spec issues must have an Acceptance Criteria section), management_filers (list of usernames or the word leads, who may file plane::management issues; tpm issue file refuses anyone else), require_approval (boolean, false by default: tpm issue merge refuses a branch without another person's approval of its tip; off, it merges without one and records an approval when one was given), audit_command (the corpus gate tpm issue merge runs in the worktree before merging a docs/ change; mage audit by default), control_reviewers (count of lead approvals a plane::control merge needs).
+require_milestone (boolean, data issues must carry a sprint milestone), require_acceptance_criteria (boolean, build, experiment, research, and spec issues must have an Acceptance Criteria section), management_filers (list of usernames or the word leads, who may file plane::management issues; tpm issue file refuses anyone else), require_approval (boolean, false by default: tpm issue merge refuses a branch without another person's approval of its tip; off, it merges without one and records an approval when one was given), audit_command (the corpus gate tpm issue merge runs in the worktree before merging a docs/ change; mage audit by default), control_reviewers (count of lead approvals a plane::control merge needs), rules (bullet list naming the admission rules that apply, of one-plane, one-type, one-component, one-op, kind-on-data, data-milestone, work-sections, and management-filers; absent, every rule applies, so removing a name disables that rule, and a name tpm does not implement is reported on every lint; GH-130). Two checks are not rules and always apply, because admission cannot express them declaratively: a Cites line must be pinned, and the link lines keep the srd007 discipline.
 
 <!-- schema_entry: scoring -->
 ### scoring
@@ -143,6 +143,18 @@ leads
 ### Audit command
 
 mage audit
+
+<!-- field: rules -->
+### Rules
+
+- one-plane
+- one-type
+- one-component
+- one-op
+- kind-on-data
+- data-milestone
+- work-sections
+- management-filers
 
 <!-- field: control_reviewers -->
 ### Control reviewers
