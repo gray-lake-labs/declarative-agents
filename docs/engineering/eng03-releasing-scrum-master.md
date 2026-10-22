@@ -71,7 +71,8 @@ release the green main.
 ## Release binaries
 
 mage publishDryRun builds the binaries and names what mage publish would
-upload, creating nothing. The first part of mage publish builds ./cmd/tpm at the tag with
+upload and push, creating nothing. mage integration:image builds the
+image for this machine's architecture and checks it without pushing. The first part of mage publish builds ./cmd/tpm at the tag with
 CGO_ENABLED=0 for linux, darwin, and windows on amd64 and arm64, writes
 SHA256SUMS over them, creates the tag's GitHub release, and uploads the
 six binaries and SHA256SUMS to it. The assets are named tpm_<os>_<arch>,
@@ -91,7 +92,12 @@ person's account, so nothing on the release names an individual.
 
 The second part builds one image for linux/amd64 and linux/arm64 with
 docker buildx from the Dockerfile at the repository root and pushes it as
-ghcr.io/gray-lake-labs/tpm:<tag>, and moves latest to it. The image holds
+ghcr.io/gray-lake-labs/tpm:<tag>, and moves latest to it. Its build
+context is the directory the first part built the binaries into, and it
+copies tpm_linux_<arch> from there, so the image's tpm is the binary on
+the GitHub release; Dockerfile.dockerignore admits nothing else. A build
+stage with Go runs tpm install --runtime, and the image keeps only the
+cache it filled. The image holds
 tpm at the tag; the declarative-agents runtime at the release tpm pins,
 in the user cache directory tpm install --runtime fills (srd037 R7),
 with agent on PATH; the spec tool built at that release, so tpm doctor
@@ -101,15 +107,19 @@ runs as a non-root user, and works in the directory a CI job mounts its
 checkout into. A job on the image therefore never runs a profile against
 a runtime it was not written for.
 
-The image is signed with cosign using the organization's key pair: the
-private key and its password come from the organization's secret store
-at release time, and cosign.pub at the repository root is what a runner
-verifies against. Keyless signing is not used, because outside a hosted
+The push logs in to ghcr.io as the organization account with its gh
+token, which needs the write:packages scope. The image is signed with
+cosign using the organization's key pair: the private key and its
+password come from the organization's secret store at release time, in
+COSIGN_PRIVATE_KEY and COSIGN_PASSWORD, and cosign.pub at the repository
+root is what a runner verifies against. Keyless signing is not used, because outside a hosted
 CI identity it would record a person's identity in the public
 transparency log. buildx attaches an SBOM attestation to the image index
 the signature covers, and its provenance is recorded at mode=min so it
-names no machine or person. The tag annotation and the GitHub release
-list the image's digest, which pipelines pin; latest is for people.
+names no machine or person. The image is published after the tag is
+pushed, so its digest cannot be in the tag annotation; mage publish adds
+it to the GitHub release's notes, which pipelines pin from; latest is for
+people. An image already at the tag is kept, and signed if it is not.
 
 A CI job reads tracker and model credentials from masked CI variables
 (TPM_TRACKER, TPM_USER, and what each profile names), and its writes are

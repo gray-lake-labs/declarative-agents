@@ -2,7 +2,7 @@
 id: test-rel04.3-distribution
 title: Test Suite for Release 04.3 tpm Ships to Machines and to CI
 release: "04.3"
-status: specified
+status: implemented
 ---
 
 <!-- field: overview -->
@@ -134,7 +134,7 @@ go test ./internal/scaffold -run '^TestDoctorRuntime|^TestRepairPrebuilt'
 
 - [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC8](../software-requirements/srd043-init-onboard.md#ac8)
 
-<!-- case: the image carries tpm and the runtime at the pin | status: specified -->
+<!-- case: the image carries tpm and the runtime at the pin | status: implemented -->
 ### the image carries tpm and the runtime at the pin
 
 <!-- field: use_case -->
@@ -150,7 +150,7 @@ mage integration:image
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/release -run '^TestImage'
+go test ./internal/release -run '^TestImage|^TestPublishPushes|^TestPublishKeepsAPushed'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs

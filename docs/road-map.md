@@ -615,7 +615,7 @@ mage audit. Planned and built on 2026-10-20 (design.md D12).
 - mage integration:backlog
 - mage integration:install
 
-<!-- release: 04.3 | status: specified -->
+<!-- release: 04.3 | status: implemented -->
 ## 04.3 - tpm ships to machines and to CI
 
 tpm and the declarative-agents runtime reach the two places they run:
@@ -626,7 +626,8 @@ own corpus pins, verified against the release's checksums, into the cache
 mage audit uses, and builds the spec tool there when Go is present; tpm
 doctor reports the runtime and repairs documents with that prebuilt tool
 when Go is absent. The image carries both, so a CI job runs tpm and a
-profile with no install step. Planned on 2026-10-21 (design.md D12).
+profile with no install step. Planned on 2026-10-21 and built on
+2026-10-22 (design.md D12).
 
 <!-- field: srds -->
 ### SRDs
@@ -640,14 +641,14 @@ profile with no install step. Planned on 2026-10-21 (design.md D12).
 | id | summary | status | priority |
 | --- | --- | --- | --- |
 | [rel04.3-uc001-install-without-go](specs/use-cases/rel04.3-uc001-install-without-go.md) | A developer with no Go toolchain installs tpm from a release and readies the pinned runtime with tpm install --runtime. | implemented | P1 |
-| [rel04.3-uc002-ci-job-on-the-image](specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md) | A CI job runs tpm and the pinned runtime on the release's image with no install step and no Go toolchain. | specified | P2 |
+| [rel04.3-uc002-ci-job-on-the-image](specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md) | A CI job runs tpm and the pinned runtime on the release's image with no install step and no Go toolchain. | implemented | P2 |
 
 <!-- field: test_suites -->
 ### Test suites
 
 | id | summary | status |
 | --- | --- | --- |
-| [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | The runtime fetched and verified once per tag in the shared cache; TPM_AGENT held to the checksums; doctor's runtime report and prebuilt repair; the image's tpm, runtime, and spec tool at the pin. | specified |
+| [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | The runtime fetched and verified once per tag in the shared cache; TPM_AGENT held to the checksums; doctor's runtime report and prebuilt repair; the image's tpm, runtime, and spec tool at the pin. | implemented |
 
 <!-- field: proof -->
 ### Proof

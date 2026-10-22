@@ -1,7 +1,7 @@
 ---
 id: rel04.3-uc002-ci-job-on-the-image
 title: A CI Job Runs tpm and the Pinned Runtime on the Release's Image
-status: specified
+status: implemented
 priority: P2
 test_suite: test-rel04.3-distribution
 ---

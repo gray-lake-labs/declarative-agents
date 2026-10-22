@@ -31,6 +31,20 @@ Then fetch the declarative-agents runtime the skills' profiles run on, at the re
 tpm install --runtime
 ```
 
+## Run tpm in CI
+
+Each release also publishes an image, `ghcr.io/gray-lake-labs/tpm:<tag>`, for linux/amd64 and linux/arm64: tpm, the declarative-agents runtime at the release tpm pins, the spec tool, git, and git-crypt, with no Go toolchain, running as a non-root user. Pin it by the digest the release's notes list, and verify it against `cosign.pub` at the repository root with `cosign verify --key cosign.pub ghcr.io/gray-lake-labs/tpm@<digest>`. A GitLab CI job uses it directly:
+
+```yaml
+tpm-check:
+  image: ghcr.io/gray-lake-labs/tpm@<digest>
+  script:
+    - tpm backlog check
+    - tpm doctor --dry-run
+```
+
+To pull from the program's own registry instead, copy it there once per release, for example with `docker buildx imagetools create --tag <registry>/tpm:<tag> ghcr.io/gray-lake-labs/tpm@<digest>`. Tracker credentials (`TPM_TRACKER`, `TPM_USER`) and any model credentials a profile names come from masked CI variables; `TPM_USER` names a service user, never a person.
+
 ## Seed a program repository from an architecture document
 
 A program's system repository can be generated from one document that describes the system the program builds: its purpose, layers, parts, and a build order. `tpm init` lays down the corpus, and a coding agent given the brief below writes the program's intent on top of it. Keep the seed in the repository (for example under `seed/`), so the program can be regenerated whenever the seed or tpm changes.

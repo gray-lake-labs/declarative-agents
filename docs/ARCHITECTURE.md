@@ -509,7 +509,7 @@ Two alternatives were rejected. A single intent- type for every level would hide
 <!-- field: current_focus -->
 ### Current focus
 
-The requirements are complete and release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, and release 03.0 are implemented; 01.3, 02.0, and 04.3 are specified. The corpus specifies the control plane and evidence (srd001-srd008), every script as a tpm subcommand group (srd010-srd019), the five outer-loop skills as commands (srd020-srd033), the six config formats, and the four semantic models. The inner loop is specify, tasks, and implement, with tpm release for the tag. Use cases and test suites exist for releases 00, 01 (01.0 to 01.4), and 03.0; implementation in Go follows the road map's releases.
+The requirements are complete and release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, and release 03.0 are implemented; 01.3 and 02.0 are specified. The corpus specifies the control plane and evidence (srd001-srd008), every script as a tpm subcommand group (srd010-srd019), the five outer-loop skills as commands (srd020-srd033), the six config formats, and the four semantic models. The inner loop is specify, tasks, and implement, with tpm release for the tag. Use cases and test suites exist for releases 00, 01 (01.0 to 01.4), and 03.0; implementation in Go follows the road map's releases.
 
 <!-- field: progress -->
 ### Progress
@@ -526,7 +526,7 @@ The requirements are complete and release 00 (00.0 to 00.3), releases 01.0 to 01
 - Implemented: 04.0 the agile hierarchy: theme, initiative, epic, feature, and story documents checked by the hierarchy gate (internal/hierarchy, mage audit); the agile link lines read and linted (internal/links); one Sprint Goal per team filed by tasks, with objective documents, issues, markers, ledgers, and report keys read under their new names (internal/sprintgoal); Sprint Planning from ranked stories to velocity (tpm plan candidates, tpm plan backlog) and the stories done recorded at sprint end (tpm sprint-end stories).
 - Implemented: 04.1 a repository that explains itself: README.md, AGENTS.md, and hierarchy-folder READMEs from tpm init and onboard; tpm doctor adds missing files, refreshes managed blocks, reports stale skills, and repairs documents with the spec tool moved to internal/spectool (1 use case, test-rel04.1-orientation-doctor)
 - Implemented: 04.2 a planning document drafted in conversation: the draft skill, one prompt for every level, over tpm backlog list and tpm backlog check (1 use case, test-rel04.2-draft)
-- Specified: 04.3 tpm ships to machines and to CI: release binaries and a signed container image per tag (eng03), tpm install --runtime fetching the pinned declarative-agents runtime (srd037 R7), and tpm doctor reporting it and repairing with a prebuilt spec tool (srd043 R4.5, R4.7) (2 use cases, test-rel04.3-distribution)
+- Implemented: 04.3 tpm ships to machines and to CI: release binaries and a signed container image per tag (eng03), tpm install --runtime fetching the pinned declarative-agents runtime (srd037 R7), and tpm doctor reporting it and repairing with a prebuilt spec tool (srd043 R4.5, R4.7) (2 use cases, test-rel04.3-distribution)
 - Specified: 01.3 tags trigger handoff and the summary (2 use cases, test-rel01.3-tag-triggered)
 - Specified: 02.0 evidence, handoff, and cadence: gates, track-goals, daily-scrum, sprint-review, sprint-retrospective (no use cases yet)
 

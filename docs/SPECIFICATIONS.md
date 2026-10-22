@@ -37,7 +37,7 @@ retired, and an interim rule says what tpm does until they are rewritten.
 The skills take Spec Kit's names (specify, plan, tasks, implement): tasks
 breaks a level into the units below it, down to a story's issues, and
 implement builds them. Every repository of a consuming program carries the same
-corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 04.0, 04.1, and 04.2 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the objective issue the Sprint Goal. Release 04.1 makes a program repository explain itself and adds tpm doctor. Release 04.2 adds the draft skill and tpm backlog list and check. Release 04.3, specified, ships tpm as release binaries and a container image (eng03) and adds tpm install --runtime and doctor's runtime report.
+corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 04.0, 04.1, 04.2, and 04.3 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the objective issue the Sprint Goal. Release 04.1 makes a program repository explain itself and adds tpm doctor. Release 04.2 adds the draft skill and tpm backlog list and check. Release 04.3 ships tpm as release binaries and a container image (eng03) and adds tpm install --runtime and doctor's runtime report.
 
 Releases are planned by use case, and a use case cites only the
 requirement items its release delivers. Release 00 is the inner loop
@@ -71,7 +71,7 @@ docs/road-map.md.
 | "04.0" | The agile hierarchy | 3 | 3 | implemented |
 | "04.1" | A repository that explains itself | 1 | 1 | implemented |
 | "04.2" | A planning document drafted in conversation | 1 | 1 | implemented |
-| "04.3" | tpm ships to machines and to CI | 1 | 2 | specified |
+| "04.3" | tpm ships to machines and to CI | 2 | 2 | implemented |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -178,7 +178,7 @@ docs/road-map.md.
 | [rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md) | A First-Time Reader Orients in a Program Repository and an Upgraded tpm Brings It Up to Date | 04.1 | implemented | [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | docs/specs/use-cases/rel04.1-uc001-orient-and-repair.md |
 | [rel04.2-uc001-draft-a-planning-document](specs/use-cases/rel04.2-uc001-draft-a-planning-document.md) | An Owner Drafts a Planning Document from a Description in Conversation | 04.2 | implemented | [test-rel04.2-draft](specs/test-suites/test-rel04.2-draft.md) | docs/specs/use-cases/rel04.2-uc001-draft-a-planning-document.md |
 | [rel04.3-uc001-install-without-go](specs/use-cases/rel04.3-uc001-install-without-go.md) | A Developer with No Go Toolchain Installs tpm and Readies the Pinned Runtime | 04.3 | implemented | [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | docs/specs/use-cases/rel04.3-uc001-install-without-go.md |
-| [rel04.3-uc002-ci-job-on-the-image](specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md) | A CI Job Runs tpm and the Pinned Runtime on the Release's Image | 04.3 | specified | [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | docs/specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md |
+| [rel04.3-uc002-ci-job-on-the-image](specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md) | A CI Job Runs tpm and the Pinned Runtime on the Release's Image | 04.3 | implemented | [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | docs/specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md |
 
 <!-- field: test_suite_index | form: "typed table" -->
 ## Test suite index

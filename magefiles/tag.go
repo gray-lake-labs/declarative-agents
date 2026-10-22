@@ -11,6 +11,7 @@ import (
 const (
 	releaseRepo    = "gray-lake-labs/scrum-master"
 	releaseAccount = "gray-lake-labs-owner"
+	releaseImage   = "ghcr.io/gray-lake-labs/tpm"
 )
 
 // Tag runs the gates in release-gates.md and, when every gate passes,
@@ -43,7 +44,7 @@ func Publish() error {
 	return p.Publish()
 }
 
-// PublishDryRun builds the release binaries and SHA256SUMS for the tag at HEAD and names what mage publish would upload, creating nothing.
+// PublishDryRun builds the release binaries and SHA256SUMS for the tag at HEAD and names what mage publish would upload and push, creating nothing.
 func PublishDryRun() error {
 	p, err := scrumMasterPublisher(true)
 	if err != nil {
@@ -53,7 +54,10 @@ func PublishDryRun() error {
 	if err != nil {
 		tag = "untagged"
 	}
-	return p.Binaries(tag)
+	if err := p.Binaries(tag); err != nil {
+		return err
+	}
+	return p.PublishImage(tag)
 }
 
 // CrossBuild builds tpm for every release platform and keeps nothing, so a release fails its gates before tagging when a platform does not build (eng03).
@@ -85,7 +89,7 @@ func scrumMasterRelease() (release.Release, error) {
 		Git:       release.ExecGit(root),
 		Exec:      release.ShellExec,
 		Out:       os.Stdout,
-		Preflight: p.CheckAccount,
+		Preflight: p.Check,
 		Publish:   func(string) error { return p.Publish() },
 	}, nil
 }
@@ -96,12 +100,13 @@ func scrumMasterPublisher(dryRun bool) (release.Publisher, error) {
 		return release.Publisher{}, err
 	}
 	return release.Publisher{
-		Root:    root,
-		Git:     release.ExecGit(root),
-		Run:     release.ExecCommand,
-		Out:     os.Stdout,
-		Repo:    releaseRepo,
-		Account: releaseAccount,
-		DryRun:  dryRun,
+		Root:      root,
+		Git:       release.ExecGit(root),
+		Run:       release.ExecCommand,
+		Out:       os.Stdout,
+		Repo:      releaseRepo,
+		Account:   releaseAccount,
+		DryRun:    dryRun,
+		ImageRepo: releaseImage,
 	}, nil
 }

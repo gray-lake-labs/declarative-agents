@@ -73,8 +73,9 @@ type Publisher struct {
 	Repo    string // the GitHub repository, owner/name
 	Account string // the gh account releases are made as
 	DryRun  bool
-	// Image publishes the tag's container image; nil publishes none.
-	Image func(tag string) error
+	// ImageRepo is where the tag's image is pushed, such as
+	// ghcr.io/owner/name; empty publishes no image.
+	ImageRepo string
 }
 
 // Build cross-builds ./cmd/tpm for each platform into dist and writes
@@ -125,8 +126,8 @@ func (p Publisher) Publish() error {
 	if err := p.Binaries(tag); err != nil {
 		return err
 	}
-	if p.Image != nil {
-		return p.Image(tag)
+	if p.ImageRepo != "" {
+		return p.PublishImage(tag)
 	}
 	return nil
 }
