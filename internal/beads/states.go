@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
 )
 
@@ -51,6 +52,11 @@ const KindSprintGoal = "sprint-goal"
 // ErrRefused is wrapped by every transition the table does not list.
 var ErrRefused = errors.New("refused")
 
+// StatesFile is the config document holding a program's transitions table
+// (config format states): tpm init writes the default, and the tracker
+// reads the program's own rows from it, overlay rows among them.
+const StatesFile = "control/states.md"
+
 // Row is one row of the srd041 transitions table.
 type Row struct {
 	From     []string
@@ -63,10 +69,15 @@ type Row struct {
 	Kind string
 }
 
-var anyOpen = []string{Open, NeedsTriage, Ready, Taken, InProgress}
+// AnyOpen is every state but closed: the any-open shorthand of the states
+// config format.
+var AnyOpen = []string{Open, NeedsTriage, Ready, Taken, InProgress}
 
-// Table is the complete srd041 state machine (R8.1): every transition the
-// tracker makes is one of these rows, fired by the row's one actor.
+var anyOpen = AnyOpen
+
+// Table is the default srd041 state machine (R8.1), the rows tpm embeds
+// and init writes to control/states.md: every transition the tracker makes
+// is one of a program's rows, fired by the row's one actor.
 var Table = []Row{
 	{From: []string{Open}, To: NeedsTriage, Actor: ActorLint, Assignee: EffectNone},
 	{From: []string{Open}, To: Ready, Actor: ActorLint, Assignee: EffectNone},
@@ -88,13 +99,87 @@ var Table = []Row{
 	{From: []string{Closed}, To: Open, Actor: ActorPerson, Assignee: EffectNone},
 }
 
+// statesDoc is what ParseStates reads of a states config document: each
+// table row a mapping keyed by the header (design.md D11).
+type statesDoc struct {
+	Rows []struct {
+		From     string `yaml:"from"`
+		To       string `yaml:"to"`
+		Actor    string `yaml:"actor"`
+		Assignee string `yaml:"assignee"`
+		Requires string `yaml:"requires"`
+		Kind     string `yaml:"kind"`
+	} `yaml:"rows"`
+}
+
+var (
+	actors    = []string{ActorPerson, ActorPop, ActorMerge, ActorTrackGoals, ActorHandoff, ActorLint}
+	effects   = []string{EffectNone, EffectSet, EffectClear}
+	allStates = []string{Open, NeedsTriage, Ready, Taken, InProgress, Closed}
+)
+
+// ParseStates decodes a states config document into transitions rows
+// (srd041 R8). A row it cannot hold to the format — an unknown state,
+// actor, assignee effect, or kind — refuses the whole document, so a typo
+// never silently drops a rule.
+func ParseStates(b []byte) ([]Row, error) {
+	var doc statesDoc
+	if err := corpus.DecodeConfig(b, &doc); err != nil {
+		return nil, err
+	}
+	if len(doc.Rows) == 0 {
+		return nil, errors.New("the states document holds no rows")
+	}
+	out := make([]Row, 0, len(doc.Rows))
+	for n, r := range doc.Rows {
+		refuse := func(what, v string) error {
+			return fmt.Errorf("rows[%d]: %s %q is not one the states format lists", n+1, what, v)
+		}
+		row := Row{To: r.To, Actor: r.Actor, Assignee: r.Assignee, Requires: r.Requires, Kind: r.Kind}
+		for _, f := range strings.Split(r.From, ",") {
+			switch f = strings.TrimSpace(f); {
+			case f == "any-open":
+				row.From = append(row.From, AnyOpen...)
+			case slices.Contains(allStates, f):
+				row.From = append(row.From, f)
+			default:
+				return nil, refuse("from state", f)
+			}
+		}
+		if len(row.From) == 0 {
+			return nil, fmt.Errorf("rows[%d]: from is empty", n+1)
+		}
+		overlay := strings.TrimLeft(row.To, "+-")
+		switch {
+		case overlay != row.To && overlay == "":
+			return nil, refuse("to overlay", row.To)
+		case overlay == row.To && !slices.Contains(allStates, row.To):
+			return nil, refuse("to state", row.To)
+		}
+		if !slices.Contains(actors, row.Actor) {
+			return nil, refuse("actor", row.Actor)
+		}
+		if row.Assignee == "" {
+			row.Assignee = EffectNone
+		}
+		if !slices.Contains(effects, row.Assignee) {
+			return nil, refuse("assignee effect", row.Assignee)
+		}
+		if row.Kind != "" && row.Kind != KindSprintGoal {
+			return nil, refuse("kind", row.Kind)
+		}
+		out = append(out, row)
+	}
+	return out, nil
+}
+
 func isSprintGoal(i Issue) bool {
 	return i.HasLabel("plane::management") && sprintgoal.Is(i.Description)
 }
 
-// row finds the table row that lets actor move i to to.
-func row(i Issue, actor, to string) (Row, bool) {
-	for _, r := range Table {
+// row finds the row of rows that lets actor move i to to.
+func row(rows []Row, i Issue, actor, to string) (Row, bool) {
+	for _, r := range rows {
 		if r.Actor != actor || r.To != to || !slices.Contains(r.From, i.State) {
 			continue
 		}
@@ -113,14 +198,19 @@ func row(i Issue, actor, to string) (Row, bool) {
 }
 
 // transition fires actor's move of i to to on behalf of caller, or refuses
-// with the attempted transition named. Only pop sets an assignee, and only
-// the caller (R9.1); a person's moves on a taken issue are the assignee's
-// alone (R9.2).
-func transition(i *Issue, actor, to, caller string) error {
+// with the attempted transition named, against the store's rows — the
+// program's control/states.md, else the embedded default (srd041 R8). Only
+// pop sets an assignee, and only the caller (R9.1); a person's moves on a
+// taken issue are the assignee's alone (R9.2).
+func (s *Store) transition(i *Issue, actor, to, caller string) error {
 	refuse := func(why string) error {
 		return fmt.Errorf("%w: %s %s to %s by %s%s (srd041)", ErrRefused, i.ID, i.State, to, actor, why)
 	}
-	r, ok := row(*i, actor, to)
+	rows, err := s.states()
+	if err != nil {
+		return err
+	}
+	r, ok := row(rows, *i, actor, to)
 	if !ok {
 		return refuse("")
 	}

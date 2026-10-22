@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -44,6 +45,37 @@ type Store struct {
 	sleep func(time.Duration)
 	// last is the most recent synchronization, what the last read reflects.
 	last *Freshness
+	// statesLoader reads the program's control/states.md rows once, on the
+	// first transition; nil, or a loader finding no file, keeps the embedded
+	// default Table (srd041 R8).
+	statesLoader func() ([]Row, error)
+	loadStates   sync.Once
+	stateRows    []Row
+	statesErr    error
+}
+
+// LoadStatesFrom sets where the store reads the program's transitions table,
+// read once on the first transition.
+func (s *Store) LoadStatesFrom(loader func() ([]Row, error)) { s.statesLoader = loader }
+
+// states is the transitions table in force: the loaded rows, else the
+// embedded default. A table that fails to load refuses every transition
+// with its reason, so a malformed control/states.md never silently
+// defaults.
+func (s *Store) states() ([]Row, error) {
+	s.loadStates.Do(func() {
+		if s.statesLoader == nil {
+			return
+		}
+		s.stateRows, s.statesErr = s.statesLoader()
+	})
+	if s.statesErr != nil {
+		return nil, fmt.Errorf("%s: %w", StatesFile, s.statesErr)
+	}
+	if s.stateRows == nil {
+		return Table, nil
+	}
+	return s.stateRows, nil
 }
 
 // Last is the most recent synchronization, if any.
@@ -175,7 +207,7 @@ func (s *Store) Pop(id string) (PopResult, error) {
 		if i.Assignee != "" {
 			return false, fmt.Errorf("%s is assigned to %s; only that person pops it", id, i.Assignee)
 		}
-		return true, transition(i, ActorPop, Taken, s.User)
+		return true, s.transition(i, ActorPop, Taken, s.User)
 	})
 	r.Read = fr
 	if err != nil {
@@ -207,7 +239,7 @@ func (s *Store) Close(id, commit string) (CloseResult, error) {
 		if i.State == Closed && i.CloseReason == commit {
 			return false, nil
 		}
-		if err := transition(i, ActorMerge, Closed, s.User); err != nil {
+		if err := s.transition(i, ActorMerge, Closed, s.User); err != nil {
 			return false, err
 		}
 		now := s.stamp()
@@ -223,7 +255,7 @@ func (s *Store) Close(id, commit string) (CloseResult, error) {
 // or refuses it.
 func (s *Store) Fire(id, actor, to string) error {
 	_, _, _, err := s.mutate(id, actor+" "+to, func(i *Issue) (bool, error) {
-		return true, transition(i, actor, to, s.User)
+		return true, s.transition(i, actor, to, s.User)
 	})
 	return err
 }
@@ -355,7 +387,11 @@ func (s *Store) merge(base, remote string) error {
 	if err != nil {
 		return err
 	}
-	merged := mergeIssues(b, o, t, s.stamp())
+	rows, err := s.states()
+	if err != nil {
+		return err
+	}
+	merged := mergeIssues(rows, b, o, t, s.stamp())
 	if _, err := s.git("merge", "-q", "--no-ff", "--no-commit", "-s", "ours", remote); err != nil {
 		return err
 	}

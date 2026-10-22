@@ -48,9 +48,22 @@ func (t *Tracker) LastRead() (tracker.Read, bool) {
 }
 
 // NewTracker serves the tracker repository cloned at clone, as user, with
-// the code half answered by the checkout at code.
+// the code half answered by the checkout at code. The transitions table is
+// the checkout's control/states.md on main, read on the first transition;
+// without one, the embedded default (srd041 R8).
 func NewTracker(clone, user, code string) *Tracker {
-	return &Tracker{Store: NewStore(clone, user), Code: &checkout.Code{Dir: code}}
+	t := &Tracker{Store: NewStore(clone, user), Code: &checkout.Code{Dir: code}}
+	t.Store.LoadStatesFrom(func() ([]Row, error) {
+		b, err := t.Code.GetFile("", StatesFile, "main")
+		if errors.Is(err, tracker.ErrNotFound) {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		return ParseStates(b)
+	})
+	return t
 }
 
 // Configured reports whether TPM_TRACKER names a tracker repository.
@@ -173,7 +186,7 @@ func (t *Tracker) CreateAdmitted(project string, in tracker.NewIssue, admit func
 		Labels: slices.Clone(in.Labels), DueDate: in.DueDate, Release: in.Milestone}, func(i *Issue) error {
 		t.Store.depend(i, own)
 		reasons, note := admit(t.view(*i))
-		if _, err := triage(i, len(reasons) == 0, me); err != nil {
+		if _, err := t.Store.triage(i, len(reasons) == 0, me); err != nil {
 			return err
 		}
 		if note != "" {
@@ -234,7 +247,7 @@ func (t *Tracker) UpdateIssue(project string, iid int, u tracker.IssueUpdate) (t
 			if to == "" {
 				return false, fmt.Errorf("state %q is neither close nor reopen", *u.State)
 			}
-			if err := transition(i, ActorPerson, to, me); err != nil {
+			if err := t.Store.transition(i, ActorPerson, to, me); err != nil {
 				return false, err
 			}
 		}
@@ -250,7 +263,7 @@ func (t *Tracker) UpdateIssue(project string, iid int, u tracker.IssueUpdate) (t
 		for _, l := range u.AddLabels {
 			if l == statusInProgress {
 				if i.State != InProgress {
-					if err := transition(i, ActorPerson, InProgress, me); err != nil {
+					if err := t.Store.transition(i, ActorPerson, InProgress, me); err != nil {
 						return false, err
 					}
 				}
@@ -261,7 +274,7 @@ func (t *Tracker) UpdateIssue(project string, iid int, u tracker.IssueUpdate) (t
 		for _, l := range u.RemoveLabels {
 			if l == statusInProgress {
 				if i.State == InProgress {
-					if err := transition(i, ActorPerson, Taken, me); err != nil {
+					if err := t.Store.transition(i, ActorPerson, Taken, me); err != nil {
 						return false, err
 					}
 				}
@@ -337,7 +350,7 @@ func (t *Tracker) Triage(project string, iid int, admitted bool) (bool, error) {
 		return false, err
 	}
 	me := t.Store.User
-	_, written, _, err := t.Store.mutate(found.ID, "lint", func(i *Issue) (bool, error) { return triage(i, admitted, me) })
+	_, written, _, err := t.Store.mutate(found.ID, "lint", func(i *Issue) (bool, error) { return t.Store.triage(i, admitted, me) })
 	return written, err
 }
 
@@ -345,7 +358,7 @@ func (t *Tracker) Triage(project string, iid int, admitted bool) (bool, error) {
 // becomes ready, an admitted one in needs-triage ready or, already taken by
 // its author, taken; a failing open data issue goes to needs-triage, and an
 // issue on another plane carries the needs-triage label instead.
-func triage(i *Issue, admitted bool, me string) (bool, error) {
+func (s *Store) triage(i *Issue, admitted bool, me string) (bool, error) {
 	data := i.HasLabel("plane::data")
 	switch {
 	case !data && admitted && i.HasLabel(NeedsTriage):
@@ -357,14 +370,14 @@ func triage(i *Issue, admitted bool, me string) (bool, error) {
 	case !data:
 		return false, nil
 	case admitted && (i.State == Open || i.State == NeedsTriage) && i.Assignee == "":
-		return true, transition(i, ActorLint, Ready, me)
+		return true, s.transition(i, ActorLint, Ready, me)
 	case admitted && i.State == NeedsTriage:
-		return true, transition(i, ActorLint, Taken, me)
+		return true, s.transition(i, ActorLint, Taken, me)
 	case admitted && i.HasLabel(NeedsTriage):
 		i.Labels = slices.DeleteFunc(i.Labels, func(l string) bool { return l == NeedsTriage })
 		return true, nil
 	case !admitted && i.State == Open:
-		return true, transition(i, ActorLint, NeedsTriage, me)
+		return true, s.transition(i, ActorLint, NeedsTriage, me)
 	case !admitted && !i.HasLabel(NeedsTriage):
 		i.Labels = append(i.Labels, NeedsTriage)
 		return true, nil

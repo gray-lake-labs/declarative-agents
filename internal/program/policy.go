@@ -26,7 +26,11 @@ type Policy struct {
 	ComponentsRead bool
 	// RequireAC lists the kinds whose issues must carry Requirements and
 	// Acceptance Criteria; any issue with a Cites line must carry them too.
-	RequireAC        []string
+	RequireAC []string
+	// AdmissionRules are the named admission rules that apply (config format
+	// policy, admission.rules); nil applies every rule tpm implements, so a
+	// program disables one by naming the rest (srd013 R1.1).
+	AdmissionRules   []string
 	RequireMilestone bool
 	// RequireApproval makes tpm issue merge refuse a branch without another
 	// person's approval of its tip (srd013 R5.5); off, merge records an
@@ -147,11 +151,12 @@ const (
 
 type policyFile struct {
 	Admission struct {
-		RequireMilestone          *bool  `yaml:"require_milestone"`
-		RequireAcceptanceCriteria *bool  `yaml:"require_acceptance_criteria"`
-		RequireApproval           *bool  `yaml:"require_approval"`
-		ManagementFilers          any    `yaml:"management_filers"`
-		AuditCommand              string `yaml:"audit_command"`
+		RequireMilestone          *bool    `yaml:"require_milestone"`
+		RequireAcceptanceCriteria *bool    `yaml:"require_acceptance_criteria"`
+		RequireApproval           *bool    `yaml:"require_approval"`
+		ManagementFilers          any      `yaml:"management_filers"`
+		AuditCommand              string   `yaml:"audit_command"`
+		Rules                     []string `yaml:"rules"`
 	} `yaml:"admission"`
 	Releases         Releases           `yaml:"releases"`
 	Escalation       Escalation         `yaml:"escalation"`
@@ -189,6 +194,9 @@ func LoadPolicy(t tracker.Tracker, project, ref string) (Policy, error) {
 		}
 		if f.Admission.AuditCommand != "" {
 			p.AuditCommand = f.Admission.AuditCommand
+		}
+		if f.Admission.Rules != nil {
+			p.AdmissionRules = f.Admission.Rules
 		}
 		if f.Releases.Scheme != "" {
 			p.Releases.Scheme = f.Releases.Scheme

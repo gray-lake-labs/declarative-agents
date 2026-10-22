@@ -68,7 +68,7 @@ Every skeleton document is in the format of the parent release tpm was built wit
 <!-- req: R1.3 -->
 ### R1.3
 
-Writes control/labels.md and control/policy.md holding the built-in defaults, in the config formats labels and policy. Every command the policy names is one a program repository can run: its audit_command is tpm backlog check, its default definition of done is that check, not go test ./..., which a repository with no Go module cannot pass, and its definition of done gives the system's corpus release that check and a peer-read check (srd015 R1.2), so the system is never released on its author's word.
+Writes control/labels.md, control/policy.md, and control/states.md holding the built-in defaults, in the config formats labels, policy, and states; the states rows are the srd041 table, so the tracker a program extends reads its own file. Every command the policy names is one a program repository can run: its audit_command is tpm backlog check, its default definition of done is that check, not go test ./..., which a repository with no Go module cannot pass, and its definition of done gives the system's corpus release that check and a peer-read check (srd015 R1.2), so the system is never released on its author's word.
 
 <!-- req: R1.4 -->
 ### R1.4
@@ -147,7 +147,7 @@ Runs in --dir, by default the root of the git repository holding the working dir
 <!-- req: R4.2 -->
 ### R4.2
 
-Writes every file init (at system level) or onboard (at subsystem level) writes that is missing, and appends or refreshes the orientation files' blocks (R3.5). At system level it extends control/labels.md with the axes and values tpm's defaults list that it lacks, keeping every value, color, and description it has and inserting rather than re-rendering, and names tpm issue labels as what creates them in the tracker. It also adds what init now writes into the system SRD and control/policy.md when they lack it: the SRD's context first and its implementation_targets last (R1.1), keeping every line the owner wrote, and the corpus release's peer-read gate when the definition of done names no corpus gate (R1.3). Every other existing file is kept; doctor offers no --force. It files no issue, installs no skill, and touches no tracker.
+Writes every file init (at system level) or onboard (at subsystem level) writes that is missing, control/states.md among them, and appends or refreshes the orientation files' blocks (R3.5). At system level it extends control/labels.md with the axes and values tpm's defaults list that it lacks, keeping every value, color, and description it has and inserting rather than re-rendering, and names tpm issue labels as what creates them in the tracker. It also adds what init now writes into the system SRD and control/policy.md when they lack it: the SRD's context first and its implementation_targets last (R1.1), keeping every line the owner wrote, and the corpus release's peer-read gate when the definition of done names no corpus gate (R1.3). Every other existing file is kept; doctor offers no --force. It files no issue, installs no skill, and touches no tracker.
 
 <!-- req: R4.3 -->
 ### R4.3

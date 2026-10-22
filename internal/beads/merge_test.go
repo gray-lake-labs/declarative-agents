@@ -23,7 +23,7 @@ func TestMergeRefusesAReplayOutsideTheTable(t *testing.T) {
 	theirs.Title, theirs.UpdatedAt = "renamed by theirs", "2026-11-02T09:03:00Z"
 	theirs.Labels = nil
 
-	m := mergeIssue(base, ours, theirs, "2026-11-02T09:10:00Z")
+	m := mergeIssue(Table, base, ours, theirs, "2026-11-02T09:10:00Z")
 	if m.State != Closed || m.Status != StatusClosed {
 		t.Fatalf("state = %s/%s, want closed kept", m.State, m.Status)
 	}
