@@ -62,6 +62,11 @@ tpm install --list names every embedded skill with its description.
 
 plugin/ conforms to Agent Plugins 1.0: plugin.json at its root is a JSON object with only the specification's fields, $schema https://agent-plugins.org/schemas/1.0.0/plugin.schema.json, and a name of 1 to 64 characters of a-z, 0-9, hyphens, and periods, alphanumeric at both ends, without doubled hyphens or periods; skills sit exactly one level under skills/; no path leaves the package. mage audit fails a package that does not conform.
 
+<!-- req: R1.4 -->
+### R1.4
+
+The binary also embeds plugin/agents/<name>/: the declarative-agents profile of a skill whose workflow is a profile (design.md D14). tpm install renders that skill's SKILL.md from the profile's machine — the purpose's first paragraph is the description, the states between the initial and the terminal ones the numbered steps in the machine's order, the terminal states its ending — and refuses a name that is both an embedded SKILL.md and a profile. The rendered skill installs, stamps, checks, and uninstalls as any other (R2 to R6).
+
 <!-- req: R2 -->
 ## R2 - Targets
 
@@ -175,7 +180,7 @@ tpm install --runtime reports the release, the agent's path and where it came fr
 <!-- ac: AC1 -->
 ### AC1
 
-plugin/ is embedded; every SKILL.md conforms to Agent Skills and is at most 50 lines; --list names each skill with its description; mage audit fails a manifest or skill that breaks Agent Plugins 1.0 or Agent Skills.
+plugin/ is embedded; every SKILL.md conforms to Agent Skills and is at most 50 lines; --list names each skill with its description; mage audit fails a manifest or skill that breaks Agent Plugins 1.0 or Agent Skills; a skill whose workflow is a profile installs a SKILL.md rendered from the profile's machine, its states the numbered steps.
 
 <!-- field: traces -->
 #### Traces
@@ -183,6 +188,7 @@ plugin/ is embedded; every SKILL.md conforms to Agent Skills and is at most 50 l
 - [R1.1](#r11)
 - [R1.2](#r12)
 - [R1.3](#r13)
+- [R1.4](#r14)
 
 <!-- ac: AC2 -->
 ### AC2

@@ -10,7 +10,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 )
 
@@ -61,7 +60,7 @@ func (Integration) Install() error {
 	}
 
 	c := &check{}
-	skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+	skills, err := install.EmbeddedSkills()
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/scrum-master/internal/help"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
@@ -27,7 +26,7 @@ func agentsFile(level string) ([]byte, error) {
 	for _, p := range pages {
 		summaries[p.Name] = p.Summary
 	}
-	skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+	skills, err := install.EmbeddedSkills()
 	if err != nil {
 		return nil, err
 	}

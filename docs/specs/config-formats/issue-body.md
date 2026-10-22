@@ -178,7 +178,7 @@ line
 <!-- field: description -->
 #### Description
 
-"Estimated LOC: N" on its own line. implement records "Actual LOC: N" against it in its completion comment, posted with tpm issue comment.
+"Estimated LOC: N" on its own line. The completion comment records "Actual LOC: N" against it, posted with tpm issue comment.
 
 <!-- schema_entry: handoff_marker -->
 ### handoff_marker

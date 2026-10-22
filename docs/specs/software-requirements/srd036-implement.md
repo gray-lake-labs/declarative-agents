@@ -106,6 +106,24 @@ Given a story, implement pops its first listed issue, claims each further one in
 
 Works one story by default, and a whole epic's stories only when the person asks: one story keeps the merge a size one reviewer reads.
 
+<!-- req: R6 -->
+## R6 - The workflow as a profile
+
+<!-- req: R6.1 -->
+### R6.1
+
+The workflow is a declarative-agents profile, plugin/agents/implement/, whose machine's states are the skill's steps and whose tools are the tpm commands the skill runs, each with --json; the model acts only in the Work state (design.md D10, D14). mage audit validates every shipped profile with the pinned runtime's --validate-config.
+
+<!-- req: R6.2 -->
+### R6.2
+
+tpm install renders the implement SKILL.md from the profile's machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps the runtime executes.
+
+<!-- req: R6.3 -->
+### R6.3
+
+A tpm refusal ends a run in the Refused terminal state with tpm's reason as the run's summary, and pop reports the issue's body, so the Work state holds the Requirements and Acceptance Criteria without a tracker round-trip.
+
 <!-- field: non_goals -->
 ## Non-goals
 
@@ -172,3 +190,15 @@ A story's open issues list in order with a blocked one apart; the second is clai
 - [R5.2](#r52)
 - [R5.3](#r53)
 - [R5.4](#r54)
+
+<!-- ac: AC6 -->
+### AC6
+
+A run of the profile with the pinned runtime over an admitted issue pops, works, pushes, merges, and closes it; a pop the admission refuses ends the run in Refused with tpm's reason; the installed implement SKILL.md presents the machine's states as its steps.
+
+<!-- field: traces -->
+#### Traces
+
+- [R6.1](#r61)
+- [R6.2](#r62)
+- [R6.3](#r63)

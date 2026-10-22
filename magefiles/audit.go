@@ -23,8 +23,9 @@ const (
 
 type commandRunner func(dir string, name string, args ...string) error
 
-// Audit runs the repository gate tests, then the parent's specification-critic
-// corpus-audit agent over the repository.
+// Audit runs the repository gate tests, the parent's specification-critic
+// corpus-audit agent over the repository, and the runtime's --validate-config
+// over every shipped profile (GH-135).
 func Audit() error {
 	root, err := repositoryRoot()
 	if err != nil {
@@ -33,7 +34,37 @@ func Audit() error {
 	if err := runStreaming(root, "go", "test", "./magefiles/...", "-count=1"); err != nil {
 		return fmt.Errorf("repository gate tests: %w", err)
 	}
-	return runCorpusAudit(root, runStreaming)
+	if err := runCorpusAudit(root, runStreaming); err != nil {
+		return err
+	}
+	return validateProfiles(root, runStreaming)
+}
+
+// validateProfiles holds every shipped declarative-agents profile under
+// plugin/agents to the pinned runtime: the same boot smoke a rollout runs,
+// so a profile the runtime would refuse fails the gate (GH-135, srd036 R6.1).
+func validateProfiles(root string, run commandRunner) error {
+	profiles, err := filepath.Glob(filepath.Join(root, "plugin", "agents", "*", "profile.yaml"))
+	if err != nil {
+		return err
+	}
+	if len(profiles) == 0 {
+		return nil
+	}
+	tag, err := pinnedRelease(root)
+	if err != nil {
+		return err
+	}
+	rel, err := fetchRelease(tag)
+	if err != nil {
+		return err
+	}
+	for _, p := range profiles {
+		if err := run(root, rel.Agent, "--profile", p, "--validate-config", "--core-root", rel.CoreRoot()); err != nil {
+			return fmt.Errorf("profile %s fails the pinned runtime's validation: %w", p, err)
+		}
+	}
+	return nil
 }
 
 // runCorpusAudit runs the pinned release's agent over root, with derived_from

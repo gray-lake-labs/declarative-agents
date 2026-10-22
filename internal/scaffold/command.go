@@ -205,6 +205,17 @@ func humanDoctor(r DoctorResult) string {
 	} else {
 		fmt.Fprintf(&b, "%s: %s (%s)\n", runtime, r.Runtime.Agent, r.Runtime.From)
 	}
+	for _, p := range r.Credentials {
+		var vars []string
+		for _, v := range p.Vars {
+			state := "set"
+			if !v.Set {
+				state = "unset"
+			}
+			vars = append(vars, v.Name+" ("+state+")")
+		}
+		fmt.Fprintf(&b, "profile %s reads: %s\n", p.Profile, strings.Join(vars, ", "))
+	}
 	agents := map[string]bool{}
 	for _, f := range r.Skills {
 		fmt.Fprintf(&b, "skill %-9s %s %s\n", f.Problem, f.Agent, f.Path)

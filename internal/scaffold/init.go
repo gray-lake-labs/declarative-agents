@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master"
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/install"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
@@ -76,7 +75,7 @@ func Init(o InitOptions) (InitResult, error) {
 		return r, err
 	}
 	if len(o.Agents) > 0 {
-		skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+		skills, err := install.EmbeddedSkills()
 		if err != nil {
 			return r, err
 		}

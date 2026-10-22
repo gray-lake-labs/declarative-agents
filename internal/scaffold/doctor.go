@@ -36,6 +36,10 @@ type DoctorResult struct {
 	Skills  []install.Finding `json:"skills,omitempty"`
 	Repair  RepairResult      `json:"repair"`
 	Runtime runtime.Status    `json:"runtime"`
+	// Credentials is, per shipped profile, every environment variable its
+	// declarations read and whether each is set here, so a run's model and
+	// tracker credentials are checked before a run (srd043 R4.7, GH-135).
+	Credentials []ProfileEnv `json:"credentials,omitempty"`
 	// Trackers is the program's tracking systems, per control/trackers.md,
 	// and each problem reaching them (srd042).
 	Trackers *routing.Report `json:"trackers,omitempty"`
@@ -53,6 +57,43 @@ type RepairResult struct {
 	// Untracked are documents under docs/ git does not track: the spec
 	// tool reads only tracked ones, so they were not checked.
 	Untracked []string `json:"untracked,omitempty"`
+}
+
+// ProfileEnv is one shipped profile's environment: the variables its
+// declarations read, each with whether it is set here.
+type ProfileEnv struct {
+	Profile string   `json:"profile"`
+	Vars    []EnvVar `json:"vars"`
+}
+
+// EnvVar is one environment variable a profile names.
+type EnvVar struct {
+	Name string `json:"name"`
+	Set  bool   `json:"set"`
+}
+
+// profileCredentials reads every shipped profile's environment variables and
+// checks each against this process's environment.
+func profileCredentials() ([]ProfileEnv, error) {
+	env, err := install.ProfileEnv(scrummaster.Plugin, scrummaster.AgentsDir)
+	if err != nil {
+		return nil, err
+	}
+	names := make([]string, 0, len(env))
+	for name := range env {
+		names = append(names, name)
+	}
+	slices.Sort(names)
+	var out []ProfileEnv
+	for _, name := range names {
+		p := ProfileEnv{Profile: name}
+		for _, v := range env[name] {
+			_, set := os.LookupEnv(v)
+			p.Vars = append(p.Vars, EnvVar{Name: v, Set: set})
+		}
+		out = append(out, p)
+	}
+	return out, nil
 }
 
 // specTool runs the spec tool at a repository's pin, lookGo finds the Go
@@ -230,8 +271,11 @@ func Doctor(o DoctorOptions) (DoctorResult, error) {
 		return r, err
 	}
 	r.Runtime = inspectRuntime(tag)
+	if r.Credentials, err = profileCredentials(); err != nil {
+		return r, err
+	}
 	if agents := install.InstalledAgents(o.Dir); len(agents) > 0 {
-		skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+		skills, err := install.EmbeddedSkills()
 		if err != nil {
 			return r, err
 		}
