@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// pushAttempts bounds how often a write re-synchronizes after its push is
+// pushAttempts bounds how often a write replays after its push is
 // rejected by a newer tracker repository; between attempts it waits a
 // growing, jittered delay so contending writers stop colliding in lockstep.
 // A writer that keeps losing needs many quick retries more than long
@@ -37,6 +37,9 @@ type Store struct {
 	// beforeWrite runs between a write's synchronization and its commit, so
 	// a test can land another clone's write inside that window.
 	beforeWrite func()
+	// beforePush runs before each push of a write, so a test can make the
+	// tracker repository move under it as many times as it likes.
+	beforePush func()
 	// sleep waits between rejected pushes; tests replace it.
 	sleep func(time.Duration)
 	// last is the most recent synchronization, what the last read reflects.
@@ -157,8 +160,16 @@ func (s *Store) Find(repository string, iid int) (Issue, bool, error) {
 // refused.
 func (s *Store) Pop(id string) (PopResult, error) {
 	r := PopResult{ID: id}
+	tries := 0
 	fr, written, queued, err := s.mutate(id, "pop", func(i *Issue) (bool, error) {
+		tries++
 		if i.Assignee == s.User {
+			return false, nil
+		}
+		if i.Assignee != "" && tries > 1 {
+			// A replay after a rejected push finds the issue taken by
+			// the writer who pushed first: the race is lost, reported
+			// below, not a pop of someone else's issue.
 			return false, nil
 		}
 		if i.Assignee != "" {
@@ -367,7 +378,11 @@ func (s *Store) CreateWith(i Issue, finish func(*Issue) error) (Issue, error) {
 		return Issue{}, err
 	}
 	i.ID = prefix + "-" + newID()[:8]
+	template := i
 	start := func(top int) error {
+		// A rejected write replays from the issue as given, so finish
+		// applies once to the issue that lands.
+		i = template
 		i.IID = top + 1
 		now := s.stamp()
 		i.CreatedAt, i.UpdatedAt, i.CreatedBy = now, now, s.User
@@ -473,55 +488,72 @@ func (s *Store) write(what string, fn func(*[]Issue) (bool, error)) (fr Freshnes
 }
 
 // writeFiles is every write: pull, let fn change the tracker files, commit,
-// push. A write made offline is committed and queued for the next
-// synchronization.
+// push. A push the tracker repository rejects, because another writer
+// pushed first, is not merged: the write's commit is dropped and the write
+// replays on the newer tracker, fn reading it afresh, so every retry takes
+// the same fast path as the first try and a create numbers its issue after
+// the other writer's, never colliding with it (eng04). A write made
+// offline, or whose retry finds the repository unreachable, is committed
+// and queued for the next synchronization, which merges it.
 func (s *Store) writeFiles(what string, fn func() (bool, error)) (fr Freshness, written, queued bool, err error) {
-	if fr, err = s.Sync(); err != nil {
-		return fr, false, false, err
-	}
-	if s.beforeWrite != nil {
-		s.beforeWrite()
-	}
-	changed, err := fn()
-	if err != nil || !changed {
-		return fr, false, false, err
-	}
-	before, err := s.git("rev-parse", "HEAD")
-	if err != nil {
-		return fr, false, false, err
-	}
-	if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
-		return fr, false, false, err
-	}
-	if _, err := s.git("commit", "-q", "-m", fmt.Sprintf("tpm: %s (%s)", what, s.User)); err != nil {
-		return fr, false, false, err
-	}
-	if fr.Offline {
-		return fr, true, true, nil
-	}
-	queued, err = s.push()
-	if err != nil {
-		// A failed write is not written: drop its commit and the merges made
-		// while retrying, so no later push lands it. Writes queued offline
-		// sit below before and stay queued.
+	delay := pushBaseDelay
+	var last error
+	for attempt := range pushAttempts {
+		if attempt > 0 {
+			s.wait(delay)
+			delay = min(2*delay, pushMaxDelay)
+		}
+		if fr, err = s.Sync(); err != nil {
+			return fr, false, false, err
+		}
+		if attempt == 0 && s.beforeWrite != nil {
+			s.beforeWrite()
+		}
+		changed, err := fn()
+		if err != nil || !changed {
+			return fr, false, false, err
+		}
+		before, err := s.git("rev-parse", "HEAD")
+		if err != nil {
+			return fr, false, false, err
+		}
+		if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
+			return fr, false, false, err
+		}
+		if _, err := s.git("commit", "-q", "-m", fmt.Sprintf("tpm: %s (%s)", what, s.User)); err != nil {
+			return fr, false, false, err
+		}
+		if fr.Offline {
+			return fr, true, true, nil
+		}
+		if s.beforePush != nil {
+			s.beforePush()
+		}
+		if _, last = s.git("push", "-q", "origin", "HEAD:main"); last == nil {
+			// The read a command reports is now its own write, not the
+			// pull before it.
+			if head, err := s.git("rev-parse", "HEAD"); err == nil {
+				s.last = &Freshness{Commit: head, At: s.Now().UTC()}
+			}
+			return fr, true, false, nil
+		}
+		if _, ferr := s.git("fetch", "-q", "origin"); ferr != nil {
+			// Unreachable now: the commit stays, queued.
+			return Freshness{Commit: fr.Commit, At: fr.At, Offline: true}, true, true, nil
+		}
+		// Rejected: drop this attempt's commit and replay. Writes queued
+		// offline sit below before and stay queued.
 		if _, rerr := s.git("reset", "-q", "--hard", before); rerr != nil {
-			return fr, false, false, errors.Join(err, rerr)
-		}
-		return fr, false, false, err
-	}
-	if !queued {
-		// The read a command reports is now its own write, not the pull
-		// before it.
-		if head, err := s.git("rev-parse", "HEAD"); err == nil {
-			s.last = &Freshness{Commit: head, At: s.Now().UTC()}
+			return fr, false, false, errors.Join(last, rerr)
 		}
 	}
-	return fr, true, queued, nil
+	return fr, false, false, fmt.Errorf("push to the tracker repository rejected %d times; nothing was written (last: %v)", pushAttempts, last)
 }
 
-// push lands the clone's commits in the tracker repository, merging and
-// retrying when the repository moved since the last pull. It reports queued
-// when the repository turned out to be unreachable.
+// push lands the clone's queued commits in the tracker repository when
+// reconcile runs, merging and retrying when the repository moved since the
+// last pull: a write made offline cannot replay, so it merges. It reports
+// queued when the repository turned out to be unreachable.
 func (s *Store) push() (queued bool, err error) {
 	delay := pushBaseDelay
 	var last error
