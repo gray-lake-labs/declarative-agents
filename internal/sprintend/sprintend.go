@@ -28,7 +28,11 @@ type SprintGoal struct {
 	Reported         string   `json:"reported,omitempty"`
 	ReportedComplete bool     `json:"reported_complete"`
 	Met              bool     `json:"met"`
-	Ledger           []string `json:"ledger"` // the event names posted on it, in order
+	// Outcome names which holds: met (evidence stands behind it), reported
+	// complete (the owner's word, not yet met), or not complete (srd038
+	// R2.2).
+	Outcome string   `json:"outcome"`
+	Ledger  []string `json:"ledger"` // the event names posted on it, in order
 	// Stories lists the stories its Sprint Backlog section names, as
 	// project#story.
 	Stories []string `json:"stories"`
@@ -137,6 +141,14 @@ func sprintGoals(t tracker.Tracker, project string, progress map[string]reports.
 		if p, ok := progress[ref]; ok {
 			o.Reported = p.Reported
 			o.ReportedComplete = o.ReportedComplete || p.Complete || p.Reported == "done"
+		}
+		switch {
+		case o.Met:
+			o.Outcome = "met"
+		case o.ReportedComplete:
+			o.Outcome = "reported complete"
+		default:
+			o.Outcome = "not complete"
 		}
 		out = append(out, o)
 	}

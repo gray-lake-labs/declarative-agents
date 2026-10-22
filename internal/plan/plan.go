@@ -7,7 +7,6 @@ package plan
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -16,7 +15,6 @@ import (
 
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 	"github.com/gray-lake-labs/scrum-master/internal/goals"
-	"github.com/gray-lake-labs/scrum-master/internal/links"
 	"github.com/gray-lake-labs/scrum-master/internal/objectives"
 	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/release"
@@ -234,12 +232,7 @@ func slippedOutcomes(in Input) (map[string]bool, error) {
 		if !ok {
 			continue
 		}
-		var cited []string
-		for _, c := range links.ParseCites(issue.Description) {
-			if u, item, ok := strings.Cut(c.URL, "#"); ok {
-				cited = append(cited, strings.TrimSuffix(path.Base(u), ".md")+"#"+item)
-			}
-		}
+		cited := sprintgoal.CitedItems(issue.Description)
 		for _, key := range m.Serves {
 			items := slices.DeleteFunc(slices.Clone(cited), func(c string) bool { return !strings.HasPrefix(c, key+".") })
 			if len(items) == 0 {

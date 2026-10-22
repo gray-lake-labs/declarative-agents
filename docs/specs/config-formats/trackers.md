@@ -6,7 +6,7 @@ title: Tracking systems
 <!-- field: purpose -->
 ## Purpose
 
-Names the tracking system each repository of a program uses: bd, whose issues live in a tracker repository; gh, GitHub's issues and pull requests; or glab, GitLab's issues and merge requests. A tracking system is one package: the issue record, how a branch is reviewed and merged, and where the records go. Every change to a repository's files goes through the same loop whichever system serves it (srd042). The file lives in the system repository at control/trackers.md; tpm reads it from the checkout it runs in, else from the one sibling checkout that holds it. A change to it is a plane::control issue and a reviewed merge.
+Names the tracking system each repository of a program uses: bd, whose issues live in a tracker repository; gh, GitHub's issues and pull requests; or glab, GitLab's issues and merge requests. A tracking system is one package: the issue record, how a branch is reviewed and merged, and where the records go. Every change to a repository's files goes through the same loop whichever system serves it (srd042). The file lives in the system repository at control/trackers.md; tpm reads it from the checkout it runs in, else from the one sibling checkout that holds it; worktrees of one repository, as pop opens beside a checkout, count as that one sibling, read from its main checkout. A change to it is a plane::control issue and a reviewed merge.
 
 <!-- field: schema -->
 ## Schema

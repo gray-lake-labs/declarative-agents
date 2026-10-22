@@ -264,6 +264,16 @@ func testPlanReleaseWritesTheRoadMapRelease(t *testing.T, p trackertest.Program)
 	if got := readBack(); len(got) != 2 || !slices.Equal(got[1].Objectives, r.Items) || got[0].Tag != "v0.1.0" {
 		t.Fatalf("after replacing: %+v", got)
 	}
+	// A republish moves the tag; the sentence tpm wrote moves with it, so
+	// the old tag is in neither prose nor fields (#188).
+	r.Tag = "corpus/v0.1.1"
+	if w, err := WriteRelease(dir, r, c, nil, "", 0); err != nil || w.Action != "replaced" {
+		t.Fatalf("republish write: %+v %v", w, err)
+	}
+	b, _ := os.ReadFile(filepath.Join(dir, RoadMap))
+	if got := readBack(); got[1].Tag != "corpus/v0.1.1" || strings.Contains(string(b), "corpus/v0.1.0") || !strings.Contains(string(b), "tagged corpus/v0.1.1.") {
+		t.Fatalf("after the republish write the road map still names the old tag:\n%s", b)
+	}
 }
 
 // initRoadMap is the road map tpm init lays down: release 01.0 with prose

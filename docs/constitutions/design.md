@@ -138,6 +138,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - program_release_fields:
     - deliverables: the initiative items the release proves, inNNN-short-name#Rn.m (objNNN-short-name#Rn.m for an objective document), listed before release
     - release.publication: tag (the release tag Cites lines pin) and milestone, as tree items
+  - release_statuses: specified (planned), implemented (built and proven by its test suite), released (tagged and handed off); tpm backlog check refuses any other (srd045 R8.2)
   - purpose: Assigns SRDs and use cases to releases and status values. In a program's system repository a release also names the initiative items it proves and its tag and milestone, in program_release_fields (srd034 R3.1).
 - srd:
   - location: docs/specs/software-requirements/srdNNN-short-name.md

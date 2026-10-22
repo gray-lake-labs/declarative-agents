@@ -22,7 +22,14 @@ func CiteURL(webBase, system, tag, docPath, item string) string {
 func Render(webBase string, p Plan, team []PlannedObjective, docs map[string]*objectives.Document) (title, body string, cites []string) {
 	var titles, serves []string
 	for _, o := range team {
-		titles = append(titles, strings.TrimSpace(docs[o.Document].Requirements[o.Group].Title))
+		group := docs[o.Document].Requirements[o.Group]
+		title := strings.TrimSpace(group.Title)
+		// A team serving part of a split group names its items, so the
+		// teams' Sprint Goals for one outcome read apart (srd034 R3.2).
+		if len(o.Items) < len(group.ItemsOf()) {
+			title += " (" + strings.Join(o.Items, ", ") + ")"
+		}
+		titles = append(titles, title)
 		serves = append(serves, o.Key)
 	}
 	goal := strings.Join(titles, "; ")

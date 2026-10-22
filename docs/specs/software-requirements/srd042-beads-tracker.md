@@ -65,7 +65,8 @@ or glab, and overrides for the projects or groups that use another. A
 repository has exactly one system, so project#iid names one issue; a
 group's entry serves every project under it that no closer entry names.
 TPM_TRACKER replaces the default for one person's run, never an override,
-and with no such file it alone names the system every project uses.
+and with no such file it alone names the system every project uses. tpm reads the file from the checkout, else from the one sibling
+checkout that holds it, worktrees of one repository counting as one.
 
 <!-- req: R1.4 -->
 ### R1.4
@@ -201,7 +202,9 @@ GitLab subgroups; eng01 is rewritten when 03.0 is planned.
 
 Every tpm command passes its tests against a fixture beads tracker with
 no GitLab reachable, and the srd041 state machine replays identically on
-both backends.
+both backends; a team checkout finds control/trackers.md in the system
+checkout beside it though a worktree of the system repository sits there
+too.
 
 <!-- field: traces -->
 #### Traces

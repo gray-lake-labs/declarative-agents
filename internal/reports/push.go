@@ -15,8 +15,9 @@ type PushResult struct {
 	Action string `json:"action"` // filed, exists
 	IID    int    `json:"iid,omitempty"`
 	WebURL string `json:"web_url,omitempty"`
-	// Admitted and Reasons are lint's result on the issue filed now.
-	Admitted bool     `json:"admitted,omitempty"`
+	// Admitted and Reasons are lint's result on the issue filed now; an
+	// issue that already existed reports false with no reasons.
+	Admitted bool     `json:"admitted"`
 	Reasons  []string `json:"reasons,omitempty"`
 }
 

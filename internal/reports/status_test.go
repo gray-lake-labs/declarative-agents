@@ -1,6 +1,7 @@
 package reports
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -217,5 +218,40 @@ func TestWeekOfTheSystemTakesTheTeamsPeriod(t *testing.T) {
 	}
 	if r, _ = Week(f, system, "tpm", monday.AddDate(0, 0, 3), nil); len(r.Merged) != 2 {
 		t.Fatalf("without the teams, merged %+v; want the whole week", r.Merged)
+	}
+}
+
+// TestWeekOfTheSystemCountsItsOwnWork is srd018 R8.1 for a system that
+// holds issues but no Sprint Goal: its period starts at its own first
+// issue, so its planning and registration merges count while an earlier
+// run's do not, and an issue a counted merge closed is listed though nobody
+// was assigned (#188).
+func TestWeekOfTheSystemCountsItsOwnWork(t *testing.T) {
+	const system = "g/system"
+	p := trackertest.NewBeads(t)
+	p.AddMerge(system, tracker.Merge{IID: 1, Title: "An earlier run's plan", Author: "tpm", MergedAt: "2026-10-12"})
+	p.AddMerge(system, tracker.Merge{IID: 2, Title: "Register the teams", Author: "tpm", MergedAt: "2026-10-14", Description: "Closes g/system#2"})
+	f := p.Tracker().(*beads.Tracker)
+	f.Store.Now = func() time.Time { return time.Date(2026, 10, 13, 9, 0, 0, 0, time.UTC) }
+	if _, err := f.CreateIssue(system, tracker.NewIssue{Title: "Plan release 01.0"}); err != nil {
+		t.Fatal(err)
+	}
+	registration, err := f.CreateIssue(system, tracker.NewIssue{Title: "Register po-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	closed := "close"
+	if _, err := f.UpdateIssue(system, registration.IID, tracker.IssueUpdate{State: &closed}); err != nil {
+		t.Fatal(err)
+	}
+	r, err := Week(f, system, "tpm", monday.AddDate(0, 0, 3), []string{po1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(r.Merged) != 1 || r.Merged[0].Title != "Register the teams" {
+		t.Fatalf("merged %+v, want the period's own merge only", r.Merged)
+	}
+	if len(r.Closed) != 1 || r.Closed[0].Ref != fmt.Sprintf("%s#%d", system, registration.IID) {
+		t.Fatalf("closed %+v, want the registration the counted merge closed", r.Closed)
 	}
 }

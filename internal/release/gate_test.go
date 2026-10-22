@@ -225,3 +225,21 @@ func TestGatePeerReadAcceptsAnotherPersonsApproval(t *testing.T) {
 		}
 	})
 }
+
+// TestGateLine prints each check as tpm release gate does: no "in none" for
+// a check with no environment, such as the peer read, and no trailing space
+// on a line with no reason (#188).
+func TestGateLine(t *testing.T) {
+	for _, c := range []struct {
+		check CheckResult
+		want  string
+	}{
+		{CheckResult{Result: "pending", Test: "peer-read", Environment: "none", Reason: "awaiting tpm release approve"}, "  pending  peer-read awaiting tpm release approve"},
+		{CheckResult{Result: "pass", Test: "unit", Environment: "local"}, "  pass     unit in local"},
+		{CheckResult{Result: "fail", Test: "unit", Environment: "local", Reason: "exit status 1"}, "  fail     unit in local exit status 1"},
+	} {
+		if got := gateLine(c.check); got != c.want {
+			t.Errorf("gateLine(%+v) = %q, want %q", c.check, got, c.want)
+		}
+	}
+}

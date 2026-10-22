@@ -46,6 +46,13 @@ func Push(t tracker.Tracker, s Sources, p Plan, webBase string, policy program.P
 	var order []string
 	for i, o := range p.Objectives {
 		r := Pushed{Key: o.Key, Project: o.Repository}
+		if o.Carried != "" {
+			// The open Sprint Goal of an earlier release carries the item;
+			// a second goal would duplicate it (srd022 R2.3).
+			r.Action, r.Reasons = "unchanged", []string{"carried by the open Sprint Goal " + o.Carried}
+			out[i] = r
+			continue
+		}
 		d := s.Documents[o.Document]
 		if d == nil {
 			return nil, fmt.Errorf("plan objective %s names a document the release does not", o.Key)

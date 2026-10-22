@@ -80,6 +80,10 @@ func untracked(dir string) []hierarchy.Finding {
 	return findings
 }
 
+// unparsable matches a spec tool error that names a document and why it
+// does not parse.
+var unparsable = regexp.MustCompile(`(?:^|\n)(?:[^\n]*?: )?(docs/[^\s:]+\.md): ([^\n]+)`)
+
 // checkShapes runs the pinned parent spec tool's check over the corpus at
 // dir and reports every finding but formatting, so a document doctor
 // would refuse, such as a VISION whose list field holds prose, fails the
@@ -88,6 +92,12 @@ func untracked(dir string) []hierarchy.Finding {
 func checkShapes(dir string) (findings []hierarchy.Finding, skipped string) {
 	lines, err := specCheck(dir, "check", "all")
 	if err != nil && len(lines) == 0 {
+		// A tool built before parse failures became findings aborts on the
+		// first document it cannot read, naming it; that is a finding about
+		// the document, not a reason the check could not run (srd045 R8.2).
+		if m := unparsable.FindStringSubmatch(err.Error()); m != nil {
+			return []hierarchy.Finding{{File: filepath.Join(dir, m[1]), Field: "parse", Message: m[2]}}, ""
+		}
 		return nil, err.Error()
 	}
 	for _, l := range lines {

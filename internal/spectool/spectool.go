@@ -352,6 +352,13 @@ func main() {
 				fail(err)
 			}
 			formatted, findings, err := d.FormatLinked(data, path, links.For(path))
+			if err != nil && command == "check" {
+				// A document that does not parse is a finding about it; the
+				// rest of the corpus is still checked (srd045 R8.2).
+				fmt.Println(path + ": parse: " + strings.TrimPrefix(err.Error(), path+": "))
+				problems++
+				continue
+			}
 			if err != nil {
 				fail(err)
 			}

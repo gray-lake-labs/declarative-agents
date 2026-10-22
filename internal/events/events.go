@@ -171,7 +171,7 @@ var ReportedCompleteRequired = []string{"release", "commit"}
 // commit. It is not met: no evidence stands behind it (srd038 R2.2).
 func ReportedComplete(release, commit string) (Event, string) {
 	e := Event{Name: "reported_complete", Keys: []KV{{"release", release}, {"commit", commit}}}
-	return e, fmt.Sprintf("Reported complete for release %s by the sprint-end merge %s; not met.", release, commit)
+	return e, fmt.Sprintf("Reported complete for release %s by the sprint-end merge %s; not yet met: met needs evidence (srd038 R2.2).", release, commit)
 }
 
 // Planned is the event tasks and plan post on a Sprint Goal: the release it
