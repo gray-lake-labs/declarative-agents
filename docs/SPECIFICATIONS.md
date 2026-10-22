@@ -23,7 +23,8 @@ whether it is project work or a requirements change, and implement takes
 it into its own branch and worktree until its merge closes it.
 srd037 is the Agent Plugins 1.0 package of the skills and tpm install,
 which writes the skills embedded in tpm for Cursor, Claude Code, or
-GitHub Copilot. srd039 is the shared reader of corpus and config
+GitHub Copilot, and with --runtime fetches the declarative-agents
+runtime at the release tpm pins. srd039 is the shared reader of corpus and config
 documents (internal/corpus), srd040 the format tools and format gates in
 magefiles, and srd041 the states and transitions of an issue. srd043 is
 tpm init and tpm onboard, which lay down a program's corpus, and tpm
@@ -36,7 +37,7 @@ retired, and an interim rule says what tpm does until they are rewritten.
 The skills take Spec Kit's names (specify, plan, tasks, implement): tasks
 breaks a level into the units below it, down to a story's issues, and
 implement builds them. Every repository of a consuming program carries the same
-corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 04.0, 04.1, and 04.2 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the objective issue the Sprint Goal. Release 04.1 makes a program repository explain itself and adds tpm doctor. Release 04.2 adds the draft skill and tpm backlog list and check.
+corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 04.0, 04.1, and 04.2 are implemented. Release 04.0 aligns the planning documents with the agile hierarchy and renames the objective issue the Sprint Goal. Release 04.1 makes a program repository explain itself and adds tpm doctor. Release 04.2 adds the draft skill and tpm backlog list and check. Release 04.3, specified, ships tpm as release binaries and a container image (eng03) and adds tpm install --runtime and doctor's runtime report.
 
 Releases are planned by use case, and a use case cites only the
 requirement items its release delivers. Release 00 is the inner loop
@@ -70,6 +71,7 @@ docs/road-map.md.
 | "04.0" | The agile hierarchy | 3 | 3 | implemented |
 | "04.1" | A repository that explains itself | 1 | 1 | implemented |
 | "04.2" | A planning document drafted in conversation | 1 | 1 | implemented |
+| "04.3" | tpm ships to machines and to CI | 0 | 2 | specified |
 
 <!-- field: foundation_document_index -->
 ## Foundation document index
@@ -175,6 +177,8 @@ docs/road-map.md.
 | [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md) | A Sprint Goal Closes at Sprint End With Its Stories Reported, and Old Objective Issues Read as Sprint Goals | 04.0 | implemented | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | docs/specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md |
 | [rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md) | A First-Time Reader Orients in a Program Repository and an Upgraded tpm Brings It Up to Date | 04.1 | implemented | [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | docs/specs/use-cases/rel04.1-uc001-orient-and-repair.md |
 | [rel04.2-uc001-draft-a-planning-document](specs/use-cases/rel04.2-uc001-draft-a-planning-document.md) | An Owner Drafts a Planning Document from a Description in Conversation | 04.2 | implemented | [test-rel04.2-draft](specs/test-suites/test-rel04.2-draft.md) | docs/specs/use-cases/rel04.2-uc001-draft-a-planning-document.md |
+| [rel04.3-uc001-install-without-go](specs/use-cases/rel04.3-uc001-install-without-go.md) | A Developer with No Go Toolchain Installs tpm and Readies the Pinned Runtime | 04.3 | specified | [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | docs/specs/use-cases/rel04.3-uc001-install-without-go.md |
+| [rel04.3-uc002-ci-job-on-the-image](specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md) | A CI Job Runs tpm and the Pinned Runtime on the Release's Image | 04.3 | specified | [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | docs/specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md |
 
 <!-- field: test_suite_index | form: "typed table" -->
 ## Test suite index
@@ -194,6 +198,7 @@ docs/road-map.md.
 | [test-rel04.0-agile-hierarchy](specs/test-suites/test-rel04.0-agile-hierarchy.md) | Test Suite for Release 04.0 The Agile Hierarchy | "04.0" | 7 | [[rel04.0-uc001-author-the-hierarchy](specs/use-cases/rel04.0-uc001-author-the-hierarchy.md), [rel04.0-uc002-plan-a-sprint-from-stories](specs/use-cases/rel04.0-uc002-plan-a-sprint-from-stories.md), [rel04.0-uc003-sprint-goal-ledger](specs/use-cases/rel04.0-uc003-sprint-goal-ledger.md)] | docs/specs/test-suites/test-rel04.0-agile-hierarchy.md |
 | [test-rel04.1-orientation-doctor](specs/test-suites/test-rel04.1-orientation-doctor.md) | Test Suite for Release 04.1 A Repository That Explains Itself | "04.1" | 4 | [[rel04.1-uc001-orient-and-repair](specs/use-cases/rel04.1-uc001-orient-and-repair.md)] | docs/specs/test-suites/test-rel04.1-orientation-doctor.md |
 | [test-rel04.2-draft](specs/test-suites/test-rel04.2-draft.md) | Test Suite for Release 04.2 A Planning Document Drafted in Conversation | "04.2" | 3 | [[rel04.2-uc001-draft-a-planning-document](specs/use-cases/rel04.2-uc001-draft-a-planning-document.md)] | docs/specs/test-suites/test-rel04.2-draft.md |
+| [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | Test Suite for Release 04.3 tpm Ships to Machines and to CI | "04.3" | 4 | [[rel04.3-uc001-install-without-go](specs/use-cases/rel04.3-uc001-install-without-go.md), [rel04.3-uc002-ci-job-on-the-image](specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md)] | docs/specs/test-suites/test-rel04.3-distribution.md |
 
 <!-- field: coverage_gaps -->
 ## Coverage gaps
@@ -208,6 +213,6 @@ docs/road-map.md.
 | GAP6 | Open decision. Release 01.4 renames the program group to issue, moves recur into it from standup, and adds init, onboard, and help (srd013, srd043, srd044). The other subcommand groups (standup, goals, handoff, release, reports, plan, sprint-end) are rationalized when 02.0 rewrites track-goals (srd019). |
 | GAP7 | The corpus's own SRDs omit test and environment on acceptance criteria (design.md srd acceptance_criteria_note) until the test subsystem's environment SRDs exist. |
 | GAP8 | The parent corpus audit does not read the hierarchy directories (docs/specs/themes/, initiatives/, epics/, features/, stories/, and objectives/), so a magefiles gate test validates those documents against design.md and srd045 R6.1 inside mage audit (srd034 R2.1). A hierarchy document is scrum-master's type written as an SRD in the parent's format, so the gate is scrum-master's own, not a gap the parent closes. |
-| GAP9 | tpm issue lint does not yet run in CI on issue creation or on a schedule (srd013 R1.3); that needs a released tpm binary the program's pipelines can run. |
+| GAP9 | tpm issue lint does not yet run in CI on issue creation or on a schedule (srd013 R1.3); that needs a released tpm binary the program's pipelines can run, which release 04.3's image provides (eng03). |
 | GAP11 | Open decision. srd041 has lint rows only out of open and needs-triage, so an issue already past admission that later fails a re-lint has no transition. On GitLab and on beads lint sets or clears the needs-triage label alone and leaves the state; whether such an issue should leave the backlog is undecided. |
 | GAP12 | Roll-up across repositories (srd045 R3.4): a story in another repository whose parent is in this one is not discovered from the parent until a program registry names every repository; roll-up counts what it reads and says so. |

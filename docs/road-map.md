@@ -20,7 +20,9 @@ delivered; the rest waits for 02.0. Release 04.0 aligns the planning
 documents with the agile hierarchy (theme, initiative, epic, feature,
 user story) and renames the objective issue the Sprint Goal. Release 04.1 makes a
 program repository explain itself and adds tpm doctor to bring one an
-older tpm laid down up to date. Every release proves itself with mage
+older tpm laid down up to date. Release 04.3 ships tpm to machines
+and to CI: release binaries, a signed container image, and the
+declarative-agents runtime at the release tpm pins. Every release proves itself with mage
 audit, which runs the parent's specification-critic corpus-audit agent
 (docs/guides/corpus-audit.md), and with its test suite.
 
@@ -612,3 +614,45 @@ mage audit. Planned and built on 2026-10-20 (design.md D12).
 - mage audit
 - mage integration:backlog
 - mage integration:install
+
+<!-- release: 04.3 | status: specified -->
+## 04.3 - tpm ships to machines and to CI
+
+tpm and the declarative-agents runtime reach the two places they run:
+people's machines and CI jobs. Each tag publishes tpm binaries with
+checksums on its GitHub release and a signed multi-arch container image
+(eng03). tpm install --runtime fetches the runtime at the release tpm's
+own corpus pins, verified against the release's checksums, into the cache
+mage audit uses, and builds the spec tool there when Go is present; tpm
+doctor reports the runtime and repairs documents with that prebuilt tool
+when Go is absent. The image carries both, so a CI job runs tpm and a
+profile with no install step. Planned on 2026-10-21 (design.md D12).
+
+<!-- field: srds -->
+### SRDs
+
+- srd037-install
+- srd043-init-onboard
+
+<!-- field: use_cases -->
+### Use cases
+
+| id | summary | status | priority |
+| --- | --- | --- | --- |
+| [rel04.3-uc001-install-without-go](specs/use-cases/rel04.3-uc001-install-without-go.md) | A developer with no Go toolchain installs tpm from a release and readies the pinned runtime with tpm install --runtime. | specified | P1 |
+| [rel04.3-uc002-ci-job-on-the-image](specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md) | A CI job runs tpm and the pinned runtime on the release's image with no install step and no Go toolchain. | specified | P2 |
+
+<!-- field: test_suites -->
+### Test suites
+
+| id | summary | status |
+| --- | --- | --- |
+| [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | The runtime fetched and verified once per tag in the shared cache; TPM_AGENT held to the checksums; doctor's runtime report and prebuilt repair; the image's tpm, runtime, and spec tool at the pin. | specified |
+
+<!-- field: proof -->
+### Proof
+
+- mage audit
+- mage integration:runtime
+- mage integration:doctor
+- mage integration:image

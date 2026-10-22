@@ -6,13 +6,15 @@ title: "Releasing scrum-master: Gates, Then a Date Tag"
 <!-- field: introduction -->
 ## Introduction
 
-A scrum-master tag is what a developer installs tpm from (go install
-github.com/gray-lake-labs/scrum-master/cmd/tpm@<tag>), and tpm install stamps
-that version into every skill it writes (srd037). A tag that nothing
-checked would put an unverified tpm and its skills into every repository
-that installs it. This guideline states how we cut a scrum-master release:
-the gates file, the sequence mage tag runs, and why the release depends on
-nothing outside this repository. A program repository's release is a
+A scrum-master tag is what tpm is installed from: a developer downloads
+the tag's release binary or runs go install
+github.com/gray-lake-labs/scrum-master/cmd/tpm@<tag>, and a CI job runs on
+the tag's container image. tpm install stamps that version into every
+skill it writes (srd037). A tag that nothing checked would put an
+unverified tpm and its skills into every repository that installs it.
+This guideline states how we cut a scrum-master release: the gates file,
+the sequence mage tag runs, the binaries and the image it publishes, and
+why the release depends on nothing outside this repository. A program repository's release is a
 different process (srd015, tpm release) and shares only the tagging code.
 
 <!-- section: the-gates-file -->
@@ -47,17 +49,73 @@ creates nothing.
 | Step | What happens |
 |---|---|
 | Lock | A directory under the git dir (scrum-master-release.lock) holds the release, so two releases of one clone cannot overlap |
-| Preflight | The release runs on main with a clean worktree; a HEAD already carrying a v0.* tag has nothing to release |
+| Preflight | The release runs on main with a clean worktree; a HEAD already carrying a v0.* tag has nothing to release; gh answers as the organization account, and docker buildx and cosign are on PATH, so a tag never lands without the means to publish it |
 | Gates | Stages run in order and the gates of a stage at the same time, each line of output prefixed with the gate's name; the first stage with a failed gate stops the release and names every failed gate |
 | Recheck | HEAD and the worktree must be unchanged after the gates; a gate that commits or edits files voids the run |
 | Tag | v0.YYYYMMDD.N, N one past the highest revision for the day across local tags and origin's; the annotation lists the gates that passed and git log --oneline since the previous release |
 | Push | push auto pushes the tag to origin; push ask asks y/N and otherwise prints the push command |
+| Publish | Once the tag is on origin, mage publish runs: the release binaries, then the container image; a tag left unpushed prints mage publish as the step to run after pushing it |
 
 Table: What mage tag does.
+
+mage publish publishes the tag at HEAD and nothing else. Each part it
+finds already published (an asset on the GitHub release, the image at
+the tag in the registry) is checked and kept, so rerunning it after a
+failed upload or push completes the release rather than repeating it.
 
 The /gh-release-push skill calls mage tag on main. A failed gate is
 never fixed inside the release: we file an issue, merge the fix, and
 release the green main.
+
+<!-- section: release-binaries -->
+## Release binaries
+
+The first part of mage publish builds ./cmd/tpm at the tag with
+CGO_ENABLED=0 for linux, darwin, and windows on amd64 and arm64, writes
+SHA256SUMS over them, creates the tag's GitHub release, and uploads the
+six binaries and SHA256SUMS to it. The assets are named tpm_<os>_<arch>,
+with .exe on windows, the convention the declarative-agents releases
+follow, so one naming rule and one checksum check serve both.
+install.sh at the repository root downloads the asset for the machine
+from a named release, or the latest, verifies it against SHA256SUMS, and
+installs it; the README gives that, a manual download, and go install,
+each followed by tpm install --runtime (srd037 R7).
+
+The release is created with the organization's token
+(GH_TOKEN=$(gh auth token --user gray-lake-labs-owner)), never a
+person's account, so nothing on the release names an individual.
+
+<!-- section: the-container-image -->
+## The container image
+
+The second part builds one image for linux/amd64 and linux/arm64 with
+docker buildx from the Dockerfile at the repository root and pushes it as
+ghcr.io/gray-lake-labs/tpm:<tag>, and moves latest to it. The image holds
+tpm at the tag; the declarative-agents runtime at the release tpm pins,
+in the user cache directory tpm install --runtime fills (srd037 R7),
+with agent on PATH; the spec tool built at that release, so tpm doctor
+repairs a corpus at tpm's pin with no Go toolchain (srd043 R4.5); git,
+git-crypt, and CA certificates. It carries no Go toolchain and no mage,
+runs as a non-root user, and works in the directory a CI job mounts its
+checkout into. A job on the image therefore never runs a profile against
+a runtime it was not written for.
+
+The image is signed with cosign using the organization's key pair: the
+private key and its password come from the organization's secret store
+at release time, and cosign.pub at the repository root is what a runner
+verifies against. Keyless signing is not used, because outside a hosted
+CI identity it would record a person's identity in the public
+transparency log. buildx attaches an SBOM attestation to the image index
+the signature covers, and its provenance is recorded at mode=min so it
+names no machine or person. The tag annotation and the GitHub release
+list the image's digest, which pipelines pin; latest is for people.
+
+A CI job reads tracker and model credentials from masked CI variables
+(TPM_TRACKER, TPM_USER, and what each profile names), and its writes are
+attributed to the service user TPM_USER names, never to a person; srd041's
+approval rule still holds, so CI never approves its own merge. The README
+shows a GitLab CI job on the image, pulling from ghcr or from a program's
+own registry mirror.
 
 <!-- section: versions -->
 ## Versions
@@ -68,13 +126,13 @@ uncommitted changes carries it with +dirty, and a build between tags
 carries a pseudo-version. tpm install stamps that version into every
 skill it writes. Nothing passes the version in by hand.
 
-Detection reads go.mod from the git objects at the tagged commit. The
-repository is encrypted with git-crypt, and an encrypted go.mod makes
-every build report (devel), so .gitattributes keeps go.mod in
-plaintext and a repository gate test (TestGoModIsStoredInPlaintext)
-fails when it is stored encrypted. Every other file stays encrypted,
-so go install from GitHub at a tag does not work; a developer builds
-tpm from an unlocked checkout.
+Detection reads go.mod from the git objects at the tagged commit, so a
+go.mod stored in any other form makes every build report (devel). The
+repository is not encrypted, so go install from GitHub at a tag builds
+tpm at that tag, and the release binaries carry the same version. A
+repository gate test (TestGoModIsStoredInPlaintext) still fails when
+go.mod is stored encrypted, so a return to encryption cannot silently
+break the version.
 
 <!-- section: no-dependency-outside-the-repository -->
 ## No dependency outside the repository
@@ -97,7 +155,9 @@ tpm release (srd015) reuses the tagging for program repositories.
 ## References
 
 - release-gates.md
-- .gitattributes (go.mod in plaintext)
+- Dockerfile
+- install.sh
+- cosign.pub
 - internal/release
 - docs/specs/software-requirements/srd015-release.md (a program repository's release)
 - docs/specs/software-requirements/srd037-install.md (the version tpm install stamps)
