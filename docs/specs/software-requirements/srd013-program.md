@@ -83,7 +83,7 @@ With a parent tracking issue given, appends the new issue to its Members section
 <!-- req: R3.3 -->
 ### R3.3
 
-A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. A milestone whose sprint has ended, its sprint-end issue in the project closed, no longer counts: the issue goes on the next milestone by start date, so a retrospective's actions land in the next sprint. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins. tpm issue milestone puts an issue already filed in a milestone its project finds and lints it again. A kind given explicitly makes a data issue of that kind, whatever plane its paths alone would give.
+A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. A milestone whose sprint has ended, its sprint-end issue in the project closed, no longer counts: the issue goes on the next milestone by start date, so a retrospective's actions land in the next sprint. An issue that cuts a release (kind::release) is the exception: it belongs to the sprint whose release it cuts, so that sprint's milestone still counts for it after the sprint-end. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins. tpm issue milestone puts an issue already filed in a milestone its project finds and lints it again. A kind given explicitly makes a data issue of that kind, whatever plane its paths alone would give.
 
 <!-- req: R4 -->
 ## R4 - tpm issue show
@@ -173,7 +173,7 @@ Installs into the worktree the skills of every agent installed in the checkout (
 <!-- req: R8.1 -->
 ### R8.1
 
-tpm issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). With --summary (or --summary-file), the run's result is the run summary it closes the issue with and the Previous Runs line in place of the outcome, with how the instance closed after it, so a run that merges no file still carries its result forward. An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists.
+tpm issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). With --summary (or --summary-file), the run's result is the run summary it closes the issue with and the Previous Runs line in place of the outcome, with how the instance closed after it, so a run that merges no file still carries its result forward. An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists. The next instance is admitted as tpm issue file admits an issue, under the policy of --control (the project's own by default), so a recurred data issue starts ready like a freshly filed one.
 
 <!-- req: R8.2 -->
 ### R8.2
@@ -217,7 +217,7 @@ Every issue subcommand honours --json and --dry-run and never prompts; tpm progr
 <!-- ac: AC3 -->
 ### AC3
 
-file creates an unassigned, linted issue (or a tracking-issue member, or a sub-issue of a parent issue) and never sets an assignee; show returns the issue with state, sub-issues, explained links, tracking issue, and events; a data issue filed without a milestone carries the one active sprint covering today, or none with the reason.
+file creates an unassigned, linted issue (or a tracking-issue member, or a sub-issue of a parent issue) and never sets an assignee; show returns the issue with state, sub-issues, explained links, tracking issue, and events; a data issue filed without a milestone carries the one active sprint covering today, or none with the reason, and a release issue filed after its sprint-end still carries that sprint.
 
 <!-- field: traces -->
 #### Traces
@@ -288,7 +288,7 @@ Under a policy with require_approval, merge refuses with no approval, with only 
 <!-- ac: AC9 -->
 ### AC9
 
-recur closes a recurring issue with its run logged and Requires updated and opens the next instance once, closes again nothing a merge closed, and finds an instance whose marker an earlier tpm standup recur wrote.
+recur closes a recurring issue with its run logged and Requires updated and opens the next instance once, admitted as a filed issue is, closes again nothing a merge closed, and finds an instance whose marker an earlier tpm standup recur wrote.
 
 <!-- field: traces -->
 #### Traces

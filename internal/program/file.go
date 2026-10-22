@@ -53,6 +53,13 @@ func File(t tracker.Tracker, project string, in tracker.NewIssue, p Policy, dryR
 		reasons := Lint(would, p)
 		return FileResult{Project: project, DryRun: true, Lint: LintResult{Project: project, Admitted: len(reasons) == 0, Reasons: reasons}}, nil
 	}
+	return CreateLinted(t, project, in, p)
+}
+
+// CreateLinted creates the issue unassigned and lints it, as File does once
+// it has decided the caller may file it: recur creates each next instance
+// through it, so an instance starts admitted as a filed issue does.
+func CreateLinted(t tracker.Tracker, project string, in tracker.NewIssue, p Policy) (FileResult, error) {
 	if c, ok := tracker.For(t, project).(tracker.AdmittingCreator); ok {
 		var r LintResult
 		issue, err := c.CreateAdmitted(project, in, func(i tracker.Issue) ([]string, string) {
@@ -84,10 +91,12 @@ func File(t tracker.Tracker, project string, in tracker.NewIssue, p Policy, dryR
 // start date is on or before today and whose due date is on or after it
 // (srd013 R3.3). A milestone whose sprint ended, its sprint-end issue in
 // the project closed, is not active: work filed after that, such as a
-// retrospective's actions, goes on the next milestone by start date. With
-// none, or more than one, it returns no title and the reason; tpm never
-// guesses between sprints.
-func SprintMilestone(t tracker.Tracker, project string, today time.Time) (string, string, error) {
+// retrospective's actions, goes on the next milestone by start date. An
+// issue that cuts a release (kind::release) still belongs to the sprint
+// whose release it cuts, so for it an ended sprint stays active. With none,
+// or more than one, it returns no title and the reason; tpm never guesses
+// between sprints.
+func SprintMilestone(t tracker.Tracker, project string, today time.Time, cutsRelease bool) (string, string, error) {
 	ms, err := t.ActiveMilestones(project)
 	if err != nil {
 		return "", "", err
@@ -104,7 +113,7 @@ func SprintMilestone(t tracker.Tracker, project string, today time.Time) (string
 			continue
 		}
 		switch {
-		case ended[m.Title]:
+		case ended[m.Title] && !cutsRelease:
 			if m.StartDate <= day && day <= m.DueDate {
 				closed = append(closed, m.Title)
 			}

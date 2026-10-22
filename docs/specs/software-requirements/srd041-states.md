@@ -44,7 +44,7 @@ script keeps.
 <!-- req: R1.1 -->
 ### R1.1
 
-An issue that exists and has not yet been checked by admission. It has no state label. Admission runs on every new issue, so open is transient.
+An issue that exists and has not yet been checked by admission. It has no state label. Admission runs on every new issue, so open is transient for a data issue; an issue of another plane has no admitted state (ready is plane data, R3.1) and stays open until it is popped or closed.
 
 <!-- req: R2 -->
 ## R2 - needs-triage

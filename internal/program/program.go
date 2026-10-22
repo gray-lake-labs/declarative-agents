@@ -420,7 +420,7 @@ func init() {
 			}
 			milestone, reason := fileArgs.milestone, ""
 			if milestone == "" && l.Plane == "data" && fileArgs.typ == "" {
-				if milestone, reason, err = SprintMilestone(t, fileArgs.project, time.Now()); err != nil {
+				if milestone, reason, err = SprintMilestone(t, fileArgs.project, time.Now(), l.Kind == "release"); err != nil {
 					return err
 				}
 			}

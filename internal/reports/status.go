@@ -137,11 +137,11 @@ func StatusIssues(t tracker.Tracker, in StatusInput) ([]StatusResult, error) {
 			body := StatusBody(in.Config, m, in.Reports, start)
 			if latest != nil {
 				rr, err := standup.Recur(t, m.Project, latest.IID, standup.RecurOptions{
-					Title: in.Config.Title(week), DueDate: due, Body: body, Now: in.Now, DryRun: in.DryRun})
+					Title: in.Config.Title(week), DueDate: due, Body: body, Policy: in.Policy, Now: in.Now, DryRun: in.DryRun})
 				if err != nil {
 					return out, err
 				}
-				r.Action, r.IID, r.WebURL, r.Admitted = "recurred", rr.Next, rr.NextURL, true
+				r.Action, r.IID, r.WebURL, r.Admitted = "recurred", rr.Next, rr.NextURL, rr.Admitted || in.DryRun
 			} else {
 				l, err := program.Derive(t, m.Project, in.Config.System, in.Ref, nil, program.Labelling{Plane: "data", Kind: "review"})
 				if err != nil {

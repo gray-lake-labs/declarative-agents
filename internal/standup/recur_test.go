@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gray-lake-labs/scrum-master/internal/beads"
+	"github.com/gray-lake-labs/scrum-master/internal/program"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
 )
@@ -110,6 +112,32 @@ func TestRecurCarriesTheRunsSummary(t *testing.T) {
 		next, _ := f.GetIssue("g/po-1", r.Next)
 		if !strings.Contains(next.Description, ": Day 3: the grader is blocked on trajectories (closed by tpm issue recur).\n") || strings.Contains(next.Description, "without its work") {
 			t.Fatalf("next body:\n%s", next.Description)
+		}
+	})
+}
+
+// TestRecurAdmitsTheNextInstance holds recur to the admission tpm issue
+// file runs: a recurred data issue is admitted as a freshly filed one is,
+// so on beads it starts ready, not open (srd013 R8.1, srd041 R1.1).
+func TestRecurAdmitsTheNextInstance(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		f := p.Tracker()
+		first, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: weekly status", DueDate: "2026-10-15",
+			Labels:      []string{"plane::data", "type::recurring", "kind::review", "component::po-1"},
+			Description: "Report the week.\n\n## Recurrence\n\nWeekly.\n\n## Previous Runs\n\n- none\n"})
+		r, err := Recur(f, "g/po-1", first.IID, RecurOptions{Policy: program.Defaults(), Now: time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC)})
+		if err != nil || !r.Admitted {
+			t.Fatalf("recur = %+v, %v; want the next instance admitted", r, err)
+		}
+		next, _ := f.GetIssue("g/po-1", r.Next)
+		notes, _ := f.ListNotes("g/po-1", r.Next)
+		if next.HasLabel("needs-triage") || len(notes) != 0 {
+			t.Fatalf("next instance labels %v, notes %+v", next.Labels, notes)
+		}
+		if bt, ok := f.(*beads.Tracker); ok {
+			if i, _, err := bt.Store.Find("g/po-1", r.Next); err != nil || i.State != beads.Ready {
+				t.Fatalf("next instance on beads is %s (%v), want ready", i.State, err)
+			}
 		}
 	})
 }

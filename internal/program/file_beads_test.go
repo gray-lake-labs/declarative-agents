@@ -46,7 +46,7 @@ func TestFileAndLintOnBeads(t *testing.T) {
 	if _, err := tr.EnsureMilestone("g", tracker.Milestone{Title: "01.1", StartDate: "2026-11-02", DueDate: "2026-11-13"}); err != nil {
 		t.Fatal(err)
 	}
-	sprint, reason, err := SprintMilestone(tr, "g/po-1", time.Date(2026, 11, 5, 0, 0, 0, 0, time.UTC))
+	sprint, reason, err := SprintMilestone(tr, "g/po-1", time.Date(2026, 11, 5, 0, 0, 0, 0, time.UTC), false)
 	if err != nil || sprint != "01.1" {
 		t.Fatalf("sprint = %q (%s), %v, want 01.1", sprint, reason, err)
 	}
