@@ -81,6 +81,18 @@ head commit, and merge merges it on GitHub and closes the issue on that
 merge commit. Files, tags, branches, and merged history come from the
 local checkout, as for bd.
 
+<!-- req: R1.5 -->
+### R1.5
+
+The glab system serves a repository's issues, notes, and award emoji from
+GitLab through the glab CLI and the person's existing login, and its
+group's milestones and labels as GitLab's own group milestones and group
+labels; due dates and start dates are GitLab's fields. A branch is
+reviewed as a merge request pop opens as a draft, an approval is GitLab's
+approval pinned to the head commit with a note naming that commit, since
+GitLab's approvals do not record one, and merge merges it on GitLab and
+closes the issue on that merge commit.
+
 <!-- req: R2 -->
 ## R2 - Mapping
 
@@ -252,3 +264,17 @@ an approval of an earlier commit is refused.
 #### Traces
 
 - [R1.4](#r14)
+
+<!-- ac: AC6 -->
+### AC6
+
+On the glab system an issue files, lints, and closes in GitLab under a
+group milestone its project finds; pop opens the branch with a draft
+merge request; another person's approval of the head lets merge land it
+on GitLab and close the issue on that commit, and an approval of an
+earlier commit is refused.
+
+<!-- field: traces -->
+#### Traces
+
+- [R1.5](#r15)

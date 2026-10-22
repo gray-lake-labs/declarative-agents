@@ -3,8 +3,9 @@ tracker: where the program's facts live, and keeping a clone current
 Each repository has one tracking system: bd, gh, or glab, named in the
 system repository's control/trackers.md, with TPM_TRACKER replacing the
 default for one run. tpm doctor reports each and whether it is reachable.
-gh keeps the issues in GitHub and reviews each branch as a pull request,
-through the gh CLI and your existing login.
+gh keeps the issues in GitHub and reviews each branch as a pull request;
+glab keeps them in GitLab and reviews each as a merge request. Both drive
+their CLI with your existing login.
 
 With bd, the tracker is a git repository of its own holding the program's issues,
 labels, milestones, and comments, served by beads (srd042). Its

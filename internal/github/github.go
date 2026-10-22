@@ -621,19 +621,7 @@ func (t *Tracker) CloseOnMerge(project string, iid int, commit string) (bool, er
 // since GitHub opens no pull request for a branch with nothing over its
 // base, and pop opens the review as it opens the branch.
 func (t *Tracker) CreateBranch(project, branch, ref string) error {
-	if _, err := t.Git(project, "fetch", "-q", "origin", ref); err != nil {
-		return err
-	}
-	tree, err := t.Git(project, "rev-parse", "refs/remotes/origin/"+ref+"^{tree}")
-	if err != nil {
-		return err
-	}
-	commit, err := t.Git(project, "commit-tree", tree, "-p", "refs/remotes/origin/"+ref, "-m", "Open "+branch+" for its pull request")
-	if err != nil {
-		return err
-	}
-	_, err = t.Git(project, "push", "-q", "origin", commit+":refs/heads/"+branch)
-	return err
+	return t.OpenBranch(project, branch, ref, "Open "+branch+" for its pull request")
 }
 
 type ghPull struct {

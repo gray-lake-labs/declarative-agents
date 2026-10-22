@@ -127,6 +127,20 @@ approval. It closes what it opened. A second person's approval and the
 merge are proven offline in internal/github, against a fake GitHub with two
 logins that merges in a real git origin, as the rig has one identity.
 
+<!-- section: glab-rig -->
+## The opt-in glab rig
+
+mage integration:glab proves the glab tracking system against GitLab the
+same way: glab logged in, the network, never mage regression. It works in
+one private project, rig, under the group GLAB_RIG_GROUP names, creating
+the group as a subgroup of its parent and the project on first use and
+reusing them after. With TPM_TRACKER=glab it proves tpm issue labels writes
+the schema as group labels, tpm issue file files an admitted issue on a
+dated group milestone, tpm issue pop opens the branch with a draft merge
+request, and tpm issue merge refuses an unapproved head, and closes what it
+opened. A second person's approval and the merge are proven offline in
+internal/gitlab.
+
 <!-- section: beads-scale -->
 ## The opt-in beads scale run
 

@@ -88,6 +88,25 @@ func (c *Code) rev(project, ref string) string {
 	return ref
 }
 
+// OpenBranch opens branch from ref with one empty commit of its own,
+// message, for a host that opens no review of a branch with nothing over
+// its base.
+func (c *Code) OpenBranch(project, branch, ref, message string) error {
+	if _, err := c.Git(project, "fetch", "-q", "origin", ref); err != nil {
+		return err
+	}
+	tree, err := c.Git(project, "rev-parse", "refs/remotes/origin/"+ref+"^{tree}")
+	if err != nil {
+		return err
+	}
+	commit, err := c.Git(project, "commit-tree", tree, "-p", "refs/remotes/origin/"+ref, "-m", message)
+	if err != nil {
+		return err
+	}
+	_, err = c.Git(project, "push", "-q", "origin", commit+":refs/heads/"+branch)
+	return err
+}
+
 // GetFile reads p at ref as text: through the repository's textconv, so a
 // git-crypt repository's files come back decrypted, and as stored where no
 // textconv is configured.

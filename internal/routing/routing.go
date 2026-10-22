@@ -16,6 +16,7 @@ import (
 	"github.com/gray-lake-labs/scrum-master/internal/beads"
 	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 	"github.com/gray-lake-labs/scrum-master/internal/github"
+	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
 	"github.com/gray-lake-labs/scrum-master/internal/tracker"
 )
 
@@ -136,6 +137,9 @@ var openers = map[string]Opener{
 	},
 	GitHub: func(s System) (tracker.Tracker, error) {
 		return github.New(s.Dir, github.CLI{}, s.Paths), nil
+	},
+	GitLab: func(s System) (tracker.Tracker, error) {
+		return gitlab.New(s.Dir, gitlab.CLI{}), nil
 	},
 }
 
