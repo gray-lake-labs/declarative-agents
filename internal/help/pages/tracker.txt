@@ -13,7 +13,9 @@ labels, milestones, and comments, served by beads (srd042). Its
 names its program; tpm init sets it once. Every command
 reads and writes it through a local clone and names the tracker commit it
 read. A clone that is offline queues its writes and makes its pops
-provisional; reconcile pushes them once the tracker is reachable.
+provisional; reconcile pushes them once the tracker is reachable. A bd
+issue has no web page, so its web_url is beads:<id>, the handle tools
+read, whatever TPM_WEB_BASE says.
 
 Subcommands:
   tpm tracker export      write every issue as bd's JSONL, for bd import (srd042)
