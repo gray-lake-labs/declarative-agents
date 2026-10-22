@@ -197,10 +197,13 @@ func humanDoctor(r DoctorResult) string {
 	if r.Repair.Skipped != "" {
 		fmt.Fprintf(&b, "repair skipped: %s\n", r.Repair.Skipped)
 	}
+	// The runtime's tag is the parent release tpm pins, not a tpm version,
+	// though both read v0.YYYYMMDD.N (#188).
+	runtime := fmt.Sprintf("runtime (declarative-agents %s, the release this tpm pins)", r.Runtime.Release)
 	if r.Runtime.Problem != "" {
-		fmt.Fprintf(&b, "runtime %s: %s\n", r.Runtime.Release, r.Runtime.Problem)
+		fmt.Fprintf(&b, "%s: %s\n", runtime, r.Runtime.Problem)
 	} else {
-		fmt.Fprintf(&b, "runtime %s: %s (%s)\n", r.Runtime.Release, r.Runtime.Agent, r.Runtime.From)
+		fmt.Fprintf(&b, "%s: %s (%s)\n", runtime, r.Runtime.Agent, r.Runtime.From)
 	}
 	agents := map[string]bool{}
 	for _, f := range r.Skills {

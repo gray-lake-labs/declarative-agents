@@ -48,27 +48,27 @@ func planning(p string, inSystem bool) bool {
 // project work of the stated kind, and a missing kind is an error naming it.
 // inSystem says the request is for the system repository.
 func Classify(paths []string, statedKind string, inSystem bool) (Classification, error) {
-	var docs, control, plan string
+	var docs, control, plan []string
 	for _, raw := range paths {
 		p := path.Clean(strings.TrimPrefix(raw, "./"))
 		switch {
 		case planning(p, inSystem):
-			plan = p
+			plan = append(plan, p)
 		case p == "control" || strings.HasPrefix(p, "control/"):
-			control = p
+			control = append(control, p)
 		case p == "docs" || strings.HasPrefix(p, "docs/"):
-			docs = p
+			docs = append(docs, p)
 		}
 	}
 	switch {
-	case plan != "":
-		return Classification{Plane: "management", Reason: plan + " is a planning document"}, nil
-	case control != "":
-		return Classification{Plane: "control", Reason: control + " is a policy file"}, nil
-	case docs != "" && statedKind != "":
-		return Classification{Plane: "data", Kind: statedKind, Reason: docs + " is a requirements or design document, and the stated kind is the work"}, nil
-	case docs != "":
-		return Classification{Plane: "data", Kind: "spec", Reason: docs + " is a requirements or design document"}, nil
+	case len(plan) > 0:
+		return Classification{Plane: "management", Reason: deciding(plan, "is a planning document", "are planning documents")}, nil
+	case len(control) > 0:
+		return Classification{Plane: "control", Reason: deciding(control, "is a policy file", "are policy files")}, nil
+	case len(docs) > 0 && statedKind != "":
+		return Classification{Plane: "data", Kind: statedKind, Reason: deciding(docs, "is a requirements or design document", "are requirements or design documents") + ", and the stated kind is the work"}, nil
+	case len(docs) > 0:
+		return Classification{Plane: "data", Kind: "spec", Reason: deciding(docs, "is a requirements or design document", "are requirements or design documents")}, nil
 	case statedKind != "":
 		return Classification{Plane: "data", Kind: statedKind, Reason: "project work"}, nil
 	}
@@ -116,4 +116,13 @@ func Derive(t tracker.Tracker, project, system, ref string, paths []string, give
 		}
 	}
 	return out, nil
+}
+
+// deciding names the paths that decided a plane: the one path, else the
+// first and how many others, so the reason accounts for all of them (#188).
+func deciding(paths []string, one, many string) string {
+	if len(paths) == 1 {
+		return paths[0] + " " + one
+	}
+	return fmt.Sprintf("%s and %d other paths %s", paths[0], len(paths)-1, many)
 }

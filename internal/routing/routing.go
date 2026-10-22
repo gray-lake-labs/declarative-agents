@@ -102,8 +102,10 @@ func known(name string) error {
 // Find is the trackers document for the checkout at dir: the checkout's
 // own control/trackers.md, else the one sibling checkout that holds one, as
 // repositories sit side by side under their owner and only the system
-// repository has control files. It returns "" when there is none, and
-// refuses more than one sibling.
+// repository has control files. Worktrees of one repository, which pop
+// opens beside its checkout, are one sibling, read from the main checkout.
+// It returns "" when there is none, and refuses siblings of more than one
+// repository.
 func Find(dir string) (string, error) {
 	root := dir
 	if out, err := exec.Command("git", "-C", dir, "rev-parse", "--show-toplevel").Output(); err == nil {
@@ -112,7 +114,7 @@ func Find(dir string) (string, error) {
 	if own := filepath.Join(root, File); exists(own) {
 		return own, nil
 	}
-	siblings, _ := filepath.Glob(filepath.Join(filepath.Dir(root), "*", File))
+	siblings := oneEachRepository(globSiblings(root))
 	switch len(siblings) {
 	case 0:
 		return "", nil
@@ -123,6 +125,37 @@ func Find(dir string) (string, error) {
 }
 
 func exists(p string) bool { _, err := os.Stat(p); return err == nil }
+
+func globSiblings(root string) []string {
+	siblings, _ := filepath.Glob(filepath.Join(filepath.Dir(root), "*", File))
+	return siblings
+}
+
+// oneEachRepository keeps one trackers document per git repository among
+// files: worktrees share their repository's common git directory, and the
+// main checkout's file is the one kept, since a worktree's branch may carry
+// an unmerged change to it.
+func oneEachRepository(files []string) []string {
+	var out []string
+	kept := map[string]int{}
+	for _, f := range files {
+		checkout := filepath.Dir(filepath.Dir(f))
+		common := checkout
+		if b, err := exec.Command("git", "-C", checkout, "rev-parse", "--path-format=absolute", "--git-common-dir").Output(); err == nil {
+			common = strings.TrimSpace(string(b))
+		}
+		main := filepath.Clean(filepath.Dir(common)) == filepath.Clean(checkout)
+		if at, seen := kept[common]; seen {
+			if main {
+				out[at] = f
+			}
+			continue
+		}
+		kept[common] = len(out)
+		out = append(out, f)
+	}
+	return out
+}
 
 // Opener opens one tracking system. bd is built in; gh and glab register
 // theirs.

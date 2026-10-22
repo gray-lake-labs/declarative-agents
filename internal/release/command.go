@@ -163,7 +163,7 @@ func init() {
 			var b strings.Builder
 			fmt.Fprintf(&b, "gate for %s at %s:\n", r.Tag, short(r.Revision))
 			for _, c := range r.Checks {
-				fmt.Fprintf(&b, "  %-8s %s in %s %s\n", c.Result, c.Test, c.Environment, c.Reason)
+				b.WriteString(gateLine(c) + "\n")
 			}
 			if r.AwaitingPeerRead {
 				fmt.Fprintf(&b, "every check but the peer read passed; %s is tagged after tpm release approve\n", r.Tag)
@@ -235,4 +235,19 @@ func init() {
 			return ctx.Emit(n, n.Human())
 		},
 	})
+}
+
+// gateLine is one check of the gate as tpm release gate prints it: the
+// result, the test, the environment when one applies, and the reason when
+// there is one, with no trailing space (srd015 R1.3). A peer read has no
+// environment; its "none" stays in the JSON and the evidence event.
+func gateLine(c CheckResult) string {
+	line := fmt.Sprintf("  %-8s %s", c.Result, c.Test)
+	if c.Environment != "" && c.Environment != "none" {
+		line += " in " + c.Environment
+	}
+	if c.Reason != "" {
+		line += " " + c.Reason
+	}
+	return line
 }

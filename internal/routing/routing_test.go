@@ -122,6 +122,21 @@ func TestFindLooksHereThenAtSiblings(t *testing.T) {
 	if p, err := Find(system); err != nil || p != filepath.Join(system, File) {
 		t.Fatalf("the system checkout itself: %q, %v", p, err)
 	}
+	// A worktree of the system, as pop opens beside its checkout, is the
+	// same repository: the team still finds the main checkout's file (#188).
+	git := func(dir string, args ...string) {
+		t.Helper()
+		cmd := exec.Command("git", append([]string{"-C", dir, "-c", "user.name=t", "-c", "user.email=t@example.com"}, args...)...)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v: %s", args, err, out)
+		}
+	}
+	git(system, "add", "-A")
+	git(system, "commit", "-q", "-m", "control files")
+	git(system, "worktree", "add", "-q", filepath.Join(root, "system-3-plan-release"), "-b", "3-plan-release")
+	if p, err := Find(team); err != nil || p != filepath.Join(system, File) {
+		t.Fatalf("a team checkout beside the system and its worktree: %q, %v", p, err)
+	}
 	repo("other-system", true)
 	if _, err := Find(team); err == nil || !strings.Contains(err.Error(), "several sibling checkouts") {
 		t.Fatalf("two systems beside the team: %v", err)

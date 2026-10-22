@@ -523,7 +523,7 @@ func TestDoctorRuntime(t *testing.T) {
 	if err != nil || r.Runtime.Release != pin || r.Runtime.Agent != "" || !strings.Contains(r.Runtime.Problem, "tpm install --runtime") {
 		t.Fatalf("no runtime: %+v, %v", r.Runtime, err)
 	}
-	if h := humanDoctor(r); !strings.Contains(h, "runtime "+pin+": ") || !strings.Contains(h, "tpm install --runtime") {
+	if h := humanDoctor(r); !strings.Contains(h, "runtime (declarative-agents "+pin+", the release this tpm pins): ") || !strings.Contains(h, "tpm install --runtime") {
 		t.Errorf("report without a runtime:\n%s", h)
 	}
 	var asked string
@@ -537,7 +537,7 @@ func TestDoctorRuntime(t *testing.T) {
 	if err != nil || asked != pin || r.Runtime.Agent != "/cache/agent" || r.Runtime.Problem != "" {
 		t.Fatalf("a cached runtime: %+v, asked %q, %v", r.Runtime, asked, err)
 	}
-	if h := humanDoctor(r); !strings.Contains(h, "runtime "+pin+": /cache/agent (cache)") {
+	if h := humanDoctor(r); !strings.Contains(h, "runtime (declarative-agents "+pin+", the release this tpm pins): /cache/agent (cache)") {
 		t.Errorf("report with a runtime:\n%s", h)
 	}
 }

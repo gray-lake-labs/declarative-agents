@@ -266,3 +266,17 @@ func TestAdmissionAfterAFailureIsRecorded(t *testing.T) {
 		t.Fatalf("the same failure after an admission = %q, want it posted again", got)
 	}
 }
+
+// TestPlaneReasonNamesEveryDecidingPath holds the reason to the paths that
+// decided the plane: one path by name, several as the first and how many
+// others (#188).
+func TestPlaneReasonNamesEveryDecidingPath(t *testing.T) {
+	one, err := Classify([]string{"docs/road-map.md"}, "", true)
+	if err != nil || one.Reason != "docs/road-map.md is a planning document" {
+		t.Fatalf("one path: %+v, %v", one, err)
+	}
+	three, err := Classify([]string{"docs/specs/themes/th001-a.md", "docs/specs/epics/ep001-a.md", "docs/road-map.md"}, "", true)
+	if err != nil || three.Reason != "docs/specs/themes/th001-a.md and 2 other paths are planning documents" {
+		t.Fatalf("three paths: %+v, %v", three, err)
+	}
+}
