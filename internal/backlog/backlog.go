@@ -4,12 +4,17 @@
 package backlog
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
+	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/gray-lake-labs/scrum-master/internal/cli"
+	"github.com/gray-lake-labs/scrum-master/internal/corpus"
 	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
 )
 
@@ -70,6 +75,11 @@ func Check(dir string) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
+	statuses, err := releaseStatuses(dir)
+	if err != nil {
+		return Report{}, err
+	}
+	untraced = append(untraced, statuses...)
 	shapes, skipped := checkShapes(dir)
 	findings = append(append(append(findings, untraced...), shapes...), untracked(dir)...)
 	for i := range findings {
@@ -160,4 +170,35 @@ func orNone(s string) string {
 		return "none"
 	}
 	return s
+}
+
+// ReleaseStatuses are the values a road-map release record's status takes:
+// planned, built and proven, and tagged and handed off (srd031 R4.1,
+// design.md roadmap).
+var ReleaseStatuses = []string{"specified", "implemented", "released"}
+
+// releaseStatuses reports each road-map release record whose status is not
+// one of ReleaseStatuses (srd045 R8.2). A repository without a road map has
+// none.
+func releaseStatuses(dir string) ([]hierarchy.Finding, error) {
+	path := filepath.Join(dir, "docs", "road-map.md")
+	b, err := os.ReadFile(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	d, err := corpus.ParseMarkdown(b)
+	if err != nil {
+		return nil, nil // the shape check reports a road map that does not parse
+	}
+	var out []hierarchy.Finding
+	for _, r := range d.Records("release") {
+		if status := r.Attrs["status"]; !slices.Contains(ReleaseStatuses, status) {
+			out = append(out, hierarchy.Finding{File: path, Field: "release " + r.Key + " status",
+				Message: fmt.Sprintf("%q is not a release status; use %s", status, strings.Join(ReleaseStatuses, ", "))})
+		}
+	}
+	return out, nil
 }

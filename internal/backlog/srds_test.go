@@ -119,3 +119,61 @@ func TestBacklogCheckNamesUntrackedDocuments(t *testing.T) {
 		t.Fatalf("a directory git does not manage = %+v, want none", f)
 	}
 }
+
+// TestCheckReportsAnUnparsableDocument is srd045 R8.2 for a document the
+// spec tool cannot parse: it is a finding naming the document and the
+// cause, whether the tool reports it as a line or aborts naming it, and only
+// a check that could not run at all is a skip (#188).
+func TestCheckReportsAnUnparsableDocument(t *testing.T) {
+	for name, stub := range map[string]struct {
+		lines []string
+		err   error
+	}{
+		"a parse line": {[]string{"docs/specs/epics/ep005-x.md: parse: field context: text line \"  2. ep003-model-gateway\" is not indented 5 spaces"}, errors.New("exit status 1")},
+		"an abort":     {nil, errors.New("spectool: docs/specs/epics/ep005-x.md: field context: text line \"  2. ep003-model-gateway\" is not indented 5 spaces")},
+	} {
+		t.Run(name, func(t *testing.T) {
+			stubSpec(t, stub.lines, stub.err)
+			r, err := Check(t.TempDir())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(r.Findings) != 1 || r.Findings[0].File != "docs/specs/epics/ep005-x.md" || r.Findings[0].Field != "parse" ||
+				!strings.Contains(r.Findings[0].Message, "not indented 5 spaces") || r.SpecSkipped != "" {
+				t.Fatalf("report = %+v, want one parse finding and no skip", r)
+			}
+		})
+	}
+	stubSpec(t, nil, errors.New("docs/external-pins.yaml pins no release of the parent"))
+	r, err := Check(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(r.Findings) != 0 || r.SpecSkipped == "" {
+		t.Fatalf("a check that could not run = %+v, want a skip and no finding", r)
+	}
+}
+
+// TestRoadMapReleaseStatuses holds the gate to the release statuses design.md
+// names: specified, implemented, and released pass, any other word is a
+// finding naming the release (srd045 R8.2, #188).
+func TestRoadMapReleaseStatuses(t *testing.T) {
+	stubSpec(t, nil, nil)
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, "docs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	roadMap := "---\nid: road-map\ntitle: Road map\n---\n\n" +
+		"<!-- release: 01.0 | status: released -->\n## 01.0 - Release 01.0\n\nCut.\n\n" +
+		"<!-- release: 01.1 | status: done -->\n## 01.1 - Release 01.1\n\nPlanned.\n"
+	if err := os.WriteFile(filepath.Join(dir, "docs", "road-map.md"), []byte(roadMap), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	r, err := Check(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(r.Findings) != 1 || r.Findings[0].Field != "release 01.1 status" || !strings.Contains(r.Findings[0].Message, `"done"`) {
+		t.Fatalf("report = %+v, want one finding on release 01.1's status", r)
+	}
+}
