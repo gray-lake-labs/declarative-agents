@@ -30,7 +30,13 @@ works a story end to end in one worktree and one merge.
 The releases were built in this order: 00.0 to 00.3, 01.0 to 01.2, 03.0,
 01.4, 04.0 to 04.3, then 03.1 and 04.4 together. 05.0 and 06.0, specified and
 not built, come next in that order; they were numbered 01.3 and 02.0
-until 2026-10-22. Each use case cites only the requirement items its
+until 2026-10-22. Also on 2026-10-22, the trunk decision (GH-189, design.md
+D13) chose the monorepo: tpm moves into declarative-agents as an
+application (the migration epic, GH-190), gated on the declarative-agent
+workflow pilot (GH-135). The migration orders the remaining work: 05.0 and
+06.0 are planned in the merged repository unless they ship first as the
+last satellite releases, and no further release builds machinery for
+tracking the parent from outside. Each use case cites only the requirement items its
 release delivers, so the SRDs it touches are partly delivered; the rest
 waits for 06.0. Every release proves itself with mage audit, which runs
 the parent's specification-critic corpus-audit agent

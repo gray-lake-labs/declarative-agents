@@ -71,6 +71,11 @@ A configuration file scrum-master reads is a config document: Markdown with fron
 
 An SRD whose release is not the next one holds its problem, goals, non-goals, and one requirement group of direction; its detailed requirement items are written when its release is planned, as its use cases are. Items written earlier and never built retire in place (D6) rather than wait to mislead the planning of the release before them. A requirement that depends on behavior an unbuilt SRD specifies states its interim rule, the behavior that holds until that SRD is built, as srd038 R2 does for Sprint Goals closing before track-goals runs. An SRD that is partly built keeps its built items live and reduces only the rest.
 
+<!-- article: D13 -->
+### D13 - The trunk is the monorepo
+
+Decided 2026-10-22 (GH-189): tpm becomes an application in declarative-agents, in the applications shape — a self-contained module whose composition manifest declares the skill profiles, with tpm subcommands as their tool blocks. This repository is therefore a satellite winding down, not a trunk growing: no new machinery is built to track the parent from outside (pins, mirrors, overlays, parent-upgrade workflows), and a document problem the parent's format cannot express is solved by changing the format in the merged repository, not by indirection here. Until the migration (GH-190) lands, the pinned parent remains the validator of record and D2 holds as written; the migration's planning writes the articles that replace this note.
+
 <!-- field: schema | form: "tree" -->
 ## Schema
 
