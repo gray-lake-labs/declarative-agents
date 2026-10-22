@@ -1,0 +1,84 @@
+# The draft workflow's tpm words: the survey the machine runs first and the check the model dispatches in the Converse state.
+# Optional flags are parameters, never ${VAR} args: the loader drops an
+# argument whose variable is unset, which corrupts the flag list (the GH-135
+# pilot finding). A non-zero exit is tpm's refusal, fed back to the model
+# (design.md D14).
+unit: tpm-draft-declarations
+tools:
+- name: tpm_backlog_check
+  type: exec
+  binary: tpm
+  args:
+  - backlog
+  - check
+  - --json
+  visibility: external
+  description: Check the hierarchy documents and report every finding to fix (srd045).
+  category: boundary
+  parameters:
+    type: object
+    properties:
+      dir:
+        type: string
+        description: The repository's checkout.
+        flag: --dir
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: tpm backlog check's JSON report.
+    schema:
+      type: string
+  side_effects:
+  - kind: external_api_call
+    target: tracker
+    description: Reads the hierarchy documents; writes nothing.
+  reversibility:
+    classification: irreversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: tpm's own policy governs what follows; the run reverses nothing.
+  errors:
+  - signal: CommandError
+    condition: the tpm binary cannot be started
+    message_shape: 'tpm_backlog_check: <error>'
+    state_after_failure: nothing ran in a process that did not start
+  - signal: ToolFailed
+    condition: the check finds problems or tpm refuses, exiting non-zero
+    message_shape: <tpm's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as tpm's refusal left them
+- name: tpm_backlog_list
+  type: exec
+  binary: tpm
+  args:
+  - backlog
+  - list
+  - --json
+  visibility: internal
+  description: Survey the hierarchy before the conversation, so the draft lands under the right parent (srd045, srd046).
+  category: boundary
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: tpm backlog list's JSON report of the hierarchy.
+    schema:
+      type: string
+  side_effects:
+  - kind: filesystem_read
+    target: hierarchy_documents
+    description: Reads the hierarchy documents; writes nothing.
+  reversibility:
+    classification: reversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: Reading the hierarchy changes nothing.
+  errors:
+  - signal: CommandError
+    condition: the tpm binary cannot be started
+    message_shape: 'tpm_backlog_list: <error>'
+    state_after_failure: nothing ran in a process that did not start
+  - signal: ToolFailed
+    condition: tpm refuses the listing and exits non-zero
+    message_shape: <tpm's refusal reason, as printed>
+    state_after_failure: the checkout is as tpm's refusal left it

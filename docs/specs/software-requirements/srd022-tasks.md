@@ -129,6 +129,14 @@ Proposes the issues the story still needs, each a change one reviewer reads in o
 
 Files each agreed issue with tpm issue file under the Sprint Goal's milestone, and shows each issue's reference and lint verdict.
 
+<!-- req: R7 -->
+## R7 - The workflow as a profile
+
+<!-- req: R7.1 -->
+### R7.1
+
+The workflow is a declarative-agents profile, plugin/agents/tasks/ (design.md D14): the machine's states carry the skill's steps, the tpm commands are model-dispatched tools with typed parameters, and the model acts only in the Decompose state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and tpm install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
+
 <!-- field: non_goals -->
 ## Non-goals
 
@@ -190,3 +198,13 @@ A chosen story's issues are filed only after the owner agrees, each admitted, in
 - [R6.1](#r61)
 - [R6.2](#r62)
 - [R6.3](#r63)
+
+<!-- ac: AC5 -->
+### AC5
+
+The tasks profile validates with the pinned runtime, and the installed SKILL.md presents its machine's states as its steps.
+
+<!-- field: traces -->
+#### Traces
+
+- [R7.1](#r71)

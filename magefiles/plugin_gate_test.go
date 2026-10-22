@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -104,10 +105,16 @@ func manifestProblems(b []byte) []string {
 	return out
 }
 
-// skillProblems checks every skills/<name>/SKILL.md of a plugin root.
+// skillProblems checks every skills/<name>/SKILL.md of a plugin root. An
+// absent skills directory is allowed: every skill is a declarative-agents
+// profile under agents/, and its SKILL.md is rendered at install
+// (design.md D14, GH-198).
 func skillProblems(fsys fs.FS) []string {
 	var out []string
 	entries, err := fs.ReadDir(fsys, "skills")
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
 	if err != nil {
 		return []string{"skills/: " + err.Error()}
 	}

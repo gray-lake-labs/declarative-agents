@@ -1,0 +1,23 @@
+# Tool selection for the specify workflow. The tpm words and file words are
+# model-invoked in the Draft state via $tool dispatch (design.md D10, D14).
+tools:
+  # tpm words -- model-invoked
+  - tpm_issue_file
+  - tpm_issue_lint
+
+  # File words -- the body is written to issue.md
+  - read
+  - write
+  - edit
+  - find
+  - list_files
+
+  # Model loop -- direct transition actions
+  - invoke_llm
+  - parse_response
+  - report_parse_error
+  - reset_history
+  - nudge_reread
+
+  # Completion -- emits TaskCompleted via parse_response
+  - done

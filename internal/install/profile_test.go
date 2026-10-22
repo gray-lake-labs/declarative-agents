@@ -11,62 +11,81 @@ import (
 	"github.com/gray-lake-labs/scrum-master"
 )
 
-// The implement skill renders from its profile: the machine's states between
-// the initial and the terminal ones are the numbered steps, in the machine's
-// order (GH-135; srd037 R1.4, srd036 R6.2).
-func TestImplementSkillRendersFromProfile(t *testing.T) {
+// Every skill renders from its profile: the machine's states between the
+// initial and the terminal ones are the numbered steps, in the machine's
+// order (GH-135, GH-198; srd037 R1.4, srd036 R6.2).
+func TestSkillsRenderFromTheirProfiles(t *testing.T) {
 	skills, err := ProfileSkills(scrummaster.Plugin, scrummaster.AgentsDir)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(skills) != 1 || skills[0].Name != "implement" {
-		t.Fatalf("profiles rendered %v, want exactly implement", skills)
+	var names []string
+	for _, s := range skills {
+		names = append(names, s.Name)
 	}
-	s := skills[0]
-	if n := len([]rune(s.Description)); n < 1 || n > 1024 || strings.Contains(s.Description, "\n") {
-		t.Errorf("description must be one line of 1 to 1024 characters, got %d", n)
+	want := []string{"draft", "implement", "plan", "specify", "sprint-end", "tasks"}
+	if strings.Join(names, " ") != strings.Join(want, " ") {
+		t.Fatalf("profiles rendered %v, want %v", names, want)
 	}
+	for _, s := range skills {
+		if n := len([]rune(s.Description)); n < 1 || n > 1024 || strings.Contains(s.Description, "\n") {
+			t.Errorf("%s: description must be one line of 1 to 1024 characters, got %d", s.Name, n)
+		}
+		mb, err := scrummaster.Plugin.ReadFile(scrummaster.AgentsDir + "/" + s.Name + "/machine.yaml")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var m machineDoc
+		if err := yaml.Unmarshal(mb, &m); err != nil {
+			t.Fatal(err)
+		}
+		terminal := map[string]bool{}
+		for _, name := range m.TerminalStates {
+			terminal[name] = true
+		}
+		var steps []string
+		for _, st := range m.States {
+			if st.Name != m.InitialState && !terminal[st.Name] {
+				steps = append(steps, st.Name)
+			}
+		}
+		for i, name := range steps {
+			if want := fmt.Sprintf("%d. **%s** — ", i+1, name); !strings.Contains(s.Body, want) {
+				t.Errorf("%s: rendered body misses step %q", s.Name, want)
+			}
+		}
+		if got := regexp.MustCompile(`(?m)^\d+\. \*\*`).FindAllString(s.Body, -1); len(got) != len(steps) {
+			t.Errorf("%s: rendered %d steps, machine has %d", s.Name, len(got), len(steps))
+		}
+		for _, name := range m.TerminalStates {
+			if !strings.Contains(s.Body, "**"+name+"**") {
+				t.Errorf("%s: rendered body misses terminal state %s", s.Name, name)
+			}
+		}
+		if !strings.Contains(s.Body, "design.md D1") {
+			t.Errorf("%s: rendered body misses its design.md citation", s.Name)
+		}
+	}
+}
 
-	mb, err := scrummaster.Plugin.ReadFile(scrummaster.AgentsDir + "/implement/machine.yaml")
+// The implement skill keeps the workflow's commands in its rendered steps.
+func TestImplementRenderKeepsItsCommands(t *testing.T) {
+	skills, err := ProfileSkills(scrummaster.Plugin, scrummaster.AgentsDir)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var m machineDoc
-	if err := yaml.Unmarshal(mb, &m); err != nil {
-		t.Fatal(err)
-	}
-	terminal := map[string]bool{}
-	for _, name := range m.TerminalStates {
-		terminal[name] = true
-	}
-	var steps []string
-	for _, st := range m.States {
-		if st.Name != m.InitialState && !terminal[st.Name] {
-			steps = append(steps, st.Name)
+	for _, s := range skills {
+		if s.Name != "implement" {
+			continue
 		}
-	}
-	for i, name := range steps {
-		want := fmt.Sprintf("%d. **%s** — ", i+1, name)
-		if !strings.Contains(s.Body, want) {
-			t.Errorf("rendered body misses step %q", want)
+		for _, cmd := range []string{"tpm issue pop", "git push", "tpm issue merge", "design.md D10"} {
+			if !strings.Contains(s.Body, cmd) {
+				t.Errorf("rendered body misses %q", cmd)
+			}
 		}
-	}
-	if got := regexp.MustCompile(`(?m)^\d+\. `).FindAllString(s.Body, -1); len(got) != len(steps) {
-		t.Errorf("rendered %d steps, machine has %d", len(got), len(steps))
-	}
-	for _, name := range m.TerminalStates {
-		if !strings.Contains(s.Body, "**"+name+"**") {
-			t.Errorf("rendered body misses terminal state %s", name)
+		if lines := strings.Count(Render("claude", s, "dev"), "\n"); lines > 70 {
+			t.Errorf("rendered SKILL.md has %d lines; keep a profile-rendered skill readable at a glance", lines)
 		}
-	}
-	// The same steps as the skill it replaces: the workflow's commands.
-	for _, cmd := range []string{"tpm issue pop", "git push", "tpm issue merge", "design.md D10"} {
-		if !strings.Contains(s.Body, cmd) {
-			t.Errorf("rendered body misses %q", cmd)
-		}
-	}
-	if lines := strings.Count(Render("claude", s, "dev"), "\n"); lines > 70 {
-		t.Errorf("rendered SKILL.md has %d lines; keep a profile-rendered skill readable at a glance", lines)
 	}
 }
 
