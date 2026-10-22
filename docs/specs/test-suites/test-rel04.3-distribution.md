@@ -35,7 +35,7 @@ the pin.
 <!-- field: test_cases -->
 ## Test cases
 
-<!-- case: the runtime is fetched once into the shared cache | status: specified -->
+<!-- case: the runtime is fetched once into the shared cache | status: implemented -->
 ### the runtime is fetched once into the shared cache
 
 <!-- field: use_case -->
@@ -51,7 +51,7 @@ mage integration:runtime
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/runtime -run '^TestFetch'
+go test ./internal/runtime -run '^TestFetchLaysOut|^TestFetchDryRun|^TestBuildSpecTool|^TestPin'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
@@ -68,7 +68,7 @@ go test ./internal/runtime -run '^TestFetch'
 
 - [srd037-install](../software-requirements/srd037-install.md) [AC7](../software-requirements/srd037-install.md#ac7)
 
-<!-- case: the runtime is held to the release's checksums | status: specified -->
+<!-- case: the runtime is held to the release's checksums | status: implemented -->
 ### the runtime is held to the release's checksums
 
 <!-- field: use_case -->
@@ -84,7 +84,7 @@ mage integration:runtime
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/runtime -run '^TestVerify|^TestResolve'
+go test ./internal/runtime -run '^TestReleaseBinary|^TestHostAsset|^TestFetchReplaces|^TestFetchRefuses|^TestTPMAgent|^TestInspect'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
@@ -101,7 +101,7 @@ go test ./internal/runtime -run '^TestVerify|^TestResolve'
 
 - [srd037-install](../software-requirements/srd037-install.md) [AC7](../software-requirements/srd037-install.md#ac7)
 
-<!-- case: doctor reports the runtime and repairs without Go | status: specified -->
+<!-- case: doctor reports the runtime and repairs without Go | status: implemented -->
 ### doctor reports the runtime and repairs without Go
 
 <!-- field: use_case -->

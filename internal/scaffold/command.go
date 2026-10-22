@@ -185,6 +185,11 @@ func humanDoctor(r DoctorResult) string {
 	if r.Repair.Skipped != "" {
 		fmt.Fprintf(&b, "repair skipped: %s\n", r.Repair.Skipped)
 	}
+	if r.Runtime.Problem != "" {
+		fmt.Fprintf(&b, "runtime %s: %s\n", r.Runtime.Release, r.Runtime.Problem)
+	} else {
+		fmt.Fprintf(&b, "runtime %s: %s (%s)\n", r.Runtime.Release, r.Runtime.Agent, r.Runtime.From)
+	}
 	agents := map[string]bool{}
 	for _, f := range r.Skills {
 		fmt.Fprintf(&b, "skill %-9s %s %s\n", f.Problem, f.Agent, f.Path)

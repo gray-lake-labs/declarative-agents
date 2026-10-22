@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/gray-lake-labs/scrum-master/internal/runtime"
 	"github.com/gray-lake-labs/scrum-master/internal/scaffold"
 )
 
@@ -17,7 +18,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Doctor)
 }
 
-// Doctor builds tpm, inits a system repository, turns it into one an older tpm laid down (README.md deleted, AGENTS.md the owner's without a block, a block rewritten around the owner's notes, a document out of canonical form), and proves tpm doctor's dry run writes nothing, its run restores README.md, appends the block to AGENTS.md, refreshes the block and keeps the notes, and repairs the document so the parent's corpus audit and the spec tool's check pass, and a second run changes nothing (test-rel04.1-orientation-doctor). It needs no rig.
+// Doctor builds tpm, inits a system repository, turns it into one an older tpm laid down (README.md deleted, AGENTS.md the owner's without a block, a block rewritten around the owner's notes, a document out of canonical form), and proves tpm doctor's dry run writes nothing, its run restores README.md, appends the block to AGENTS.md, refreshes the block and keeps the notes, and repairs the document so the parent's corpus audit and the spec tool's check pass, and a second run changes nothing, and that it reports the runtime at the release tpm pins and refuses a TPM_AGENT that is not that release's binary (test-rel04.1-orientation-doctor, test-rel04.3-distribution). It needs no rig.
 func (Integration) Doctor() error {
 	root, err := repositoryRoot()
 	if err != nil {
@@ -130,10 +131,10 @@ func (Integration) Doctor() error {
 		}
 	}
 
-	doctor := func(args ...string) (scaffold.DoctorResult, error) {
+	doctorEnv := func(extra []string, args ...string) (scaffold.DoctorResult, error) {
 		var r scaffold.DoctorResult
 		cmd := exec.Command(bin, append([]string{"doctor", "--json", "--dir", repo}, args...)...)
-		cmd.Dir, cmd.Env = repo, env
+		cmd.Dir, cmd.Env = repo, append(slices.Clone(env), extra...)
 		out, err := cmd.Output()
 		var exit *exec.ExitError
 		if errors.As(err, &exit) {
@@ -144,6 +145,7 @@ func (Integration) Doctor() error {
 		}
 		return r, json.Unmarshal(out, &r)
 	}
+	doctor := func(args ...string) (scaffold.DoctorResult, error) { return doctorEnv(nil, args...) }
 	expectChanges := func(c *check, r scaffold.DoctorResult, run string) {
 		got := map[string]string{}
 		for _, f := range r.Files {
@@ -164,6 +166,16 @@ func (Integration) Doctor() error {
 		return err
 	}
 	expectChanges(c, dry, "dry run")
+	pin, err := runtime.Pin()
+	if err != nil {
+		return err
+	}
+	c.expect(dry.Runtime.Release == pin && (dry.Runtime.Agent != "") != (dry.Runtime.Problem != ""), "dry run: runtime %+v", dry.Runtime)
+	foreign, err := doctorEnv([]string{runtime.AgentEnv + "=" + bin}, "--dry-run")
+	if err != nil {
+		return err
+	}
+	c.expect(foreign.Runtime.Agent == "" && strings.Contains(foreign.Runtime.Problem, pin), "a TPM_AGENT that is not the release's binary: runtime %+v", foreign.Runtime)
 	_, statErr := os.Stat(filepath.Join(repo, "README.md"))
 	b, _ := os.ReadFile(epics)
 	v, _ := os.ReadFile(vision)
