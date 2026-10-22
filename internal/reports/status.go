@@ -52,17 +52,23 @@ func StatusBody(cfg Config, m Member, reportsProject string, weekStart time.Time
 	week := ISOWeek(weekStart)
 	path := ReportPath(weekStart, m.Username)
 	branch := week + "-" + m.Username
+	// The system repository holds no Sprint Goal of its own; its week takes
+	// the period from the teams' (srd018 R8.1).
+	control := ""
+	if cfg.System != "" && m.Project == cfg.System {
+		control = " --control " + cfg.System
+	}
 	return fmt.Sprintf(`@%[1]s: your weekly status for %[2]s, due %[3]s.
 
 %[9]s
 
 ## Requirements
 
-1. Run `+"`tpm reports week --project %[4]s --user %[1]s --json`"+` for this repository's open Sprint Goals and your activity this week.
+1. Run `+"`tpm reports week --project %[4]s --user %[1]s%[10]s --json`"+` for this repository's open Sprint Goals and your activity this week.
 2. Model step (structure): for each open Sprint Goal, ask and record its status (on-track, at-risk, blocked, or done), its problems, and whether it is complete; record what blocks the work.
 3. Run `+"`tpm issue pop --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s --dir <reports checkout>`"+`, and in the worktree it opens write %[7]s in the report format (schema/report.md).
 4. Run `+"`tpm reports validate --dir <reports checkout> %[7]s`"+` and fix what it reports.
-5. Commit, push the branch, and ask a reviewer to run `+"`tpm issue approve --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s`"+`; then run `+"`tpm issue merge --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s --dir <reports checkout>`"+`; the merge closes this issue.
+5. Commit and push the branch; when the program's policy requires approval, ask a reviewer to run `+"`tpm issue approve --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s`"+`. Then run `+"`tpm issue merge --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s --dir <reports checkout>`"+`; the merge closes this issue.
 
 ## Acceptance Criteria
 
@@ -75,7 +81,7 @@ Weekly, due the day after %[8]s. After its merge closes it, the reports reposito
 ## Previous Runs
 
 - none
-`, m.Username, week, DueDate(weekStart, reminder).Format("2006-01-02"), m.Project, reportsProject, branch, path, reminder, statusMarker(week, m.Username))
+`, m.Username, week, DueDate(weekStart, reminder).Format("2006-01-02"), m.Project, reportsProject, branch, path, reminder, statusMarker(week, m.Username), control)
 }
 
 // StatusResult is what status-issues did for one person.

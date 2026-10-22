@@ -70,7 +70,16 @@ func init() {
 			var h strings.Builder
 			fmt.Fprintf(&h, "%s, %s to %s: %d reports, %d signals; recommended version %s: %s\n", f.Project, a.from, a.to, agg.Reports, len(agg.Signals), orNothing(f.Recommended), f.Next.Reason)
 			for _, o := range f.SprintGoals {
-				fmt.Fprintf(&h, "  %s %s (%s): %s, reported %q, complete=%v, met=%v\n", o.Issue, strings.Join(o.Serves, ","), o.Release, o.State, o.Reported, o.ReportedComplete, o.Met)
+				// Reported complete is not met: only track-goals decides met
+				// (srd038 R2.2), so the line names which one holds.
+				outcome := "not complete"
+				switch {
+				case o.Met:
+					outcome = "met"
+				case o.ReportedComplete:
+					outcome = "reported complete, not yet met"
+				}
+				fmt.Fprintf(&h, "  %s %s (%s): %s, reported %q, %s\n", o.Issue, strings.Join(o.Serves, ","), o.Release, o.State, o.Reported, outcome)
 			}
 			return ctx.Emit(f, h.String())
 		},
