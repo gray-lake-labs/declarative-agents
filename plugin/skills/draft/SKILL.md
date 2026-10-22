@@ -1,6 +1,6 @@
 ---
 name: draft
-description: Draft one planning document, a theme, initiative, epic, feature, or story, from a description, in conversation with its owner, then check it and offer its children (srd046). Use when a person has notes or a description and asks to write, draft, or plan a theme, initiative, epic, feature, or story.
+description: Draft one planning document, a theme, initiative, epic, feature, or story, or an engineering document, from a description, in conversation with its owner, then check it and offer its children (srd046). Use when a person has notes or a description and asks to write, draft, or plan a theme, initiative, epic, feature, or story, or to describe how a system or subsystem is built.
 ---
 
 # draft
@@ -27,11 +27,14 @@ Input: the description (a file or text) and the level to write.
    | epic | owner; a horizon longer than one sprint; dependencies; non-goals |
    | feature | owner; its boundary; its tests |
    | story | as a, I want, so that; points and rank; each criterion's test and environment; cites |
+   | engineering | which part; its structure, runtime, and deployment; the decisions it explains; one section each |
 
    Write nothing until the person answers or says to use your
    recommendations. Ask for no other confirmation.
 4. Model step (structure): write the document at the level's location with
-   status `to_be_agreed`. Run `tpm backlog check` and fix every finding.
+   status `to_be_agreed` (an engineering document has no status; name it
+   in ARCHITECTURE.md's related documents). Run `tpm backlog check` and fix
+   every finding.
 5. Model step (iterate): show the document and revise it with the person,
    running `tpm backlog check` after each revision.
 6. Offer the next level down (initiatives under a theme, epics under an

@@ -115,11 +115,12 @@ func (Integration) Init() error {
 }
 
 // expectOrientation holds a repository tpm laid down to its orientation
-// files: README.md and AGENTS.md at the root, a README in each hierarchy
-// folder of has and in none of lacks, each one tpm block, and AGENTS.md
+// files: README.md and AGENTS.md at the root, docs/engineering/README.md, a
+// README in each hierarchy folder of has and in none of lacks, each one tpm
+// block, ARCHITECTURE.md naming the engineering documents, and AGENTS.md
 // carrying the Mermaid figure rule (srd043 R1.6, R2.4).
 func expectOrientation(c *check, dir string, has, lacks []string) {
-	paths := []string{"README.md", scaffold.AgentsFile}
+	paths := []string{"README.md", scaffold.AgentsFile, filepath.Join("docs", "engineering", "README.md")}
 	for _, f := range has {
 		paths = append(paths, filepath.Join("docs", "specs", f, "README.md"))
 	}
@@ -132,6 +133,8 @@ func expectOrientation(c *check, dir string, has, lacks []string) {
 		_, err := os.Stat(filepath.Join(dir, "docs", "specs", f, "README.md"))
 		c.expect(errors.Is(err, fs.ErrNotExist), "a %s README was written where the level holds no %s", f, f)
 	}
+	architecture, _ := os.ReadFile(filepath.Join(dir, "docs", "ARCHITECTURE.md"))
+	c.expect(strings.Contains(string(architecture), "docs/engineering/"), "ARCHITECTURE.md does not name docs/engineering/")
 	agents, _ := os.ReadFile(filepath.Join(dir, scaffold.AgentsFile))
 	c.expect(strings.Contains(string(agents), "Mermaid in a fenced code block") && strings.Contains(string(agents), "- tpm doctor: "),
 		"AGENTS.md lacks the figure rule or tpm doctor")

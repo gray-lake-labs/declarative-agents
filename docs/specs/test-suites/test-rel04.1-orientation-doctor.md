@@ -51,8 +51,8 @@ go test ./internal/scaffold -run '^Test(InitWritesOrientation|OnboardWritesOrien
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- system: README.md, AGENTS.md, and README.md in themes/, initiatives/, and epics/
-- subsystem: README.md, AGENTS.md, and README.md in epics/, features/, and stories/; none in themes/ or initiatives/
+- system: README.md, AGENTS.md, and README.md in themes/, initiatives/, epics/, and engineering/
+- subsystem: README.md, AGENTS.md, and README.md in epics/, features/, stories/, and engineering/; none in themes/ or initiatives/
 - agents_file: every command group and skill at the level, and the Mermaid figure rule
 - audit: the parent's corpus audit and the hierarchy gate pass on both repositories
 

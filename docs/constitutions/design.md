@@ -19,7 +19,7 @@ Specifications lead implementation. A new skill or a change to one starts with a
 <!-- article: D2 -->
 ### D2 - Every file is Markdown with tags
 
-Every file is Markdown with marker tags. Structured artifacts use the format the pinned declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's hierarchy documents (themes, initiatives, epics, features, and stories), which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides, except a program repository's orientation files, which tpm writes where a first-time reader looks: README.md and AGENTS.md at the root and a README.md in each hierarchy folder (srd043 R1.6, R2.4). Four files are not Markdown because a consumer outside this repository requires their format: docs/external-pins.yaml, which the parent's audit reads by path, and docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the parent's audit executes; and plugin/plugin.json, which the Agent Plugins 1.0 standard names.
+Every file is Markdown with marker tags. Structured artifacts use the format the pinned declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's hierarchy documents (themes, initiatives, epics, features, and stories), which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides, except a program repository's orientation files, which tpm writes where a first-time reader looks: README.md and AGENTS.md at the root and a README.md in each hierarchy folder and in docs/engineering/ (srd043 R1.6, R2.4). Four files are not Markdown because a consumer outside this repository requires their format: docs/external-pins.yaml, which the parent's audit reads by path, and docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the parent's audit executes; and plugin/plugin.json, which the Agent Plugins 1.0 standard names.
 
 <!-- article: D3 -->
 ### D3 - Traceability
@@ -451,7 +451,8 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
     1. introduction
     1. sections
     1. references
-  - purpose: Defines repository-wide engineering practices shared by modules.
+  - purpose:
+    - "Defines the engineering of the repository's system or subsystem, in the detail ARCHITECTURE's index has no room for": architecture descriptions of how its parts are structured, run, and deployed, and the practices its parts share. ARCHITECTURE names each engineering document in its related documents.
 - guide:
   - location: docs/guides/name.md
   - format: markdown

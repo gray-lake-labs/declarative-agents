@@ -83,7 +83,7 @@ Writes control/trackers.md naming bd with the tracker repository --tracker or TP
 <!-- req: R1.6 -->
 ### R1.6
 
-Writes the orientation files at the system level: README.md and AGENTS.md at the root of --dir, and a README.md in docs/specs/themes/, docs/specs/initiatives/, and docs/specs/epics/. The root README says what the repository is, the order to read its corpus in, and the chain theme, initiative, epic, feature, story with each level's owner and timeframe. Each folder README says what its level is, its owner, timeframe, parent kind, file naming, and status values, and which tpm commands and skills read it. AGENTS.md lists the tpm command groups and the skills that apply at the level, read from the binary's dispatch table and embedded skills, and the working rules: intent changes through the gate, work enters as an issue, and every figure is Mermaid in a fenced code block inside the Markdown document, with no generated image file or other diagram source under docs/.
+Writes the orientation files at the system level: README.md and AGENTS.md at the root of --dir, and a README.md in docs/specs/themes/, docs/specs/initiatives/, and docs/specs/epics/, and in docs/engineering/. The root README says what the repository is, the order to read its corpus in, ARCHITECTURE and the engineering documents among it, and the chain theme, initiative, epic, feature, story with each level's owner and timeframe. Each folder README says what its level is, its owner, timeframe, parent kind, file naming, and status values, and which tpm commands and skills read it. The docs/engineering/ README says what an engineering document is (how the repository's part is structured, run, and deployed, and the practices its parts share), how it differs from ARCHITECTURE, the index that names it, and from the SRDs, and its file naming and sections; the ARCHITECTURE skeleton names docs/engineering/ among its related documents. AGENTS.md lists the tpm command groups and the skills that apply at the level, read from the binary's dispatch table and embedded skills, and the working rules: intent changes through the gate, work enters as an issue, and every figure is Mermaid in a fenced code block inside the Markdown document, with no generated image file or other diagram source under docs/.
 
 <!-- req: R2 -->
 ## R2 - tpm onboard
@@ -106,7 +106,7 @@ Files no second registration while one for the same repository is open or the su
 <!-- req: R2.4 -->
 ### R2.4
 
-Writes the orientation files at the subsystem level, as R1.6 states them: README.md and AGENTS.md at the root, and a README.md in docs/specs/epics/, docs/specs/features/, and docs/specs/stories/, the levels a team's repository holds (srd045 R2.2), and none in themes/ or initiatives/.
+Writes the orientation files at the subsystem level, as R1.6 states them: README.md and AGENTS.md at the root, and a README.md in docs/specs/epics/, docs/specs/features/, and docs/specs/stories/, the levels a team's repository holds (srd045 R2.2), and in docs/engineering/, and none in themes/ or initiatives/.
 
 <!-- req: R3 -->
 ## R3 - Common behavior
@@ -237,7 +237,7 @@ Both commands honour --json and --dry-run, never prompt, refuse a directory that
 <!-- ac: AC5 -->
 ### AC5
 
-init writes README.md, AGENTS.md, and README.md in themes/, initiatives/, and epics/; onboard writes README.md, AGENTS.md, and README.md in epics/, features/, and stories/ and none in themes/ or initiatives/; AGENTS.md names every command group and skill at its level and the Mermaid figure rule; the parent's corpus audit and the hierarchy gate pass on both results.
+init writes README.md, AGENTS.md, and README.md in themes/, initiatives/, epics/, and engineering/; onboard writes README.md, AGENTS.md, and README.md in epics/, features/, stories/, and engineering/ and none in themes/ or initiatives/; AGENTS.md names every command group and skill at its level and the Mermaid figure rule; the parent's corpus audit and the hierarchy gate pass on both results.
 
 <!-- field: traces -->
 #### Traces
