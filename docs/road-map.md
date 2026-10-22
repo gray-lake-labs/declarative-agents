@@ -36,7 +36,11 @@ application (the migration epic, GH-190), gated on the declarative-agent
 workflow pilot (GH-135). The migration orders the remaining work: 05.0 and
 06.0 are planned in the merged repository unless they ship first as the
 last satellite releases, and no further release builds machinery for
-tracking the parent from outside. Each use case cites only the requirement items its
+tracking the parent from outside. The tool layer the migration carries is
+a word library (GH-201): composite tpm commands decompose into profiles
+over primitive, policy-free words, each migration on its own evidence —
+issue merge first, its gates, merge, and closes three words the merge
+profile composes. Each use case cites only the requirement items its
 release delivers, so the SRDs it touches are partly delivered; the rest
 waits for 06.0. Every release proves itself with mage audit, which runs
 the parent's specification-critic corpus-audit agent

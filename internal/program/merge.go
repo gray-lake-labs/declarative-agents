@@ -33,7 +33,11 @@ type MergeResult struct {
 	// Reported are the Sprint Goals the merge closed as reported complete,
 	// each with a reported_complete event on its ledger (srd038 R2.2).
 	Reported []string `json:"reported_complete,omitempty"`
-	DryRun   bool     `json:"dry_run"`
+	// ToClose is what merge-branch leaves for close-delivered, the --closes
+	// references comma-joined (empty when none, never omitted, so a
+	// machine's close word resolves it from the merge word's output; GH-201).
+	ToClose string `json:"closes"`
+	DryRun  bool   `json:"dry_run"`
 }
 
 // MergedByTrailer names, on a merge commit, the tracker user who ran the
@@ -42,15 +46,29 @@ type MergeResult struct {
 const MergedByTrailer = "Merged-by:"
 
 // Merge is delivery on the beads tracker, which delivers by local merge
-// (srd042 R2.3): it requires the issue open, each closes open, commits of
-// its own, the corpus audit passing when docs/ changes, and, when the gate
-// requires it, another person's approval of the commit it merges (srd013
-// R5.5); an approval given without the requirement is still reported. It
-// then merges the branch --no-ff into the default branch of the repository's main checkout with a message
-// citing the issue and each issue it closes, pushes it, and closes each on
-// that merge. A branch already merged is not merged again; its issues
-// still close.
+// (srd042 R2.3): the gates and the merge of MergeBranch, then the closes of
+// CloseDelivered — the two words the merge profile composes, so the command
+// and the machine run the same code (GH-201, srd013 R5.7). A branch already
+// merged is not merged again; its issues still close.
 func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, gate MergeGate, closes []string, dryRun bool) (MergeResult, error) {
+	r, err := MergeBranch(t, git, project, issueProject, iid, branch, dir, gate, closes, dryRun)
+	if err != nil || dryRun {
+		return r, err
+	}
+	r.ToClose = ""
+	r.Closed, r.Reported, r.AlreadyClosed, err = CloseDelivered(t, git, dir, r.Commit, issueProject, iid, closes)
+	return r, err
+}
+
+// MergeBranch is the merge word (GH-201, srd013 R5.7): the gates — the
+// issue and each closes open, commits of its own, the sprint-end summary
+// format, the corpus audit when docs/ changes, and, when the gate requires
+// it, another person's approval of the commit it merges (srd013 R5.5; an
+// approval given without the requirement is still reported) — then the
+// --no-ff merge into the default branch of the repository's main checkout,
+// with a message citing the issue and each issue it closes, pushed. It
+// closes nothing: close-delivered does, on the commit this word reports.
+func MergeBranch(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, gate MergeGate, closes []string, dryRun bool) (MergeResult, error) {
 	r := MergeResult{Project: project, IID: iid, Branch: branch, DryRun: dryRun}
 	if _, ok := tracker.For(t, issueProject).(MergeCloser); !ok {
 		return r, fmt.Errorf("this tracker does not close issues on a local merge; tpm issue merge serves the beads tracker")
@@ -165,47 +183,65 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 	if dryRun {
 		return r, nil
 	}
+	_ = others
+	r.ToClose = strings.Join(closes, ",")
+	return r, nil
+}
+
+// CloseDelivered is the close word (GH-201, srd013 R5.7): on the merge
+// commit the merge word reports, it closes the issue and each --closes
+// reference that is still open, posts a reported_complete event on each
+// closed Sprint Goal's ledger, and reports complete a Sprint Goal another
+// merge closed first — its ledger keeps the event that merge posted, or
+// gets one now; one closed as met is not (srd038 R2.2). A second run
+// changes nothing: a closed issue stays closed on its commit.
+func CloseDelivered(t tracker.Tracker, git Git, dir, commit, issueProject string, iid int, closes []string) (closed, reported, alreadyClosed []string, err error) {
+	others, already, err := checkCloses(t, closes)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	out, err := git.Run(dir, "rev-parse", "--path-format=absolute", "--git-common-dir")
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("close-delivered needs a local checkout of %s: %w", issueProject, err)
+	}
+	main := strings.TrimSuffix(strings.TrimSuffix(strings.TrimSpace(out), "/"), "/.git")
 	targets := append([][2]any{{issueProject, iid}}, others...)
 	for _, tgt := range targets {
 		p, n := tgt[0].(string), tgt[1].(int)
-		c, err := Close(t, git, p, n, main, r.Commit, false)
+		c, err := Close(t, git, p, n, main, commit, false)
 		if err != nil {
-			return r, fmt.Errorf("merged %s, but %s#%d did not close: %w", r.Commit, p, n, err)
+			return closed, reported, already, fmt.Errorf("merged %s, but %s#%d did not close: %w", commit, p, n, err)
 		}
 		if c.Closed {
-			r.Closed = append(r.Closed, p+"#"+strconv.Itoa(n))
+			closed = append(closed, p+"#"+strconv.Itoa(n))
 		}
 	}
 	for _, tgt := range others {
 		p, n := tgt[0].(string), tgt[1].(int)
 		i, err := t.GetIssue(p, n)
 		if err != nil {
-			return r, err
+			return closed, reported, already, err
 		}
 		m, ok := sprintgoal.Parse(i.Description)
 		if !ok {
 			continue
 		}
-		e, text := events.ReportedComplete(m.Release, r.Commit)
+		e, text := events.ReportedComplete(m.Release, commit)
 		if _, err := events.Post(t, p, n, e, events.ReportedCompleteRequired, text, false); err != nil {
-			return r, fmt.Errorf("closed %s#%d, but its ledger has no reported_complete event: %w", p, n, err)
+			return closed, reported, already, fmt.Errorf("closed %s#%d, but its ledger has no reported_complete event: %w", p, n, err)
 		}
-		r.Reported = append(r.Reported, p+"#"+strconv.Itoa(n))
+		reported = append(reported, p+"#"+strconv.Itoa(n))
 	}
-	// A Sprint Goal another merge closed first, as a team's sprint-end merge
-	// does before the program's, is still reported complete here: its
-	// ledger keeps the reported_complete event that merge posted, or gets
-	// one now; one closed as met is not (srd038 R2.2).
-	for _, ref := range r.AlreadyClosed {
-		reported, err := reportClosed(t, ref, r.Commit)
+	for _, ref := range already {
+		was, err := reportClosed(t, ref, commit)
 		if err != nil {
-			return r, err
+			return closed, reported, already, err
 		}
-		if reported {
-			r.Reported = append(r.Reported, ref)
+		if was {
+			reported = append(reported, ref)
 		}
 	}
-	return r, nil
+	return closed, reported, already, nil
 }
 
 // reportClosed reports whether the closed issue ref is a Sprint Goal
