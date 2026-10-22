@@ -17,7 +17,7 @@ title: "Script: issue (tpm issue ...)"
 Every issue that enters a program has to carry the labels and sections the
 other scripts read, and every merge has to tell its reviewer what to
 look at. Done by hand, admission means something different in each
-repository, and an issue missing its acceptance criteria reaches do-work
+repository, and an issue missing its acceptance criteria reaches implement
 with nothing to build against.
 
 The issue subcommands are the small set of issue operations every
@@ -183,7 +183,7 @@ The marker recur writes into the next instance's body, naming the issue it recur
 <!-- field: non_goals -->
 ## Non-goals
 
-- Splitting an issue into sub-issues and working them; that arrives with tracking issues and do-work in a later release.
+- Working a story's issues in one branch; that is planned for implement at the story level.
 - Choosing what goes in a release; that is plan.
 - Tracking Sprint Goals, verifying merged work, closing tracking issues, or rendering the dashboard; that is track-goals (srd019).
 - Offering or assigning work to a person.

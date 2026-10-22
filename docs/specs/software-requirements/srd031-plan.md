@@ -118,7 +118,7 @@ Refuses to place a requirement without a named test and environment, and refuses
 <!-- req: R5.2 -->
 ### R5.2
 
-Refuses to create work issues; Developers turn the plan into issues with make-work.
+Refuses to create work issues; Developers turn each chosen story into issues with tasks.
 
 <!-- req: R6 -->
 ## R6 - Sprint Planning from stories

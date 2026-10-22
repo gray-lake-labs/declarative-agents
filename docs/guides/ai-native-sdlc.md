@@ -29,11 +29,11 @@ counted, not how the work runs.
 
 ```mermaid
 flowchart LR
-    P[planned release] -->|make-work| I[item with requirements and acceptance criteria]
+    P[planned release] -->|tasks| I[item with requirements and acceptance criteria]
     O[outer-loop skill] -->|specify| I
     A[recurring audit] -->|due| I
     I -->|implement| W[worktree, sub-issues if needed]
-    W -->|do-work| MR[reviewed merge]
+    W -->|implement| MR[reviewed merge]
     MR -->|review and merge| M[default branch]
     M -->|closes| I
     M -->|tpm release| REL[version tag]
@@ -47,10 +47,10 @@ it. The tracker holds the plan, so no window has to.
 
 | Step | Who | Skill | Produces |
 |---|---|---|---|
-| Make | Developers, from a planned release | `make-work` | One item per change the release needs, each in do-work's input format |
+| Make | Developers, from a chosen story | `tasks` | One item per change the story needs, each in the issue body's work format |
 | Push | Anyone, or an outer-loop skill on their answer | `specify` | One item with plane, kind, component, Requirements, Acceptance Criteria, Design Decisions, and an estimate, filed unassigned |
 | Pop | The person who will do it | `implement` | The item assigned to that person and no one else, a fresh worktree from the default branch, and sub-issues when the item is larger than one pass |
-| Work | The assignee, driving an agent | `do-work` | Each unit built against its Acceptance Criteria and committed with its requirements; actual size logged against the estimate |
+| Work | The assignee, driving an agent | `implement` | Each unit built against its Acceptance Criteria and committed with its requirements; actual size logged against the estimate |
 | Gate | Another person | approval, then merge | Review against the definition of done |
 | Close | The merge | closing lines | The item and its sub-issues closed; cycle time recorded |
 | Release | The producer, when others depend on it | `tpm release gate`, then `tpm release tag` | A version tag behind the release gate, which handoff routes downstream |
@@ -59,8 +59,8 @@ it. The tracker holds the plan, so no window has to.
 
 There is no separate specification document for a piece of work. An item
 carries its Requirements, Acceptance Criteria an agent can check, the Design
-Decisions already made, and the files it touches. That is do-work's input
-format, and every outer-loop skill pushes items in it. A vague item produces
+Decisions already made, and the files it touches. That is the issue body's
+work format, and every outer-loop skill pushes items in it. A vague item produces
 the wrong result at once, so the product owner's work, split between the
 program lead at component interfaces and the Product Owner and Developers
 inside a component, is clarity rather than list management. Effort is

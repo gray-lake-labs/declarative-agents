@@ -139,7 +139,7 @@ As a skill, is at most 50 lines (design.md D10).
 
 - Generating a whole program in one pass; that is the README's seeding brief.
 - Agreeing, planning, or scheduling the document; agreement is the owner's, and plan reads only agreed documents (srd031).
-- Turning a story into issues; that is make-work (srd045 R4.3).
+- Turning a story into issues; that is tasks at the story level (srd045 R4.3).
 
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria

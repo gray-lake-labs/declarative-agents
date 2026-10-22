@@ -12,8 +12,8 @@ carries whatever labels and sections its author remembered, so admission
 sends it back, or it reaches the person who pops it with nothing to build
 against.
 
-specify turns one request into one admitted issue in do-work's input
-format. The model does the one thing a program cannot: it structures the
+specify turns one request into one admitted issue in the issue body's
+work format. The model does the one thing a program cannot: it structures the
 request into the issue body. tpm does the rest: it picks the plane, kind,
 and component, files the issue unassigned, and lints it. The plane decides
 what the issue is: plane::data for project work, plane::management for a
@@ -23,7 +23,7 @@ a change to the process's rules under control/ (srd001 R1-R3).
 <!-- field: goals -->
 ## Goals
 
-- G1: Every request becomes one admitted issue in do-work's input format.
+- G1: Every request becomes one admitted issue in the issue body's work format.
 - G2: An issue's plane and kind say whether it is project work, a design change, a planning change, or a rule change.
 - G3: The model writes the body and nothing else.
 

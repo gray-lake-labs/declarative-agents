@@ -24,7 +24,7 @@ Table 1: The Scrum Team's accountabilities.
 | Scrum Guide | Here | Fit |
 |---|---|---|
 | Scrum Team: small, cross-functional, self-managing | A level's owner and the people who pull its issues; nobody assigns work, people pop issues for themselves (srd041 R9.1) | Aligned |
-| Developers: create the Increment, own the Sprint Backlog, hold to the Definition of Done, adapt daily | Component owners: turn each selected story into issues with make-work, pull and build them, review every merge, release (roles.md developer) | Aligned |
+| Developers: create the Increment, own the Sprint Backlog, hold to the Definition of Done, adapt daily | Component owners: turn each selected story into issues with tasks, pull and build them, review every merge, release (roles.md developer) | Aligned |
 | Product Owner: maximizes value, owns the Product Backlog and the Product Goal, orders the backlog | Subsystem owner: writes the team's epics, features, and user stories, orders the Product Backlog by rank, selects stories at Sprint Planning, judges the Increment (roles.md product_owner) | Aligned |
 | Scrum Master: accountable for the team's effectiveness, the events, and removing impediments | Owns the test subsystem: environments, suites, evidence, and audits; facilitates the Retrospective (roles.md scrum_master) | Deviation, explained below |
 | (none: the Guide has no role above one team) | Technical program manager: owns the system level, its themes, initiatives, and cross-team epics, the label schema, and the policy (roles.md technical_program_manager) | Addition, explained below |
@@ -36,7 +36,7 @@ Table 2: The Scrum events.
 | Scrum Guide | Here | Fit |
 |---|---|---|
 | The Sprint: fixed length, one month or less | A three-week period ending in a road-map release: a group milestone and one type::sprint issue holding the exit checklist (srd001 R7) | Aligned |
-| Sprint Planning: why, what, and how for the Sprint | tasks (srd022) files each team's Sprint Goal; plan (srd031 R6) lists the ranked Product Backlog with velocity and writes the stories the Product Owner chooses onto the Sprint Goal; make-work turns each story into issues | Aligned |
+| Sprint Planning: why, what, and how for the Sprint | tasks (srd022) files each team's Sprint Goal; plan (srd031 R6) lists the ranked Product Backlog with velocity and writes the stories the Product Owner chooses onto the Sprint Goal; tasks turns each story into issues | Aligned |
 | Daily Scrum: Developers inspect progress toward the Sprint Goal and adapt the Sprint Backlog | daily-scrum (srd020): the facts are shown, and only blockers and interrupts are asked; until it is built, tpm standup (srd010) | Aligned, with status recitation removed |
 | Sprint Review: inspect the Increment with stakeholders and adapt the Product Backlog | sprint-review (srd032): each Sprint Goal's ledger and evidence shown, the Product Owner's verdict recorded, follow-up items pushed; until it is built, the sprint-end issue (srd038), which also records which stories are done | Aligned |
 | Sprint Retrospective: plan ways to increase quality and effectiveness | sprint-retrospective (srd033): the period's metrics read, at most three plane::control issues that change the policy; until it is built, a policy change is a plane::control issue | Aligned |

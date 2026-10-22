@@ -134,7 +134,7 @@ naming the time of its last successful synchronization.
 ### R4.1
 
 The platform Terraform (groups, projects, memberships, recurring-issue
-seeding) is retired; recurring issues of srd014 are seeded by tpm
+seeding) is retired; recurring issues (srd001 R8) are seeded by tpm
 against the tracker repository.
 
 <!-- req: R4.2 -->

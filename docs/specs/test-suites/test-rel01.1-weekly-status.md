@@ -210,7 +210,7 @@ go test ./internal/reports -run '^Test(AggregateHonoursJSONAndDryRun|ActionableS
 #### Expected outputs
 
 - flags: --json and --dry-run honoured; no prompt
-- actionable_signal: one issue in do-work's input format
+- actionable_signal: one issue in the issue body's work format
 
 <!-- field: traces -->
 #### Traces

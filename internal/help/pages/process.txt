@@ -16,9 +16,9 @@ One release cycle, and what serves each step:
    2 tasks, a Sprint Goal per team          skill tasks; tpm goals
    3 epics, features, stories, and SRDs     skill draft; tpm backlog; tpm issue file, pop, merge
    4 Sprint Planning, stories to velocity   tpm plan candidates, backlog
-   5 make-work, each story becomes issues   skill make-work; tpm issue file
-   6 push, pop, do-work, a reviewed merge   tpm issue pop, approve, merge
-   7 release-push, a tag behind its gate    tpm release next, gate, tag
+   5 tasks, each story becomes issues       skill tasks; tpm issue file
+   6 specify, implement, a reviewed merge   skills specify, implement; tpm issue pop, approve, merge
+   7 release, a tag behind its gate         tpm release next, gate, tag
    8 promotion through the environments     CI/CD in the test subsystem
    9 track-goals, evidence on Sprint Goals  specified (srd019), not built
   10 sprint-review against the ledger       skill sprint-end; tpm sprint-end

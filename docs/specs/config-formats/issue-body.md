@@ -6,7 +6,7 @@ title: Issue body conventions
 <!-- field: purpose -->
 ## Purpose
 
-Defines the lines and sections scripts read from or write to an issue description or comment. The three work sections (Requirements, Acceptance Criteria, Design Decisions) are do-work's input format: every issue an outer-loop skill pushes carries them, and do-work builds against them whatever the issue's kind. Everything else in an issue body is free text for people. Each convention has one syntax so a script can find it with a line match.
+Defines the lines and sections scripts read from or write to an issue description or comment. The three work sections (Requirements, Acceptance Criteria, Design Decisions) are the issue body's work format: every issue an outer-loop skill pushes carries them, and implement builds against them whatever the issue's kind. Everything else in an issue body is free text for people. Each convention has one syntax so a script can find it with a line match.
 
 <!-- field: schema -->
 ## Schema
@@ -74,7 +74,7 @@ line
 <!-- field: description -->
 #### Description
 
-"Implements: STORY" on its own line in a description, naming the story the issue executes by same-repository id or pinned URL (srd007 R6.5). make-work writes it on every issue it creates from a story. At most one.
+"Implements: STORY" on its own line in a description, naming the story the issue executes by same-repository id or pinned URL (srd007 R6.5). tasks writes it on every issue it creates from a story. At most one.
 
 <!-- schema_entry: sprint_backlog_section -->
 ### sprint_backlog_section
@@ -126,7 +126,7 @@ section
 <!-- field: description -->
 #### Description
 
-A "## Requirements" heading followed by a list of what the deliverable must do or contain. Part of do-work's input; required by admission on every issue an outer-loop skill pushes.
+A "## Requirements" heading followed by a list of what the deliverable must do or contain. Part of the work format; required by admission on every issue an outer-loop skill pushes.
 
 <!-- schema_entry: acceptance_criteria_section -->
 ### acceptance_criteria_section
@@ -139,7 +139,7 @@ section
 <!-- field: description -->
 #### Description
 
-A "## Acceptance Criteria" heading followed by a list of checkable conditions, each naming the test that proves it and the environment where it counts, as "(test: T; environment: E)" (design.md D8). Part of do-work's input; the unit is not done until each holds. Required by admission on every issue an outer-loop skill pushes, and on build, experiment, research, and spec issues when policy says so.
+A "## Acceptance Criteria" heading followed by a list of checkable conditions, each naming the test that proves it and the environment where it counts, as "(test: T; environment: E)" (design.md D8). Part of the work format; the unit is not done until each holds. Required by admission on every issue an outer-loop skill pushes, and on build, experiment, research, and spec issues when policy says so.
 
 <!-- schema_entry: design_decisions_section -->
 ### design_decisions_section
@@ -152,7 +152,7 @@ section
 <!-- field: description -->
 #### Description
 
-A "## Design Decisions" heading followed by a list of choices already made and their reasons. Part of do-work's input; optional, present when a choice constrains how the deliverable is built.
+A "## Design Decisions" heading followed by a list of choices already made and their reasons. Part of the work format; optional, present when a choice constrains how the deliverable is built.
 
 <!-- schema_entry: notes_section -->
 ### notes_section
@@ -178,7 +178,7 @@ line
 <!-- field: description -->
 #### Description
 
-"Estimated LOC: N" on its own line. do-work records "Actual LOC: N" against it in its completion comment.
+"Estimated LOC: N" on its own line. implement records "Actual LOC: N" against it in its completion comment.
 
 <!-- schema_entry: handoff_marker -->
 ### handoff_marker

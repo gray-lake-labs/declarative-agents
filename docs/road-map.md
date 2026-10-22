@@ -18,7 +18,7 @@ agent-legible CLI, ships before 01.3. Each use case cites only the
 requirement items its release delivers, so the SRDs it touches are partly
 delivered; the rest waits for 02.0. Release 04.0 aligns the planning
 documents with the agile hierarchy (theme, initiative, epic, feature,
-user story) and renames the Sprint Goal the Sprint Goal. Release 04.1 makes a
+user story) and renames the objective issue the Sprint Goal. Release 04.1 makes a
 program repository explain itself and adds tpm doctor to bring one an
 older tpm laid down up to date. Every release proves itself with mage
 audit, which runs the parent's specification-critic corpus-audit agent
@@ -66,7 +66,7 @@ tpm picks the labels, files, and lints.
 
 implement claims an issue for the person who works it, on its own
 branch in its own worktree, and the merge request tpm opens closes it.
-Sub-issues and do-work arrive with tracking issues later.
+Working a story's issues in one branch is planned for implement.
 
 <!-- field: srds -->
 ### SRDs

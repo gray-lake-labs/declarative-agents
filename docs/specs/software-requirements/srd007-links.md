@@ -172,7 +172,7 @@ Duplicates names the item this one repeats. A duplicate issue closes as a duplic
 <!-- req: R6.5 -->
 ### R6.5
 
-Implements names the story an issue executes. make-work writes it on every issue it creates from a story; a story may be implemented by several issues, and an issue implements at most one story. An issue has no Parent line: its story is its parent.
+Implements names the story an issue executes. tasks writes it on every issue it creates from a story; a story may be implemented by several issues, and an issue implements at most one story. An issue has no Parent line: its story is its parent.
 
 <!-- req: R7 -->
 ## R7 - Links on hierarchy documents
@@ -276,7 +276,7 @@ A Cites URL with an existing tag, path, and anchor resolves; one naming a branch
 <!-- ac: AC6 -->
 ### AC6
 
-An issue's Blocked-by, Blocks, Depends-on, Relates-to, Duplicates, and Implements lines are read with the targets R6.1 allows; a Blocks line on one issue and a Blocked-by line on the other are one link; Depends-on and Relates-to are shown and never set waiting; a duplicate closes as a duplicate; make-work's issues carry Implements naming their story.
+An issue's Blocked-by, Blocks, Depends-on, Relates-to, Duplicates, and Implements lines are read with the targets R6.1 allows; a Blocks line on one issue and a Blocked-by line on the other are one link; Depends-on and Relates-to are shown and never set waiting; a duplicate closes as a duplicate; the issues tasks files for a story carry Implements naming it.
 
 <!-- field: traces -->
 #### Traces
