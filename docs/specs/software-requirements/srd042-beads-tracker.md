@@ -39,10 +39,15 @@ tracker boundary the GitLab client serves today.
 <!-- req: R1.1 -->
 ### R1.1
 
-tpm's commands reach the tracker only through the tracker interface the
-GitLab client implements today. The beads backend is a second
-implementation of that interface; no command, skill, or gate knows which
-backend serves it.
+tpm's commands reach a tracking system only through the tracker
+interface, in two halves every tracking system supplies as one package:
+the issue half (issues, their notes and the ledger events in them,
+milestones, labels, the current user, assignment) and the code half (a
+project's files, tags, branches, and merged history). A branch's approval
+and merge go through one delivery; beads' is the local one, an approval
+comment naming the commit and a --no-ff merge in the project's checkout
+(srd013 R5.5). No command, skill, or gate knows which tracking system
+serves it.
 
 <!-- req: R1.2 -->
 ### R1.2

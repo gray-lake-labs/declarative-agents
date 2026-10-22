@@ -129,28 +129,17 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 		if err != nil {
 			return r, err
 		}
-		if r.ApprovedBy, err = approval(t, issueProject, iid, branch, tip, me.Username); err != nil {
+		d := deliveryFor(t, git)
+		if r.ApprovedBy, err = d.approval(issueProject, iid, branch, tip, me.Username); err != nil {
 			return r, err
 		}
 		if dryRun {
 			return r, nil
 		}
-		if current, _ := inMain("branch", "--show-current"); current != base {
-			if _, err := inMain("checkout", "-q", base); err != nil {
-				return r, err
-			}
-		}
-		inMain("merge", "-q", "--ff-only", "refs/remotes/origin/"+base)
-		if _, err := inMain("merge", "-q", "--no-ff", branch, "-m", fmt.Sprintf("Merge %s (%s)\n\n%s %s", branch, cite, MergedByTrailer, me.Username)); err != nil {
+		if r.Commit, err = d.merge(main, base, branch, fmt.Sprintf("Merge %s (%s)\n\n%s %s", branch, cite, MergedByTrailer, me.Username)); err != nil {
 			return r, err
-		}
-		if _, err := inMain("push", "-q", "origin", base); err != nil {
-			return r, fmt.Errorf("merged locally but could not push %s: %w", base, err)
 		}
 		r.Merged = true
-		if r.Commit, err = inMain("rev-parse", "HEAD"); err != nil {
-			return r, err
-		}
 	}
 	if dryRun {
 		return r, nil

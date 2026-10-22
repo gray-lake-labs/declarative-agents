@@ -107,7 +107,7 @@ func Comment(e Event, text string) (string, error) {
 // Post posts the event on an issue unless an equal one is already there.
 // It returns whether it posted; a dry run reports what it would do and
 // writes nothing.
-func Post(t tracker.Tracker, project string, iid int, e Event, required []string, text string, dryRun bool) (bool, error) {
+func Post(t tracker.Issues, project string, iid int, e Event, required []string, text string, dryRun bool) (bool, error) {
 	body, err := Comment(e, text)
 	if err != nil {
 		return false, err

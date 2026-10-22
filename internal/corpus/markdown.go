@@ -286,7 +286,7 @@ type File struct {
 
 // Get reads and parses the Markdown document at path from project at ref.
 // A missing document's error wraps tracker.ErrNotFound.
-func Get(t tracker.Tracker, project, path, ref string) (File, error) {
+func Get(t tracker.Forge, project, path, ref string) (File, error) {
 	b, err := t.GetFile(project, path, ref)
 	if err != nil {
 		return File{}, fmt.Errorf("%s: %w", path, err)

@@ -156,12 +156,11 @@ type AdmittingCreator interface {
 	CreateAdmitted(project string, in NewIssue, admit func(Issue) (reasons []string, note string)) (Issue, error)
 }
 
-// Tracker is everything tpm asks of the tracker; a new need is a new method here.
-type Tracker interface {
-	GetFile(project, path, ref string) ([]byte, error)
-	// ListDir returns the paths of the files directly under dir at ref.
-	ListDir(project, dir, ref string) ([]string, error)
-	TagExists(project, tag string) (bool, error)
+// Issues is the issue half of a tracking system: the issues, their notes
+// and the ledger events in them, milestones, labels, and the people who
+// pop and approve (srd042). Every tracking system supplies it, beads from
+// its tracker repository and a hosted one from its host.
+type Issues interface {
 	GetIssue(project string, iid int) (Issue, error)
 	ListIssues(project string, q IssueQuery) ([]Issue, error)
 	CreateIssue(project string, in NewIssue) (Issue, error)
@@ -179,11 +178,6 @@ type Tracker interface {
 	// twice leaves one milestone (srd001 R7.1, srd031 R4.2). It returns
 	// MilestoneCreated, MilestoneUpdated, or MilestoneUnchanged.
 	EnsureMilestone(group string, m Milestone) (string, error)
-	// Merges lists the merges into the project since a YYYY-MM-DD day,
-	// from its midnight UTC, or since an RFC 3339 instant, by author or,
-	// with author empty, by anyone. A merge's MergedAt is its UTC day
-	// (srd018 R3.2, R8.1).
-	Merges(project, author, since string) ([]Merge, error)
 	// IssueAwards lists the award emoji on an issue (srd015 R1.2).
 	IssueAwards(project string, iid int) ([]Award, error)
 	// GroupLabels lists the labels defined on the group itself.
@@ -195,7 +189,31 @@ type Tracker interface {
 	// AssignIssue makes user the issue's only assignee. Only pop calls it
 	// (srd041 R9.1).
 	AssignIssue(project string, iid int, user User) error
+}
+
+// Forge is the code half of a tracking system: a project's files, tags,
+// branches, and merged history. Every tracking system reads these from the
+// project's checkout and its origin; how a branch is reviewed and merged is
+// program's delivery, local or through the host's review (srd013 R5).
+type Forge interface {
+	GetFile(project, path, ref string) ([]byte, error)
+	// ListDir returns the paths of the files directly under dir at ref.
+	ListDir(project, dir, ref string) ([]string, error)
+	TagExists(project, tag string) (bool, error)
+	// Merges lists the merges into the project since a YYYY-MM-DD day,
+	// from its midnight UTC, or since an RFC 3339 instant, by author or,
+	// with author empty, by anyone. A merge's MergedAt is its UTC day
+	// (srd018 R3.2, R8.1).
+	Merges(project, author, since string) ([]Merge, error)
 	DefaultBranch(project string) (string, error)
 	BranchExists(project, branch string) (bool, error)
 	CreateBranch(project, branch, ref string) error
+}
+
+// Tracker is a whole tracking system, both halves, as one package: bd, gh,
+// or glab, chosen per repository (srd042). A caller that needs one half
+// takes that half; a new need is a new method on the half it belongs to.
+type Tracker interface {
+	Issues
+	Forge
 }

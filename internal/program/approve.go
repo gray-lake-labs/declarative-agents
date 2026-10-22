@@ -64,53 +64,6 @@ func Approve(t tracker.Tracker, git Git, project, issueProject string, iid int, 
 	if r.Commit == "" {
 		return r, fmt.Errorf("no branch %s to approve in %s", r.Branch, project)
 	}
-	notes, err := t.ListNotes(issueProject, iid)
-	if err != nil {
-		return r, err
-	}
-	for _, n := range notes {
-		if n.Author == me.Username && strings.Contains(n.Body, approvalMarker(r.Commit)) {
-			return r, nil
-		}
-	}
-	r.Posted = true
-	return r, t.CreateNote(issueProject, iid, fmt.Sprintf("Approved %s at %s for merge.\n\n%s", r.Branch, r.Commit, approvalMarker(r.Commit)))
-}
-
-// approval finds who approved the issue's branch at tip, other than the
-// assignees or, for an issue nobody took, other than merger (srd013 R5.5).
-// When nobody did, the error names what is missing, and the commit an
-// earlier approval named, if any.
-func approval(t tracker.Tracker, issueProject string, iid int, branch, tip, merger string) (string, error) {
-	i, err := t.GetIssue(issueProject, iid)
-	if err != nil {
-		return "", err
-	}
-	excluded := i.Assignees
-	if len(excluded) == 0 {
-		excluded = []string{merger}
-	}
-	notes, err := t.ListNotes(issueProject, iid)
-	if err != nil {
-		return "", err
-	}
-	stale := ""
-	for _, n := range notes {
-		if slices.Contains(excluded, n.Author) {
-			continue
-		}
-		if strings.Contains(n.Body, approvalMarker(tip)) {
-			return n.Author, nil
-		}
-		if at := strings.Index(n.Body, approvalPrefix); at >= 0 {
-			stale, _, _ = strings.Cut(n.Body[at+len(approvalPrefix):], " ")
-		}
-	}
-	short := func(c string) string { return c[:min(12, len(c))] }
-	if stale != "" {
-		return "", fmt.Errorf("the approval of %s#%d is for %s, and %s is now at %s; ask for a new approval with tpm issue approve (srd013 R5.5)",
-			issueProject, iid, short(stale), branch, short(tip))
-	}
-	return "", fmt.Errorf("no approval of %s at %s from someone other than %s; ask a reviewer to run tpm issue approve (srd013 R5.5)",
-		branch, short(tip), strings.Join(excluded, ", "))
+	r.Posted, err = deliveryFor(t, git).approve(issueProject, iid, r.Branch, r.Commit, me.Username)
+	return r, err
 }
