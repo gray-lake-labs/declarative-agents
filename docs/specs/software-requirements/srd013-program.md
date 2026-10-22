@@ -183,7 +183,7 @@ The marker recur writes into the next instance's body, naming the issue it recur
 <!-- field: non_goals -->
 ## Non-goals
 
-- Working a story's issues in one branch; that is planned for implement at the story level.
+- Working a story's issues in one branch; that is implement at the story level (srd036 R5).
 - Choosing what goes in a release; that is plan.
 - Tracking Sprint Goals, verifying merged work, closing tracking issues, or rendering the dashboard; that is track-goals (srd019).
 - Offering or assigning work to a person.

@@ -36,7 +36,7 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
     1. - skill: implement
        - does: takes the issue
        - "assigning only the person who runs it": null
-       - "and opens its own branch and worktree (srd036); a story's issues share one branch, as planned": null
+       - "and opens its own branch and worktree (srd036); a story's issues share one branch (srd036 R5)": null
     1. - skill: implement (build)
        - does: builds each issue against its Requirements and Acceptance Criteria
        - "commits with the unit's record embedded": null

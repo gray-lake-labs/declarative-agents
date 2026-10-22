@@ -83,10 +83,32 @@ Asks nothing: tpm decides whether the issue can be taken, and the issue body hol
 
 As a skill, is at most 50 lines and has no model step; the work in the worktree is the person's or their agent's, not the skill's (design.md D10).
 
+<!-- req: R5 -->
+## R5 - A story's issues in one branch
+
+<!-- req: R5.1 -->
+### R5.1
+
+tpm issue list --implements lists the open issues whose Implements line names a story, or with --epic every story under an epic in the hierarchy, in the stories' rank order and then by IID, and lists apart an issue a Blocked-by line holds behind an open issue.
+
+<!-- req: R5.2 -->
+### R5.2
+
+tpm issue pop --worktree claims an issue into a worktree an earlier pop opened, on that worktree's branch, with pop's refusals and assignment and without opening a branch or worktree of its own.
+
+<!-- req: R5.3 -->
+### R5.3
+
+Given a story, implement pops its first listed issue, claims each further one into the same worktree, builds them in order, each committed separately with its record, and finishes with one approved merge of that branch whose --closes names every other claimed issue, so the one merge closes them all.
+
+<!-- req: R5.4 -->
+### R5.4
+
+Works one story by default, and a whole epic's stories only when the person asks: one story keeps the merge a size one reviewer reads.
+
 <!-- field: non_goals -->
 ## Non-goals
 
-- Working a story's issues one after another in one branch; that is planned for implement at the story level.
 - Re-creating a recurring issue after its run; that is release 01.1 (tpm issue recur).
 - Approving; a reviewer reads the branch and approves it (srd013 R5.6).
 
@@ -137,3 +159,16 @@ A worktree pop creates from a checkout with installed skills holds the same agen
 #### Traces
 
 - [R2.3](#r23)
+
+<!-- ac: AC5 -->
+### AC5
+
+A story's open issues list in order with a blocked one apart; the second is claimed into the first's worktree on its branch with no branch opened, an issue someone else holds is refused, and one approved merge closes every claimed issue.
+
+<!-- field: traces -->
+#### Traces
+
+- [R5.1](#r51)
+- [R5.2](#r52)
+- [R5.3](#r53)
+- [R5.4](#r54)

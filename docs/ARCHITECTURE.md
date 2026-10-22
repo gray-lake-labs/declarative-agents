@@ -60,7 +60,7 @@ implement takes it into its own branch and worktree and builds it
 against its Requirements and Acceptance Criteria, tpm issue merge
 delivers it and closes it, and tpm release tag tags a release once its gate passed. specify and
 implement are commands in this repository over tpm (srd035, srd036,
-release 00.0); tasks at the story level, and implement working a story's issues in one branch, are planned. The outer loops are the five Scrum
+release 00.0); tasks at the story level and implement working a story's issues in one branch are srd022 R6 and srd036 R5. The outer loops are the five Scrum
 skills (srd020 to srd033): each reads the tracker, asks people bounded
 questions, and pushes issues or posts ledger events.
 
