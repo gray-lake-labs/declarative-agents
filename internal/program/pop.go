@@ -99,67 +99,84 @@ func Pop(t tracker.Tracker, git Git, project string, iid int, dir string, p Poli
 // is claimed in issueProject, and the branch, named branch when given, and
 // its worktree are opened in project.
 func PopIn(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, p Policy, dryRun bool) (PopResult, error) {
-	r, i, err := claim(t, project, issueProject, iid, p, dryRun)
+	r, i, err := Claim(t, project, issueProject, iid, p, dryRun)
 	if err != nil {
 		return r, err
 	}
-
-	r.Branch = branch
-	if r.Branch == "" {
-		r.Branch = fmt.Sprintf("%d-%s", iid, Slug(i.Title))
+	if branch != "" {
+		r.Branch = branch
 	}
-	base, err := t.DefaultBranch(project)
-	if err != nil {
+	if r.Created, r.Review, err = OpenIssueBranch(t, project, issueProject, iid, r.Branch, i.Title, dryRun); err != nil {
 		return r, err
 	}
-	exists, err := t.BranchExists(project, r.Branch)
-	if err != nil {
-		return r, err
-	}
-	if !exists {
-		r.Created = true
-		if !dryRun {
-			if err := t.CreateBranch(project, r.Branch, base); err != nil {
-				return r, err
-			}
-		}
-	}
-
-	if rv, ok := tracker.For(t, project).(tracker.Reviewer); ok && !dryRun {
-		ref := fmt.Sprintf("%s#%d", issueProject, iid)
-		if r.Review, err = rv.OpenReview(project, r.Branch, base, i.Title, "Delivers "+ref+".\n\nCloses "+ref); err != nil {
-			return r, fmt.Errorf("opened %s, but not its review: %w", r.Branch, err)
-		}
-	}
-
-	top, err := git.Run(dir, "rev-parse", "--show-toplevel")
+	r.Checkout, r.Worktree, r.Added, err = AddIssueWorktree(git, dir, r.Branch, dryRun)
 	if err != nil {
 		return r, fmt.Errorf("pop needs a local checkout of %s: %w", project, err)
 	}
+	return r, nil
+}
+
+// OpenIssueBranch is the branch word (GH-204, srd013 R7.5): create or reuse
+// the issue's branch from the default branch and, on a tracking system
+// whose host reviews branches, open or find its review. It assigns nothing
+// and adds no worktree.
+func OpenIssueBranch(t tracker.Tracker, project, issueProject string, iid int, branch, title string, dryRun bool) (created bool, review string, err error) {
+	base, err := t.DefaultBranch(project)
+	if err != nil {
+		return false, "", err
+	}
+	exists, err := t.BranchExists(project, branch)
+	if err != nil {
+		return false, "", err
+	}
+	if !exists {
+		created = true
+		if !dryRun {
+			if err := t.CreateBranch(project, branch, base); err != nil {
+				return created, "", err
+			}
+		}
+	}
+	if rv, ok := tracker.For(t, project).(tracker.Reviewer); ok && !dryRun {
+		ref := fmt.Sprintf("%s#%d", issueProject, iid)
+		if review, err = rv.OpenReview(project, branch, base, title, "Delivers "+ref+".\n\nCloses "+ref); err != nil {
+			return created, "", fmt.Errorf("opened %s, but not its review: %w", branch, err)
+		}
+	}
+	return created, review, nil
+}
+
+// AddIssueWorktree is the worktree word (GH-204, srd013 R7.5): the sibling
+// worktree for branch beside the checkout around dir, created or reused,
+// with the branch checked out and a git-crypt key linked where the
+// repository has one.
+func AddIssueWorktree(git Git, dir, branch string, dryRun bool) (checkout, worktree string, added bool, err error) {
+	top, err := git.Run(dir, "rev-parse", "--show-toplevel")
+	if err != nil {
+		return "", "", false, err
+	}
 	root := strings.TrimSpace(top)
-	r.Checkout = root
-	r.Worktree = filepath.Join(filepath.Dir(root), filepath.Base(root)+"-"+r.Branch)
-	if _, err := os.Stat(r.Worktree); err == nil {
-		return r, nil
+	worktree = filepath.Join(filepath.Dir(root), filepath.Base(root)+"-"+branch)
+	if _, err := os.Stat(worktree); err == nil {
+		return root, worktree, false, nil
 	}
-	r.Added = true
 	if dryRun {
-		return r, nil
+		return root, worktree, true, nil
 	}
-	if _, err := git.Run(root, "fetch", "origin", r.Branch); err != nil {
-		return r, err
+	if _, err := git.Run(root, "fetch", "origin", branch); err != nil {
+		return root, worktree, true, err
 	}
-	if _, err := git.Run(root, "rev-parse", "--verify", "--quiet", "refs/heads/"+r.Branch); err == nil {
-		return r, addWorktree(git, root, r.Worktree, r.Worktree, r.Branch)
+	if _, err := git.Run(root, "rev-parse", "--verify", "--quiet", "refs/heads/"+branch); err == nil {
+		return root, worktree, true, addWorktree(git, root, worktree, worktree, branch)
 	}
-	return r, addWorktree(git, root, r.Worktree, "--track", "-b", r.Branch, r.Worktree, "origin/"+r.Branch)
+	return root, worktree, true, addWorktree(git, root, worktree, "--track", "-b", branch, worktree, "origin/"+branch)
 }
 
 // PopInto claims an issue into a worktree another pop opened, so a
 // story's issues are built on one branch and close in one merge (srd036):
 // the same refusals as Pop, and no branch or worktree of its own.
 func PopInto(t tracker.Tracker, git Git, project, issueProject string, iid int, worktree string, p Policy, dryRun bool) (PopResult, error) {
-	r, _, err := claim(t, project, issueProject, iid, p, dryRun)
+	r, _, err := Claim(t, project, issueProject, iid, p, dryRun)
 	if err != nil {
 		return r, err
 	}
@@ -178,15 +195,18 @@ func PopInto(t tracker.Tracker, git Git, project, issueProject string, iid int, 
 	return r, nil
 }
 
-// claim is pop's claim: it refuses a closed issue, an issue assigned to
-// anyone else, and a data issue admission does not admit, and assigns the
-// caller (srd013 R7.1, srd041 R9.1).
-func claim(t tracker.Tracker, project, issueProject string, iid int, p Policy, dryRun bool) (PopResult, tracker.Issue, error) {
+// Claim is the claim word (GH-204, srd013 R7.1, srd041 R9.1): it refuses a
+// closed issue, an issue assigned to anyone else, and a data issue
+// admission does not admit, assigns the caller, and names the branch the
+// branch word opens. The assignment is the atomic transaction the word
+// boundary protects (GH-201).
+func Claim(t tracker.Tracker, project, issueProject string, iid int, p Policy, dryRun bool) (PopResult, tracker.Issue, error) {
 	i, err := t.GetIssue(issueProject, iid)
 	if err != nil {
 		return PopResult{}, i, err
 	}
 	r := PopResult{Project: project, IID: iid, Title: i.Title, Body: i.Description, WebURL: i.WebURL, DryRun: dryRun}
+	r.Branch = fmt.Sprintf("%d-%s", iid, Slug(i.Title))
 	if issueProject != project {
 		r.IssueProject = issueProject
 	}

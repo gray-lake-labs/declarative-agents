@@ -178,6 +178,155 @@ func init() {
 		},
 	})
 
+	var claimArgs struct {
+		project, issueProject, control, ref string
+		iid                                 int
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "issue", Name: "claim", Summary: "the claim word: assign the issue to the caller with pop's refusals, naming the branch to open (GH-204)",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&claimArgs.project, "project", "", "project path (required)")
+			fs.IntVar(&claimArgs.iid, "issue", 0, "issue IID (required)")
+			fs.StringVar(&claimArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
+			fs.StringVar(&claimArgs.control, "control", "", "program repository holding control/ files; empty uses the defaults")
+			fs.StringVar(&claimArgs.ref, "ref", "main", "ref of the control files")
+		},
+		Run: func(ctx *cli.Context) error {
+			if claimArgs.project == "" || claimArgs.iid == 0 {
+				return fmt.Errorf("%w: claim needs --project and --issue", cli.ErrUsage)
+			}
+			t, err := ctx.Tracker()
+			if err != nil {
+				return err
+			}
+			p, err := LoadPolicy(t, claimArgs.control, claimArgs.ref)
+			if err != nil {
+				return err
+			}
+			issueProject := claimArgs.issueProject
+			if issueProject == "" {
+				issueProject = claimArgs.project
+			}
+			r, _, err := Claim(t, claimArgs.project, issueProject, claimArgs.iid, p, ctx.DryRun)
+			if err != nil {
+				return err
+			}
+			return ctx.Emit(r, fmt.Sprintf("%s#%d claimed; open its branch %s with tpm issue open-branch", issueProject, r.IID, r.Branch))
+		},
+	})
+
+	var obArgs struct {
+		project, issueProject, branch string
+		iid                           int
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "issue", Name: "open-branch", Summary: "the branch word: create or reuse the issue's branch and, on a hosted tracker, its review (GH-204)",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&obArgs.project, "project", "", "project path (required)")
+			fs.IntVar(&obArgs.iid, "issue", 0, "issue IID (required)")
+			fs.StringVar(&obArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
+			fs.StringVar(&obArgs.branch, "branch", "", "the branch to open (required; tpm issue claim names it)")
+		},
+		Run: func(ctx *cli.Context) error {
+			if obArgs.project == "" || obArgs.iid == 0 || obArgs.branch == "" {
+				return fmt.Errorf("%w: open-branch needs --project, --issue, and --branch", cli.ErrUsage)
+			}
+			t, err := ctx.Tracker()
+			if err != nil {
+				return err
+			}
+			issueProject := obArgs.issueProject
+			if issueProject == "" {
+				issueProject = obArgs.project
+			}
+			i, err := t.GetIssue(issueProject, obArgs.iid)
+			if err != nil {
+				return err
+			}
+			created, review, err := OpenIssueBranch(t, obArgs.project, issueProject, obArgs.iid, obArgs.branch, i.Title, ctx.DryRun)
+			if err != nil {
+				return err
+			}
+			r := struct {
+				Project string `json:"project"`
+				IID     int    `json:"iid"`
+				Branch  string `json:"branch"`
+				Created bool   `json:"branch_created"`
+				Review  string `json:"review,omitempty"`
+				DryRun  bool   `json:"dry_run"`
+			}{obArgs.project, obArgs.iid, obArgs.branch, created, review, ctx.DryRun}
+			human := fmt.Sprintf("branch %s opened on %s", r.Branch, r.Project)
+			if !created {
+				human = fmt.Sprintf("branch %s already on %s", r.Branch, r.Project)
+			}
+			return ctx.Emit(r, human)
+		},
+	})
+
+	var awArgs struct {
+		branch, dir string
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "issue", Name: "add-worktree", Summary: "the worktree word: the sibling worktree for the issue's branch, created or reused (GH-204)",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&awArgs.branch, "branch", "", "the branch the worktree checks out (required)")
+			fs.StringVar(&awArgs.dir, "dir", ".", "a directory in the local checkout of the project")
+		},
+		Run: func(ctx *cli.Context) error {
+			if awArgs.branch == "" {
+				return fmt.Errorf("%w: add-worktree needs --branch", cli.ErrUsage)
+			}
+			checkout, worktree, added, err := AddIssueWorktree(ExecGit{}, awArgs.dir, awArgs.branch, ctx.DryRun)
+			if err != nil {
+				return err
+			}
+			r := struct {
+				Branch   string `json:"branch"`
+				Checkout string `json:"checkout"`
+				Worktree string `json:"worktree"`
+				Added    bool   `json:"worktree_added"`
+				DryRun   bool   `json:"dry_run"`
+			}{awArgs.branch, checkout, worktree, added, ctx.DryRun}
+			human := fmt.Sprintf("worktree %s on %s", worktree, awArgs.branch)
+			if !added {
+				human = fmt.Sprintf("worktree %s already there", worktree)
+			}
+			return ctx.Emit(r, human)
+		},
+	})
+
+	var isArgs struct {
+		checkout, worktree string
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "issue", Name: "install-skills", Summary: "the install word: the checkout's agents' skills into the worktree (GH-204, srd036 R2.3)",
+		Flags: func(fs *flag.FlagSet) {
+			fs.StringVar(&isArgs.checkout, "checkout", "", "the checkout whose installed agents decide what installs (required)")
+			fs.StringVar(&isArgs.worktree, "worktree", "", "the worktree the skills install into (required)")
+		},
+		Run: func(ctx *cli.Context) error {
+			if isArgs.checkout == "" || isArgs.worktree == "" {
+				return fmt.Errorf("%w: install-skills needs --checkout and --worktree", cli.ErrUsage)
+			}
+			if ctx.DryRun {
+				return fmt.Errorf("install-skills has no dry run; tpm issue pop --dry-run shows the whole pop")
+			}
+			installed, err := InstallSkills(isArgs.checkout, isArgs.worktree)
+			if err != nil {
+				return err
+			}
+			r := struct {
+				Worktree  string   `json:"worktree"`
+				Installed []string `json:"installed"`
+			}{isArgs.worktree, installed}
+			human := "skills installed for " + strings.Join(installed, ", ")
+			if len(installed) == 0 {
+				human = "nothing to install; the checkout has no agents or the worktree already has their skills"
+			}
+			return ctx.Emit(r, human)
+		},
+	})
+
 	var closeArgs struct {
 		project, dir string
 		iid          int

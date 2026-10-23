@@ -172,6 +172,11 @@ Returns the issue, its branch, and its worktree path, so the skill and the perso
 
 Installs into the worktree the skills of every agent installed in the checkout (srd037), and reports which; a failed install is reported without undoing the pop, and --dry-run installs nothing.
 
+<!-- req: R7.5 -->
+### R7.5
+
+pop decomposes into four words the pop profile composes (GH-201, GH-204, design.md D14): tpm issue claim — the assignment with pop's refusals, the atomic transaction the word boundary protects, naming the branch to open — tpm issue open-branch, tpm issue add-worktree, and tpm issue install-skills (srd036 R2.3). tpm issue pop runs the same code as one command. Each word reuses what is already in place, so a word that fails after the claim is a partial machine state a re-run of the pop finishes.
+
 <!-- req: R8 -->
 ## R8 - tpm issue recur
 
@@ -328,3 +333,13 @@ A run of the merge profile with the pinned runtime over a popped issue with comm
 #### Traces
 
 - [R5.7](#r57)
+
+<!-- ac: AC12 -->
+### AC12
+
+A run of the pop profile with the pinned runtime over an admitted issue claims it, opens its branch and worktree, and installs the skills, ending in Done; a closed issue ends in Refused with tpm's reason; the words reuse what exists, so a re-run changes nothing.
+
+<!-- field: traces -->
+#### Traces
+
+- [R7.5](#r75)
