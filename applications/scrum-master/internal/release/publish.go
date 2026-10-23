@@ -109,6 +109,28 @@ func (p Publisher) Build(dist string, platforms []Platform) ([]Asset, error) {
 		fmt.Fprintf(&sums, "%s  %s\n", sum, a.Name)
 		assets = append(assets, a)
 	}
+	// The release also carries the runtime: the sibling agent-core's agent
+	// for every platform the parent ecosystem publishes, in the same
+	// SHA256SUMS, so a program repository's tpm install --runtime fetches
+	// agent and checksums from one release (GH-14; srd037 R7).
+	if core, err := filepath.Abs(filepath.Join(p.Root, "..", "..", "agent-core")); err == nil {
+		if _, statErr := os.Stat(filepath.Join(core, "cmd", "agent")); statErr == nil {
+			for _, pl := range []Platform{{OS: "darwin", Arch: "amd64"}, {OS: "darwin", Arch: "arm64"}, {OS: "linux", Arch: "amd64"}, {OS: "linux", Arch: "arm64"}} {
+				a := Asset{Name: AssetName("agent", pl), Path: filepath.Join(dist, AssetName("agent", pl))}
+				env := []string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}
+				if _, err := p.Run(core, env, "go", "build", "-trimpath", "-o", a.Path, "./cmd/agent"); err != nil {
+					return nil, fmt.Errorf("build agent for %s/%s: %w", pl.OS, pl.Arch, err)
+				}
+				sum, err := fileSum(a.Path)
+				if err != nil {
+					return nil, err
+				}
+				a.Sum = sum
+				fmt.Fprintf(&sums, "%s  %s\n", sum, a.Name)
+				assets = append(assets, a)
+			}
+		}
+	}
 	path := filepath.Join(dist, SumsFile)
 	if err := os.WriteFile(path, []byte(sums.String()), 0o644); err != nil {
 		return nil, err

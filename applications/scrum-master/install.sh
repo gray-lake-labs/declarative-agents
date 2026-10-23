@@ -1,5 +1,5 @@
 #!/bin/sh
-# Installs tpm from a scrum-master release (eng03): downloads the binary for
+# Installs tpm from a declarative-agents release (eng03): downloads the binary for
 # this machine and the release's SHA256SUMS, refuses a binary whose checksum
 # differs, and installs it.
 #
@@ -12,7 +12,7 @@ set -eu
 
 tag=${1:-latest}
 prefix=${TPM_PREFIX:-$HOME/.local/bin}
-base=${TPM_RELEASE_URL:-https://github.com/gray-lake-labs/scrum-master/releases}
+base=${TPM_RELEASE_URL:-https://github.com/gray-lake-labs/declarative-agents/releases}
 
 case $(uname -s) in
   Linux) os=linux ;;
