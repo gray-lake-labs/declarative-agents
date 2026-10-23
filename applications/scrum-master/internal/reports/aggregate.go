@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -16,6 +17,7 @@ import (
 	"time"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/events"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/links"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/sprintgoal"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
@@ -286,11 +288,18 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 	}
 	end := to.AddDate(0, 0, 6).Format("2006-01-02")
 	var reported []tracker.Issue
+	// backlog holds project#story for every story a reported Sprint Goal's
+	// Sprint Backlog lists: a merge delivering one is the goal's work.
+	backlog := map[string]bool{}
 	for ref := range goals {
 		if i, ok, err := issueOf(t, ref); err != nil {
 			return a, err
 		} else if ok {
 			reported = append(reported, i)
+			project, _, _ := strings.Cut(ref, "#")
+			for _, s := range sprintgoal.SprintBacklog(i.Description) {
+				backlog[project+"#"+s] = true
+			}
 		}
 	}
 	since := periodStart(from, reported, sprintgoal.Is).Format(time.RFC3339)
@@ -310,6 +319,11 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 			if routine, err := closesOnlyRecurring(t, project, mr.Description); err != nil {
 				return a, err
 			} else if routine {
+				continue
+			}
+			if goalWork, err := closesBacklogWork(t, project, mr.Description, backlog); err != nil {
+				return a, err
+			} else if goalWork {
 				continue
 			}
 			a.Signals = append(a.Signals, Signal{SignalUnreportedWork, project, fmt.Sprintf("%s!%d", project, mr.IID), ISOWeek(mustDate(mr.MergedAt)),
@@ -376,6 +390,35 @@ func closesOnlyRecurring(t tracker.Tracker, project, description string) (bool, 
 		}
 	}
 	return len(refs) > 0, nil
+}
+
+// closesBacklogWork reports whether the merge closes an issue that
+// implements a story on a reported Sprint Goal's Sprint Backlog.
+func closesBacklogWork(t tracker.Tracker, project, description string, backlog map[string]bool) (bool, error) {
+	for _, m := range closesPattern.FindAllStringSubmatch(description, -1) {
+		ref := m[1]
+		if strings.HasPrefix(ref, "#") {
+			ref = project + ref
+		}
+		i, ok, err := issueOf(t, ref)
+		if err != nil {
+			return false, err
+		}
+		if !ok {
+			continue
+		}
+		owner, _, _ := strings.Cut(ref, "#")
+		for _, l := range links.ParseLinks(i.Description) {
+			if l.Kind != links.Implements {
+				continue
+			}
+			story, _, _ := strings.Cut(strings.TrimSpace(l.Target), "#")
+			if backlog[owner+"#"+strings.TrimSuffix(path.Base(story), ".md")] {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
 }
 
 // hasMet reports whether the Sprint Goal's ledger holds a met event

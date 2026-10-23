@@ -21,11 +21,14 @@ docs/constitutions/design.md, under Schema; tpm init writes that file
 into a program repository. tpm backlog template --kind <level> prints a
 document of that level in the Markdown layout the gate reads, to copy
 and fill; the gate's errors then name the fields by that layout.
+--kind vision and --kind architecture print VISION and ARCHITECTURE,
+whose shape the gate also checks and counts. The gate passes a document
+that still holds tpm init's placeholder text, and names it as unfilled.
 
 Subcommands:
   tpm backlog list    the repository's hierarchy documents, with id, kind, parent, and status (srd045)
   tpm backlog check   the hierarchy gate on the repository's documents (srd045)
-  tpm backlog template   a document of one level in the layout the gate reads (GH-20)
+  tpm backlog template   a document of one level, or VISION or ARCHITECTURE, in the layout the gate reads (GH-20, GH-22)
 
 Also: tpm plan candidates, tpm plan backlog, tpm issue lint
 

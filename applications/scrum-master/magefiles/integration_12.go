@@ -100,8 +100,10 @@ Ingest reads trajectories from the queue, and grading scores each one.
 		return err
 	}
 	out, err = run("backlog", "check")
-	// Nine hierarchy documents and the repository's SRD (#149).
-	c.expect(err == nil && strings.HasPrefix(out, "hierarchy gate: pass, 10 documents"), "check on a valid hierarchy: %v: %s", err, out)
+	// Nine hierarchy documents, the repository's SRD (#149), and VISION and
+	// ARCHITECTURE, which init left as placeholders the gate names (GH-22).
+	c.expect(err == nil && strings.HasPrefix(out, "hierarchy gate: pass, 12 documents") && strings.Contains(out, "unfilled: docs/ARCHITECTURE.md"),
+		"check on a valid hierarchy: %v: %s", err, out)
 	after, err := tree(repo)
 	if err != nil {
 		return err

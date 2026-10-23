@@ -128,7 +128,13 @@ func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurRes
 		if err := t.CreateNote(project, iid, note); err != nil {
 			return r, err
 		}
-		reason := "closed by tpm issue recur without its work; the next instance is due " + r.DueDate
+		// The reason says what the close was, without contradicting the
+		// run's summary: recur closed it, and the summary says what ran
+		// (GH-22).
+		reason := "closed by tpm issue recur, without a merge; the next instance is due " + r.DueDate
+		if o.Summary != "" {
+			reason = "closed by tpm issue recur after the run its summary records, without a merge; the next instance is due " + r.DueDate
+		}
 		if _, err := t.UpdateIssue(project, iid, tracker.IssueUpdate{State: ptr("close"), CloseReason: &reason}); err != nil {
 			return r, err
 		}

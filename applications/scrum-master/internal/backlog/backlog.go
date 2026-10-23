@@ -45,7 +45,20 @@ type Report struct {
 	Documents   int                 `json:"documents"`
 	Findings    []hierarchy.Finding `json:"findings"`
 	SpecSkipped string              `json:"spec_check_skipped,omitempty"`
+	// Unfilled are the documents that still hold tpm init's or onboard's
+	// placeholder text: the gate passes them, since a repository is
+	// onboarded before its owner writes them, and names them so a pass is
+	// not taken for a written corpus.
+	Unfilled []string `json:"unfilled,omitempty"`
 }
+
+// shaped are the documents beside the hierarchy and the SRDs whose shape
+// the gate checks, and counts, when the repository has them.
+var shaped = []string{"docs/VISION.md", "docs/ARCHITECTURE.md"}
+
+// placeholder is the phrase every placeholder sentence init and onboard
+// write carries: "<Owner> writes here ...".
+const placeholder = " writes here "
 
 // List reads the hierarchy documents under dir, keeping one kind when kind
 // is not empty; paths are relative to dir.
@@ -97,7 +110,40 @@ func Check(dir string) (Report, error) {
 	if findings == nil {
 		findings = []hierarchy.Finding{}
 	}
-	return Report{Documents: len(docs) + srds, Findings: findings, SpecSkipped: skipped}, nil
+	top, unfilled, err := corpusFiles(dir)
+	if err != nil {
+		return Report{}, err
+	}
+	return Report{Documents: len(docs) + srds + top, Findings: findings, SpecSkipped: skipped, Unfilled: unfilled}, nil
+}
+
+// corpusFiles counts the shaped documents dir holds and lists, relative to
+// dir, the corpus documents that still hold placeholder text.
+func corpusFiles(dir string) (top int, unfilled []string, err error) {
+	for _, p := range shaped {
+		if _, err := os.Stat(filepath.Join(dir, p)); err == nil {
+			top++
+		} else if !errors.Is(err, fs.ErrNotExist) {
+			return 0, nil, err
+		}
+	}
+	err = filepath.WalkDir(filepath.Join(dir, "docs"), func(path string, d fs.DirEntry, err error) error {
+		if errors.Is(err, fs.ErrNotExist) {
+			return fs.SkipAll
+		}
+		if err != nil || d.IsDir() || filepath.Ext(path) != ".md" {
+			return err
+		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if strings.Contains(string(b), placeholder) {
+			unfilled = append(unfilled, relative(dir, path))
+		}
+		return nil
+	})
+	return top, unfilled, err
 }
 
 func relative(dir, path string) string {
@@ -159,6 +205,9 @@ func init() {
 			}
 			if len(r.Findings) == 0 {
 				fmt.Fprintf(&h, "hierarchy gate: pass, %d documents\n", r.Documents)
+			}
+			if len(r.Unfilled) > 0 {
+				fmt.Fprintf(&h, "unfilled: %s still hold the placeholder text tpm init or onboard wrote\n", strings.Join(r.Unfilled, ", "))
 			}
 			if r.SpecSkipped != "" {
 				fmt.Fprintf(&h, "spec shape check skipped: %s\n", r.SpecSkipped)

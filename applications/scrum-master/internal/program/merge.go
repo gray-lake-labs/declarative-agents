@@ -41,6 +41,9 @@ type MergeResult struct {
 	// the one-command merge's JSON it would read as "closed nothing" beside
 	// closed (GH-20).
 	ToClose string `json:"-"`
+	// Refused is why tpm refused the merge, set on the JSON a refusal
+	// emits; the exit status is non-zero (GH-22).
+	Refused string `json:"refused,omitempty"`
 	DryRun  bool   `json:"dry_run"`
 }
 
@@ -87,6 +90,12 @@ func MergeBranch(t tracker.Tracker, git Git, project, issueProject string, iid i
 	base, err := t.DefaultBranch(project)
 	if err != nil {
 		return r, err
+	}
+	if branch == base {
+		// Merging the default branch into itself would find it "already
+		// merged" and take an earlier merge citing the issue for this one's
+		// (GH-22).
+		return r, fmt.Errorf("%s is the default branch; merge the issue's own branch, from its worktree or with --branch", branch)
 	}
 	run := func(args ...string) (string, error) {
 		out, err := git.Run(dir, args...)

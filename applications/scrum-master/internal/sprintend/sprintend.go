@@ -34,7 +34,7 @@ type SprintGoal struct {
 	// complete (the owner's word, not yet met), or not complete (srd038
 	// R2.2).
 	Outcome string   `json:"outcome"`
-	Ledger  []string `json:"ledger"` // the event names posted on it, in order
+	Ledger  []string `json:"ledger"` // the events posted on it, in order: each by name, a planned event that lists the Sprint Backlog with its story count
 	// Stories lists the stories its Sprint Backlog section names, as
 	// project#story.
 	Stories []string `json:"stories"`
@@ -135,7 +135,7 @@ func sprintGoals(t tracker.Tracker, project string, progress map[string]reports.
 		}
 		for _, n := range notes {
 			if e, ok := events.Parse(n.Body); ok {
-				o.Ledger = append(o.Ledger, e.Name)
+				o.Ledger = append(o.Ledger, ledgerEntry(e))
 				o.Met = o.Met || e.Name == "met"
 				o.ReportedComplete = o.ReportedComplete || e.Name == "reported_complete"
 			}
@@ -155,4 +155,14 @@ func sprintGoals(t tracker.Tracker, project string, progress map[string]reports.
 		out = append(out, o)
 	}
 	return out, nil
+}
+
+// ledgerEntry names an event in a ledger. Filing a Sprint Goal and listing
+// its stories each post a planned event (srd006 R8); the second reads
+// "planned, N stories", so a ledger never shows planning twice.
+func ledgerEntry(e events.Event) string {
+	if stories := e.Values("story"); e.Name == "planned" && len(stories) > 0 {
+		return fmt.Sprintf("planned, %d stories", len(stories))
+	}
+	return e.Name
 }

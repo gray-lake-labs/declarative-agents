@@ -479,3 +479,21 @@ func TestPlanOffersNoSystemCandidate(t *testing.T) {
 		}
 	})
 }
+
+// TestPushedLineNamesTheSprintGoal shows goals push's line names the Sprint
+// Goal as project#iid, its web address only when it has one, and ends
+// without a trailing space.
+func TestPushedLineNamesTheSprintGoal(t *testing.T) {
+	for _, c := range []struct {
+		r    Pushed
+		want string
+	}{
+		{Pushed{Key: "in001#R1", Action: "created", Project: "g/fleet", IID: 13, WebURL: "beads:aeop-2bea2ac0"}, "in001#R1: created g/fleet#13"},
+		{Pushed{Key: "in001#R1", Action: "created", Project: "g/fleet", IID: 13, WebURL: "https://gitlab.example.com/g/fleet/-/issues/13"}, "in001#R1: created g/fleet#13 https://gitlab.example.com/g/fleet/-/issues/13"},
+		{Pushed{Key: "in001#R2", Action: "refused", Reasons: []string{"no repository confirmed"}}, "in001#R2: refused no repository confirmed"},
+	} {
+		if got := pushedLine(c.r); got != c.want {
+			t.Errorf("pushedLine = %q, want %q", got, c.want)
+		}
+	}
+}

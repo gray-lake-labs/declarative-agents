@@ -117,7 +117,7 @@ func init() {
 			human := humanFiles(r.Files)
 			if len(r.Skills) > 0 {
 				// As init does: the agents' skills are installed (GH-20).
-				human += fmt.Sprintf("skills: %d files for the named agents\n", len(r.Skills))
+				human += fmt.Sprintf("skills: %d files for the named agents\n", skillFiles(r.Skills))
 			}
 			switch reg := r.Registration; {
 			case reg.Issue != nil && reg.Filed:
@@ -254,7 +254,7 @@ func humanInit(r InitResult) string {
 	var b strings.Builder
 	b.WriteString(humanFiles(r.Files))
 	if len(r.Skills) > 0 {
-		fmt.Fprintf(&b, "skills: %d files for the named agents\n", len(r.Skills))
+		fmt.Fprintf(&b, "skills: %d files for the named agents\n", skillFiles(r.Skills))
 	}
 	if t := r.Tracker; t != nil {
 		switch {
@@ -291,4 +291,16 @@ func person() (string, error) {
 		return u, nil
 	}
 	return "", fmt.Errorf("no person for the tracker's writes: set TPM_USER or git config user.name")
+}
+
+// skillFiles counts the skill files among an install's results; the
+// .git/info/exclude update it also reports is not one (GH-22).
+func skillFiles(results []install.Result) int {
+	n := 0
+	for _, r := range results {
+		if r.Skill != "" {
+			n++
+		}
+	}
+	return n
 }

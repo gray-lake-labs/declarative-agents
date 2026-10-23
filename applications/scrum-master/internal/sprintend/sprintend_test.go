@@ -252,3 +252,13 @@ func TestEmptyListsAreEmpty(t *testing.T) {
 		t.Fatalf("stories with none done = %s, want \"done\": []", out.String())
 	}
 }
+
+// TestLedgerTellsTheTwoPlannedEventsApart shows filing a Sprint Goal and
+// listing its stories, each a planned event, read as two different steps.
+func TestLedgerTellsTheTwoPlannedEventsApart(t *testing.T) {
+	filed, _ := events.Planned("01.0", []string{"https://example.com/obj001.md#R1"}, "dev")
+	listed, _ := events.PlannedStories("01.0", []string{"https://example.com/obj001.md#R1"}, []string{"st001-a", "st002-b"}, "dev")
+	if got := []string{ledgerEntry(filed), ledgerEntry(listed)}; !slices.Equal(got, []string{"planned", "planned, 2 stories"}) {
+		t.Errorf("ledger = %v", got)
+	}
+}

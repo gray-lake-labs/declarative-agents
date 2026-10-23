@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -177,5 +178,31 @@ func TestRoadMapReleaseStatuses(t *testing.T) {
 	}
 	if len(r.Findings) != 1 || r.Findings[0].Field != "release 01.1 status" || !strings.Contains(r.Findings[0].Message, `"done"`) {
 		t.Fatalf("report = %+v, want one finding on release 01.1's status", r)
+	}
+}
+
+// TestCheckCountsVisionAndArchitectureAndNamesUnfilled counts VISION and
+// ARCHITECTURE, whose shape the gate checks, among its documents, and names
+// a document that still holds init's placeholder text without failing it.
+func TestCheckCountsVisionAndArchitectureAndNamesUnfilled(t *testing.T) {
+	stubSpec(t, nil, errors.New("no pinned release"))
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, "docs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for name, body := range map[string]string{
+		"VISION.md":       "The Product Owner writes here what the program is.\n",
+		"ARCHITECTURE.md": "The gateway routes every request.\n",
+	} {
+		if err := os.WriteFile(filepath.Join(dir, "docs", name), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	r, err := Check(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Documents != 2 || len(r.Findings) != 0 || !slices.Equal(r.Unfilled, []string{filepath.Join("docs", "VISION.md")}) {
+		t.Fatalf("report = %+v, want two documents, no finding, VISION unfilled", r)
 	}
 }
