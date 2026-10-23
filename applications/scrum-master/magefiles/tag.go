@@ -13,7 +13,7 @@ import (
 const (
 	releaseRepo    = "gray-lake-labs/declarative-agents"
 	releaseAccount = "gray-lake-labs-owner"
-	releaseImage   = "ghcr.io/gray-lake-labs/tpm"
+	releaseImage   = "ghcr.io/gray-lake-labs/scrum-master"
 )
 
 // Tag runs the gates in release-gates.md and, when every gate passes,

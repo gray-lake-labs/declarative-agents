@@ -16,8 +16,12 @@ import (
 // each command, and answers as the registry and the release's notes say.
 type fakeImageTools struct {
 	fakeTools
-	ran      []string
-	pushed   string // the digest at the tag in the registry; empty is none
+	ran    []string
+	pushed string // the digest at the tag in the registry; empty is none
+	// revision is the image's org.opencontainers.image.revision label;
+	// empty answers with the commit at HEAD, as this release's image would.
+	revision string
+	head     func() string
 	notes    string
 	noBuildx bool
 }
@@ -33,6 +37,12 @@ func (f *fakeImageTools) run(dir string, env []string, name string, args ...stri
 	case name == "docker" && args[1] == "imagetools":
 		if f.pushed == "" {
 			return "", errors.New("not found")
+		}
+		if strings.Contains(line, "image.revision") {
+			if f.revision != "" {
+				return f.revision, nil
+			}
+			return f.head(), nil
 		}
 		return f.pushed, nil
 	case name == "docker" && args[1] == "build":
@@ -68,7 +78,23 @@ func imageRelease(t *testing.T) (Publisher, *fakeImageTools) {
 	f := &fakeImageTools{fakeTools: fakeTools{login: "org-owner"}, notes: "Release v0.20261015.1"}
 	p := publisher(dir, git, &f.fakeTools, io.Discard)
 	p.Run, p.ImageRepo = f.run, "ghcr.io/org/tpm"
+	f.head = func() string { h, _ := p.Git("rev-parse", "HEAD"); return h }
 	return p, f
+}
+
+// An image already at the tag but built from another commit — a tag the
+// image name shares with another source — is refused, not listed on this
+// release (GH-18).
+func TestPublishRefusesAnImageFromAnotherCommit(t *testing.T) {
+	p, f := imageRelease(t)
+	f.pushed, f.revision = "sha256:abc", "0123456789abcdef0123456789abcdef01234567"
+	err := p.PublishImage("v0.20261015.1")
+	if err == nil || !strings.Contains(err.Error(), "collides") {
+		t.Fatalf("err = %v, want the collision named", err)
+	}
+	if f.count("gh release edit") != 0 {
+		t.Fatalf("a foreign image was listed on the release:\n%s", strings.Join(f.ran, "\n"))
+	}
 }
 
 func TestPublishPushesAndListsTheImage(t *testing.T) {

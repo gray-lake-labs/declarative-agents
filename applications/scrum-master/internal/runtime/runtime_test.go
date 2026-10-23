@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/spectool"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/version"
 )
 
 const tag = "v0.20260101.1"
@@ -279,7 +280,7 @@ func TestBuildSpecToolNeedsGoOrAPrebuiltTool(t *testing.T) {
 // A dev build pins the newest release with published binaries, and a
 // release tag is the shape DefaultPin takes from a released build (GH-190).
 func TestDefaultPinIsAReleaseTag(t *testing.T) {
-	if pin := DefaultPin(); !releaseTag.MatchString(pin) {
+	if pin := DefaultPin(); !version.IsRelease(pin) {
 		t.Fatalf("DefaultPin %q is not a release tag", pin)
 	}
 }
@@ -296,5 +297,17 @@ func TestSiblingLocatesThisRepository(t *testing.T) {
 	}
 	if _, ok, _ := Sibling(t.TempDir(), nil); ok {
 		t.Fatal("a directory outside the repository must not be a sibling")
+	}
+}
+
+// A published tpm pins its own release: the stamp, not the build info,
+// decides DefaultPin, so a program repository a release lays down pins
+// that release's runtime (GH-18).
+func TestDefaultPinFollowsTheStampedRelease(t *testing.T) {
+	saved := version.Release
+	defer func() { version.Release = saved }()
+	version.Release = "v0.20990101.4"
+	if got := DefaultPin(); got != "v0.20990101.4" {
+		t.Fatalf("DefaultPin = %q, want the stamped release", got)
 	}
 }
