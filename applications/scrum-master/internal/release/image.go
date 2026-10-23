@@ -148,6 +148,14 @@ func (p Publisher) PublishImage(tag string) error {
 	}
 	digest, err := p.Run(p.Root, nil, "docker", "buildx", "imagetools", "inspect", ref, "--format", "{{.Manifest.Digest}}")
 	if err == nil && digest != "" {
+		// An image already at the tag is kept only when it is this commit's:
+		// a tag the image name shares with another source would otherwise
+		// be listed on this release (GH-18).
+		label, lerr := p.Run(p.Root, nil, "docker", "buildx", "imagetools", "inspect", ref, "--format", `{{index .Image.Config.Labels "org.opencontainers.image.revision"}}`)
+		head, herr := p.Git("rev-parse", "HEAD")
+		if lerr == nil && herr == nil && strings.TrimSpace(label) != "" && !strings.Contains(label, strings.TrimSpace(head)) {
+			return fmt.Errorf("%s exists but was built from %s, not this commit %s; the image name collides with another source — publish under another image name", ref, strings.TrimSpace(label), strings.TrimSpace(head))
+		}
 		fmt.Fprintf(p.Out, "publish: kept %s@%s, already pushed\n", ref, digest)
 	} else {
 		if _, err := p.Run(p.Root, nil, "docker", "buildx", "inspect", imageBuilder); err != nil {

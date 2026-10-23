@@ -94,7 +94,7 @@ person's account, so nothing on the release names an individual.
 
 The second part builds one image for linux/amd64 and linux/arm64 with
 docker buildx from the Dockerfile at the repository root and pushes it as
-ghcr.io/gray-lake-labs/tpm:<tag>, and moves latest to it. Its build
+ghcr.io/gray-lake-labs/scrum-master:<tag>, and moves latest to it. Its build
 context is the directory the first part built the binaries into, and it
 copies tpm_linux_<arch> from there, so the image's tpm is the binary on
 the GitHub release; Dockerfile.dockerignore admits nothing else. A build

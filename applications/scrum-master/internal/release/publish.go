@@ -80,6 +80,27 @@ type Publisher struct {
 	ImageRepo string
 }
 
+// VersionPackage is where a release's version is stamped in tpm; the agent's
+// is agent-core's internal/version, under the module path its go.mod
+// declares. Both are nested modules of the repository, so their build info
+// never carries its tag (GH-18).
+const VersionPackage = "github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/version"
+
+// agentVersionPackage is agent-core's version package, read from the module
+// path in core's go.mod.
+func agentVersionPackage(core string) (string, error) {
+	b, err := os.ReadFile(filepath.Join(core, "go.mod"))
+	if err != nil {
+		return "", err
+	}
+	for _, line := range strings.Split(string(b), "\n") {
+		if mod, ok := strings.CutPrefix(strings.TrimSpace(line), "module "); ok {
+			return strings.TrimSpace(mod) + "/internal/version", nil
+		}
+	}
+	return "", fmt.Errorf("%s/go.mod declares no module", core)
+}
+
 // Build cross-builds ./cmd/tpm for each platform into dist and writes
 // SHA256SUMS over the binaries. Go stamps the version from the commit's tag.
 func (p Publisher) Build(dist string, platforms []Platform) ([]Asset, error) {
@@ -95,7 +116,7 @@ func (p Publisher) Build(dist string, platforms []Platform) ([]Asset, error) {
 		if tag, err := p.releaseTag(); err == nil && tag != "" {
 			// The application is a nested module (GH-190): the repository's
 			// release tag is not its buildinfo version, so the build stamps it.
-			args = append(args, "-ldflags", "-X github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install.version="+tag)
+			args = append(args, "-ldflags", "-X "+VersionPackage+".Release="+tag)
 		}
 		args = append(args, "-o", a.Path, "./cmd/tpm")
 		if _, err := p.Run(p.Root, env, "go", args...); err != nil {
@@ -118,7 +139,16 @@ func (p Publisher) Build(dist string, platforms []Platform) ([]Asset, error) {
 			for _, pl := range []Platform{{OS: "darwin", Arch: "amd64"}, {OS: "darwin", Arch: "arm64"}, {OS: "linux", Arch: "amd64"}, {OS: "linux", Arch: "arm64"}} {
 				a := Asset{Name: AssetName("agent", pl), Path: filepath.Join(dist, AssetName("agent", pl))}
 				env := []string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}
-				if _, err := p.Run(core, env, "go", "build", "-trimpath", "-o", a.Path, "./cmd/agent"); err != nil {
+				agentArgs := []string{"build", "-trimpath"}
+				if tag, err := p.releaseTag(); err == nil && tag != "" {
+					pkg, err := agentVersionPackage(core)
+					if err != nil {
+						return nil, err
+					}
+					agentArgs = append(agentArgs, "-ldflags", "-X "+pkg+".Version="+tag)
+				}
+				agentArgs = append(agentArgs, "-o", a.Path, "./cmd/agent")
+				if _, err := p.Run(core, env, "go", agentArgs...); err != nil {
 					return nil, fmt.Errorf("build agent for %s/%s: %w", pl.OS, pl.Arch, err)
 				}
 				sum, err := fileSum(a.Path)

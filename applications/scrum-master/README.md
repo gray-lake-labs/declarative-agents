@@ -35,17 +35,17 @@ tpm install --runtime
 
 ## Run tpm in CI
 
-Each release also publishes an image, `ghcr.io/gray-lake-labs/tpm:<tag>`, for linux/amd64 and linux/arm64: tpm, the declarative-agents runtime at the release tpm pins, the spec tool, git, and git-crypt, with no Go toolchain, running as a non-root user. Pin it by the digest the release's notes list. A GitLab CI job uses it directly:
+Each release also publishes an image, `ghcr.io/gray-lake-labs/scrum-master:<tag>`, for linux/amd64 and linux/arm64: tpm, the declarative-agents runtime at the release tpm pins, the spec tool, git, and git-crypt, with no Go toolchain, running as a non-root user. Pin it by the digest the release's notes list. A GitLab CI job uses it directly:
 
 ```yaml
 tpm-check:
-  image: ghcr.io/gray-lake-labs/tpm@<digest>
+  image: ghcr.io/gray-lake-labs/scrum-master@<digest>
   script:
     - tpm backlog check
     - tpm doctor --dry-run
 ```
 
-To pull from the program's own registry instead, copy it there once per release, for example with `docker buildx imagetools create --tag <registry>/tpm:<tag> ghcr.io/gray-lake-labs/tpm@<digest>`. Tracker credentials (`TPM_TRACKER`, `TPM_USER`) and any model credentials a profile names come from masked CI variables; `TPM_USER` names a service user, never a person.
+To pull from the program's own registry instead, copy it there once per release, for example with `docker buildx imagetools create --tag <registry>/tpm:<tag> ghcr.io/gray-lake-labs/scrum-master@<digest>`. Tracker credentials (`TPM_TRACKER`, `TPM_USER`) and any model credentials a profile names come from masked CI variables; `TPM_USER` names a service user, never a person.
 
 ## Seed a program repository from an architecture document
 

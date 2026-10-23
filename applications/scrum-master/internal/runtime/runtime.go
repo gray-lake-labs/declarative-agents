@@ -20,12 +20,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	goruntime "runtime"
-	"runtime/debug"
 	"strings"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/spectool"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/version"
 )
 
 // AgentEnv names an agent binary already on the machine, used in place of
@@ -44,14 +43,12 @@ const (
 // ship from one repository (GH-190, srd043 R3.3).
 const fallbackPin = "v0.20261018.1"
 
-var releaseTag = regexp.MustCompile(`^v0\.\d{8}\.\d+$`)
-
 // DefaultPin is the release a new corpus pins and tpm install --runtime
 // fetches when the repository pins nothing: this tpm's own release, else
 // the newest release with published binaries (GH-190).
 func DefaultPin() string {
-	if bi, ok := debug.ReadBuildInfo(); ok && releaseTag.MatchString(bi.Main.Version) {
-		return bi.Main.Version
+	if v := version.Current(); version.IsRelease(v) {
+		return v
 	}
 	return fallbackPin
 }

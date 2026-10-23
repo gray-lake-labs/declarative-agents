@@ -13,7 +13,7 @@ test_suite: test-rel04.3-distribution
 
 A program runs tpm in GitLab CI: a release gate, a scheduled run, or an
 agent workflow. The job names the release's image by digest,
-ghcr.io/gray-lake-labs/tpm:<tag>, and runs with no install step and no Go
+ghcr.io/gray-lake-labs/scrum-master:<tag>, and runs with no install step and no Go
 toolchain. tpm in the image finds the runtime at the release it pins in
 the cache the image carries, tpm doctor reports it, and repairs a corpus
 at tpm's pin with the spec tool built into the image.

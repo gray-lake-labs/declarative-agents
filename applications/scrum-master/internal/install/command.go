@@ -7,30 +7,17 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
-	"runtime/debug"
 	"strings"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/version"
 )
 
-// version is the release the Publisher stamps at build time (GH-190): the
-// application is a nested module, so the repository's release tag is not
-// its buildinfo version and the stamp carries it instead.
-var version string
-
-// Version is the tpm version stamped into installed files: the stamped
-// release, else the module version the binary was built at, or dev for a
-// local build.
-func Version() string {
-	if version != "" {
-		return version
-	}
-	if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
-		return bi.Main.Version
-	}
-	return "dev"
-}
+// Version is the tpm version stamped into installed files: the release the
+// binary was published at, else its module version, or dev for a local
+// build (internal/version).
+func Version() string { return version.Current() }
 
 func gitRoot() (string, error) {
 	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
