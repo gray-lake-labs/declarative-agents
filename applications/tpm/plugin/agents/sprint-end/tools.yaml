@@ -1,0 +1,30 @@
+# Tool selection for the sprint-end workflow. The tpm words and file words are
+# model-invoked in the Summarize state via $tool dispatch (design.md D10, D14).
+tools:
+  # tpm words -- model-invoked
+  - tpm_sprint_end_facts
+  - tpm_sprint_end_stories
+  - tpm_issue_merge
+  - tpm_release_gate
+  - tpm_release_tag
+
+  # File words
+  - read
+  - write
+  - edit
+  - find
+  - list_files
+
+  # Commit words -- model-invoked where the skill commits
+  - stage_all
+  - commit
+
+  # Model loop -- direct transition actions
+  - invoke_llm
+  - parse_response
+  - report_parse_error
+  - reset_history
+  - nudge_reread
+
+  # Completion -- emits TaskCompleted via parse_response
+  - done

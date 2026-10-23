@@ -1,0 +1,7 @@
+# Tool selection for the plan-push machine: four tpm words, no model
+# anywhere (design.md D10, D14; GH-206).
+tools:
+  - tpm_plan_milestone
+  - tpm_plan_sprint_issue
+  - tpm_plan_sprint_ends
+  - tpm_plan_events

@@ -1,0 +1,29 @@
+backlog: the planning hierarchy, theme to story
+
+A program plans in the agile hierarchy, each level a document the corpus
+gate checks with at most one parent. A theme names a strategic area and an
+initiative a multi-team outcome for several quarters, both in the system
+repository. An epic is a large body of work under an initiative, an
+optional feature a capability inside it, and a user story the unit of
+value a team finishes in one sprint: as a, I want, so that, story points,
+a rank, and acceptance criteria naming a test and an environment. Links
+are the agile set: parent, blocked by, depends on, relates to, duplicates,
+and implements. A team's Product Backlog is its agreed stories not yet
+done, by rank; velocity is the points of stories done per sprint, and
+progress rolls up from story points through parent links.
+
+The draft skill turns a description into one document at any level,
+in conversation with its owner, reading and checking the hierarchy
+with this group.
+
+Where each level lives and the fields its document carries are in
+docs/constitutions/design.md, under Schema; tpm init writes that file
+into a program repository.
+
+Subcommands:
+  tpm backlog list    the repository's hierarchy documents, with id, kind, parent, and status (srd045)
+  tpm backlog check   the hierarchy gate on the repository's documents (srd045)
+
+Also: tpm plan candidates, tpm plan backlog, tpm issue lint
+
+See: srd045, srd046, srd007, srd034, srd031
