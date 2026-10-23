@@ -166,8 +166,15 @@ func ProfileEnv(fsys fs.FS, dir string) (map[string][]string, error) {
 			if err != nil {
 				return err
 			}
-			for _, m := range envPattern.FindAllStringSubmatch(string(b), -1) {
-				seen[m[1]] = true
+			for _, line := range strings.Split(string(b), "\n") {
+				// A comment names a variable without reading it, as the
+				// declarations' own "never a ${VAR} arg" note does (GH-20).
+				if strings.HasPrefix(strings.TrimSpace(line), "#") {
+					continue
+				}
+				for _, m := range envPattern.FindAllStringSubmatch(line, -1) {
+					seen[m[1]] = true
+				}
 			}
 			return nil
 		})

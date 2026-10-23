@@ -143,6 +143,19 @@ func TestGatePeerReadNeedsAnotherPersonsThumbsUp(t *testing.T) {
 	if err != nil || r.Passed || r.Checks[0].Result != ResultPending || r.Checks[0].Environment != "none" {
 		t.Fatalf("own thumbs-up: %+v %v", r, err)
 	}
+	// The evidence sentence names no "none" environment (GH-196, GH-20).
+	posted := false
+	for _, n := range f.Notes[key] {
+		if strings.Contains(n.Body, "Release gate for") {
+			posted = true
+			if strings.Contains(n.Body, " in none") {
+				t.Fatalf("the evidence sentence names in none: %q", n.Body)
+			}
+		}
+	}
+	if !posted {
+		t.Fatalf("the gate posted no evidence on %s: %+v", key, f.Notes[key])
+	}
 	f.Awards[key] = append(f.Awards[key], tracker.Award{Name: "thumbsup", User: "reviewer"})
 	r, err = g.run(p, "a", t0.Add(time.Minute))
 	if err != nil || !r.Passed || !strings.Contains(r.Checks[0].Reason, "reviewer") {

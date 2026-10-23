@@ -136,7 +136,12 @@ func RunGate(t tracker.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) 
 	for _, res := range r.Checks {
 		e := events.Evidence("definition_of_done."+in.Artifact, res.Test, res.Environment, r.Tag, res.Result,
 			events.KV{Key: "artifact", Value: in.Artifact}, events.KV{Key: "revision", Value: r.Revision}, events.KV{Key: "run", Value: r.Run})
-		text := fmt.Sprintf("Release gate for %s at %s: %s %s in %s.", r.Tag, short(r.Revision), res.Test, res.Result, res.Environment)
+		text := fmt.Sprintf("Release gate for %s at %s: %s %s.", r.Tag, short(r.Revision), res.Test, res.Result)
+		if res.Environment != "" && res.Environment != "none" {
+			// A peer read has no environment; "none" stays in the event's
+			// fields, not its sentence (GH-196, GH-20).
+			text = fmt.Sprintf("Release gate for %s at %s: %s %s in %s.", r.Tag, short(r.Revision), res.Test, res.Result, res.Environment)
+		}
 		if res.Reason != "" {
 			text += " " + res.Reason
 		}
