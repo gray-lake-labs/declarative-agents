@@ -10,6 +10,7 @@ import (
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/links"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/objectives"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/sprintgoal"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
@@ -56,6 +57,10 @@ func MakePlan(t tracker.Tracker, s Sources) (Plan, error) {
 	if err != nil {
 		return p, err
 	}
+	// The system repository is a component (srd001 R21), but it serves no
+	// Sprint Goal of its own: a team does. It stays a candidate only where
+	// an outcome's delivered_by names it (GH-20).
+	teams := slices.DeleteFunc(slices.Clone(candidates), func(r string) bool { return r == program.ProjectPath(s.System) })
 	for _, id := range s.Release.Objectives {
 		doc, item, _ := strings.Cut(id, "#")
 		group, _, ok := strings.Cut(item, ".")
@@ -65,8 +70,11 @@ func MakePlan(t tracker.Tracker, s Sources) (Plan, error) {
 			return p, fmt.Errorf("release objective %s names no item of %s", id, doc)
 		}
 		key := doc + "#" + group
-		po := PlannedObjective{Key: key, Document: doc, Group: group, Title: obj.Title, Items: []string{item}, Due: obj.Due, Candidates: candidates}
+		po := PlannedObjective{Key: key, Document: doc, Group: group, Title: obj.Title, Items: []string{item}, Due: obj.Due, Candidates: teams}
 		po.Repository = recommendRepository(s, obj)
+		if po.Repository != "" && !slices.Contains(po.Candidates, po.Repository) {
+			po.Candidates = append(slices.Clone(teams), po.Repository)
+		}
 		po.Environment = recommendEnvironment(d, group, item)
 		if c, ok := carriers[id]; ok {
 			po.Carried, po.Repository = c.ref, c.repo

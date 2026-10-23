@@ -45,7 +45,12 @@ func init() {
 	}
 	cli.Default.Register(&cli.Command{
 		Group: "goals", Name: "plan", Summary: "initiative outcomes of a release with recommended team and environment",
-		Flags: common,
+		Flags: func(fs *flag.FlagSet) {
+			common(fs)
+			// plan reads no control files; it takes --control so the one
+			// flag set serves plan and push, as AGENTS.md asks (GH-20).
+			fs.StringVar(&a.control, "control", "", "program repository holding control/ files; plan reads none, and accepts it so one flag set serves plan and push")
+		},
 		Run: func(ctx *cli.Context) error {
 			t, s, err := load(ctx)
 			if err != nil {

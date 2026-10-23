@@ -157,3 +157,24 @@ func TestTrackerLoadsStatesFromTheCheckout(t *testing.T) {
 		t.Fatalf("the program's own row must fire: %v", err)
 	}
 }
+
+// A person's close may carry its reason, recorded as close_reason with the
+// close time, as a merge's close records its commit (GH-20).
+func TestCloseRecordsItsReason(t *testing.T) {
+	tr := newTestTracker(t, "alice")
+	created, err := tr.CreateIssue("g/po-1", tracker.NewIssue{Title: "one"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	closeState, reason := "close", "closed by tpm issue recur without its work"
+	if _, err := tr.UpdateIssue("g/po-1", created.IID, tracker.IssueUpdate{State: &closeState, CloseReason: &reason}); err != nil {
+		t.Fatal(err)
+	}
+	i, ok, err := tr.Store.Find("g/po-1", created.IID)
+	if err != nil || !ok {
+		t.Fatalf("find: %v %v", ok, err)
+	}
+	if i.State != Closed || i.CloseReason != reason || i.ClosedAt == "" {
+		t.Fatalf("closed issue = state %s reason %q at %q", i.State, i.CloseReason, i.ClosedAt)
+	}
+}

@@ -457,3 +457,25 @@ func TestSharedCriterionNamesOnlyItsGoalsTests(t *testing.T) {
 		})
 	}
 }
+
+// The system repository, a component like any team's (srd001 R21), is no
+// team: goals plan offers it as a candidate for no outcome (GH-20).
+func TestPlanOffersNoSystemCandidate(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
+		tp.AddFile(system, "v0.1.0", "docs/specs/software-requirements/srd001-system.md", []byte(strings.NewReplacer(
+			"srd010-delivery", "srd001-system", "| fleet |", "| system |", "/delivery/fleet", "/system").Replace(string(read(t, "../../testdata/system/srd010-delivery.md")))))
+		f, s := fixture(t, tp)
+		if !slices.Contains(s.Subsystems.Repositories(), system) {
+			t.Fatalf("the fixture must declare the system repository: %v", s.Subsystems.Repositories())
+		}
+		p, err := MakePlan(f, s)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, o := range p.Objectives {
+			if slices.Contains(o.Candidates, system) {
+				t.Fatalf("%s offers the system repository: %v", o.Key, o.Candidates)
+			}
+		}
+	})
+}

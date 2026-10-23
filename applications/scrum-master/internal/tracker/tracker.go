@@ -52,7 +52,10 @@ type NewIssue struct {
 // IssueUpdate changes an issue; nil fields are left alone.
 type IssueUpdate struct {
 	// State is "close" or "reopen", or nil to leave the state alone.
-	State       *string
+	State *string
+	// CloseReason, with State "close", records why the issue closed where
+	// the tracking system keeps a reason (beads' close_reason; GH-20).
+	CloseReason *string
 	Description *string
 	DueDate     *string
 	// Milestone sets the issue's milestone, by title.

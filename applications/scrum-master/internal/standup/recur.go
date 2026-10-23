@@ -104,13 +104,17 @@ func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurRes
 	summary := strings.Join(strings.Fields(o.Summary), " ")
 	run := fmt.Sprintf("- %s#%d (due %s): %s.", project, iid, orNone(i.DueDate), outcome)
 	if summary != "" {
-		// The run's result is what the line records; closed by recur, the
-		// instance merged no work of its own.
-		how := "closed by its merge"
+		// The run's result is what the line records, the summary's own
+		// sentence kept whole; closed by recur, the instance merged no work
+		// of its own (GH-20).
+		how := "Closed by its merge."
 		if r.Closed {
-			how = "closed by tpm issue recur"
+			how = "Closed by tpm issue recur."
 		}
-		run = fmt.Sprintf("- %s#%d (due %s): %s (%s).", project, iid, orNone(i.DueDate), strings.TrimSuffix(summary, "."), how)
+		if !strings.HasSuffix(summary, ".") && !strings.HasSuffix(summary, "!") && !strings.HasSuffix(summary, "?") {
+			summary += "."
+		}
+		run = fmt.Sprintf("- %s#%d (due %s): %s %s", project, iid, orNone(i.DueDate), summary, how)
 	}
 	body := nextBody(i.Description, o.Body, run) + "\n\n" + marker + "\n"
 	if o.DryRun {
@@ -124,7 +128,8 @@ func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurRes
 		if err := t.CreateNote(project, iid, note); err != nil {
 			return r, err
 		}
-		if _, err := t.UpdateIssue(project, iid, tracker.IssueUpdate{State: ptr("close")}); err != nil {
+		reason := "closed by tpm issue recur without its work; the next instance is due " + r.DueDate
+		if _, err := t.UpdateIssue(project, iid, tracker.IssueUpdate{State: ptr("close"), CloseReason: &reason}); err != nil {
 			return r, err
 		}
 	}

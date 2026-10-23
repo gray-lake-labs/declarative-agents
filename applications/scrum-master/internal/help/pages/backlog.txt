@@ -18,11 +18,14 @@ with this group.
 
 Where each level lives and the fields its document carries are in
 docs/constitutions/design.md, under Schema; tpm init writes that file
-into a program repository.
+into a program repository. tpm backlog template --kind <level> prints a
+document of that level in the Markdown layout the gate reads, to copy
+and fill; the gate's errors then name the fields by that layout.
 
 Subcommands:
   tpm backlog list    the repository's hierarchy documents, with id, kind, parent, and status (srd045)
   tpm backlog check   the hierarchy gate on the repository's documents (srd045)
+  tpm backlog template   a document of one level in the layout the gate reads (GH-20)
 
 Also: tpm plan candidates, tpm plan backlog, tpm issue lint
 
