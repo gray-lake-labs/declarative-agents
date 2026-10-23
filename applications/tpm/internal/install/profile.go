@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package install
 
 import (
@@ -10,7 +12,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/gray-lake-labs/scrum-master"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm"
 )
 
 // EmbeddedSkills is the full roster the binary ships: the embedded SKILL.md

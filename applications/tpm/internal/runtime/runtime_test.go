@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package runtime
 
 import (
@@ -17,7 +19,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/spectool"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/spectool"
 )
 
 const tag = "v0.20260101.1"
@@ -274,13 +276,25 @@ func TestBuildSpecToolNeedsGoOrAPrebuiltTool(t *testing.T) {
 	}
 }
 
-func TestPinIsTheEmbeddedPinsFile(t *testing.T) {
-	tag, err := Pin()
-	if err != nil {
-		t.Fatal(err)
+// A dev build pins the newest release with published binaries, and a
+// release tag is the shape DefaultPin takes from a released build (GH-190).
+func TestDefaultPinIsAReleaseTag(t *testing.T) {
+	if pin := DefaultPin(); !releaseTag.MatchString(pin) {
+		t.Fatalf("DefaultPin %q is not a release tag", pin)
 	}
-	pinned, err := spectool.Pinned(filepath.Join("..", ".."))
-	if err != nil || tag != pinned {
-		t.Fatalf("Pin %q, docs/external-pins.yaml %q, %v", tag, pinned, err)
+}
+
+// Inside this repository the sibling is the runtime: the source is the
+// repository root holding agent-core, and nothing downloads (GH-190).
+func TestSiblingLocatesThisRepository(t *testing.T) {
+	rel, ok, err := Sibling(".", nil)
+	if err != nil || !ok {
+		t.Fatalf("ok=%v err=%v", ok, err)
+	}
+	if _, serr := os.Stat(filepath.Join(rel.CoreRoot(), "cmd", "agent")); serr != nil {
+		t.Fatalf("core root %q has no agent: %v", rel.CoreRoot(), serr)
+	}
+	if _, ok, _ := Sibling(t.TempDir(), nil); ok {
+		t.Fatal("a directory outside the repository must not be a sibling")
 	}
 }

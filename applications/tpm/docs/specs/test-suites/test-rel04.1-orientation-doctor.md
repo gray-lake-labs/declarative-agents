@@ -4,6 +4,8 @@ title: Test Suite for Release 04.1 A Repository That Explains Itself
 release: "04.1"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package sprintend is the tpm side of a sprint-end issue (srd038 R1, R6):
 // the facts its Requirements summarize, so the model drafts the period's
 // summary from computed state and asks only what tpm cannot know.
@@ -7,12 +9,12 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
-	"github.com/gray-lake-labs/scrum-master/internal/release"
-	"github.com/gray-lake-labs/scrum-master/internal/reports"
-	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/events"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/release"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/reports"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/sprintgoal"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // SprintGoal is one Sprint Goal issue of the repository, or an objective

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package program
 
 import (
@@ -8,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
-	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/beads/beadstest"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/hierarchy"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // TestEpicStoriesInRankOrder reads an epic's stories, directly or through

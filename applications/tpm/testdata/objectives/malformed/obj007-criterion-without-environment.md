@@ -3,6 +3,8 @@ id: obj007-criterion-without-environment
 title: Reliable agents the product teams can deploy
 status: agreed
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: context | form: "tree" -->
 ## Context

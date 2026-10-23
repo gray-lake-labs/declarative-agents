@@ -1,10 +1,12 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
 	"path/filepath"
 	"slices"
 
-	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
 )
 
 func init() {

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -5,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/hierarchy"
 )
 
 // TestHierarchyDocumentsAreValid gates every theme, initiative, epic,

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package program
 
 import (
@@ -8,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/events"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/sprintgoal"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // MergeResult is what merge reports.

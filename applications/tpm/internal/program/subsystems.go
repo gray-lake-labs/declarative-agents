@@ -1,10 +1,12 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package program
 
 import (
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // SRDDir holds a repository's SRDs; in the system repository, subsystem

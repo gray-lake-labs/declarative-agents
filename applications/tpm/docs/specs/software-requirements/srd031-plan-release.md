@@ -5,6 +5,8 @@ status: retired
 retired_in: "1.4"
 replaced_by: ["srd031-plan"]
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

@@ -2,6 +2,8 @@
 id: program-roadmap
 title: Program road map
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- release: 01.0 -->
 ## 01.0

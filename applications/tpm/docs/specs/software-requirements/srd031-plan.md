@@ -2,6 +2,8 @@
 id: srd031-plan
 title: "Skill: plan"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The implement profile's model binding. The model acts only in the Work
 # state (design.md D10), so invoke_llm and parse_response build their tool
 # manifest there. The binding reads TPM_MODEL, TPM_RESPONSE_PROFILE, and

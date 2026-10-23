@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The checks this corpus's audit gates on. The shipped specification-critic
 # corpus-audit profile of gray-lake-labs/declarative-agents binds
 # docs/corpus-charter.yaml relative to --directory, so this file decides what
@@ -63,9 +65,9 @@ checks:
       - citation-of-retired-id
       - unresolved-clarification
       - invalid-priority
-      # External references: derived_from entries resolve offline against the
-      # parent cache at their validated release, are pinned, and are current
-      # with docs/external-pins.yaml.
+      # External references: derived_from entries resolve against this
+      # repository's own tree (docs/external-checkouts.yaml, written by
+      # mage audit for the run), are pinned, and stay resolvable.
       - unverifiable-external-reference
       - broken-external-reference
       - retired-external-reference

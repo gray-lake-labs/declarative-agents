@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package release
 
 import (
@@ -11,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
 )
 
 // CommitsSince returns the messages of the commits in dir since tag, or of

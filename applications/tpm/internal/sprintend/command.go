@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package sprintend
 
 import (
@@ -7,12 +9,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
-	"github.com/gray-lake-labs/scrum-master/internal/release"
-	"github.com/gray-lake-labs/scrum-master/internal/reports"
-	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/release"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/reports"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/sprintgoal"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 func init() {

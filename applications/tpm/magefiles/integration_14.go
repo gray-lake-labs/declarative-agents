@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -9,9 +11,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/release"
-	tpmruntime "github.com/gray-lake-labs/scrum-master/internal/runtime"
-	"github.com/gray-lake-labs/scrum-master/internal/scaffold"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/release"
+	tpmruntime "github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/scaffold"
 )
 
 // Image builds tpm for Linux on this machine's architecture, builds the release image from it as mage publish does, and proves the image's tpm is that binary, its agent is the pinned release's, it carries no Go toolchain or mage and runs as a non-root user, tpm backlog check and tpm doctor --dry-run run over a mounted checkout with doctor finding the runtime and repairing with the image's spec tool, and the agent validates a profile against the image's source root (test-rel04.3-distribution). It needs docker with buildx and network access, and no rig.
@@ -79,10 +81,7 @@ func (Integration) Image() error {
 	got, err := inImage("tpm --version")
 	c.expect(err == nil && got == want, "the image's tpm reports %q, the release binary %q: %v", got, want, err)
 
-	pin, err := tpmruntime.Pin()
-	if err != nil {
-		return err
-	}
+	pin := tpmruntime.DefaultPin()
 	asset, _ := tpmruntime.HostAsset("agent", "linux", runtime.GOARCH)
 	sums, err := inImage(`sha256sum "$(readlink -f "$(command -v agent)")" | cut -d" " -f1; grep " ` + asset + `$" "$XDG_CACHE_HOME/scrum-master/release/` + pin + `/SHA256SUMS" | cut -d" " -f1`)
 	lines := strings.Fields(sums)

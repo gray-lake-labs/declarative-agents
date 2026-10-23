@@ -3,6 +3,8 @@ id: ep001-agent-evaluation
 title: Agent evaluation
 status: agreed
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: context | form: "tree" -->
 ## Context

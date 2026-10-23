@@ -2,6 +2,8 @@
 id: srd034-initiatives
 title: "Initiatives and the Sprint Goal loop"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

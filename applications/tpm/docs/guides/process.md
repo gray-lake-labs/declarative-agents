@@ -1,3 +1,5 @@
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 # The Process
 
 This page shows how the process runs, in Scrum's own terms. Three figures

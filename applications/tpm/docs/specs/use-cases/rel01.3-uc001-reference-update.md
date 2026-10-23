@@ -7,6 +7,8 @@ replaced_by: ["rel05.0-uc001-reference-update"]
 priority: P2
 test_suite: test-rel01.3-tag-triggered
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: summary -->
 ## Summary

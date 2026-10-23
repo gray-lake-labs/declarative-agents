@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package gitlab is the glab tracking system: a program's issues, labels,
 // and milestones in GitLab, and each branch reviewed and merged as a merge
 // request, all through the glab CLI and the person's existing login, so
@@ -21,8 +23,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/checkout"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/checkout"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // API is how the tracker reaches GitLab: Do calls the REST API v4 through

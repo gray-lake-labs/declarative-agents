@@ -3,6 +3,8 @@ id: ep001-lost
 title: Lost epic
 status: agreed
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: context | form: "tree" -->
 ## Context

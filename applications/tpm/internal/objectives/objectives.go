@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package objectives loads and validates initiative documents (srd034 R1),
 // and objective documents, their name before release 04.0, as initiatives.
 // An initiative is an SRD in the pinned parent release's Markdown format:
@@ -13,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
 )
 
 // Dir is where a system repository keeps its initiatives; LegacyDir is where

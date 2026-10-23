@@ -5,6 +5,8 @@ status: implemented
 priority: P1
 test_suite: test-rel01.0-objectives
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: summary -->
 ## Summary
@@ -30,7 +32,7 @@ The program agrees what it commits to for the next horizon of periods.
 ## Preconditions
 
 - The system repository carries the docs/ corpus, docs/corpus-charter.yaml, and docs/external-pins.yaml (design.md D7).
-- The parent release that docs/external-pins.yaml pins is available in the clone cache docs/external-checkouts.yaml names.
+- The corpus audit's agent is available: in this repository the sibling agent-core; in a program repository, the release its docs/external-pins.yaml pins, in the clone cache (GH-190).
 - The system repository runs mage audit before every merge that changes docs/.
 
 <!-- field: flow -->

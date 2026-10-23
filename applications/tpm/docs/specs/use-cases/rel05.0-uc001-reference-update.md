@@ -5,6 +5,8 @@ status: specified
 priority: P2
 test_suite: test-rel05.0-tag-triggered
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: summary -->
 ## Summary

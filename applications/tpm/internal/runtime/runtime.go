@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package runtime fetches and verifies the declarative-agents runtime: the
 // release's agent binary for this host and the release's source, whose
 // agent-core tree a profile runs against (srd037 R7). tpm install --runtime
@@ -18,13 +20,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	goruntime "runtime"
+	"runtime/debug"
 	"strings"
 
-	"gopkg.in/yaml.v3"
-
-	"github.com/gray-lake-labs/scrum-master"
-	"github.com/gray-lake-labs/scrum-master/internal/spectool"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/spectool"
 )
 
 // AgentEnv names an agent binary already on the machine, used in place of
@@ -37,20 +38,66 @@ const (
 	FromEnv   = AgentEnv
 )
 
-// Pin is the parent release tpm's own corpus pins, embedded when tpm is
-// built: the release tpm init writes into a new corpus and the runtime tpm
-// install --runtime fetches.
-func Pin() (string, error) {
-	var pins struct {
-		Pins map[string]string `yaml:"pins"`
+// fallbackPin is the newest release of this repository with published agent
+// binaries, written into a new corpus when this tpm is not itself a release
+// build; a released tpm writes its own version, since tpm and the runtime
+// ship from one repository (GH-190, srd043 R3.3).
+const fallbackPin = "v0.20261018.1"
+
+var releaseTag = regexp.MustCompile(`^v0\.\d{8}\.\d+$`)
+
+// DefaultPin is the release a new corpus pins and tpm install --runtime
+// fetches when the repository pins nothing: this tpm's own release, else
+// the newest release with published binaries (GH-190).
+func DefaultPin() string {
+	if bi, ok := debug.ReadBuildInfo(); ok && releaseTag.MatchString(bi.Main.Version) {
+		return bi.Main.Version
 	}
-	if err := yaml.Unmarshal(scrummaster.Pins, &pins); err != nil {
-		return "", err
+	return fallbackPin
+}
+
+// RepoPin is the release the repository around dir pins in its
+// docs/external-pins.yaml, else DefaultPin (GH-190).
+func RepoPin(dir string) string {
+	out, err := exec.Command("git", "-C", dir, "rev-parse", "--show-toplevel").Output()
+	if err != nil {
+		return DefaultPin()
 	}
-	if pins.Pins[spectool.ParentRepository] == "" {
-		return "", fmt.Errorf("tpm was built without a pin of %s", spectool.ParentRepository)
+	if tag, err := spectool.Pinned(strings.TrimSpace(string(out))); err == nil {
+		return tag
 	}
-	return pins.Pins[spectool.ParentRepository], nil
+	return DefaultPin()
+}
+
+// Sibling is the runtime this repository holds beside the application, when
+// dir is inside the repository that ships agent-core: the repository root
+// is the source and the agent builds from agent-core into agent-core/bin —
+// no pin and no download, the sibling is the release (GH-190). With a nil
+// builder it only locates; ok reports whether dir is in that repository.
+func Sibling(dir string, build func(dir, name string, args ...string) error) (Release, bool, error) {
+	out, err := exec.Command("git", "-C", dir, "rev-parse", "--show-toplevel").Output()
+	if err != nil {
+		return Release{}, false, nil
+	}
+	root := strings.TrimSpace(string(out))
+	core := filepath.Join(root, "agent-core")
+	if _, err := os.Stat(filepath.Join(core, "cmd", "agent")); err != nil {
+		return Release{}, false, nil
+	}
+	// Build products live in the release cache, not in the tree: a scratch
+	// module inside the repository would read as a maintained module.
+	dir, derr := spectool.ReleaseDir("in-repo")
+	if derr != nil {
+		return Release{}, true, derr
+	}
+	r := Release{Tag: "in-repo", Dir: dir, Src: root, Agent: filepath.Join(dir, "agent")}
+	if build == nil {
+		return r, true, nil
+	}
+	if err := build(core, "go", "build", "-o", r.Agent, "./cmd/agent"); err != nil {
+		return r, true, err
+	}
+	return r, true, nil
 }
 
 // Release is a release's runtime on this host: its directory under the
@@ -306,6 +353,10 @@ func exists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
 }
+
+// RunCommand runs name with args in dir and keeps its output for the error:
+// the builder Sibling takes.
+func RunCommand(dir, name string, args ...string) error { return run(dir, name, args...) }
 
 // run runs name with args in dir and keeps its output for the error.
 func run(dir, name string, args ...string) error {

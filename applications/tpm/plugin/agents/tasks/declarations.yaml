@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The tasks workflow's tpm words, dispatched by the model in the Decompose state.
 # Optional flags are parameters, never ${VAR} args: the loader drops an
 # argument whose variable is unset, which corrupts the flag list (the GH-135

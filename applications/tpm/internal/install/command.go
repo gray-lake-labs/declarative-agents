@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package install
 
 import (
@@ -8,13 +10,22 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/runtime"
 )
 
-// Version is the tpm version stamped into installed files: the module
-// version the binary was built at, or dev for a local build.
+// version is the release the Publisher stamps at build time (GH-190): the
+// application is a nested module, so the repository's release tag is not
+// its buildinfo version and the stamp carries it instead.
+var version string
+
+// Version is the tpm version stamped into installed files: the stamped
+// release, else the module version the binary was built at, or dev for a
+// local build.
 func Version() string {
+	if version != "" {
+		return version
+	}
 	if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
 		return bi.Main.Version
 	}
@@ -120,14 +131,27 @@ func init() {
 	})
 }
 
-// installRuntime fetches the runtime at the release tpm pins, builds the
-// spec tool there when Go is on PATH, and reports where each part is
-// (srd037 R7). It needs no git repository.
+// installRuntime lays out the runtime (srd037 R7). Inside the repository
+// that ships agent-core, the sibling is the release: the agent builds from
+// source and nothing downloads (GH-190). Elsewhere it fetches the release
+// the repository pins in docs/external-pins.yaml, else the default pin.
 func installRuntime(ctx *cli.Context) error {
-	tag, err := runtime.Pin()
-	if err != nil {
-		return err
+	var build func(dir, name string, args ...string) error
+	if !ctx.DryRun {
+		build = runtime.RunCommand
 	}
+	if rel, ok, err := runtime.Sibling(".", build); ok {
+		if err != nil {
+			return err
+		}
+		rep := runtime.Report{Release: rel.Tag, Agent: rel.Agent, From: "repository", CoreRoot: rel.CoreRoot(), DryRun: ctx.DryRun}
+		var b strings.Builder
+		fmt.Fprintf(&b, "release    %s (this repository)\n", rep.Release)
+		fmt.Fprintf(&b, "agent      %s (built from agent-core)\n", rep.Agent)
+		fmt.Fprintf(&b, "core root  %s\n", rep.CoreRoot)
+		return ctx.Emit(rep, b.String())
+	}
+	tag := runtime.RepoPin(".")
 	rep, err := runtime.Fetch(tag, ctx.DryRun)
 	if err != nil {
 		return err

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package tracker is tpm's tracker boundary. Every package that reads or
 // writes issues goes through the Tracker interface: production uses the
 // beads tracker (internal/beads), and tests use it or the fake in

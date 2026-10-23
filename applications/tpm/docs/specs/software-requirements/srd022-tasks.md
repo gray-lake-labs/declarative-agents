@@ -2,6 +2,8 @@
 id: srd022-tasks
 title: "Skill: tasks"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

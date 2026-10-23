@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package objectives
 
 import (
@@ -8,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/links"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/links"
 )
 
 // Finding is one validation failure in one document.

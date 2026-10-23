@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package scaffold
 
 import (
@@ -5,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/beads"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/beads"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
 )
 
 // StatesDocument round-trips: the beads parser reads back exactly the rows

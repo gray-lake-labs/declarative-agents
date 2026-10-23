@@ -3,6 +3,8 @@ id: st001-on-a-branch
 title: On a branch
 status: agreed
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: context | form: "tree" -->
 ## Context

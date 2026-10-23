@@ -5,6 +5,8 @@ status: implemented
 priority: P2
 test_suite: test-rel03.1-tracking-systems
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: summary -->
 ## Summary

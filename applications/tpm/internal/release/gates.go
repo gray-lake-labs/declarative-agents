@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package release cuts a tag only after a repository's declared gates pass:
 // the gates file, the stage runner, and the v0.YYYYMMDD.N tag sequence
 // (eng03). scrum-master's mage tag drives it; tpm release reuses the tagging.
@@ -10,7 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
 )
 
 // DefaultGatesFile is the gates file at the repository root, a config

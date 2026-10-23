@@ -2,6 +2,8 @@
 id: srd046-draft
 title: "Skill: draft"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: design_notes -->
 ## Design notes

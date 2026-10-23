@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package help is tpm help: the process, each group, and each load-bearing
 // concept, as pages embedded in the binary (srd044).
 package help
@@ -12,7 +14,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
 )
 
 //go:embed pages/*.txt

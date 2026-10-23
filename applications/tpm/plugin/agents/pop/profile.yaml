@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The pop as a declarative-agents profile (GH-204, design.md D14): a
 # model-free machine — claim, branch, worktree, install, each a tpm word,
 # the branch and paths flowing between words through $from selectors. tpm

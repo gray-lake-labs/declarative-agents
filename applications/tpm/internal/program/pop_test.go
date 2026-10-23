@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package program
 
 import (
@@ -7,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker/fake"
 )
 
 // recGit records git calls; rev-parse --show-toplevel answers root, and

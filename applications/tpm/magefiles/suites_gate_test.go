@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -13,7 +15,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
 )
 
 // evidence resolves the commands a test suite or the road map names against

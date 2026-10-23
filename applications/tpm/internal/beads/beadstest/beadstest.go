@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package beadstest builds the git fixtures beads tests run against: a
 // tracker repository and code repositories, all on local disk, with no
 // network.

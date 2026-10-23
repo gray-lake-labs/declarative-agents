@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -7,8 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	"github.com/gray-lake-labs/scrum-master/internal/spectool"
 )
 
 // parentRepository is the parent corpus whose specification-critic agent
@@ -16,7 +16,6 @@ import (
 const parentRepository = "github.com/gray-lake-labs/declarative-agents"
 
 const (
-	pinsFile      = "docs/external-pins.yaml"
 	checkoutsFile = "docs/external-checkouts.yaml"
 	auditProfile  = "applications/catalog/agents/specification-critic/corpus-audit-profile.yaml"
 )
@@ -51,11 +50,7 @@ func validateProfiles(root string, run commandRunner) error {
 	if len(profiles) == 0 {
 		return nil
 	}
-	tag, err := pinnedRelease(root)
-	if err != nil {
-		return err
-	}
-	rel, err := fetchRelease(tag)
+	rel, err := repoRuntime()
 	if err != nil {
 		return err
 	}
@@ -67,14 +62,10 @@ func validateProfiles(root string, run commandRunner) error {
 	return nil
 }
 
-// runCorpusAudit runs the pinned release's agent over root, with derived_from
-// entries resolving against the release's own source.
+// runCorpusAudit runs this repository's agent over root, with derived_from
+// entries resolving against the repository's own source (GH-190).
 func runCorpusAudit(root string, run commandRunner) error {
-	tag, err := pinnedRelease(root)
-	if err != nil {
-		return err
-	}
-	rel, err := fetchRelease(tag)
+	rel, err := repoRuntime()
 	if err != nil {
 		return err
 	}
@@ -100,15 +91,16 @@ func runCorpusAudit(root string, run commandRunner) error {
 	return nil
 }
 
-// pinnedRelease reads the parent release docs/external-pins.yaml tracks.
-func pinnedRelease(root string) (string, error) { return spectool.Pinned(root) }
-
+// repositoryRoot is the application's root: the directory holding its
+// go.mod, which inside the monorepo is applications/tpm, not the git
+// toplevel (GH-190).
 func repositoryRoot() (string, error) {
-	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
-	if err != nil {
-		return "", errors.New("not inside a git checkout")
+	out, err := exec.Command("go", "env", "GOMOD").Output()
+	gomod := strings.TrimSpace(string(out))
+	if err != nil || gomod == "" || gomod == os.DevNull {
+		return "", errors.New("not inside the application's module")
 	}
-	return strings.TrimSpace(string(out)), nil
+	return filepath.Dir(gomod), nil
 }
 
 func runStreaming(dir, name string, args ...string) error {

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -8,8 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/program"
-	"github.com/gray-lake-labs/scrum-master/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/runtime"
 )
 
 func init() {
@@ -37,11 +39,7 @@ func (Integration) MergeProfile() error {
 	if _, err := r.runTPM("issue", "labels", "--group", r.group); err != nil {
 		return err
 	}
-	tag, err := pinnedRelease(r.root)
-	if err != nil {
-		return err
-	}
-	rel, err := fetchRelease(tag)
+	rel, err := repoRuntime()
 	if err != nil {
 		return err
 	}

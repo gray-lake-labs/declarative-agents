@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package program
 
 import (
@@ -6,8 +8,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/beads/beadstest"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // recording is a delivery that records each call and passes it to the

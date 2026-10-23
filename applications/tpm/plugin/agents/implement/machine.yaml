@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 name: implement
 purpose: |-
   Take an issue, or a story's issues, into a branch and worktree, build them,

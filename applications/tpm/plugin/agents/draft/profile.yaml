@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The draft skill as a declarative-agents profile (GH-198, design.md D14):
 # the drafting conversation around tpm's hierarchy survey and check.
 # tpm install renders the SKILL.md from this machine, and mage audit

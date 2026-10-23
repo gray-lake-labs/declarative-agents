@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package beads is tpm's tracker over beads (srd042). Issues live in bd's
 // JSONL interchange format, one issue per line, in a dedicated tracker
 // repository that every working clone synchronizes with through git by the

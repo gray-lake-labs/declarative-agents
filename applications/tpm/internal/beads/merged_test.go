@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package beads
 
 import (
@@ -6,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/beads/beadstest"
 )
 
 // deliver makes a branch with one commit in the checkout and merges it into

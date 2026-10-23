@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The pop machine's words (GH-204, srd013 R7.5): the claim, the branch, the
 # worktree, and the skills install. The branch name, the checkout, and the
 # worktree flow from each word's JSON output into the next word's

@@ -3,6 +3,8 @@ id: st002-second
 title: Second
 status: agreed
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: context | form: "tree" -->
 ## Context

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package program
 
 import (
@@ -11,8 +13,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/install"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/install"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // Git runs git in a directory and returns its standard output. Tests use a

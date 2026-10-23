@@ -5,6 +5,8 @@ status: implemented
 priority: P1
 test_suite: test-rel04.0-agile-hierarchy
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: summary -->
 ## Summary

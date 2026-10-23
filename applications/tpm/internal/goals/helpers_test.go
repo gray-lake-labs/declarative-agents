@@ -1,6 +1,8 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package goals
 
-import "github.com/gray-lake-labs/scrum-master/internal/tracker"
+import "github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 
 func openIssues() tracker.IssueQuery { return tracker.IssueQuery{State: "opened"} }
 

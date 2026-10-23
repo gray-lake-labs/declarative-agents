@@ -2,6 +2,8 @@
 id: srd042-beads-tracker
 title: "Beads tracker: the program's facts live in a repository"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: design_notes -->
 ## Design notes

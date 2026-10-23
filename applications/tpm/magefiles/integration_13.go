@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -9,7 +11,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/runtime"
 )
 
 func init() {
@@ -77,10 +79,7 @@ func (Integration) Runtime() error {
 	if err != nil {
 		return fmt.Errorf("install --runtime: %w", err)
 	}
-	pin, err := runtime.Pin()
-	if err != nil {
-		return err
-	}
+	pin := runtime.DefaultPin()
 	if rep.Release != pin || rep.From != runtime.FromCache || !strings.HasPrefix(rep.Agent, cache) || len(rep.Downloaded) != 3 {
 		return fmt.Errorf("install --runtime reported %+v", rep)
 	}

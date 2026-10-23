@@ -4,6 +4,8 @@ title: Test Suite for Release 04.0 The Agile Hierarchy
 release: "04.0"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

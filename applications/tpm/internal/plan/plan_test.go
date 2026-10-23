@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package plan
 
 import (
@@ -9,13 +11,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/goals"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
-	"github.com/gray-lake-labs/scrum-master/internal/reports"
-	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
-	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/goals"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/reports"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/sprintgoal"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/trackertest"
 )
 
 // obj002 is a second agreed objective document: R1 is due before obj001's

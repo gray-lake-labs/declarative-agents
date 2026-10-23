@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The plan-push machine's words (GH-206, srd031 R4.7): the milestone, the
 # sprint issue, the sprint-end issues, and the planned events. Each word
 # rereads the road map in the checkout and recomputes its scope, and each

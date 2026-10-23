@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -15,8 +17,8 @@ import (
 
 	"github.com/magefile/mage/mg"
 
-	"github.com/gray-lake-labs/scrum-master/internal/beads"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/beads"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // Regression creates, uses, and destroys the regression rig

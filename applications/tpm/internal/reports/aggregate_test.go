@@ -1,19 +1,21 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package reports
 
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
 	"slices"
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/beads"
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
-	"github.com/gray-lake-labs/scrum-master/internal/trackertest"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/beads"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/events"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/trackertest"
 )
 
 func work(obj, comp, status, complete string) Entry {

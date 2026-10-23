@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -8,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/plan"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
-	"github.com/gray-lake-labs/scrum-master/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/plan"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/runtime"
 )
 
 func init() {
@@ -33,11 +35,7 @@ func (Integration) PlanPushProfile() error {
 	if err := r.seed(system, map[string]string{program.PolicyFile: planPolicy, "docs/specs/objectives/obj002-fast-scoring.md": obj002}); err != nil {
 		return err
 	}
-	tag, err := pinnedRelease(r.root)
-	if err != nil {
-		return err
-	}
-	rel, err := fetchRelease(tag)
+	rel, err := repoRuntime()
 	if err != nil {
 		return err
 	}

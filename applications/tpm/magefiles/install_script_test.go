@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -10,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/release"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/release"
 )
 
 // TestInstallScriptInstallsAVerifiedRelease builds tpm for this machine at a
@@ -22,13 +24,19 @@ func TestInstallScriptInstallsAVerifiedRelease(t *testing.T) {
 	if runtime.GOOS != "darwin" && runtime.GOOS != "linux" {
 		t.Skip("install.sh serves Linux and macOS")
 	}
-	root := mustAbs(t, "..")
+	// The application lives inside the repository (GH-190): the test clones
+	// the repository and publishes from the application's directory in it.
+	top, err := exec.Command("git", "-C", mustAbs(t, ".."), "rev-parse", "--show-toplevel").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := strings.TrimSpace(string(top))
 	head, err := exec.Command("git", "-C", root, "rev-parse", "HEAD").Output()
 	if err != nil {
 		t.Fatal(err)
 	}
 	const tag = "v0.20990101.1"
-	clone := filepath.Join(t.TempDir(), "scrum-master")
+	clone := filepath.Join(t.TempDir(), "monorepo")
 	for _, args := range [][]string{
 		{"clone", "-q", "--no-checkout", root, clone},
 		{"-C", clone, "checkout", "-q", strings.TrimSpace(string(head))},
@@ -39,7 +47,8 @@ func TestInstallScriptInstallsAVerifiedRelease(t *testing.T) {
 		}
 	}
 	dist := t.TempDir()
-	p := release.Publisher{Root: clone, Run: release.ExecCommand}
+	appRoot := filepath.Join(clone, "applications", "tpm")
+	p := release.Publisher{Root: appRoot, Git: release.ExecGit(appRoot), Run: release.ExecCommand}
 	assets, err := p.Build(dist, []release.Platform{{OS: runtime.GOOS, Arch: runtime.GOARCH}})
 	if err != nil {
 		t.Fatal(err)
@@ -59,7 +68,7 @@ func TestInstallScriptInstallsAVerifiedRelease(t *testing.T) {
 	defer srv.Close()
 
 	install := func(prefix string) (string, error) {
-		cmd := exec.Command("sh", filepath.Join(root, "install.sh"), tag)
+		cmd := exec.Command("sh", filepath.Join(root, "applications", "tpm", "install.sh"), tag)
 		cmd.Env = []string{"PATH=/usr/bin:/bin", "HOME=" + t.TempDir(), "TPM_PREFIX=" + prefix, "TPM_RELEASE_URL=" + srv.URL}
 		out, err := cmd.CombinedOutput()
 		return string(out), err

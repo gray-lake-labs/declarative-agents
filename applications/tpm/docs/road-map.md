@@ -2,6 +2,8 @@
 id: ai-native-scrum-roadmap
 title: AI-Native Scrum Release Road Map
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

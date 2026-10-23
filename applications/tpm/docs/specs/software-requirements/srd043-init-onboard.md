@@ -2,6 +2,8 @@
 id: srd043-init-onboard
 title: "Script: init, onboard, and doctor (tpm init, tpm onboard, tpm doctor)"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: design_notes -->
 ## Design notes
@@ -124,7 +126,7 @@ Each file is reported as created, kept, appended or refreshed (R3.5), or overwri
 <!-- req: R3.3 -->
 ### R3.3
 
-The templates are embedded in the tpm binary beside the skills. init and onboard write into docs/external-pins.yaml the parent release the templates were written against.
+The templates are embedded in the tpm binary beside the skills. init and onboard write into docs/external-pins.yaml the release of this repository the corpus follows: the running tpm's own release, or, for a build that is not a release, the newest release with published binaries (GH-190).
 
 <!-- req: R3.4 -->
 ### R3.4
@@ -181,7 +183,7 @@ Reports, without fetching it, the declarative-agents runtime at the release tpm 
 - Enforcing that a corpus stays complete; that is the audit's. doctor adds what is missing when it is run and gates nothing.
 - Installing or upgrading skills; that is tpm install (srd037).
 - The reports repository; that is tpm reports init (srd018 R1).
-- Moving an existing corpus to a newer parent format; that is the parent-upgrade workflow (docs/guides/parent-upgrade.md).
+- Moving an existing corpus to a newer format release; a person moves the pin in docs/external-pins.yaml and tpm doctor repairs at it.
 
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria

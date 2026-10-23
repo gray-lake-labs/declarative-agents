@@ -2,6 +2,8 @@
 id: ai-native-scrum
 title: "AI-Native Scrum: Scrum Without the Administrative Work"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: executive_summary -->
 ## Executive summary

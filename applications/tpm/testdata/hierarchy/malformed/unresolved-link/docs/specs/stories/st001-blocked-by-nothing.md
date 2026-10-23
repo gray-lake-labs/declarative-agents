@@ -3,6 +3,8 @@ id: st001-blocked-by-nothing
 title: Blocked by nothing
 status: agreed
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: context | form: "tree" -->
 ## Context

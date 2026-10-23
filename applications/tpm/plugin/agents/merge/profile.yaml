@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The merge delivery as a declarative-agents profile (GH-201, design.md
 # D14): the first machine with no model state — delivery is deterministic,
 # tpm words all the way down. tpm issue merge runs the same code as one

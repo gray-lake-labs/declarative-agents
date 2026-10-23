@@ -1,12 +1,14 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package scaffold
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/help"
-	"github.com/gray-lake-labs/scrum-master/internal/install"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/help"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/install"
 )
 
 // AgentsFile is the orientation file that tells an agent which tpm commands

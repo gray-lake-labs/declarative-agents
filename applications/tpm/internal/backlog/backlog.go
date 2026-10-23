@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package backlog is tpm backlog: the planning hierarchy of one repository,
 // read and checked (srd045 R8). It reads only the directory it is given and
 // writes nothing, so a skill can call it for facts (design.md D10).
@@ -13,9 +15,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/hierarchy"
 )
 
 // Entry is one hierarchy document as tpm backlog list prints it.

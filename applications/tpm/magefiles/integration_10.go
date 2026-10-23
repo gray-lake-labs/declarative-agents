@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -7,10 +9,10 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/goals"
-	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
-	"github.com/gray-lake-labs/scrum-master/internal/plan"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/events"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/goals"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/hierarchy"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/plan"
 )
 
 func init() {

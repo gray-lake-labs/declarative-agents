@@ -6,6 +6,8 @@ status: retired
 retired_in: "5.0"
 replaced_by: ["test-rel05.0-tag-triggered"]
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

@@ -2,6 +2,8 @@
 id: srd001-labels
 title: "The label scheme: plane, type, kind, component, and state"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: context | form: "tree" -->
 ## Context

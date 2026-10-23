@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -5,9 +7,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	_ "github.com/gray-lake-labs/scrum-master/internal/commands"
-	"github.com/gray-lake-labs/scrum-master/internal/help"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	_ "github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/commands"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/help"
 )
 
 // The help pages are prose held to the binary and the corpus: every command

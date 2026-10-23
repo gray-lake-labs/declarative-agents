@@ -2,6 +2,8 @@
 id: eng01-regression-rig
 title: "Regression Rig: A Program on Local Disk Per Run"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: introduction -->
 ## Introduction

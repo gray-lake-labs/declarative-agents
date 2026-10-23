@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package help_test
 
 import (
@@ -8,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	_ "github.com/gray-lake-labs/scrum-master/internal/commands"
-	"github.com/gray-lake-labs/scrum-master/internal/help"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	_ "github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/commands"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/help"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 func noTracker() (tracker.Tracker, error) { return nil, errors.New("help reads no tracker") }

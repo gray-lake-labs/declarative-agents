@@ -5,6 +5,8 @@ status: retired
 retired_in: "4.0"
 replaced_by: ["srd045-backlog"]
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

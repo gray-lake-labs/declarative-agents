@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package trackertest runs one test against every tracker tpm serves: the
 // in-memory fake and a beads tracker over real git repositories on local disk
 // (srd042 R1.1). A test describes its program through Program and asserts
@@ -14,10 +16,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/beads"
-	"github.com/gray-lake-labs/scrum-master/internal/beads/beadstest"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/beads"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/beads/beadstest"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker/fake"
 )
 
 // User is the person every Program's tracker acts as, the fake's Me.

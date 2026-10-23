@@ -4,6 +4,8 @@ title: Test Suite for Release 00.3 Install the Skills
 release: "00.3"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

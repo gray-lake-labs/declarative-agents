@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package scaffold
 
 import (
@@ -8,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/program"
-	"github.com/gray-lake-labs/scrum-master/internal/runtime"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker/fake"
 )
 
 // older is a system repository as an older tpm laid it down: the skeleton
@@ -515,10 +517,7 @@ func TestRepairPrebuiltWithoutGo(t *testing.T) {
 
 func TestDoctorRuntime(t *testing.T) {
 	dir := older(t)
-	pin, err := runtime.Pin()
-	if err != nil {
-		t.Fatal(err)
-	}
+	pin := runtime.DefaultPin()
 	r, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
 	if err != nil || r.Runtime.Release != pin || r.Runtime.Agent != "" || !strings.Contains(r.Runtime.Problem, "tpm install --runtime") {
 		t.Fatalf("no runtime: %+v, %v", r.Runtime, err)

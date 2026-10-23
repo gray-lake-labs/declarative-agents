@@ -1,43 +1,41 @@
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 # Corpus Audit
 
-We audit this corpus with the specification-corpus audit that ships with
-the parent, gray-lake-labs/declarative-agents, at the release
-`docs/external-pins.yaml` pins. The audit is the parent's
-`specification-critic` corpus-audit profile run over this repository:
-the profile binds `docs/corpus-charter.yaml` relative to the directory it
-audits, so the charter here decides which checks gate this corpus.
+We audit this corpus with the specification-corpus audit this repository
+ships: the `specification-critic` corpus-audit profile, run by the agent
+built from the sibling `agent-core` (GH-190). The profile binds
+`docs/corpus-charter.yaml` relative to the directory it audits, so the
+charter here decides which checks gate this corpus.
 
 ## Where things live
 
 | What | Where |
 |---|---|
 | Checks that gate this corpus | `docs/corpus-charter.yaml` |
-| Tracked parent release | `docs/external-pins.yaml` |
-| The release's agent and source, and the spec tool built from it | the user cache directory, `scrum-master/release/<tag>`, fetched on first use |
-| Parent requirements this corpus derives from | `derived_from` entries in the SRDs |
+| The agent and the spec tool | built from the sibling `agent-core` into `agent-core/bin` |
+| Format requirements this corpus derives from | `derived_from` entries in the SRDs, resolved against this repository |
 
-The parent publishes each tag's `agent` for darwin and linux on amd64 and
-arm64, with `SHA256SUMS`. `mage audit` downloads the pinned tag's agent for
-the host, refuses it if its checksum does not match, and keeps it in the
-cache. It also lays out the tag's source archive there as a git repository
-tagged with the release, which is the clone the audit resolves `derived_from`
-entries against. A host the parent publishes no binary for fails with an
-error that names it.
+`mage audit` builds the agent from the sibling `agent-core` with the Go
+toolchain — no pin and no download — and resolves `derived_from` entries
+against this repository's own tree. A program repository, which has no
+sibling, fetches the release its `docs/external-pins.yaml` pins instead:
+each tag's `agent` is published for darwin and linux on amd64 and arm64
+with `SHA256SUMS`, verified and kept in the user cache.
 
 The spec tool behind `mage fmt`, `mage convert`, and `mage specCheck` is this
 repository's own (`magefiles/spec.go`): it lists the tracked documents, reads
-initiatives as SRDs, and formats each with the parent's Markdown
-library. It is built once per tag against that library in the downloaded
-source.
+initiatives as SRDs, and formats each with the sibling Markdown library,
+built beside the agent.
 
 ## Running the audit
 
 The entry point is `mage audit`. It runs the repository gate tests
 (`go test ./magefiles/...`: gofmt, the 50-line skill limit, the
-hierarchy gate, the help pages, and the rest), then runs the pinned
-release's agent over the repository root. For that run it writes
-`docs/external-checkouts.yaml`, pointing the parent at the cached source, and
-removes it afterwards. The file is ignored by git; a checkouts file a person
+hierarchy gate, the help pages, and the rest), then runs the sibling agent
+over the application root. For that run it writes
+`docs/external-checkouts.yaml`, pointing the format source at this
+repository, and removes it afterwards. The file is ignored by git; a checkouts file a person
 wrote is left as it is and used instead.
 
 The run exits zero and ends in the `Passed` state when no check in the
@@ -51,9 +49,9 @@ The parent audit reads structured citations (traces, touchpoints,
 "(srd010 R5)", are not checked by it; keep them resolvable by hand or with a
 local check until the parent covers them.
 
-## When the release is missing or a new one ships
+## When the format changes
 
-Nothing is built or cloned by hand. Deleting `scrum-master/release/<tag>`
-from the user cache makes the next `mage audit` download it again. Moving the
-pin to a new release is the parent-upgrade workflow
-(docs/guides/parent-upgrade.md); the new release downloads on first use.
+The format library, the audit, and this corpus are siblings at one tag
+(GH-190): a format change and the corpus that satisfies it land in one
+change, gated by this same audit. Program repositories move by editing the
+pin in their `docs/external-pins.yaml`; `tpm doctor` repairs at it.

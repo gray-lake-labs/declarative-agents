@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 name: merge
 purpose: |-
   Deliver an issue by the one merge that closes it (srd013 R5): the gates,

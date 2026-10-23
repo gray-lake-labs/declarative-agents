@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package backlog
 
 import (
@@ -8,8 +10,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
-	"github.com/gray-lake-labs/scrum-master/internal/spectool"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/hierarchy"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/spectool"
 )
 
 // SRDDir holds the repository's software requirements documents.

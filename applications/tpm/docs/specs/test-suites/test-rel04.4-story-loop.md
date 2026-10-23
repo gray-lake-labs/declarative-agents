@@ -4,6 +4,8 @@ title: Test Suite for Release 04.4 Work a Story End to End
 release: "04.4"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

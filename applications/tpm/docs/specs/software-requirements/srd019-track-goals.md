@@ -2,6 +2,8 @@
 id: srd019-track-goals
 title: "Script: track-goals (tpm goals ...)"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The merge machine's words (GH-201, srd013 R5.7): the gate that writes
 # nothing, the merge word, and the close word. The commit and the closes
 # flow from the merge word's JSON output into the close word's parameters —

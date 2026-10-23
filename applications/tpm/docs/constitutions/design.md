@@ -2,6 +2,8 @@
 id: design
 title: Documentation Design Constitution
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: purpose -->
 ## Purpose
@@ -19,7 +21,7 @@ Specifications lead implementation. A new skill or a change to one starts with a
 <!-- article: D2 -->
 ### D2 - Every file is Markdown with tags
 
-Every file is Markdown with marker tags. Structured artifacts use the format the pinned declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's hierarchy documents (themes, initiatives, epics, features, and stories), which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides, except a program repository's orientation files, which tpm writes where a first-time reader looks: README.md and AGENTS.md at the root and a README.md in each hierarchy folder and in docs/engineering/ (srd043 R1.6, R2.4). Four files are not Markdown because a consumer outside this repository requires their format: docs/external-pins.yaml, which the parent's audit reads by path, and docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the parent's audit executes; and plugin/plugin.json, which the Agent Plugins 1.0 standard names. The declarative-agents profiles under plugin/agents/ are YAML for the same reason: the pinned runtime reads them (D14).
+Every file is Markdown with marker tags. Structured artifacts use the format the pinned declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's hierarchy documents (themes, initiatives, epics, features, and stories), which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides, except a program repository's orientation files, which tpm writes where a first-time reader looks: README.md and AGENTS.md at the root and a README.md in each hierarchy folder and in docs/engineering/ (srd043 R1.6, R2.4). Three files are not Markdown because a consumer outside this corpus requires their format: docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the corpus audit executes; and plugin/plugin.json, which the Agent Plugins 1.0 standard names. A program repository tpm scaffolds also keeps docs/external-pins.yaml, pinning the release of this repository its corpus follows (srd043 R3.3); this corpus needs none, because the format library and the audit are siblings in this repository (GH-190). The declarative-agents profiles under plugin/agents/ are YAML for the same reason: the pinned runtime reads them (D14).
 
 <!-- article: D3 -->
 ### D3 - Traceability
@@ -74,7 +76,7 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
 <!-- article: D13 -->
 ### D13 - The trunk is the monorepo
 
-Decided 2026-10-22 (GH-189): tpm becomes an application in declarative-agents, in the applications shape — a self-contained module whose composition manifest declares the skill profiles, with tpm subcommands as their tool blocks. This repository is therefore a satellite winding down, not a trunk growing: no new machinery is built to track the parent from outside (pins, mirrors, overlays, parent-upgrade workflows), and a document problem the parent's format cannot express is solved by changing the format in the merged repository, not by indirection here. Until the migration (GH-190) lands, the pinned parent remains the validator of record and D2 holds as written; the migration's planning writes the articles that replace this note.
+Decided 2026-10-22 (GH-189) and landed with GH-190: tpm is an application of this repository, applications/tpm, imported with its history. There is no parent to track from outside — the format library, the runtime, and this corpus are siblings at one tag, mage audit runs the sibling agent built from agent-core, and a document problem the format cannot express is solved by changing the format here. Program repositories remain satellites by design: each pins this repository's release in its docs/external-pins.yaml, and tpm install --runtime fetches at that pin; inside this repository the sibling is the release and nothing downloads.
 
 <!-- article: D14 -->
 ### D14 - A skill is a profile

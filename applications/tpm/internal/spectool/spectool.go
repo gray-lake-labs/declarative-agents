@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package spectool builds and runs the spec tool: the pinned parent
 // release's own Markdown library, compiled from that release's source, which
 // converts, formats, and checks a corpus's documents (srd040 R1). mage

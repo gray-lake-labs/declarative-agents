@@ -2,6 +2,8 @@
 id: srd036-implement
 title: "Skill: implement"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

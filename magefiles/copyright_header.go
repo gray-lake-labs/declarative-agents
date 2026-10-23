@@ -52,11 +52,30 @@ func isHelmTemplateYAML(path string) bool {
 		strings.EqualFold(filepath.Ext(parts[4]), ".yaml")
 }
 
+// tpmHolderLine and tpmSPDX are the canonical header of the tpm application,
+// which arrived with its own license and copyright holder (GH-190): files
+// under applications/tpm carry its lines, every other file the repository's.
+const (
+	tpmHolderLine = "Copyright (c) 2026 Gray Lake Labs"
+	tpmSPDX       = "SPDX-License-Identifier: MIT-0"
+)
+
+var tpmHeaderByExt = map[string][2]string{
+	".go":   {"// " + tpmHolderLine, "// " + tpmSPDX},
+	".yaml": {"# " + tpmHolderLine, "# " + tpmSPDX},
+	".yml":  {"# " + tpmHolderLine, "# " + tpmSPDX},
+	".md":   {"<!-- " + tpmHolderLine + " -->", "<!-- " + tpmSPDX + " -->"},
+}
+
 func copyrightHeaderLines(path string) ([2]string, bool) {
 	if isHelmTemplateYAML(path) {
 		return helmTemplateYAMLHeader, true
 	}
 	ext := strings.ToLower(filepath.Ext(path))
+	if strings.HasPrefix(filepath.ToSlash(path), "applications/tpm/") {
+		lines, ok := tpmHeaderByExt[ext]
+		return lines, ok
+	}
 	lines, ok := copyrightHeaderByExt[ext]
 	return lines, ok
 }

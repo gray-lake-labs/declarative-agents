@@ -1,4 +1,4 @@
-module github.com/gray-lake-labs/scrum-master
+module github.com/gray-lake-labs/declarative-agents/applications/tpm
 
 go 1.26
 

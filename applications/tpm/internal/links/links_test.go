@@ -1,10 +1,12 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package links
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker/fake"
 )
 
 func TestParseCitesReadsEveryLineAndAsk(t *testing.T) {

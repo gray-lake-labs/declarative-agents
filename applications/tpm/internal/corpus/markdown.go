@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package corpus reads a program repository's specification documents
 // (srd039). A
 // corpus is Markdown in the format the pinned declarative-agents
@@ -16,7 +18,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // Document is a Markdown corpus document: its frontmatter and its tagged

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -5,9 +7,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/help"
-	"github.com/gray-lake-labs/scrum-master/internal/standup"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/help"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/standup"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 func init() {

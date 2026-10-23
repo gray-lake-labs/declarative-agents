@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -9,11 +11,11 @@ import (
 
 	"github.com/magefile/mage/mg"
 
-	"github.com/gray-lake-labs/scrum-master/internal/events"
-	"github.com/gray-lake-labs/scrum-master/internal/goals"
-	"github.com/gray-lake-labs/scrum-master/internal/objectives"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/events"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/goals"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/objectives"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // Integration holds the release integration targets the test suites name.
@@ -246,3 +248,7 @@ func (Integration) Program() error {
 	c.expect(!slices.Contains(i.Labels, "needs-triage"), "needs-triage not cleared: %v", i.Labels)
 	return c.err("program")
 }
+
+// All runs the rig's full integration suite — up, every target, then down —
+// the aggregate the repository's release gate dispatches (GH-190).
+func (Integration) All() error { return Regression{}.All() }

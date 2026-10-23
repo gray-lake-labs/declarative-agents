@@ -1,3 +1,5 @@
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 # Why This Process Alongside Spec Kit
 
 [Spec Kit](https://github.com/github/spec-kit) is GitHub's open-source

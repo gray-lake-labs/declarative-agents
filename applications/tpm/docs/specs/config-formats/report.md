@@ -2,6 +2,8 @@
 id: report
 title: Weekly status report
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: purpose -->
 ## Purpose

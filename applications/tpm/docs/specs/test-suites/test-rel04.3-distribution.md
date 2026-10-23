@@ -4,6 +4,8 @@ title: Test Suite for Release 04.3 tpm Ships to Machines and to CI
 release: "04.3"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package routing opens the tracking systems a program configures in
 // control/trackers.md, one per repository (srd042), and routes each
 // project to its own. With no such file, the one system TPM_TRACKER names
@@ -13,11 +15,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/beads"
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/github"
-	"github.com/gray-lake-labs/scrum-master/internal/gitlab"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/beads"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/github"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/gitlab"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // File is where a program's tracking systems are configured, in its

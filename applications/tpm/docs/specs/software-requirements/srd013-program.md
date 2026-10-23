@@ -2,6 +2,8 @@
 id: srd013-program
 title: "Script: issue (tpm issue ...)"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: design_notes -->
 ## Design notes

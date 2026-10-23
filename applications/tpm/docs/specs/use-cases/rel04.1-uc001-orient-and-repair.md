@@ -5,6 +5,8 @@ status: implemented
 priority: P1
 test_suite: test-rel04.1-orientation-doctor
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: summary -->
 ## Summary
@@ -115,7 +117,7 @@ tpm doctor repairs documents to the pinned format so the audit passes, lists wha
 ## Out of scope
 
 - Installing or upgrading skills (tpm install).
-- Moving a corpus to a newer parent release (docs/guides/parent-upgrade.md).
+- Moving a corpus to a newer format release; a person moves the pin and doctor repairs at it.
 
 <!-- field: assumptions -->
 ## Assumptions

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package scaffold lays down a program repository's corpus: tpm init for the
 // system repository and tpm onboard for each repository that joins it
 // (srd043).
@@ -18,11 +20,11 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/gray-lake-labs/scrum-master/internal/beads"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/beads"
 
-	"github.com/gray-lake-labs/scrum-master"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
-	"github.com/gray-lake-labs/scrum-master/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/runtime"
 )
 
 //go:embed templates
@@ -43,7 +45,7 @@ type Result struct {
 
 // ParentRelease is the parent release the templates were written against,
 // the one this tpm's own corpus pins.
-func ParentRelease() (string, error) { return runtime.Pin() }
+func ParentRelease() (string, error) { return runtime.DefaultPin(), nil }
 
 // implementationTargets is the system SRD's implementation_targets field
 // for the repository in dir: one row naming the repository, at its origin's

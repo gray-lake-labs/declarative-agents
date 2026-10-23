@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package events writes and reads comment events: comments whose body holds
 // one <!-- tpm program event=NAME key=value ... --> marker (srd006 R1).
 // Events inform; posting one never changes an issue's state (R7.3).
@@ -9,7 +11,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // KV is one key and value of a marker, in the order written.

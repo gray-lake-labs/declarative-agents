@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Command tpm is the process's deterministic half: every step a program can
 // do (design.md D10). Skills call it with --json.
 package main
@@ -7,12 +9,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/scrum-master/internal/install"
-	"github.com/gray-lake-labs/scrum-master/internal/routing"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/install"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/routing"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 
-	_ "github.com/gray-lake-labs/scrum-master/internal/commands"
+	_ "github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/commands"
 )
 
 func main() {

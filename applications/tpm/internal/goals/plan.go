@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package goals
 
 import (
@@ -6,10 +8,10 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/links"
-	"github.com/gray-lake-labs/scrum-master/internal/objectives"
-	"github.com/gray-lake-labs/scrum-master/internal/sprintgoal"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/links"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/objectives"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/sprintgoal"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // Plan is what tpm goals plan returns and tpm goals push takes back once the

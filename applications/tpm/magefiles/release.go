@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -7,20 +9,21 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/runtime"
 )
 
-// fetchRelease lays out tag's runtime on this host through internal/runtime,
-// the cache tpm install --runtime fills (srd037 R7), and returns it with the
-// agent Fetch chose: the cached one, or TPM_AGENT when that is the release's.
-func fetchRelease(tag string) (runtime.Release, error) {
-	rep, err := runtime.Fetch(tag, false)
+// repoRuntime is the runtime this repository holds as a sibling (GH-190):
+// the repository root as the source and the agent built from agent-core —
+// no pin, no download. Every gate and rig target runs against it.
+func repoRuntime() (runtime.Release, error) {
+	rel, ok, err := runtime.Sibling(".", runStreaming)
 	if err != nil {
-		return runtime.Release{}, err
+		return rel, err
 	}
-	rel, err := runtime.Locate(tag)
-	rel.Agent = rep.Agent
-	return rel, err
+	if !ok {
+		return rel, fmt.Errorf("this checkout is not inside the repository that ships agent-core")
+	}
+	return rel, nil
 }
 
 // withCheckouts writes docs/external-checkouts.yaml in root pointing each

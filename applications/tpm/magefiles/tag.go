@@ -1,15 +1,17 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
 	"os"
 
-	"github.com/gray-lake-labs/scrum-master/internal/release"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/release"
 )
 
 // The GitHub repository releases are published to, and the organization
 // account they are published as (eng03).
 const (
-	releaseRepo    = "gray-lake-labs/scrum-master"
+	releaseRepo    = "gray-lake-labs/declarative-agents"
 	releaseAccount = "gray-lake-labs-owner"
 	releaseImage   = "ghcr.io/gray-lake-labs/tpm"
 )

@@ -2,6 +2,8 @@
 id: reports-config
 title: Reports repository configuration
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: purpose -->
 ## Purpose

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -8,16 +10,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
-	"github.com/gray-lake-labs/scrum-master/internal/release"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/release"
 )
 
 // notMarkdown are the files design.md D2 keeps out of Markdown, each because
 // a consumer outside this repository requires its format.
 var notMarkdown = []string{
-	"docs/external-pins.yaml",      // the parent's audit reads it by path
-	"docs/external-checkouts.yaml", // the parent's audit reads it by path
-	"docs/corpus-charter.yaml",     // the parent's audit executes it
+	"docs/external-checkouts.yaml", // the audit reads it by path
+	"docs/corpus-charter.yaml",     // the audit executes it
 	"plugin/plugin.json",           // the Agent Plugins 1.0 standard
 }
 

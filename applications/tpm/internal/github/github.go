@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package github is the gh tracking system: a program's issues, labels,
 // and milestones in GitHub, and each branch reviewed and merged as a pull
 // request, all through the gh CLI and the person's existing login, so tpm
@@ -17,8 +19,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/checkout"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/checkout"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // API is how the tracker reaches GitHub: Do calls the REST API through gh

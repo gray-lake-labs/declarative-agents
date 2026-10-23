@@ -4,6 +4,8 @@ title: Test Suite for Release 05.0 Tags Trigger Handoff and the Summary
 release: "05.0"
 status: specified
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

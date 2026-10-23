@@ -1,9 +1,9 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
-	"path/filepath"
-
-	"github.com/gray-lake-labs/scrum-master/internal/spectool"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/spectool"
 )
 
 // The corpus is Markdown in the format the pinned parent release declares
@@ -37,15 +37,11 @@ func runSpecTool(command, scope string) error {
 func specCheckAt(dir string) error { return specToolAt(dir, "check", "all") }
 
 func specToolAt(dir, command, scope string) error {
-	tag, err := pinnedRelease(dir)
+	rel, err := repoRuntime()
 	if err != nil {
 		return err
 	}
-	rel, err := fetchRelease(tag)
-	if err != nil {
-		return err
-	}
-	tool, err := spectool.Ensure(rel.Dir, filepath.Join(rel.Src, "agent-core"), runStreaming)
+	tool, err := spectool.Ensure(rel.Dir, rel.CoreRoot(), runStreaming)
 	if err != nil {
 		return err
 	}

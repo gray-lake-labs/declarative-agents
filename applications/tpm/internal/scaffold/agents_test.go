@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package scaffold_test
 
 import (
@@ -7,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master"
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	_ "github.com/gray-lake-labs/scrum-master/internal/commands"
-	"github.com/gray-lake-labs/scrum-master/internal/install"
-	"github.com/gray-lake-labs/scrum-master/internal/scaffold"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	_ "github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/commands"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/install"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/scaffold"
 )
 
 func TestAgentsFile(t *testing.T) {

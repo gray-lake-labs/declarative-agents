@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 name: tasks
 purpose: |-
   Break a level into the units below it (srd022), a release into one Sprint

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package reports keeps weekly status in a fixed, checkable shape and reads
 // it back: the reports repository's scaffold, the report format, the weekly
 // status issue, and aggregation by component (srd018).

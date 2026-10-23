@@ -2,6 +2,8 @@
 id: srd014-handoff
 title: "Script: handoff (tpm handoff ...)"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

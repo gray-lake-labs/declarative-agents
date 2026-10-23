@@ -1,3 +1,5 @@
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 # scrum-master
 
 A technical program manager as a toolchain: `tpm`, a Go CLI that does Scrum's administrative work against a GitLab tracker, and the agent skills that drive it.

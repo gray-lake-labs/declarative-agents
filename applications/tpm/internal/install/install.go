@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package install writes the embedded Agent Skills where each agent reads
 // skills and checks that what is installed matches the binary (srd037).
 package install

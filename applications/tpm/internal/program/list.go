@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package program
 
 import (
@@ -8,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
-	"github.com/gray-lake-labs/scrum-master/internal/links"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/hierarchy"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/links"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // Listed is one open issue that implements a story.

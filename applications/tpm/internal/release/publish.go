@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package release
 
 import (
@@ -89,7 +91,14 @@ func (p Publisher) Build(dist string, platforms []Platform) ([]Asset, error) {
 	for _, pl := range platforms {
 		a := Asset{Name: AssetName("tpm", pl), Path: filepath.Join(dist, AssetName("tpm", pl))}
 		env := []string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}
-		if _, err := p.Run(p.Root, env, "go", "build", "-trimpath", "-o", a.Path, "./cmd/tpm"); err != nil {
+		args := []string{"build", "-trimpath"}
+		if tag, err := p.releaseTag(); err == nil && tag != "" {
+			// The application is a nested module (GH-190): the repository's
+			// release tag is not its buildinfo version, so the build stamps it.
+			args = append(args, "-ldflags", "-X github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/install.version="+tag)
+		}
+		args = append(args, "-o", a.Path, "./cmd/tpm")
+		if _, err := p.Run(p.Root, env, "go", args...); err != nil {
 			return nil, fmt.Errorf("build tpm for %s/%s: %w", pl.OS, pl.Arch, err)
 		}
 		sum, err := fileSum(a.Path)
@@ -130,6 +139,15 @@ func (p Publisher) Publish() error {
 		return p.PublishImage(tag)
 	}
 	return nil
+}
+
+// releaseTag is the v0.* tag at HEAD when the Publisher has git, else
+// empty: a Build without git stamps nothing.
+func (p Publisher) releaseTag() (string, error) {
+	if p.Git == nil {
+		return "", nil
+	}
+	return p.headTag()
 }
 
 // headTag is the v0.* tag at HEAD.

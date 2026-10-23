@@ -2,6 +2,8 @@
 id: eng03-releasing-scrum-master
 title: "Releasing scrum-master: Gates, Then a Date Tag"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: introduction -->
 ## Introduction

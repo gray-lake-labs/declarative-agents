@@ -2,6 +2,8 @@
 id: srd045-backlog
 title: "The backlog hierarchy: themes, initiatives, epics, features, and stories"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

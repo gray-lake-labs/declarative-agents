@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The period push as a declarative-agents profile (GH-206, design.md D14):
 # the third model-free machine — the milestone, the sprint issue, the
 # sprint-end issues, and the planned events, each a tpm word that upserts,

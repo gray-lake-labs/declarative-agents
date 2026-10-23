@@ -1,3 +1,5 @@
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 # The Inner Loop
 
 This guide describes how one piece of work travels from intent to a merged,

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -10,8 +12,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/runtime"
-	"github.com/gray-lake-labs/scrum-master/internal/scaffold"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/scaffold"
 )
 
 func init() {
@@ -166,10 +168,7 @@ func (Integration) Doctor() error {
 		return err
 	}
 	expectChanges(c, dry, "dry run")
-	pin, err := runtime.Pin()
-	if err != nil {
-		return err
-	}
+	pin := runtime.DefaultPin()
 	c.expect(dry.Runtime.Release == pin && (dry.Runtime.Agent != "") != (dry.Runtime.Problem != ""), "dry run: runtime %+v", dry.Runtime)
 	foreign, err := doctorEnv([]string{runtime.AgentEnv + "=" + bin}, "--dry-run")
 	if err != nil {

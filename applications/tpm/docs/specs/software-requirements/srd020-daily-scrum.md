@@ -2,6 +2,8 @@
 id: srd020-daily-scrum
 title: "Skill: daily-scrum"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

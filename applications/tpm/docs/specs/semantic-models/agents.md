@@ -2,6 +2,8 @@
 id: agents
 title: Agents and the loops they run
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: purpose -->
 ## Purpose

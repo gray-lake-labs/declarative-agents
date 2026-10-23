@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package scaffold
 
 import (
@@ -10,12 +12,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master"
-	"github.com/gray-lake-labs/scrum-master/internal/install"
-	"github.com/gray-lake-labs/scrum-master/internal/program"
-	"github.com/gray-lake-labs/scrum-master/internal/routing"
-	"github.com/gray-lake-labs/scrum-master/internal/runtime"
-	"github.com/gray-lake-labs/scrum-master/internal/spectool"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/install"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/routing"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/spectool"
 )
 
 // DoctorOptions are what tpm doctor is given.
@@ -266,11 +268,11 @@ func Doctor(o DoctorOptions) (DoctorResult, error) {
 		}
 	}
 	r.Repair = repair(o.Dir, o.DryRun)
-	tag, err := runtime.Pin()
-	if err != nil {
-		return r, err
+	if rel, ok, _ := runtime.Sibling(o.Dir, nil); ok {
+		r.Runtime = runtime.Status{Release: rel.Tag, Agent: rel.Agent, From: "repository"}
+	} else {
+		r.Runtime = inspectRuntime(runtime.RepoPin(o.Dir))
 	}
-	r.Runtime = inspectRuntime(tag)
 	if r.Credentials, err = profileCredentials(); err != nil {
 		return r, err
 	}

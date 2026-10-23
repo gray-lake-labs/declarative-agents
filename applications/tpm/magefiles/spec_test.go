@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -5,23 +7,22 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/spectool"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/spectool"
 )
 
-// TestSpecToolConvertsAndFormats builds the tool against a real release's
-// source and runs it on a copy of the corpus, converting an objective
-// document as an SRD. It downloads the release, so it runs only when
-// SCRUM_MASTER_SPEC_TOOL_TAG names one.
+// TestSpecToolConvertsAndFormats builds the tool against the sibling
+// agent-core and runs it on a copy of the corpus, converting an objective
+// document as an SRD (GH-190). It builds the tool, so it runs only when
+// SCRUM_MASTER_SPEC_TOOL names anything.
 func TestSpecToolConvertsAndFormats(t *testing.T) {
-	tag := os.Getenv("SCRUM_MASTER_SPEC_TOOL_TAG")
-	if tag == "" {
-		t.Skip("set SCRUM_MASTER_SPEC_TOOL_TAG to a published release")
+	if os.Getenv("SCRUM_MASTER_SPEC_TOOL") == "" {
+		t.Skip("set SCRUM_MASTER_SPEC_TOOL to build and run the tool")
 	}
-	rel, err := fetchRelease(tag)
+	rel, err := repoRuntime()
 	if err != nil {
 		t.Fatal(err)
 	}
-	tool, err := spectool.Ensure(rel.Dir, filepath.Join(rel.Src, "agent-core"), runStreaming)
+	tool, err := spectool.Ensure(rel.Dir, rel.CoreRoot(), runStreaming)
 	if err != nil {
 		t.Fatal(err)
 	}

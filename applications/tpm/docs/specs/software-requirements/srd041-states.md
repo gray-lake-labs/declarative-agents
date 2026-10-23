@@ -2,6 +2,8 @@
 id: srd041-states
 title: "States: where an issue is and who may move it"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: design_notes -->
 ## Design notes

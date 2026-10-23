@@ -4,6 +4,8 @@ title: Test Suite for Release 00.1 Pop and Merge
 release: "00.1"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

@@ -2,6 +2,8 @@
 id: srd040-format-tools
 title: "Tooling: the format tools and the format gates"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

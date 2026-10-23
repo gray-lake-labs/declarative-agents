@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # Tool selection for the sprint-end workflow. The tpm words and file words are
 # model-invoked in the Summarize state via $tool dispatch (design.md D10, D14).
 tools:

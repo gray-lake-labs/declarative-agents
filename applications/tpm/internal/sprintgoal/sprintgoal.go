@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package sprintgoal writes and reads the marker tasks puts in every Sprint
 // Goal issue (srd034 R3), and reads the marker of an objective issue, a
 // Sprint Goal filed before release 04.0, as a Sprint Goal's (srd034 R3.7).

@@ -2,6 +2,8 @@
 id: srd044-help
 title: "Script: help (tpm help)"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: design_notes -->
 ## Design notes

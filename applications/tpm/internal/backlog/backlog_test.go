@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package backlog_test
 
 import (
@@ -10,11 +12,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/backlog"
-	"github.com/gray-lake-labs/scrum-master/internal/cli"
-	_ "github.com/gray-lake-labs/scrum-master/internal/commands"
-	"github.com/gray-lake-labs/scrum-master/internal/hierarchy"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/backlog"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	_ "github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/commands"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/hierarchy"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 const fixtures = "../../testdata/hierarchy"

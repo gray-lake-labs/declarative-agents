@@ -4,6 +4,8 @@ title: Test Suite for Release 04.2 A Planning Document Drafted in Conversation
 release: "04.2"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

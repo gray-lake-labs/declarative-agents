@@ -4,6 +4,8 @@ title: Test Suite for Release 00.0 Labels and Push
 release: "00.0"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

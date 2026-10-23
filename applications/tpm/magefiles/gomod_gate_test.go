@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -28,7 +30,7 @@ func TestGoModGateRecognisesCiphertext(t *testing.T) {
 	if goModStoredInPlaintext([]byte("\x00GITCRYPT\x00\xa1\xb2")) {
 		t.Fatal("a git-crypt blob passed as plaintext")
 	}
-	if !goModStoredInPlaintext([]byte("module github.com/gray-lake-labs/scrum-master\n")) {
+	if !goModStoredInPlaintext([]byte("module github.com/example/app\n")) {
 		t.Fatal("a plaintext go.mod failed")
 	}
 }

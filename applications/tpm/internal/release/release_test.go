@@ -1,9 +1,11 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package release
 
 import (
 	"bytes"
 	"errors"
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
 	"io"
 	"os"
 	"os/exec"

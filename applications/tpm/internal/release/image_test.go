@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package release
 
 import (
@@ -160,7 +162,7 @@ func TestDockerfileLabelsMatchTheIndexAnnotations(t *testing.T) {
 	for _, want := range []string{
 		`org.opencontainers.image.description="` + ImageDescription + `"`,
 		`org.opencontainers.image.licenses="` + ImageLicenses + `"`,
-		`org.opencontainers.image.source="https://github.com/gray-lake-labs/scrum-master"`,
+		`org.opencontainers.image.source="https://github.com/gray-lake-labs/declarative-agents"`,
 	} {
 		if !strings.Contains(string(b), want) {
 			t.Errorf("the Dockerfile's labels lack %s", want)

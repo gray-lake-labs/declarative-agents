@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 name: pop
 purpose: |-
   Claim an issue and open its own branch and worktree (srd013 R7): the

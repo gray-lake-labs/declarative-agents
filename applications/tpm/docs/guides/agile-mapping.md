@@ -1,3 +1,5 @@
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 # This Process and the Scrum Guide
 
 This page is for a reader who knows the [Scrum Guide

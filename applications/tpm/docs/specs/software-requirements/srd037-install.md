@@ -2,6 +2,8 @@
 id: srd037-install
 title: "Script: install (tpm install)"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem
@@ -143,7 +145,7 @@ The installed files are untracked, so a new worktree of the clone has none; tpm 
 <!-- req: R7.1 -->
 ### R7.1
 
-tpm install --runtime fetches the release of github.com/gray-lake-labs/declarative-agents that tpm's own docs/external-pins.yaml pins, embedded when tpm is built: the release's agent binary for the host's operating system and architecture, and the release's source, laid out as the spec tool lays it out (srd040 R1.1). It writes them into that release's directory under the user cache directory, scrum-master/release/<tag>/, the directory mage audit and the spec tool use, so each part is downloaded once per tag on a machine. It needs no git repository and writes nothing in --dir.
+tpm install --runtime lays out the runtime (GH-190). Inside this repository, the sibling is the release: the agent builds from agent-core into agent-core/bin and nothing downloads. Elsewhere it fetches the release of github.com/gray-lake-labs/declarative-agents that the surrounding repository pins in its docs/external-pins.yaml — else this tpm's own release, or the newest release with published binaries when this tpm is not a release build — the release's agent binary for the host's operating system and architecture, and the release's source, laid out as the spec tool lays it out (srd040 R1.1). Fetched parts land in that release's directory under the user cache directory, scrum-master/release/<tag>/, so each is downloaded once per tag on a machine.
 
 <!-- req: R7.2 -->
 ### R7.2

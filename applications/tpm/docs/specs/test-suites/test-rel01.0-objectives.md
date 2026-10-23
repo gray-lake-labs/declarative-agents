@@ -4,6 +4,8 @@ title: Test Suite for Release 01.0 Sprint Goals Reach the Product Owner
 release: "01.0"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview
@@ -25,7 +27,7 @@ events, and that a second run changes nothing.
 <!-- field: preconditions -->
 ## Preconditions
 
-- The parent release docs/external-pins.yaml pins is in the clone cache, and the agent builds from it.
+- The corpus audit's agent is available: the sibling agent-core in this repository, else the pinned release in the clone cache (GH-190).
 - mage regression:up builds a rig run under .regression/<run-id>, a beads tracker repository with a system repository and two Product Owner repositories, each declared by a subsystem SRD fixture, and writes their paths as JSON for the integration targets (eng01).
 - mage regression:down removes the run after the targets run, including when they fail; nothing outside the run directory is touched.
 

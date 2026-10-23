@@ -2,6 +2,8 @@
 id: srd010-delivery
 title: "Subsystem: delivery"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: context | form: "tree" -->
 ## Context

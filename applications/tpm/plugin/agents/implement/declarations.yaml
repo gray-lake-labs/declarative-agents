@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The implement workflow's own words: the tpm commands the machine drives and
 # the push that publishes the branch. Each tpm word runs the local tpm binary
 # with --json; a non-zero exit is tpm's refusal, and the machine routes it to

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package checkout is the code half every tracking system shares: a
 // project's files, tags, branches, and merged history, read from its local
 // checkout and that checkout's origin (srd042 R2.3). bd, gh, and glab differ
@@ -14,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // Code answers the code half for the command's checkout at Dir. A

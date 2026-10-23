@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 name: plan
 purpose: |-
   Plan the next release in the system repository, choosing its initiative

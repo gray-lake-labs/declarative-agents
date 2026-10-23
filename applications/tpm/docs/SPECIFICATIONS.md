@@ -2,6 +2,8 @@
 id: ai-native-scrum-specifications
 title: AI-Native Scrum Specification Index
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview
@@ -93,7 +95,6 @@ docs/road-map.md.
 | docs/guides/agile-mapping.md | agile-mapping |
 | docs/guides/ai-native-sdlc.md | ai-native-sdlc |
 | docs/guides/corpus-audit.md | corpus-audit |
-| docs/guides/parent-upgrade.md | parent-upgrade |
 | docs/guides/process.md | process |
 | docs/guides/sdlc-playbook.md | sdlc-playbook |
 | docs/guides/spec-kit.md | spec-kit |

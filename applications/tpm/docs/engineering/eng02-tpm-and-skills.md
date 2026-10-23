@@ -2,6 +2,8 @@
 id: eng02-tpm-and-skills
 title: "tpm and Skills: Code Does the Workflow, the Model Does Language"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: introduction -->
 ## Introduction

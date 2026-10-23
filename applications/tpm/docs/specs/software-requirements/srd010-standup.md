@@ -2,6 +2,8 @@
 id: srd010-standup
 title: "Script: standup (tpm standup ...)"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

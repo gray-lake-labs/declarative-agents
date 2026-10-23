@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package hierarchy reads the planning documents of the agile hierarchy,
 // theme, initiative, epic, feature, and story, and checks them as the corpus
 // gate does (design.md hierarchy_links, srd045). Each is an SRD in the
@@ -13,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/corpus"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/corpus"
 )
 
 // Kind is a level of the hierarchy.

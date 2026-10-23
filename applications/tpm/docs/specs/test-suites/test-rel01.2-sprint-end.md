@@ -4,6 +4,8 @@ title: Test Suite for Release 01.2 Sprint End Closes the Loop
 release: "01.2"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

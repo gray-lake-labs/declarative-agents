@@ -2,6 +2,8 @@
 id: person-config
 title: Person configuration
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: purpose -->
 ## Purpose

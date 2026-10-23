@@ -2,6 +2,8 @@
 id: srd033-sprint-retrospective
 title: "Skill: sprint-retrospective"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

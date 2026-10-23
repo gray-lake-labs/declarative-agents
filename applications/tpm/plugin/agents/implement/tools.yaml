@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # Tool selection for the implement workflow. The tpm words and git_push are
 # machine actions the model never dispatches; the file and git words are
 # model-invoked in the Work state via $tool dispatch (design.md D10).

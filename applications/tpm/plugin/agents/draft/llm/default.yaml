@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The draft profile's model binding: the model acts only in the Converse
 # state (design.md D10), reading TPM_MODEL, TPM_RESPONSE_PROFILE, and
 # OLLAMA_URL with the defaults the parent's executor ships (srd043 R4.7).

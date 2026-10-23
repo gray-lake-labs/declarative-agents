@@ -2,6 +2,8 @@
 id: srd039-corpus
 title: "Shared: reading the corpus and config documents"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

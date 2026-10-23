@@ -2,6 +2,8 @@
 id: srd008-gates
 title: "Definition of done: evidence in a named environment"
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: problem -->
 ## Problem

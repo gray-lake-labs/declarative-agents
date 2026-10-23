@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
 # The implement skill as a declarative-agents profile (GH-135): the workflow
 # around the work is this machine, its tpm commands are its tools, and the
 # model acts only in the Work state (design.md D10). tpm install --agent

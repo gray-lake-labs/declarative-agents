@@ -4,6 +4,8 @@ title: Test Suite for Release 00.2 Changes Under docs/
 release: "00.2"
 status: implemented
 ---
+<!-- Copyright (c) 2026 Gray Lake Labs -->
+<!-- SPDX-License-Identifier: MIT-0 -->
 
 <!-- field: overview -->
 ## Overview

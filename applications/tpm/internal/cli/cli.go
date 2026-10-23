@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 // Package cli is tpm's command line: subcommand groups registered by
 // packages, each subcommand with --json and --dry-run, none reading stdin or
 // prompting (srd010 R1, srd013 R2.1).
@@ -12,7 +14,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
 )
 
 // Command is one subcommand of one group. A command with an empty Name is

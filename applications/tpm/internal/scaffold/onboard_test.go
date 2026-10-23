@@ -1,16 +1,18 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package scaffold
 
 import (
-	scrummaster "github.com/gray-lake-labs/scrum-master"
-	"github.com/gray-lake-labs/scrum-master/internal/install"
+	scrummaster "github.com/gray-lake-labs/declarative-agents/applications/tpm"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/install"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/scrum-master/internal/tracker"
-	"github.com/gray-lake-labs/scrum-master/internal/tracker/fake"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker/fake"
 )
 
 // subsystemSRD lists one component, the repository the program already has.

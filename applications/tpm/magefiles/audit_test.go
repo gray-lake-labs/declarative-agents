@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
 package main
 
 import (
@@ -18,39 +20,34 @@ func writeFile(t *testing.T, path, content string) {
 	}
 }
 
-func TestPinnedReleaseReadsTheParentPin(t *testing.T) {
-	root := t.TempDir()
-	writeFile(t, filepath.Join(root, pinsFile), "pins:\n  "+parentRepository+": v0.20261014.0\n")
-	tag, err := pinnedRelease(root)
-	if err != nil || tag != "v0.20261014.0" {
-		t.Fatalf("tag=%q err=%v", tag, err)
+// The application roots at its go.mod, not the monorepo's git toplevel, so
+// every gate and rig path stays inside applications/tpm (GH-190).
+func TestRepositoryRootIsTheApplication(t *testing.T) {
+	root, err := repositoryRoot()
+	if err != nil {
+		t.Fatal(err)
 	}
-}
-
-func TestPinnedReleaseRefusesAMissingPin(t *testing.T) {
-	root := t.TempDir()
-	writeFile(t, filepath.Join(root, pinsFile), "pins: {}\n")
-	if _, err := pinnedRelease(root); err == nil || !strings.Contains(err.Error(), parentRepository) {
-		t.Fatalf("err = %v", err)
+	if _, serr := os.Stat(filepath.Join(root, "go.mod")); serr != nil || filepath.Base(root) == "magefiles" {
+		t.Fatalf("root = %q, want the directory holding go.mod: %v", root, serr)
+	}
+	if _, serr := os.Stat(filepath.Join(root, "plugin", "agents")); serr != nil {
+		t.Fatalf("root %q does not hold the application's profiles: %v", root, serr)
 	}
 }
 
 // TestAuditFailsOnMissingIndexedDocument proves the acceptance criterion of
 // GH-39: a corpus whose SPECIFICATIONS.md index names a document that does
 // not exist fails the corpus audit with index-broken-path. It runs the
-// pinned release's agent on a copy of this corpus with docs/VISION.md
-// removed, so it downloads the release; it runs only when
-// SCRUM_MASTER_AUDIT_FIXTURE_TAG names one.
+// sibling agent on a copy of this corpus with docs/VISION.md removed; it
+// builds the agent, so it runs only when SCRUM_MASTER_AUDIT_FIXTURE is set.
 func TestAuditFailsOnMissingIndexedDocument(t *testing.T) {
-	tag := os.Getenv("SCRUM_MASTER_AUDIT_FIXTURE_TAG")
-	if tag == "" {
-		t.Skip("set SCRUM_MASTER_AUDIT_FIXTURE_TAG to a published release")
+	if os.Getenv("SCRUM_MASTER_AUDIT_FIXTURE") == "" {
+		t.Skip("set SCRUM_MASTER_AUDIT_FIXTURE to build the sibling agent and run the fixture")
 	}
 	work := t.TempDir()
 	if err := runStreaming(work, "cp", "-R", mustAbs(t, filepath.Join("..", "docs")), "."); err != nil {
 		t.Fatal(err)
 	}
-	writeFile(t, filepath.Join(work, pinsFile), "pins:\n  "+parentRepository+": "+tag+"\n")
 	if err := os.Remove(filepath.Join(work, "docs", "VISION.md")); err != nil {
 		t.Fatal(err)
 	}
