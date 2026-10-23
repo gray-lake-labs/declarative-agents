@@ -22,7 +22,10 @@ type Pushed struct {
 	IID     int      `json:"iid,omitempty"`
 	WebURL  string   `json:"web_url,omitempty"`
 	Reasons []string `json:"reasons,omitempty"`
-	Planned bool     `json:"planned_event_posted"`
+	// Warnings are what push filed but could not make exact, such as a
+	// shared criterion's unattributed tests (GH-20).
+	Warnings []string `json:"warnings,omitempty"`
+	Planned  bool     `json:"planned_event_posted"`
 	// Legacy is set when an objective issue filed before release 04.0
 	// already serves the outcome; push leaves it as it is (srd034 R3.7).
 	Legacy bool `json:"legacy,omitempty"`
@@ -163,7 +166,7 @@ func pushTeam(t tracker.Tracker, s Sources, p Plan, webBase string, policy progr
 		body = KeepNotes(body, goal.Description)
 	}
 	comp, _, _ := s.ComponentFor(repo)
-	r := Pushed{Project: repo}
+	r := Pushed{Project: repo, Warnings: SharedTestWarnings(team, s.Documents)}
 	var issue tracker.Issue
 	switch {
 	case goal == nil:

@@ -258,3 +258,23 @@ func TestGateLine(t *testing.T) {
 		}
 	}
 }
+
+// A gate on a closed release issue — the documented order for a plan or a
+// sprint end, gated after the merge that closed it — says so rather than
+// running silently (GH-20).
+func TestGateReportsAClosedReleaseIssue(t *testing.T) {
+	f := fake.New()
+	g := newGateFixture(t, f)
+	p := policyWith("a", program.Check{Kind: "peer-read"})
+	r, err := g.run(p, "a", t0)
+	if err != nil || r.IssueClosed {
+		t.Fatalf("open issue: closed=%v %v", r.IssueClosed, err)
+	}
+	closed := "close"
+	if _, err := f.UpdateIssue("g/po-1", g.issue.IID, tracker.IssueUpdate{State: &closed}); err != nil {
+		t.Fatal(err)
+	}
+	if r, err = g.run(p, "a", t0.Add(time.Minute)); err != nil || !r.IssueClosed {
+		t.Fatalf("closed issue: closed=%v %v", r.IssueClosed, err)
+	}
+}

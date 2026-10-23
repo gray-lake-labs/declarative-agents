@@ -46,7 +46,11 @@ type ReleaseGateResult struct {
 	// failure (srd015 R1.3).
 	AwaitingPeerRead bool          `json:"awaiting_peer_read"`
 	Checks           []CheckResult `json:"checks"`
-	DryRun           bool          `json:"dry_run"`
+	// IssueClosed says the release issue is closed — as the planning or
+	// sprint-end issue is once the merge that delivered it has landed, the
+	// documented order — so the evidence lands on a closed issue (GH-20).
+	IssueClosed bool `json:"issue_closed,omitempty"`
+	DryRun      bool `json:"dry_run"`
 }
 
 // ReleaseGateInput is one gate run: the release issue, the candidate, and the
@@ -108,6 +112,7 @@ func RunGate(t tracker.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) 
 	if err != nil {
 		return r, err
 	}
+	r.IssueClosed = issue.State == "closed"
 
 	r.Passed = true
 	awaiting, others := false, true

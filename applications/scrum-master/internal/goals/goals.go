@@ -111,6 +111,9 @@ func init() {
 			var h strings.Builder
 			for _, r := range res {
 				fmt.Fprintf(&h, "%s: %s %s %s\n", r.Key, r.Action, r.WebURL, strings.Join(r.Reasons, "; "))
+				for _, w := range r.Warnings {
+					fmt.Fprintf(&h, "  warning: %s\n", w)
+				}
 			}
 			return ctx.Emit(res, h.String())
 		},
