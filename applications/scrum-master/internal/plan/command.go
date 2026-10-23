@@ -115,7 +115,7 @@ func init() {
 				fmt.Fprintf(&h, "  held back %s: missing %s\n", it.ID, strings.Join(it.Missing, " and "))
 			}
 			if b := c.Backlog; b != nil {
-				fmt.Fprintf(&h, "Product Backlog, velocity %d (measured %v), recommended %s\n", b.Velocity, b.Measured, strings.Join(b.Recommended, ", "))
+				fmt.Fprintln(&h, backlogLine(*b))
 				for _, st := range b.Stories {
 					fmt.Fprintf(&h, "  %s (%d points, rank %s): %s\n", st.ID, st.Points, st.Rank, st.Title)
 				}
@@ -163,9 +163,9 @@ func init() {
 				return err
 			}
 			var h strings.Builder
-			fmt.Fprintf(&h, "milestone %s: %s\nsprint issue %s#%d: %s\n", res.Release.Milestone, res.Milestone, res.Sprint.Project, res.Sprint.IID, res.Sprint.Action)
+			fmt.Fprintf(&h, "milestone %s: %s\n%s\n", res.Release.Milestone, res.Milestone, issueLine("sprint issue", res.Sprint))
 			for _, s := range res.SprintEnds {
-				fmt.Fprintf(&h, "sprint-end issue %s#%d: %s\n", s.Project, s.IID, s.Action)
+				fmt.Fprintln(&h, issueLine("sprint-end issue", s))
 			}
 			for _, e := range res.Planned {
 				fmt.Fprintf(&h, "planned event on %s: posted=%v\n", e.Issue, e.Posted)
@@ -266,7 +266,7 @@ func init() {
 			}{actions, skipped, ctx.DryRun}
 			var h strings.Builder
 			for _, s := range actions {
-				fmt.Fprintf(&h, "sprint-end issue %s#%d: %s\n", s.Project, s.IID, s.Action)
+				fmt.Fprintln(&h, issueLine("sprint-end issue", s))
 			}
 			for _, s := range skipped {
 				fmt.Fprintf(&h, "skipped %s\n", s)
@@ -381,4 +381,25 @@ func init() {
 			return ctx.Emit(r, fmt.Sprintf("%s: %s, %d stories, planned event posted=%v", r.Issue, r.Action, len(r.Stories), r.Planned))
 		},
 	})
+}
+
+// issueLine is one issue push filed or found: project#iid once it has a
+// number, and the repository it goes to when a dry run has not filed it.
+func issueLine(kind string, a IssueAction) string {
+	if a.IID == 0 {
+		return fmt.Sprintf("%s in %s: %s, not yet numbered", kind, a.Project, a.Action)
+	}
+	return fmt.Sprintf("%s %s#%d: %s", kind, a.Project, a.IID, a.Action)
+}
+
+// backlogLine heads the Product Backlog: the velocity and the stories it
+// recommends, or that there is no velocity to recommend from.
+func backlogLine(b Backlog) string {
+	if b.Velocity == 0 {
+		return "Product Backlog, no velocity to recommend from: no sprint-end summary records a story done; pass --velocity"
+	}
+	if len(b.Recommended) == 0 {
+		return fmt.Sprintf("Product Backlog, velocity %d (measured %v), no story fits", b.Velocity, b.Measured)
+	}
+	return fmt.Sprintf("Product Backlog, velocity %d (measured %v), recommended %s", b.Velocity, b.Measured, strings.Join(b.Recommended, ", "))
 }

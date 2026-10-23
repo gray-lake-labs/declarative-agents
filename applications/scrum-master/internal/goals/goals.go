@@ -26,15 +26,23 @@ func WebBase() (string, error) {
 }
 
 func init() {
-	var a struct{ system, release, ref, planFile, control string }
+	var a struct{ system, release, ref, planFile, control, dir string }
 	common := func(fs *flag.FlagSet) {
 		fs.StringVar(&a.system, "system", "", "system repository path (required)")
 		fs.StringVar(&a.release, "release", "", "road-map release version (required)")
 		fs.StringVar(&a.ref, "ref", "main", "ref of the road map, docs/road-map.md")
+		fs.StringVar(&a.dir, "dir", ".", "the checkout the tracker is routed from, as the other commands a step runs from a checkout take it")
 	}
 	load := func(ctx *cli.Context) (tracker.Tracker, Sources, error) {
 		if a.system == "" || a.release == "" {
 			return nil, Sources{}, fmt.Errorf("%w: needs --system and --release", cli.ErrUsage)
+		}
+		// goals reads the corpus through the tracker, which tpm routes from
+		// the working directory.
+		if a.dir != "." {
+			if err := os.Chdir(a.dir); err != nil {
+				return nil, Sources{}, err
+			}
 		}
 		t, err := ctx.Tracker()
 		if err != nil {
@@ -115,7 +123,7 @@ func init() {
 			}
 			var h strings.Builder
 			for _, r := range res {
-				fmt.Fprintf(&h, "%s: %s %s %s\n", r.Key, r.Action, r.WebURL, strings.Join(r.Reasons, "; "))
+				fmt.Fprintln(&h, pushedLine(r))
 				for _, w := range r.Warnings {
 					fmt.Fprintf(&h, "  warning: %s\n", w)
 				}
@@ -123,4 +131,21 @@ func init() {
 			return ctx.Emit(res, h.String())
 		},
 	})
+}
+
+// pushedLine is goals push's human line for one outcome: its key, what push
+// did, the Sprint Goal as project#iid with its web address when the tracker
+// has one, and any reasons.
+func pushedLine(r Pushed) string {
+	parts := []string{r.Key + ":", r.Action}
+	if r.IID != 0 {
+		parts = append(parts, fmt.Sprintf("%s#%d", r.Project, r.IID))
+	}
+	if strings.Contains(r.WebURL, "://") {
+		parts = append(parts, r.WebURL)
+	}
+	if len(r.Reasons) > 0 {
+		parts = append(parts, strings.Join(r.Reasons, "; "))
+	}
+	return strings.Join(parts, " ")
 }
