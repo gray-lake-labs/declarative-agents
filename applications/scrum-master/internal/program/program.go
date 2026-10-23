@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -475,11 +476,10 @@ func init() {
 			}
 			branch := mergeArgs.branch
 			if branch == "" {
-				out, err := ExecGit{}.Run(mergeArgs.dir, "rev-parse", "--abbrev-ref", "HEAD")
-				if err != nil {
+				var err error
+				if branch, err = inferBranch(mergeArgs.dir, mergeArgs.iid); err != nil {
 					return err
 				}
-				branch = strings.TrimSpace(out)
 			}
 			t, err := ctx.Tracker()
 			if err != nil {
@@ -503,7 +503,7 @@ func init() {
 			}
 			r, err := Merge(t, ExecGit{}, mergeArgs.project, issueProject, mergeArgs.iid, branch, mergeArgs.dir, gate, mergeArgs.closes, ctx.DryRun)
 			if err != nil {
-				return err
+				return refusedJSON(ctx, r, err)
 			}
 			audit := "no docs/ change, so no audit ran"
 			if r.Audit {
@@ -524,8 +524,14 @@ func init() {
 					// the run would only close what is open (GH-20).
 					human = fmt.Sprintf("dry run: %s is already merged on %s; a run would close %s#%d", r.Branch, short12(r.Commit), issueProject, r.IID)
 				}
-				if len(mergeArgs.closes) > 0 {
-					human += " and " + strings.Join(mergeArgs.closes, ", ")
+				// Only what is open would close: a --closes issue another
+				// merge closed first is reported, not closed (GH-22).
+				open := openRefs(mergeArgs.closes, r.AlreadyClosed)
+				if len(open) > 0 {
+					human += " and " + strings.Join(open, ", ")
+				}
+				if len(r.AlreadyClosed) > 0 {
+					human += "; already closed: " + strings.Join(r.AlreadyClosed, ", ")
 				}
 			} else if !r.Merged {
 				human = fmt.Sprintf("%s was already merged on %s; closed %s", r.Branch, r.Commit, strings.Join(r.Closed, ", "))
@@ -558,11 +564,10 @@ func init() {
 			}
 			branch := mbArgs.branch
 			if branch == "" {
-				out, err := ExecGit{}.Run(mbArgs.dir, "rev-parse", "--abbrev-ref", "HEAD")
-				if err != nil {
+				var err error
+				if branch, err = inferBranch(mbArgs.dir, mbArgs.iid); err != nil {
 					return err
 				}
-				branch = strings.TrimSpace(out)
 			}
 			t, err := ctx.Tracker()
 			if err != nil {
@@ -586,7 +591,7 @@ func init() {
 			}
 			r, err := MergeBranch(t, ExecGit{}, mbArgs.project, issueProject, mbArgs.iid, branch, mbArgs.dir, gate, mbArgs.closes, ctx.DryRun)
 			if err != nil {
-				return err
+				return refusedJSON(ctx, r, err)
 			}
 			human := fmt.Sprintf("%s merged into %s on %s; nothing closed: run tpm issue close-delivered --commit %s", r.Branch, r.Project, r.Commit, r.Commit)
 			if r.DryRun && r.Commit != "" && !r.Merged {
@@ -793,4 +798,44 @@ func verdict(r LintResult) string {
 		return "admitted"
 	}
 	return "needs-triage: " + strings.Join(r.Reasons, "; ")
+}
+
+// inferBranch is the issue's branch from the checkout at dir, when no
+// --branch names one: the branch checked out there, which must be the
+// issue's own <iid>-<slug> branch. A checkout on the default branch, or on
+// another issue's branch, would merge the wrong thing, so it is refused
+// with the fix (GH-22).
+func inferBranch(dir string, iid int) (string, error) {
+	out, err := ExecGit{}.Run(dir, "rev-parse", "--abbrev-ref", "HEAD")
+	if err != nil {
+		return "", err
+	}
+	branch := strings.TrimSpace(out)
+	if !strings.HasPrefix(branch, fmt.Sprintf("%d-", iid)) {
+		return "", fmt.Errorf("%s is checked out on %s, not the issue's %d-<slug> branch; run from the issue's worktree, or name its branch with --branch", dir, branch, iid)
+	}
+	return branch, nil
+}
+
+// refusedJSON emits r with the refusal under --json, so a caller reading
+// JSON gets JSON for a refusal too, and returns err, so the exit status
+// still says it was refused (GH-22).
+func refusedJSON(ctx *cli.Context, r MergeResult, err error) error {
+	if ctx.JSON && r.Project != "" {
+		r.Refused = err.Error()
+		_ = ctx.Emit(r, "")
+	}
+	return err
+}
+
+// openRefs are the --closes references not already closed: what a merge
+// would close (GH-22).
+func openRefs(closes, already []string) []string {
+	var open []string
+	for _, ref := range closes {
+		if !slices.Contains(already, ref) {
+			open = append(open, ref)
+		}
+	}
+	return open
 }
