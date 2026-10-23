@@ -2173,7 +2173,7 @@ rollout-read
 <!-- field: profile -->
 ##### Profile
 
-applications/tpm/plugin/agents/implement/profile.yaml
+applications/scrum-master/plugin/agents/implement/profile.yaml
 
 <!-- field: classification -->
 ##### Classification
@@ -2186,7 +2186,7 @@ workflow_machine
 <!-- field: profile -->
 ##### Profile
 
-applications/tpm/plugin/agents/merge/profile.yaml
+applications/scrum-master/plugin/agents/merge/profile.yaml
 
 <!-- field: classification -->
 ##### Classification
@@ -2199,7 +2199,7 @@ workflow_machine
 <!-- field: profile -->
 ##### Profile
 
-applications/tpm/plugin/agents/pop/profile.yaml
+applications/scrum-master/plugin/agents/pop/profile.yaml
 
 <!-- field: classification -->
 ##### Classification
@@ -2212,7 +2212,7 @@ workflow_machine
 <!-- field: profile -->
 ##### Profile
 
-applications/tpm/plugin/agents/plan-push/profile.yaml
+applications/scrum-master/plugin/agents/plan-push/profile.yaml
 
 <!-- field: classification -->
 ##### Classification
@@ -2225,7 +2225,7 @@ workflow_machine
 <!-- field: profile -->
 ##### Profile
 
-applications/tpm/plugin/agents/plan/profile.yaml
+applications/scrum-master/plugin/agents/plan/profile.yaml
 
 <!-- field: classification -->
 ##### Classification
@@ -2238,7 +2238,7 @@ workflow_machine
 <!-- field: profile -->
 ##### Profile
 
-applications/tpm/plugin/agents/specify/profile.yaml
+applications/scrum-master/plugin/agents/specify/profile.yaml
 
 <!-- field: classification -->
 ##### Classification
@@ -2251,7 +2251,7 @@ workflow_machine
 <!-- field: profile -->
 ##### Profile
 
-applications/tpm/plugin/agents/tasks/profile.yaml
+applications/scrum-master/plugin/agents/tasks/profile.yaml
 
 <!-- field: classification -->
 ##### Classification
@@ -2264,7 +2264,7 @@ workflow_machine
 <!-- field: profile -->
 ##### Profile
 
-applications/tpm/plugin/agents/sprint-end/profile.yaml
+applications/scrum-master/plugin/agents/sprint-end/profile.yaml
 
 <!-- field: classification -->
 ##### Classification
@@ -2277,7 +2277,7 @@ workflow_machine
 <!-- field: profile -->
 ##### Profile
 
-applications/tpm/plugin/agents/draft/profile.yaml
+applications/scrum-master/plugin/agents/draft/profile.yaml
 
 <!-- field: classification -->
 ##### Classification

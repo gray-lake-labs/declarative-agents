@@ -261,7 +261,7 @@ func releaseGates(root string) []releaseGate {
 			priority = chatbotReleasePriority
 			resources = append(resources, releaseResourceHostOllama)
 		}
-		if mod == "applications/tpm" {
+		if mod == "applications/scrum-master" {
 			// tpm's rig is local git repositories and the sibling agent;
 			// it needs no container runtime (GH-190).
 			resources = []releaseResourceClass{releaseResourceCPU}

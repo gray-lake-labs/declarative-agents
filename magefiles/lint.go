@@ -22,7 +22,7 @@ var lintModuleDirs = []string{
 	"applications/chatbot-mesh",
 	"applications/coding-agent",
 	"applications/agent-architecture",
-	"applications/tpm",
+	"applications/scrum-master",
 	"design-patterns/magefiles",
 	"application-dsl-spec/magefiles",
 }
