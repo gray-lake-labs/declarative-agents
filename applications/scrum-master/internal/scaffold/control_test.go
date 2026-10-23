@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/beads"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
 )
 
@@ -32,5 +33,18 @@ func TestPolicyDocumentListsTheAdmissionRules(t *testing.T) {
 		if !strings.Contains(doc, "- "+name+"\n") {
 			t.Errorf("policy document misses rule %s", name)
 		}
+	}
+}
+
+// The skills line counts skill files, not the exclude-file update an
+// install also reports, so a first install and a rerun agree (GH-22).
+func TestSkillFilesCountsOnlySkills(t *testing.T) {
+	results := []install.Result{
+		{Agent: "claude", Skill: "implement", Path: ".claude/skills/implement/SKILL.md", Action: "created"},
+		{Agent: "claude", Skill: "plan", Path: ".claude/skills/plan/SKILL.md", Action: "created"},
+		{Path: ".git/info/exclude", Action: "created"},
+	}
+	if n := skillFiles(results); n != 2 {
+		t.Fatalf("skillFiles = %d, want 2", n)
 	}
 }
