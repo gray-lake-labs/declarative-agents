@@ -36,9 +36,11 @@ type MergeResult struct {
 	// each with a reported_complete event on its ledger (srd038 R2.2).
 	Reported []string `json:"reported_complete,omitempty"`
 	// ToClose is what merge-branch leaves for close-delivered, the --closes
-	// references comma-joined (empty when none, never omitted, so a
-	// machine's close word resolves it from the merge word's output; GH-201).
-	ToClose string `json:"closes"`
+	// references comma-joined. Only the merge word outputs it (as "closes",
+	// always present so the machine's close word resolves it; GH-201): in
+	// the one-command merge's JSON it would read as "closed nothing" beside
+	// closed (GH-20).
+	ToClose string `json:"-"`
 	DryRun  bool   `json:"dry_run"`
 }
 
@@ -57,7 +59,6 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 	if err != nil || dryRun {
 		return r, err
 	}
-	r.ToClose = ""
 	r.Closed, r.Reported, r.AlreadyClosed, err = CloseDelivered(t, git, dir, r.Commit, issueProject, iid, closes)
 	return r, err
 }
@@ -122,6 +123,19 @@ func MergeBranch(t tracker.Tracker, git Git, project, issueProject string, iid i
 		r.Commit, _ = inMain("rev-list", "-1", "--merges", "-E", exact, upstream)
 		if r.Commit == "" {
 			return r, fmt.Errorf("%s has no commits over %s; commit the work first", branch, base)
+		}
+		// A dry run of a branch already merged answers what a run would do:
+		// close what is still open, or nothing when the issue is closed —
+		// which it refuses, as it refuses a closed issue it has not merged
+		// (GH-20).
+		if dryRun {
+			i, err := t.GetIssue(issueProject, iid)
+			if err != nil {
+				return r, err
+			}
+			if i.State == "closed" {
+				return r, fmt.Errorf("%s#%d is already delivered: %s merged on %s and the issue is closed; nothing would merge or close", issueProject, iid, branch, short12(r.Commit))
+			}
 		}
 	} else {
 		i, err := t.GetIssue(issueProject, iid)
@@ -283,3 +297,6 @@ func reportClosed(t tracker.Tracker, ref, commit string) (bool, error) {
 	}
 	return true, nil
 }
+
+// short12 is a commit's first twelve characters.
+func short12(c string) string { return c[:min(12, len(c))] }

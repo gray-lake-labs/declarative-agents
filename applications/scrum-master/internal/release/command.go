@@ -164,6 +164,9 @@ func init() {
 			}
 			var b strings.Builder
 			fmt.Fprintf(&b, "gate for %s at %s:\n", r.Tag, short(r.Revision))
+			if r.IssueClosed {
+				fmt.Fprintf(&b, "note: the release issue %s#%d is closed; its evidence is recorded there, as after the merge that delivered it\n", r.Project, r.Issue)
+			}
 			for _, c := range r.Checks {
 				b.WriteString(gateLine(c) + "\n")
 			}

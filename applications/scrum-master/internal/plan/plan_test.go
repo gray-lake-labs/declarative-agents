@@ -266,6 +266,13 @@ func testPlanReleaseWritesTheRoadMapRelease(t *testing.T, p trackertest.Program)
 	if got := readBack(); len(got) != 2 || !slices.Equal(got[1].Objectives, r.Items) || got[0].Tag != "v0.1.0" {
 		t.Fatalf("after replacing: %+v", got)
 	}
+	// A person's own sentence naming the tag moves with the republish too
+	// (GH-20).
+	b0, _ := os.ReadFile(filepath.Join(dir, RoadMap))
+	b0 = []byte(strings.Replace(string(b0), "tagged corpus/v0.1.0.\n", "tagged corpus/v0.1.0.\n\nThe team reviews corpus/v0.1.0 before the demo.\n", 1))
+	if err := os.WriteFile(filepath.Join(dir, RoadMap), b0, 0o644); err != nil {
+		t.Fatal(err)
+	}
 	// A republish moves the tag; the sentence tpm wrote moves with it, so
 	// the old tag is in neither prose nor fields (#188).
 	r.Tag = "corpus/v0.1.1"
@@ -273,7 +280,8 @@ func testPlanReleaseWritesTheRoadMapRelease(t *testing.T, p trackertest.Program)
 		t.Fatalf("republish write: %+v %v", w, err)
 	}
 	b, _ := os.ReadFile(filepath.Join(dir, RoadMap))
-	if got := readBack(); got[1].Tag != "corpus/v0.1.1" || strings.Contains(string(b), "corpus/v0.1.0") || !strings.Contains(string(b), "tagged corpus/v0.1.1.") {
+	if got := readBack(); got[1].Tag != "corpus/v0.1.1" || strings.Contains(string(b), "corpus/v0.1.0") || !strings.Contains(string(b), "tagged corpus/v0.1.1.") ||
+		!strings.Contains(string(b), "The team reviews corpus/v0.1.1 before the demo.") {
 		t.Fatalf("after the republish write the road map still names the old tag:\n%s", b)
 	}
 }

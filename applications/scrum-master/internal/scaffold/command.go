@@ -115,6 +115,10 @@ func init() {
 				return err
 			}
 			human := humanFiles(r.Files)
+			if len(r.Skills) > 0 {
+				// As init does: the agents' skills are installed (GH-20).
+				human += fmt.Sprintf("skills: %d files for the named agents\n", len(r.Skills))
+			}
 			switch reg := r.Registration; {
 			case reg.Issue != nil && reg.Filed:
 				human += fmt.Sprintf("registration filed: %s#%d\n", reg.Issue.Project, reg.Issue.IID)

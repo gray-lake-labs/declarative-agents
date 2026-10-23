@@ -11,6 +11,8 @@ package objectives
 import (
 	"os"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -60,11 +62,57 @@ type Objective struct {
 
 // Criterion is one acceptance criterion; it names its evidence (D8).
 type Criterion struct {
-	ID          string
-	Criterion   string
-	Traces      []string
+	ID        string
+	Criterion string
+	Traces    []string
+	// Tests are the criterion's test names. A test entry written
+	// "name (R1.1, R1.2)" names the items it proves, kept in TestItems; a
+	// test without items proves every item the criterion traces (GH-20).
 	Tests       []string
+	TestItems   map[string][]string
 	Environment string
+}
+
+// TestsFor are the criterion's tests that prove any of items: an
+// attributed test only when it names one of them, an unattributed one
+// always.
+func (c Criterion) TestsFor(items []string) []string {
+	var out []string
+	for _, t := range c.Tests {
+		names, ok := c.TestItems[t]
+		if !ok {
+			out = append(out, t)
+			continue
+		}
+		for _, n := range names {
+			if slices.Contains(items, n) {
+				out = append(out, t)
+				break
+			}
+		}
+	}
+	return out
+}
+
+// testEntry splits a test entry "name (R1.1, R1.2)" into its name and the
+// items it names; an entry without them names none.
+var testEntry = regexp.MustCompile(`^\s*(\S+)\s*\(\s*(R\d+(?:\.\d+)?(?:\s*,\s*R\d+(?:\.\d+)?)*)\s*\)\s*$`)
+
+func parseTests(entries []string) ([]string, map[string][]string) {
+	var names []string
+	items := map[string][]string{}
+	for _, e := range entries {
+		m := testEntry.FindStringSubmatch(e)
+		if m == nil {
+			names = append(names, strings.TrimSpace(e))
+			continue
+		}
+		names = append(names, m[1])
+		for _, it := range strings.Split(m[2], ",") {
+			items[m[1]] = append(items[m[1]], strings.TrimSpace(it))
+		}
+	}
+	return names, items
 }
 
 // Item is one numbered part of an objective.
@@ -141,11 +189,13 @@ func fromMarkdown(d *Document, md *corpus.Document) {
 		if ac.Kind != "ac" {
 			continue
 		}
+		tests, testItems := parseTests(ac.Field("tests").List())
 		d.AcceptanceCriteria = append(d.AcceptanceCriteria, Criterion{
 			ID:          ac.Key,
 			Criterion:   ac.Text(),
 			Traces:      ac.Field("traces").List(),
-			Tests:       ac.Field("tests").List(),
+			Tests:       tests,
+			TestItems:   testItems,
 			Environment: ac.Field("applicability").Text(),
 		})
 	}

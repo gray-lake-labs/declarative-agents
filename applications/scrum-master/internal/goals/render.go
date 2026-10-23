@@ -74,10 +74,16 @@ func Render(webBase string, p Plan, team []PlannedObjective, docs map[string]*ob
 					mine = append(mine, t)
 				}
 			}
+			tests := c.Tests
 			if len(mine) < len(c.Traces) {
 				part = " [this Sprint Goal: " + strings.Join(mine, ", ") + "]"
+				// A shared criterion names only the tests that prove this
+				// Sprint Goal's items (GH-20).
+				if own := c.TestsFor(mine); len(own) > 0 {
+					tests = own
+				}
 			}
-			fmt.Fprintf(&b, "- %s%s (test: %s; environment: %s)\n", strings.TrimSpace(c.Criterion), part, strings.Join(c.Tests, ", "), c.Environment)
+			fmt.Fprintf(&b, "- %s%s (test: %s; environment: %s)\n", strings.TrimSpace(c.Criterion), part, strings.Join(tests, ", "), c.Environment)
 		}
 	}
 	b.WriteString("\n## Notes\n\n## Sprint Backlog\n\n")
@@ -117,4 +123,32 @@ func tracesAny(c objectives.Criterion, items []string) bool {
 		}
 	}
 	return false
+}
+
+// SharedTestWarnings names each criterion a team's items share with
+// another team's whose tests say nothing of which items they prove: push
+// cannot tell the team's tests from the others', so the Sprint Goal names
+// them all until the initiative attributes them (GH-20).
+func SharedTestWarnings(team []PlannedObjective, docs map[string]*objectives.Document) []string {
+	var out []string
+	for _, o := range team {
+		d := docs[o.Document]
+		for _, c := range d.CriteriaFor(o.Group) {
+			if !tracesAny(c, o.Items) {
+				continue
+			}
+			var mine []string
+			for _, t := range c.Traces {
+				if contains(o.Items, t) {
+					mine = append(mine, t)
+				}
+			}
+			if len(mine) == len(c.Traces) || len(c.Tests) < 2 || len(c.TestItems) == len(c.Tests) {
+				continue
+			}
+			out = append(out, fmt.Sprintf("%s %s is shared with another Sprint Goal and its tests name no items, so this Sprint Goal names them all; write each test as name (Rn.m) in the initiative to name only %s's",
+				o.Document, c.ID, strings.Join(mine, ", ")))
+		}
+	}
+	return out
 }

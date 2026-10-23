@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"testing/fstest"
 
 	"gopkg.in/yaml.v3"
 
@@ -116,5 +117,36 @@ func TestRenderProfileSkillRefusesAnEmptyMachine(t *testing.T) {
 	m := machineDoc{Purpose: "p", InitialState: "Idle", States: []machineState{{Name: "Idle"}, {Name: "End"}}, TerminalStates: []string{"End"}}
 	if _, err := renderProfileSkill("x", "plugin/agents/x", m); err == nil {
 		t.Error("a machine with no steps between initial and terminal states must be refused")
+	}
+}
+
+// A comment that names ${VAR} reads nothing: only values count, so the
+// doctor reports no VAR for the declarations' own note about it (GH-20).
+func TestProfileEnvIgnoresComments(t *testing.T) {
+	fsys := fstest.MapFS{
+		"agents/x/profile.yaml":      {Data: []byte("name: x\n")},
+		"agents/x/declarations.yaml": {Data: []byte("# never a ${VAR} arg\nargs:\n- ${TPM_PROJECT}\nmodel: ${TPM_MODEL:-qwen}\n")},
+	}
+	env, err := ProfileEnv(fsys, "agents")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.Join(env["x"], " "); got != "TPM_MODEL TPM_PROJECT" {
+		t.Fatalf("variables = %q, want TPM_MODEL TPM_PROJECT", got)
+	}
+}
+
+// No shipped profile reads a variable named VAR.
+func TestShippedProfilesReadNoPlaceholder(t *testing.T) {
+	env, err := ProfileEnv(scrummaster.Plugin, scrummaster.AgentsDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, vars := range env {
+		for _, v := range vars {
+			if v == "VAR" {
+				t.Errorf("profile %s reads VAR", name)
+			}
+		}
 	}
 }

@@ -143,8 +143,17 @@ func putRelease(doc string, r Release) (string, string) {
 		if tail != "" {
 			tail = "\n" + strings.TrimLeft(tail, "\n")
 		}
-		prose, fields := recordParts(doc[headEnd:end])
+		record := doc[headEnd:end]
+		prose, fields := recordParts(record)
 		prose = placeholder.ReplaceAllString(prose+"\n", proves+"\n")
+		// A republish moves the tag: every mention of the old one in the
+		// release's prose moves with it, a person's sentences included, so
+		// no paragraph names a tag the record no longer holds (GH-20).
+		if m := publicationTag.FindStringSubmatch(record); m != nil {
+			if old := strings.Trim(strings.TrimSpace(m[1]), `"'`); old != "" && old != r.Tag {
+				prose = strings.ReplaceAll(prose, old, r.Tag)
+			}
+		}
 		// The sentence tpm wrote for an earlier write follows the record:
 		// a republish moves the tag, so the prose moves with it (#188).
 		own := regexp.MustCompile(`(?m)^Release ` + regexp.QuoteMeta(r.Version) + ` delivers [^\n]*, tagged [^\n]*\.\n`)
@@ -170,6 +179,9 @@ func putRelease(doc string, r Release) (string, string) {
 	}
 	return before, "added"
 }
+
+// publicationTag is the tag line of a release record's publication.
+var publicationTag = regexp.MustCompile(`(?m)^- tag: (.+)$`)
 
 var recordField = regexp.MustCompile(`(?m)^<!-- field: ([a-z_]+)[^\n]*-->\n### `)
 

@@ -252,6 +252,12 @@ func (t *Tracker) UpdateIssue(project string, iid int, u tracker.IssueUpdate) (t
 			if err := t.Store.transition(i, ActorPerson, to, me); err != nil {
 				return false, err
 			}
+			if to == Closed {
+				i.ClosedAt = t.Store.stamp()
+				if u.CloseReason != nil {
+					i.CloseReason = *u.CloseReason
+				}
+			}
 		}
 		if u.Description != nil {
 			i.Description = *u.Description

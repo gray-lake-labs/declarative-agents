@@ -78,6 +78,12 @@ func TestMergeDeliversOnBeads(t *testing.T) {
 	if err != nil || again.Merged || again.Commit != head {
 		t.Fatalf("second merge = %+v, %v, want nothing new", again, err)
 	}
+
+	// A dry run of the delivered issue says nothing would happen and is
+	// refused, rather than reporting it would merge (GH-20).
+	if _, err := Merge(tr, ExecGit{}, "g/po-1", "g/po-1", work.IID, p.Branch, p.Worktree, gate, nil, true); err == nil || !strings.Contains(err.Error(), "already delivered") {
+		t.Fatalf("dry run of a delivered issue = %v, want it refused as already delivered", err)
+	}
 }
 
 // TestMergeNeedsTheBeadsTracker: a tracker that does not close issues on a

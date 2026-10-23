@@ -400,3 +400,82 @@ func TestCarriedItemsAreNotFiledTwice(t *testing.T) {
 		}
 	})
 }
+
+// A criterion two teams share names, on each Sprint Goal, only the tests
+// attributed to that goal's items; with unattributed tests push names them
+// all and warns how to attribute them (GH-20).
+func TestSharedCriterionNamesOnlyItsGoalsTests(t *testing.T) {
+	split := func(doc string) func(t *testing.T, tp trackertest.Program) (tracker.Tracker, Sources) {
+		return func(t *testing.T, tp trackertest.Program) (tracker.Tracker, Sources) {
+			tp.AddFile(system, "main", "docs/road-map.md", read(t, "../../testdata/system/road-map.md"))
+			tp.AddTag(system, "v0.1.0")
+			tp.AddFile(system, "v0.1.0", "docs/specs/objectives/obj001-reliable-agents.md", []byte(doc))
+			tp.AddFile(system, "v0.1.0", "docs/specs/software-requirements/srd010-delivery.md", read(t, "../../testdata/system/srd010-delivery.md"))
+			tp.AddFile(system, "v0.1.0", "docs/specs/software-requirements/srd011-scoring.md", []byte(strings.NewReplacer(
+				"srd010-delivery", "srd011-scoring", "| fleet |", "| scoring |", "/delivery/fleet", "/delivery/scoring").Replace(string(read(t, "../../testdata/system/srd010-delivery.md")))))
+			f := tp.Tracker()
+			s, err := Load(f, system, "01.0", "main")
+			if err != nil {
+				t.Fatal(err)
+			}
+			return f, s
+		}
+	}
+	const scoring = "program/delivery/scoring"
+	base := string(read(t, "../../testdata/objectives/valid/obj001-reliable-agents.md"))
+	for name, c := range map[string]struct {
+		tests      string
+		fleetHas   string
+		fleetLacks string
+		warns      bool
+	}{
+		"attributed":   {"- fleet_scores (R1.1)\n- scoring_stores (R1.2)", "fleet_scores", "scoring_stores", false},
+		"unattributed": {"- fleet_scores\n- scoring_stores", "scoring_stores", "", true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			doc := strings.Replace(base, "- grader_scores_fixture_agent", c.tests, 1)
+			trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
+				f, s := split(doc)(t, tp)
+				p, err := MakePlan(f, s)
+				if err != nil {
+					t.Fatal(err)
+				}
+				p.Objectives[1].Repository = scoring
+				res, err := Push(f, s, p, web, program.Defaults(), false)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if got := len(res[0].Warnings) > 0; got != c.warns {
+					t.Fatalf("warnings = %v, want warnings=%v", res[0].Warnings, c.warns)
+				}
+				issues, _ := f.ListIssues(fleet, openIssues())
+				body := issues[0].Description
+				if !strings.Contains(body, c.fleetHas) || (c.fleetLacks != "" && strings.Contains(body, c.fleetLacks)) {
+					t.Fatalf("fleet's Sprint Goal names the wrong tests:\n%s", body)
+				}
+			})
+		})
+	}
+}
+
+// The system repository, a component like any team's (srd001 R21), is no
+// team: goals plan offers it as a candidate for no outcome (GH-20).
+func TestPlanOffersNoSystemCandidate(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
+		tp.AddFile(system, "v0.1.0", "docs/specs/software-requirements/srd001-system.md", []byte(strings.NewReplacer(
+			"srd010-delivery", "srd001-system", "| fleet |", "| system |", "/delivery/fleet", "/system").Replace(string(read(t, "../../testdata/system/srd010-delivery.md")))))
+		f, s := fixture(t, tp)
+		if !slices.Contains(s.Subsystems.Repositories(), system) {
+			t.Fatalf("the fixture must declare the system repository: %v", s.Subsystems.Repositories())
+		}
+		p, err := MakePlan(f, s)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, o := range p.Objectives {
+			if slices.Contains(o.Candidates, system) {
+				t.Fatalf("%s offers the system repository: %v", o.Key, o.Candidates)
+			}
+		}
+	})
+}

@@ -46,7 +46,11 @@ type ReleaseGateResult struct {
 	// failure (srd015 R1.3).
 	AwaitingPeerRead bool          `json:"awaiting_peer_read"`
 	Checks           []CheckResult `json:"checks"`
-	DryRun           bool          `json:"dry_run"`
+	// IssueClosed says the release issue is closed — as the planning or
+	// sprint-end issue is once the merge that delivered it has landed, the
+	// documented order — so the evidence lands on a closed issue (GH-20).
+	IssueClosed bool `json:"issue_closed,omitempty"`
+	DryRun      bool `json:"dry_run"`
 }
 
 // ReleaseGateInput is one gate run: the release issue, the candidate, and the
@@ -108,6 +112,7 @@ func RunGate(t tracker.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) 
 	if err != nil {
 		return r, err
 	}
+	r.IssueClosed = issue.State == "closed"
 
 	r.Passed = true
 	awaiting, others := false, true
@@ -136,7 +141,12 @@ func RunGate(t tracker.Tracker, in ReleaseGateInput) (ReleaseGateResult, error) 
 	for _, res := range r.Checks {
 		e := events.Evidence("definition_of_done."+in.Artifact, res.Test, res.Environment, r.Tag, res.Result,
 			events.KV{Key: "artifact", Value: in.Artifact}, events.KV{Key: "revision", Value: r.Revision}, events.KV{Key: "run", Value: r.Run})
-		text := fmt.Sprintf("Release gate for %s at %s: %s %s in %s.", r.Tag, short(r.Revision), res.Test, res.Result, res.Environment)
+		text := fmt.Sprintf("Release gate for %s at %s: %s %s.", r.Tag, short(r.Revision), res.Test, res.Result)
+		if res.Environment != "" && res.Environment != "none" {
+			// A peer read has no environment; "none" stays in the event's
+			// fields, not its sentence (GH-196, GH-20).
+			text = fmt.Sprintf("Release gate for %s at %s: %s %s in %s.", r.Tag, short(r.Revision), res.Test, res.Result, res.Environment)
+		}
 		if res.Reason != "" {
 			text += " " + res.Reason
 		}

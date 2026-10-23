@@ -273,7 +273,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
     1. delivered_by
   - numbering: same as srd; each requirement group is one outcome
   - acceptance_criteria_fields: same as srd
-  - acceptance_criteria_note: tests and applicability are required (D8); applicability names the environment. Until the program's environment SRDs exist, it names a chain stage D8 lists and the audit cannot resolve it (srd034 R1.5).
+  - acceptance_criteria_note: tests and applicability are required (D8); applicability names the environment. Until the program's environment SRDs exist, it names a chain stage D8 lists and the audit cannot resolve it (srd034 R1.5). A test written "name (R1.1, R1.2)" names the items it proves, so a criterion two teams' items share puts only each team's tests on its Sprint Goal; a test without items proves every item the criterion traces (GH-20).
   - purpose: A multi-team outcome over several quarters, the program's Product Goal, owned by the technical program manager. Its parent is a theme; epics name it as theirs. plan places its outcomes in a release and tasks cites them, pinned, on each team's Sprint Goal (srd034).
 - epic:
   - location: docs/specs/epics/epNNN-short-name.md, in the system (TPM) repository when it spans teams or in a subsystem repository when one team owns it; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document

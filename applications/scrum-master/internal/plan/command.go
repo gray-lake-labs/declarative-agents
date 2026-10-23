@@ -92,7 +92,18 @@ func init() {
 				return err
 			}
 			var h strings.Builder
-			fmt.Fprintf(&h, "next release %s, ending %s, tagged %s\n", c.Version, c.EndDate, c.Tag)
+			// A team repository plans a sprint from its backlog and has no
+			// release of its own to name: print only what is known (GH-20).
+			if c.Version != "" {
+				line := "next release " + c.Version
+				if c.EndDate != "" {
+					line += ", ending " + c.EndDate
+				}
+				if c.Tag != "" {
+					line += ", tagged " + c.Tag
+				}
+				h.WriteString(line + "\n")
+			}
 			for _, it := range c.Items {
 				flag := ""
 				if it.Slipped {
