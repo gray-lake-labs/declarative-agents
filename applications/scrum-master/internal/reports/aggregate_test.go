@@ -292,3 +292,39 @@ func TestAggregateSeesATeamWithoutAGoal(t *testing.T) {
 		}
 	})
 }
+
+// TestAggregateCountsBacklogWorkAsReported shows a merge that closes an
+// issue implementing a story on a reported Sprint Goal's Sprint Backlog is
+// the goal's work, not unreported, while a merge delivering a story no
+// reported goal lists still is.
+func TestAggregateCountsBacklogWorkAsReported(t *testing.T) {
+	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
+		dir := t.TempDir()
+		for _, week := range []string{"2026-W41", "2026-W42"} {
+			start, _ := ParseWeek(week)
+			writeReport(t, dir, ReportPath(start, "carol"), Render("carol", week, []Entry{work("g/po-3#1", "platform", "done", "yes")}, nil))
+		}
+		p.AddMerge("g/po-3", tracker.Merge{IID: 1, Title: "Deliver the story", Author: "carol", MergedAt: "2026-10-14", Description: "Closes #2"})
+		p.AddMerge("g/po-3", tracker.Merge{IID: 2, Title: "Deliver another story", Author: "carol", MergedAt: "2026-10-14", Description: "Closes #3"})
+		f := p.Tracker()
+		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "goal", Description: "## Sprint Backlog\n\n- st001-ingest Ingest (3 points)\n"})
+		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "ingest task", Description: "Implements: st001-ingest\n"})
+		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "other task", Description: "Implements: st009-other\n"})
+		cfg := Config{Team: []Member{{"carol", "g/po-3"}}, System: "g/system"}
+		cfg.defaults()
+
+		a, err := Aggregate(f, AggregateInput{Dir: dir, Config: cfg, Policy: program.Defaults(), From: "2026-W41", To: "2026-W42"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var unreported []string
+		for _, s := range a.Signals {
+			if s.Kind == SignalUnreportedWork {
+				unreported = append(unreported, s.Subject)
+			}
+		}
+		if !slices.Equal(unreported, []string{"g/po-3!2"}) {
+			t.Errorf("unreported work = %v, want only the merge delivering an unlisted story", unreported)
+		}
+	})
+}
