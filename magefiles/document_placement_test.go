@@ -585,7 +585,7 @@ func excludedDocumentPath(candidate string) bool {
 		case "testdata", "node_modules", "vendor", "build", "generated-files":
 			return true
 		case "templates":
-			// applications/tpm/internal/scaffold/templates holds the files
+			// applications/scrum-master/internal/scaffold/templates holds the files
 			// tpm init writes into program repositories: scaffolding, not
 			// this repository's corpus (GH-190).
 			if index > 0 && parts[index-1] == "scaffold" {
