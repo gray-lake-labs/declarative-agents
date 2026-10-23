@@ -20,6 +20,7 @@ var notMarkdown = []string{
 	"docs/external-checkouts.yaml", // the audit reads it by path
 	"docs/corpus-charter.yaml",     // the audit executes it
 	"plugin/plugin.json",           // the Agent Plugins 1.0 standard
+	".golangci.yml",                // the repository's lint gate reads it by path
 }
 
 // agentsDir holds the declarative-agents profiles, which the pinned runtime
