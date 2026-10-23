@@ -1,0 +1,135 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
+# The implement workflow's own words: the tpm commands the machine drives and
+# the push that publishes the branch. Each tpm word runs the local tpm binary
+# with --json; a non-zero exit is tpm's refusal, and the machine routes it to
+# the Refused terminal state with tpm's reason as the output (srd036 R2.1,
+# R4.2). The words read TPM_PROJECT, TPM_ISSUE, and TPM_CHECKOUT (the
+# project's clone, from which pop opens or reuses the issue's worktree, the
+# run's workspace) from the environment; tpm
+# itself reads TPM_TRACKER and TPM_USER (srd043), so the profile names every
+# variable a run reads. The control files come from --project's defaults: the
+# loader drops an argument whose variable is unset, which would corrupt the
+# flag list, so an optional flag stays out of a declaration (a GH-135 pilot
+# finding).
+unit: tpm-implement-declarations
+tools:
+- name: tpm_issue_pop
+  type: exec
+  binary: tpm
+  args:
+  - issue
+  - pop
+  - --json
+  - --project
+  - ${TPM_PROJECT}
+  - --issue
+  - ${TPM_ISSUE}
+  - --dir
+  - ${TPM_CHECKOUT}
+  visibility: internal
+  description: Take the issue tpm was asked for — assign only the caller and create or reuse its branch and worktree (srd013 R7).
+  category: boundary
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: tpm issue pop's JSON report — the branch, the worktree, and the issue taken.
+    schema:
+      type: string
+  side_effects:
+  - kind: filesystem_write
+    target: git_repository
+    description: Creates or reuses the issue's branch and worktree, and assigns the issue in the tracker.
+  reversibility:
+    classification: irreversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: A pop is reconciled by tpm itself; the run does not reverse it.
+  errors:
+  - signal: CommandError
+    condition: the tpm binary cannot be started or an environment variable is unset
+    message_shape: 'tpm_issue_pop: <error>'
+    state_after_failure: nothing was taken by a process that did not start
+  - signal: ToolFailed
+    condition: tpm refuses the pop — an inadmissible or already-assigned issue — and exits non-zero
+    message_shape: <tpm's refusal reason, as printed>
+    state_after_failure: the tracker and the clone are as tpm's refusal left them
+
+- name: git_push
+  type: exec
+  binary: git
+  args:
+  - push
+  - -u
+  - origin
+  - HEAD
+  visibility: internal
+  description: Publish the branch so a reviewer can read and approve its tip (srd036 R3.1).
+  precondition: git_repo
+  category: boundary
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: Combined stdout and stderr from git push.
+    schema:
+      type: string
+  side_effects:
+  - kind: external_api_call
+    target: git_remote
+    description: Pushes the branch to origin and sets its upstream.
+  reversibility:
+    classification: irreversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: A pushed branch stays; the merge or a person decides its fate.
+  errors:
+  - signal: CommandError
+    condition: the git process cannot be started
+    message_shape: 'git_push: <error>'
+    state_after_failure: nothing was pushed by a process that did not start
+  - signal: ToolFailed
+    condition: git push exits non-zero — no remote, no credentials, or a rejected ref
+    message_shape: <captured git output>
+    state_after_failure: the remote is as the rejection left it
+
+- name: tpm_issue_merge
+  type: exec
+  binary: tpm
+  args:
+  - issue
+  - merge
+  - --json
+  - --project
+  - ${TPM_PROJECT}
+  - --issue
+  - ${TPM_ISSUE}
+  visibility: internal
+  description: Finish the work — audit a docs/ change, merge the approved branch, push, and close each issue (srd013 R5.5).
+  category: boundary
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: tpm issue merge's JSON report — the merge commit and the issues it closed.
+    schema:
+      type: string
+  side_effects:
+  - kind: external_api_call
+    target: git_remote
+    description: Merges the branch, pushes the result, and closes the issues in the tracker.
+  reversibility:
+    classification: irreversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: A merge is not reversed by the run; tpm's own policy governs what follows.
+  errors:
+  - signal: CommandError
+    condition: the tpm binary cannot be started or an environment variable is unset
+    message_shape: 'tpm_issue_merge: <error>'
+    state_after_failure: nothing was merged by a process that did not start
+  - signal: ToolFailed
+    condition: tpm refuses the merge — no approval at the tip under require_approval, or a failed audit — and exits non-zero
+    message_shape: <tpm's refusal reason, as printed>
+    state_after_failure: the branch and the tracker are as tpm's refusal left them

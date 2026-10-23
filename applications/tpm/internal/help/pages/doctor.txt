@@ -1,0 +1,29 @@
+doctor: bring a program repository up to date after an upgrade of tpm
+
+Run this in a program repository after installing a newer tpm. It reads the
+repository's level from the files init or onboard wrote there, the system
+repository's policy or SRD or a team's subsystem SRD, and writes every file
+that init or onboard now writes at that level and the repository lacks. It
+refreshes the text between the tpm:begin and tpm:end lines of README.md,
+AGENTS.md, and the hierarchy folders' READMEs, keeping the text around it,
+and appends that text to one of them that has none. In the system
+repository it adds to control/labels.md the axes and values tpm's defaults
+list that it lacks, keeping every value, color, and description already
+there; tpm issue labels then creates them in the tracker. It adds to the
+system SRD the context and component row, and to control/policy.md the
+corpus release's peer read, when an older init wrote them without. Every
+other file is the owner's and is kept. It rewrites the corpus
+documents in the canonical form of the parent release the repository pins,
+with that release's formatter, which it builds with Go or finds already
+built by tpm install --runtime, and lists what the formatter cannot repair
+with each fix hint, and the documents git does not track, which it cannot
+check. It lists the installed skills that differ from the binary, for tpm
+install to update, and names the agent runtime at the pinned release, or
+tpm install --runtime when there is none; it downloads nothing. It files no issue
+and touches no tracker. With --dry-run it reports and writes nothing; a
+second run changes nothing.
+
+Command:
+  tpm doctor   add missing files, append or refresh the orientation text, repair the format, report stale skills and the runtime (srd043 R4)
+
+See: srd043, srd037

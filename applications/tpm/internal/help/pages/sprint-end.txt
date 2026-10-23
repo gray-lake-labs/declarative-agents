@@ -1,0 +1,14 @@
+sprint-end: the facts a period ends on
+
+At the end of a period each owner closes it from the record, not from
+memory: the period's aggregate, each Sprint Goal's ledger, reported status,
+and listed stories, and the version the release should take. The sprint-end
+skill runs this, records which listed stories are done, and merges the
+summary, which closes the sprint-end issue and the Sprint Goals the owner
+reports complete.
+
+Subcommands:
+  tpm sprint-end facts     the aggregate, ledgers, stories, and recommended version (srd038)
+  tpm sprint-end stories   record the stories done in the sprint-end summary (srd038)
+
+See: srd038, srd045, srd032

@@ -1,0 +1,128 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
+# The specify workflow's tpm words, dispatched by the model in the Draft
+# state. Optional flags are parameters, never ${VAR} args: the loader drops
+# an argument whose variable is unset, which corrupts the flag list (the
+# GH-135 pilot finding). A non-zero exit is tpm's refusal, fed back to the
+# model, which fixes the body and lints again (srd035).
+unit: tpm-specify-declarations
+tools:
+- name: tpm_issue_file
+  type: exec
+  binary: tpm
+  args:
+  - issue
+  - file
+  - --json
+  visibility: external
+  description: File one unassigned issue and lint it; tpm sets the plane, kind, and component from the paths (srd035, srd013).
+  category: boundary
+  parameters:
+    type: object
+    properties:
+      project:
+        type: string
+        description: Project path.
+        flag: --project
+      system:
+        type: string
+        description: System repository whose subsystem SRDs give the component.
+        flag: --system
+      title:
+        type: string
+        description: Issue title.
+        flag: --title
+      body_file:
+        type: string
+        description: File holding the body.
+        flag: --body-file
+      path:
+        type: string
+        description: A path the request changes; plane and kind follow from it.
+        flag: --path
+      kind:
+        type: string
+        description: Kind, on data issues, when no path decides it.
+        flag: --kind
+      milestone:
+        type: string
+        description: Milestone title.
+        flag: --milestone
+    required: [project, title, body_file]
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: tpm issue file's JSON report — the issue's reference, labels, and admission verdict.
+    schema:
+      type: string
+  side_effects:
+  - kind: external_api_call
+    target: tracker
+    description: Files the issue and its labels in the tracker.
+  reversibility:
+    classification: irreversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: A filed issue stays; admission and people decide its fate.
+  errors:
+  - signal: CommandError
+    condition: the tpm binary cannot be started
+    message_shape: 'tpm_issue_file: <error>'
+    state_after_failure: nothing was filed by a process that did not start
+  - signal: ToolFailed
+    condition: tpm refuses the filing and exits non-zero
+    message_shape: <tpm's refusal reason, as printed>
+    state_after_failure: the tracker is as tpm's refusal left it
+
+- name: tpm_issue_lint
+  type: exec
+  binary: tpm
+  args:
+  - issue
+  - lint
+  - --json
+  visibility: external
+  description: Check an issue against the label schema and admission policy after its body was fixed (srd035, srd013).
+  category: boundary
+  parameters:
+    type: object
+    properties:
+      project:
+        type: string
+        description: Project path.
+        flag: --project
+      issue:
+        type: integer
+        description: Issue IID.
+        flag: --issue
+      control:
+        type: string
+        description: Program repository holding control/ files.
+        flag: --control
+    required: [project, issue]
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: tpm issue lint's JSON verdict with each admission reason.
+    schema:
+      type: string
+  side_effects:
+  - kind: external_api_call
+    target: tracker
+    description: Re-reads the issue and updates its needs-triage labels.
+  reversibility:
+    classification: irreversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: Lint records a verdict; the next lint replaces it.
+  errors:
+  - signal: CommandError
+    condition: the tpm binary cannot be started
+    message_shape: 'tpm_issue_lint: <error>'
+    state_after_failure: nothing was linted by a process that did not start
+  - signal: ToolFailed
+    condition: tpm refuses the lint and exits non-zero
+    message_shape: <tpm's refusal reason, as printed>
+    state_after_failure: the tracker is as tpm's refusal left it

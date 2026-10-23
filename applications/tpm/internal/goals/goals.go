@@ -1,0 +1,118 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
+package goals
+
+import (
+	"encoding/json"
+	"errors"
+	"flag"
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/cli"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/tpm/internal/tracker"
+)
+
+// WebBase is the web root repositories are cited under, TPM_WEB_BASE: a
+// pinned citation is <web base>/<project>/-/blob/<tag>/<path> (srd007).
+func WebBase() (string, error) {
+	base := strings.TrimSuffix(strings.TrimSpace(os.Getenv("TPM_WEB_BASE")), "/")
+	if base == "" {
+		return "", errors.New("no web base for citations: set TPM_WEB_BASE to the web root repositories are cited under")
+	}
+	return base, nil
+}
+
+func init() {
+	var a struct{ system, release, ref, planFile, control string }
+	common := func(fs *flag.FlagSet) {
+		fs.StringVar(&a.system, "system", "", "system repository path (required)")
+		fs.StringVar(&a.release, "release", "", "road-map release version (required)")
+		fs.StringVar(&a.ref, "ref", "main", "ref of the road map, docs/road-map.md")
+	}
+	load := func(ctx *cli.Context) (tracker.Tracker, Sources, error) {
+		if a.system == "" || a.release == "" {
+			return nil, Sources{}, fmt.Errorf("%w: needs --system and --release", cli.ErrUsage)
+		}
+		t, err := ctx.Tracker()
+		if err != nil {
+			return nil, Sources{}, err
+		}
+		s, err := Load(t, a.system, a.release, a.ref)
+		return t, s, err
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "goals", Name: "plan", Summary: "initiative outcomes of a release with recommended team and environment",
+		Flags: common,
+		Run: func(ctx *cli.Context) error {
+			t, s, err := load(ctx)
+			if err != nil {
+				return err
+			}
+			p, err := MakePlan(t, s)
+			if err != nil {
+				return err
+			}
+			var h strings.Builder
+			for _, o := range p.Objectives {
+				line := fmt.Sprintf("%s %q items=%s -> repository=%q environment=%s due=%s existing=%s", o.Key, o.Title, strings.Join(o.Items, ","), o.Repository, o.Environment, o.Due, o.Existing)
+				if o.Carried != "" {
+					line += " carried by " + o.Carried
+				}
+				fmt.Fprintln(&h, line)
+			}
+			return ctx.Emit(p, h.String())
+		},
+	})
+	cli.Default.Register(&cli.Command{
+		Group: "goals", Name: "push", Summary: "file one Sprint Goal per team and post planned events",
+		Flags: func(fs *flag.FlagSet) {
+			common(fs)
+			fs.StringVar(&a.planFile, "plan", "", "confirmed plan JSON from tpm goals plan (required)")
+			fs.StringVar(&a.control, "control", "", "program repository holding control/ files; defaults to --system")
+		},
+		Run: func(ctx *cli.Context) error {
+			if a.planFile == "" {
+				return fmt.Errorf("%w: push needs --plan", cli.ErrUsage)
+			}
+			raw, err := os.ReadFile(a.planFile)
+			if err != nil {
+				return err
+			}
+			var p Plan
+			if err := json.Unmarshal(raw, &p); err != nil {
+				return fmt.Errorf("%s: %w", a.planFile, err)
+			}
+			t, s, err := load(ctx)
+			if err != nil {
+				return err
+			}
+			if p.Release != s.Release.Version || p.Tag != s.Release.Tag {
+				return fmt.Errorf("plan is for %s at %s, the road-map has %s at %s; run tpm goals plan again", p.Release, p.Tag, s.Release.Version, s.Release.Tag)
+			}
+			control := a.control
+			if control == "" {
+				control = a.system
+			}
+			policy, err := program.LoadPolicy(t, control, a.ref)
+			if err != nil {
+				return err
+			}
+			web, err := WebBase()
+			if err != nil {
+				return err
+			}
+			res, err := Push(t, s, p, web, policy, ctx.DryRun)
+			if err != nil {
+				return err
+			}
+			var h strings.Builder
+			for _, r := range res {
+				fmt.Fprintf(&h, "%s: %s %s %s\n", r.Key, r.Action, r.WebURL, strings.Join(r.Reasons, "; "))
+			}
+			return ctx.Emit(res, h.String())
+		},
+	})
+}

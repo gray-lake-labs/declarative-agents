@@ -1,0 +1,19 @@
+install: the skills, where each agent reads them
+
+The skills are thin scripts over this binary, embedded in it so they always
+match it. This writes them where Cursor, Claude Code, or GitHub Copilot reads
+skills, stamped with the version, and keeps them out of git. After an
+upgrade, --check names the skills that no longer match.
+
+With --runtime it fetches instead the declarative-agents runtime the
+skills' profiles run on, at the pinned release: the agent for this
+machine, checked against the release's SHA256SUMS, and the release's
+source, into the user cache directory, once per release. With Go on PATH
+it also builds the spec tool there, so tpm doctor repairs without Go
+later. TPM_AGENT names an agent already on the machine, used only
+when it is that release's binary.
+
+Command:
+  tpm install   write the embedded skills for an agent, or with --runtime fetch the agent runtime (srd037)
+
+See: srd037

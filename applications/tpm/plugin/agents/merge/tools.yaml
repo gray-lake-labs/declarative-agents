@@ -1,0 +1,8 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
+# Tool selection for the merge machine: three tpm words, no model anywhere
+# (design.md D10, D14; GH-201).
+tools:
+  - tpm_merge_gate
+  - tpm_merge_branch
+  - tpm_close_delivered

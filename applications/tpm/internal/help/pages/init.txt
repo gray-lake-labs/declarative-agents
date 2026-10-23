@@ -1,0 +1,17 @@
+init: start a program from an empty repository
+
+The technical program manager runs this once, in the empty git repository
+that becomes the program's system repository. It writes the corpus every
+repository of a program carries, which the parent's corpus audit passes as
+written, the control files with the built-in defaults, the orientation files
+(README.md, AGENTS.md, and a README in themes/, initiatives/, and epics/),
+and the skills; with --tracker and --group it makes the tracker repository's
+first commit, setting the program's issue ID prefix (--prefix, or the last
+segment of --group), and creates the labels there. Without --tracker, and
+with no TPM_TRACKER, it says no tracker was seeded: no issue can be filed
+until one is, so seed the tracker first. Running it again changes nothing.
+
+Command:
+  tpm init     lay down the system repository: corpus, control files, skills (srd043 R1)
+
+See: srd043

@@ -1,0 +1,17 @@
+goals: Sprint Goals, from the initiatives to one dated issue per team
+
+An initiative is the program's outcome for several quarters, written by the
+technical program manager in the system repository. This group turns a
+release's initiative items into one dated Sprint Goal per team, serving
+every outcome confirmed for that team's repository, citing the items by URL
+pinned to the release tag and naming the environment where they count. Each
+item is planned on its own, so one outcome's items can go to different teams.
+goals reads the subsystem SRDs at the release tag: a team declared after the
+plan was tagged needs the plan republished before it can get a Sprint Goal.
+The tasks skill runs it.
+
+Subcommands:
+  tpm goals plan      the release's outcomes, recommended team and environment (srd034)
+  tpm goals push      file one Sprint Goal per team, post planned events (srd034)
+
+See: srd022, srd034

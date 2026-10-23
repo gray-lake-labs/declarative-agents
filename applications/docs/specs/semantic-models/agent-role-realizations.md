@@ -236,6 +236,7 @@ validation. CI must not read a developer-local checkout or absolute path.
 | mock | false | A scripted test double; the source architecture has no equivalent role. |
 | fixture | false | Test-only profile or data. |
 | infrastructure_adapter | false | Runtime, protocol, serving, or lifecycle boundary adapter. |
+| workflow_machine | false | A workflow machine of the tpm application, whose states are a process skill's steps, whose tools are tpm words, and whose roles live in the application's own corpus rather than this role model. |
 
 <!-- field: bindings -->
 ## Bindings
@@ -2162,6 +2163,126 @@ applications/catalog/agents/applier/rollout-profile.yaml
 ##### Execution scope
 
 rollout-read
+
+<!-- field: tpm -->
+### Tpm
+
+<!-- tpm_entry: tpm-implement -->
+#### tpm-implement
+
+<!-- field: profile -->
+##### Profile
+
+applications/tpm/plugin/agents/implement/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- tpm_entry: tpm-merge -->
+#### tpm-merge
+
+<!-- field: profile -->
+##### Profile
+
+applications/tpm/plugin/agents/merge/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- tpm_entry: tpm-pop -->
+#### tpm-pop
+
+<!-- field: profile -->
+##### Profile
+
+applications/tpm/plugin/agents/pop/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- tpm_entry: tpm-plan-push -->
+#### tpm-plan-push
+
+<!-- field: profile -->
+##### Profile
+
+applications/tpm/plugin/agents/plan-push/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- tpm_entry: tpm-plan -->
+#### tpm-plan
+
+<!-- field: profile -->
+##### Profile
+
+applications/tpm/plugin/agents/plan/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- tpm_entry: tpm-specify -->
+#### tpm-specify
+
+<!-- field: profile -->
+##### Profile
+
+applications/tpm/plugin/agents/specify/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- tpm_entry: tpm-tasks -->
+#### tpm-tasks
+
+<!-- field: profile -->
+##### Profile
+
+applications/tpm/plugin/agents/tasks/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- tpm_entry: tpm-sprint-end -->
+#### tpm-sprint-end
+
+<!-- field: profile -->
+##### Profile
+
+applications/tpm/plugin/agents/sprint-end/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- tpm_entry: tpm-draft -->
+#### tpm-draft
+
+<!-- field: profile -->
+##### Profile
+
+applications/tpm/plugin/agents/draft/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
 
 <!-- field: deployment_realizations -->
 ## Deployment realizations

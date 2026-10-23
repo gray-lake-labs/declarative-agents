@@ -261,6 +261,11 @@ func releaseGates(root string) []releaseGate {
 			priority = chatbotReleasePriority
 			resources = append(resources, releaseResourceHostOllama)
 		}
+		if mod == "applications/tpm" {
+			// tpm's rig is local git repositories and the sibling agent;
+			// it needs no container runtime (GH-190).
+			resources = []releaseResourceClass{releaseResourceCPU}
+		}
 		gates = append(gates, releaseGate{
 			name:      mod + " integration",
 			dir:       filepath.Join(root, filepath.FromSlash(mod)),
