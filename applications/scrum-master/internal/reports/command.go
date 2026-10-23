@@ -236,7 +236,10 @@ func init() {
 				// An issue filed now says how admission went, as tpm issue
 				// file does (srd018 R3.6).
 				if pr.Action == "filed" && pr.Admitted {
-					line += ", admitted"
+					// A signal issue is a management issue: admission
+					// clears it, but only a data issue moves to ready, so it
+					// stays open until someone takes it (srd041; GH-20).
+					line += ", admitted; a management issue, it stays open until someone takes it"
 				} else if pr.Action == "filed" {
 					line += ", needs-triage: " + strings.Join(pr.Reasons, "; ")
 				}

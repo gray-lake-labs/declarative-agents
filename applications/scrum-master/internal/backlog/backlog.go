@@ -30,6 +30,12 @@ type Entry struct {
 	Path   string `json:"path"`
 	Points string `json:"points,omitempty"`
 	Rank   string `json:"rank,omitempty"`
+	// The horizontal links the document carries (GH-20): what it is
+	// blocked by, depends on, relates to, and duplicates.
+	BlockedBy  []string `json:"blocked_by,omitempty"`
+	DependsOn  []string `json:"depends_on,omitempty"`
+	RelatesTo  []string `json:"relates_to,omitempty"`
+	Duplicates []string `json:"duplicates,omitempty"`
 }
 
 // Report is what tpm backlog check prints: how many documents it read and
@@ -53,7 +59,8 @@ func List(dir, kind string) ([]Entry, error) {
 		if kind != "" && string(d.Kind) != kind {
 			continue
 		}
-		e := Entry{ID: d.ID, Kind: string(d.Kind), Title: d.Title, Status: d.Status, Parent: d.Parent, Path: relative(dir, d.Path)}
+		e := Entry{ID: d.ID, Kind: string(d.Kind), Title: d.Title, Status: d.Status, Parent: d.Parent, Path: relative(dir, d.Path),
+			BlockedBy: d.Links["blocked_by"], DependsOn: d.Links["depends_on"], RelatesTo: d.Links["relates_to"], Duplicates: d.Links["duplicates"]}
 		if d.Kind == hierarchy.Story {
 			e.Points, e.Rank = d.Points, d.Rank
 		}

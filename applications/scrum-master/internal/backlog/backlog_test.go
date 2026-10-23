@@ -156,3 +156,21 @@ func snapshot(t *testing.T, dir string) map[string]string {
 	}
 	return files
 }
+
+// backlog list carries each document's horizontal links, so a reader of
+// --json sees what a story is blocked by or depends on (GH-20).
+func TestListCarriesTheLinks(t *testing.T) {
+	entries, err := backlog.List(fixtures+"/valid", "story")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, e := range entries {
+		if e.ID == "st002-store-scores" {
+			if len(e.BlockedBy) == 0 {
+				t.Fatalf("st002's blocked_by is lost: %+v", e)
+			}
+			return
+		}
+	}
+	t.Fatalf("no st002 in %+v", entries)
+}

@@ -98,6 +98,9 @@ type LintResult struct {
 	Admitted bool     `json:"admitted"`
 	Reasons  []string `json:"reasons,omitempty"`
 	Changed  bool     `json:"changed"`
+	// Milestone is the milestone the issue carries, which admission reads
+	// for a data issue (GH-20).
+	Milestone string `json:"milestone,omitempty"`
 }
 
 // lintNote is the comment lint leaves on a failing issue.
@@ -129,7 +132,7 @@ func lastLint(notes []tracker.Note) string {
 // failure comment. It changes no other label and never the assignee
 // (srd013 R1.2, srd041 R9.4). A dry run writes nothing.
 func Apply(t tracker.Tracker, i tracker.Issue, reasons []string, p Policy, dryRun bool) (LintResult, error) {
-	r := LintResult{Project: i.Project, IID: i.IID, Admitted: len(reasons) == 0, Reasons: reasons}
+	r := LintResult{Project: i.Project, IID: i.IID, Admitted: len(reasons) == 0, Reasons: reasons, Milestone: i.Milestone}
 	triaged := i.HasLabel(p.TriageLabel)
 	triager, byState := tracker.For(t, i.Project).(tracker.Triager)
 	if r.Admitted {

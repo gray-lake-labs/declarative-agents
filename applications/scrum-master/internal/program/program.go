@@ -168,6 +168,11 @@ func init() {
 			if len(r.NotAdmitted) > 0 {
 				human += "\nnot admitted, which does not block a non-data issue: " + strings.Join(r.NotAdmitted, "; ")
 			}
+			if r.Provisional {
+				// Taken offline: the assignment is the clone's until the
+				// tracker repository confirms it (GH-20).
+				human += "\nprovisional: taken while the tracker repository was unreachable; run tpm tracker reconcile once it is reachable"
+			}
 			if !ctx.DryRun {
 				if r.Installed, err = InstallSkills(r.Checkout, r.Worktree); err != nil {
 					r.InstallError = err.Error()
@@ -695,7 +700,7 @@ func init() {
 					return err
 				}
 				results = append(results, r)
-				fmt.Fprintf(&human, "%s#%d: %s\n", r.Project, r.IID, verdict(r))
+				fmt.Fprintf(&human, "%s#%d: %s; milestone %s\n", r.Project, r.IID, verdict(r), orNone(r.Milestone))
 			}
 			return ctx.Emit(results, human.String())
 		},
@@ -764,8 +769,14 @@ func init() {
 			}
 			r.Plane, r.Kind, r.Component, r.Derived = l.Plane, l.Kind, l.Component, l.Derived
 			r.Milestone, r.MilestoneReason = milestone, reason
-			return ctx.Emit(r, fmt.Sprintf("%s#%d %s: %s\nplane %s, kind %s, component %s, milestone %s",
-				r.Project, r.IID, r.WebURL, verdict(r.Lint), r.Plane, orNone(r.Kind), orNone(r.Component), orNone(r.Milestone)))
+			human := fmt.Sprintf("%s#%d %s: %s\nplane %s, kind %s, component %s, milestone %s",
+				r.Project, r.IID, r.WebURL, verdict(r.Lint), r.Plane, orNone(r.Kind), orNone(r.Component), orNone(r.Milestone))
+			if r.MilestoneReason != "" {
+				// Why the milestone is what it is — or absent — is the fix a
+				// needs-triage verdict asks for (GH-20).
+				human += "\nmilestone: " + r.MilestoneReason
+			}
+			return ctx.Emit(r, human)
 		},
 	})
 }
