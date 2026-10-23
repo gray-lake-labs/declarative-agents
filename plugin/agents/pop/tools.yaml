@@ -1,0 +1,7 @@
+# Tool selection for the pop machine: four tpm words, no model anywhere
+# (design.md D10, D14; GH-204).
+tools:
+  - tpm_claim
+  - tpm_open_branch
+  - tpm_add_worktree
+  - tpm_install_skills
