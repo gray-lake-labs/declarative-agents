@@ -107,6 +107,11 @@ In the system repository, once the release entry merges, a documents-only releas
 
 tpm plan push dates the milestone, sets the sprint issue (srd001 R7) with one checklist item per Sprint Goal, posts the planned events, and files one sprint-end issue (srd038 R1.1) in each releasing repository due on the milestone end date; a second run updates and creates nothing.
 
+<!-- req: R4.7 -->
+### R4.7
+
+push decomposes into four words the plan-push profile composes (GH-201, GH-206, design.md D14): tpm plan milestone, tpm plan sprint-issue, tpm plan sprint-ends, and tpm plan events. tpm plan push runs the same code as one command. Each word rereads the road map and recomputes its scope, and each upserts by marker or ensures by title, so a re-run of a word, the machine, or the command updates and creates nothing, and a word that fails after another is a partial machine state a re-run finishes.
+
 <!-- req: R5 -->
 ## R5 - Refusals
 
@@ -245,3 +250,13 @@ The plan profile validates with the pinned runtime, and the installed SKILL.md p
 #### Traces
 
 - [R7.1](#r71)
+
+<!-- ac: AC7 -->
+### AC7
+
+A run of the plan-push profile with the pinned runtime dates the milestone, files the sprint and sprint-end issues, and posts the planned events, ending in Done; a second run ends in Done and the one-command push after it reports everything unchanged; a road map without the release ends in Refused with tpm's reason.
+
+<!-- field: traces -->
+#### Traces
+
+- [R4.7](#r47)

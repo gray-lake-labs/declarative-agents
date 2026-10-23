@@ -164,6 +164,130 @@ func init() {
 		},
 	})
 
+	pushWordInput := func(ctx *cli.Context, version, end, group string) (tracker.Tracker, PushInput, error) {
+		if a.system == "" || version == "" || end == "" {
+			return nil, PushInput{}, fmt.Errorf("%w: the push words need --system, --version, and --end", cli.ErrUsage)
+		}
+		t, err := ctx.Tracker()
+		if err != nil {
+			return nil, PushInput{}, err
+		}
+		control := a.control
+		if control == "" {
+			control = a.system
+		}
+		p, err := program.LoadPolicy(t, control, a.ref)
+		if err != nil {
+			return nil, PushInput{}, err
+		}
+		if group == "" {
+			group = path.Dir(program.ProjectPath(a.system))
+		}
+		web, err := goals.WebBase()
+		if err != nil {
+			return nil, PushInput{}, err
+		}
+		return t, PushInput{Dir: a.dir, System: a.system, Group: group, Version: version, End: end,
+			WebBase: web, Policy: p, Ref: a.ref, DryRun: ctx.DryRun}, nil
+	}
+
+	var pw struct{ version, end, group string }
+	pushWordFlags := func(fs *flag.FlagSet) {
+		common(fs)
+		fs.StringVar(&pw.version, "version", "", "the road-map release (required)")
+		fs.StringVar(&pw.end, "end", "", "the period's end date, YYYY-MM-DD (required)")
+		fs.StringVar(&pw.group, "group", "", "the program group the milestone lives on; defaults to the system repository's group")
+	}
+	cli.Default.Register(&cli.Command{
+		Group: "plan", Name: "milestone", Summary: "the milestone word: date the release's milestone in every group it serves (GH-206)",
+		Flags: pushWordFlags,
+		Run: func(ctx *cli.Context) error {
+			t, in, err := pushWordInput(ctx, pw.version, pw.end, pw.group)
+			if err != nil {
+				return err
+			}
+			status, groups, err := PushMilestone(t, in)
+			if err != nil {
+				return err
+			}
+			r := struct {
+				Version   string   `json:"version"`
+				Milestone string   `json:"milestone"`
+				Groups    []string `json:"milestone_groups,omitempty"`
+				DryRun    bool     `json:"dry_run"`
+			}{in.Version, status, groups, ctx.DryRun}
+			return ctx.Emit(r, fmt.Sprintf("milestone %s in %s", status, strings.Join(groups, ", ")))
+		},
+	})
+	cli.Default.Register(&cli.Command{
+		Group: "plan", Name: "sprint-issue", Summary: "the sprint word: the release's one sprint issue with its exit checklist, upserted by marker (GH-206)",
+		Flags: pushWordFlags,
+		Run: func(ctx *cli.Context) error {
+			t, in, err := pushWordInput(ctx, pw.version, pw.end, pw.group)
+			if err != nil {
+				return err
+			}
+			action, err := PushSprintIssue(t, in)
+			if err != nil {
+				return err
+			}
+			return ctx.Emit(action, fmt.Sprintf("sprint issue %s#%d: %s", action.Project, action.IID, action.Action))
+		},
+	})
+	cli.Default.Register(&cli.Command{
+		Group: "plan", Name: "sprint-ends", Summary: "the sprint-ends word: one sprint-end issue per releasing repository, upserted by marker (GH-206)",
+		Flags: pushWordFlags,
+		Run: func(ctx *cli.Context) error {
+			t, in, err := pushWordInput(ctx, pw.version, pw.end, pw.group)
+			if err != nil {
+				return err
+			}
+			actions, skipped, err := PushSprintEnds(t, in)
+			if err != nil {
+				return err
+			}
+			r := struct {
+				SprintEnds []IssueAction `json:"sprint_end_issues"`
+				Skipped    []string      `json:"skipped,omitempty"`
+				DryRun     bool          `json:"dry_run"`
+			}{actions, skipped, ctx.DryRun}
+			var h strings.Builder
+			for _, s := range actions {
+				fmt.Fprintf(&h, "sprint-end issue %s#%d: %s\n", s.Project, s.IID, s.Action)
+			}
+			for _, s := range skipped {
+				fmt.Fprintf(&h, "skipped %s\n", s)
+			}
+			return ctx.Emit(r, h.String())
+		},
+	})
+	cli.Default.Register(&cli.Command{
+		Group: "plan", Name: "events", Summary: "the events word: a planned event on each open Sprint Goal the release moves, posted once (GH-206)",
+		Flags: pushWordFlags,
+		Run: func(ctx *cli.Context) error {
+			t, in, err := pushWordInput(ctx, pw.version, pw.end, pw.group)
+			if err != nil {
+				return err
+			}
+			planned, err := PushEvents(t, in)
+			if err != nil {
+				return err
+			}
+			r := struct {
+				Planned []PlannedOnIssue `json:"planned_events"`
+				DryRun  bool             `json:"dry_run"`
+			}{planned, ctx.DryRun}
+			var h strings.Builder
+			for _, e := range planned {
+				fmt.Fprintf(&h, "planned event on %s: posted=%v\n", e.Issue, e.Posted)
+			}
+			if len(planned) == 0 {
+				h.WriteString("no open Sprint Goal needed a planned event\n")
+			}
+			return ctx.Emit(r, h.String())
+		},
+	})
+
 	var w struct{ version, milestone, tag, items, issue string }
 	cli.Default.Register(&cli.Command{
 		Group: "plan", Name: "write", Summary: "write the chosen release into docs/road-map.md in the checkout",
