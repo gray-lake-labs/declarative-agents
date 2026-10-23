@@ -68,82 +68,176 @@ type PlannedOnIssue struct {
 
 var weekRange = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 
-// Push dates the release's milestone, sets the sprint issue's checklist,
-// posts a planned event on each open objective issue the release moves,
-// and files one sprint-end issue per releasing repository, each found by
-// its marker so a second push updates and creates nothing (srd031 R4.2,
-// R4.3, R4.6; srd038 R1.1; srd001 R7).
-func Push(t tracker.Tracker, in PushInput) (PushResult, error) {
-	var res PushResult
+// pushPlan is what every push word loads from the road map and the system
+// repository: the release, its milestone, the objective groups, and the
+// releasing repositories (GH-206).
+type pushPlan struct {
+	r       Release
+	m       tracker.Milestone
+	docs    []*objectives.Document
+	groups  []group
+	repos   []string
+	skipped []string
+}
+
+// loadPushPlan reads the road map in in.Dir and the system repository's
+// subsystem SRDs, so each word recomputes its scope and a re-run updates
+// and creates nothing.
+func loadPushPlan(t tracker.Tracker, in PushInput) (pushPlan, error) {
+	var p pushPlan
 	if !weekRange.MatchString(in.End) {
-		return res, fmt.Errorf("--end must be YYYY-MM-DD, not %q", in.End)
+		return p, fmt.Errorf("--end must be YYYY-MM-DD, not %q", in.End)
 	}
 	end, _ := time.Parse(time.DateOnly, in.End)
 	start := periodStart(end)
 	releases, err := readRoadMap(in.Dir)
 	if err != nil {
-		return res, err
+		return p, err
 	}
 	i := slices.IndexFunc(releases, func(r goals.Release) bool { return r.Version == in.Version })
 	if i < 0 {
-		return res, fmt.Errorf("%s names no release %s; write it with tpm plan write first", RoadMap, in.Version)
+		return p, fmt.Errorf("%s names no release %s; write it with tpm plan write first", RoadMap, in.Version)
 	}
-	r := Release{Version: in.Version, Items: releases[i].Objectives, Milestone: releases[i].Milestone, Tag: releases[i].Tag}
-	res.Release = r
-	if r.Milestone == "" || r.Tag == "" {
-		return res, fmt.Errorf("release %s has no milestone or tag in release.publication", r.Version)
+	p.r = Release{Version: in.Version, Items: releases[i].Objectives, Milestone: releases[i].Milestone, Tag: releases[i].Tag}
+	if p.r.Milestone == "" || p.r.Tag == "" {
+		return p, fmt.Errorf("release %s has no milestone or tag in release.publication", p.r.Version)
 	}
-	docs, err := objectives.LoadAll(in.Dir)
-	if err != nil {
-		return res, err
+	if p.docs, err = objectives.LoadAll(in.Dir); err != nil {
+		return p, err
 	}
-	groups := groupsOf(r.Items, docs)
-
-	m := tracker.Milestone{Title: r.Milestone, StartDate: start.Format(time.DateOnly), DueDate: in.End,
-		Description: fmt.Sprintf("Release %s, %s to %s.", r.Version, isoWeek(start), isoWeek(end))}
-	if in.DryRun {
-		res.Milestone = "dry-run"
-	} else if res.Milestone, err = t.EnsureMilestone(in.Group, m); err != nil {
-		return res, err
-	} else {
-		res.MilestoneGroups = []string{in.Group}
-	}
-
-	if res.Sprint, err = pushSprint(t, in, r, groups); err != nil {
-		return res, err
-	}
+	p.groups = groupsOf(p.r.Items, p.docs)
+	p.m = tracker.Milestone{Title: p.r.Milestone, StartDate: start.Format(time.DateOnly), DueDate: in.End,
+		Description: fmt.Sprintf("Release %s, %s to %s.", p.r.Version, isoWeek(start), isoWeek(end))}
 	subs, err := program.LoadSubsystems(t, in.System, in.Ref)
 	if err != nil {
+		return p, err
+	}
+	p.repos = subs.Repositories()
+	if !slices.Contains(p.repos, program.ProjectPath(in.System)) {
+		p.skipped = append(p.skipped, in.System+": no subsystem SRD declares it as a component, so it has no sprint-end issue")
+	}
+	return p, nil
+}
+
+// ensureProgramMilestone dates the milestone in the program group.
+func ensureProgramMilestone(t tracker.Tracker, in PushInput, p pushPlan) (status string, groups []string, err error) {
+	if in.DryRun {
+		return "dry-run", nil, nil
+	}
+	if status, err = t.EnsureMilestone(in.Group, p.m); err != nil {
+		return "", nil, err
+	}
+	return status, []string{in.Group}, nil
+}
+
+// ensureOtherMilestones dates the milestone in each releasing repository's
+// group outside the program group, so its issues find it (srd031 R4.2).
+func ensureOtherMilestones(t tracker.Tracker, in PushInput, p pushPlan, have []string) ([]string, error) {
+	if in.DryRun {
+		return have, nil
+	}
+	for _, repo := range p.repos {
+		group := path.Dir(repo)
+		if group == "." || group == in.Group || strings.HasPrefix(group, in.Group+"/") || slices.Contains(have, group) {
+			continue
+		}
+		if _, err := t.EnsureMilestone(group, p.m); err != nil {
+			return have, err
+		}
+		have = append(have, group)
+	}
+	return have, nil
+}
+
+// PushMilestone is the milestone word (GH-206, srd031 R4.7): the release's
+// dated milestone in the program group and each releasing repository's
+// group outside it.
+func PushMilestone(t tracker.Tracker, in PushInput) (status string, groups []string, err error) {
+	p, err := loadPushPlan(t, in)
+	if err != nil {
+		return "", nil, err
+	}
+	status, groups, err = ensureProgramMilestone(t, in, p)
+	if err != nil {
+		return "", nil, err
+	}
+	groups, err = ensureOtherMilestones(t, in, p, groups)
+	return status, groups, err
+}
+
+// PushSprintIssue is the sprint-issue word (GH-206, srd031 R4.7): the
+// release's one sprint issue with its exit checklist, upserted by marker.
+func PushSprintIssue(t tracker.Tracker, in PushInput) (IssueAction, error) {
+	p, err := loadPushPlan(t, in)
+	if err != nil {
+		return IssueAction{}, err
+	}
+	return pushSprint(t, in, p.r, p.groups)
+}
+
+// PushSprintEnds is the sprint-ends word (GH-206, srd031 R4.7): one
+// sprint-end issue per releasing repository, each upserted by marker.
+func PushSprintEnds(t tracker.Tracker, in PushInput) ([]IssueAction, []string, error) {
+	p, err := loadPushPlan(t, in)
+	if err != nil {
+		return nil, nil, err
+	}
+	actions, err := pushSprintEnds(t, in, p)
+	return actions, p.skipped, err
+}
+
+func pushSprintEnds(t tracker.Tracker, in PushInput, p pushPlan) ([]IssueAction, error) {
+	repos := slices.Clone(p.repos)
+	sort.Strings(repos)
+	var out []IssueAction
+	for _, repo := range slices.Compact(repos) {
+		a, err := pushSprintEnd(t, in, p.r, repo)
+		if err != nil {
+			return out, err
+		}
+		out = append(out, a)
+	}
+	return out, nil
+}
+
+// PushEvents is the events word (GH-206, srd031 R4.7): a planned event on
+// each open Sprint Goal the release moves, posted once.
+func PushEvents(t tracker.Tracker, in PushInput) ([]PlannedOnIssue, error) {
+	p, err := loadPushPlan(t, in)
+	if err != nil {
+		return nil, err
+	}
+	return postPlanned(t, in, p.r, p.repos, p.docs, p.groups)
+}
+
+// Push dates the release's milestone, sets the sprint issue's checklist,
+// posts a planned event on each open objective issue the release moves,
+// and files one sprint-end issue per releasing repository, each found by
+// its marker so a second push updates and creates nothing (srd031 R4.2,
+// R4.3, R4.6; srd038 R1.1; srd001 R7). It is the four words of the
+// plan-push profile as one command, in the one order the words run
+// (GH-206, srd031 R4.7).
+func Push(t tracker.Tracker, in PushInput) (PushResult, error) {
+	var res PushResult
+	p, err := loadPushPlan(t, in)
+	if err != nil {
 		return res, err
 	}
-	repos := subs.Repositories()
-	if !in.DryRun {
-		// A milestone is found in a project's own group and its ancestors:
-		// a releasing repository outside the program group gets it in its
-		// own group too (srd031 R4.2).
-		for _, repo := range repos {
-			group := path.Dir(repo)
-			if group == "." || group == in.Group || strings.HasPrefix(group, in.Group+"/") || slices.Contains(res.MilestoneGroups, group) {
-				continue
-			}
-			if _, err := t.EnsureMilestone(group, m); err != nil {
-				return res, err
-			}
-			res.MilestoneGroups = append(res.MilestoneGroups, group)
-		}
+	res.Release = p.r
+	if res.Milestone, res.MilestoneGroups, err = ensureProgramMilestone(t, in, p); err != nil {
+		return res, err
 	}
-	if !slices.Contains(repos, program.ProjectPath(in.System)) {
-		res.Skipped = append(res.Skipped, in.System+": no subsystem SRD declares it as a component, so it has no sprint-end issue")
+	if res.Sprint, err = pushSprint(t, in, p.r, p.groups); err != nil {
+		return res, err
 	}
-	sort.Strings(repos)
-	for _, repo := range slices.Compact(repos) {
-		a, err := pushSprintEnd(t, in, r, repo)
-		if err != nil {
-			return res, err
-		}
-		res.SprintEnds = append(res.SprintEnds, a)
+	if res.MilestoneGroups, err = ensureOtherMilestones(t, in, p, res.MilestoneGroups); err != nil {
+		return res, err
 	}
-	if res.Planned, err = postPlanned(t, in, r, repos, docs, groups); err != nil {
+	res.Skipped = p.skipped
+	if res.SprintEnds, err = pushSprintEnds(t, in, p); err != nil {
+		return res, err
+	}
+	if res.Planned, err = postPlanned(t, in, p.r, p.repos, p.docs, p.groups); err != nil {
 		return res, err
 	}
 	return res, nil
