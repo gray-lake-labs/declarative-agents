@@ -19,13 +19,13 @@ Most of what Scrum asks of people outside the work itself is moving facts the tr
 
 ## Install
 
-Each release publishes tpm for Linux, macOS, and Windows on amd64 and arm64, with a `SHA256SUMS` file, on its [GitHub release](https://github.com/gray-lake-labs/scrum-master/releases). Install the latest, or name a tag, with the script, which checks the binary against `SHA256SUMS` and installs it in `$HOME/.local/bin` (`TPM_PREFIX` changes that):
+Each release of this repository publishes tpm for Linux, macOS, and Windows on amd64 and arm64 — beside the runtime's `agent` binaries, in one `SHA256SUMS` — on its [GitHub release](https://github.com/gray-lake-labs/declarative-agents/releases). Install the latest, or name a tag, with the script, which checks the binary against `SHA256SUMS` and installs it in `$HOME/.local/bin` (`TPM_PREFIX` changes that):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gray-lake-labs/scrum-master/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/gray-lake-labs/declarative-agents/main/applications/scrum-master/install.sh | sh
 ```
 
-Or download `tpm_<os>_<arch>` (`.exe` on Windows) and `SHA256SUMS` from the release and check them with `sha256sum -c --ignore-missing SHA256SUMS`, or, with a Go toolchain, `go install github.com/gray-lake-labs/scrum-master/cmd/tpm@<tag>`.
+Or download `tpm_<os>_<arch>` (`.exe` on Windows) and `SHA256SUMS` from the release and check them with `sha256sum -c --ignore-missing SHA256SUMS`, or, with a Go toolchain, `go install github.com/gray-lake-labs/declarative-agents/applications/scrum-master/cmd/tpm@<tag>`.
 
 Then fetch the declarative-agents runtime the skills' profiles run on, at the release tpm pins; with Go on the machine this also builds the spec tool `tpm doctor` repairs documents with:
 
