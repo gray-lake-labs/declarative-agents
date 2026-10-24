@@ -102,7 +102,7 @@ func (r *rigEnv) runPlanPushAgent(rel runtime.Release, system, clone, version, e
 	)
 	cmd.Dir = clone
 	cmd.Env = append(os.Environ(),
-		"PATH="+pathWithout("tpm"),
+		"PATH="+pathWithout("tpm", "scrum-master"),
 		"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
 		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
 		"TPM_USER="+r.user,

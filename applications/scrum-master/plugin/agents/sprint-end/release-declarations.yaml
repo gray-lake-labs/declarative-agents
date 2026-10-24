@@ -8,7 +8,7 @@ unit: tpm-sprint-end-release-declarations
 tools:
 - name: tpm_issue_merge
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - merge
@@ -58,7 +58,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_issue_merge: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -68,7 +68,7 @@ tools:
 
 - name: tpm_release_gate
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - release
   - gate
@@ -118,7 +118,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_release_gate: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -128,7 +128,7 @@ tools:
 
 - name: tpm_release_tag
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - release
   - tag
@@ -178,7 +178,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_release_tag: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed

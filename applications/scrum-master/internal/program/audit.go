@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
@@ -17,24 +18,45 @@ import (
 // combined output. Tests replace it.
 type AuditRunner func(dir, command string) (string, error)
 
-// Words runs a tpm command line in this process, with dir as its working
-// directory, and returns its exit code; the words package sets it. An audit
-// command that is a tpm command line, such as BacklogAudit, runs through it,
-// so a merge's gate needs no tpm installed (GH-28).
+// WordsBinary is the name the profiles and the policy's commands give the
+// words (GH-32); tpm, the binary that ran them, still names them too.
+const WordsBinary = "scrum-master"
+
+// Words runs a command line of words in this process, with dir as its
+// working directory, and returns its exit code; the words package sets it.
 var Words func(dir string, args []string, out io.Writer) int
 
-// ShellAudit runs the command with sh -c, or a tpm command line in process.
+// wordsMu serializes the commands RunWords runs: a word runs in the
+// process's working directory, and gates of one stage run at once.
+var wordsMu sync.Mutex
+
+// RunWords runs command in this process when it is a plain command line of
+// words — scrum-master or tpm, then its arguments, with no shell syntax —
+// and reports whether it did. A merge's audit and a release's gate run a
+// policy command through it, so neither needs a words binary installed
+// (GH-28, GH-32).
+func RunWords(dir, command string, out io.Writer) (bool, error) {
+	args := strings.Fields(command)
+	if Words == nil || len(args) < 2 || (args[0] != WordsBinary && args[0] != "tpm") || strings.ContainsAny(command, "|&;<>()$`\\\"'*?") {
+		return false, nil
+	}
+	wordsMu.Lock()
+	defer wordsMu.Unlock()
+	if code := Words(dir, args[1:], out); code != 0 {
+		return true, fmt.Errorf("%s exited %d", command, code)
+	}
+	return true, nil
+}
+
+// ShellAudit runs the command with sh -c, or a command line of words in
+// process.
 func ShellAudit(dir, command string) (string, error) {
-	if args := strings.Fields(command); Words != nil && len(args) > 1 && args[0] == "tpm" && !strings.ContainsAny(command, "|&;<>()$`\\\"'*?") {
-		var out bytes.Buffer
-		if code := Words(dir, args[1:], &out); code != 0 {
-			return out.String(), fmt.Errorf("%s exited %d", command, code)
-		}
-		return out.String(), nil
+	var out bytes.Buffer
+	if ok, err := RunWords(dir, command, &out); ok {
+		return out.String(), err
 	}
 	cmd := exec.Command("sh", "-c", command)
 	cmd.Dir = dir
-	var out bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &out
 	err := cmd.Run()
 	return out.String(), err

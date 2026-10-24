@@ -9,7 +9,7 @@ unit: tpm-tasks-declarations
 tools:
 - name: tpm_goals_plan
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - goals
   - plan
@@ -47,7 +47,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_goals_plan: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -57,7 +57,7 @@ tools:
 
 - name: tpm_goals_push
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - goals
   - push
@@ -103,7 +103,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_goals_push: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -113,7 +113,7 @@ tools:
 
 - name: tpm_backlog_list
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - backlog
   - list
@@ -150,7 +150,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_backlog_list: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -160,7 +160,7 @@ tools:
 
 - name: tpm_issue_list
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - list
@@ -206,7 +206,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_issue_list: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -216,7 +216,7 @@ tools:
 
 - name: tpm_issue_file
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - file
@@ -270,7 +270,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_issue_file: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed

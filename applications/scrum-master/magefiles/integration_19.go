@@ -41,7 +41,7 @@ func (Integration) InitProfile() error {
 		return err
 	}
 	repo, tracker := filepath.Join(tmp, "system"), filepath.Join(tmp, "tracker.git")
-	env := append(os.Environ(), "PATH="+pathWithout("tpm"), install.SourceEnv+"="+rel.Src, "TPM_USER=operator",
+	env := append(os.Environ(), "PATH="+pathWithout("tpm", "scrum-master"), install.SourceEnv+"="+rel.Src, "TPM_USER=operator",
 		"GIT_AUTHOR_NAME=operator", "GIT_AUTHOR_EMAIL=operator@example.invalid",
 		"GIT_COMMITTER_NAME=operator", "GIT_COMMITTER_EMAIL=operator@example.invalid")
 	sh := func(dir, name string, args ...string) (string, error) {
@@ -164,7 +164,7 @@ func (Integration) OnboardProfile() error {
 			"--core-root", rel.CoreRoot(), "--directory", store, "--output", filepath.Join(r.run.Dir, out), "--request", request)
 		cmd.Dir = store
 		cmd.Env = append(os.Environ(),
-			"PATH="+pathWithout("tpm"),
+			"PATH="+pathWithout("tpm", "scrum-master"),
 			install.SourceEnv+"="+rel.Src,
 			"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
 			"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),

@@ -11,7 +11,7 @@ unit: tpm-pop-declarations
 tools:
 - name: tpm_claim
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - claim
@@ -41,7 +41,7 @@ tools:
     description: A claim is released by the person with tpm, not reversed by the run.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
     message_shape: 'tpm_claim: <error>'
     state_after_failure: nothing was assigned by a process that did not start
   - signal: ToolFailed
@@ -51,7 +51,7 @@ tools:
 
 - name: tpm_open_branch
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - open-branch
@@ -90,7 +90,7 @@ tools:
     description: A branch stays; a re-run reuses it.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
     message_shape: 'tpm_open_branch: <error>'
     state_after_failure: nothing opened by a process that did not start
   - signal: ToolFailed
@@ -100,7 +100,7 @@ tools:
 
 - name: tpm_add_worktree
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - add-worktree
@@ -135,7 +135,7 @@ tools:
     description: A worktree stays; a re-run reuses it, and a person removes one with git.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_add_worktree: <error>'
     state_after_failure: nothing added by a process that did not start
   - signal: ToolFailed
@@ -145,7 +145,7 @@ tools:
 
 - name: tpm_install_skills
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - install-skills
@@ -185,7 +185,7 @@ tools:
     description: Installed skill files are untracked; a re-install rewrites them.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_install_skills: <error>'
     state_after_failure: nothing written by a process that did not start
   - signal: ToolFailed

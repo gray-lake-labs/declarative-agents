@@ -112,7 +112,7 @@ func (r *rigEnv) runMergeAgent(rel runtime.Release, project, worktree string, ii
 	)
 	cmd.Dir = worktree
 	cmd.Env = append(os.Environ(),
-		"PATH="+pathWithout("tpm"),
+		"PATH="+pathWithout("tpm", "scrum-master"),
 		"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
 		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
 		"TPM_USER="+r.user,

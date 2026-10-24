@@ -11,7 +11,7 @@ unit: tpm-merge-declarations
 tools:
 - name: tpm_merge_gate
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - merge
@@ -42,7 +42,7 @@ tools:
     description: A dry run changes nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
     message_shape: 'tpm_merge_gate: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -52,7 +52,7 @@ tools:
 
 - name: tpm_merge_branch
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - merge-branch
@@ -82,7 +82,7 @@ tools:
     description: A pushed merge stays; a re-run finds the branch already merged and makes no second commit.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
     message_shape: 'tpm_merge_branch: <error>'
     state_after_failure: nothing merged by a process that did not start
   - signal: ToolFailed
@@ -92,7 +92,7 @@ tools:
 
 - name: tpm_close_delivered
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - close-delivered
@@ -136,7 +136,7 @@ tools:
     description: A re-run changes nothing; a closed issue stays closed on its commit.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or the commit parameter is missing
+    condition: the word cannot start — this agent does not serve the scrum-master words — or the commit parameter is missing
     message_shape: 'tpm_close_delivered: <error>'
     state_after_failure: nothing closed by a process that did not start
   - signal: ToolFailed

@@ -322,7 +322,9 @@ func TestScaffoldWritesParentPin(t *testing.T) {
 func TestTemplatesNameNoProject(t *testing.T) {
 	forbidden := []string{"scrum-master", "gray-lake", "nokia", "github", "gitlab", "anthropic", "homeostat"}
 	check := func(name string, b []byte) {
-		lower := strings.ToLower(string(b))
+		// The policy's corpus gate is the words' own command, the one name
+		// a program runs them by (GH-32).
+		lower := strings.ToLower(strings.ReplaceAll(string(b), ProgramAudit, ""))
 		for _, w := range forbidden {
 			if strings.Contains(lower, w) {
 				t.Errorf("%s names %q", name, w)

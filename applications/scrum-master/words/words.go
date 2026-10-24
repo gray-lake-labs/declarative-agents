@@ -24,7 +24,7 @@ import (
 func init() { program.Words = Run }
 
 // Binary is the name the profiles' exec declarations give the words.
-const Binary = "tpm"
+const Binary = program.WordsBinary
 
 // Exit codes, as the tpm binary has always had them.
 const (

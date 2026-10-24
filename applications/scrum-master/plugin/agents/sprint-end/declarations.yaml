@@ -9,7 +9,7 @@ unit: tpm-sprint-end-declarations
 tools:
 - name: tpm_sprint_end_facts
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - sprint-end
   - facts
@@ -67,7 +67,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_sprint_end_facts: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -77,7 +77,7 @@ tools:
 
 - name: tpm_sprint_end_stories
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - sprint-end
   - stories
@@ -123,7 +123,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_sprint_end_stories: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed

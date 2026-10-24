@@ -1,8 +1,8 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
 # The implement workflow's own words: the tpm commands the machine drives and
-# the push that publishes the branch. Each tpm word runs the local tpm binary
-# with --json; a non-zero exit is tpm's refusal, and the machine routes it to
+# the push that publishes the branch. Each word runs in the agent's own
+# process (GH-27, GH-32) with --json; a non-zero exit is tpm's refusal, and the machine routes it to
 # the Refused terminal state with tpm's reason as the output (srd036 R2.1,
 # R4.2). The words read TPM_PROJECT, TPM_ISSUE, and TPM_CHECKOUT (the
 # project's clone, from which pop opens or reuses the issue's worktree, the
@@ -16,7 +16,7 @@ unit: tpm-implement-declarations
 tools:
 - name: tpm_issue_pop
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - pop
@@ -48,7 +48,7 @@ tools:
     description: A pop is reconciled by tpm itself; the run does not reverse it.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
     message_shape: 'tpm_issue_pop: <error>'
     state_after_failure: nothing was taken by a process that did not start
   - signal: ToolFailed
@@ -96,7 +96,7 @@ tools:
 
 - name: tpm_issue_merge
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - issue
   - merge
@@ -126,7 +126,7 @@ tools:
     description: A merge is not reversed by the run; tpm's own policy governs what follows.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
     message_shape: 'tpm_issue_merge: <error>'
     state_after_failure: nothing was merged by a process that did not start
   - signal: ToolFailed

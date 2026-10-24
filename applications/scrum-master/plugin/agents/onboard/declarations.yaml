@@ -9,7 +9,7 @@ unit: tpm-onboard-declarations
 tools:
 - name: tpm_onboard
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - onboard
   - --json
@@ -61,7 +61,7 @@ tools:
     description: The files are the person's to commit or discard; the registration closes with its merge.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
     message_shape: 'tpm_onboard: <error>'
     state_after_failure: nothing written by a process that did not start
   - signal: ToolFailed
@@ -71,7 +71,7 @@ tools:
 
 - name: tpm_vendor
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - install
   - --profiles
@@ -97,7 +97,7 @@ tools:
     description: The vendored tree is the person's to commit or discard; a rerun rewrites what nobody edited.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_vendor: <error>'
     state_after_failure: nothing written by a process that did not start
   - signal: ToolFailed

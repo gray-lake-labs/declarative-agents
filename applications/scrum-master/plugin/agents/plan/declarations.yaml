@@ -9,7 +9,7 @@ unit: tpm-plan-declarations
 tools:
 - name: tpm_plan_candidates
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - plan
   - candidates
@@ -58,7 +58,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_plan_candidates: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -68,7 +68,7 @@ tools:
 
 - name: tpm_plan_write
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - plan
   - write
@@ -126,7 +126,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_plan_write: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -136,7 +136,7 @@ tools:
 
 - name: tpm_plan_push
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - plan
   - push
@@ -186,7 +186,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_plan_push: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
@@ -196,7 +196,7 @@ tools:
 
 - name: tpm_plan_backlog
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - plan
   - backlog
@@ -242,7 +242,7 @@ tools:
     description: tpm's own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_plan_backlog: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed

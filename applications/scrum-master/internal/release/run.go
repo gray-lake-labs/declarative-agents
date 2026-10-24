@@ -12,13 +12,19 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
 )
 
 // Exec runs one gate's command in dir, writing its output to out.
 type Exec func(dir, command string, out io.Writer) error
 
-// ShellExec runs the command with sh -c, as a person would type it.
+// ShellExec runs the command with sh -c, as a person would type it, or a
+// command line of words in process (GH-32).
 func ShellExec(dir, command string, out io.Writer) error {
+	if ok, err := program.RunWords(dir, command, out); ok {
+		return err
+	}
 	cmd := exec.Command("sh", "-c", command)
 	cmd.Dir = dir
 	cmd.Env = os.Environ()

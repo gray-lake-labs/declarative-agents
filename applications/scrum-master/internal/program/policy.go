@@ -113,7 +113,7 @@ func canonicalTypes(vals []string) []string {
 
 // BacklogAudit is the corpus gate a repository without mage runs: tpm's own
 // hierarchy gate (srd045 R8.2).
-const BacklogAudit = "tpm backlog check"
+const BacklogAudit = WordsBinary + " backlog check"
 
 // AuditFor is the audit a docs/ merge in the worktree at dir runs under p:
 // the policy's command, except that the built-in mage audit becomes tpm

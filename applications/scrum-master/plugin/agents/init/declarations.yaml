@@ -7,7 +7,7 @@ unit: tpm-init-declarations
 tools:
 - name: tpm_init
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - init
   - --json
@@ -55,7 +55,7 @@ tools:
     description: The files are the person's to commit or discard.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_init: <error>'
     state_after_failure: nothing written by a process that did not start
   - signal: ToolFailed
@@ -65,7 +65,7 @@ tools:
 
 - name: tpm_vendor
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - install
   - --profiles
@@ -91,7 +91,7 @@ tools:
     description: The vendored tree is the person's to commit or discard; a rerun rewrites what nobody edited.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started
+    condition: the word cannot start — this agent does not serve the scrum-master words
     message_shape: 'tpm_vendor: <error>'
     state_after_failure: nothing written by a process that did not start
   - signal: ToolFailed
