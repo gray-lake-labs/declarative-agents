@@ -35,6 +35,10 @@ type MergeResult struct {
 	// Reported are the Sprint Goals the merge closed as reported complete,
 	// each with a reported_complete event on its ledger (srd038 R2.2).
 	Reported []string `json:"reported_complete,omitempty"`
+	// AlreadyReported are the closed Sprint Goals whose ledgers held a
+	// reported_complete event before this merge: it reports nothing new
+	// for them (GH-24).
+	AlreadyReported []string `json:"already_reported,omitempty"`
 	// ToClose is what merge-branch leaves for close-delivered, the --closes
 	// references comma-joined. Only the merge word outputs it (as "closes",
 	// always present so the machine's close word resolves it; GH-201): in
@@ -62,7 +66,7 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 	if err != nil || dryRun {
 		return r, err
 	}
-	r.Closed, r.Reported, r.AlreadyClosed, err = CloseDelivered(t, git, dir, r.Commit, issueProject, iid, closes)
+	r.Closed, r.Reported, r.AlreadyReported, r.AlreadyClosed, err = CloseDelivered(t, git, dir, r.Commit, issueProject, iid, closes)
 	return r, err
 }
 
@@ -217,17 +221,18 @@ func MergeBranch(t tracker.Tracker, git Git, project, issueProject string, iid i
 // commit the merge word reports, it closes the issue and each --closes
 // reference that is still open, posts a reported_complete event on each
 // closed Sprint Goal's ledger, and reports complete a Sprint Goal another
-// merge closed first — its ledger keeps the event that merge posted, or
-// gets one now; one closed as met is not (srd038 R2.2). A second run
+// merge closed first — its ledger gets one now, or keeps the one that
+// merge posted, and the goal is then already reported, not reported again
+// (GH-24); one closed as met is neither (srd038 R2.2). A second run
 // changes nothing: a closed issue stays closed on its commit.
-func CloseDelivered(t tracker.Tracker, git Git, dir, commit, issueProject string, iid int, closes []string) (closed, reported, alreadyClosed []string, err error) {
+func CloseDelivered(t tracker.Tracker, git Git, dir, commit, issueProject string, iid int, closes []string) (closed, reported, alreadyReported, alreadyClosed []string, err error) {
 	others, already, err := checkCloses(t, closes)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	out, err := git.Run(dir, "rev-parse", "--path-format=absolute", "--git-common-dir")
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("close-delivered needs a local checkout of %s: %w", issueProject, err)
+		return nil, nil, nil, nil, fmt.Errorf("close-delivered needs a local checkout of %s: %w", issueProject, err)
 	}
 	main := strings.TrimSuffix(strings.TrimSuffix(strings.TrimSpace(out), "/"), "/.git")
 	targets := append([][2]any{{issueProject, iid}}, others...)
@@ -235,7 +240,7 @@ func CloseDelivered(t tracker.Tracker, git Git, dir, commit, issueProject string
 		p, n := tgt[0].(string), tgt[1].(int)
 		c, err := Close(t, git, p, n, main, commit, false)
 		if err != nil {
-			return closed, reported, already, fmt.Errorf("merged %s, but %s#%d did not close: %w", commit, p, n, err)
+			return closed, reported, alreadyReported, already, fmt.Errorf("merged %s, but %s#%d did not close: %w", commit, p, n, err)
 		}
 		if c.Closed {
 			closed = append(closed, p+"#"+strconv.Itoa(n))
@@ -245,50 +250,59 @@ func CloseDelivered(t tracker.Tracker, git Git, dir, commit, issueProject string
 		p, n := tgt[0].(string), tgt[1].(int)
 		i, err := t.GetIssue(p, n)
 		if err != nil {
-			return closed, reported, already, err
+			return closed, reported, alreadyReported, already, err
 		}
 		m, ok := sprintgoal.Parse(i.Description)
 		if !ok {
 			continue
 		}
 		e, text := events.ReportedComplete(m.Release, commit)
-		if _, err := events.Post(t, p, n, e, events.ReportedCompleteRequired, text, false); err != nil {
-			return closed, reported, already, fmt.Errorf("closed %s#%d, but its ledger has no reported_complete event: %w", p, n, err)
+		posted, err := events.Post(t, p, n, e, events.ReportedCompleteRequired, text, false)
+		if err != nil {
+			return closed, reported, alreadyReported, already, fmt.Errorf("closed %s#%d, but its ledger has no reported_complete event: %w", p, n, err)
 		}
-		reported = append(reported, p+"#"+strconv.Itoa(n))
+		if posted {
+			reported = append(reported, p+"#"+strconv.Itoa(n))
+		} else {
+			alreadyReported = append(alreadyReported, p+"#"+strconv.Itoa(n))
+		}
 	}
 	for _, ref := range already {
-		was, err := reportClosed(t, ref, commit)
+		posted, was, err := reportClosed(t, ref, commit)
 		if err != nil {
-			return closed, reported, already, err
+			return closed, reported, alreadyReported, already, err
 		}
-		if was {
+		switch {
+		case posted:
 			reported = append(reported, ref)
+		case was:
+			alreadyReported = append(alreadyReported, ref)
 		}
 	}
-	return closed, reported, already, nil
+	return closed, reported, alreadyReported, already, nil
 }
 
-// reportClosed reports whether the closed issue ref is a Sprint Goal
-// reported complete, posting its reported_complete event when its ledger
-// has neither that nor a met event.
-func reportClosed(t tracker.Tracker, ref, commit string) (bool, error) {
+// reportClosed reports, for the closed issue ref, whether it posted a
+// reported_complete event, which it does for a Sprint Goal whose ledger
+// has neither that nor a met event, and whether the ledger already held
+// one.
+func reportClosed(t tracker.Tracker, ref, commit string) (posted, already bool, err error) {
 	p, n, ok := strings.Cut(ref, "#")
 	iid, err := strconv.Atoi(n)
 	if !ok || err != nil {
-		return false, nil
+		return false, false, nil
 	}
 	i, err := t.GetIssue(p, iid)
 	if err != nil {
-		return false, err
+		return false, false, err
 	}
 	m, ok := sprintgoal.Parse(i.Description)
 	if !ok {
-		return false, nil
+		return false, false, nil
 	}
 	notes, err := t.ListNotes(p, iid)
 	if err != nil {
-		return false, err
+		return false, false, err
 	}
 	met, reported := false, false
 	for _, note := range notes {
@@ -298,13 +312,13 @@ func reportClosed(t tracker.Tracker, ref, commit string) (bool, error) {
 		}
 	}
 	if met || reported {
-		return !met, nil
+		return false, !met, nil
 	}
 	e, text := events.ReportedComplete(m.Release, commit)
 	if _, err := events.Post(t, p, iid, e, events.ReportedCompleteRequired, text, false); err != nil {
-		return false, fmt.Errorf("%s was closed, but its ledger has no reported_complete event: %w", ref, err)
+		return false, false, fmt.Errorf("%s was closed, but its ledger has no reported_complete event: %w", ref, err)
 	}
-	return true, nil
+	return true, false, nil
 }
 
 // short12 is a commit's first twelve characters.

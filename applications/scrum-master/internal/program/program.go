@@ -518,6 +518,9 @@ func init() {
 			if len(r.Reported) > 0 {
 				human += "; reported complete " + strings.Join(r.Reported, ", ")
 			}
+			if len(r.AlreadyReported) > 0 {
+				human += "; already reported complete " + strings.Join(r.AlreadyReported, ", ")
+			}
 			if r.DryRun {
 				approved := "with no approval"
 				if r.ApprovedBy != "" {
@@ -656,8 +659,8 @@ func init() {
 					closes = append(closes, ref)
 				}
 			}
-			closed, reported, already, err := CloseDelivered(t, ExecGit{}, cdArgs.dir, cdArgs.commit, issueProject, cdArgs.iid, closes)
-			r := MergeResult{Project: cdArgs.project, IID: cdArgs.iid, Commit: cdArgs.commit, Closed: closed, Reported: reported, AlreadyClosed: already}
+			closed, reported, wasReported, already, err := CloseDelivered(t, ExecGit{}, cdArgs.dir, cdArgs.commit, issueProject, cdArgs.iid, closes)
+			r := MergeResult{Project: cdArgs.project, IID: cdArgs.iid, Commit: cdArgs.commit, Closed: closed, Reported: reported, AlreadyReported: wasReported, AlreadyClosed: already}
 			if issueProject != cdArgs.project {
 				r.IssueProject = issueProject
 			}
@@ -667,6 +670,9 @@ func init() {
 			human := fmt.Sprintf("closed %s on %s", strings.Join(closed, ", "), cdArgs.commit)
 			if len(reported) > 0 {
 				human += "; reported complete " + strings.Join(reported, ", ")
+			}
+			if len(wasReported) > 0 {
+				human += "; already reported complete " + strings.Join(wasReported, ", ")
 			}
 			return ctx.Emit(r, human)
 		},
