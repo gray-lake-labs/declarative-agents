@@ -23,7 +23,7 @@ const (
 // The image's description and license, which the Dockerfile's labels
 // repeat on each platform's image.
 const (
-	ImageDescription = "tpm and the declarative-agents runtime it pins"
+	ImageDescription = "the agent with the scrum-master words and profiles"
 	ImageLicenses    = "MIT-0"
 )
 
@@ -51,9 +51,12 @@ func (p Publisher) BuildImage(b ImageBuild) (string, error) {
 	var platforms []string
 	for _, pl := range b.Platforms {
 		platforms = append(platforms, pl.OS+"/"+pl.Arch)
-		if _, err := os.Stat(filepath.Join(b.Dist, AssetName("tpm", pl))); err != nil {
-			return "", fmt.Errorf("the image needs %s: %w", AssetName("tpm", pl), err)
+		if _, err := os.Stat(filepath.Join(b.Dist, AssetName("agent", pl))); err != nil {
+			return "", fmt.Errorf("the image needs %s: %w", AssetName("agent", pl), err)
 		}
+	}
+	if _, err := os.Stat(filepath.Join(b.Dist, ProfilesArchive)); err != nil {
+		return "", fmt.Errorf("the image needs %s: %w", ProfilesArchive, err)
 	}
 	metadata := filepath.Join(b.Dist, imageMetadata)
 	args := []string{"buildx", "build",
@@ -205,7 +208,7 @@ func (p Publisher) dist(tag string) (string, error) {
 	}
 	dist := filepath.Join(gitDir, tag)
 	for _, pl := range ImagePlatforms {
-		if _, err := os.Stat(filepath.Join(dist, AssetName("tpm", pl))); errors.Is(err, os.ErrNotExist) {
+		if _, err := os.Stat(filepath.Join(dist, AssetName("agent", pl))); errors.Is(err, os.ErrNotExist) {
 			dist = filepath.Join(dist, "image")
 			_, err := p.Build(dist, ImagePlatforms)
 			return dist, err

@@ -19,48 +19,32 @@ Most of what Scrum asks of people outside the work itself is moving facts the tr
 
 ## Install
 
-Each release of this repository publishes tpm for Linux, macOS, and Windows on amd64 and arm64 — beside the runtime's `agent` binaries, in one `SHA256SUMS` — on its [GitHub release](https://github.com/gray-lake-labs/declarative-agents/releases). Install the latest, or name a tag, with the script, which checks the binary against `SHA256SUMS` and installs it in `$HOME/.local/bin` (`TPM_PREFIX` changes that):
+Each release of this repository publishes the agent for Linux and macOS on amd64 and arm64, built with the scrum-master words, and the profiles archive — the profiles and the agent-core declarations they read — in one `SHA256SUMS`, on its [GitHub release](https://github.com/gray-lake-labs/declarative-agents/releases). Install the latest, or name a tag, with the script, which checks both against `SHA256SUMS`, installs the agent in `$HOME/.local/bin` (`AGENT_PREFIX` changes that), and unpacks the profiles in `$HOME/.local/share/scrum-master` (`SCRUM_MASTER_HOME` changes that):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gray-lake-labs/declarative-agents/main/applications/scrum-master/install.sh | sh
 ```
 
-Or download `tpm_<os>_<arch>` (`.exe` on Windows) and `SHA256SUMS` from the release and check them with `sha256sum -c --ignore-missing SHA256SUMS`, or, with a Go toolchain, `go install github.com/gray-lake-labs/declarative-agents/applications/scrum-master/cmd/tpm@<tag>`.
-
-Then fetch the declarative-agents runtime the skills' profiles run on, at the release tpm pins; with Go on the machine this also builds the spec tool `tpm doctor` repairs documents with:
-
-```bash
-tpm install --runtime
-```
+No Go toolchain is needed: the agent runs the words, and the corpus gate's shape check, in its own process.
 
 ## Start a program with the agent
 
-A program repository runs its workflows with the agent: each installed skill runs `agent --profile .scrum-master/agents/<name>/profile.yaml --core-root .scrum-master/agent-core --directory .` over the profiles the repository vendored, and the agent runs tpm's words in its own process. The one workflow a person runs directly is `init` in a system repository, or `onboard` in a repository joining a program: it lays the repository down, installs the skills, and vendors the profiles and the agent-core declarations they read into `.scrum-master`, with a manifest naming the release. Commit `.scrum-master` with the rest; rerun the same profile to check the repository and to take a new release, which keeps every file a person edited and reports what drifted.
+A program repository runs its workflows with the agent: each installed skill runs `agent --profile .scrum-master/agents/<name>/profile.yaml --core-root .scrum-master/agent-core --directory .` over the profiles the repository vendored. The one workflow a person runs directly is `init` in a system repository, or `onboard` in a repository joining a program: it lays the repository down, installs the skills, and vendors the profiles and the agent-core declarations they read into `.scrum-master`, with a manifest naming the release. Commit `.scrum-master` with the rest; rerun the same profile to check the repository and to take a new release, which keeps every file a person edited and reports what drifted.
 
-With the runtime fetched as above, put its `agent` on `PATH` and run `init` from the release's source (`TPM_SYSTEM` and `TPM_SUBSYSTEM` name where an `onboard` joins):
+Run `init` from the installed profiles (`TPM_SYSTEM` and `TPM_SUBSYSTEM` name where an `onboard` joins):
 
 ```bash
-report=$(tpm install --runtime --json)
-core=$(printf '%s' "$report" | sed -n 's/.*"core_root": "\([^"]*\)".*/\1/p')
-ln -sf "$(printf '%s' "$report" | sed -n 's/.*"agent": "\([^"]*\)".*/\1/p')" "$HOME/.local/bin/agent"
-agent --profile "$core/../applications/scrum-master/plugin/agents/init/profile.yaml" --core-root "$core" --directory .
+home="${SCRUM_MASTER_HOME:-$HOME/.local/share/scrum-master}"
+agent --profile "$home/agents/init/profile.yaml" --core-root "$home/agent-core" --directory .
 ```
 
 A run's request file (`--request`, `{"parameters": {...}}`) names the agents whose skills install (`agent`, default `all`) and, for `init`, the tracker to seed (`tracker`, `group`, `prefix`).
 
-## Run tpm in CI
+## Run in CI
 
-Each release also publishes an image, `ghcr.io/gray-lake-labs/scrum-master:<tag>`, for linux/amd64 and linux/arm64: tpm, the declarative-agents runtime at the release tpm pins, the spec tool, git, and git-crypt, with no Go toolchain, running as a non-root user. Pin it by the digest the release's notes list. A GitLab CI job uses it directly:
+Each release also publishes an image, `ghcr.io/gray-lake-labs/scrum-master:<tag>`, for linux/amd64 and linux/arm64: the agent, built with the scrum-master words, and the release's profiles under `SCRUM_MASTER_HOME`, with git and git-crypt, no Go toolchain, running as a non-root user. Pin it by the digest the release's notes list. A CI job runs a profile with the agent over its checkout; the check profile, the corpus gate and the repository's drift for CI, comes with GH-35.
 
-```yaml
-tpm-check:
-  image: ghcr.io/gray-lake-labs/scrum-master@<digest>
-  script:
-    - tpm backlog check
-    - tpm doctor --dry-run
-```
-
-To pull from the program's own registry instead, copy it there once per release, for example with `docker buildx imagetools create --tag <registry>/tpm:<tag> ghcr.io/gray-lake-labs/scrum-master@<digest>`. Tracker credentials (`TPM_TRACKER`, `TPM_USER`) and any model credentials a profile names come from masked CI variables; `TPM_USER` names a service user, never a person.
+To pull from the program's own registry instead, copy it there once per release, for example with `docker buildx imagetools create --tag <registry>/scrum-master:<tag> ghcr.io/gray-lake-labs/scrum-master@<digest>`. Tracker credentials (`TPM_TRACKER`, `TPM_USER`) and any model credentials a profile names come from masked CI variables; `TPM_USER` names a service user, never a person.
 
 ## Seed a program repository from an architecture document
 

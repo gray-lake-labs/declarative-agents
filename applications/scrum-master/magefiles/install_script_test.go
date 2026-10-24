@@ -15,11 +15,13 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/release"
 )
 
-// TestInstallScriptInstallsAVerifiedRelease builds tpm for this machine at a
-// tag in a clone of this repository, as mage publish builds it, serves it as
-// a release, and proves install.sh, run with no Go toolchain on PATH,
-// installs a tpm whose version is the tag, and refuses a binary whose
-// checksum SHA256SUMS does not list (eng03).
+// TestInstallScriptInstallsAVerifiedRelease builds the release for this
+// machine at a tag in a clone of this repository, as mage publish builds it
+// — the agent and the profiles archive — serves it, and proves install.sh,
+// run with no Go toolchain on PATH, installs an agent whose version is the
+// tag and the profiles at that release, that the init profile runs from
+// them with only the agent installed, and that a file whose checksum
+// SHA256SUMS does not list is refused (eng03, GH-34).
 func TestInstallScriptInstallsAVerifiedRelease(t *testing.T) {
 	if runtime.GOOS != "darwin" && runtime.GOOS != "linux" {
 		t.Skip("install.sh serves Linux and macOS")
@@ -67,33 +69,53 @@ func TestInstallScriptInstallsAVerifiedRelease(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	install := func(prefix string) (string, error) {
+	install := func(prefix, home string) (string, error) {
 		cmd := exec.Command("sh", filepath.Join(root, "applications", "scrum-master", "install.sh"), tag)
-		cmd.Env = []string{"PATH=/usr/bin:/bin", "HOME=" + t.TempDir(), "TPM_PREFIX=" + prefix, "TPM_RELEASE_URL=" + srv.URL}
+		cmd.Env = []string{"PATH=/usr/bin:/bin", "HOME=" + t.TempDir(), "AGENT_PREFIX=" + prefix, "SCRUM_MASTER_HOME=" + home,
+			"SCRUM_MASTER_RELEASE_URL=" + srv.URL}
 		out, err := cmd.CombinedOutput()
 		return string(out), err
 	}
-	prefix := filepath.Join(t.TempDir(), "bin")
-	out, err := install(prefix)
+	prefix, home := filepath.Join(t.TempDir(), "bin"), filepath.Join(t.TempDir(), "scrum-master")
+	out, err := install(prefix, home)
 	if err != nil {
 		t.Fatalf("install.sh: %v\n%s", err, out)
 	}
-	version, err := exec.Command(filepath.Join(prefix, "tpm"), "--version").Output()
-	if err != nil || strings.TrimSpace(string(version)) != "tpm "+tag {
-		t.Fatalf("the installed tpm reports %q, want tpm %s: %v", version, tag, err)
+	version, err := exec.Command(filepath.Join(prefix, "agent"), "--version").Output()
+	if err != nil || !strings.HasSuffix(strings.TrimSpace(string(version)), tag) {
+		t.Fatalf("the installed agent reports %q, want %s: %v", version, tag, err)
 	}
-	if !strings.Contains(out, "tpm install --runtime") {
+	if b, err := os.ReadFile(filepath.Join(home, "release")); err != nil || strings.TrimSpace(string(b)) != tag {
+		t.Fatalf("the installed profiles are at %q, want %s: %v", b, tag, err)
+	}
+	if !strings.Contains(out, "agent --profile") {
 		t.Errorf("install.sh did not name the next step:\n%s", out)
 	}
 
+	// With only the agent installed, the init profile lays a repository down.
+	repo := filepath.Join(t.TempDir(), "system")
+	if out, err := exec.Command("git", "init", "-q", "-b", "main", repo).CombinedOutput(); err != nil {
+		t.Fatalf("git init: %v: %s", err, out)
+	}
+	run := exec.Command(filepath.Join(prefix, "agent"), "--profile", filepath.Join(home, "agents", "init", "profile.yaml"),
+		"--core-root", filepath.Join(home, "agent-core"), "--directory", repo, "--output", t.TempDir())
+	run.Dir = repo
+	run.Env = []string{"PATH=" + prefix + ":/usr/bin:/bin", "HOME=" + t.TempDir(), "SCRUM_MASTER_HOME=" + home}
+	if out, err := run.CombinedOutput(); err != nil || !strings.Contains(string(out), "final machine state: Done") {
+		t.Fatalf("the init profile from the installed release: %v\n%s", err, out)
+	}
+	if b, err := os.ReadFile(filepath.Join(repo, ".scrum-master", "manifest.json")); err != nil || !strings.Contains(string(b), tag) {
+		t.Fatalf("the init run vendored no profiles at %s: %v\n%s", tag, err, b)
+	}
+
 	tampered := filepath.Join(t.TempDir(), "tampered")
-	os.WriteFile(tampered, []byte("not tpm"), 0o755)
+	os.WriteFile(tampered, []byte("not the agent"), 0o755)
 	served["/download/"+tag+"/"+assets[0].Name] = tampered
 	other := filepath.Join(t.TempDir(), "bin")
-	if out, err := install(other); err == nil || !strings.Contains(out, "refusing") {
-		t.Fatalf("a tampered binary was installed: %v\n%s", err, out)
+	if out, err := install(other, filepath.Join(t.TempDir(), "home")); err == nil || !strings.Contains(out, "refusing") {
+		t.Fatalf("a tampered agent was installed: %v\n%s", err, out)
 	}
-	if _, err := os.Stat(filepath.Join(other, "tpm")); !os.IsNotExist(err) {
-		t.Fatalf("a refused binary was written: %v", err)
+	if _, err := os.Stat(filepath.Join(other, "agent")); !os.IsNotExist(err) {
+		t.Fatalf("a refused agent was written: %v", err)
 	}
 }

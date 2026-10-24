@@ -62,13 +62,13 @@ func PublishDryRun() error {
 	return p.PublishImage(tag)
 }
 
-// CrossBuild builds tpm for every release platform and keeps nothing, so a release fails its gates before tagging when a platform does not build (eng03).
+// CrossBuild builds the release — the agent for every platform and the profiles archive — and keeps nothing, so a release fails its gates before tagging when a platform does not build (eng03).
 func CrossBuild() error {
 	p, err := scrumMasterPublisher(true)
 	if err != nil {
 		return err
 	}
-	dist, err := os.MkdirTemp("", "tpm-cross-build-")
+	dist, err := os.MkdirTemp("", "scrum-master-cross-build-")
 	if err != nil {
 		return err
 	}

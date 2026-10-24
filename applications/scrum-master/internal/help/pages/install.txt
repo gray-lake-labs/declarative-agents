@@ -5,15 +5,13 @@ match it. This writes them where Cursor, Claude Code, or GitHub Copilot reads
 skills, stamped with the version, and keeps them out of git. After an
 upgrade, --check names the skills that no longer match.
 
-With --runtime it fetches instead the declarative-agents runtime the
-skills' profiles run on, at the pinned release: the agent for this
-machine, checked against the release's SHA256SUMS, and the release's
-source, into the user cache directory, once per release. With Go on PATH
-it also builds the spec tool there, so tpm doctor repairs without Go
-later. TPM_AGENT names an agent already on the machine, used only
-when it is that release's binary.
+With --profiles it vendors instead the release's profiles, and the
+agent-core declarations they read, into .scrum-master, with a manifest of
+the release and each file's digest; a rerun keeps what a person edited and
+reports what drifted (GH-29). The release comes from install.sh's
+SCRUM_MASTER_HOME, the agent installed beside it.
 
 Command:
-  tpm install   write the embedded skills for an agent, or with --runtime fetch the agent runtime (srd037)
+  tpm install   write the embedded skills for an agent, or with --profiles vendor the profiles they run (srd037)
 
 See: srd037

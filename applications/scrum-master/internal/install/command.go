@@ -40,12 +40,11 @@ func init() {
 		agents             []string
 		dir                string
 		list, check, force bool
-		withRuntime        bool
 		profiles           bool
 	)
 	cli.Default.Register(&cli.Command{
 		Group:   "install",
-		Summary: "write the embedded skill commands for an agent, or fetch the agent runtime",
+		Summary: "write the embedded skill commands for an agent, or vendor the profiles they run",
 		Flags: func(fs *flag.FlagSet) {
 			agents = nil
 			fs.Func("agent", "cursor, claude, copilot, or all (repeatable)", func(v string) error {
@@ -56,13 +55,9 @@ func init() {
 			fs.BoolVar(&list, "list", false, "name the embedded skills and write nothing")
 			fs.BoolVar(&check, "check", false, "report installed files that differ from the binary; write nothing")
 			fs.BoolVar(&force, "force", false, "replace files a person edited")
-			fs.BoolVar(&withRuntime, "runtime", false, "fetch the declarative-agents runtime at the release tpm pins into the user cache; write nothing in --dir")
 			fs.BoolVar(&profiles, "profiles", false, "vendor the release's profiles and agent-core declarations into "+VendorDir+", which the skills run (GH-29)")
 		},
 		Run: func(ctx *cli.Context) error {
-			if withRuntime {
-				return installRuntime(ctx)
-			}
 			if profiles {
 				return vendorProfiles(ctx, dir, force)
 			}
@@ -124,69 +119,30 @@ func init() {
 	})
 }
 
-// installRuntime lays out the runtime (srd037 R7). Inside the repository
-// that ships agent-core, the sibling is the release: the agent builds from
-// source and nothing downloads (GH-190). Elsewhere it fetches the release
-// the repository pins in docs/external-pins.yaml, else the default pin.
-func installRuntime(ctx *cli.Context) error {
-	var build func(dir, name string, args ...string) error
-	if !ctx.DryRun {
-		build = runtime.RunCommand
-	}
-	if rel, ok, err := runtime.Sibling(".", build); ok {
-		if err != nil {
-			return err
-		}
-		rep := runtime.Report{Release: rel.Tag, Agent: rel.Agent, From: "repository", CoreRoot: rel.CoreRoot(), DryRun: ctx.DryRun}
-		var b strings.Builder
-		fmt.Fprintf(&b, "release    %s (this repository)\n", rep.Release)
-		fmt.Fprintf(&b, "agent      %s (built from agent-core)\n", rep.Agent)
-		fmt.Fprintf(&b, "core root  %s\n", rep.CoreRoot)
-		return ctx.Emit(rep, b.String())
-	}
-	tag := runtime.RepoPin(".")
-	rep, err := runtime.Fetch(tag, ctx.DryRun)
-	if err != nil {
-		return err
-	}
-	if err := runtime.BuildSpecTool(&rep); err != nil {
-		return err
-	}
-	var b strings.Builder
-	fmt.Fprintf(&b, "release    %s\n", rep.Release)
-	fmt.Fprintf(&b, "agent      %s (%s)\n", rep.Agent, rep.From)
-	fmt.Fprintf(&b, "core root  %s\n", rep.CoreRoot)
-	switch {
-	case rep.Built && rep.DryRun:
-		fmt.Fprintf(&b, "spec tool  %s (would build)\n", rep.SpecTool)
-	case rep.Built:
-		fmt.Fprintf(&b, "spec tool  %s (built)\n", rep.SpecTool)
-	case rep.SpecTool != "":
-		fmt.Fprintf(&b, "spec tool  %s\n", rep.SpecTool)
-	default:
-		fmt.Fprintf(&b, "spec tool  not built: %s\n", rep.Skipped)
-	}
-	verb := "downloaded"
-	if rep.DryRun {
-		verb = "would download"
-	}
-	if len(rep.Downloaded) == 0 {
-		b.WriteString("nothing downloaded; the cache is current\n")
-	} else {
-		fmt.Fprintf(&b, "%s %s\n", verb, strings.Join(rep.Downloaded, ", "))
-	}
-	return ctx.Emit(rep, b.String())
-}
+// SourceEnv names a declarative-agents source tree to vendor from: a
+// development override, as the rig's runs use.
+const SourceEnv = "SCRUM_MASTER_SOURCE"
 
-// SourceEnv names a declarative-agents source tree to vendor from instead of
-// the release the repository pins: a development override, as TPM_AGENT is
-// for the agent.
-const SourceEnv = "TPM_SOURCE"
+// HomeEnv names where install.sh unpacked a release's profiles: agents/,
+// agent-core/tools/, and release (GH-34). By default it is
+// $XDG_DATA_HOME/scrum-master, else $HOME/.local/share/scrum-master.
+const HomeEnv = "SCRUM_MASTER_HOME"
+
+// Home is where the installed profiles live.
+func Home() string {
+	if h := os.Getenv(HomeEnv); h != "" {
+		return h
+	}
+	if d := os.Getenv("XDG_DATA_HOME"); d != "" {
+		return filepath.Join(d, "scrum-master")
+	}
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, ".local", "share", "scrum-master")
+}
 
 // vendorSource is the release the repository at dir vendors from:
 // SourceEnv's tree when set, this repository's own inside the repository
-// that ships agent-core, else the pinned release's source, which tpm
-// install --runtime lays out.
+// that ships agent-core, else the release install.sh installed.
 func vendorSource(dir string) (VendorSource, error) {
 	tree := func(release, root string) VendorSource {
 		return VendorSource{Release: release, Agents: filepath.Join(root, "applications", "scrum-master", "plugin", "agents"),
@@ -198,16 +154,13 @@ func vendorSource(dir string) (VendorSource, error) {
 	if rel, ok, err := runtime.Sibling(dir, nil); ok {
 		return tree(rel.Tag, rel.Src), err
 	}
-	tag := runtime.RepoPin(dir)
-	rel, err := runtime.Locate(tag)
+	home := Home()
+	release, err := os.ReadFile(filepath.Join(home, "release"))
 	if err != nil {
-		return VendorSource{}, err
+		return VendorSource{}, fmt.Errorf("no scrum-master profiles installed at %s; install them with install.sh, or set %s", home, HomeEnv)
 	}
-	src := tree(tag, rel.Src)
-	if _, err := os.Stat(src.Agents); err != nil {
-		return VendorSource{}, fmt.Errorf("%s's profiles are not on this host (%s); run tpm install --runtime", tag, src.Agents)
-	}
-	return src, nil
+	return VendorSource{Release: strings.TrimSpace(string(release)), Agents: filepath.Join(home, "agents"),
+		CoreTools: filepath.Join(home, "agent-core", "tools")}, nil
 }
 
 // vendorProfiles is install --profiles: the vendoring, reported per file,

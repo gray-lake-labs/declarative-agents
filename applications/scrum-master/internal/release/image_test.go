@@ -166,7 +166,8 @@ func TestImageDryRunRunsNothing(t *testing.T) {
 func TestLoadedImageCarriesNoIndexAnnotation(t *testing.T) {
 	dist := t.TempDir()
 	platform := Platform{"linux", "arm64"}
-	os.WriteFile(filepath.Join(dist, AssetName("tpm", platform)), []byte("tpm"), 0o755)
+	os.WriteFile(filepath.Join(dist, AssetName("agent", platform)), []byte("agent"), 0o755)
+	os.WriteFile(filepath.Join(dist, ProfilesArchive), []byte("profiles"), 0o644)
 	var ran string
 	p := Publisher{Root: t.TempDir(), Repo: "org/repo", Run: func(_ string, _ []string, name string, args ...string) (string, error) {
 		ran = name + " " + strings.Join(args, " ")

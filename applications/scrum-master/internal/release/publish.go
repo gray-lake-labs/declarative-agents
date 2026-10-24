@@ -22,11 +22,11 @@ import (
 // built for.
 type Platform struct{ OS, Arch string }
 
-// Platforms are the release binaries' platforms (eng03).
+// Platforms are the agent's platforms, the ones the runtime publishes
+// (eng03).
 var Platforms = []Platform{
 	{"linux", "amd64"}, {"linux", "arm64"},
 	{"darwin", "amd64"}, {"darwin", "arm64"},
-	{"windows", "amd64"}, {"windows", "arm64"},
 }
 
 // AssetName is a release binary's name, the convention the declarative-agents
@@ -80,12 +80,15 @@ type Publisher struct {
 	// ImageRepo is where the tag's image is pushed, such as
 	// ghcr.io/owner/name; empty publishes no image.
 	ImageRepo string
+	// Core is the agent-core the agent builds from; empty is the one beside
+	// the application, ../../agent-core.
+	Core string
 }
 
-// VersionPackage is where a release's version is stamped in tpm; the agent's
-// is agent-core's internal/version, under the module path its go.mod
-// declares. Both are nested modules of the repository, so their build info
-// never carries its tag (GH-18).
+// VersionPackage is where a release's version is stamped in the words,
+// which the agent links; agent-core's is its internal/version, under the
+// module path its go.mod declares. Both are nested modules of the
+// repository, so their build info never carries its tag (GH-18).
 const VersionPackage = "github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/version"
 
 // agentVersionPackage is agent-core's version package, read from the module
@@ -103,72 +106,69 @@ func agentVersionPackage(core string) (string, error) {
 	return "", fmt.Errorf("%s/go.mod declares no module", core)
 }
 
-// Build cross-builds ./cmd/tpm for each platform into dist and writes
-// SHA256SUMS over the binaries. Go stamps the version from the commit's tag.
+// Build cross-builds the release into dist (eng03): the agent, composed
+// with this application's words (GH-27), for each platform, and the
+// profiles archive (GH-34), with SHA256SUMS over them. The tag's version is
+// stamped into the agent: agent-core is a nested module, so its build info
+// never carries the repository's tag (GH-18).
 func (p Publisher) Build(dist string, platforms []Platform) ([]Asset, error) {
 	if err := os.MkdirAll(dist, 0o755); err != nil {
 		return nil, err
 	}
+	core := p.Core
+	if core == "" {
+		var err error
+		if core, err = filepath.Abs(filepath.Join(p.Root, "..", "..", "agent-core")); err != nil {
+			return nil, err
+		}
+	}
+	comp, err := runtime.Compose(core, p.Root)
+	if err != nil {
+		return nil, fmt.Errorf("the release builds the agent from the agent-core beside the application: %w", err)
+	}
+	defer comp.Cleanup()
+	tag, _ := p.releaseTag()
 	var assets []Asset
 	var sums strings.Builder
-	for _, pl := range platforms {
-		a := Asset{Name: AssetName("tpm", pl), Path: filepath.Join(dist, AssetName("tpm", pl))}
-		env := []string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}
-		args := []string{"build", "-trimpath"}
-		if tag, err := p.releaseTag(); err == nil && tag != "" {
-			// The application is a nested module (GH-190): the repository's
-			// release tag is not its buildinfo version, so the build stamps it.
-			args = append(args, "-ldflags", "-X "+VersionPackage+".Release="+tag)
-		}
-		args = append(args, "-o", a.Path, "./cmd/tpm")
-		if _, err := p.Run(p.Root, env, "go", args...); err != nil {
-			return nil, fmt.Errorf("build tpm for %s/%s: %w", pl.OS, pl.Arch, err)
-		}
+	add := func(a Asset) error {
 		sum, err := fileSum(a.Path)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		a.Sum = sum
 		fmt.Fprintf(&sums, "%s  %s\n", sum, a.Name)
 		assets = append(assets, a)
+		return nil
 	}
-	// The release also carries the runtime: the sibling agent-core's agent
-	// for every platform the parent ecosystem publishes, in the same
-	// SHA256SUMS, so a program repository's tpm install --runtime fetches
-	// agent and checksums from one release (GH-14; srd037 R7).
-	if core, err := filepath.Abs(filepath.Join(p.Root, "..", "..", "agent-core")); err == nil {
-		if _, statErr := os.Stat(filepath.Join(core, "cmd", "agent")); statErr == nil {
-			// The released agent serves this application's words in process
-			// (GH-27).
-			comp, err := runtime.Compose(core, p.Root)
+	for _, pl := range platforms {
+		a := Asset{Name: AssetName("agent", pl), Path: filepath.Join(dist, AssetName("agent", pl))}
+		env := append([]string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}, comp.Env...)
+		args := append([]string{"build", "-trimpath"}, comp.Flags...)
+		if tag != "" {
+			pkg, err := agentVersionPackage(core)
 			if err != nil {
 				return nil, err
 			}
-			defer comp.Cleanup()
-			for _, pl := range []Platform{{OS: "darwin", Arch: "amd64"}, {OS: "darwin", Arch: "arm64"}, {OS: "linux", Arch: "amd64"}, {OS: "linux", Arch: "arm64"}} {
-				a := Asset{Name: AssetName("agent", pl), Path: filepath.Join(dist, AssetName("agent", pl))}
-				env := append([]string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}, comp.Env...)
-				agentArgs := append([]string{"build", "-trimpath"}, comp.Flags...)
-				if tag, err := p.releaseTag(); err == nil && tag != "" {
-					pkg, err := agentVersionPackage(core)
-					if err != nil {
-						return nil, err
-					}
-					agentArgs = append(agentArgs, "-ldflags", "-X "+pkg+".Version="+tag)
-				}
-				agentArgs = append(agentArgs, "-o", a.Path, "./cmd/agent")
-				if _, err := p.Run(comp.Dir, env, "go", agentArgs...); err != nil {
-					return nil, fmt.Errorf("build agent for %s/%s: %w", pl.OS, pl.Arch, err)
-				}
-				sum, err := fileSum(a.Path)
-				if err != nil {
-					return nil, err
-				}
-				a.Sum = sum
-				fmt.Fprintf(&sums, "%s  %s\n", sum, a.Name)
-				assets = append(assets, a)
-			}
+			args = append(args, "-ldflags", "-X "+pkg+".Version="+tag+" -X "+VersionPackage+".Release="+tag)
 		}
+		args = append(args, "-o", a.Path, "./cmd/agent")
+		if _, err := p.Run(comp.Dir, env, "go", args...); err != nil {
+			return nil, fmt.Errorf("build agent for %s/%s: %w", pl.OS, pl.Arch, err)
+		}
+		if err := add(a); err != nil {
+			return nil, err
+		}
+	}
+	archive := Asset{Name: ProfilesArchive, Path: filepath.Join(dist, ProfilesArchive)}
+	release := tag
+	if release == "" {
+		release = "dev"
+	}
+	if err := WriteProfilesArchive(archive.Path, filepath.Join(p.Root, "plugin", "agents"), filepath.Join(core, "tools"), release); err != nil {
+		return nil, err
+	}
+	if err := add(archive); err != nil {
+		return nil, err
 	}
 	path := filepath.Join(dist, SumsFile)
 	if err := os.WriteFile(path, []byte(sums.String()), 0o644); err != nil {

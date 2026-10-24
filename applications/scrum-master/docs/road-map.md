@@ -656,13 +656,13 @@ profile with no install step. Planned on 2026-10-21 and built on
 
 | id | summary | status |
 | --- | --- | --- |
-| [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | The runtime fetched and verified once per tag in the shared cache; TPM_AGENT held to the checksums; doctor's runtime report and prebuilt repair; the image's tpm, runtime, and spec tool at the pin. | implemented |
+| [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | The release ships the agent and the profiles; install.sh installs both held to SHA256SUMS; doctor reports the vendored release and repairs without Go; the image carries the agent and the profiles (GH-34). | implemented |
 
 <!-- field: proof -->
 ### Proof
 
 - mage audit
-- mage integration:runtime
+- mage integration:initProfile
 - mage integration:doctor
 - mage integration:image
 

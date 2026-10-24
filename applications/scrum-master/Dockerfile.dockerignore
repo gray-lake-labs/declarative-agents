@@ -1,4 +1,5 @@
-# The build context is the release binaries' directory; only the Linux
-# binaries enter the image.
+# The build context is the release's directory; only the Linux agents and
+# the profiles archive enter the image.
 *
-!tpm_linux_*
+!agent_linux_*
+!scrum-master-profiles.tar.gz

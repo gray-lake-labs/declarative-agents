@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
-	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/runtime"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker/fake"
 )
@@ -185,9 +185,6 @@ func init() {
 	specTool = func(string, string, string) ([]string, error) { return nil, nil }
 	lookGo = func() error { return nil }
 	built = func(string) bool { return false }
-	inspectRuntime = func(tag string) runtime.Status {
-		return runtime.Status{Release: tag, Problem: "the checksums of " + tag + " are not cached; run tpm install --runtime"}
-	}
 }
 
 // stubTool replaces the spec tool for one test with one that answers each
@@ -515,28 +512,18 @@ func TestRepairPrebuiltWithoutGo(t *testing.T) {
 	}
 }
 
-func TestDoctorRuntime(t *testing.T) {
+// Doctor names the release the repository vendored, or that it vendored
+// none (GH-34).
+func TestDoctorReportsTheVendoredRelease(t *testing.T) {
 	dir := older(t)
-	pin := runtime.DefaultPin()
 	r, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
-	if err != nil || r.Runtime.Release != pin || r.Runtime.Agent != "" || !strings.Contains(r.Runtime.Problem, "tpm install --runtime") {
-		t.Fatalf("no runtime: %+v, %v", r.Runtime, err)
+	if err != nil || r.Vendored != "" || !strings.Contains(humanDoctor(r), "profiles: none vendored") {
+		t.Fatalf("nothing vendored: %+v, %v\n%s", r.Vendored, err, humanDoctor(r))
 	}
-	if h := humanDoctor(r); !strings.Contains(h, "runtime (declarative-agents "+pin+", the release this tpm pins): ") || !strings.Contains(h, "tpm install --runtime") {
-		t.Errorf("report without a runtime:\n%s", h)
-	}
-	var asked string
-	prev := inspectRuntime
-	inspectRuntime = func(tag string) runtime.Status {
-		asked = tag
-		return runtime.Status{Release: tag, Agent: "/cache/agent", From: runtime.FromCache}
-	}
-	t.Cleanup(func() { inspectRuntime = prev })
-	r, err = Doctor(DoctorOptions{Dir: dir})
-	if err != nil || asked != pin || r.Runtime.Agent != "/cache/agent" || r.Runtime.Problem != "" {
-		t.Fatalf("a cached runtime: %+v, asked %q, %v", r.Runtime, asked, err)
-	}
-	if h := humanDoctor(r); !strings.Contains(h, "runtime (declarative-agents "+pin+", the release this tpm pins): /cache/agent (cache)") {
-		t.Errorf("report with a runtime:\n%s", h)
+	os.MkdirAll(filepath.Join(dir, install.VendorDir), 0o755)
+	os.WriteFile(filepath.Join(dir, install.ManifestFile), []byte(`{"release":"v1.2.3","files":{}}`), 0o644)
+	r, err = Doctor(DoctorOptions{Dir: dir, DryRun: true})
+	if err != nil || r.Vendored != "v1.2.3" || !strings.Contains(humanDoctor(r), "profiles: v1.2.3 vendored in .scrum-master") {
+		t.Fatalf("vendored: %+v, %v\n%s", r.Vendored, err, humanDoctor(r))
 	}
 }

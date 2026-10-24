@@ -3,6 +3,7 @@
 package scaffold
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -30,14 +31,16 @@ type DoctorOptions struct {
 // DoctorResult is what tpm doctor reports: the repository's level, what
 // happened to each file tpm scaffolds there, the installed skills that
 // differ from this tpm, the repair of the documents' format, and the
-// declarative-agents runtime at the release tpm pins.
+// release whose profiles the repository vendored (GH-34).
 type DoctorResult struct {
-	Dir     string            `json:"dir"`
-	Level   string            `json:"level"`
-	Files   []Result          `json:"files"`
-	Skills  []install.Finding `json:"skills,omitempty"`
-	Repair  RepairResult      `json:"repair"`
-	Runtime runtime.Status    `json:"runtime"`
+	Dir    string            `json:"dir"`
+	Level  string            `json:"level"`
+	Files  []Result          `json:"files"`
+	Skills []install.Finding `json:"skills,omitempty"`
+	Repair RepairResult      `json:"repair"`
+	// Vendored is the release .scrum-master holds, from its manifest; empty
+	// when the repository vendored none.
+	Vendored string `json:"vendored,omitempty"`
 	// Credentials is, per shipped profile, every environment variable its
 	// declarations read and whether each is set here, so a run's model and
 	// tracker credentials are checked before a run (srd043 R4.7, GH-135).
@@ -99,13 +102,12 @@ func profileCredentials() ([]ProfileEnv, error) {
 }
 
 // specTool runs the spec tool at a repository's pin, lookGo finds the Go
-// toolchain the tool is built with, built reports a tool already built at a
-// release, and inspectRuntime reads the runtime at one; tests replace them.
+// toolchain the tool is built with, and built reports a tool already built
+// at a release; tests replace them.
 var (
-	specTool       = spectool.Run
-	lookGo         = func() error { _, err := exec.LookPath("go"); return err }
-	built          = runtime.Built
-	inspectRuntime = runtime.Inspect
+	specTool = spectool.Run
+	lookGo   = func() error { _, err := exec.LookPath("go"); return err }
+	built    = runtime.Built
 )
 
 // notCanonical ends the line the tool's check prints for a document fmt
@@ -124,10 +126,11 @@ func repair(dir string, dryRun bool) RepairResult {
 			}
 		}
 	}
-	if lookGo() != nil {
+	// In the agent the check runs in process and needs no Go (GH-33).
+	if spectool.InProcess == nil && lookGo() != nil {
 		tag, err := spectool.Pinned(dir)
 		if err != nil || !built(tag) {
-			r.Skipped = "no Go toolchain on PATH and no spec tool built at the pinned release; install Go, or run tpm install --runtime with Go where tpm pins the same release"
+			r.Skipped = "no Go toolchain on PATH and no spec tool built at the pinned release; run the check with the agent, which carries it, or install Go"
 			return r
 		}
 	}
@@ -268,10 +271,11 @@ func Doctor(o DoctorOptions) (DoctorResult, error) {
 		}
 	}
 	r.Repair = repair(o.Dir, o.DryRun)
-	if rel, ok, _ := runtime.Sibling(o.Dir, nil); ok {
-		r.Runtime = runtime.Status{Release: rel.Tag, Agent: rel.Agent, From: "repository"}
-	} else {
-		r.Runtime = inspectRuntime(runtime.RepoPin(o.Dir))
+	if b, err := os.ReadFile(filepath.Join(o.Dir, install.ManifestFile)); err == nil {
+		var m install.Manifest
+		if json.Unmarshal(b, &m) == nil {
+			r.Vendored = m.Release
+		}
 	}
 	if r.Credentials, err = profileCredentials(); err != nil {
 		return r, err

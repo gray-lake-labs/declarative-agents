@@ -10,16 +10,17 @@ status: implemented
 <!-- field: overview -->
 ## Overview
 
-The Go tests run offline against a local release server that serves a
-fixture release: binaries, SHA256SUMS, and a source archive. The
-integration targets build tpm and run it against the real release tpm
-pins, so they need network access to github.com, as mage audit does;
-mage integration:image also needs docker. Together they check that the
-runtime is fetched and verified once per tag into the cache mage audit
-uses, that TPM_AGENT is held to the release's checksums, that tpm doctor
-reports the runtime and repairs with a prebuilt spec tool when Go is
-absent, and that the image carries tpm, the runtime, and the spec tool at
-the pin.
+The Go tests run offline: the release tests against a fixture tree and a
+fake toolchain, and the install-script test against a local release
+server serving a release built from a clone of this repository — the
+agent and the profiles archive under SHA256SUMS. The integration targets
+build the release from this repository; mage integration:image also needs
+docker. Together they check that a release ships the agent, which serves
+the scrum-master words, and the profiles, that install.sh installs both
+held to SHA256SUMS and the init profile runs from them with only the
+agent installed, that doctor reports the vendored release and repairs
+without Go, and that the image carries the agent and the profiles (GH-34;
+the runtime this suite once fetched into a cache retired with it).
 
 <!-- field: traces -->
 ## Traces
@@ -30,15 +31,15 @@ the pin.
 <!-- field: preconditions -->
 ## Preconditions
 
-- A tpm binary built from this repository, so its pins file is embedded.
-- For the Go tests: a temporary cache directory and a local release server; no network.
-- For the integration targets: network access to github.com; docker with buildx for mage integration:image.
+- This repository, with agent-core beside the application, which the release builds the agent from.
+- For the Go tests: a temporary directory and a local release server; no network.
+- For the integration targets: docker with buildx for mage integration:image.
 
 <!-- field: test_cases -->
 ## Test cases
 
-<!-- case: the runtime is fetched once into the shared cache | status: implemented -->
-### the runtime is fetched once into the shared cache
+<!-- case: the release ships the agent and the profiles | status: implemented -->
+### the release ships the agent and the profiles
 
 <!-- field: use_case -->
 #### Use case
@@ -48,30 +49,27 @@ the pin.
 <!-- field: integration_target -->
 #### Integration target
 
-mage integration:runtime
+mage integration:image
 
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/runtime -run '^TestFetchLaysOut|^TestFetchDryRun|^TestBuildSpecTool|^TestPin'
+go test ./internal/release -run '^TestBuildWritesEveryPlatformAndItsSums$|^TestProfilesArchiveIsTheTreesAndTheRelease$|^TestPublishCompletesAPartialRelease$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- fetched: the pinned release's agent for the host and the release's source in scrum-master/release/<tag>/ under the user cache directory
-- shared: mage audit resolves the same agent and source paths
-- second_run: nothing downloaded
-- spec_tool: built when Go is on PATH; reported not built, with the reason, otherwise
-- report: release, agent path and source, source root, and spec tool in --json
-- dry_run: the downloads named and nothing written
+- assets: the agent for darwin and linux on amd64 and arm64, and the profiles archive, under one SHA256SUMS
+- archive: agents/, agent-core/tools/, and release, the tag, written the same at every build
+- stamped: the agent reports the tag, and the words it serves stamp it into what they install
 
 <!-- field: traces -->
 #### Traces
 
 - [srd037-install](../software-requirements/srd037-install.md) [AC7](../software-requirements/srd037-install.md#ac7)
 
-<!-- case: the runtime is held to the release's checksums | status: implemented -->
-### the runtime is held to the release's checksums
+<!-- case: install.sh installs the agent and the profiles, held to the checksums | status: implemented -->
+### install.sh installs the agent and the profiles, held to the checksums
 
 <!-- field: use_case -->
 #### Use case
@@ -81,30 +79,28 @@ go test ./internal/runtime -run '^TestFetchLaysOut|^TestFetchDryRun|^TestBuildSp
 <!-- field: integration_target -->
 #### Integration target
 
-mage integration:runtime
+mage integration:initProfile
 
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/runtime -run '^TestReleaseBinary|^TestHostAsset|^TestFetchReplaces|^TestFetchRefuses|^TestTPMAgent|^TestInspect'
+go test ./magefiles -run '^TestInstallScriptInstallsAVerifiedRelease$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- tampered_cache: a cached binary that no longer matches is downloaded again
-- tampered_download: refused naming the asset and both checksums; nothing written executable
-- platform: an unpublished platform refused naming darwin and linux on amd64 and arm64
-- tpm_agent_match: TPM_AGENT used when its SHA-256 is the release's for the host
-- tpm_agent_mismatch: any other binary refused naming the pinned release
-- offline: TPM_AGENT with no cached or reachable checksums refused naming them
+- installed: the agent at the tag in AGENT_PREFIX and the profiles at the tag in SCRUM_MASTER_HOME, with no Go on PATH
+- init: the init profile runs from the installed profiles with only the agent, and vendors the release
+- tampered_download: refused naming the asset and both checksums; nothing written
+- next: install.sh names the init profile's command
 
 <!-- field: traces -->
 #### Traces
 
 - [srd037-install](../software-requirements/srd037-install.md) [AC7](../software-requirements/srd037-install.md#ac7)
 
-<!-- case: doctor reports the runtime and repairs without Go | status: implemented -->
-### doctor reports the runtime and repairs without Go
+<!-- case: doctor reports the vendored release and repairs without Go | status: implemented -->
+### doctor reports the vendored release and repairs without Go
 
 <!-- field: use_case -->
 #### Use case
@@ -119,25 +115,23 @@ mage integration:doctor
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/scaffold -run '^TestDoctorRuntime|^TestRepairPrebuilt'
+go test ./internal/scaffold -run '^TestDoctorReportsTheVendoredRelease$|^TestRepairPrebuilt'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- missing: no runtime named with tpm install --runtime as the fix
-- found: the cached or TPM_AGENT runtime named with its path when the checksums match
-- refused: a runtime the checksums refuse reported, with the fix
-- no_fetch: doctor downloads nothing, on a run or a dry run
+- vendored: the release .scrum-master holds, from its manifest
+- none: a repository that vendored none told to run the init or onboard profile
 - prebuilt: with no Go on PATH and a spec tool built at the pin, a document repaired to canonical form
-- neither: with no Go and no built tool, the repair skipped and the reason named
+- in_agent: in the agent the check runs in process, with no Go
 
 <!-- field: traces -->
 #### Traces
 
 - [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC8](../software-requirements/srd043-init-onboard.md#ac8)
 
-<!-- case: the image carries tpm and the runtime at the pin | status: implemented -->
-### the image carries tpm and the runtime at the pin
+<!-- case: the image carries the agent and the profiles | status: implemented -->
+### the image carries the agent and the profiles
 
 <!-- field: use_case -->
 #### Use case
@@ -157,11 +151,10 @@ go test ./internal/release -run '^TestImage|^TestPublishPushes|^TestPublishKeeps
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- versions: tpm --version in the image names the build, and the agent's SHA-256 is the pinned release's for linux on the image's architecture
-- no_go: the image carries no Go toolchain and no mage
-- doctor: tpm doctor --dry-run in a corpus at tpm's pin reports the runtime and the repair, with no Go
-- backlog: tpm backlog check runs over a mounted checkout as the image's non-root user
-- validate: agent --validate-config runs against the image's source root
+- agent: the image's agent is the release's for linux on the image's architecture
+- profiles: the release's profiles under SCRUM_MASTER_HOME
+- no_go: the image carries no Go toolchain and no mage, and runs as a non-root user
+- init: the init profile runs over a mounted checkout, and a vendored profile validates against the vendored core root
 
 <!-- field: traces -->
 #### Traces
