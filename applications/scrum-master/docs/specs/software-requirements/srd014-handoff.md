@@ -30,69 +30,69 @@ the interface by pinned URL (srd007 R5.4), which track-goals collects.
 <!-- req: R1 -->
 ## R1 - scrum-master handoff on-merge
 
-<!-- req: R1.1 -->
+<!-- req: R1.1 | status: retired | retired_in: 5 -->
 ### R1.1
 
-For a merged request, finds the issues it closed. For each closed issue with an Upstream line, posts a downstream-done event on the upstream issue (srd006 R3).
+Retired in 05.0 (design.md D12): direction in R9.
 
-<!-- req: R1.2 -->
+<!-- req: R1.2 | status: retired | retired_in: 5 -->
 ### R1.2
 
-Creates no issue. A merge means done, not dependable; fan-out waits for a release (srd008 R2).
+Retired in 05.0 (design.md D12): direction in R9.
 
-<!-- req: R1.3 -->
+<!-- req: R1.3 | status: retired | retired_in: 5 -->
 ### R1.3
 
-For each closed issue with a Downstream section that requests a review, creates one kind::review issue per requested component in the repository its subsystem SRD declares for that component, unassigned, with an Upstream line to the closed issue.
+Retired in 05.0 (design.md D12): direction in R9.
 
 <!-- req: R2 -->
 ## R2 - scrum-master handoff on-release
 
-<!-- req: R2.1 -->
+<!-- req: R2.1 | status: retired | retired_in: 5 -->
 ### R2.1
 
-For a new release tag, identifies the artifact and version from the tag format in policy and classifies the release as breaking or compatible by policy.releases.breaking against the previous tag.
+Retired in 05.0 (design.md D12): direction in R9.
 
-<!-- req: R2.2 -->
+<!-- req: R2.2 | status: retired | retired_in: 5 -->
 ### R2.2
 
-Determines consumers from the open recurring issues subscribed to the artifact (srd001 R8.4) and from the repositories citing the artifact's interface by pinned URL, as track-goals last collected them (srd019).
+Retired in 05.0 (design.md D12): direction in R9.
 
-<!-- req: R2.3 -->
+<!-- req: R2.3 | status: retired | retired_in: 5 -->
 ### R2.3
 
-For a breaking release, sets needs-run on each subscribing recurring issue (srd041 R10); for a citing repository without a subscription, creates one kind::consume issue in it, unassigned, with a Requires line at the new version, a Cites line pinned to the new tag, and an Upstream line to the release issue.
+Retired in 05.0 (design.md D12): direction in R9.
 
-<!-- req: R2.4 -->
+<!-- req: R2.4 | status: retired | retired_in: 5 -->
 ### R2.4
 
-For every release, posts a release event on each subscribing recurring issue and each open consume issue for an earlier version of the artifact (srd006 R2).
+Retired in 05.0 (design.md D12): direction in R9.
 
-<!-- req: R2.5 -->
+<!-- req: R2.5 | status: retired | retired_in: 5 -->
 ### R2.5
 
-For each open consume issue for an earlier version, also posts a superseded event (srd006 R4) and creates no second consume issue for the same consumer.
+Retired in 05.0 (design.md D12): direction in R9.
 
-<!-- req: R2.6 -->
+<!-- req: R2.6 | status: retired | retired_in: 5 -->
 ### R2.6
 
-For a citing repository whose citation asks for a review or a handoff decision (a Cites line ending in | review or | handoff, config format issue-body), creates one issue of that kind in it, unassigned, with an Upstream line to the release issue.
+Retired in 05.0 (design.md D12): direction in R9.
 
 <!-- req: R3 -->
 ## R3 - Tracking-issue membership
 
-<!-- req: R3.1 -->
+<!-- req: R3.1 | status: retired | retired_in: 5 -->
 ### R3.1
 
-When the issue that caused a handoff is a member of a tracking issue, every issue handoff creates is appended to that tracking issue's Members section (issue-body tracking_task_list).
+Retired in 05.0 (design.md D12): direction in R9.
 
 <!-- req: R4 -->
 ## R4 - scrum-master handoff sweep
 
-<!-- req: R4.1 -->
+<!-- req: R4.1 | status: retired | retired_in: 5 -->
 ### R4.1
 
-Runs on-merge for every merged request and on-release for every release tag in the group since a given date. It is the fallback when a project's CI did not run handoff.
+Retired in 05.0 (design.md D12): direction in R9.
 
 <!-- req: R5 -->
 ## R5 - Idempotency and findings
@@ -102,10 +102,10 @@ Runs on-merge for every merged request and on-release for every release tag in t
 
 Every issue handoff creates carries a handoff marker naming the merge or tag that caused it. Before creating, handoff searches the target project for that marker and consumer and skips creation when it exists.
 
-<!-- req: R5.2 -->
+<!-- req: R5.2 | status: retired | retired_in: 5 -->
 ### R5.2
 
-Events follow srd006 R7.2: no duplicate event with the same name and keys on the same issue.
+Retired in 05.0 (design.md D12): direction in R9.
 
 <!-- req: R5.3 -->
 ### R5.3
@@ -126,7 +126,12 @@ Handoff sets no assignee, closes no issue, and changes no label except setting n
 <!-- req: R7.1 -->
 ### R7.1
 
-The program's CI runs scrum-master handoff on-merge on merge to a default branch and scrum-master handoff on-release on a new tag, with a token scoped to the program group. Subcommands are in the scrum-master group handoff, honour --json and --dry-run, and never prompt.
+The release profile runs scrum-master handoff on-release as its step after the tag word, once the tag is pushed, with the person's own access to each repository's tracking system; no CI job, watcher, or group token is needed. The same word is the standalone handoff profile, idempotent (R5.1), which re-runs a handoff that failed and which a program may also run from a tag pipeline on the release image (eng03), as a service user SCRUM_MASTER_USER names with a credential scoped to the tracking system; the two paths are safe together. A handoff that fails after the push ends the release run in a state naming the handoff profile to re-run, and neither undoes nor fails the tag. Subcommands are in the scrum-master group handoff, honour --json and --dry-run, and never prompt.
+
+<!-- req: R7.2 -->
+### R7.2
+
+Handoff reads and writes each repository's issues through the tracking system control/trackers.md routes it to, bd, gh, or glab (srd042 R1.3 to R1.5), with the person's access to it: the tracker clone and git credentials for bd, the gh or glab CLI's existing login for gh and glab. An upstream and a downstream repository may use different systems.
 
 <!-- req: R8 -->
 ## R8 - Reference update on a downstream release
@@ -134,17 +139,40 @@ The program's CI runs scrum-master handoff on-merge on merge to a default branch
 <!-- req: R8.1 -->
 ### R8.1
 
-A release tag in a downstream repository files one issue in each upstream repository whose initiatives list that repository in delivered_by, or whose Sprint Goals the release closed, naming the old and new tag.
+A release tag in a downstream repository files one reference-update issue in each upstream repository whose initiatives list that repository in delivered_by by pinned URL, or whose Sprint Goals the release closed, found from the Cites lines of those Sprint Goals. The issue names the old tag, the tag the upstream pins now, and the new tag.
 
 <!-- req: R8.2 -->
 ### R8.2
 
-The issue asks for the pinned references to move to the new tag through the inner loop (srd007 R5.5); no script edits a reference in place. Its Requirements name the files and fields to change.
+The issue asks for the pinned references to move to the new tag through the inner loop (srd007 R5.5); no script edits a reference in place. Its Requirements name the files and fields to change, computed from the initiative file and its delivered_by entries for the downstream repository.
 
 <!-- req: R8.3 -->
 ### R8.3
 
-It carries a handoff marker naming the tag, so a second run files nothing (R5.1). This is the slice of srd014 on-release a program runs before the rest of handoff.
+It carries the handoff marker <!-- handoff reference-update from=<repo> tag=<tag> -->, the neutral form of the managed markers. Before filing, handoff searches the upstream repository's issues in every state for the marker, so a closed issue also suppresses a second; a second run files nothing (R5.1). This is the slice of srd014 on-release 05.0 builds.
+
+<!-- req: R8.4 -->
+### R8.4
+
+One reference-update issue stays open per upstream–downstream pair: when one is open for an earlier tag, handoff adds the new tag and a comment to it instead of filing a sibling. The marker search and this rule behave the same on bd, gh, and glab, through the tracker interface rather than one system's search.
+
+<!-- req: R8.5 -->
+### R8.5
+
+Handoff refuses, exits non-zero, and files nothing when a repository's tracking system is unreachable, the bd tracker repository or the gh or glab CLI logged out, or when the upstream repository's sibling checkout is missing.
+
+<!-- req: R9 -->
+## R9 - Direction
+
+<!-- req: R9.1 -->
+### R9.1
+
+Release 06.0 builds the rest of handoff: on-merge notices to the upstream issue and review issues for a Downstream section; the release fan-out, which marks subscriptions needs-run, files consume issues, and posts release and superseded events, with review and handoff issues for Cites lines ending in | review or | handoff; appending created issues to a tracking issue's Members; a sweep over a date range as the fallback when handoff did not run; and bd's dedup of issues created concurrently, by derived issue ids.
+
+<!-- req: R9.2 -->
+### R9.2
+
+Until then, handoff files only the reference-update issue of R8, and a merge or a release posts no event and files no other issue.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -156,10 +184,10 @@ It carries a handoff marker naming the tag, so a second run files nothing (R5.1)
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria
 
-<!-- ac: AC1 -->
+<!-- ac: AC1 | status: retired | retired_in: 5 -->
 ### AC1
 
-A merge that closes an issue with an Upstream line posts one downstream-done event upstream, creates no consume issue, and creates one review issue per requested review component.
+Retired in 05.0 (design.md D12): direction in R9.
 
 <!-- field: traces -->
 #### Traces
@@ -168,10 +196,10 @@ A merge that closes an issue with an Upstream line posts one downstream-done eve
 - [R1.2](#r12)
 - [R1.3](#r13)
 
-<!-- ac: AC2 -->
+<!-- ac: AC2 | status: retired | retired_in: 5 -->
 ### AC2
 
-A breaking tag marks every subscription needs-run, creates one unassigned consume issue per unsubscribed citing repository with Requires, Cites, and Upstream lines, posts release events, and posts superseded on older open consume issues without creating duplicates; a compatible tag only posts events; review and handoff consumers get one issue each.
+Retired in 05.0 (design.md D12): direction in R9.
 
 <!-- field: traces -->
 #### Traces
@@ -183,20 +211,20 @@ A breaking tag marks every subscription needs-run, creates one unassigned consum
 - [R2.5](#r25)
 - [R2.6](#r26)
 
-<!-- ac: AC3 -->
+<!-- ac: AC3 | status: retired | retired_in: 5 -->
 ### AC3
 
-Issues created because of a tracking-issue member are appended to the tracking issue's Members section.
+Retired in 05.0 (design.md D12): direction in R9.
 
 <!-- field: traces -->
 #### Traces
 
 - [R3.1](#r31)
 
-<!-- ac: AC4 -->
+<!-- ac: AC4 | status: retired | retired_in: 5 -->
 ### AC4
 
-sweep over a date range produces the same result as the CI runs would have; running sweep after CI creates and posts nothing new.
+Retired in 05.0 (design.md D12): direction in R9.
 
 <!-- field: traces -->
 #### Traces
@@ -219,17 +247,18 @@ An undeclared or uncited artifact creates nothing, records a dashboard finding, 
 <!-- ac: AC6 -->
 ### AC6
 
-CI runs on-merge on merge and on-release on tag with a group-scoped token; subcommands honour --json and --dry-run and never prompt.
+The release profile runs handoff on-release after its tag word with the person's access, a handoff failure names the handoff profile and leaves the tag, the handoff profile re-runs it idempotently, and each repository's issues go through its routed tracking system, an upstream and a downstream on different systems included; subcommands honour --json and --dry-run and never prompt.
 
 <!-- field: traces -->
 #### Traces
 
 - [R7.1](#r71)
+- [R7.2](#r72)
 
 <!-- ac: AC7 -->
 ### AC7
 
-A downstream release tag files one reference-update issue in each upstream repository that lists or is closed by it, naming old and new tags and the fields to change; a second run files nothing; no reference is edited outside the inner loop.
+A downstream release tag files one reference-update issue in each upstream repository that lists or is closed by it, naming the pinned old tag, the new tag, and the fields to change; a second run files nothing, a closed issue included; an open issue for an earlier tag gets the new tag and a comment instead of a sibling, on bd, gh, and glab; an unreachable tracking system or a missing upstream checkout files nothing and exits non-zero; no reference is edited outside the inner loop.
 
 <!-- field: traces -->
 #### Traces
@@ -237,3 +266,16 @@ A downstream release tag files one reference-update issue in each upstream repos
 - [R8.1](#r81)
 - [R8.2](#r82)
 - [R8.3](#r83)
+- [R8.4](#r84)
+- [R8.5](#r85)
+
+<!-- ac: AC8 -->
+### AC8
+
+Release 06.0's planning writes on-merge, the release fan-out, tracking-issue membership, sweep, and bd's dedup of concurrent creates from R9.1; until then handoff files only the reference-update issue (R9.2).
+
+<!-- field: traces -->
+#### Traces
+
+- [R9.1](#r91)
+- [R9.2](#r92)

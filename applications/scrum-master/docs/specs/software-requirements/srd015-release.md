@@ -64,7 +64,7 @@ The release is classified as breaking or compatible by policy.releases.breaking,
 <!-- req: R2.4 -->
 ### R2.4
 
-Tagging does not run handoff; the tag triggers scrum-master handoff on-release in CI (srd014 R7).
+scrum-master release tag runs no handoff. After the tag is pushed, the release profile runs the post-tag steps: scrum-master handoff on-release (srd014 R7.1) and, in the system repository, the deck render from the merged sprint-end summary (srd018 R10). A post-tag step that fails ends the run in a state naming the profile to re-run, and neither undoes nor fails the release.
 
 <!-- req: R2.5 -->
 ### R2.5
@@ -121,7 +121,7 @@ gate runs exactly the declared checks in their environments, local ones through 
 <!-- ac: AC2 -->
 ### AC2
 
-scrum-master release tag tags and pushes only after a passing gate for the same artifact, version, and revision, refuses a non-increasing version, records the class, and leaves handoff to CI.
+scrum-master release tag tags and pushes only after a passing gate for the same artifact, version, and revision, refuses a non-increasing version, records the class, and runs no handoff itself; the release profile's post-tag steps run handoff and, in the system repository, the deck, and a post-tag failure names the profile to re-run and leaves the tag.
 
 <!-- field: traces -->
 #### Traces

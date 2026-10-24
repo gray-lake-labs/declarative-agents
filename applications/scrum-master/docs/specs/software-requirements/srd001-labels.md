@@ -341,7 +341,7 @@ Decides what an arriving artifact means for the receiving side. Finished when th
 <!-- req: R15.2 -->
 ### R15.2
 
-Created by handoff when a repository citing the released interface asked for a handoff decision (srd014 R2.6). Plane data (R3), or plane management (R1) when the decision changes a road-map release or an SRD. Enters the backlog only when plane data.
+Created by handoff when a repository citing the released interface asked for a handoff decision (srd014 R9.1, from 06.0). Plane data (R3), or plane management (R1) when the decision changes a road-map release or an SRD. Enters the backlog only when plane data.
 
 <!-- req: R16 -->
 ## R16 - kind::release

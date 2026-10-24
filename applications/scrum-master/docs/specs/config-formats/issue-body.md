@@ -50,7 +50,7 @@ line
 <!-- field: description -->
 #### Description
 
-"Cites: URL" on its own line in a description, where URL is a cross-repository reference pinned to a release tag with a requirement or interface anchor (srd007 R5). Zero or more. A Sprint Goal issue carries one per initiative or epic item it serves. A Cites line may end in " | review" or " | handoff", asking for a review or a handoff decision when a new tag of the cited interface is released (srd014 R2.6).
+"Cites: URL" on its own line in a description, where URL is a cross-repository reference pinned to a release tag with a requirement or interface anchor (srd007 R5). Zero or more. A Sprint Goal issue carries one per initiative or epic item it serves. A Cites line may end in " | review" or " | handoff", asking for a review or a handoff decision when a new tag of the cited interface is released (srd014 R9.1, from 06.0).
 
 <!-- schema_entry: link_lines -->
 ### link_lines
@@ -193,7 +193,7 @@ html comment
 <!-- field: description -->
 #### Description
 
-"<!-- handoff: PROJECT!MR -->" in the description of an issue handoff created, naming the merge (the marker keeps its PROJECT!MR form) or "PROJECT@TAG" naming the tag that caused it. Makes handoff idempotent (srd014 R5).
+"<!-- handoff reference-update from=REPO tag=TAG -->" in the description of a reference-update issue, naming the downstream repository and the tag that caused it (srd014 R8.3); from 06.0 the other issues handoff creates carry "<!-- handoff: PROJECT!MR -->" naming the merge or "<!-- handoff: PROJECT@TAG -->" naming the tag (srd014 R9.1). Makes handoff idempotent (srd014 R5).
 
 <!-- schema_entry: event_marker -->
 ### event_marker
