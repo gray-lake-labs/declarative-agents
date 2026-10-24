@@ -35,7 +35,7 @@ type WeekResult struct {
 // Week returns the project's open Sprint Goals with their due dates
 // and the person's activity since the ISO week began, in UTC: branches
 // they merged and the issues that closed, assigned to them or closed by a
-// merge counted here. A merge from before the period's first Sprint Goal is
+// merge counted here; a recurring issue counts only by such a merge. A merge from before the period's first Sprint Goal is
 // not the period's work, so it does not count even inside the week
 // (periodStart). A project holding no Sprint Goal of its own, such as the
 // system repository, starts its period at its own earliest open or
@@ -96,7 +96,12 @@ func Week(t tracker.Tracker, project, user string, now time.Time, teams []string
 		}
 	}
 	for _, i := range closed {
-		if slices.Contains(i.Assignees, user) || byMerge[i.Project+"#"+itoa(i.IID)] {
+		// A recurring issue, such as the person's status issue, closes by a
+		// merge in another repository, which Merged does not list; it counts
+		// only when a merge counted here closes it, so merged and closed
+		// agree (GH-24).
+		assigned := slices.Contains(i.Assignees, user) && !i.HasLabel("type::recurring")
+		if assigned || byMerge[i.Project+"#"+itoa(i.IID)] {
 			r.Closed = append(r.Closed, sprintGoalOf(i))
 		}
 	}

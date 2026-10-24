@@ -300,8 +300,8 @@ func TestSprintEndMergeRecordsReportedComplete(t *testing.T) {
 	if n := countEvents(teamNotes, "reported_complete"); n != 1 {
 		t.Fatalf("the team-closed Sprint Goal has %d reported_complete events, want 1", n)
 	}
-	if again, err := reportClosed(tr, closes[2], "another-commit"); err != nil || !again {
-		t.Fatalf("reporting it again = %v, %v", again, err)
+	if posted, already, err := reportClosed(tr, closes[2], "another-commit"); err != nil || posted || !already {
+		t.Fatalf("reporting it again = posted %v, already %v, %v; want already reported, nothing posted (GH-24)", posted, already, err)
 	}
 	if teamNotes, _ = tr.ListNotes("g/po-1", teamGoal.IID); countEvents(teamNotes, "reported_complete") != 1 {
 		t.Fatal("a second report posted a second event")

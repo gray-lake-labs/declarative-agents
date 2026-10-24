@@ -22,7 +22,10 @@ into a program repository. tpm backlog template --kind <level> prints a
 document of that level in the Markdown layout the gate reads, to copy
 and fill; the gate's errors then name the fields by that layout.
 --kind vision and --kind architecture print VISION and ARCHITECTURE,
-whose shape the gate also checks and counts. The gate passes a document
+whose shape the gate also checks and counts. A template holds every
+field its document requires and the common optional ones, such as
+VISION's canonical_documents; design.md lists the rest. A nested list,
+such as depends_on, numbers every item "1.". The gate passes a document
 that still holds tpm init's placeholder text, and names it as unfilled.
 
 Subcommands:

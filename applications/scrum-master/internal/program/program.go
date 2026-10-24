@@ -475,15 +475,18 @@ func init() {
 				return fmt.Errorf("%w: merge needs --project and --issue", cli.ErrUsage)
 			}
 			branch := mergeArgs.branch
+			refuse := func(err error) error {
+				return refusedJSON(ctx, MergeResult{Project: mergeArgs.project, IID: mergeArgs.iid, Branch: branch, DryRun: ctx.DryRun}, err)
+			}
 			if branch == "" {
 				var err error
 				if branch, err = inferBranch(mergeArgs.dir, mergeArgs.iid); err != nil {
-					return err
+					return refuse(err)
 				}
 			}
 			t, err := ctx.Tracker()
 			if err != nil {
-				return err
+				return refuse(err)
 			}
 			control := mergeArgs.control
 			if control == "" {
@@ -491,7 +494,7 @@ func init() {
 			}
 			p, err := LoadPolicy(t, control, mergeArgs.ref)
 			if err != nil {
-				return err
+				return refuse(err)
 			}
 			gate := MergeGate{Command: AuditFor(p, mergeArgs.dir), Dir: mergeArgs.dir, RequireApproval: p.RequireApproval}
 			if mergeArgs.audit != "" {
@@ -502,7 +505,9 @@ func init() {
 				issueProject = mergeArgs.project
 			}
 			r, err := Merge(t, ExecGit{}, mergeArgs.project, issueProject, mergeArgs.iid, branch, mergeArgs.dir, gate, mergeArgs.closes, ctx.DryRun)
-			if err != nil {
+			if err != nil && r.Project == "" {
+				return refuse(err)
+			} else if err != nil {
 				return refusedJSON(ctx, r, err)
 			}
 			audit := "no docs/ change, so no audit ran"
@@ -512,6 +517,9 @@ func init() {
 			human := fmt.Sprintf("%s merged into %s on %s; %s; closed %s", r.Branch, r.Project, r.Commit, audit, strings.Join(r.Closed, ", "))
 			if len(r.Reported) > 0 {
 				human += "; reported complete " + strings.Join(r.Reported, ", ")
+			}
+			if len(r.AlreadyReported) > 0 {
+				human += "; already reported complete " + strings.Join(r.AlreadyReported, ", ")
 			}
 			if r.DryRun {
 				approved := "with no approval"
@@ -563,15 +571,18 @@ func init() {
 				return fmt.Errorf("%w: merge-branch needs --project and --issue", cli.ErrUsage)
 			}
 			branch := mbArgs.branch
+			refuse := func(err error) error {
+				return refusedJSON(ctx, MergeResult{Project: mbArgs.project, IID: mbArgs.iid, Branch: branch, DryRun: ctx.DryRun}, err)
+			}
 			if branch == "" {
 				var err error
 				if branch, err = inferBranch(mbArgs.dir, mbArgs.iid); err != nil {
-					return err
+					return refuse(err)
 				}
 			}
 			t, err := ctx.Tracker()
 			if err != nil {
-				return err
+				return refuse(err)
 			}
 			control := mbArgs.control
 			if control == "" {
@@ -579,7 +590,7 @@ func init() {
 			}
 			p, err := LoadPolicy(t, control, mbArgs.ref)
 			if err != nil {
-				return err
+				return refuse(err)
 			}
 			gate := MergeGate{Command: AuditFor(p, mbArgs.dir), Dir: mbArgs.dir, RequireApproval: p.RequireApproval}
 			if mbArgs.audit != "" {
@@ -590,7 +601,9 @@ func init() {
 				issueProject = mbArgs.project
 			}
 			r, err := MergeBranch(t, ExecGit{}, mbArgs.project, issueProject, mbArgs.iid, branch, mbArgs.dir, gate, mbArgs.closes, ctx.DryRun)
-			if err != nil {
+			if err != nil && r.Project == "" {
+				return refuse(err)
+			} else if err != nil {
 				return refusedJSON(ctx, r, err)
 			}
 			human := fmt.Sprintf("%s merged into %s on %s; nothing closed: run tpm issue close-delivered --commit %s", r.Branch, r.Project, r.Commit, r.Commit)
@@ -646,8 +659,8 @@ func init() {
 					closes = append(closes, ref)
 				}
 			}
-			closed, reported, already, err := CloseDelivered(t, ExecGit{}, cdArgs.dir, cdArgs.commit, issueProject, cdArgs.iid, closes)
-			r := MergeResult{Project: cdArgs.project, IID: cdArgs.iid, Commit: cdArgs.commit, Closed: closed, Reported: reported, AlreadyClosed: already}
+			closed, reported, wasReported, already, err := CloseDelivered(t, ExecGit{}, cdArgs.dir, cdArgs.commit, issueProject, cdArgs.iid, closes)
+			r := MergeResult{Project: cdArgs.project, IID: cdArgs.iid, Commit: cdArgs.commit, Closed: closed, Reported: reported, AlreadyReported: wasReported, AlreadyClosed: already}
 			if issueProject != cdArgs.project {
 				r.IssueProject = issueProject
 			}
@@ -657,6 +670,9 @@ func init() {
 			human := fmt.Sprintf("closed %s on %s", strings.Join(closed, ", "), cdArgs.commit)
 			if len(reported) > 0 {
 				human += "; reported complete " + strings.Join(reported, ", ")
+			}
+			if len(wasReported) > 0 {
+				human += "; already reported complete " + strings.Join(wasReported, ", ")
 			}
 			return ctx.Emit(r, human)
 		},
@@ -818,10 +834,11 @@ func inferBranch(dir string, iid int) (string, error) {
 }
 
 // refusedJSON emits r with the refusal under --json, so a caller reading
-// JSON gets JSON for a refusal too, and returns err, so the exit status
-// still says it was refused (GH-22).
+// JSON gets JSON for every refusal, the checkout's branch among them, and
+// returns err, so the exit status still says it was refused (GH-22,
+// GH-24). r holds at least the project and issue the command was given.
 func refusedJSON(ctx *cli.Context, r MergeResult, err error) error {
-	if ctx.JSON && r.Project != "" {
+	if ctx.JSON {
 		r.Refused = err.Error()
 		_ = ctx.Emit(r, "")
 	}

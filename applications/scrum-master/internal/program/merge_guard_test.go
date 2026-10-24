@@ -63,3 +63,15 @@ func TestOpenRefsLeavesTheClosedOut(t *testing.T) {
 		t.Fatalf("open = %v", got)
 	}
 }
+
+// A refusal before the merge result exists, such as a checkout on the
+// default branch, is JSON under --json too, naming the project and issue
+// the command was given (GH-24).
+func TestEarlyRefusalIsJSONUnderJSON(t *testing.T) {
+	var out bytes.Buffer
+	ctx := &cli.Context{JSON: true, Out: &out}
+	err := refusedJSON(ctx, MergeResult{Project: "g/po-1", IID: 17, Branch: ""}, errors.New(". is checked out on main, not the issue's 17-<slug> branch"))
+	if err == nil || !strings.Contains(out.String(), `"refused": ". is checked out on main`) || !strings.Contains(out.String(), `"issue": 17`) {
+		t.Fatalf("err = %v, out = %s", err, out.String())
+	}
+}

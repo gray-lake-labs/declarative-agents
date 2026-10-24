@@ -51,6 +51,8 @@ func (c *Context) Emit(v any, human string) error {
 		}
 		enc := json.NewEncoder(c.Out)
 		enc.SetIndent("", "  ")
+		// Output is read by programs and people, never embedded in HTML.
+		enc.SetEscapeHTML(false)
 		return enc.Encode(v)
 	}
 	human = strings.TrimRight(human, "\n")
