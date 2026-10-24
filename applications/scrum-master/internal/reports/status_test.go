@@ -160,6 +160,13 @@ func testWeekListsOpenObjectivesAndActivity(t *testing.T, p trackertest.Program)
 		t.Fatal(err)
 	}
 	f.UpdateIssue(po1, done.IID, tracker.IssueUpdate{State: ptr("close")})
+	// The status issue closes by a merge in the reports repository, which
+	// this week's merges do not list, so it is not listed as closed (GH-24).
+	status, _ := f.CreateIssue(po1, tracker.NewIssue{Title: "Recurring: weekly status 2026-W42", Labels: StatusLabels})
+	if err := p.As("po-1").AssignIssue(po1, status.IID, tracker.User{Username: "po-1"}); err != nil {
+		t.Fatal(err)
+	}
+	f.UpdateIssue(po1, status.IID, tracker.IssueUpdate{State: ptr("close")})
 	r, err := Week(f, po1, "po-1", monday.AddDate(0, 0, 2), nil)
 	if err != nil {
 		t.Fatal(err)
