@@ -316,7 +316,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 			if mr.MergedAt > end || !strings.Contains(mr.Description, "Closes ") || closesMentioned(project, mr.Description, mentioned) {
 				continue
 			}
-			if routine, err := closesOnlyRecurring(t, project, mr.Description); err != nil {
+			if routine, err := closesOnlyRoutine(t, project, mr.Description); err != nil {
 				return a, err
 			} else if routine {
 				continue
@@ -327,7 +327,7 @@ func Aggregate(t tracker.Tracker, in AggregateInput) (Aggregation, error) {
 				continue
 			}
 			a.Signals = append(a.Signals, Signal{SignalUnreportedWork, project, fmt.Sprintf("%s!%d", project, mr.IID), ISOWeek(mustDate(mr.MergedAt)),
-				fmt.Sprintf("%s!%d %q merged on %s and closes no reported Sprint Goal", project, mr.IID, mr.Title, mr.MergedAt), false, nil})
+				fmt.Sprintf("%s!%d %q merged on %s and closes no reported Sprint Goal, nor an issue that implements, or links to one that implements, a story on one's Sprint Backlog", project, mr.IID, mr.Title, mr.MergedAt), false, nil})
 		}
 	}
 	for c := range a.ByComponent {
@@ -375,9 +375,11 @@ func closesMentioned(project, description string, mentioned map[string]bool) boo
 	return false
 }
 
-// closesOnlyRecurring reports whether every issue the merge closes is a
-// recurring one (type::recurring): routine, not planned work.
-func closesOnlyRecurring(t tracker.Tracker, project, description string) (bool, error) {
+// closesOnlyRoutine reports whether every issue the merge closes is
+// routine or planning, not delivery the reports account for: a recurring
+// one (type::recurring), such as a sprint-end or a status report, or one
+// on the management plane, such as writing a goal's stories (GH-24).
+func closesOnlyRoutine(t tracker.Tracker, project, description string) (bool, error) {
 	refs := closesPattern.FindAllStringSubmatch(description, -1)
 	for _, m := range refs {
 		ref := m[1]
@@ -385,7 +387,7 @@ func closesOnlyRecurring(t tracker.Tracker, project, description string) (bool, 
 			ref = project + ref
 		}
 		i, ok, err := issueOf(t, ref)
-		if err != nil || !ok || !i.HasLabel("type::recurring") {
+		if err != nil || !ok || !(i.HasLabel("type::recurring") || i.HasLabel("plane::management")) {
 			return false, err
 		}
 	}
@@ -408,17 +410,49 @@ func closesBacklogWork(t tracker.Tracker, project, description string, backlog m
 			continue
 		}
 		owner, _, _ := strings.Cut(ref, "#")
+		if implementsBacklog(owner, i.Description, backlog) {
+			return true, nil
+		}
+		// Work that links to an issue implementing a backlog story, such as
+		// a defect found in it, serves the same goal (GH-24).
 		for _, l := range links.ParseLinks(i.Description) {
-			if l.Kind != links.Implements {
+			if !slices.Contains(servingLinks, l.Kind) {
 				continue
 			}
-			story, _, _ := strings.Cut(strings.TrimSpace(l.Target), "#")
-			if backlog[owner+"#"+strings.TrimSuffix(path.Base(story), ".md")] {
+			target := strings.TrimSpace(l.Target)
+			if strings.HasPrefix(target, "#") {
+				target = owner + target
+			}
+			linked, ok, err := issueOf(t, target)
+			if err != nil {
+				return false, err
+			}
+			if ok && implementsBacklog(linked.Project, linked.Description, backlog) {
 				return true, nil
 			}
 		}
 	}
 	return false, nil
+}
+
+// servingLinks are the link kinds by which an issue serves the issue it
+// names.
+var servingLinks = []string{links.RelatesTo, links.BlockedBy, links.Blocks, links.DependsOn}
+
+// implementsBacklog reports whether an issue of project, by its
+// description, implements a story on a reported Sprint Goal's Sprint
+// Backlog.
+func implementsBacklog(project, description string, backlog map[string]bool) bool {
+	for _, l := range links.ParseLinks(description) {
+		if l.Kind != links.Implements {
+			continue
+		}
+		story, _, _ := strings.Cut(strings.TrimSpace(l.Target), "#")
+		if backlog[project+"#"+strings.TrimSuffix(path.Base(story), ".md")] {
+			return true
+		}
+	}
+	return false
 }
 
 // hasMet reports whether the Sprint Goal's ledger holds a met event

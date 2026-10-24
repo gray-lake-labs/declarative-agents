@@ -295,8 +295,10 @@ func TestAggregateSeesATeamWithoutAGoal(t *testing.T) {
 
 // TestAggregateCountsBacklogWorkAsReported shows a merge that closes an
 // issue implementing a story on a reported Sprint Goal's Sprint Backlog is
-// the goal's work, not unreported, while a merge delivering a story no
-// reported goal lists still is.
+// the goal's work, not unreported, and so is one closing an issue that
+// links to such an issue, or one closing only planning on the management
+// plane (GH-24), while a merge delivering a story no reported goal lists
+// still is.
 func TestAggregateCountsBacklogWorkAsReported(t *testing.T) {
 	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
 		dir := t.TempDir()
@@ -306,10 +308,14 @@ func TestAggregateCountsBacklogWorkAsReported(t *testing.T) {
 		}
 		p.AddMerge("g/po-3", tracker.Merge{IID: 1, Title: "Deliver the story", Author: "carol", MergedAt: "2026-10-14", Description: "Closes #2"})
 		p.AddMerge("g/po-3", tracker.Merge{IID: 2, Title: "Deliver another story", Author: "carol", MergedAt: "2026-10-14", Description: "Closes #3"})
+		p.AddMerge("g/po-3", tracker.Merge{IID: 3, Title: "Fix a defect in the story", Author: "carol", MergedAt: "2026-10-14", Description: "Closes #4"})
+		p.AddMerge("g/po-3", tracker.Merge{IID: 4, Title: "Add the stories", Author: "carol", MergedAt: "2026-10-14", Description: "Closes #5"})
 		f := p.Tracker()
 		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "goal", Description: "## Sprint Backlog\n\n- st001-ingest Ingest (3 points)\n"})
 		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "ingest task", Description: "Implements: st001-ingest\n"})
 		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "other task", Description: "Implements: st009-other\n"})
+		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "defect", Description: "Relates-to: g/po-3#2\n", Labels: []string{"plane::data", "kind::defect"}})
+		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "add the stories", Labels: []string{"plane::management"}})
 		cfg := Config{Team: []Member{{"carol", "g/po-3"}}, System: "g/system"}
 		cfg.defaults()
 
