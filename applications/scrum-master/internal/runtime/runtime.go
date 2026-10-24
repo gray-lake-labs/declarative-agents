@@ -69,7 +69,8 @@ func RepoPin(dir string) string {
 // Sibling is the runtime this repository holds beside the application, when
 // dir is inside the repository that ships agent-core: the repository root
 // is the source and the agent builds from agent-core into agent-core/bin —
-// no pin and no download, the sibling is the release (GH-190). With a nil
+// no pin and no download, the sibling is the release (GH-190) — composed
+// with this application's words, which it serves in process (GH-27). With a nil
 // builder it only locates; ok reports whether dir is in that repository.
 func Sibling(dir string, build func(dir, name string, args ...string) error) (Release, bool, error) {
 	out, err := exec.Command("git", "-C", dir, "rev-parse", "--show-toplevel").Output()
@@ -91,7 +92,14 @@ func Sibling(dir string, build func(dir, name string, args ...string) error) (Re
 	if build == nil {
 		return r, true, nil
 	}
-	if err := build(core, "go", "build", "-o", r.Agent, "./cmd/agent"); err != nil {
+	comp, err := Compose(core, filepath.Join(root, "applications", "scrum-master"))
+	if err != nil {
+		return r, true, err
+	}
+	defer comp.Cleanup()
+	// build takes no environment, so env(1) carries the workspace.
+	args := append(append(append(comp.Env, "go", "build"), comp.Flags...), "-o", r.Agent, "./cmd/agent")
+	if err := build(core, "env", args...); err != nil {
 		return r, true, err
 	}
 	return r, true, nil

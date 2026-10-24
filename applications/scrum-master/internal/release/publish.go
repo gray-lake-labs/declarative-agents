@@ -14,6 +14,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/runtime"
 )
 
 // Platform is one operating system and architecture a release binary is
@@ -136,10 +138,17 @@ func (p Publisher) Build(dist string, platforms []Platform) ([]Asset, error) {
 	// agent and checksums from one release (GH-14; srd037 R7).
 	if core, err := filepath.Abs(filepath.Join(p.Root, "..", "..", "agent-core")); err == nil {
 		if _, statErr := os.Stat(filepath.Join(core, "cmd", "agent")); statErr == nil {
+			// The released agent serves this application's words in process
+			// (GH-27).
+			comp, err := runtime.Compose(core, p.Root)
+			if err != nil {
+				return nil, err
+			}
+			defer comp.Cleanup()
 			for _, pl := range []Platform{{OS: "darwin", Arch: "amd64"}, {OS: "darwin", Arch: "arm64"}, {OS: "linux", Arch: "amd64"}, {OS: "linux", Arch: "arm64"}} {
 				a := Asset{Name: AssetName("agent", pl), Path: filepath.Join(dist, AssetName("agent", pl))}
-				env := []string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}
-				agentArgs := []string{"build", "-trimpath"}
+				env := append([]string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}, comp.Env...)
+				agentArgs := append([]string{"build", "-trimpath"}, comp.Flags...)
 				if tag, err := p.releaseTag(); err == nil && tag != "" {
 					pkg, err := agentVersionPackage(core)
 					if err != nil {

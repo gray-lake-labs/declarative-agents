@@ -464,6 +464,13 @@ A program's planning items are the agile hierarchy, each a document type with it
 
 Two alternatives were rejected. A single intent- type for every level would hide the distinctions an agile reader relies on: a theme, an initiative, an epic, a feature, and a story differ in timeframe, owner, and parent, and each has its own name in every agile tool. A type field in the frontmatter would depend on the parent format, whose SRD frontmatter allows a fixed set of keys (id, title, status, retired_in, replaced_by, depends_on, derived_from) and no type, so a hierarchy document could not carry one and still be an SRD (srd034 R1.1). A published document's path is pinned in citation URLs across repositories (design.md D9), so renaming one keeps its old path: a retired stub there, with status retired and replaced_by naming the new id, which the audit's retired-id-missing check requires. The four SRDs given Spec Kit names (srd022-tasks, srd031-plan, srd035-specify, srd036-implement) keep stubs at their old paths for that reason.
 
+<!-- decision: 15 -->
+### 15 - The words run inside the agent
+
+The tpm words the profiles name run in the agent's own process (GH-27). agent-core's exec tools take an in-process transport: a build of the agent registers a runner under a binary's name, and an exec declaration naming that binary calls the runner instead of starting a process, with its args, parameter flags, output shaping, exit code, and receipt unchanged. One run at a time holds the process, since a runner shares its working directory. The words package of this application runs one tpm command line with a working directory, and the Scrum Master agent is agent-core's cmd/agent, unchanged on disk, built in a Go workspace with this application and one overlaid file that registers the words under tpm. The released agent and the agent built in this repository are that build, so a profile runs with no tpm installed and the agent's command line is the agent's.
+
+Four alternatives were rejected. Moving the agent's main into an importable package would change a path some sixty agent-core documents and gates name. Having agent-core's main import this application would make the core depend on one of its applications. A build-tagged file in agent-core would put the application in agent-core's module requirements. A separate tools executable would keep a second binary to version, pin, and install: tpm under another name. The profiles keep binary: tpm until step 2 of GH-25 moves every profile; the declarations stay exec, so a profile still runs with a tpm on PATH under an agent built without the words.
+
 <!-- field: technology_choices -->
 ## Technology choices
 

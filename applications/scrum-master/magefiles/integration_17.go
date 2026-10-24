@@ -90,8 +90,9 @@ func (Integration) PopProfile() error {
 }
 
 // runPopAgent runs the release's agent over the pop profile for one issue,
-// from the project's clone, with the rig's tracker and the built tpm on
-// PATH — the environment the profile's declarations name.
+// from the project's clone, with the rig's tracker — the environment the
+// profile's declarations name — and no tpm on PATH: the agent serves the
+// words in its own process (GH-27).
 func (r *rigEnv) runPopAgent(rel runtime.Release, project, clone string, iid int) (string, error) {
 	outDir, err := os.MkdirTemp(r.run.Dir, "pop-agent-*")
 	if err != nil {
@@ -105,7 +106,7 @@ func (r *rigEnv) runPopAgent(rel runtime.Release, project, clone string, iid int
 	)
 	cmd.Dir = clone
 	cmd.Env = append(os.Environ(),
-		"PATH="+r.run.Dir+string(os.PathListSeparator)+os.Getenv("PATH"),
+		"PATH="+pathWithout("tpm"),
 		"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
 		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
 		"TPM_USER="+r.user,
@@ -127,4 +128,17 @@ func tail17(out string) string {
 		return out
 	}
 	return "…" + out[len(out)-n:]
+}
+
+// pathWithout is PATH less every directory holding an executable named
+// name, so a run that finds it anyway did not find it there.
+func pathWithout(name string) string {
+	var keep []string
+	for _, dir := range filepath.SplitList(os.Getenv("PATH")) {
+		if fi, err := os.Stat(filepath.Join(dir, name)); err == nil && !fi.IsDir() {
+			continue
+		}
+		keep = append(keep, dir)
+	}
+	return strings.Join(keep, string(os.PathListSeparator))
 }
