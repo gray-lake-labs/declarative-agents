@@ -81,6 +81,9 @@ func (Integration) MergeProfile() error {
 	c.expect(runErr == nil, "the delivery run failed: %v: %s", runErr, tail16(out))
 	c.expect(strings.Contains(out, "final machine state: Done"), "the run must end in Done: %s", tail16(out))
 	c.expect(r.closed(po1, work.IID), "the delivery must close %s#%d", po1, work.IID)
+	// The run reports every word, the gate's audit among them (GH-49).
+	c.expect(strings.Contains(out, `"audit_reason"`) && strings.Contains(out, `"merged": true`) && strings.Contains(out, `"closed"`),
+		"the delivery run must report the gate, the merge, and the close: %s", out)
 
 	// The refusal: a branch with nothing over the base ends in Refused.
 	empty, err := file("Merge profile refusal")

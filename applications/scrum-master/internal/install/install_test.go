@@ -360,3 +360,33 @@ func TestInstallMigratesCommandFiles(t *testing.T) {
 		t.Fatalf("check after migration: %v %v", findings, err)
 	}
 }
+
+// detect names the agents a repository already uses, in Agents' order,
+// and refuses when it uses none; .github alone, which CI uses, is not
+// copilot (GH-49).
+func TestResolveAgentsDetectsTheAgentsInUse(t *testing.T) {
+	dir := t.TempDir()
+	os.MkdirAll(filepath.Join(dir, ".github", "workflows"), 0o755)
+	if _, err := ResolveAgents([]string{Detect}, dir); err == nil || !strings.Contains(err.Error(), "--agent") {
+		t.Fatalf("detect in a repository using no agent = %v, want a refusal naming --agent", err)
+	}
+	os.WriteFile(filepath.Join(dir, "CLAUDE.md"), []byte("x\n"), 0o644)
+	os.MkdirAll(filepath.Join(dir, ".github", "skills"), 0o755)
+	got, err := ResolveAgents([]string{Detect}, dir)
+	if err != nil || strings.Join(got, " ") != "claude copilot" {
+		t.Fatalf("detect = %v, %v, want claude copilot", got, err)
+	}
+	if got, err := ResolveAgents([]string{"cursor"}, dir); err != nil || strings.Join(got, " ") != "cursor" {
+		t.Fatalf("an explicit agent = %v, %v", got, err)
+	}
+}
+
+// With no release's profiles installed, the source check refuses and says
+// nothing was written (GH-49).
+func TestCheckSourceRefusesWithNoProfilesInstalled(t *testing.T) {
+	t.Setenv(SourceEnv, "")
+	t.Setenv(HomeEnv, t.TempDir())
+	if err := CheckSource(t.TempDir()); err == nil || !strings.Contains(err.Error(), "nothing was written") {
+		t.Fatalf("CheckSource = %v, want a refusal", err)
+	}
+}

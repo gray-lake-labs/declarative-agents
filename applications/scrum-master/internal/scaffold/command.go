@@ -18,8 +18,9 @@ import (
 
 func init() {
 	var (
-		o      InitOptions
-		agents []string
+		o               InitOptions
+		agents          []string
+		requireProfiles bool
 	)
 	cli.Default.Register(&cli.Command{
 		Group:   "init",
@@ -27,7 +28,7 @@ func init() {
 		Flags: func(fs *flag.FlagSet) {
 			o, agents = InitOptions{}, nil
 			fs.StringVar(&o.Dir, "dir", "", "the system repository's checkout (default: the git root)")
-			fs.Func("agent", "install the skills for cursor, claude, copilot, or all (repeatable)", func(v string) error {
+			fs.Func("agent", "install the skills for cursor, claude, copilot, all, or detect, the agents the repository already uses (repeatable)", func(v string) error {
 				agents = append(agents, v)
 				return nil
 			})
@@ -35,16 +36,22 @@ func init() {
 			fs.StringVar(&o.Group, "group", "", "the program group whose labels --tracker gets")
 			fs.StringVar(&o.Prefix, "prefix", "", "the issue ID prefix --tracker gets (default: the last segment of --group)")
 			fs.BoolVar(&o.Force, "force", false, "replace files a person edited")
+			fs.BoolVar(&requireProfiles, "require-profiles", false, "refuse, writing nothing, when no release's profiles are installed to vendor (the init profile's vendor step needs them)")
 		},
 		Run: func(ctx *cli.Context) error {
 			var err error
+			if o.Dir == "" {
+				if o.Dir, err = gitRoot(); err != nil {
+					return err
+				}
+			}
 			if len(agents) > 0 {
-				if o.Agents, err = install.ParseAgents(agents); err != nil {
+				if o.Agents, err = install.ResolveAgents(agents, o.Dir); err != nil {
 					return fmt.Errorf("%w: %v", cli.ErrUsage, err)
 				}
 			}
-			if o.Dir == "" {
-				if o.Dir, err = gitRoot(); err != nil {
+			if requireProfiles {
+				if err := install.CheckSource(o.Dir); err != nil {
 					return err
 				}
 			}
@@ -65,8 +72,9 @@ func init() {
 
 func init() {
 	var (
-		o      OnboardOptions
-		agents []string
+		o               OnboardOptions
+		agents          []string
+		requireProfiles bool
 	)
 	cli.Default.Register(&cli.Command{
 		Group:   "onboard",
@@ -74,7 +82,7 @@ func init() {
 		Flags: func(fs *flag.FlagSet) {
 			o, agents = OnboardOptions{}, nil
 			fs.StringVar(&o.Dir, "dir", "", "the joining repository's checkout (default: the git root)")
-			fs.Func("agent", "install the skills for cursor, claude, copilot, or all (repeatable)", func(v string) error {
+			fs.Func("agent", "install the skills for cursor, claude, copilot, all, or detect, the agents the repository already uses (repeatable)", func(v string) error {
 				agents = append(agents, v)
 				return nil
 			})
@@ -84,19 +92,25 @@ func init() {
 			fs.StringVar(&o.Repository, "repository", "", "the repository's URL (default: its origin)")
 			fs.StringVar(&o.Path, "path", "/", "the component's path in the repository")
 			fs.BoolVar(&o.Force, "force", false, "replace files a person edited")
+			fs.BoolVar(&requireProfiles, "require-profiles", false, "refuse, writing nothing, when no release's profiles are installed to vendor (the onboard profile's vendor step needs them)")
 		},
 		Run: func(ctx *cli.Context) error {
 			var err error
 			if o.System == "" || o.Subsystem == "" {
 				return fmt.Errorf("%w: onboard needs --system and --subsystem", cli.ErrUsage)
 			}
+			if o.Dir == "" {
+				if o.Dir, err = gitRoot(); err != nil {
+					return err
+				}
+			}
 			if len(agents) > 0 {
-				if o.Agents, err = install.ParseAgents(agents); err != nil {
+				if o.Agents, err = install.ResolveAgents(agents, o.Dir); err != nil {
 					return fmt.Errorf("%w: %v", cli.ErrUsage, err)
 				}
 			}
-			if o.Dir == "" {
-				if o.Dir, err = gitRoot(); err != nil {
+			if requireProfiles {
+				if err := install.CheckSource(o.Dir); err != nil {
 					return err
 				}
 			}

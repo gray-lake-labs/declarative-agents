@@ -48,6 +48,11 @@ func (Integration) Image() error {
 	if out, err := exec.Command("git", "init", "-q", "-b", "main", repo).CombinedOutput(); err != nil {
 		return fmt.Errorf("git init: %w: %s", err, out)
 	}
+	// The init profile installs the skills of the agents the repository
+	// uses, and refuses a repository that uses none (GH-49).
+	if err := os.MkdirAll(filepath.Join(repo, ".claude"), 0o777); err != nil {
+		return err
+	}
 	os.Chmod(repo, 0o777)
 	inImage := func(script string) (string, error) {
 		out, err := exec.Command("docker", "run", "--rm", "-v", repo+":/work", image, "sh", "-c", script).CombinedOutput()

@@ -13,6 +13,7 @@ tools:
   args:
   - onboard
   - --json
+  - --require-profiles
   - --system
   - ${SCRUM_MASTER_SYSTEM}
   - --subsystem
@@ -25,9 +26,9 @@ tools:
     properties:
       agent:
         type: string
-        description: The agents whose skills install, cursor, claude, copilot, or all.
+        description: The agents whose skills install, cursor, claude, copilot, or all; empty is the agents the repository already uses, refused when it uses none.
         flag: --agent
-        default: all
+        default: detect
       ref:
         type: string
         description: The ref of the system repository's SRDs and control files, when not main.

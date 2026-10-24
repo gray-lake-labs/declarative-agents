@@ -75,7 +75,7 @@ Writes control/labels.md, control/policy.md, and control/states.md holding the b
 <!-- req: R1.4 -->
 ### R1.4
 
-Installs the skills for the agents --agent names, through scrum-master install (srd037).
+Installs the skills for the agents --agent names, through scrum-master install (srd037). --agent detect names the agents the repository already uses (.cursor; .claude or CLAUDE.md; copilot's instructions or skills under .github) and is refused when it uses none; the init and onboard profiles default to it. With --require-profiles, which both profiles pass, init and onboard refuse before their first write when no release's profiles are installed to vendor (GH-49).
 
 <!-- req: R1.5 -->
 ### R1.5

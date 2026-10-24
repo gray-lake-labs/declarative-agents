@@ -170,6 +170,8 @@ major-and-minor-before-1.0
 	}
 	out, rerr := r.runWorkflow(rel, "release", rigUser, wf, po1, ref, nil, "SCRUM_MASTER_ARTIFACT=grader", "SCRUM_MASTER_CONTROL="+system, "SCRUM_MASTER_REF="+seedBranch)
 	c.expect(rerr == nil && strings.Contains(out, "final machine state: Done"), "the release run: %v: %s", rerr, tail17(out))
+	c.expect(strings.Contains(out, "next recommended_version: 0.1.1") && strings.Contains(out, "released tag: grader/v0.1.1"),
+		"the release run must print its version and tag as lines (GH-49): %s", tail17(out))
 	_, terr = r.remoteTag(po1, "grader/v0.1.1")
 	c.expect(terr == nil, "the release run left no grader/v0.1.1 at the origin: %v", terr)
 
