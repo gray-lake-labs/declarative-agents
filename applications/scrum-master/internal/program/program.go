@@ -460,6 +460,9 @@ func init() {
 	cli.Default.Register(&cli.Command{
 		Group: "issue", Name: "merge", Summary: "deliver an issue by a local merge that closes it (beads tracker)",
 		Flags: func(fs *flag.FlagSet) {
+			// A repeatable flag appends, so each run starts it empty: the
+			// words run many times in one agent process (GH-28).
+			mergeArgs.closes = nil
 			fs.StringVar(&mergeArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&mergeArgs.iid, "issue", 0, "issue IID (required)")
 			fs.StringVar(&mergeArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
@@ -556,6 +559,9 @@ func init() {
 	cli.Default.Register(&cli.Command{
 		Group: "issue", Name: "merge-branch", Summary: "the merge word: gates, the --no-ff merge, and the push, closing nothing (GH-201)",
 		Flags: func(fs *flag.FlagSet) {
+			// A repeatable flag appends, so each run starts it empty: the
+			// words run many times in one agent process (GH-28).
+			mbArgs.closes = nil
 			fs.StringVar(&mbArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&mbArgs.iid, "issue", 0, "issue IID (required)")
 			fs.StringVar(&mbArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
@@ -734,6 +740,7 @@ func init() {
 	cli.Default.Register(&cli.Command{
 		Group: "issue", Name: "file", Summary: "file an unassigned issue and lint it",
 		Flags: func(fs *flag.FlagSet) {
+			fileArgs.paths = nil
 			fs.StringVar(&fileArgs.project, "project", "", "project path (required)")
 			fs.StringVar(&fileArgs.title, "title", "", "issue title (required)")
 			fs.StringVar(&fileArgs.bodyFile, "body-file", "", "file holding the description (required)")

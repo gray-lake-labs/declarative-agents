@@ -5,6 +5,7 @@ package program
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -16,8 +17,21 @@ import (
 // combined output. Tests replace it.
 type AuditRunner func(dir, command string) (string, error)
 
-// ShellAudit runs the command with sh -c.
+// Words runs a tpm command line in this process, with dir as its working
+// directory, and returns its exit code; the words package sets it. An audit
+// command that is a tpm command line, such as BacklogAudit, runs through it,
+// so a merge's gate needs no tpm installed (GH-28).
+var Words func(dir string, args []string, out io.Writer) int
+
+// ShellAudit runs the command with sh -c, or a tpm command line in process.
 func ShellAudit(dir, command string) (string, error) {
+	if args := strings.Fields(command); Words != nil && len(args) > 1 && args[0] == "tpm" && !strings.ContainsAny(command, "|&;<>()$`\\\"'*?") {
+		var out bytes.Buffer
+		if code := Words(dir, args[1:], &out); code != 0 {
+			return out.String(), fmt.Errorf("%s exited %d", command, code)
+		}
+		return out.String(), nil
+	}
 	cmd := exec.Command("sh", "-c", command)
 	cmd.Dir = dir
 	var out bytes.Buffer

@@ -16,9 +16,12 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/cli"
 	_ "github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/commands"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/routing"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
+
+func init() { program.Words = Run }
 
 // Binary is the name the profiles' exec declarations give the words.
 const Binary = "tpm"

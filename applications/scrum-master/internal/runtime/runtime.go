@@ -99,7 +99,7 @@ func Sibling(dir string, build func(dir, name string, args ...string) error) (Re
 	defer comp.Cleanup()
 	// build takes no environment, so env(1) carries the workspace.
 	args := append(append(append(comp.Env, "go", "build"), comp.Flags...), "-o", r.Agent, "./cmd/agent")
-	if err := build(core, "env", args...); err != nil {
+	if err := build(comp.Dir, "env", args...); err != nil {
 		return r, true, err
 	}
 	return r, true, nil

@@ -87,8 +87,8 @@ func (Integration) PlanPushProfile() error {
 
 // runPlanPushAgent runs the release's agent over the plan-push profile for
 // one release, from the system repository's checkout, with the rig's
-// tracker and the built tpm on PATH — the environment the profile's
-// declarations name.
+// tracker — the environment the profile's declarations name — and no tpm
+// on PATH: the agent serves the words in process (GH-28).
 func (r *rigEnv) runPlanPushAgent(rel runtime.Release, system, clone, version, end string) (string, error) {
 	outDir, err := os.MkdirTemp(r.run.Dir, "planpush-agent-*")
 	if err != nil {
@@ -102,7 +102,7 @@ func (r *rigEnv) runPlanPushAgent(rel runtime.Release, system, clone, version, e
 	)
 	cmd.Dir = clone
 	cmd.Env = append(os.Environ(),
-		"PATH="+r.run.Dir+string(os.PathListSeparator)+os.Getenv("PATH"),
+		"PATH="+pathWithout("tpm"),
 		"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
 		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
 		"TPM_USER="+r.user,

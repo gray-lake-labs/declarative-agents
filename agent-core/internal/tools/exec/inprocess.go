@@ -19,6 +19,15 @@ import (
 // working directory and globals, which a subprocess would have had alone.
 var inProcessMu sync.Mutex
 
+// run runs spec in this process when a build registered a runner for its
+// binary, and as a subprocess otherwise (srd023 R8).
+func (c *ExecCmd) run(ctx context.Context, spec subprocess.Spec) *subprocess.Result {
+	if runner, ok := inprocess.Lookup(spec.Binary); ok {
+		return runInProcess(ctx, runner, spec)
+	}
+	return subprocess.Run(ctx, spec)
+}
+
 // runInProcess runs spec through the runner registered for its binary and
 // reports it as subprocess.Run would: combined output on Stdout and the
 // exit code. A runner cannot take extra environment variables, which a

@@ -17,8 +17,11 @@ import (
 // workspace with this application and with one more file overlaid into it,
 // which registers words.Run under words.Binary with agent-core's
 // in-process exec transport. Env and Flags go to the go build; Cleanup
-// removes the workspace and the overlay.
+// removes the workspace and the overlay. Dir is the agent-core directory
+// to build in: core with its symbolic links resolved, as the go command
+// resolves its working directory against the workspace.
 type Composition struct {
+	Dir     string
 	Env     []string
 	Flags   []string
 	Cleanup func()
@@ -47,6 +50,13 @@ func init() {
 // Compose prepares the composed build of the agent in core, the agent-core
 // module, with the words of app, this application's module.
 func Compose(core, app string) (Composition, error) {
+	var err error
+	if core, err = filepath.EvalSymlinks(core); err != nil {
+		return Composition{}, err
+	}
+	if app, err = filepath.EvalSymlinks(app); err != nil {
+		return Composition{}, err
+	}
 	coreMod, coreGo, err := readGoMod(core)
 	if err != nil {
 		return Composition{}, err
@@ -77,6 +87,7 @@ func Compose(core, app string) (Composition, error) {
 		return Composition{}, err
 	}
 	return Composition{
+		Dir:     core,
 		Env:     []string{"GOWORK=" + filepath.Join(dir, "go.work")},
 		Flags:   []string{"-overlay", filepath.Join(dir, "overlay.json")},
 		Cleanup: cleanup,

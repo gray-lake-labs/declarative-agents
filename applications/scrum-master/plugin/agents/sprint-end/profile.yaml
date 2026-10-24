@@ -12,6 +12,7 @@ tool_config_dirs:
   - /opt/agent-core/tools/builtin/filesystem
 tool_declarations:
   - declarations.yaml
+  - release-declarations.yaml
   - llm/default.yaml
   - /opt/agent-core/tools/builtin/report-parse-error.yaml
   - /opt/agent-core/tools/builtin/reset-history.yaml

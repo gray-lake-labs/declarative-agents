@@ -93,8 +93,8 @@ func (Integration) ImplementProfile() error {
 }
 
 // runImplementAgent runs the release's agent over the implement profile for
-// one issue, as the rig user, with the rig's tracker and the built tpm on
-// PATH — the environment the profile's declarations name.
+// one issue, as the rig user, with the rig's tracker — the environment the profile's declarations name —
+// and no tpm on PATH: the agent serves the words in process (GH-28).
 func (r *rigEnv) runImplementAgent(rel runtime.Release, project, checkout, workspace string, iid int, model string) (string, error) {
 	outDir, err := os.MkdirTemp(r.run.Dir, "implement-agent-*")
 	if err != nil {
@@ -108,7 +108,7 @@ func (r *rigEnv) runImplementAgent(rel runtime.Release, project, checkout, works
 	)
 	cmd.Dir = workspace
 	cmd.Env = append(os.Environ(),
-		"PATH="+r.run.Dir+string(os.PathListSeparator)+os.Getenv("PATH"),
+		"PATH="+pathWithout("tpm"),
 		"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
 		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
 		"TPM_USER="+r.user,

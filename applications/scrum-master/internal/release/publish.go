@@ -157,7 +157,7 @@ func (p Publisher) Build(dist string, platforms []Platform) ([]Asset, error) {
 					agentArgs = append(agentArgs, "-ldflags", "-X "+pkg+".Version="+tag)
 				}
 				agentArgs = append(agentArgs, "-o", a.Path, "./cmd/agent")
-				if _, err := p.Run(core, env, "go", agentArgs...); err != nil {
+				if _, err := p.Run(comp.Dir, env, "go", agentArgs...); err != nil {
 					return nil, fmt.Errorf("build agent for %s/%s: %w", pl.OS, pl.Arch, err)
 				}
 				sum, err := fileSum(a.Path)

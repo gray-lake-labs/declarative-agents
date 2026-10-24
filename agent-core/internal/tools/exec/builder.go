@@ -15,7 +15,6 @@ import (
 	"github.com/Nokia-Bell-Labs/declarative-agents/agent-core/internal/runtime/core"
 	"github.com/Nokia-Bell-Labs/declarative-agents/agent-core/internal/support/subprocess"
 	"github.com/Nokia-Bell-Labs/declarative-agents/agent-core/internal/tools/catalog"
-	"github.com/Nokia-Bell-Labs/declarative-agents/agent-core/pkg/inprocess"
 )
 
 // gitPreconditionTimeout bounds the git rev-parse precondition probe so a hung
@@ -147,7 +146,7 @@ func (c *ExecCmd) ExecuteContext(ctx context.Context) core.Result {
 	if err := c.checkPrecondition(ctx, dir); err != nil {
 		return core.Result{Output: err.Error(), Signal: core.ToolFailed, CommandName: c.def.Name}
 	}
-	spec := subprocess.Spec{
+	run := c.run(ctx, subprocess.Spec{
 		Binary:           c.def.Binary,
 		Args:             c.buildArgs(),
 		Dir:              dir,
@@ -155,13 +154,7 @@ func (c *ExecCmd) ExecuteContext(ctx context.Context) core.Result {
 		Stdin:            stdin,
 		CombinedOutput:   true,
 		NoDefaultTimeout: true,
-	}
-	var run *subprocess.Result
-	if runner, ok := inprocess.Lookup(c.def.Binary); ok {
-		run = runInProcess(ctx, runner, spec)
-	} else {
-		run = subprocess.Run(ctx, spec)
-	}
+	})
 	res := SubprocessResult(c.def.Name, run)
 	c.recordExecMetrics(run.Duration, len(run.Stdout), run.ExitCode)
 	if c.def.OutputCap > 0 {

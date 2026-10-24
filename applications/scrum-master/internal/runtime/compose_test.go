@@ -16,6 +16,12 @@ import (
 // by their go.mod (GH-27).
 func TestComposeWritesTheWorkspaceAndTheRegistration(t *testing.T) {
 	core, app := t.TempDir(), t.TempDir()
+	if resolved, err := filepath.EvalSymlinks(core); err == nil {
+		core = resolved
+	}
+	if resolved, err := filepath.EvalSymlinks(app); err == nil {
+		app = resolved
+	}
 	os.WriteFile(filepath.Join(core, "go.mod"), []byte("module example.com/core\n\ngo 1.26.3\n"), 0o644)
 	os.WriteFile(filepath.Join(app, "go.mod"), []byte("module example.com/app\n\ngo 1.26\n"), 0o644)
 	c, err := Compose(core, app)
@@ -23,6 +29,9 @@ func TestComposeWritesTheWorkspaceAndTheRegistration(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer c.Cleanup()
+	if c.Dir != core {
+		t.Fatalf("dir = %s, want %s", c.Dir, core)
+	}
 	work := strings.TrimPrefix(c.Env[0], "GOWORK=")
 	b, _ := os.ReadFile(work)
 	if !strings.HasPrefix(string(b), "go 1.26.3\n") || !strings.Contains(string(b), core) || !strings.Contains(string(b), app) {
