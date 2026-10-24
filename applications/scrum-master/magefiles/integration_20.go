@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
@@ -27,7 +28,9 @@ func init() {
 // tracker-sync, tracker-migrate, and tracker-export each end in Done with
 // their effect in the tracker or, for the export, the file holding every
 // issue; pop opens a chosen branch, and merge closes two other issues as it
-// delivers (GH-47) (test: workflow profile runs; environment: local).
+// delivers (GH-47); issue-file files a recurring issue, and backlog-list
+// and issue-lint run as a model skill's steps would without a model (GH-48)
+// (test: workflow profile runs; environment: local).
 func (Integration) WorkflowProfiles() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -148,6 +151,23 @@ func (Integration) WorkflowProfiles() error {
 			c.expect(r.closed(po1, iid), "%s#%d is open after the merge that closes it", po1, iid)
 		}
 	}
+
+	// GH-48: the model-free profiles a model skill's steps name.
+	scrumBody := filepath.Join(r.run.Dir, "wf-recurring.md")
+	writeFileTo(scrumBody, "Hold the Daily Scrum.\n\n## Recurrence\n\nEvery weekday.\n\n## Previous Runs\n\n- none\n")
+	before, _ := r.issues(po1)
+	run("issue-file", rigUser, clone, 0, map[string]any{"project": po1, "title": "Recurring: daily scrum", "body_file": scrumBody,
+		"type": "recurring", "plane": "management", "milestone": rigMilestone, "due": rigDue})
+	after, _ := r.issues(po1)
+	recurringIID := 0
+	for _, i := range after {
+		if i.Title == "Recurring: daily scrum" && slices.Contains(i.Labels, "type::recurring") && i.DueDate == rigDue {
+			recurringIID = i.IID
+		}
+	}
+	c.expect(recurringIID != 0 && len(after) == len(before)+1, "issue-file filed no recurring issue with its due date: %d issues before, %d after", len(before), len(after))
+	run("backlog-list", rigUser, clone, 0, nil)
+	run("issue-lint", rigUser, clone, 0, map[string]any{"project": po1, "issue": recurringIID})
 
 	status := run("status", rigUser, clone, 0, nil)
 	c.expect(strings.Contains(status, po1), "the status run names no %s: %s", po1, tail17(status))

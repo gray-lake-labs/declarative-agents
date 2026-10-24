@@ -26,7 +26,7 @@ func TestSkillsRenderFromTheirProfiles(t *testing.T) {
 	for _, s := range skills {
 		names = append(names, s.Name)
 	}
-	want := []string{"admit", "aggregate", "approve", "check", "close", "comment", "draft", "implement", "init", "labels", "merge", "onboard", "peer-read", "plan-push", "plan", "pop", "recur", "release", "reports-init", "specify", "sprint-end", "status-issues", "status", "tasks", "tracker-export", "tracker-migrate", "tracker-sync"}
+	want := []string{"admit", "aggregate", "approve", "backlog-check", "backlog-list", "backlog-template", "check", "close", "comment", "doctor", "draft", "goals-plan", "goals-push", "implement", "init", "issue-file", "issue-lint", "issue-list", "labels", "merge", "onboard", "peer-read", "plan-backlog", "plan-candidates", "plan-push", "plan-write", "plan", "pop", "recur", "release-gate", "release-tag", "release", "reports-init", "reports-validate", "specify", "sprint-end-facts", "sprint-end-stories", "sprint-end", "status-issues", "status", "tasks", "tracker-export", "tracker-migrate", "tracker-sync"}
 	if strings.Join(names, " ") != strings.Join(want, " ") {
 		t.Fatalf("profiles rendered %v, want %v", names, want)
 	}
@@ -107,15 +107,39 @@ func TestMergeSkillsRefusesASkillWithTwoSources(t *testing.T) {
 	}
 }
 
+// A model skill names, for each of its words, the model-free profile a
+// coding agent runs it with when no model is configured (GH-48).
+func TestModelSkillsNameTheirWordsProfiles(t *testing.T) {
+	skills, err := ProfileSkills(scrummaster.Plugin, scrummaster.AgentsDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string][]string{
+		"specify":    {"issue-file", "issue-lint"},
+		"plan":       {"plan-candidates", "plan-write", "plan-push", "plan-backlog"},
+		"tasks":      {"goals-plan", "goals-push", "backlog-list", "issue-list", "issue-file"},
+		"sprint-end": {"sprint-end-facts", "sprint-end-stories"},
+		"draft":      {"backlog-check", "backlog-list", "backlog-template"},
+		"implement":  {"pop", "merge"},
+	}
+	for _, s := range skills {
+		for _, profile := range want[s.Name] {
+			if !strings.Contains(s.Body, RunCommand(profile)+" --request request.json") {
+				t.Errorf("%s's skill does not name the %s profile", s.Name, profile)
+			}
+		}
+	}
+}
+
 func TestRenderProfileSkillRefusesAnEmptyMachine(t *testing.T) {
-	if _, err := renderProfileSkill("x", machineDoc{Purpose: "", States: []machineState{{Name: "A"}}}, nil, false); err == nil {
+	if _, err := renderProfileSkill("x", machineDoc{Purpose: "", States: []machineState{{Name: "A"}}}, nil, false, nil); err == nil {
 		t.Error("a machine without a purpose must be refused")
 	}
-	if _, err := renderProfileSkill("x", machineDoc{Purpose: "p"}, nil, false); err == nil {
+	if _, err := renderProfileSkill("x", machineDoc{Purpose: "p"}, nil, false, nil); err == nil {
 		t.Error("a machine without states must be refused")
 	}
 	m := machineDoc{Purpose: "p", InitialState: "Idle", States: []machineState{{Name: "Idle"}, {Name: "End"}}, TerminalStates: []string{"End"}}
-	if _, err := renderProfileSkill("x", m, nil, false); err == nil {
+	if _, err := renderProfileSkill("x", m, nil, false, nil); err == nil {
 		t.Error("a machine with no steps between initial and terminal states must be refused")
 	}
 }
@@ -140,7 +164,7 @@ func TestRenderedSkillsRunTheVendoredProfile(t *testing.T) {
 				t.Errorf("pop's run section:\n%s", s.Body)
 			}
 		case "plan":
-			if !strings.Contains(s.Body, "follow the steps below yourself") {
+			if !strings.Contains(s.Body, "do the model's part yourself") || !strings.Contains(s.Body, "The steps below say what each word is for") {
 				t.Errorf("plan's run section:\n%s", s.Body)
 			}
 		}
