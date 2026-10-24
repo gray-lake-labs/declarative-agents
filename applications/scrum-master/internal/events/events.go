@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
 // Package events writes and reads comment events: comments whose body holds
-// one <!-- tpm program event=NAME key=value ... --> marker (srd006 R1).
+// one <!-- scrum-master program event=NAME key=value ... --> marker (srd006 R1).
 // Events inform; posting one never changes an issue's state (R7.3).
 package events
 
@@ -34,7 +34,7 @@ func (e Event) Values(key string) []string {
 	return out
 }
 
-var markerPattern = regexp.MustCompile(`<!--\s*tpm program (event=\S+(?:\s+[a-z_]+=\S+)*)\s*-->`)
+var markerPattern = regexp.MustCompile(`<!--\s*scrum-master program (event=\S+(?:\s+[a-z_]+=\S+)*)\s*-->`)
 
 // Marker renders the event's marker. Values must be free of spaces (R1.1).
 func (e Event) Marker() (string, error) {
@@ -48,7 +48,7 @@ func (e Event) Marker() (string, error) {
 		}
 		parts = append(parts, kv.Key+"="+kv.Value)
 	}
-	return "<!-- tpm program " + strings.Join(parts, " ") + " -->", nil
+	return "<!-- scrum-master program " + strings.Join(parts, " ") + " -->", nil
 }
 
 // Parse returns the marker in a comment body, if it holds exactly one.

@@ -52,7 +52,7 @@ func TestDeclaredDefaultRulesMatchTheBuiltInList(t *testing.T) {
 	}
 }
 
-// A rule name tpm does not implement is reported, not silently skipped.
+// A rule name scrum-master does not implement is reported, not silently skipped.
 func TestUnknownRuleIsReported(t *testing.T) {
 	p := Defaults()
 	p.AdmissionRules = []string{"one-plane", "no-such-rule"}

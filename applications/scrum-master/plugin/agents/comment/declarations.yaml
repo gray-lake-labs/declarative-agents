@@ -1,0 +1,56 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
+# The comment machine's words (GH-37). TPM_PROJECT and TPM_ISSUE name the issue; optional flags are
+# parameters from the run's request, never ${VAR} args (GH-135).
+unit: scrum-master-comment-declarations
+tools:
+- name: issue_comment
+  type: exec
+  binary: scrum-master
+  args:
+  - issue
+  - comment
+  - --json
+  - --project
+  - ${TPM_PROJECT}
+  - --issue
+  - ${TPM_ISSUE}
+  visibility: internal
+  description: 'Post a comment on the issue as the caller.'
+  category: boundary
+  parameters:
+    type: object
+    properties:
+      body:
+        type: string
+        description: 'The comment''s text.'
+        flag: --body
+      body_file:
+        type: string
+        description: 'A file holding the comment''s text.'
+        flag: --body-file
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: 'The comment word''s JSON report.'
+    schema:
+      type: string
+  side_effects:
+  - kind: external_api_call
+    target: tracker
+    description: 'Posts the comment.'
+  reversibility:
+    classification: irreversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: The word's write is a person's to reverse with the tracker.
+  errors:
+  - signal: CommandError
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
+    message_shape: 'issue_comment: <error>'
+    state_after_failure: nothing ran in a word that did not start
+  - signal: ToolFailed
+    condition: the word refuses and exits non-zero
+    message_shape: <the word's reason, as printed>
+    state_after_failure: the tracker is as the word's refusal left it

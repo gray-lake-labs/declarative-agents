@@ -19,7 +19,8 @@ import (
 type AuditRunner func(dir, command string) (string, error)
 
 // WordsBinary is the name the profiles and the policy's commands give the
-// words (GH-32); tpm, the binary that ran them, still names them too.
+// words (GH-32); tpm, the binary that ran them before, still names them in
+// a policy an earlier release wrote.
 const WordsBinary = "scrum-master"
 
 // Words runs a command line of words in this process, with dir as its

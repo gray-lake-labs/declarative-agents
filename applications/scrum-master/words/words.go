@@ -1,8 +1,8 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
 
-// Package words runs tpm's commands, the words the Scrum Master profiles'
-// exec declarations name, as one command line: from the tpm binary, or in
+// Package words runs scrum-master's commands, the words the Scrum Master profiles'
+// exec declarations name, as one command line: from the rig's harness, or in
 // the agent's own process when an agent build links this package in and
 // serves Binary with Run (GH-27).
 package words
@@ -32,7 +32,7 @@ func SetSpecTool(run func(args []string, stdout, stderr io.Writer) int) { specto
 // Binary is the name the profiles' exec declarations give the words.
 const Binary = program.WordsBinary
 
-// Exit codes, as the tpm binary has always had them.
+// Exit codes, as the words have always had them.
 const (
 	ExitOK    = 0
 	ExitError = 1
@@ -48,11 +48,11 @@ func Run(dir string, args []string, out io.Writer) int {
 	if dir != "" {
 		prev, err := os.Getwd()
 		if err != nil {
-			fmt.Fprintln(out, "tpm:", err)
+			fmt.Fprintln(out, "scrum-master:", err)
 			return ExitError
 		}
 		if err := os.Chdir(dir); err != nil {
-			fmt.Fprintln(out, "tpm:", err)
+			fmt.Fprintln(out, "scrum-master:", err)
 			return ExitError
 		}
 		defer os.Chdir(prev)
@@ -60,11 +60,11 @@ func Run(dir string, args []string, out io.Writer) int {
 	return Main(args, out, out)
 }
 
-// Main is the tpm command line from the current directory: the output to
+// Main is the scrum-master command line from the current directory: the output to
 // out, an error to errOut, and the exit code.
 func Main(args []string, out, errOut io.Writer) int {
 	if len(args) == 1 && (args[0] == "--version" || args[0] == "version") {
-		fmt.Fprintln(out, "tpm", install.Version())
+		fmt.Fprintln(out, "scrum-master", install.Version())
 		return ExitOK
 	}
 	open := func() (tracker.Tracker, error) {
@@ -82,7 +82,7 @@ func Main(args []string, out, errOut io.Writer) int {
 		fmt.Fprintln(errOut, err)
 		return ExitUsage
 	default:
-		fmt.Fprintln(errOut, "tpm:", err)
+		fmt.Fprintln(errOut, "scrum-master:", err)
 		return ExitError
 	}
 }

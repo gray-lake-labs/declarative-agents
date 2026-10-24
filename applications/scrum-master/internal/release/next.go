@@ -9,7 +9,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
 )
 
-// Candidate is one version tpm release next offers.
+// Candidate is one version scrum-master release next offers.
 type Candidate struct {
 	Bump    string `json:"bump"`
 	Version string `json:"version"`
@@ -19,7 +19,7 @@ type Candidate struct {
 	Label string `json:"-"`
 }
 
-// NextResult is what tpm release next reports (srd015 R3.1).
+// NextResult is what scrum-master release next reports (srd015 R3.1).
 type NextResult struct {
 	Artifact   string      `json:"artifact"`
 	Latest     string      `json:"latest,omitempty"`
@@ -28,7 +28,10 @@ type NextResult struct {
 	// Recommended is the candidate the commits since the latest tag call
 	// for, and Reason says why; empty when nothing changed since it.
 	Recommended string `json:"recommended,omitempty"`
-	Reason      string `json:"reason"`
+	// RecommendedVersion is the recommended candidate's version, which the
+	// release profile's gate and tag read (GH-37).
+	RecommendedVersion string `json:"recommended_version,omitempty"`
+	Reason             string `json:"reason"`
 }
 
 // Recommend picks the bump the commits since the latest release call for
@@ -38,6 +41,14 @@ type NextResult struct {
 // patch; any other change is minor. No commit since the latest release
 // recommends nothing.
 func (n *NextResult) Recommend(messages []string, requirementsUnchanged bool) {
+	defer func() {
+		n.RecommendedVersion = ""
+		for _, c := range n.Candidates {
+			if c.Bump == n.Recommended {
+				n.RecommendedVersion = c.Version
+			}
+		}
+	}()
 	switch {
 	case n.Latest == "":
 		n.Recommended, n.Reason = "minor", "no "+n.Artifact+" tag yet: the first release is minor"
@@ -83,7 +94,7 @@ func Next(r program.Releases, artifact string, tags []string) NextResult {
 	return out
 }
 
-// Human is the text tpm release next prints without --json.
+// Human is the text scrum-master release next prints without --json.
 func (n NextResult) Human() string {
 	var b strings.Builder
 	if n.Latest == "" {

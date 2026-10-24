@@ -19,7 +19,7 @@ import (
 //go:embed templates/*.md.tmpl
 var templates embed.FS
 
-// Template is a document of kind in the layout tpm backlog check accepts:
+// Template is a document of kind in the layout scrum-master backlog check accepts:
 // its frontmatter, its context tree, and every field the level declares,
 // with example values to replace.
 func Template(kind string) (string, error) {

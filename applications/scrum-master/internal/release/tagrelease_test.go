@@ -134,10 +134,10 @@ func TestTagReadsAPeerReadMadeAfterTheGate(t *testing.T) {
 }
 
 func TestNextRecommendsFromTheCommits(t *testing.T) {
-	first := NextResult{}
+	first := NextResult{Candidates: []Candidate{{Bump: "patch", Version: "0.0.1"}, {Bump: "minor", Version: "0.1.0"}}}
 	first.Recommend(nil, false)
-	if first.Recommended != "minor" {
-		t.Errorf("first release: %+v", first)
+	if first.Recommended != "minor" || first.RecommendedVersion != "0.1.0" {
+		t.Errorf("first release: %+v, want minor at 0.1.0 (GH-37)", first)
 	}
 	for want, messages := range map[string][]string{
 		"":      nil,

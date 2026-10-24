@@ -25,7 +25,7 @@ func init() {
 	common := func(fs *flag.FlagSet) {
 		fs.StringVar(&a.dir, "dir", ".", "the system repository's checkout")
 		fs.StringVar(&a.system, "system", "", "system repository path, for slipped objectives and the last milestone")
-		fs.StringVar(&a.aggregate, "aggregate", "", "the period's tpm reports aggregate --json output, for slipped objectives")
+		fs.StringVar(&a.aggregate, "aggregate", "", "the period's scrum-master reports aggregate --json output, for slipped objectives")
 		fs.StringVar(&a.artifact, "artifact", "corpus", "the artifact the system repository releases its plan as")
 		fs.StringVar(&a.control, "control", "", "program repository holding control/policy.md; defaults to --system")
 		fs.StringVar(&a.ref, "ref", "main", "ref of the control files")

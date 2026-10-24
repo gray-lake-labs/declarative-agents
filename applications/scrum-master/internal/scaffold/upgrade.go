@@ -16,14 +16,14 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
 )
 
-// systemContext is the context field tpm init writes first in the system
+// systemContext is the context field scrum-master init writes first in the system
 // SRD: the system's owner, so the SRD declares the system repository a
 // component of the program (srd043 R1.1).
 const systemContext = "<!-- field: context | form: \"tree\" -->\n## Context\n\n- owner: The technical program manager\n"
 
 var documentField = regexp.MustCompile(`(?m)^<!-- field: ([a-z_]+)[^\n]*-->\n## `)
 
-// UpgradeSystemSRD adds to the system SRD text doc the fields tpm init now
+// UpgradeSystemSRD adds to the system SRD text doc the fields scrum-master init now
 // writes there and doc lacks: context as its first field, and
 // implementation_targets, from the origin of the repository at dir, as its
 // last. It returns the text and the fields it added; every other line is
@@ -51,7 +51,7 @@ func UpgradeSystemSRD(doc []byte, dir string) ([]byte, []string) {
 var policySection = regexp.MustCompile(`(?m)^<!-- field: ([a-z_]+)[^\n]*-->\n(#+) `)
 
 // AddCorpusPeerRead adds to the control/policy.md text doc the corpus
-// release's peer-read gate tpm init now writes (srd015 R1.2), when its
+// release's peer-read gate scrum-master init now writes (srd015 R1.2), when its
 // definition of done names no corpus gate. A definition of done that names
 // one is the program's and stays. A policy with no definition of done gets
 // init's whole one, so the defaults it read before still apply.
@@ -123,7 +123,7 @@ func upgradeSystem(dir string, files []Result, dryRun bool) error {
 		}
 		out, reason, err := change(doc)
 		if err != nil {
-			files[i].Reason = "does not parse, so doctor cannot add what tpm init now writes there: " + err.Error()
+			files[i].Reason = "does not parse, so doctor cannot add what scrum-master init now writes there: " + err.Error()
 			return nil
 		}
 		if bytes.Equal(out, doc) {

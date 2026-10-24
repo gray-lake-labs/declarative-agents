@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
-// Package beads is tpm's tracker over beads (srd042). Issues live in bd's
+// Package beads is scrum-master's tracker over beads (srd042). Issues live in bd's
 // JSONL interchange format, one issue per line, in a dedicated tracker
 // repository that every working clone synchronizes with through git by the
 // discipline of eng04-beads-sync: pull before read, push after write,
@@ -43,7 +43,7 @@ type Comment struct {
 }
 
 // Issue is one line of the tracker file. The fields up to Comments are
-// bd's own; the rest are tpm's, which bd carries in the file but does not
+// bd's own; the rest are scrum-master's, which bd carries in the file but does not
 // read. State is the srd041 state, held explicitly so a merge can replay a
 // transition through the table (srd042 R1.2), and StateActor is the actor
 // that fired the transition into it.

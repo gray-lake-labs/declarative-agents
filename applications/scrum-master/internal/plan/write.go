@@ -31,7 +31,7 @@ type Returned struct {
 	Missing []string `json:"missing"`
 }
 
-// Written is what tpm plan write reports.
+// Written is what scrum-master plan write reports.
 type Written struct {
 	Path     string     `json:"path"`
 	Release  Release    `json:"release"`
@@ -95,7 +95,7 @@ func WriteRelease(dir string, r Release, c Candidates, t tracker.Tracker, issueP
 }
 
 // releaseFieldOrder is the order the parent schema gives a release
-// record's fields (agent-core design.yaml, release_field), which tpm doctor
+// record's fields (agent-core design.yaml, release_field), which scrum-master doctor
 // checks: deliverables come before srds, and both before release.
 var releaseFieldOrder = []string{"capabilities", "numbering_note", "proof_commands", "title", "library_srds", "parent",
 	"related_agent_core_release", "application_srds", "planned_work", "relocated_to", "deliverables", "dependencies", "srds",
@@ -104,7 +104,7 @@ var releaseFieldOrder = []string{"capabilities", "numbering_note", "proof_comman
 	"test_suites", "current_application_evidence", "follow_up", "evidence_status", "proof", "evidence", "implementation_evidence",
 	"evidence_boundary", "success_markers", "deferred", "post_merge", "non_runnable_modules"}
 
-// placeholder is a sentence tpm init's templates leave for an owner to
+// placeholder is a sentence scrum-master init's templates leave for an owner to
 // replace ("... writes here ...").
 var placeholder = regexp.MustCompile(`(?m)^[^\n]* writes here [^\n]*\.\n`)
 
@@ -154,7 +154,7 @@ func putRelease(doc string, r Release) (string, string) {
 				prose = strings.ReplaceAll(prose, old, r.Tag)
 			}
 		}
-		// The sentence tpm wrote for an earlier write follows the record:
+		// The sentence scrum-master wrote for an earlier write follows the record:
 		// a republish moves the tag, so the prose moves with it (#188).
 		own := regexp.MustCompile(`(?m)^Release ` + regexp.QuoteMeta(r.Version) + ` delivers [^\n]*, tagged [^\n]*\.\n`)
 		prose = own.ReplaceAllLiteralString(prose, proves+"\n")
@@ -232,8 +232,8 @@ func assemble(prose string, fields []recordPart) string {
 	return out
 }
 
-// overviewFill is the overview tpm writes in place of init's placeholder.
-const overviewFill = "Each release below names the objective items it delivers, in deliverables, and its milestone and tag, in release; tpm plan write keeps them.\n"
+// overviewFill is the overview scrum-master writes in place of init's placeholder.
+const overviewFill = "Each release below names the objective items it delivers, in deliverables, and its milestone and tag, in release; scrum-master plan write keeps them.\n"
 
 // fillOverview replaces the overview field's placeholder sentence.
 func fillOverview(doc string) string {

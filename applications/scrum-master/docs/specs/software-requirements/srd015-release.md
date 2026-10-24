@@ -1,6 +1,6 @@
 ---
 id: srd015-release
-title: "Script: release (tpm release ...)"
+title: "Script: release (scrum-master release ...)"
 ---
 <!-- Copyright (c) 2026 Gray Lake Labs -->
 <!-- SPDX-License-Identifier: MIT-0 -->
@@ -12,11 +12,11 @@ A release is the point where an artifact becomes something other
 repositories may depend on, so it is where the checks declared for that
 artifact must run (srd008 R2). If tagging and checking are separate manual
 steps, tags appear without evidence, and consumers adapt to versions nobody
-verified. A program repository has the tpm binary and no build tool of
+verified. A program repository has the agent and no build tool of
 its own, and creating the tag is a rule rather than a judgement
-(design.md D10), so tpm does all of it: the gate's evidence, the next
+(design.md D10), so scrum-master does all of it: the gate's evidence, the next
 version, the class of the release, and the tag. The person chooses the
-version bump; tpm refuses a tag the evidence does not support.
+version bump; scrum-master refuses a tag the evidence does not support.
 
 <!-- field: goals -->
 ## Goals
@@ -26,7 +26,7 @@ version bump; tpm refuses a tag the evidence does not support.
 - G3: The tests that produced a release's evidence ship with it.
 
 <!-- req: R1 -->
-## R1 - tpm release gate
+## R1 - scrum-master release gate
 
 <!-- req: R1.1 -->
 ### R1.1
@@ -36,20 +36,20 @@ For an artifact and a candidate revision, runs every check the policy declares f
 <!-- req: R1.2 -->
 ### R1.2
 
-A peer-read check passes when a person other than the release issue's author has approved the release issue, either with a thumbs-up award emoji, on a tracker that has awards, or with an approval comment carrying the marker `<!-- tpm release peer-read -->`, which tpm release approve posts as the person who runs it and refuses to post for the issue's author. On the beads tracker, which has no awards, the comment is the approval (srd042). The subcommand reports the check pending otherwise and does not wait. tpm release tag reads a pending peer read again, so an approval made after the gate ran counts without running the gate again.
+A peer-read check passes when a person other than the release issue's author has approved the release issue, either with a thumbs-up award emoji, on a tracker that has awards, or with an approval comment carrying the marker `<!-- scrum-master release peer-read -->`, which scrum-master release approve posts as the person who runs it and refuses to post for the issue's author. On the beads tracker, which has no awards, the comment is the approval (srd042). The subcommand reports the check pending otherwise and does not wait. scrum-master release tag reads a pending peer read again, so an approval made after the gate ran counts without running the gate again.
 
 <!-- req: R1.3 -->
 ### R1.3
 
-Exits zero only when every check passed, or when the peer read is the only check pending, the state before tpm release approve: it then says the tag waits on that approval.
+Exits zero only when every check passed, or when the peer read is the only check pending, the state before scrum-master release approve: it then says the tag waits on that approval.
 
 <!-- req: R2 -->
-## R2 - tpm release tag
+## R2 - scrum-master release tag
 
 <!-- req: R2.1 -->
 ### R2.1
 
-tpm release tag creates the tag in policy.releases.tag_format for the artifact and version at the candidate revision, and pushes it, only when the most recent gate run for that artifact, version, and revision passed.
+scrum-master release tag creates the tag in policy.releases.tag_format for the artifact and version at the candidate revision, and pushes it, only when the most recent gate run for that artifact, version, and revision passed.
 
 <!-- req: R2.2 -->
 ### R2.2
@@ -64,15 +64,15 @@ The release is classified as breaking or compatible by policy.releases.breaking,
 <!-- req: R2.4 -->
 ### R2.4
 
-Tagging does not run handoff; the tag triggers tpm handoff on-release in CI (srd014 R7).
+Tagging does not run handoff; the tag triggers scrum-master handoff on-release in CI (srd014 R7).
 
 <!-- req: R2.5 -->
 ### R2.5
 
-A declared check this tpm cannot run, a contract-tests or scorecard check or any environment other than local, fails the gate with that reason rather than passing, so no tag follows it.
+A declared check this scrum-master cannot run, a contract-tests or scorecard check or any environment other than local, fails the gate with that reason rather than passing, so no tag follows it.
 
 <!-- req: R3 -->
-## R3 - tpm release next
+## R3 - scrum-master release next
 
 <!-- req: R3.1 -->
 ### R3.1
@@ -93,12 +93,12 @@ The release issue records the test-subsystem release whose suites produced the g
 <!-- req: R5.1 -->
 ### R5.1
 
-Subcommands are in the tpm group release, honour --json and --dry-run, and never prompt (srd010 R1).
+Subcommands are in the scrum-master group release, honour --json and --dry-run, and never prompt (srd010 R1).
 
 <!-- field: non_goals -->
 ## Non-goals
 
-- Choosing the version bump; the person decides it from what tpm release next reports.
+- Choosing the version bump; the person decides it from what scrum-master release next reports.
 - Promotion between environments; that is CI/CD in the test subsystem (srd008).
 - Publishing packages or images; a program attaches those to the tag through its own CI.
 
@@ -121,7 +121,7 @@ gate runs exactly the declared checks in their environments, local ones through 
 <!-- ac: AC2 -->
 ### AC2
 
-tpm release tag tags and pushes only after a passing gate for the same artifact, version, and revision, refuses a non-increasing version, records the class, and leaves handoff to CI.
+scrum-master release tag tags and pushes only after a passing gate for the same artifact, version, and revision, refuses a non-increasing version, records the class, and leaves handoff to CI.
 
 <!-- field: traces -->
 #### Traces

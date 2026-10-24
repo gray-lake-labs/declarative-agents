@@ -23,7 +23,7 @@ counts. Each Sprint Goal is the ledger track-goals writes evidence to, and
 the team's Sprint Planning lists on it the stories it selected (srd034,
 srd045). Before release 04.0 a Sprint Goal was called an objective issue.
 Invoking tasks is the decision to file them: it takes every owner
-and environment tpm can compute, asks only for what it cannot, and pushes
+and environment scrum-master can compute, asks only for what it cannot, and pushes
 without a further confirmation.
 
 <!-- field: goals -->
@@ -65,7 +65,7 @@ Open Sprint Goal issues (and objective issues, read as Sprint Goals) already in 
 <!-- req: R3.1 -->
 ### R3.1
 
-Takes the owner tpm recommends for each initiative item: the Product Owner whose subsystem SRD declares a repository the item's delivered_by names (srd034 R1.4). Asks which downstream team serves an item only when none is recommended, offering the repositories the subsystem SRDs declare.
+Takes the owner scrum-master recommends for each initiative item: the Product Owner whose subsystem SRD declares a repository the item's delivered_by names (srd034 R1.4). Asks which downstream team serves an item only when none is recommended, offering the repositories the subsystem SRDs declare.
 
 <!-- req: R3.2 -->
 ### R3.2
@@ -119,7 +119,7 @@ Refuses to copy names or confidential content from inputs.
 <!-- req: R6.1 -->
 ### R6.1
 
-At the story level, reads the story a team selected at Sprint Planning through tpm backlog list, and the issues already implementing it through tpm issue list --implements.
+At the story level, reads the story a team selected at Sprint Planning through scrum-master backlog list, and the issues already implementing it through scrum-master issue list --implements.
 
 <!-- req: R6.2 -->
 ### R6.2
@@ -129,7 +129,7 @@ Proposes the issues the story still needs, each a change one reviewer reads in o
 <!-- req: R6.3 -->
 ### R6.3
 
-Files each agreed issue with tpm issue file under the Sprint Goal's milestone, and shows each issue's reference and lint verdict.
+Files each agreed issue with scrum-master issue file under the Sprint Goal's milestone, and shows each issue's reference and lint verdict.
 
 <!-- req: R7 -->
 ## R7 - The workflow as a profile
@@ -137,7 +137,7 @@ Files each agreed issue with tpm issue file under the Sprint Goal's milestone, a
 <!-- req: R7.1 -->
 ### R7.1
 
-The workflow is a declarative-agents profile, plugin/agents/tasks/ (design.md D14): the machine's states carry the skill's steps, the tpm commands are model-dispatched tools with typed parameters, and the model acts only in the Decompose state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and tpm install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
+The workflow is a declarative-agents profile, plugin/agents/tasks/ (design.md D14): the machine's states carry the skill's steps, the scrum-master commands are model-dispatched tools with typed parameters, and the model acts only in the Decompose state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and scrum-master install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
 
 <!-- field: non_goals -->
 ## Non-goals

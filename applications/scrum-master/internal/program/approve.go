@@ -12,7 +12,7 @@ import (
 
 // approvalPrefix opens the marker an approval comment carries; the commit
 // the reviewer read completes it (srd013 R5.6).
-const approvalPrefix = "<!-- tpm program approve commit="
+const approvalPrefix = "<!-- scrum-master program approve commit="
 
 func approvalMarker(commit string) string { return approvalPrefix + commit + " -->" }
 

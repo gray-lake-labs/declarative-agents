@@ -39,7 +39,7 @@ reconstructs the Sprint Goal's state without reading anything else.
 <!-- req: R1.1 -->
 ### R1.1
 
-An event is a comment whose body contains exactly one marker of the form <!-- tpm program event=NAME key=value ... -->, where NAME is an event in this SRD's vocabulary and every value is free of spaces.
+An event is a comment whose body contains exactly one marker of the form <!-- scrum-master program event=NAME key=value ... -->, where NAME is an event in this SRD's vocabulary and every value is free of spaces.
 
 <!-- req: R1.2 -->
 ### R1.2

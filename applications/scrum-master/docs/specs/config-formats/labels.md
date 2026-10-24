@@ -8,7 +8,7 @@ title: Label schema
 <!-- field: purpose -->
 ## Purpose
 
-Defines the labels a program creates in its tracker group so every issue can carry the five axes of the process: plane, type, kind, component, and state. The scripts create missing labels from this file and read it to check admission. Values for plane, type, kind, op, and state are fixed by srd001; component values come from the program. When a newer tpm adds an axis or a value, tpm doctor adds it to the file and keeps everything the file already holds (srd043 R4.2).
+Defines the labels a program creates in its tracker group so every issue can carry the five axes of the process: plane, type, kind, component, and state. The scripts create missing labels from this file and read it to check admission. Values for plane, type, kind, op, and state are fixed by srd001; component values come from the program. When a newer scrum-master adds an axis or a value, scrum-master doctor adds it to the file and keeps everything the file already holds (srd043 R4.2).
 
 <!-- field: schema -->
 ## Schema
@@ -253,13 +253,13 @@ none
 
 | name | color | description |
 | --- | --- | --- |
-| file | #95a5a6 | Filed by tpm issue file |
-| plan | #95a5a6 | Filed by tpm plan push |
-| goals | #95a5a6 | Filed by tpm goals push |
-| onboard | #95a5a6 | Filed by tpm onboard |
-| report | #95a5a6 | Filed by tpm reports aggregate --push |
-| status | #95a5a6 | Filed by tpm reports status |
-| recur | #95a5a6 | Opened by tpm issue recur |
+| file | #95a5a6 | Filed by scrum-master issue file |
+| plan | #95a5a6 | Filed by scrum-master plan push |
+| goals | #95a5a6 | Filed by scrum-master goals push |
+| onboard | #95a5a6 | Filed by scrum-master onboard |
+| report | #95a5a6 | Filed by scrum-master reports aggregate --push |
+| status | #95a5a6 | Filed by scrum-master reports status |
+| recur | #95a5a6 | Opened by scrum-master issue recur |
 
 <!-- field: state -->
 ### State

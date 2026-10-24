@@ -123,7 +123,7 @@ A score is ready within an hour.
 dev
 `
 
-// Plan plans release 01.1 in the system repository: candidates, the road-map write merged through a planning issue with tpm issue merge, the plan tagged behind the documents-only gate, the period pushed (milestone, sprint issue, sprint-end issues) once, and tasks reading the plan at its tag (test-rel01.2-sprint-end).
+// Plan plans release 01.1 in the system repository: candidates, the road-map write merged through a planning issue with scrum-master issue merge, the plan tagged behind the documents-only gate, the period pushed (milestone, sprint issue, sprint-end issues) once, and tasks reading the plan at its tag (test-rel01.2-sprint-end).
 func (Integration) Plan() error {
 	e, err := newWeeklyEnv("reports-plan")
 	if err != nil {
@@ -163,7 +163,7 @@ func (Integration) Plan() error {
 	control := []string{"--system", system, "--control", system, "--ref", seedBranch, "--dir", clone}
 
 	var cand plan.Candidates
-	if err := r.tpmJSON(&cand, append([]string{"plan", "candidates"}, control...)...); err != nil {
+	if err := r.wordsJSON(&cand, append([]string{"plan", "candidates"}, control...)...); err != nil {
 		return err
 	}
 	c.expect(cand.Version == "01.1" && cand.Tag == "corpus/v0.1.0" && len(cand.Items) > 0 && cand.Items[0].ID == "obj002-fast-scoring#R1.1",
@@ -172,14 +172,14 @@ func (Integration) Plan() error {
 	body := filepath.Join(r.run.Dir, "plan.md")
 	writeFileTo(body, "## Requirements\n\n1. Plan release 01.1.\n\n## Acceptance Criteria\n\n- mage audit passes (test: mage_audit; environment: local)\n")
 	var filed program.FileResult
-	if err := r.tpmJSON(&filed, "issue", "file", "--project", system, "--system", system, "--ref", seedBranch,
+	if err := r.wordsJSON(&filed, "issue", "file", "--project", system, "--system", system, "--ref", seedBranch,
 		"--title", "Plan release 01.1", "--body-file", body, "--path", "docs/road-map.md"); err != nil {
 		return err
 	}
 	issue := fmt.Sprintf("%s#%d", system, filed.IID)
 
 	var written plan.Written
-	if err := r.tpmJSON(&written, append([]string{"plan", "write", "--version", "01.1", "--tag", cand.Tag,
+	if err := r.wordsJSON(&written, append([]string{"plan", "write", "--version", "01.1", "--tag", cand.Tag,
 		"--items", "obj002-fast-scoring#R1.1", "--issue", issue}, control...)...); err != nil {
 		return err
 	}
@@ -197,7 +197,7 @@ func (Integration) Plan() error {
 		return err
 	}
 	var merged program.MergeResult
-	if err := r.tpmJSON(&merged, "issue", "merge", "--project", system, "--issue", fmt.Sprint(filed.IID),
+	if err := r.wordsJSON(&merged, "issue", "merge", "--project", system, "--issue", fmt.Sprint(filed.IID),
 		"--branch", branch, "--dir", clone, "--audit", rigAudit); err != nil {
 		return err
 	}
@@ -213,11 +213,11 @@ func (Integration) Plan() error {
 	}
 	gateArgs := []string{"--artifact", "corpus", "--version", "0.1.0", "--issue", issue, "--control", system, "--ref", seedBranch, "--dir", clone}
 	var gate release.ReleaseGateResult
-	if err := r.tpmJSON(&gate, append([]string{"release", "gate"}, gateArgs...)...); err != nil {
+	if err := r.wordsJSON(&gate, append([]string{"release", "gate"}, gateArgs...)...); err != nil {
 		return err
 	}
 	var tagged release.TagResult
-	if err := r.tpmJSON(&tagged, append([]string{"release", "tag"}, gateArgs...)...); err != nil {
+	if err := r.wordsJSON(&tagged, append([]string{"release", "tag"}, gateArgs...)...); err != nil {
 		return err
 	}
 	c.expect(gate.Passed && tagged.Pushed && tagged.Tag == cand.Tag, "plan tag: gate %+v tag %+v", gate, tagged)
@@ -225,7 +225,7 @@ func (Integration) Plan() error {
 	end := time.Now().AddDate(0, 0, 21).Format(time.DateOnly)
 	push := append([]string{"plan", "push", "--version", "01.1", "--end", end, "--group", r.group}, control...)
 	var pushed plan.PushResult
-	if err := r.tpmJSON(&pushed, push...); err != nil {
+	if err := r.wordsJSON(&pushed, push...); err != nil {
 		return err
 	}
 	repos := []string{}
@@ -235,7 +235,7 @@ func (Integration) Plan() error {
 	}
 	c.expect(pushed.Milestone == "created" && pushed.Sprint.Action == "filed", "first push: %+v", pushed)
 	c.expect(slices.Contains(repos, e.po1) && slices.Contains(repos, po2), "sprint-end issues in %v, want %s and %s", repos, e.po1, po2)
-	if err := r.tpmJSON(&pushed, push...); err != nil {
+	if err := r.wordsJSON(&pushed, push...); err != nil {
 		return err
 	}
 	c.expect(pushed.Milestone == "unchanged" && pushed.Sprint.Action == "unchanged" && pushed.SprintEnds[0].Action == "unchanged",
@@ -243,14 +243,14 @@ func (Integration) Plan() error {
 
 	// tasks reads the plan at its tag.
 	var p goals.Plan
-	if err := r.tpmJSON(&p, "goals", "plan", "--system", system, "--release", "01.1", "--ref", "main"); err != nil {
+	if err := r.wordsJSON(&p, "goals", "plan", "--system", system, "--release", "01.1", "--ref", "main"); err != nil {
 		return err
 	}
 	c.expect(p.Tag == cand.Tag && len(p.Objectives) == 1 && p.Objectives[0].Key == "obj002-fast-scoring#R1", "tasks plan: %+v", p)
 	return c.err("plan")
 }
 
-// SprintEnd works po-1's sprint-end issue: facts with the objective issue read as a Sprint Goal and reported complete, the stories done recorded in the summary, a summary merged with tpm issue merge that closes the issue and the objective with no met event and no contradiction signal, and a release gated and tagged on main after the merge (test-rel01.2-sprint-end).
+// SprintEnd works po-1's sprint-end issue: facts with the objective issue read as a Sprint Goal and reported complete, the stories done recorded in the summary, a summary merged with scrum-master issue merge that closes the issue and the objective with no met event and no contradiction signal, and a release gated and tagged on main after the merge (test-rel01.2-sprint-end).
 func (Integration) SprintEnd() error {
 	e, err := newWeeklyEnv("reports-sprint-end")
 	if err != nil {
@@ -273,7 +273,7 @@ func (Integration) SprintEnd() error {
 	body := filepath.Join(r.run.Dir, "sprint-end.md")
 	writeFileTo(body, plan.SprintEndBody("01.0", rigDue))
 	var filed program.FileResult
-	if err := r.tpmJSON(&filed, "issue", "file", "--project", po1, "--system", system, "--ref", seedBranch, "--control", system,
+	if err := r.wordsJSON(&filed, "issue", "file", "--project", po1, "--system", system, "--ref", seedBranch, "--control", system,
 		"--title", "Recurring: sprint end 01.0", "--body-file", body, "--kind", "release", "--type", "recurring", "--milestone", rigMilestone, "--due", rigDue); err != nil {
 		return err
 	}
@@ -284,7 +284,7 @@ func (Integration) SprintEnd() error {
 		return err
 	}
 	var facts sprintend.Facts
-	if err := r.tpmJSON(&facts, "sprint-end", "facts", "--project", po1, "--reports", e.clone, "--from", week, "--to", week,
+	if err := r.wordsJSON(&facts, "sprint-end", "facts", "--project", po1, "--reports", e.clone, "--from", week, "--to", week,
 		"--artifact", "grader", "--control", system, "--ref", seedBranch, "--dir", clone); err != nil {
 		return err
 	}
@@ -297,14 +297,14 @@ func (Integration) SprintEnd() error {
 	c.expect(obj != nil && obj.ReportedComplete && !obj.Met && obj.Legacy && facts.Recommended != "", "facts: %+v", facts)
 
 	var popped program.PopResult
-	if err := r.tpmJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(filed.IID), "--dir", clone); err != nil {
+	if err := r.wordsJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(filed.IID), "--dir", clone); err != nil {
 		return err
 	}
 	writeFileTo(filepath.Join(popped.Worktree, "docs/sprint-ends/01.0.md"), "# Sprint end 01.0\n\nThe Sprint Goal is reported complete.\n")
 	var recorded struct {
 		Changed bool `json:"changed"`
 	}
-	if err := r.tpmJSON(&recorded, "sprint-end", "stories", "--dir", popped.Worktree, "--release", "01.0", "--project", po1, "--done", "st001-score-trajectories"); err != nil {
+	if err := r.wordsJSON(&recorded, "sprint-end", "stories", "--dir", popped.Worktree, "--release", "01.0", "--project", po1, "--done", "st001-score-trajectories"); err != nil {
 		return err
 	}
 	summary, _ := os.ReadFile(filepath.Join(popped.Worktree, "docs/sprint-ends/01.0.md"))
@@ -316,7 +316,7 @@ func (Integration) SprintEnd() error {
 		return err
 	}
 	var merged program.MergeResult
-	if err := r.tpmJSON(&merged, "issue", "merge", "--project", po1, "--issue", fmt.Sprint(filed.IID),
+	if err := r.wordsJSON(&merged, "issue", "merge", "--project", po1, "--issue", fmt.Sprint(filed.IID),
 		"--branch", popped.Branch, "--dir", popped.Worktree, "--audit", rigAudit, "--closes", objRef); err != nil {
 		return err
 	}
@@ -334,7 +334,7 @@ func (Integration) SprintEnd() error {
 		}
 	}
 	var agg reports.Aggregation
-	if err := r.tpmJSON(&agg, "reports", "aggregate", "--dir", e.clone, "--from", week, "--to", week); err != nil {
+	if err := r.wordsJSON(&agg, "reports", "aggregate", "--dir", e.clone, "--from", week, "--to", week); err != nil {
 		return err
 	}
 	for _, s := range agg.Signals {
@@ -351,11 +351,11 @@ func (Integration) SprintEnd() error {
 	ref := fmt.Sprintf("%s#%d", po1, filed.IID)
 	gateArgs := []string{"--artifact", "grader", "--version", facts.Recommended, "--issue", ref, "--control", system, "--ref", seedBranch, "--dir", clone}
 	var gate release.ReleaseGateResult
-	if err := r.tpmJSON(&gate, append([]string{"release", "gate"}, gateArgs...)...); err != nil {
+	if err := r.wordsJSON(&gate, append([]string{"release", "gate"}, gateArgs...)...); err != nil {
 		return err
 	}
 	var tagged release.TagResult
-	if err := r.tpmJSON(&tagged, append([]string{"release", "tag"}, gateArgs...)...); err != nil {
+	if err := r.wordsJSON(&tagged, append([]string{"release", "tag"}, gateArgs...)...); err != nil {
 		return err
 	}
 	head, err := program.ExecGit{}.Run(clone, "rev-parse", "HEAD")

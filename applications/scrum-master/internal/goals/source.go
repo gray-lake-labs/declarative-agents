@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
-// Package goals is the tpm side of tasks (srd022, srd034 R3): it
+// Package goals is the scrum-master side of tasks (srd022, srd034 R3): it
 // computes each objective's facts and recommendations, and files the
 // confirmed objective issues. Nothing here is a model step (design.md D10).
 package goals

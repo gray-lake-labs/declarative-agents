@@ -8,7 +8,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
-// CommentResult is what tpm issue comment reports.
+// CommentResult is what scrum-master issue comment reports.
 type CommentResult struct {
 	Project string `json:"project"`
 	IID     int    `json:"iid"`

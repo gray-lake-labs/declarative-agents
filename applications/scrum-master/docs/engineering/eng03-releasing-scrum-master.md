@@ -8,16 +8,16 @@ title: "Releasing scrum-master: Gates, Then a Date Tag"
 <!-- field: introduction -->
 ## Introduction
 
-A scrum-master tag is what tpm is installed from: a developer downloads
-the tag's release binary or runs go install
-github.com/gray-lake-labs/scrum-master/cmd/tpm@<tag>, and a CI job runs on
-the tag's container image. tpm install stamps that version into every
-skill it writes (srd037). A tag that nothing checked would put an
-unverified tpm and its skills into every repository that installs it.
+A scrum-master tag is what scrum-master is installed from: a developer runs
+install.sh, which installs the tag's agent and unpacks its profiles, and
+a CI job runs on the tag's container image. The words stamp that version
+into every skill they install and every profile they vendor (srd037). A
+tag that nothing checked would put an unverified agent and its profiles
+into every repository that installs them.
 This guideline states how we cut a scrum-master release: the gates file,
 the sequence mage tag runs, the binaries and the image it publishes, and
 why the release depends on nothing outside this repository. A program repository's release is a
-different process (srd015, tpm release) and shares only the tagging code.
+different process (srd015, scrum-master release) and shares only the tagging code.
 
 <!-- section: the-gates-file -->
 ## The gates file
@@ -31,7 +31,7 @@ root.
 | Stage | Gates |
 |---|---|
 | audit | mage audit: the repository gate tests, then the specification-critic corpus audit |
-| test | go test ./..., mage integration:install, and mage crossBuild, which builds tpm for every release platform |
+| test | go test ./..., mage integration:install, and mage crossBuild, which builds the agent for every release platform and the profiles archive |
 
 Table: scrum-master's release gates.
 
@@ -56,7 +56,7 @@ creates nothing.
 | Recheck | HEAD and the worktree must be unchanged after the gates; a gate that commits or edits files voids the run |
 | Tag | v0.YYYYMMDD.N, N one past the highest revision for the day across local tags and origin's; the annotation lists the gates that passed and git log --oneline since the previous release |
 | Push | push auto pushes the tag to origin; push ask asks y/N and otherwise prints the push command |
-| Publish | Once the tag is on origin, mage publish runs: the release binaries, then the container image; a tag left unpushed prints mage publish as the step to run after pushing it |
+| Publish | Once the tag is on origin, mage publish runs: the release assets, then the container image; a tag left unpushed prints mage publish as the step to run after pushing it |
 
 Table: What mage tag does.
 
@@ -72,18 +72,21 @@ release the green main.
 <!-- section: release-binaries -->
 ## Release binaries
 
-mage publishDryRun builds the binaries and names what mage publish would
+mage publishDryRun builds the assets and names what mage publish would
 upload and push, creating nothing. mage integration:image builds the
-image for this machine's architecture and checks it without pushing. The first part of mage publish builds ./cmd/tpm at the tag with
-CGO_ENABLED=0 for linux, darwin, and windows on amd64 and arm64, writes
-SHA256SUMS over them, creates the tag's GitHub release, and uploads the
-six binaries and SHA256SUMS to it. The assets are named tpm_<os>_<arch>,
-with .exe on windows, the convention the declarative-agents releases
-follow, so one naming rule and one checksum check serve both.
-install.sh at the repository root downloads the asset for the machine
-from a named release, or the latest, verifies it against SHA256SUMS, and
-installs it; the README gives that, a manual download, and go install,
-each followed by tpm install --runtime (srd037 R7).
+image for this machine's architecture and checks it without pushing. The
+first part of mage publish builds the agent at the tag with
+CGO_ENABLED=0 for linux and darwin on amd64 and arm64, composed with the
+scrum-master words (GH-27) and stamped with the tag, writes the profiles
+archive, scrum-master-profiles.tar.gz — the profiles, agent-core's tools
+tree, and the release — writes SHA256SUMS over them, creates the tag's
+GitHub release, and uploads the assets to it (GH-34). The agents are named
+agent_<os>_<arch>, the convention the declarative-agents releases follow,
+so one naming rule and one checksum check serve both. install.sh
+downloads the agent for the machine and the profiles archive from a named
+release, or the latest, verifies both against SHA256SUMS, installs the
+agent, and unpacks the profiles; the README gives that, and the init
+profile a program starts from.
 
 The release is created with the organization's token
 (GH_TOKEN=$(gh auth token --user gray-lake-labs-owner)), never a
@@ -94,20 +97,17 @@ person's account, so nothing on the release names an individual.
 
 The second part builds one image for linux/amd64 and linux/arm64 with
 docker buildx from the Dockerfile at the repository root and pushes it as
-ghcr.io/gray-lake-labs/scrum-master:<tag>, and moves latest to it. Its build
-context is the directory the first part built the binaries into, and it
-copies tpm_linux_<arch> from there, so the image's tpm is the binary on
-the GitHub release; Dockerfile.dockerignore admits nothing else. A build
-stage with Go runs tpm install --runtime, and the image keeps only the
-cache it filled. The image holds
-tpm at the tag; the declarative-agents runtime at the release tpm pins,
-in the user cache directory tpm install --runtime fills (srd037 R7),
-with agent on PATH; the spec tool built at that release, so tpm doctor
-repairs a corpus at tpm's pin with no Go toolchain (srd043 R4.5); git,
-git-crypt, and CA certificates. It carries no Go toolchain and no mage,
-runs as a non-root user, and works in the directory a CI job mounts its
-checkout into. A job on the image therefore never runs a profile against
-a runtime it was not written for.
+ghcr.io/gray-lake-labs/scrum-master:<tag>, and moves latest to it. Its
+build context is the directory the first part built the assets into, and
+it copies agent_linux_<arch> and unpacks the profiles archive from there,
+so the image's agent and profiles are the ones on the GitHub release;
+Dockerfile.dockerignore admits nothing else. The image holds the agent,
+the profiles under SCRUM_MASTER_HOME, git, git-crypt, and CA
+certificates. The agent runs the words and the corpus gate's shape check
+in its own process, so the image carries no Go toolchain and no mage; it
+runs as a non-root user and works in the directory a CI job mounts its
+checkout into, where the job runs the repository's vendored check
+profile (GH-35).
 
 The push logs in to ghcr.io as the organization account with its gh
 token, which needs the write:packages scope. buildx attaches an SBOM
@@ -140,19 +140,12 @@ own registry mirror.
 <!-- section: versions -->
 ## Versions
 
-tpm takes its version from Go's version control detection: a build of
-./cmd/tpm from a clean checkout at a tag carries that tag, a build with
-uncommitted changes carries it with +dirty, and a build between tags
-carries a pseudo-version. tpm install stamps that version into every
-skill it writes. Nothing passes the version in by hand.
-
-Detection reads go.mod from the git objects at the tagged commit, so a
-go.mod stored in any other form makes every build report (devel). The
-repository is not encrypted, so go install from GitHub at a tag builds
-tpm at that tag, and the release binaries carry the same version. A
-repository gate test (TestGoModIsStoredInPlaintext) still fails when
-go.mod is stored encrypted, so a return to encryption cannot silently
-break the version.
+The agent and the words take their version from the tag: agent-core and
+the application are nested modules, so their build info never carries
+the repository's tag, and mage publish stamps it into both with -ldflags
+(GH-18). The words stamp that version into every skill they install and
+the profiles archive's release file names it. Nothing passes the version
+in by hand; a local build reports dev.
 
 <!-- section: no-dependency-outside-the-repository -->
 ## No dependency outside the repository
@@ -169,7 +162,7 @@ internal/release holds the gates file, the stage runner, and the
 tagging (NextDateTag, RemoteTags, Release.Tag), each behind a git
 function so tests run against real temporary repositories with a bare
 origin. magefiles/tag.go only wires the repository root to it, and
-tpm release (srd015) reuses the tagging for program repositories.
+scrum-master release (srd015) reuses the tagging for program repositories.
 
 <!-- field: references -->
 ## References
@@ -179,5 +172,5 @@ tpm release (srd015) reuses the tagging for program repositories.
 - install.sh
 - internal/release
 - docs/specs/software-requirements/srd015-release.md (a program repository's release)
-- docs/specs/software-requirements/srd037-install.md (the version tpm install stamps)
+- docs/specs/software-requirements/srd037-install.md (the version the words stamp)
 - docs/constitutions/design.md D10

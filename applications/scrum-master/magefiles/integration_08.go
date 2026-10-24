@@ -21,13 +21,13 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Init)
 }
 
-// Init builds tpm, inits an empty git repository with an empty tracker repository beside it, and proves the parent's corpus audit, the objective gate, and the hierarchy gate pass on the result as written, the orientation files are written for the system level, the tracker got its first commit and labels, and a second init changes nothing (test-rel01.4-agent-legible-cli, test-rel04.1-orientation-doctor). It needs no rig.
+// Init builds scrum-master, inits an empty git repository with an empty tracker repository beside it, and proves the parent's corpus audit, the objective gate, and the hierarchy gate pass on the result as written, the orientation files are written for the system level, the tracker got its first commit and labels, and a second init changes nothing (test-rel01.4-agent-legible-cli, test-rel04.1-orientation-doctor). It needs no rig.
 func (Integration) Init() error {
 	root, err := repositoryRoot()
 	if err != nil {
 		return err
 	}
-	tmp, err := os.MkdirTemp("", "tpm-init-")
+	tmp, err := os.MkdirTemp("", "scrum-master-init-")
 	if err != nil {
 		return err
 	}
@@ -35,9 +35,9 @@ func (Integration) Init() error {
 	if tmp, err = filepath.EvalSymlinks(tmp); err != nil {
 		return err
 	}
-	bin, repo, tracker := filepath.Join(tmp, "tpm"), filepath.Join(tmp, "system"), filepath.Join(tmp, "tracker.git")
-	if err := runStreaming(root, "go", "build", "-o", bin, "./cmd/tpm"); err != nil {
-		return fmt.Errorf("build tpm: %w", err)
+	bin, repo, tracker := filepath.Join(tmp, "scrum-master"), filepath.Join(tmp, "system"), filepath.Join(tmp, "tracker.git")
+	if err := runStreaming(root, "go", "build", "-o", bin, "./magefiles/words"); err != nil {
+		return fmt.Errorf("build the words: %w", err)
 	}
 	env := append(os.Environ(), "TPM_USER=operator",
 		"GIT_AUTHOR_NAME=operator", "GIT_AUTHOR_EMAIL=operator@example.invalid",
@@ -63,7 +63,7 @@ func (Integration) Init() error {
 		out, err := cmd.Output()
 		var exit *exec.ExitError
 		if errors.As(err, &exit) {
-			return r, fmt.Errorf("tpm init: %w: %s", err, exit.Stderr)
+			return r, fmt.Errorf("scrum-master init: %w: %s", err, exit.Stderr)
 		}
 		if err != nil {
 			return r, err
@@ -92,8 +92,8 @@ func (Integration) Init() error {
 	if err := sh(repo, "git", "add", "-A"); err != nil {
 		return err
 	}
-	c.expect(runCorpusAudit(repo, runStreaming) == nil, "the parent's corpus audit fails on the corpus tpm init wrote")
-	c.expect(specCheckAt(repo) == nil, "the spec tool's check fails on the corpus tpm init wrote")
+	c.expect(runCorpusAudit(repo, runStreaming) == nil, "the parent's corpus audit fails on the corpus scrum-master init wrote")
+	c.expect(specCheckAt(repo) == nil, "the spec tool's check fails on the corpus scrum-master init wrote")
 	docs, err := objectives.LoadDir(filepath.Join(repo, objectives.Dir))
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
@@ -103,7 +103,7 @@ func (Integration) Init() error {
 	}
 
 	hdocs, err := hierarchy.Load(repo)
-	c.expect(err == nil && len(hierarchy.Validate(hdocs)) == 0, "the hierarchy gate fails on the corpus tpm init wrote: %v", err)
+	c.expect(err == nil && len(hierarchy.Validate(hdocs)) == 0, "the hierarchy gate fails on the corpus scrum-master init wrote: %v", err)
 
 	second, err := initRepo()
 	if err != nil {
@@ -116,9 +116,9 @@ func (Integration) Init() error {
 	return c.err("init")
 }
 
-// expectOrientation holds a repository tpm laid down to its orientation
+// expectOrientation holds a repository scrum-master laid down to its orientation
 // files: README.md and AGENTS.md at the root, docs/engineering/README.md, a
-// README in each hierarchy folder of has and in none of lacks, each one tpm
+// README in each hierarchy folder of has and in none of lacks, each one scrum-master
 // block, ARCHITECTURE.md naming the engineering documents, and AGENTS.md
 // carrying the Mermaid figure rule (srd043 R1.6, R2.4).
 func expectOrientation(c *check, dir string, has, lacks []string) {
@@ -129,7 +129,7 @@ func expectOrientation(c *check, dir string, has, lacks []string) {
 	for _, p := range paths {
 		b, err := os.ReadFile(filepath.Join(dir, p))
 		c.expect(err == nil && strings.Contains(string(b), "<!-- managed:begin") && strings.Contains(string(b), scaffold.BlockEnd),
-			"%s: no orientation file with a tpm block: %v", p, err)
+			"%s: no orientation file with a scrum-master block: %v", p, err)
 	}
 	for _, f := range lacks {
 		_, err := os.Stat(filepath.Join(dir, "docs", "specs", f, "README.md"))

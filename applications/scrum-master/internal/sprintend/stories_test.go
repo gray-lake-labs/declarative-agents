@@ -55,7 +55,7 @@ func TestSprintEndRecordsStoriesDone(t *testing.T) {
 	if err != nil || done.Latest != "01.10" || !slices.Equal(done.Last, []string{"st002-store-scores"}) || done.Release["st001-old"] != "01.9" {
 		t.Fatalf("done %+v err %v", done, err)
 	}
-	if got := sprintgoal.SprintBacklog("x\n## Sprint Backlog\n\n- st002-store-scores Store scores (3 points)\n- st003-a A (8 points)\n\n<!-- tpm goals sprint-goal release=01.1 serves=a#R1 -->\n"); !slices.Equal(got, []string{"st002-store-scores", "st003-a"}) {
+	if got := sprintgoal.SprintBacklog("x\n## Sprint Backlog\n\n- st002-store-scores Store scores (3 points)\n- st003-a A (8 points)\n\n<!-- scrum-master goals sprint-goal release=01.1 serves=a#R1 -->\n"); !slices.Equal(got, []string{"st002-store-scores", "st003-a"}) {
 		t.Fatalf("sprint backlog %v", got)
 	}
 }

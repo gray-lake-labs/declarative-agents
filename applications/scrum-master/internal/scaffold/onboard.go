@@ -11,7 +11,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
-// OnboardOptions are what tpm onboard is given.
+// OnboardOptions are what scrum-master onboard is given.
 type OnboardOptions struct {
 	Dir     string
 	Agents  []string
@@ -26,7 +26,7 @@ type OnboardOptions struct {
 	Force, DryRun    bool
 }
 
-// OnboardResult is what tpm onboard reports.
+// OnboardResult is what scrum-master onboard reports.
 type OnboardResult struct {
 	Dir          string           `json:"dir"`
 	Files        []Result         `json:"files"`
@@ -46,7 +46,7 @@ type Registration struct {
 // registrationMarker names the repository a registration issue registers, so
 // a second onboard finds it.
 func registrationMarker(repository string) string {
-	return "<!-- tpm onboard registers " + program.ProjectPath(repository) + " -->"
+	return "<!-- scrum-master onboard registers " + program.ProjectPath(repository) + " -->"
 }
 
 // Onboard lays down a joining repository's corpus skeleton in o.Dir and

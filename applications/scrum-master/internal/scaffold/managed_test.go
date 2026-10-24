@@ -32,8 +32,8 @@ func TestRefreshManaged(t *testing.T) {
 	if !ok || how != "refreshed" || string(got) != "notes\n"+BlockBegin+"\nnew\n"+BlockEnd+"\nmore notes\n" {
 		t.Fatalf("refresh: %q %s %v", got, how, ok)
 	}
-	if _, _, ok := refreshManaged([]byte("anything\n"), []byte("no block in tpm's text\n")); ok {
-		t.Fatal("a file tpm writes without a block was treated as an orientation file")
+	if _, _, ok := refreshManaged([]byte("anything\n"), []byte("no block in scrum-master's text\n")); ok {
+		t.Fatal("a file scrum-master writes without a block was treated as an orientation file")
 	}
 }
 
@@ -53,7 +53,7 @@ func TestRefreshManagedAppends(t *testing.T) {
 	}
 }
 
-// olderBlock rewrites an orientation file's tpm text as an older tpm would
+// olderBlock rewrites an orientation file's scrum-master text as an older release would
 // have written it, and adds the owner's notes around the block.
 func olderBlock(t *testing.T, path string) {
 	t.Helper()
@@ -132,10 +132,10 @@ func TestInitAppendsToOrientationWithoutBlock(t *testing.T) {
 	}
 }
 
-// A block an earlier release wrote between tpm markers is found and
+// A block an earlier release wrote between scrum-master markers is found and
 // replaced with the current markers, keeping the owner's text (GH-36).
 func TestRefreshReplacesALegacyBlock(t *testing.T) {
-	cur := []byte("owner above\n<!-- tpm:begin: tpm writes the text -->\nold\n<!-- tpm:end -->\nowner below\n")
+	cur := []byte("owner above\n<!-- tpm:begin: scrum-master writes the text -->\nold\n<!-- tpm:end -->\nowner below\n")
 	fresh := []byte(BlockBegin + "\nnew\n" + BlockEnd + "\n")
 	merged, how, ok := refreshManaged(cur, fresh)
 	if !ok || how != "refreshed" || string(merged) != "owner above\n"+BlockBegin+"\nnew\n"+BlockEnd+"\nowner below\n" {

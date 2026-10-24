@@ -136,7 +136,7 @@ func init() {
 	var o DoctorOptions
 	cli.Default.Register(&cli.Command{
 		Group:   "doctor",
-		Summary: "bring a program repository up to date after an upgrade of tpm: missing files, tpm's text, document format, installed skills",
+		Summary: "bring a program repository up to date after an upgrade of scrum-master: missing files, scrum-master's text, document format, installed skills",
 		Flags: func(fs *flag.FlagSet) {
 			o = DoctorOptions{}
 			fs.StringVar(&o.Dir, "dir", "", "the program repository's checkout (default: the git root)")
@@ -159,7 +159,7 @@ func init() {
 }
 
 // humanDoctor names what doctor changed, or would change on a dry run, and
-// the skills tpm install would update; a file left as it was is counted,
+// the skills scrum-master install would update; a file left as it was is counted,
 // not listed.
 func humanDoctor(r DoctorResult) string {
 	var b strings.Builder
@@ -226,7 +226,7 @@ func humanDoctor(r DoctorResult) string {
 	}
 	for _, a := range install.Agents {
 		if agents[a] {
-			fmt.Fprintf(&b, "run tpm install --agent %s to update its skills\n", a)
+			fmt.Fprintf(&b, "run scrum-master install --agent %s to update its skills\n", a)
 		}
 	}
 	if r.DryRun {

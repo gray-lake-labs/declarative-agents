@@ -117,12 +117,12 @@ Each morning daily-scrum shows a person their in-progress issues, the overnight 
 <!-- req: R6.2 -->
 ### R6.2
 
-Until it is written, tpm standup (srd010) is the person's morning view.
+Until it is written, scrum-master standup (srd010) is the person's morning view.
 
 <!-- field: non_goals -->
 ## Non-goals
 
-- Team standups; the team view is tpm goals status.
+- Team standups; the team view is scrum-master goals status.
 - Reporting yesterday's work; the sprint update is a recurring audit (srd018 R6.1).
 
 <!-- field: acceptance_criteria -->

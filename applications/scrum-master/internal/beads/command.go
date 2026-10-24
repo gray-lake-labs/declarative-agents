@@ -23,7 +23,7 @@ func init() {
 			}
 			b, ok := t.(*Tracker)
 			if !ok {
-				return fmt.Errorf("tpm tracker reconcile serves the beads tracker; set TPM_TRACKER")
+				return fmt.Errorf("scrum-master tracker reconcile serves the beads tracker; set TPM_TRACKER")
 			}
 			if ctx.DryRun {
 				return fmt.Errorf("%w: reconcile pushes queued writes and has no dry run", cli.ErrUsage)
@@ -54,7 +54,7 @@ func init() {
 				return err
 			}
 			if ctx.DryRun {
-				return fmt.Errorf("%w: migrate has no dry run; tpm tracker export shows the issues it would move", cli.ErrUsage)
+				return fmt.Errorf("%w: migrate has no dry run; scrum-master tracker export shows the issues it would move", cli.ErrUsage)
 			}
 			r, err := b.Store.Migrate()
 			if err != nil {

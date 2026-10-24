@@ -13,7 +13,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
-// TestReconcileCommandConfirmsProvisionalPops runs tpm tracker reconcile on
+// TestReconcileCommandConfirmsProvisionalPops runs scrum-master tracker reconcile on
 // a clone that popped offline: back online, the pop is confirmed, and the
 // output names the tracker commit it read.
 func TestReconcileCommandConfirmsProvisionalPops(t *testing.T) {

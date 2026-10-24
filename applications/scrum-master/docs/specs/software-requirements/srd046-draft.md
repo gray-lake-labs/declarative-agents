@@ -10,7 +10,7 @@ title: "Skill: draft"
 
 - One skill serves every level. A theme, an initiative, an epic, a feature, and a story share one document shape (srd045 R2.1): context items, problem, goals, requirement groups, non-goals, and acceptance criteria. What differs by level is the parent kind, the location, and the context items the owner must decide, so the skill carries that difference as a table instead of five skills.
 - The skill discusses before it writes. A description says what someone wants; it rarely settles the parent, the horizon, the owner, the scope boundary, or how each criterion is tested, and those are the owner's decisions (D5). Asking them first, with a recommended answer for each, costs one exchange and spares a rewrite.
-- Facts and checks are tpm's (D10). The skill reads the existing hierarchy with tpm backlog list and checks what it wrote with tpm backlog check (srd045 R8); the model writes only the document's language and iterates on it with the person.
+- Facts and checks are scrum-master's (D10). The skill reads the existing hierarchy with scrum-master backlog list and checks what it wrote with scrum-master backlog check (srd045 R8); the model writes only the document's language and iterates on it with the person.
 - Children reuse the skill. Drafting an initiative's epics or an epic's stories is the same task one level down, so the skill offers it and runs again per child.
 
 <!-- field: problem -->
@@ -55,12 +55,12 @@ Its input is a description (a file or text the person gives) and the level to wr
 <!-- req: R2.1 -->
 ### R2.1
 
-The description, and the level's fields and context items from tpm help backlog and docs/constitutions/design.md.
+The description, and the level's fields and context items from docs/constitutions/design.md.
 
 <!-- req: R2.2 -->
 ### R2.2
 
-The repository's hierarchy documents from tpm backlog list --json (srd045 R8.1): their ids, kinds, titles, statuses, and parents, to propose a parent and an id and to find overlap.
+The repository's hierarchy documents from scrum-master backlog list --json (srd045 R8.1): their ids, kinds, titles, statuses, and parents, to propose a parent and an id and to find overlap.
 
 <!-- req: R3 -->
 ## R3 - Asks only what is not computed
@@ -101,12 +101,12 @@ Model step (structure): writes the document at its level's location in the paren
 <!-- req: R4.2 -->
 ### R4.2
 
-Runs tpm backlog check (srd045 R8.2) and fixes every finding before it shows the document.
+Runs scrum-master backlog check (srd045 R8.2) and fixes every finding before it shows the document.
 
 <!-- req: R4.3 -->
 ### R4.3
 
-Model step (iterate): shows the document and revises it with the person until they are satisfied, running tpm backlog check after each revision.
+Model step (iterate): shows the document and revises it with the person until they are satisfied, running scrum-master backlog check after each revision.
 
 <!-- req: R4.4 -->
 ### R4.4
@@ -142,7 +142,7 @@ As a skill, is at most 50 lines (design.md D10).
 <!-- req: R6.1 -->
 ### R6.1
 
-The workflow is a declarative-agents profile, plugin/agents/draft/ (design.md D14): the machine's states carry the skill's steps, the tpm commands are model-dispatched tools with typed parameters, and the model acts only in the Converse state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and tpm install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
+The workflow is a declarative-agents profile, plugin/agents/draft/ (design.md D14): the machine's states carry the skill's steps, the scrum-master commands are model-dispatched tools with typed parameters, and the model acts only in the Converse state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and scrum-master install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -157,7 +157,7 @@ The workflow is a declarative-agents profile, plugin/agents/draft/ (design.md D1
 <!-- ac: AC1 -->
 ### AC1
 
-Started by the level's owner with a description and a level, the skill reads the description, the level's fields, and the repository's hierarchy through tpm backlog list.
+Started by the level's owner with a description and a level, the skill reads the description, the level's fields, and the repository's hierarchy through scrum-master backlog list.
 
 <!-- field: traces -->
 #### Traces
@@ -184,7 +184,7 @@ Before writing, the skill states its understanding, proposes an id, title, and p
 <!-- ac: AC3 -->
 ### AC3
 
-The document is written at its level's location as to_be_agreed (an engineering document at docs/engineering/ with no status, named in ARCHITECTURE's related documents), passes tpm backlog check before it is shown, is revised with the person with a check after each revision, and the skill offers to draft its children with the same skill.
+The document is written at its level's location as to_be_agreed (an engineering document at docs/engineering/ with no status, named in ARCHITECTURE's related documents), passes scrum-master backlog check before it is shown, is revised with the person with a check after each revision, and the skill offers to draft its children with the same skill.
 
 <!-- field: traces -->
 #### Traces

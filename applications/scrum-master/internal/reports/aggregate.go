@@ -64,7 +64,7 @@ type Progress struct {
 	State      string `json:"state"` // met, reported complete, or the reported status
 }
 
-// Aggregation is what tpm reports aggregate returns.
+// Aggregation is what scrum-master reports aggregate returns.
 type Aggregation struct {
 	From        string              `json:"from"`
 	To          string              `json:"to"`

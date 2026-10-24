@@ -18,7 +18,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Pop)
 }
 
-// Pop files an admitted issue in po-1, pops it into a worktree of a local clone, proves the refusals, commits, delivers it with tpm issue merge, and proves the issue closed on the merge (test-rel00.1-pop).
+// Pop files an admitted issue in po-1, pops it into a worktree of a local clone, proves the refusals, commits, delivers it with scrum-master issue merge, and proves the issue closed on the merge (test-rel00.1-pop).
 func (Integration) Pop() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -31,7 +31,7 @@ func (Integration) Pop() error {
 	if err := r.milestone(rigMilestone, rigDue); err != nil {
 		return err
 	}
-	if _, err := r.runTPM("issue", "labels", "--group", r.group); err != nil {
+	if _, err := r.runWords("issue", "labels", "--group", r.group); err != nil {
 		return err
 	}
 	c := &check{}
@@ -42,7 +42,7 @@ func (Integration) Pop() error {
 		path := filepath.Join(run, "pop-"+program.Slug(title)+".md")
 		writeFileTo(path, body)
 		var res program.FileResult
-		return res, r.tpmJSON(&res, "issue", "file", "--project", po1, "--title", title, "--body-file", path,
+		return res, r.wordsJSON(&res, "issue", "file", "--project", po1, "--title", title, "--body-file", path,
 			"--plane", "data", "--kind", "build", "--component", "po-1", "--milestone", rigMilestone)
 	}
 
@@ -54,12 +54,12 @@ func (Integration) Pop() error {
 	if err != nil {
 		return err
 	}
-	if _, err := r.runTPM("install", "--agent", "claude", "--dir", clone); err != nil {
+	if _, err := r.runWords("install", "--agent", "claude", "--dir", clone); err != nil {
 		return err
 	}
 
 	var popped program.PopResult
-	if err := r.tpmJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", clone); err != nil {
+	if err := r.wordsJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", clone); err != nil {
 		return err
 	}
 	i, err := r.issue(po1, work.IID)
@@ -76,7 +76,7 @@ func (Integration) Pop() error {
 	c.expect(len(status) == 0, "worktree not clean after the install: %q", status)
 
 	var again program.PopResult
-	if err := r.tpmJSON(&again, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", clone); err != nil {
+	if err := r.wordsJSON(&again, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", clone); err != nil {
 		return err
 	}
 	c.expect(!again.Assigned && !again.Created && !again.Added, "second pop changed something: %+v", again)
@@ -89,13 +89,13 @@ func (Integration) Pop() error {
 	if _, err := r.tr.UpdateIssue(po1, closed.IID, tracker.IssueUpdate{State: &closeState}); err != nil {
 		return err
 	}
-	_, err = r.runTPM("issue", "pop", "--project", po1, "--issue", fmt.Sprint(closed.IID), "--dir", clone)
+	_, err = r.runWords("issue", "pop", "--project", po1, "--issue", fmt.Sprint(closed.IID), "--dir", clone)
 	c.expect(err != nil && strings.Contains(err.Error(), "is closed"), "pop of a closed issue: %v", err)
 	triaged, err := file("No acceptance criteria", bad)
 	if err != nil {
 		return err
 	}
-	_, err = r.runTPM("issue", "pop", "--project", po1, "--issue", fmt.Sprint(triaged.IID), "--dir", clone)
+	_, err = r.runWords("issue", "pop", "--project", po1, "--issue", fmt.Sprint(triaged.IID), "--dir", clone)
 	c.expect(err != nil && strings.Contains(err.Error(), "not admitted"), "pop of a needs-triage issue: %v", err)
 
 	writeFileTo(filepath.Join(popped.Worktree, "GRADER.md"), "# Grader notes\n")
@@ -105,7 +105,7 @@ func (Integration) Pop() error {
 	// The default policy merges without an approval; one that requires
 	// approval refuses until a reviewer gives one (srd013 R5.5).
 	var unapproved program.MergeResult
-	err = r.tpmJSON(&unapproved, "issue", "merge", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", popped.Worktree, "--dry-run")
+	err = r.wordsJSON(&unapproved, "issue", "merge", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", popped.Worktree, "--dry-run")
 	c.expect(err == nil && unapproved.DryRun && unapproved.ApprovedBy == "", "dry-run merge under the default policy: %+v, %v", unapproved, err)
 	system, err := r.project("system")
 	if err != nil {
@@ -116,13 +116,13 @@ func (Integration) Pop() error {
 		return err
 	}
 	requiring := []string{"issue", "merge", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", popped.Worktree, "--control", system, "--ref", seedBranch}
-	_, err = r.runTPM(requiring...)
+	_, err = r.runWords(requiring...)
 	c.expect(err != nil && strings.Contains(err.Error(), "no approval"), "merge with no approval under require_approval: %v", err)
 	if err := r.approve(po1, po1, work.IID, ""); err != nil {
 		return err
 	}
 	var merged program.MergeResult
-	if err := r.tpmJSON(&merged, requiring...); err != nil {
+	if err := r.wordsJSON(&merged, requiring...); err != nil {
 		return err
 	}
 	c.expect(merged.Merged && merged.Commit != "" && merged.ApprovedBy == rigReviewer, "merge: %+v", merged)

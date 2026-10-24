@@ -6,6 +6,7 @@ tools:
   # words -- model-invoked
   - backlog_list
   - backlog_check
+  - backlog_template
 
   # File words
   - read

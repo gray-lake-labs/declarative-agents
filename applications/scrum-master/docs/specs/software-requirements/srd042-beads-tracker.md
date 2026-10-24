@@ -28,11 +28,11 @@ merge requests, and costs three things the program feels daily: an
 external service to provision and keep reachable (the Terraform roots,
 service accounts, and CI wiring exist only to shape it), tracker text
 stored and indexed outside the repository, and a hard dependency that
-makes every tpm command a network call. The skills already merge
+makes every scrum-master command a network call. The skills already merge
 branches locally, and the tracker data is small, structured, and
 line-oriented. This SRD states the requirements for beads as the
 program's tracker: issues as data in a dedicated shared repository,
-synchronized through git, read and written by tpm through the same
+synchronized through git, read and written by scrum-master through the same
 tracker boundary the GitLab client serves today.
 
 <!-- req: R1 -->
@@ -41,7 +41,7 @@ tracker boundary the GitLab client serves today.
 <!-- req: R1.1 -->
 ### R1.1
 
-tpm's commands reach a tracking system only through the tracker
+scrum-master's commands reach a tracking system only through the tracker
 interface, in two halves every tracking system supplies as one package:
 the issue half (issues, their notes and the ledger events in them,
 milestones, labels, the current user, assignment) and the code half (a
@@ -67,14 +67,14 @@ or glab, and overrides for the projects or groups that use another. A
 repository has exactly one system, so project#iid names one issue; a
 group's entry serves every project under it that no closer entry names.
 TPM_TRACKER replaces the default for one person's run, never an override,
-and with no such file it alone names the system every project uses. tpm reads the file from the checkout, else from the one sibling
+and with no such file it alone names the system every project uses. scrum-master reads the file from the checkout, else from the one sibling
 checkout that holds it, worktrees of one repository counting as one.
 
 <!-- req: R1.4 -->
 ### R1.4
 
 The gh system serves a repository's issues, notes, labels, and milestones
-from GitHub through the gh CLI and the person's existing login; tpm keeps
+from GitHub through the gh CLI and the person's existing login; scrum-master keeps
 no token. GitHub has no due date on an issue and no start date on a
 milestone, so each is a Due: or Start: line of the description. A group's
 labels and milestones go to each of its repositories, as GitHub has none
@@ -144,18 +144,18 @@ The program's beads database lives in one dedicated git repository, the
 tracker repository, separate from every code repository. It is the
 single source of truth for program facts; a working clone's local beads
 state is a cache. Its .beads/config.yaml sets the program's issue
-prefix, once, when tpm init seeds it: every issue's ID is that prefix and
-eight hex digits, and tpm when the file sets none. An ID is never renamed.
+prefix, once, when scrum-master init seeds it: every issue's ID is that prefix and
+eight hex digits, and scrum-master when the file sets none. An ID is never renamed.
 The file's layout key names how issues are stored: files keeps each issue
 in .beads/issues/<id>.json, with an index under .beads/index/ from each
 repository's IIDs to IDs, and without the key every issue is in
-.beads/issues.jsonl; both are read and written, and tpm tracker migrate
+.beads/issues.jsonl; both are read and written, and scrum-master tracker migrate
 moves the second to the first.
 
 <!-- req: R3.2 -->
 ### R3.2
 
-Every tpm command that reads the tracker synchronizes from the tracker
+Every scrum-master command that reads the tracker synchronizes from the tracker
 repository before reading; every command that writes synchronizes to it
 after writing. The protocol, its conflict rules, and its offline
 behavior are eng04-beads-sync.
@@ -174,7 +174,7 @@ the last push of its own writes, whichever came later.
 ### R4.1
 
 The platform Terraform (groups, projects, memberships, recurring-issue
-seeding) is retired; recurring issues (srd001 R8) are seeded by tpm
+seeding) is retired; recurring issues (srd001 R8) are seeded by scrum-master
 against the tracker repository.
 
 <!-- req: R4.2 -->
@@ -187,7 +187,7 @@ GitLab subgroups; eng01 is rewritten when 03.0 is planned.
 ## Goals
 
 - G1: Every program fact lives in a repository the program owns, synchronized through git, with no hosted tracker in the loop.
-- G2: tpm behaves identically over beads and GitLab while both exist, because both serve one tracker interface.
+- G2: scrum-master behaves identically over beads and GitLab while both exist, because both serve one tracker interface.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -202,7 +202,7 @@ GitLab subgroups; eng01 is rewritten when 03.0 is planned.
 <!-- ac: AC1 -->
 ### AC1
 
-Every tpm command passes its tests against a fixture beads tracker with
+Every scrum-master command passes its tests against a fixture beads tracker with
 no GitLab reachable, and the srd041 state machine replays identically on
 both backends; a team checkout finds control/trackers.md in the system
 checkout beside it though a worktree of the system repository sits there

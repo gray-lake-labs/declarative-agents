@@ -14,7 +14,7 @@ import (
 )
 
 // checkoutWithWorktree is a git checkout with one commit and a linked
-// worktree beside it, as tpm issue pop leaves them.
+// worktree beside it, as scrum-master issue pop leaves them.
 func checkoutWithWorktree(t *testing.T) (checkout, worktree string, git func(dir string, args ...string) string) {
 	t.Helper()
 	base, _ := filepath.EvalSymlinks(t.TempDir())

@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
-// Package cli is tpm's command line: subcommand groups registered by
+// Package cli is scrum-master's command line: subcommand groups registered by
 // packages, each subcommand with --json and --dry-run, none reading stdin or
 // prompting (srd010 R1, srd013 R2.1).
 package cli
@@ -116,14 +116,14 @@ func (r *Registry) Register(c *Command) {
 		r.commands[c.Group] = map[string]*Command{}
 	}
 	if _, dup := r.commands[c.Group][c.Name]; dup {
-		panic("tpm: duplicate command " + c.Group + " " + c.Name)
+		panic("scrum-master: duplicate command " + c.Group + " " + c.Name)
 	}
 	r.commands[c.Group][c.Name] = c
 }
 
 // Retire makes old a former name of the group now: running it runs nothing
 // and fails naming the group that replaced it, so a skill written for an
-// earlier tpm says how to fix itself (srd013 R2.2).
+// earlier release says how to fix itself (srd013 R2.2).
 func (r *Registry) Retire(old, now string) {
 	if r.retired == nil {
 		r.retired = map[string]string{}
@@ -161,7 +161,7 @@ func (r *Registry) Run(args []string, out io.Writer, open func() (tracker.Tracke
 		if len(args) > 1 && !strings.HasPrefix(args[1], "-") {
 			sub = " " + args[1]
 		}
-		return fmt.Errorf("tpm %s is now tpm %s: run tpm %s%s; a skill that called tpm %s was installed from an earlier tpm, so run tpm install to update it",
+		return fmt.Errorf("scrum-master %s is now scrum-master %s: run scrum-master %s%s; a skill that called scrum-master %s was installed by an earlier release, so rerun the init or onboard profile to update it",
 			args[0], now, now, sub, args[0])
 	}
 	group, ok := r.commands[args[0]]
@@ -182,7 +182,7 @@ func (r *Registry) Run(args []string, out io.Writer, open func() (tracker.Tracke
 		}
 		rest = args[2:]
 	}
-	fs := flag.NewFlagSet(strings.TrimSpace("tpm "+cmd.Group+" "+cmd.Name), flag.ContinueOnError)
+	fs := flag.NewFlagSet(strings.TrimSpace("scrum-master "+cmd.Group+" "+cmd.Name), flag.ContinueOnError)
 	fs.SetOutput(out)
 	ctx := &Context{Flags: fs, Out: out}
 	ctx.Tracker = func() (tracker.Tracker, error) {
@@ -211,7 +211,7 @@ func (r *Registry) Run(args []string, out io.Writer, open func() (tracker.Tracke
 
 func (r *Registry) usage() string {
 	var b strings.Builder
-	b.WriteString("usage: tpm <group> <subcommand> [--json] [--dry-run] [flags]\n\ngroups:\n")
+	b.WriteString("usage: scrum-master <group> <subcommand> [--json] [--dry-run] [flags]\n\ngroups:\n")
 	for _, g := range sortedKeys(r.commands) {
 		if c := r.commands[g][""]; c != nil && len(r.commands[g]) == 1 {
 			fmt.Fprintf(&b, "  %-20s %s\n", g, c.Summary)
@@ -220,14 +220,14 @@ func (r *Registry) usage() string {
 		fmt.Fprintf(&b, "  %s\n", g)
 	}
 	if _, ok := r.commands["help"]; ok {
-		b.WriteString("\nrun tpm help for the process, tpm help <group> for one group\n")
+		b.WriteString("\nrun scrum-master help for the process, scrum-master help <group> for one group\n")
 	}
 	return b.String()
 }
 
 func (r *Registry) groupUsage(group string) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "usage: tpm %s <subcommand> [--json] [--dry-run] [flags]\n\nsubcommands:\n", group)
+	fmt.Fprintf(&b, "usage: scrum-master %s <subcommand> [--json] [--dry-run] [flags]\n\nsubcommands:\n", group)
 	for _, n := range sortedKeys(r.commands[group]) {
 		if n == "" {
 			continue

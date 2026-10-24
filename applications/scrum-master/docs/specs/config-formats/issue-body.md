@@ -180,7 +180,7 @@ line
 <!-- field: description -->
 #### Description
 
-"Estimated LOC: N" on its own line. The completion comment records "Actual LOC: N" against it, posted with tpm issue comment.
+"Estimated LOC: N" on its own line. The completion comment records "Actual LOC: N" against it, posted with scrum-master issue comment.
 
 <!-- schema_entry: handoff_marker -->
 ### handoff_marker
@@ -206,7 +206,7 @@ html comment
 <!-- field: description -->
 #### Description
 
-"<!-- tpm program event=NAME key=value ... -->" in a comment (srd006 R1). Exactly one per event comment.
+"<!-- scrum-master program event=NAME key=value ... -->" in a comment (srd006 R1). Exactly one per event comment.
 
 <!-- schema_entry: ledger_events -->
 ### ledger_events
@@ -219,7 +219,7 @@ html comment
 <!-- field: description -->
 #### Description
 
-Event markers that make a Sprint Goal issue its own ledger (srd006 R8–R11): "<!-- tpm program event=planned release=R requirement=URL story=REF environment=E -->", "<!-- tpm program event=evidence criterion=URL test=T environment=E version=V result=pass|fail -->", and "<!-- tpm program event=met release=R version=V -->".
+Event markers that make a Sprint Goal issue its own ledger (srd006 R8–R11): "<!-- scrum-master program event=planned release=R requirement=URL story=REF environment=E -->", "<!-- scrum-master program event=evidence criterion=URL test=T environment=E version=V result=pass|fail -->", and "<!-- scrum-master program event=met release=R version=V -->".
 
 <!-- schema_entry: previous_runs_section -->
 ### previous_runs_section
@@ -245,7 +245,7 @@ section
 <!-- field: description -->
 #### Description
 
-A "## Recurrence" heading on a recurring issue (srd001 R8), saying when the next copy is filed and by what: for a weekly status issue the reports repository's schedule (srd018 R9), for a sprint-end issue tpm plan push for the next period (srd038 R1.1).
+A "## Recurrence" heading on a recurring issue (srd001 R8), saying when the next copy is filed and by what: for a weekly status issue the reports repository's schedule (srd018 R9), for a sprint-end issue scrum-master plan push for the next period (srd038 R1.1).
 
 <!-- schema_entry: tracking_task_list -->
 ### tracking_task_list

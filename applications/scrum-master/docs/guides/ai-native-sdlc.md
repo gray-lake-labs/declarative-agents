@@ -38,7 +38,7 @@ flowchart LR
     W -->|implement| MR[reviewed merge]
     MR -->|review and merge| M[default branch]
     M -->|closes| I
-    M -->|tpm release| REL[version tag]
+    M -->|scrum-master release| REL[version tag]
     REL -->|test subsystem CI/CD| E[environments]
     E -->|track-goals: evidence| OBJ[Sprint Goal ledger]
 ```
@@ -55,7 +55,7 @@ it. The tracker holds the plan, so no window has to.
 | Work | The assignee, driving an agent | `implement` | Each unit built against its Acceptance Criteria and committed with its requirements; actual size logged against the estimate |
 | Gate | Another person, when the policy requires it | approval, then merge | Review against the definition of done |
 | Close | The merge | closing lines | The item and its sub-issues closed; cycle time recorded |
-| Release | The producer, when others depend on it | `tpm release gate`, then `tpm release tag` | A version tag behind the release gate, which handoff routes downstream |
+| Release | The producer, when others depend on it | `scrum-master release gate`, then `scrum-master release tag` | A version tag behind the release gate, which handoff routes downstream |
 
 ## The item is the specification
 
@@ -84,7 +84,7 @@ person the findings that landed on their work overnight.
 
 Whether a merge waits for a person other than its author is the program's
 choice. With `require_approval` in its policy, no kind and no size is
-exempt, and `tpm issue merge` refuses a branch without that person's
+exempt, and `scrum-master issue merge` refuses a branch without that person's
 approval of its tip; by default review is the team's practice, and an
 approval given is recorded on the merge. The reviewer is not checking what the tests check; the
 reviewer looks for what passes the tests and is still wrong: a pattern that

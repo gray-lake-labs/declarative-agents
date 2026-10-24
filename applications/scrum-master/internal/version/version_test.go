@@ -5,7 +5,7 @@ package version
 
 import "testing"
 
-// A stamped release wins over the build info, so a published tpm names its
+// A stamped release wins over the build info, so a published scrum-master names its
 // own release whatever its module version reads (GH-18).
 func TestCurrentPrefersTheStampedRelease(t *testing.T) {
 	saved := Release

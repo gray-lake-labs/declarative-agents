@@ -54,4 +54,4 @@ local check until the parent covers them.
 The format library, the audit, and this corpus are siblings at one tag
 (GH-190): a format change and the corpus that satisfies it land in one
 change, gated by this same audit. Program repositories move by editing the
-pin in their `docs/external-pins.yaml`; `tpm doctor` repairs at it.
+pin in their `docs/external-pins.yaml`; `scrum-master doctor` repairs at it.

@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
-// Package program is the tpm issue group: the issue operations every
+// Package program is the scrum-master issue group: the issue operations every
 // repository shares, admission and filing (srd013). Its former name,
 // program, runs nothing and names the group (srd013 R2.2).
 package program
@@ -172,7 +172,7 @@ func init() {
 			if r.Provisional {
 				// Taken offline: the assignment is the clone's until the
 				// tracker repository confirms it (GH-20).
-				human += "\nprovisional: taken while the tracker repository was unreachable; run tpm tracker reconcile once it is reachable"
+				human += "\nprovisional: taken while the tracker repository was unreachable; run scrum-master tracker reconcile once it is reachable"
 			}
 			if !ctx.DryRun {
 				if r.Installed, err = InstallSkills(r.Checkout, r.Worktree); err != nil {
@@ -219,7 +219,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			return ctx.Emit(r, fmt.Sprintf("%s#%d claimed; open its branch %s with tpm issue open-branch", issueProject, r.IID, r.Branch))
+			return ctx.Emit(r, fmt.Sprintf("%s#%d claimed; open its branch %s with scrum-master issue open-branch", issueProject, r.IID, r.Branch))
 		},
 	})
 
@@ -233,7 +233,7 @@ func init() {
 			fs.StringVar(&obArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&obArgs.iid, "issue", 0, "issue IID (required)")
 			fs.StringVar(&obArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
-			fs.StringVar(&obArgs.branch, "branch", "", "the branch to open (required; tpm issue claim names it)")
+			fs.StringVar(&obArgs.branch, "branch", "", "the branch to open (required; scrum-master issue claim names it)")
 		},
 		Run: func(ctx *cli.Context) error {
 			if obArgs.project == "" || obArgs.iid == 0 || obArgs.branch == "" {
@@ -317,7 +317,7 @@ func init() {
 				return fmt.Errorf("%w: install-skills needs --checkout and --worktree", cli.ErrUsage)
 			}
 			if ctx.DryRun {
-				return fmt.Errorf("install-skills has no dry run; tpm issue pop --dry-run shows the whole pop")
+				return fmt.Errorf("install-skills has no dry run; scrum-master issue pop --dry-run shows the whole pop")
 			}
 			installed, err := InstallSkills(isArgs.checkout, isArgs.worktree)
 			if err != nil {
@@ -467,7 +467,7 @@ func init() {
 			fs.IntVar(&mergeArgs.iid, "issue", 0, "issue IID (required)")
 			fs.StringVar(&mergeArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
 			fs.StringVar(&mergeArgs.branch, "branch", "", "branch to merge; empty uses the current branch of the working directory")
-			fs.StringVar(&mergeArgs.audit, "audit", "", "corpus gate command for a docs/ change; empty uses the policy's audit_command, tpm backlog check in a repository without magefiles")
+			fs.StringVar(&mergeArgs.audit, "audit", "", "corpus gate command for a docs/ change; empty uses the policy's audit_command, scrum-master backlog check in a repository without magefiles")
 			fs.StringVar(&mergeArgs.dir, "dir", ".", "the worktree holding the branch, where the audit runs")
 			fs.StringVar(&mergeArgs.control, "control", "", "program repository holding control/ files; empty reads them from --project, else the defaults")
 			fs.StringVar(&mergeArgs.ref, "ref", "main", "ref of the control files")
@@ -612,7 +612,7 @@ func init() {
 			} else if err != nil {
 				return refusedJSON(ctx, r, err)
 			}
-			human := fmt.Sprintf("%s merged into %s on %s; nothing closed: run tpm issue close-delivered --commit %s", r.Branch, r.Project, r.Commit, r.Commit)
+			human := fmt.Sprintf("%s merged into %s on %s; nothing closed: run scrum-master issue close-delivered --commit %s", r.Branch, r.Project, r.Commit, r.Commit)
 			if r.DryRun && r.Commit != "" && !r.Merged {
 				human = fmt.Sprintf("dry run: %s is already merged on %s; nothing would merge", r.Branch, r.Commit)
 			} else if r.DryRun {
@@ -649,7 +649,7 @@ func init() {
 				return fmt.Errorf("%w: close-delivered needs --project, --issue, and --commit", cli.ErrUsage)
 			}
 			if ctx.DryRun {
-				return fmt.Errorf("close-delivered has no dry run; tpm issue merge --dry-run shows the whole delivery")
+				return fmt.Errorf("close-delivered has no dry run; scrum-master issue merge --dry-run shows the whole delivery")
 			}
 			t, err := ctx.Tracker()
 			if err != nil {

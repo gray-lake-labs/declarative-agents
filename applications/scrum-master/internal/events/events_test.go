@@ -16,7 +16,7 @@ func TestPlannedRoundTripsThroughMarker(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.HasPrefix(body, "Planned for release 01.0; evidence counts in dev for 2 requirement(s).\n\n<!-- tpm program event=planned release=01.0 requirement=") {
+	if !strings.HasPrefix(body, "Planned for release 01.0; evidence counts in dev for 2 requirement(s).\n\n<!-- scrum-master program event=planned release=01.0 requirement=") {
 		t.Fatalf("body = %q", body)
 	}
 	got, ok := Parse(body)
@@ -35,7 +35,7 @@ func TestMarkerRefusesValuesWithSpaces(t *testing.T) {
 }
 
 func TestParseIgnoresCommentsWithoutExactlyOneMarker(t *testing.T) {
-	for _, body := range []string{"plain discussion", "<!-- tpm program event=a -->\n<!-- tpm program event=b -->"} {
+	for _, body := range []string{"plain discussion", "<!-- scrum-master program event=a -->\n<!-- scrum-master program event=b -->"} {
 		if _, ok := Parse(body); ok {
 			t.Errorf("%q parsed", body)
 		}

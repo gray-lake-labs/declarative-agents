@@ -15,7 +15,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
-// Plan is what tpm goals plan returns and tpm goals push takes back once the
+// Plan is what scrum-master goals plan returns and scrum-master goals push takes back once the
 // person has confirmed or changed each Repository and Environment.
 type Plan struct {
 	System     string             `json:"system"`

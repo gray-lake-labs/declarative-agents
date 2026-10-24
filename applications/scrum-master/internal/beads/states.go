@@ -55,7 +55,7 @@ const KindSprintGoal = "sprint-goal"
 var ErrRefused = errors.New("refused")
 
 // StatesFile is the config document holding a program's transitions table
-// (config format states): tpm init writes the default, and the tracker
+// (config format states): scrum-master init writes the default, and the tracker
 // reads the program's own rows from it, overlay rows among them.
 const StatesFile = "control/states.md"
 
@@ -77,7 +77,7 @@ var AnyOpen = []string{Open, NeedsTriage, Ready, Taken, InProgress}
 
 var anyOpen = AnyOpen
 
-// Table is the default srd041 state machine (R8.1), the rows tpm embeds
+// Table is the default srd041 state machine (R8.1), the rows scrum-master embeds
 // and init writes to control/states.md: every transition the tracker makes
 // is one of a program's rows, fired by the row's one actor.
 var Table = []Row{

@@ -26,7 +26,7 @@ func TestSkillsRenderFromTheirProfiles(t *testing.T) {
 	for _, s := range skills {
 		names = append(names, s.Name)
 	}
-	want := []string{"check", "draft", "implement", "init", "merge", "onboard", "plan-push", "plan", "pop", "specify", "sprint-end", "tasks"}
+	want := []string{"admit", "aggregate", "approve", "check", "close", "comment", "draft", "implement", "init", "labels", "merge", "onboard", "peer-read", "plan-push", "plan", "pop", "recur", "release", "reports-init", "specify", "sprint-end", "status-issues", "status", "tasks", "tracker-sync"}
 	if strings.Join(names, " ") != strings.Join(want, " ") {
 		t.Fatalf("profiles rendered %v, want %v", names, want)
 	}

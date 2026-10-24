@@ -1,0 +1,5 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
+# Tool selection for the reports-init machine: no model anywhere (GH-37).
+tools:
+  - reports_init

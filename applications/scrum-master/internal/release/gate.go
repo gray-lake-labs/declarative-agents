@@ -31,7 +31,7 @@ type CheckResult struct {
 	Reason      string `json:"reason,omitempty"`
 }
 
-// ReleaseGateResult is what tpm release gate reports (srd015 R1).
+// ReleaseGateResult is what scrum-master release gate reports (srd015 R1).
 type ReleaseGateResult struct {
 	Project  string `json:"project"`
 	Issue    int    `json:"issue"`
@@ -42,7 +42,7 @@ type ReleaseGateResult struct {
 	Run      string `json:"run"`
 	Passed   bool   `json:"passed"`
 	// AwaitingPeerRead is a gate whose every other check passed and whose
-	// peer read is pending: the state before tpm release approve, not a
+	// peer read is pending: the state before scrum-master release approve, not a
 	// failure (srd015 R1.3).
 	AwaitingPeerRead bool          `json:"awaiting_peer_read"`
 	Checks           []CheckResult `json:"checks"`
@@ -167,11 +167,11 @@ func runCheck(t tracker.Tracker, in ReleaseGateInput, issue tracker.Issue, c pro
 		if by != "" {
 			return ResultPass, "approved by " + by + "."
 		}
-		return ResultPending, "waiting for a thumbs-up or tpm release approve from someone other than " + issue.Author + "."
+		return ResultPending, "waiting for a thumbs-up or scrum-master release approve from someone other than " + issue.Author + "."
 	case c.Kind != "tests" && c.Kind != "custom":
-		return ResultFail, "a " + c.Kind + " check is not runnable by this tpm (srd015 R2.5)."
+		return ResultFail, "a " + c.Kind + " check is not runnable by this scrum-master (srd015 R2.5)."
 	case c.Environment != "local":
-		return ResultFail, "environment " + strconv.Quote(c.Environment) + " is not runnable by this tpm; only local is (srd015 R2.5)."
+		return ResultFail, "environment " + strconv.Quote(c.Environment) + " is not runnable by this scrum-master; only local is (srd015 R2.5)."
 	case strings.TrimSpace(c.Command) == "":
 		return ResultFail, "the check declares no command to run."
 	}

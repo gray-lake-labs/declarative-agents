@@ -13,7 +13,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
-// TagInput is one tpm release tag: the release issue holding the gate's
+// TagInput is one scrum-master release tag: the release issue holding the gate's
 // evidence, the candidate, and the checkout to tag.
 type TagInput struct {
 	Project  string
@@ -25,7 +25,7 @@ type TagInput struct {
 	DryRun   bool
 }
 
-// TagResult is what tpm release tag reports (srd015 R2).
+// TagResult is what scrum-master release tag reports (srd015 R2).
 type TagResult struct {
 	Project  string `json:"project"`
 	Issue    int    `json:"issue"`
@@ -95,7 +95,7 @@ func ReleaseTag(t tracker.Tracker, in TagInput) (TagResult, error) {
 	if status, err := in.Git("status", "--porcelain"); err != nil {
 		return r, err
 	} else if status != "" {
-		return r, errors.New("tpm release tag runs on a clean checkout; commit or stash the changes first")
+		return r, errors.New("scrum-master release tag runs on a clean checkout; commit or stash the changes first")
 	}
 	rev, err := in.Git("rev-parse", "HEAD")
 	if err != nil {
@@ -116,7 +116,7 @@ func ReleaseTag(t tracker.Tracker, in TagInput) (TagResult, error) {
 	if found {
 		r.Previous = latest.String()
 		if !latest.Less(in.Version) {
-			return r, fmt.Errorf("%s is not greater than the latest release %s; tpm release next lists the candidates", in.Version, latest)
+			return r, fmt.Errorf("%s is not greater than the latest release %s; scrum-master release next lists the candidates", in.Version, latest)
 		}
 	}
 
@@ -126,11 +126,11 @@ func ReleaseTag(t tracker.Tracker, in TagInput) (TagResult, error) {
 	}
 	run, ok := latestGateRun(notes, in.Artifact, tag)
 	if !ok {
-		return r, fmt.Errorf("no gate has run for %s on %s#%d; run tpm release gate first", tag, in.Project, in.Issue)
+		return r, fmt.Errorf("no gate has run for %s on %s#%d; run scrum-master release gate first", tag, in.Project, in.Issue)
 	}
 	r.GateRun = run.run
 	if run.revision != rev {
-		return r, fmt.Errorf("the latest gate for %s ran at %s, not at HEAD %s; run tpm release gate again", tag, short(run.revision), short(rev))
+		return r, fmt.Errorf("the latest gate for %s ran at %s, not at HEAD %s; run scrum-master release gate again", tag, short(run.revision), short(rev))
 	}
 	issue, err := t.GetIssue(in.Project, in.Issue)
 	if err != nil {

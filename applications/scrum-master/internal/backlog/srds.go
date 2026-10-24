@@ -60,7 +60,7 @@ func checkSRDs(dir string) (int, []hierarchy.Finding, error) {
 var specCheck = spectool.Run
 
 // notCanonical ends a spec tool line that only asks for formatting, which
-// tpm doctor repairs; the gate reports the shape findings it cannot.
+// scrum-master doctor repairs; the gate reports the shape findings it cannot.
 const notCanonical = ": not-canonical: run mage fmt"
 
 // untracked names each document under docs/ that git does not track: the

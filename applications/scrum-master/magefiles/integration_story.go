@@ -15,8 +15,8 @@ func init() {
 }
 
 // Story files a story's issues in po-1, one blocked behind an open issue,
-// lists them with tpm issue list --implements, pops the first, claims the
-// second into its worktree with tpm issue pop --worktree, builds both on
+// lists them with scrum-master issue list --implements, pops the first, claims the
+// second into its worktree with scrum-master issue pop --worktree, builds both on
 // the one branch, and proves one approved merge closes them both while the
 // blocked one stays open (srd036 R5, srd022 R6).
 func (Integration) Story() error {
@@ -31,7 +31,7 @@ func (Integration) Story() error {
 	if err := r.milestone(rigMilestone, rigDue); err != nil {
 		return err
 	}
-	if _, err := r.runTPM("issue", "labels", "--group", r.group); err != nil {
+	if _, err := r.runWords("issue", "labels", "--group", r.group); err != nil {
 		return err
 	}
 	c := &check{}
@@ -40,7 +40,7 @@ func (Integration) Story() error {
 		path := filepath.Join(r.run.Dir, "story-"+program.Slug(title)+".md")
 		writeFileTo(path, "## Requirements\n\n1. "+title+".\n\n## Acceptance Criteria\n\n- It is done (test: done; environment: local)\n\nImplements: "+story+"\n"+extra)
 		var res program.FileResult
-		return res, r.tpmJSON(&res, "issue", "file", "--project", po1, "--title", title, "--body-file", path,
+		return res, r.wordsJSON(&res, "issue", "file", "--project", po1, "--title", title, "--body-file", path,
 			"--plane", "data", "--kind", "build", "--component", "po-1", "--milestone", rigMilestone)
 	}
 	first, err := file("Score one trajectory", "")
@@ -61,7 +61,7 @@ func (Integration) Story() error {
 	}
 
 	var listed program.ListResult
-	if err := r.tpmJSON(&listed, "issue", "list", "--project", po1, "--implements", story); err != nil {
+	if err := r.wordsJSON(&listed, "issue", "list", "--project", po1, "--implements", story); err != nil {
 		return err
 	}
 	var order []int
@@ -76,10 +76,10 @@ func (Integration) Story() error {
 		return err
 	}
 	var popped, joined program.PopResult
-	if err := r.tpmJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(first.IID), "--dir", clone); err != nil {
+	if err := r.wordsJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(first.IID), "--dir", clone); err != nil {
 		return err
 	}
-	if err := r.tpmJSON(&joined, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(second.IID), "--worktree", popped.Worktree); err != nil {
+	if err := r.wordsJSON(&joined, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(second.IID), "--worktree", popped.Worktree); err != nil {
 		return err
 	}
 	c.expect(joined.Branch == popped.Branch && joined.Worktree == popped.Worktree && joined.Assigned && !joined.Created && !joined.Added,
@@ -94,7 +94,7 @@ func (Integration) Story() error {
 		return err
 	}
 	var merged program.MergeResult
-	if err := r.tpmJSON(&merged, "issue", "merge", "--project", po1, "--issue", fmt.Sprint(first.IID), "--dir", popped.Worktree,
+	if err := r.wordsJSON(&merged, "issue", "merge", "--project", po1, "--issue", fmt.Sprint(first.IID), "--dir", popped.Worktree,
 		"--closes", fmt.Sprintf("%s#%d", po1, second.IID)); err != nil {
 		return err
 	}

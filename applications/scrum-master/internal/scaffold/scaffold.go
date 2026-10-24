@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
-// Package scaffold lays down a program repository's corpus: tpm init for the
-// system repository and tpm onboard for each repository that joins it
+// Package scaffold lays down a program repository's corpus: scrum-master init for the
+// system repository and scrum-master onboard for each repository that joins it
 // (srd043).
 package scaffold
 
@@ -44,7 +44,7 @@ type Result struct {
 }
 
 // ParentRelease is the parent release the templates were written against,
-// the one this tpm's own corpus pins.
+// the one this scrum-master's own corpus pins.
 func ParentRelease() (string, error) { return runtime.DefaultPin(), nil }
 
 // implementationTargets is the system SRD's implementation_targets field
@@ -154,12 +154,12 @@ func controlFiles() map[string][]byte {
 	}
 }
 
-// ProgramAudit is the corpus gate a program repository runs: tpm's own
+// ProgramAudit is the corpus gate a program repository runs: scrum-master's own
 // hierarchy gate, since a program repository has no mage.
 const ProgramAudit = program.BacklogAudit
 
-// InitPolicy is the policy tpm init writes: the built-in defaults, with
-// tpm backlog check as the audit a docs/ merge runs and as the default
+// InitPolicy is the policy scrum-master init writes: the built-in defaults, with
+// scrum-master backlog check as the audit a docs/ merge runs and as the default
 // definition of done, and a gate for the system's corpus release of that
 // check and a peer read, since a release of the system needs one (srd015
 // R1.2). Every command it names is one a program repository can run: it
@@ -213,11 +213,11 @@ func write(dir string, files map[string][]byte, force, dryRun bool) ([]Result, e
 			if merged, how, ok := refreshManaged(cur, files[n]); ok {
 				switch {
 				case bytes.Equal(merged, cur):
-					r.Reason = "unchanged; text outside the tpm block is yours"
+					r.Reason = "unchanged; text outside the scrum-master block is yours"
 				case how == "appended":
-					r.Action, r.Reason, files[n] = how, "tpm block added after your text", merged
+					r.Action, r.Reason, files[n] = how, "scrum-master block added after your text", merged
 				default:
-					r.Action, r.Reason, files[n] = how, "tpm block replaced; text outside it kept", merged
+					r.Action, r.Reason, files[n] = how, "scrum-master block replaced; text outside it kept", merged
 				}
 			}
 		}

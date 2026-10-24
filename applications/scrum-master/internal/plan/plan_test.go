@@ -152,7 +152,7 @@ func input(t *testing.T, dir string, p trackertest.Program) (Input, tracker.Trac
 	t.Helper()
 	f := p.Tracker()
 	i, err := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Objective R2",
-		Description: "Objective\n\n<!-- tpm goals objective=obj001-reliable-agents#R2 release=01.0 -->"})
+		Description: "Objective\n\n<!-- scrum-master goals objective=obj001-reliable-agents#R2 release=01.0 -->"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -273,7 +273,7 @@ func testPlanReleaseWritesTheRoadMapRelease(t *testing.T, p trackertest.Program)
 	if err := os.WriteFile(filepath.Join(dir, RoadMap), b0, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	// A republish moves the tag; the sentence tpm wrote moves with it, so
+	// A republish moves the tag; the sentence scrum-master wrote moves with it, so
 	// the old tag is in neither prose nor fields (#188).
 	r.Tag = "corpus/v0.1.1"
 	if w, err := WriteRelease(dir, r, c, nil, "", 0); err != nil || w.Action != "replaced" {
@@ -286,7 +286,7 @@ func testPlanReleaseWritesTheRoadMapRelease(t *testing.T, p trackertest.Program)
 	}
 }
 
-// initRoadMap is the road map tpm init lays down: release 01.0 with prose
+// initRoadMap is the road map scrum-master init lays down: release 01.0 with prose
 // and srds, and no deliverables or publication yet.
 const initRoadMap = `---
 id: program-roadmap
@@ -309,7 +309,7 @@ The technical program manager writes here what the first release proves, after p
 - srd001-system
 `
 
-// TestPlanAFreshProgram plans the release tpm init laid down: candidates
+// TestPlanAFreshProgram plans the release scrum-master init laid down: candidates
 // read its road map without failing and recommend 01.0 itself, and plan
 // write keeps its prose and srds (srd031 R3.1, R4.1).
 func TestPlanAFreshProgram(t *testing.T) {
@@ -337,7 +337,7 @@ func TestPlanAFreshProgram(t *testing.T) {
 		if strings.Contains(got, "writes here") {
 			t.Errorf("a placeholder sentence survived the write:\n%s", got)
 		}
-		// The parent schema's order, which tpm doctor checks: deliverables,
+		// The parent schema's order, which scrum-master doctor checks: deliverables,
 		// then srds, then release (#148).
 		if strings.Index(got, "### Deliverables") > strings.Index(got, "### SRDs") || strings.Index(got, "### SRDs") > strings.Index(got, "### Release") {
 			t.Errorf("field order: want deliverables, srds, release:\n%s", got)

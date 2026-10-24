@@ -112,7 +112,7 @@ func (Integration) Tasks() error {
 	base := []string{"--system", system, "--release", rigRelease, "--ref", seedBranch}
 
 	var plan goals.Plan
-	if err := r.tpmJSON(&plan, append([]string{"goals", "plan"}, base...)...); err != nil {
+	if err := r.wordsJSON(&plan, append([]string{"goals", "plan"}, base...)...); err != nil {
 		return err
 	}
 	// One entry per item: R1's two items, then R2's one.
@@ -132,7 +132,7 @@ func (Integration) Tasks() error {
 	writeJSONTo(planFile, plan)
 	push := append([]string{"goals", "push", "--plan", planFile}, base...)
 
-	if _, err := r.runTPM(append(push, "--dry-run")...); err != nil {
+	if _, err := r.runWords(append(push, "--dry-run")...); err != nil {
 		return err
 	}
 	for _, p := range []string{po1, po2} {
@@ -141,7 +141,7 @@ func (Integration) Tasks() error {
 	}
 
 	var pushed []goals.Pushed
-	if err := r.tpmJSON(&pushed, push...); err != nil {
+	if err := r.wordsJSON(&pushed, push...); err != nil {
 		return err
 	}
 	for _, p := range pushed {
@@ -160,7 +160,7 @@ func (Integration) Tasks() error {
 		c.expect(due != "", "%s#%d has no due date", p, i.IID)
 		c.expect(strings.Contains(i.Description, "/-/blob/"+rigTag+"/docs/specs/objectives/obj001-reliable-agents.md#R"), "%s#%d Cites not pinned to %s", p, i.IID, rigTag)
 		c.expect(strings.Contains(i.Description, "Environment: dev") && strings.Contains(i.Description, "## Notes"), "%s#%d body lacks Environment or Notes", p, i.IID)
-		c.expect(strings.HasPrefix(i.Title, "Sprint Goal: ") && strings.Contains(i.Description, "## Sprint Backlog") && strings.Contains(i.Description, "<!-- tpm goals sprint-goal release="+rigRelease),
+		c.expect(strings.HasPrefix(i.Title, "Sprint Goal: ") && strings.Contains(i.Description, "## Sprint Backlog") && strings.Contains(i.Description, "<!-- scrum-master goals sprint-goal release="+rigRelease),
 			"%s#%d is not a Sprint Goal: %q", p, i.IID, i.Title)
 		ns, _ := r.notes(p, i.IID)
 		planned := 0
@@ -173,7 +173,7 @@ func (Integration) Tasks() error {
 	}
 
 	var again []goals.Pushed
-	if err := r.tpmJSON(&again, push...); err != nil {
+	if err := r.wordsJSON(&again, push...); err != nil {
 		return err
 	}
 	for _, p := range again {
@@ -183,7 +183,7 @@ func (Integration) Tasks() error {
 	plan.Objectives[r2].Environment = ""
 	writeJSONTo(planFile, plan)
 	var refused []goals.Pushed
-	if err := r.tpmJSON(&refused, push...); err != nil {
+	if err := r.wordsJSON(&refused, push...); err != nil {
 		return err
 	}
 	// One result per outcome and issue (#152): the refused outcome is found
@@ -215,14 +215,14 @@ func (Integration) Program() error {
 		"--plane", "data", "--kind", "build", "--component", "po-1", "--milestone", rigMilestone}
 
 	before, _ := r.issues(po1)
-	if _, err := r.runTPM(append(file, "--dry-run")...); err != nil {
+	if _, err := r.runWords(append(file, "--dry-run")...); err != nil {
 		return err
 	}
 	after, _ := r.issues(po1)
 	c.expect(len(after) == len(before), "dry-run file created an issue")
 
 	var filed program.FileResult
-	if err := r.tpmJSON(&filed, file...); err != nil {
+	if err := r.wordsJSON(&filed, file...); err != nil {
 		return err
 	}
 	c.expect(!filed.Lint.Admitted, "bad issue admitted")
@@ -240,7 +240,7 @@ func (Integration) Program() error {
 		return err
 	}
 	var linted []program.LintResult
-	if err := r.tpmJSON(&linted, "issue", "lint", "--project", po1, "--issue", fmt.Sprint(i.IID)); err != nil {
+	if err := r.wordsJSON(&linted, "issue", "lint", "--project", po1, "--issue", fmt.Sprint(i.IID)); err != nil {
 		return err
 	}
 	c.expect(len(linted) == 1 && linted[0].Admitted, "fixed issue not admitted: %+v", linted)

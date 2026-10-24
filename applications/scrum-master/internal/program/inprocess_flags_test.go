@@ -39,8 +39,8 @@ func TestRepeatableFlagsStartEmptyEachRun(t *testing.T) {
 	}
 }
 
-// A tpm audit command runs through the words in this process, so a merge's
-// gate needs no tpm installed; a shell command still runs in sh (GH-28).
+// A scrum-master audit command runs through the words in this process, so a merge's
+// gate needs no scrum-master installed; a shell command still runs in sh (GH-28).
 func TestAuditRunsATpmCommandInProcess(t *testing.T) {
 	var got []string
 	var gotDir string
@@ -56,7 +56,7 @@ func TestAuditRunsATpmCommandInProcess(t *testing.T) {
 		t.Fatalf("dir %q args %v out %q err %v", gotDir, got, out, err)
 	}
 	got = nil
-	if _, err := ShellAudit(t.TempDir(), "tpm backlog check | cat"); err != nil || got != nil {
+	if _, err := ShellAudit(t.TempDir(), "scrum-master backlog check | cat"); err != nil || got != nil {
 		t.Fatalf("a pipeline must run in sh: args %v err %v", got, err)
 	}
 }

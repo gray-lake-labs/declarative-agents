@@ -86,7 +86,7 @@ Every repository that carries initiative documents runs the corpus audit on each
 <!-- req: R2.3 -->
 ### R2.3
 
-A repository whose releases carry only documents declares the corpus audit as its release gate check (srd008 R2), so tpm release tag tags only an audited corpus (srd015 R2.1).
+A repository whose releases carry only documents declares the corpus audit as its release gate check (srd008 R2), so scrum-master release tag tags only an audited corpus (srd015 R2.1).
 
 <!-- req: R3 -->
 ## R3 - From initiative to Sprint Goal
@@ -124,7 +124,7 @@ A Sprint Goal is met when every acceptance criterion of every story it lists has
 <!-- req: R3.7 -->
 ### R3.7
 
-An objective issue, filed before release 04.0, is a Sprint Goal: every script reads it, its marker, and its ledger as a Sprint Goal's (srd006 R11.3). tpm files every new one as a Sprint Goal.
+An objective issue, filed before release 04.0, is a Sprint Goal: every script reads it, its marker, and its ledger as a Sprint Goal's (srd006 R11.3). scrum-master files every new one as a Sprint Goal.
 
 <!-- req: R4 -->
 ## R4 - Weekly status issue

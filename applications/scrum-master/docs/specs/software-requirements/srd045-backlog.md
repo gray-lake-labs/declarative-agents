@@ -143,7 +143,7 @@ A team's Product Backlog is its agreed stories that are not done, ordered by the
 <!-- req: R5.2 -->
 ### R5.2
 
-At Sprint Planning, plan in the team's repository (srd031) lists the Product Backlog with the team's velocity and recommends the stories, in rank order, whose points fit it; the Product Owner decides. tpm plan backlog writes the chosen stories into the Sprint Goal's Sprint Backlog section and posts a planned event naming them (srd034 R3.5, srd006 R8).
+At Sprint Planning, plan in the team's repository (srd031) lists the Product Backlog with the team's velocity and recommends the stories, in rank order, whose points fit it; the Product Owner decides. scrum-master plan backlog writes the chosen stories into the Sprint Goal's Sprint Backlog section and posts a planned event naming them (srd034 R3.5, srd006 R8).
 
 <!-- req: R5.3 -->
 ### R5.3
@@ -177,12 +177,12 @@ Until then, reports render no forecast and no burn-up.
 <!-- req: R8.1 -->
 ### R8.1
 
-tpm backlog list reads the hierarchy documents of the repository at --dir and prints each one's id, kind, title, status, parent, and path, and a story's points and rank; --kind keeps one kind. With --json it prints one object per document.
+scrum-master backlog list reads the hierarchy documents of the repository at --dir and prints each one's id, kind, title, status, parent, and path, and a story's points and rank; --kind keeps one kind. With --json it prints one object per document.
 
 <!-- req: R8.2 -->
 ### R8.2
 
-tpm backlog check runs R6.1's checks on the repository at --dir through the same function the gate in mage audit calls; it also reads the SRDs, counting them among the documents and refusing a requirement item no acceptance criterion traces, and runs the pinned parent spec tool's check, refusing each shape finding but formatting, which tpm doctor repairs, so the merge gate refuses what doctor would; the spec tool reads only what git tracks, so the gate also refuses each document under docs/ git does not track, naming it, rather than passing it unchecked. It prints each finding with its file, field, and message, says when the spec tool could not run and why, a document the tool cannot parse being a finding naming it and the cause, not a check that could not run; it also refuses a road-map release record whose status is not specified, implemented, or released, and exits non-zero when there is any finding; with --json it prints the document count, the findings, and why the spec check was skipped.
+scrum-master backlog check runs R6.1's checks on the repository at --dir through the same function the gate in mage audit calls; it also reads the SRDs, counting them among the documents and refusing a requirement item no acceptance criterion traces, and runs the pinned parent spec tool's check, refusing each shape finding but formatting, which scrum-master doctor repairs, so the merge gate refuses what doctor would; the spec tool reads only what git tracks, so the gate also refuses each document under docs/ git does not track, naming it, rather than passing it unchecked. It prints each finding with its file, field, and message, says when the spec tool could not run and why, a document the tool cannot parse being a finding naming it and the cause, not a check that could not run; it also refuses a road-map release record whose status is not specified, implemented, or released, and exits non-zero when there is any finding; with --json it prints the document count, the findings, and why the spec check was skipped.
 
 <!-- req: R8.3 -->
 ### R8.3
@@ -289,7 +289,7 @@ Release 06.0's planning writes the forecast items from R7.1; until then the inte
 <!-- ac: AC8 -->
 ### AC8
 
-tpm backlog list prints every hierarchy document with its id, kind, title, status, parent, path, and a story's points and rank, filtered by --kind; tpm backlog check reports exactly the gate's findings on the same documents, names a document git does not track, reports a document the spec tool cannot parse as a finding, refuses an unknown road-map release status, and exits non-zero when there is any; neither opens a tracker, uses the network, or writes.
+scrum-master backlog list prints every hierarchy document with its id, kind, title, status, parent, path, and a story's points and rank, filtered by --kind; scrum-master backlog check reports exactly the gate's findings on the same documents, names a document git does not track, reports a document the spec tool cannot parse as a finding, refuses an unknown road-map release status, and exits non-zero when there is any; neither opens a tracker, uses the network, or writes.
 
 <!-- field: traces -->
 #### Traces

@@ -8,13 +8,13 @@ import (
 )
 
 // TestCreateUsesTheTrackerPrefix names a new issue with the prefix the
-// tracker's config file sets, and with tpm when there is none (srd042).
+// tracker's config file sets, and with scrum-master when there is none (srd042).
 func TestCreateUsesTheTrackerPrefix(t *testing.T) {
 	f := newFixture(t)
 	alice := f.clone("alice")
 	before, err := alice.Create(Issue{Repository: "g/po-1", Title: "before"})
-	if err != nil || !strings.HasPrefix(before.ID, "tpm-") || len(before.ID) != len("tpm-")+8 {
-		t.Fatalf("create without a config file = %+v, %v, want a tpm- ID", before, err)
+	if err != nil || !strings.HasPrefix(before.ID, "sm-") || len(before.ID) != len("sm-")+8 {
+		t.Fatalf("create without a config file = %+v, %v, want an sm- ID", before, err)
 	}
 	if err := WriteConfig(alice.Dir, Config{IssuePrefix: "aeop"}); err != nil {
 		t.Fatal(err)
@@ -33,7 +33,7 @@ func TestCreateUsesTheTrackerPrefix(t *testing.T) {
 }
 
 func TestPrefixForTakesTheGroupsLastSegment(t *testing.T) {
-	for group, want := range map[string]string{"gray-lake-labs/aeop": "aeop", "Acme": "acme", "g/My_Program/": "myprogram", "g/__": "tpm", "": "tpm"} {
+	for group, want := range map[string]string{"gray-lake-labs/aeop": "aeop", "Acme": "acme", "g/My_Program/": "myprogram", "g/__": "sm", "": "sm"} {
 		if got := PrefixFor(group); got != want {
 			t.Errorf("PrefixFor(%q) = %q, want %q", group, got, want)
 		}

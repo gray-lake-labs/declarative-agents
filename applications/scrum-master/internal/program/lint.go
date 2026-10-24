@@ -15,7 +15,7 @@ import (
 
 // lintMarker heads every admission comment, so a repeated failure with the
 // same reasons posts nothing new.
-const lintMarker = "<!-- tpm program lint -->"
+const lintMarker = "<!-- scrum-master program lint -->"
 
 var (
 	evidencePattern = regexp.MustCompile(`\(test:\s*[^;)]+;\s*environment:\s*[^)]+\)`)
@@ -38,7 +38,7 @@ func Lint(i tracker.Issue, p Policy) []string {
 	for _, name := range names {
 		n := slices.IndexFunc(rules, func(r rule) bool { return r.name == name })
 		if n < 0 {
-			reasons = append(reasons, fmt.Sprintf("admission rule %q is not one tpm implements, so it cannot apply (config format policy)", name))
+			reasons = append(reasons, fmt.Sprintf("admission rule %q is not one scrum-master implements, so it cannot apply (config format policy)", name))
 			continue
 		}
 		reasons = append(reasons, rules[n].check(i, p)...)

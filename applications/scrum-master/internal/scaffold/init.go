@@ -16,11 +16,11 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/routing"
 )
 
-// InitOptions are what tpm init is given.
+// InitOptions are what scrum-master init is given.
 type InitOptions struct {
 	Dir     string
 	Agents  []string // agents to install the skills for; none installs none
-	Version string   // tpm version stamped into installed skills
+	Version string   // scrum-master version stamped into installed skills
 	// Tracker is a tracker repository to seed; Group is the program group
 	// whose labels are created there.
 	Tracker, Group string
@@ -30,7 +30,7 @@ type InitOptions struct {
 	Force, DryRun bool
 }
 
-// InitResult is what tpm init reports.
+// InitResult is what scrum-master init reports.
 type InitResult struct {
 	Dir     string           `json:"dir"`
 	Files   []Result         `json:"files"`
@@ -107,7 +107,7 @@ const NoTracker = "no tracker repository seeded; issues cannot be filed until on
 // repository that already has commits is left as it is.
 func seedTracker(o InitOptions) (TrackerResult, error) {
 	r := TrackerResult{Remote: o.Tracker}
-	tmp, err := os.MkdirTemp("", "tpm-init-tracker-*")
+	tmp, err := os.MkdirTemp("", "scrum-master-init-tracker-*")
 	if err != nil {
 		return r, err
 	}
@@ -137,7 +137,7 @@ func seedTracker(o InitOptions) (TrackerResult, error) {
 	}
 	for _, args := range [][]string{
 		{"add", beads.ConfigFile},
-		{"commit", "-q", "-m", "tpm init: the tracker repository's first commit"},
+		{"commit", "-q", "-m", "scrum-master init: the tracker repository's first commit"},
 		{"push", "-q", "origin", "HEAD:main"},
 	} {
 		if err := git(clone, args...); err != nil {

@@ -3,7 +3,7 @@
 // Package spectool builds and runs the spec tool: the pinned parent
 // release's own Markdown library, compiled from that release's source, which
 // converts, formats, and checks a corpus's documents (srd040 R1). mage
-// convert, fmt, and specCheck run it in this repository, and tpm doctor runs
+// convert, fmt, and specCheck run it in this repository, and scrum-master doctor runs
 // it in a program repository at that repository's pin (srd043 R4.4). The
 // library is built at run time, so go.mod depends on no parent release.
 package spectool

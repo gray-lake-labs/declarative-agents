@@ -22,9 +22,9 @@ func init() {
 // PlanPushProfile runs the pinned runtime over the plan-push profile in the
 // rig (GH-206, srd031 R4.7) — the third model-free machine: a written
 // release's milestone, sprint issue, sprint-end issues, and planned events
-// land through the four tpm words, ending in Done; a second run of the
-// machine, and the one-command tpm plan push after it, change nothing; a
-// road map without the release ends in Refused with tpm's reason (test:
+// land through the four scrum-master words, ending in Done; a second run of the
+// machine, and the one-command scrum-master plan push after it, change nothing; a
+// road map without the release ends in Refused with scrum-master's reason (test:
 // plan push profile run, plan push profile refusal; environment: local).
 func (Integration) PlanPushProfile() error {
 	e, err := newWeeklyEnv("reports-planpush")
@@ -54,7 +54,7 @@ func (Integration) PlanPushProfile() error {
 	}
 	control := []string{"--system", system, "--control", system, "--ref", seedBranch, "--dir", clone}
 	var written plan.Written
-	if err := r.tpmJSON(&written, append([]string{"plan", "write", "--version", "01.1", "--tag", "corpus/v0.1.0",
+	if err := r.wordsJSON(&written, append([]string{"plan", "write", "--version", "01.1", "--tag", "corpus/v0.1.0",
 		"--items", "obj002-fast-scoring#R1.1"}, control...)...); err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (Integration) PlanPushProfile() error {
 	out, runErr = r.runPlanPushAgent(rel, system, clone, "01.1", end)
 	c.expect(runErr == nil && strings.Contains(out, "final machine state: Done"), "the second run must end in Done: %s", tail18(out))
 	var pushed plan.PushResult
-	if err := r.tpmJSON(&pushed, append([]string{"plan", "push", "--version", "01.1", "--end", end, "--group", r.group}, control...)...); err != nil {
+	if err := r.wordsJSON(&pushed, append([]string{"plan", "push", "--version", "01.1", "--end", end, "--group", r.group}, control...)...); err != nil {
 		return err
 	}
 	c.expect(pushed.Milestone == "unchanged" && pushed.Sprint.Action == "unchanged", "the machine's push must satisfy the one command: %+v", pushed)
@@ -81,13 +81,13 @@ func (Integration) PlanPushProfile() error {
 	out, runErr = r.runPlanPushAgent(rel, system, clone, "99.9", end)
 	c.expect(runErr != nil, "a refused run must not report success: %s", tail18(out))
 	c.expect(strings.Contains(out, "final machine state: Refused"), "the run must end in Refused: %s", tail18(out))
-	c.expect(strings.Contains(out, "names no release"), "the Refused state must carry tpm's reason: %s", tail18(out))
+	c.expect(strings.Contains(out, "names no release"), "the Refused state must carry scrum-master's reason: %s", tail18(out))
 	return c.err("planPushProfile")
 }
 
 // runPlanPushAgent runs the release's agent over the plan-push profile for
 // one release, from the system repository's checkout, with the rig's
-// tracker — the environment the profile's declarations name — and no tpm
+// tracker — the environment the profile's declarations name — and no scrum-master
 // on PATH: the agent serves the words in process (GH-28).
 func (r *rigEnv) runPlanPushAgent(rel runtime.Release, system, clone, version, end string) (string, error) {
 	outDir, err := os.MkdirTemp(r.run.Dir, "planpush-agent-*")

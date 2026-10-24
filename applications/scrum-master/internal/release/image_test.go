@@ -173,7 +173,7 @@ func TestLoadedImageCarriesNoIndexAnnotation(t *testing.T) {
 		ran = name + " " + strings.Join(args, " ")
 		return "", nil
 	}}
-	if _, err := p.BuildImage(ImageBuild{Dist: dist, Platforms: []Platform{platform}, Refs: []string{"tpm:test"}}); err != nil {
+	if _, err := p.BuildImage(ImageBuild{Dist: dist, Platforms: []Platform{platform}, Refs: []string{"scrum-master:test"}}); err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(ran, "--load") || strings.Contains(ran, "index:") {

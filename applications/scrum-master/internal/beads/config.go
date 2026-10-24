@@ -14,12 +14,12 @@ import (
 )
 
 // ConfigFile is where the tracker repository holds its settings: the issue
-// ID prefix, one per program, set when tpm init seeds the tracker (srd042).
+// ID prefix, one per program, set when scrum-master init seeds the tracker (srd042).
 const ConfigFile = ".beads/config.yaml"
 
 // DefaultPrefix names the issues of a tracker whose config file sets no
 // prefix, as every tracker did before the prefix existed.
-const DefaultPrefix = "tpm"
+const DefaultPrefix = "sm"
 
 // Config is the tracker repository's config file.
 type Config struct {

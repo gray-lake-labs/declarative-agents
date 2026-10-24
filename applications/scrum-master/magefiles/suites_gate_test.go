@@ -238,13 +238,17 @@ func language(re *syntax.Regexp) ([]string, bool) {
 
 // suiteProblems checks an implemented test suite's go_test and
 // integration_target commands; a suite still specified names tests and
-// targets its release has yet to build.
+// targets its release has yet to build, and a retired case is skipped.
 func (e *evidence) suiteProblems(doc *corpus.Document) []string {
 	if doc.Front["status"] != "implemented" {
 		return nil
 	}
 	var out []string
 	for _, c := range doc.Records("case") {
+		// A retired case names evidence its feature no longer has (GH-37).
+		if c.Attrs["status"] == "retired" {
+			continue
+		}
 		for _, f := range []string{"go_test", "integration_target"} {
 			for _, line := range strings.Split(c.Field(f).Text(), "\n") {
 				if p := e.check(strings.TrimSpace(line)); p != "" {

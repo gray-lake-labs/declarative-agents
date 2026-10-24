@@ -20,7 +20,7 @@ func init() {
 
 // ImplementProfile runs the pinned declarative-agents runtime over the
 // implement profile in the rig (GH-135, srd036 R6): a pop the admission
-// refuses ends the run in the Refused state with tpm's reason, and, when
+// refuses ends the run in the Refused state with scrum-master's reason, and, when
 // TPM_IMPLEMENT_MODEL names a model the OLLAMA_URL provider serves, a full
 // run pops, works, merges, and closes an issue (test: implement refusal,
 // implement profile run).
@@ -36,7 +36,7 @@ func (Integration) ImplementProfile() error {
 	if err := r.milestone(rigMilestone, rigDue); err != nil {
 		return err
 	}
-	if _, err := r.runTPM("issue", "labels", "--group", r.group); err != nil {
+	if _, err := r.runWords("issue", "labels", "--group", r.group); err != nil {
 		return err
 	}
 	rel, err := repoRuntime()
@@ -51,7 +51,7 @@ func (Integration) ImplementProfile() error {
 		path := filepath.Join(r.run.Dir, "implement-"+program.Slug(title)+".md")
 		writeFileTo(path, body)
 		var res program.FileResult
-		return res, r.tpmJSON(&res, "issue", "file", "--project", po1, "--title", title, "--body-file", path,
+		return res, r.wordsJSON(&res, "issue", "file", "--project", po1, "--title", title, "--body-file", path,
 			"--plane", "data", "--kind", "build", "--component", "po-1", "--milestone", rigMilestone)
 	}
 	c := &check{}
@@ -64,7 +64,7 @@ func (Integration) ImplementProfile() error {
 	out, runErr := r.runImplementAgent(rel, po1, clone, clone, triaged.IID, "")
 	c.expect(runErr != nil, "a refused run must not report success: %s", tail(out))
 	c.expect(strings.Contains(out, "Refused"), "the run must end in the Refused state: %s", tail(out))
-	c.expect(strings.Contains(out, "not admitted"), "the Refused state must carry tpm's reason: %s", tail(out))
+	c.expect(strings.Contains(out, "not admitted"), "the Refused state must carry scrum-master's reason: %s", tail(out))
 
 	model := os.Getenv("TPM_IMPLEMENT_MODEL")
 	if model == "" {
@@ -82,7 +82,7 @@ func (Integration) ImplementProfile() error {
 	// starts the agent in the worktree; the machine's Pop stays the claim
 	// gate (GH-135 pilot finding).
 	var popped program.PopResult
-	if err := r.tpmJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", clone); err != nil {
+	if err := r.wordsJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", clone); err != nil {
 		return err
 	}
 	out, runErr = r.runImplementAgent(rel, po1, clone, popped.Worktree, work.IID, model)
@@ -94,7 +94,7 @@ func (Integration) ImplementProfile() error {
 
 // runImplementAgent runs the release's agent over the implement profile for
 // one issue, as the rig user, with the rig's tracker — the environment the profile's declarations name —
-// and no tpm on PATH: the agent serves the words in process (GH-28).
+// and no scrum-master on PATH: the agent serves the words in process (GH-28).
 func (r *rigEnv) runImplementAgent(rel runtime.Release, project, checkout, workspace string, iid int, model string) (string, error) {
 	outDir, err := os.MkdirTemp(r.run.Dir, "implement-agent-*")
 	if err != nil {

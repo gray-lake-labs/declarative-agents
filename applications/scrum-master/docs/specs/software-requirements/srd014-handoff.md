@@ -1,6 +1,6 @@
 ---
 id: srd014-handoff
-title: "Script: handoff (tpm handoff ...)"
+title: "Script: handoff (scrum-master handoff ...)"
 ---
 <!-- Copyright (c) 2026 Gray Lake Labs -->
 <!-- SPDX-License-Identifier: MIT-0 -->
@@ -28,7 +28,7 @@ the interface by pinned URL (srd007 R5.4), which track-goals collects.
 - G3: Running handoff twice over the same event changes nothing.
 
 <!-- req: R1 -->
-## R1 - tpm handoff on-merge
+## R1 - scrum-master handoff on-merge
 
 <!-- req: R1.1 -->
 ### R1.1
@@ -46,7 +46,7 @@ Creates no issue. A merge means done, not dependable; fan-out waits for a releas
 For each closed issue with a Downstream section that requests a review, creates one kind::review issue per requested component in the repository its subsystem SRD declares for that component, unassigned, with an Upstream line to the closed issue.
 
 <!-- req: R2 -->
-## R2 - tpm handoff on-release
+## R2 - scrum-master handoff on-release
 
 <!-- req: R2.1 -->
 ### R2.1
@@ -87,7 +87,7 @@ For a citing repository whose citation asks for a review or a handoff decision (
 When the issue that caused a handoff is a member of a tracking issue, every issue handoff creates is appended to that tracking issue's Members section (issue-body tracking_task_list).
 
 <!-- req: R4 -->
-## R4 - tpm handoff sweep
+## R4 - scrum-master handoff sweep
 
 <!-- req: R4.1 -->
 ### R4.1
@@ -126,7 +126,7 @@ Handoff sets no assignee, closes no issue, and changes no label except setting n
 <!-- req: R7.1 -->
 ### R7.1
 
-The program's CI runs tpm handoff on-merge on merge to a default branch and tpm handoff on-release on a new tag, with a token scoped to the program group. Subcommands are in the tpm group handoff, honour --json and --dry-run, and never prompt.
+The program's CI runs scrum-master handoff on-merge on merge to a default branch and scrum-master handoff on-release on a new tag, with a token scoped to the program group. Subcommands are in the scrum-master group handoff, honour --json and --dry-run, and never prompt.
 
 <!-- req: R8 -->
 ## R8 - Reference update on a downstream release

@@ -155,7 +155,7 @@ var storyRef = regexp.MustCompile(`^[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)*#[a-z]
 func CheckSummary(text string) []string {
 	_, rest, ok := strings.Cut("\n"+text, "\n"+storiesHeading+"\n")
 	if !ok {
-		return []string{"it has no " + storiesHeading + " section; tpm sprint-end stories writes it"}
+		return []string{"it has no " + storiesHeading + " section; scrum-master sprint-end stories writes it"}
 	}
 	var problems []string
 	entries, none := 0, false

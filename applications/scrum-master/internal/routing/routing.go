@@ -123,7 +123,7 @@ func Find(dir string) (string, error) {
 	case 1:
 		return siblings[0], nil
 	}
-	return "", fmt.Errorf("several sibling checkouts hold %s (%s); run tpm from the system repository's checkout", File, strings.Join(siblings, ", "))
+	return "", fmt.Errorf("several sibling checkouts hold %s (%s); run scrum-master from the system repository's checkout", File, strings.Join(siblings, ", "))
 }
 
 func exists(p string) bool { _, err := os.Stat(p); return err == nil }
@@ -188,7 +188,7 @@ func Register(name string, open Opener) { openers[name] = open }
 func open(s System) (tracker.Tracker, error) {
 	o, ok := openers[s.Name]
 	if !ok {
-		return nil, fmt.Errorf("tpm has no %s tracking system yet; use bd", s.Name)
+		return nil, fmt.Errorf("scrum-master has no %s tracking system yet; use bd", s.Name)
 	}
 	return o(s)
 }
@@ -286,7 +286,7 @@ func Document(c Config) []byte {
 	return []byte(b.String())
 }
 
-// Report is what tpm doctor says about a program's tracking systems: the
+// Report is what scrum-master doctor says about a program's tracking systems: the
 // document it read, the default and the overrides, and each problem found.
 type Report struct {
 	File      string            `json:"file"`
@@ -297,7 +297,7 @@ type Report struct {
 
 // Check reads the trackers document for dir and reports each system's
 // reach: bd's tracker repository answers git ls-remote, and gh and glab are
-// systems this tpm has. It reports nothing when there is no document.
+// systems this scrum-master has. It reports nothing when there is no document.
 func Check(dir string) (*Report, error) {
 	path, err := Find(dir)
 	if err != nil || path == "" {
@@ -320,7 +320,7 @@ func Check(dir string) (*Report, error) {
 	}
 	for _, n := range names {
 		if _, ok := openers[n]; !ok {
-			r.Problems = append(r.Problems, fmt.Sprintf("tpm has no %s tracking system yet", n))
+			r.Problems = append(r.Problems, fmt.Sprintf("scrum-master has no %s tracking system yet", n))
 			continue
 		}
 		if bin := cli[n]; bin != "" {

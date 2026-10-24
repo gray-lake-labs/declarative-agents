@@ -236,7 +236,7 @@ validation. CI must not read a developer-local checkout or absolute path.
 | mock | false | A scripted test double; the source architecture has no equivalent role. |
 | fixture | false | Test-only profile or data. |
 | infrastructure_adapter | false | Runtime, protocol, serving, or lifecycle boundary adapter. |
-| workflow_machine | false | A workflow machine of the tpm application, whose states are a process skill's steps, whose tools are tpm words, and whose roles live in the application's own corpus rather than this role model. |
+| workflow_machine | false | A workflow machine of the scrum-master application, whose states are a process skill's steps, whose tools are its words, and whose roles live in the application's own corpus rather than this role model. |
 
 <!-- field: bindings -->
 ## Bindings
@@ -2164,11 +2164,11 @@ applications/catalog/agents/applier/rollout-profile.yaml
 
 rollout-read
 
-<!-- field: tpm -->
-### Tpm
+<!-- field: scrum_master -->
+### Scrum master
 
-<!-- tpm_entry: tpm-implement -->
-#### tpm-implement
+<!-- scrum_master_entry: scrum-master-implement -->
+#### scrum-master-implement
 
 <!-- field: profile -->
 ##### Profile
@@ -2180,8 +2180,8 @@ applications/scrum-master/plugin/agents/implement/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-merge -->
-#### tpm-merge
+<!-- scrum_master_entry: scrum-master-merge -->
+#### scrum-master-merge
 
 <!-- field: profile -->
 ##### Profile
@@ -2193,8 +2193,8 @@ applications/scrum-master/plugin/agents/merge/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-pop -->
-#### tpm-pop
+<!-- scrum_master_entry: scrum-master-pop -->
+#### scrum-master-pop
 
 <!-- field: profile -->
 ##### Profile
@@ -2206,8 +2206,8 @@ applications/scrum-master/plugin/agents/pop/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-plan-push -->
-#### tpm-plan-push
+<!-- scrum_master_entry: scrum-master-plan-push -->
+#### scrum-master-plan-push
 
 <!-- field: profile -->
 ##### Profile
@@ -2219,8 +2219,8 @@ applications/scrum-master/plugin/agents/plan-push/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-plan -->
-#### tpm-plan
+<!-- scrum_master_entry: scrum-master-plan -->
+#### scrum-master-plan
 
 <!-- field: profile -->
 ##### Profile
@@ -2232,8 +2232,21 @@ applications/scrum-master/plugin/agents/plan/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-specify -->
-#### tpm-specify
+<!-- scrum_master_entry: scrum-master-reports-init -->
+#### scrum-master-reports-init
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/reports-init/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-specify -->
+#### scrum-master-specify
 
 <!-- field: profile -->
 ##### Profile
@@ -2245,8 +2258,8 @@ applications/scrum-master/plugin/agents/specify/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-tasks -->
-#### tpm-tasks
+<!-- scrum_master_entry: scrum-master-tasks -->
+#### scrum-master-tasks
 
 <!-- field: profile -->
 ##### Profile
@@ -2258,8 +2271,8 @@ applications/scrum-master/plugin/agents/tasks/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-sprint-end -->
-#### tpm-sprint-end
+<!-- scrum_master_entry: scrum-master-sprint-end -->
+#### scrum-master-sprint-end
 
 <!-- field: profile -->
 ##### Profile
@@ -2271,8 +2284,8 @@ applications/scrum-master/plugin/agents/sprint-end/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-draft -->
-#### tpm-draft
+<!-- scrum_master_entry: scrum-master-draft -->
+#### scrum-master-draft
 
 <!-- field: profile -->
 ##### Profile
@@ -2284,8 +2297,164 @@ applications/scrum-master/plugin/agents/draft/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-check -->
-#### tpm-check
+<!-- scrum_master_entry: scrum-master-admit -->
+#### scrum-master-admit
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/admit/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-aggregate -->
+#### scrum-master-aggregate
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/aggregate/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-approve -->
+#### scrum-master-approve
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/approve/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-comment -->
+#### scrum-master-comment
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/comment/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-close -->
+#### scrum-master-close
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/close/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-labels -->
+#### scrum-master-labels
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/labels/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-peer-read -->
+#### scrum-master-peer-read
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/peer-read/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-recur -->
+#### scrum-master-recur
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/recur/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-release -->
+#### scrum-master-release
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/release/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-status -->
+#### scrum-master-status
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/status/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-status-issues -->
+#### scrum-master-status-issues
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/status-issues/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-tracker-sync -->
+#### scrum-master-tracker-sync
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/tracker-sync/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-check -->
+#### scrum-master-check
 
 <!-- field: profile -->
 ##### Profile
@@ -2297,8 +2466,8 @@ applications/scrum-master/plugin/agents/check/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-init -->
-#### tpm-init
+<!-- scrum_master_entry: scrum-master-init -->
+#### scrum-master-init
 
 <!-- field: profile -->
 ##### Profile
@@ -2310,8 +2479,8 @@ applications/scrum-master/plugin/agents/init/profile.yaml
 
 workflow_machine
 
-<!-- tpm_entry: tpm-onboard -->
-#### tpm-onboard
+<!-- scrum_master_entry: scrum-master-onboard -->
+#### scrum-master-onboard
 
 <!-- field: profile -->
 ##### Profile

@@ -84,3 +84,44 @@ tools:
     condition: the word refuses the listing and exits non-zero
     message_shape: <the word's refusal reason, as printed>
     state_after_failure: the checkout is as the word's refusal left it
+
+- name: backlog_template
+  type: exec
+  binary: scrum-master
+  args:
+  - backlog
+  - template
+  - --json
+  visibility: external
+  description: Print a document of one hierarchy level, or VISION or ARCHITECTURE, in the layout the gate reads, to copy and fill (GH-20, GH-22).
+  category: boundary
+  parameters:
+    type: object
+    properties:
+      kind:
+        type: string
+        description: The document — theme, initiative, epic, feature, story, vision, or architecture.
+        flag: --kind
+    required: [kind]
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: The template word's JSON report, the document in its layout.
+    schema:
+      type: string
+  side_effects: []
+  reversibility:
+    classification: reversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: The word prints a template and writes nothing.
+  errors:
+  - signal: CommandError
+    condition: the word cannot start — this agent does not serve the scrum-master words
+    message_shape: 'backlog_template: <error>'
+    state_after_failure: nothing ran in a process that did not start
+  - signal: ToolFailed
+    condition: the kind names no template
+    message_shape: <the word's reason, as printed>
+    state_after_failure: nothing was written

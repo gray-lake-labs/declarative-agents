@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
-// Package backlog is tpm backlog: the planning hierarchy of one repository,
+// Package backlog is scrum-master backlog: the planning hierarchy of one repository,
 // read and checked (srd045 R8). It reads only the directory it is given and
 // writes nothing, so a skill can call it for facts (design.md D10).
 package backlog
@@ -20,7 +20,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/hierarchy"
 )
 
-// Entry is one hierarchy document as tpm backlog list prints it.
+// Entry is one hierarchy document as scrum-master backlog list prints it.
 type Entry struct {
 	ID     string `json:"id"`
 	Kind   string `json:"kind"`
@@ -38,14 +38,14 @@ type Entry struct {
 	Duplicates []string `json:"duplicates,omitempty"`
 }
 
-// Report is what tpm backlog check prints: how many documents it read and
+// Report is what scrum-master backlog check prints: how many documents it read and
 // every finding the gate reports on them. SpecSkipped says why the parent
 // spec tool's shape check did not run, when it did not.
 type Report struct {
 	Documents   int                 `json:"documents"`
 	Findings    []hierarchy.Finding `json:"findings"`
 	SpecSkipped string              `json:"spec_check_skipped,omitempty"`
-	// Unfilled are the documents that still hold tpm init's or onboard's
+	// Unfilled are the documents that still hold scrum-master init's or onboard's
 	// placeholder text: the gate passes them, since a repository is
 	// onboarded before its owner writes them, and names them so a pass is
 	// not taken for a written corpus.
@@ -85,7 +85,7 @@ func List(dir, kind string) ([]Entry, error) {
 // Check runs the hierarchy gate (srd045 R6.1) on the documents under dir,
 // through hierarchy.Validate, the function the mage audit gate calls; it
 // also reads the SRDs, refusing a requirement no criterion traces, and runs
-// the parent spec tool's shape check, so the gate refuses what tpm doctor
+// the parent spec tool's shape check, so the gate refuses what scrum-master doctor
 // would (srd043 R4.4).
 func Check(dir string) (Report, error) {
 	docs, err := hierarchy.Load(dir)
@@ -207,7 +207,7 @@ func init() {
 				fmt.Fprintf(&h, "hierarchy gate: pass, %d documents\n", r.Documents)
 			}
 			if len(r.Unfilled) > 0 {
-				fmt.Fprintf(&h, "unfilled: %s still hold the placeholder text tpm init or onboard wrote\n", strings.Join(r.Unfilled, ", "))
+				fmt.Fprintf(&h, "unfilled: %s still hold the placeholder text scrum-master init or onboard wrote\n", strings.Join(r.Unfilled, ", "))
 			}
 			if r.SpecSkipped != "" {
 				fmt.Fprintf(&h, "spec shape check skipped: %s\n", r.SpecSkipped)

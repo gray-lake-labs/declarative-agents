@@ -49,12 +49,12 @@ type gitlabRig struct {
 	} `json:"projects"`
 }
 
-// gitlabEnv is a provisioned run: the rig, the built tpm, and how git
+// gitlabEnv is a provisioned run: the rig, the built scrum-master, and how git
 // reaches the instance.
 type gitlabEnv struct {
 	run      gitlabRun
 	rig      gitlabRig
-	tpm      string
+	words    string
 	base     string   // web root, https://gitlab.com
 	auth     []string // git environment carrying the token as a header, never in a file
 	tracker  string   // the tracker repository's clone URL
@@ -162,7 +162,7 @@ func terraform(root string, run gitlabRun, command string, args ...string) error
 	return tf(append(append([]string{command, "-input=false"}, args...), "-var", "group="+run.Group, "-var", "run_id="+run.ID)...)
 }
 
-// newGitlabEnv reads the provisioned rig, builds tpm, seeds the tracker's
+// newGitlabEnv reads the provisioned rig, builds scrum-master, seeds the tracker's
 // first commit and the program's labels, and installs the skills.
 func newGitlabEnv(root string, run gitlabRun, token string) (*gitlabEnv, error) {
 	cmd := exec.Command("terraform", "-chdir="+filepath.Join(root, gitlabRoot), "output", "-json", "rig")
@@ -171,7 +171,7 @@ func newGitlabEnv(root string, run gitlabRun, token string) (*gitlabEnv, error) 
 	if err != nil {
 		return nil, fmt.Errorf("read the rig output: %w", err)
 	}
-	env := &gitlabEnv{run: run, base: gitlabWebBase(), tpm: filepath.Join(run.Dir, "tpm")}
+	env := &gitlabEnv{run: run, base: gitlabWebBase(), words: filepath.Join(run.Dir, "scrum-master")}
 	if err := json.Unmarshal(out, &env.rig); err != nil {
 		return nil, err
 	}
@@ -188,8 +188,8 @@ func newGitlabEnv(root string, run gitlabRun, token string) (*gitlabEnv, error) 
 	if env.tracker == "" {
 		return nil, errors.New("the rig has no tracker project")
 	}
-	if err := runStreaming(root, "go", "build", "-o", env.tpm, "./cmd/tpm"); err != nil {
-		return nil, fmt.Errorf("build tpm: %w", err)
+	if err := runStreaming(root, "go", "build", "-o", env.words, "./magefiles/words"); err != nil {
+		return nil, fmt.Errorf("build the words: %w", err)
 	}
 	seed := filepath.Join(run.Dir, "seed")
 	if err := env.clone(env.tracker, seed); err != nil {
@@ -209,7 +209,7 @@ func newGitlabEnv(root string, run gitlabRun, token string) (*gitlabEnv, error) 
 	if err != nil {
 		return nil, err
 	}
-	if _, err := w.tpm("issue", "labels", "--group", env.rig.Group.FullPath); err != nil {
+	if _, err := w.run("issue", "labels", "--group", env.rig.Group.FullPath); err != nil {
 		return nil, err
 	}
 	return env, nil
@@ -263,7 +263,7 @@ func (e *gitlabEnv) gitOut(dir string, args ...string) (string, error) {
 }
 
 // gitlabWorker is one person at one machine: their own clone of the tracker
-// and their own checkouts, side by side with the work checkout tpm runs in.
+// and their own checkouts, side by side with the work checkout scrum-master runs in.
 type gitlabWorker struct {
 	env  *gitlabEnv
 	user string
@@ -291,7 +291,7 @@ func (e *gitlabEnv) worker(i int) (*gitlabWorker, error) {
 				return nil, err
 			}
 		}
-		if _, err := w.tpm("install", "--agent", "claude", "--dir", dir); err != nil {
+		if _, err := w.run("install", "--agent", "claude", "--dir", dir); err != nil {
 			return nil, err
 		}
 	}
@@ -302,13 +302,13 @@ func (w *gitlabWorker) checkout(name string) string { return filepath.Join(w.dir
 
 func (w *gitlabWorker) trackerClone() string { return filepath.Join(w.dir, "tracker") }
 
-// tpm runs the built tpm as this worker, from its work checkout, against
+// scrum-master runs the built scrum-master as this worker, from its work checkout, against
 // its own clone of the tracker, one command at a time.
-func (w *gitlabWorker) tpm(args ...string) ([]byte, error) {
+func (w *gitlabWorker) run(args ...string) ([]byte, error) {
 	lock, _ := w.env.busy.LoadOrStore(w.user, &sync.Mutex{})
 	lock.(*sync.Mutex).Lock()
 	defer lock.(*sync.Mutex).Unlock()
-	cmd := exec.Command(w.env.tpm, args...)
+	cmd := exec.Command(w.env.words, args...)
 	cmd.Dir = w.checkout("work")
 	cmd.Env = append(append(os.Environ(), w.env.auth...),
 		"TPM_TRACKER="+w.env.tracker, "TPM_TRACKER_CLONE="+w.trackerClone(),
@@ -318,13 +318,13 @@ func (w *gitlabWorker) tpm(args ...string) ([]byte, error) {
 	var out, errb bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errb
 	if err := cmd.Run(); err != nil {
-		return out.Bytes(), fmt.Errorf("%s: tpm %s: %w: %s", w.user, strings.Join(args, " "), err, strings.TrimSpace(errb.String()))
+		return out.Bytes(), fmt.Errorf("%s: scrum-master %s: %w: %s", w.user, strings.Join(args, " "), err, strings.TrimSpace(errb.String()))
 	}
 	return out.Bytes(), nil
 }
 
-func (w *gitlabWorker) tpmJSON(into any, args ...string) error {
-	out, err := w.tpm(append(args, "--json")...)
+func (w *gitlabWorker) wordsJSON(into any, args ...string) error {
+	out, err := w.run(append(args, "--json")...)
 	if err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
@@ -15,7 +16,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Release)
 }
 
-// Release runs tpm release next, gate, and tag on a clone of po-1 with the policy seeded in the system repository: no tag before a gate, evidence events on the release issue, peer-read pending while only the author could approve, a pushed tag after a passing gate, no second tag at the same version, and the peer read passing on a reviewer's tpm release approve (test-rel01.2-sprint-end).
+// Release runs scrum-master release next, gate, and tag on a clone of po-1 with the policy seeded in the system repository: no tag before a gate, evidence events on the release issue, peer-read pending while only the author could approve, a pushed tag after a passing gate, no second tag at the same version, and the peer read passing on a reviewer's scrum-master release approve (test-rel01.2-sprint-end).
 func (Integration) Release() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -90,30 +91,30 @@ major-and-minor-before-1.0
 	c := &check{}
 
 	var next release.NextResult
-	if err := r.tpmJSON(&next, append([]string{"release", "next", "--artifact", "grader"}, common...)...); err != nil {
+	if err := r.wordsJSON(&next, append([]string{"release", "next", "--artifact", "grader"}, common...)...); err != nil {
 		return err
 	}
 	c.expect(next.Latest == "" && next.Candidates[1].Version == "0.1.0", "next before any release: %+v", next)
 
-	_, err = r.runTPM(append([]string{"release", "tag", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...)
+	_, err = r.runWords(append([]string{"release", "tag", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...)
 	c.expect(err != nil && strings.Contains(err.Error(), "no gate has run"), "tag before a gate: %v", err)
 
 	var gate release.ReleaseGateResult
-	if err := r.tpmJSON(&gate, append([]string{"release", "gate", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...); err != nil {
+	if err := r.wordsJSON(&gate, append([]string{"release", "gate", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...); err != nil {
 		return err
 	}
 	c.expect(gate.Passed && len(gate.Checks) == 1, "grader gate: %+v", gate)
 
-	_, err = r.runTPM("release", "approve", "--project", po1, "--issue", fmt.Sprint(issue.IID))
+	_, err = r.runWords("release", "approve", "--project", po1, "--issue", fmt.Sprint(issue.IID))
 	c.expect(err != nil && strings.Contains(err.Error(), "author"), "the author approved their own release: %v", err)
 	// A pending peer read alone is the state before release approve, not a
 	// failure: the gate exits zero, does not pass, and says it waits (#151).
 	var awaiting release.ReleaseGateResult
-	err = r.tpmJSON(&awaiting, append([]string{"release", "gate", "--artifact", "reviewed", "--version", "0.1.0", "--issue", ref}, common...)...)
+	err = r.wordsJSON(&awaiting, append([]string{"release", "gate", "--artifact", "reviewed", "--version", "0.1.0", "--issue", ref}, common...)...)
 	c.expect(err == nil && !awaiting.Passed && awaiting.AwaitingPeerRead, "peer-read with no approval from anyone else: %+v, %v", awaiting, err)
 
 	var tagged release.TagResult
-	if err := r.tpmJSON(&tagged, append([]string{"release", "tag", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...); err != nil {
+	if err := r.wordsJSON(&tagged, append([]string{"release", "tag", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...); err != nil {
 		return err
 	}
 	c.expect(tagged.Pushed && tagged.Tag == "grader/v0.1.0" && tagged.Class == "breaking", "tag: %+v", tagged)
@@ -138,17 +139,38 @@ major-and-minor-before-1.0
 	}
 	c.expect(evidence == 3 && pending == 1 && taggedNote == 1, "release issue notes: %d evidence, %d pending, %d tagged", evidence, pending, taggedNote)
 
-	_, err = r.runTPM(append([]string{"release", "tag", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...)
+	_, err = r.runWords(append([]string{"release", "tag", "--artifact", "grader", "--version", "0.1.0", "--issue", ref}, common...)...)
 	c.expect(err != nil && strings.Contains(err.Error(), "not greater"), "a second tag at 0.1.0: %v", err)
 
-	// Another person's approval is the peer read (srd015 R1.2).
-	if _, err := r.runTPMAs(rigReviewer, "release", "approve", "--project", po1, "--issue", fmt.Sprint(issue.IID)); err != nil {
+	// Another person's approval is the peer read (srd015 R1.2), run as the
+	// reviewer's peer-read workflow with the agent (GH-37).
+	rel, err := repoRuntime()
+	if err != nil {
 		return err
 	}
+	if out, err := r.runWorkflow(rel, "peer-read", rigReviewer, clone, po1, fmt.Sprint(issue.IID), nil); err != nil || !strings.Contains(out, "final machine state: Done") {
+		return fmt.Errorf("the peer-read run: %v: %s", err, tail17(out))
+	}
 	var reviewed release.ReleaseGateResult
-	if err := r.tpmJSON(&reviewed, append([]string{"release", "gate", "--artifact", "reviewed", "--version", "0.1.0", "--issue", ref}, common...)...); err != nil {
+	if err := r.wordsJSON(&reviewed, append([]string{"release", "gate", "--artifact", "reviewed", "--version", "0.1.0", "--issue", ref}, common...)...); err != nil {
 		return err
 	}
 	c.expect(reviewed.Passed, "peer-read after the reviewer's approval: %+v", reviewed)
+	// The release workflow (GH-37): a fix since grader/v0.1.0 calls for a
+	// patch, which the profile gates and tags with the agent.
+	// The run starts in a checkout beside the system repository's, where a
+	// word reads the program's control files.
+	wf := filepath.Join(r.run.Dir, "checkouts", "po-1-release")
+	if err := gitIn(r.run.Dir, "clone", "-q", r.origin(po1), wf); err != nil {
+		return err
+	}
+	writeFileTo(filepath.Join(wf, "FIX.md"), "a fix\n")
+	if err := r.commitPush(wf, "Fix the grader's rounding", "FIX.md"); err != nil {
+		return err
+	}
+	out, rerr := r.runWorkflow(rel, "release", rigUser, wf, po1, ref, nil, "TPM_ARTIFACT=grader", "TPM_CONTROL="+system, "TPM_REF="+seedBranch)
+	c.expect(rerr == nil && strings.Contains(out, "final machine state: Done"), "the release run: %v: %s", rerr, tail17(out))
+	_, terr = r.remoteTag(po1, "grader/v0.1.1")
+	c.expect(terr == nil, "the release run left no grader/v0.1.1 at the origin: %v", terr)
 	return c.err("release")
 }

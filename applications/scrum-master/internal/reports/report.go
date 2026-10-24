@@ -230,7 +230,7 @@ func missing(where string, e Entry, keys []string) []string {
 }
 
 // Render writes a report in the format, its front matter derived from the
-// body, so what tpm writes always validates.
+// body, so what scrum-master writes always validates.
 func Render(author, sprint string, work, blockers []Entry) string {
 	named := make([]Entry, len(work))
 	for i, e := range work {

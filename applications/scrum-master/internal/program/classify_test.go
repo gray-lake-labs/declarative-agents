@@ -160,7 +160,7 @@ func TestSpecIssueIsAdmittedForAnyMember(t *testing.T) {
 	f := fake.New()
 	f.Me = tracker.User{ID: 9, Username: "developer"}
 	p := Defaults()
-	p.ManagementFilers = []string{"tpm-lead"}
+	p.ManagementFilers = []string{"scrum-master-lead"}
 	in := tracker.NewIssue{Title: "Split the use case", Milestone: "m",
 		Description: "## Requirements\n\n1. Split F3.\n\n## Acceptance Criteria\n\n- mage audit passes (test: mage_audit; environment: local)\n",
 		Labels:      Labels("data", "", "spec", "po-1")}
@@ -174,7 +174,7 @@ func TestManagementIssueRefusedForNonLead(t *testing.T) {
 	f := fake.New()
 	f.Me = tracker.User{ID: 9, Username: "developer"}
 	p := Defaults()
-	p.ManagementFilers = []string{"tpm-lead"}
+	p.ManagementFilers = []string{"scrum-master-lead"}
 	in := tracker.NewIssue{Title: "Move release 01.1", Labels: Labels("management", "", "", "system")}
 	if _, err := File(f, "g/system", in, p, false); err == nil || !strings.Contains(err.Error(), "may not file a plane::management issue") {
 		t.Fatalf("err = %v", err)
@@ -182,14 +182,14 @@ func TestManagementIssueRefusedForNonLead(t *testing.T) {
 	if f.Writes != 0 {
 		t.Fatal("a refused issue was filed")
 	}
-	f.Me = tracker.User{ID: 1, Username: "tpm-lead"}
+	f.Me = tracker.User{ID: 1, Username: "scrum-master-lead"}
 	if _, err := File(f, "g/system", in, p, false); err != nil {
 		t.Fatalf("lead refused: %v", err)
 	}
 }
 
 // TestStatedKindMakesADataIssue files a data issue of the stated kind on a
-// planning document, as tpm's own sprint-end issues are.
+// planning document, as scrum-master's own sprint-end issues are.
 func TestStatedKindMakesADataIssue(t *testing.T) {
 	l, err := Derive(fake.New(), "g/po-1", "", "main", []string{"docs/sprint-ends/01.0.md"}, Labelling{Kind: "release"})
 	if err != nil || l.Plane != "data" || l.Kind != "release" || l.Derived == nil || !strings.Contains(l.Derived.Reason, "stated kind") {

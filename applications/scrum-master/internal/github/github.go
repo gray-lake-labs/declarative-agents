@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 // Package github is the gh tracking system: a program's issues, labels,
 // and milestones in GitHub, and each branch reviewed and merged as a pull
-// request, all through the gh CLI and the person's existing login, so tpm
+// request, all through the gh CLI and the person's existing login, so scrum-master
 // stores no token (srd042). Files, tags, branches, and merged history come
 // from the local checkout, as every tracking system reads them.
 package github
@@ -598,7 +598,7 @@ func (t *Tracker) CurrentUser() (tracker.User, error) {
 }
 
 // AssignIssue makes user the issue's only assignee; pop's rule that only
-// the caller is assigned stays tpm's (srd041 R9.1).
+// the caller is assigned stays scrum-master's (srd041 R9.1).
 func (t *Tracker) AssignIssue(project string, iid int, user tracker.User) error {
 	_, err := t.API.Do("PATCH", fmt.Sprintf("repos/%s/issues/%d", project, iid), map[string]any{"assignees": []string{user.Username}})
 	return err
@@ -743,7 +743,7 @@ func (t *Tracker) Approval(project, branch, tip string, excluded []string) (stri
 
 // Merge marks the draft ready and merges the pull request at tip with a
 // merge commit carrying message's first line as its title and the rest as
-// its body, so merged history reads it as tpm's own merges.
+// its body, so merged history reads it as scrum-master's own merges.
 func (t *Tracker) Merge(project, branch, tip, message string) (string, error) {
 	p, err := t.pull(project, branch)
 	if err != nil {

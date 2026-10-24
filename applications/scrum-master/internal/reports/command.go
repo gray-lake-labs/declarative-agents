@@ -31,6 +31,16 @@ func init() {
 				initArgs.members = append(initArgs.members, v)
 				return nil
 			})
+			// One flag for every member, as a profile's one parameter passes
+			// them (GH-37).
+			fs.Func("members", "username=project of each person who reports, comma-separated", func(v string) error {
+				for _, m := range strings.Split(v, ",") {
+					if m = strings.TrimSpace(m); m != "" {
+						initArgs.members = append(initArgs.members, m)
+					}
+				}
+				return nil
+			})
 			fs.Func("agent", "install the skills for cursor, claude, copilot, or all (repeatable)", func(v string) error {
 				initArgs.agents = append(initArgs.agents, v)
 				return nil
@@ -233,7 +243,7 @@ func init() {
 			}
 			for _, pr := range a.Pushed {
 				line := fmt.Sprintf("  pushed %s: %s #%d", pr.Key, pr.Action, pr.IID)
-				// An issue filed now says how admission went, as tpm issue
+				// An issue filed now says how admission went, as scrum-master issue
 				// file does (srd018 R3.6).
 				if pr.Action == "filed" && pr.Admitted {
 					// A signal issue is a management issue: admission

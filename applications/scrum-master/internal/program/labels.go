@@ -12,7 +12,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
-// The operations that file issues. Each issue tpm files carries the one that
+// The operations that file issues. Each issue scrum-master files carries the one that
 // filed it as an op:: label, set at creation and never changed (srd001 R34).
 const (
 	OpFile    = "file"
@@ -211,7 +211,7 @@ func MigrateTypes(t tracker.Tracker, projects []string, dryRun bool) ([]TypeMigr
 }
 
 // StaleTypes lists the earlier type names control/labels.md in the program
-// repository at ref still lists. tpm never edits a control file; a
+// repository at ref still lists. scrum-master never edits a control file; a
 // plane::control issue changes it (srd013 R6.3).
 func StaleTypes(t tracker.Tracker, project, ref string) ([]string, error) {
 	b, err := t.GetFile(project, LabelsFile, ref)

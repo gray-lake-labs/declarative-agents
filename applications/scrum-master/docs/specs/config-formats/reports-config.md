@@ -8,7 +8,7 @@ title: Reports repository configuration
 <!-- field: purpose -->
 ## Purpose
 
-Names who reports status and when, so tpm reports status-issues files one weekly status issue per listed person and tpm reports aggregate knows whose report is missing (srd018 R3.2, R7; srd018 R9.1, R4.2). The escalation thresholds aggregate uses stay in policy.escalation, where the rest of the program's rules live.
+Names who reports status and when, so scrum-master reports status-issues files one weekly status issue per listed person and scrum-master reports aggregate knows whose report is missing (srd018 R3.2, R7; srd018 R9.1, R4.2). The escalation thresholds aggregate uses stay in policy.escalation, where the rest of the program's rules live.
 
 <!-- field: schema -->
 ## Schema
@@ -77,7 +77,7 @@ title: Reports configuration
 <!-- field: config_files -->
 ## Config files
 
-reports.md at the root of the reports repository, written once by tpm reports init
+reports.md at the root of the reports repository, written once by scrum-master reports init
 
 <!-- field: team -->
 ## Team

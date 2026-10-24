@@ -32,7 +32,7 @@ type CloseResult struct {
 // a merge commit on the default branch of the checkout around dir that
 // cites project#iid. When the issue has a pop branch, the merge must bring
 // that branch in, so a fast-forward or a branch with nothing of its own is
-// not a delivery. at, when set, is the merge that delivered it, as tpm
+// not a delivery. at, when set, is the merge that delivered it, as scrum-master
 // issue merge knows the merge it made, and must be one of those merges;
 // otherwise an issue never popped, such as an objective a sprint-end merge
 // closes, closes on the first merge citing it made after the issue was
@@ -42,7 +42,7 @@ func Close(t tracker.Tracker, git Git, project string, iid int, dir, at string, 
 	r := CloseResult{Project: project, IID: iid, DryRun: dryRun}
 	c, ok := tracker.For(t, project).(MergeCloser)
 	if !ok {
-		return r, fmt.Errorf("%s#%d closes on its merge only on a tracker that records it; tpm issue close serves the beads tracker", project, iid)
+		return r, fmt.Errorf("%s#%d closes on its merge only on a tracker that records it; scrum-master issue close serves the beads tracker", project, iid)
 	}
 	i, err := t.GetIssue(project, iid)
 	if err != nil {

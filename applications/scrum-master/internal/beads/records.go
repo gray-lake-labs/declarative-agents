@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-// record is a line of one of tpm's own tracker files beside the issues:
+// record is a line of one of scrum-master's own tracker files beside the issues:
 // milestones and labels. Each has a key unique in its file and a time it
 // last changed, and merges a record at a time.
 type record interface {

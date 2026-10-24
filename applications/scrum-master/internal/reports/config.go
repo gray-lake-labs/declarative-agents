@@ -65,7 +65,7 @@ func ParseConfig(b []byte) (Config, error) {
 func LoadConfig(dir string) (Config, error) {
 	b, err := os.ReadFile(filepath.Join(dir, ConfigFile))
 	if errors.Is(err, fs.ErrNotExist) {
-		return Config{}, errors.New(dir + " has no " + ConfigFile + "; run tpm reports init")
+		return Config{}, errors.New(dir + " has no " + ConfigFile + "; run scrum-master reports init")
 	}
 	if err != nil {
 		return Config{}, err

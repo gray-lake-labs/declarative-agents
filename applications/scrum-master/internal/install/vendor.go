@@ -113,7 +113,7 @@ func vendorFile(dir, rel string, content []byte, vendored string, force, dryRun 
 	case digest(string(have)) != vendored && !force:
 		reason := "edited since it was vendored; --force replaces it"
 		if vendored == "" {
-			reason = "not vendored by tpm; --force replaces it"
+			reason = "not vendored by scrum-master; --force replaces it"
 		}
 		return Result{Path: path, Action: "kept", Reason: reason}, vendored, nil
 	default:

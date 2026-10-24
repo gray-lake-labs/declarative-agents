@@ -19,7 +19,7 @@ type InitResult struct {
 
 const deckTemplate = `# {title}
 
-<!-- tpm reports deck renders one slide per outline section of an approved
+<!-- scrum-master reports deck renders one slide per outline section of an approved
 summary, up to the slide limit (srd018 R4). -->
 `
 
@@ -41,7 +41,7 @@ func Init(dir string, cfg Config, now time.Time, dryRun bool) ([]InitResult, err
 	files := []struct{ path, content string }{
 		{ConfigFile, string(conf)},
 		{filepath.Join("reports", Quarter(now), ".gitkeep"), ""},
-		{filepath.Join("schema", "report.md"), example + "\n<!-- The report format (config format report): one file per person per ISO week at\nreports/<YYYY-Qn>/<YYYY-Www>-<username>.md; tpm reports validate checks it. -->\n"},
+		{filepath.Join("schema", "report.md"), example + "\n<!-- The report format (config format report): one file per person per ISO week at\nreports/<YYYY-Qn>/<YYYY-Www>-<username>.md; scrum-master reports validate checks it. -->\n"},
 		{filepath.Join("summaries", ".gitkeep"), ""},
 		{filepath.Join("deck", "template.md"), deckTemplate},
 	}

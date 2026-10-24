@@ -32,7 +32,7 @@ func TestAgentsFile(t *testing.T) {
 	}
 	// Every workflow runs as a skill; AGENTS.md names no command (GH-36).
 	if strings.Contains(agents, "tpm") {
-		t.Errorf("AGENTS.md names tpm:\n%s", agents)
+		t.Errorf("AGENTS.md names scrum-master:\n%s", agents)
 	}
 	skills, err := install.EmbeddedSkills()
 	if err != nil {

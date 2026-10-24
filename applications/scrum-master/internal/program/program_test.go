@@ -147,7 +147,7 @@ func TestSprintIssueNeedsNoComponent(t *testing.T) {
 
 func TestManagementFilersAreEnforcedWhenListed(t *testing.T) {
 	p := Defaults()
-	p.ManagementFilers = []string{"tpm-lead"}
+	p.ManagementFilers = []string{"scrum-master-lead"}
 	i := tracker.Issue{Author: "someone", Labels: []string{"plane::management", "component::system"}}
 	if r := Lint(i, p); len(r) != 1 || !strings.Contains(r[0], "someone may not file a management issue") {
 		t.Fatalf("reasons: %v", r)

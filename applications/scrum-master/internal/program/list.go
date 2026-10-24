@@ -27,7 +27,7 @@ type Listed struct {
 	BlockedBy []string `json:"blocked_by,omitempty"`
 }
 
-// ListResult is what tpm issue list reports: the stories read, in rank
+// ListResult is what scrum-master issue list reports: the stories read, in rank
 // order, the open issues implementing them that can be worked now, and
 // those an open blocker holds back.
 type ListResult struct {

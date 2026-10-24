@@ -291,7 +291,7 @@ func (s *Store) mergeFiles(base, remote string) error {
 	if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
 		return err
 	}
-	_, err = s.git("commit", "-q", "-m", "tpm: merge the tracker repository")
+	_, err = s.git("commit", "-q", "-m", "scrum-master: merge the tracker repository")
 	return err
 }
 
@@ -356,7 +356,7 @@ func (s *Store) renumberNew(ours, theirs []string) error {
 	return err
 }
 
-// MigrateResult is what tpm tracker migrate did.
+// MigrateResult is what scrum-master tracker migrate did.
 type MigrateResult struct {
 	Issues  int    `json:"issues"`
 	Commit  string `json:"tracker_commit,omitempty"`
@@ -389,7 +389,7 @@ func (s *Store) Migrate() (MigrateResult, error) {
 		if r.Indexed, err = ensureIndex(s.Dir); err != nil || r.Indexed == 0 {
 			return r, err
 		}
-		return r, s.commitMigration(&r, before, fmt.Sprintf("tpm: index the tracker's %d issues (%s)", r.Indexed, s.User))
+		return r, s.commitMigration(&r, before, fmt.Sprintf("scrum-master: index the tracker's %d issues (%s)", r.Indexed, s.User))
 	}
 	issues, err := s.read()
 	if err != nil {
@@ -410,7 +410,7 @@ func (s *Store) Migrate() (MigrateResult, error) {
 		return r, err
 	}
 	r.Issues = len(issues)
-	return r, s.commitMigration(&r, before, fmt.Sprintf("tpm: migrate the tracker to one file per issue, %d issues (%s)", len(issues), s.User))
+	return r, s.commitMigration(&r, before, fmt.Sprintf("scrum-master: migrate the tracker to one file per issue, %d issues (%s)", len(issues), s.User))
 }
 
 // commitMigration commits and pushes what Migrate wrote, once: a rejected
@@ -426,7 +426,7 @@ func (s *Store) commitMigration(r *MigrateResult, before, message string) error 
 		if _, rerr := s.git("reset", "-q", "--hard", before); rerr != nil {
 			return errors.Join(err, rerr)
 		}
-		return fmt.Errorf("the tracker repository moved while migrating, so nothing was written; run tpm tracker migrate again when no one is writing: %w", err)
+		return fmt.Errorf("the tracker repository moved while migrating, so nothing was written; run scrum-master tracker migrate again when no one is writing: %w", err)
 	}
 	var err error
 	r.Commit, err = s.git("rev-parse", "HEAD")

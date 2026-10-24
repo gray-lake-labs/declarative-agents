@@ -156,7 +156,7 @@ func renderProfileSkill(name string, m machineDoc, env []string, model bool) (Sk
 }
 
 // ProfileEnv is the environment a profile names: every ${VAR} its directory's
-// YAML files read, per profile, sorted. tpm doctor reports which are set, so
+// YAML files read, per profile, sorted. scrum-master doctor reports which are set, so
 // a run's credentials are checked before a run (srd043 R4.7).
 func ProfileEnv(fsys fs.FS, dir string) (map[string][]string, error) {
 	paths, err := fs.Glob(fsys, dir+"/*/profile.yaml")

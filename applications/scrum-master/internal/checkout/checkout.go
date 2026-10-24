@@ -133,7 +133,7 @@ func (c *Code) TagExists(project, tag string) (bool, error) {
 	return out != "", err
 }
 
-// mergedBy is the Merged-by trailer tpm issue merge writes, naming the
+// mergedBy is the Merged-by trailer scrum-master issue merge writes, naming the
 // tracker user who merged.
 var mergedBy = regexp.MustCompile(`(?m)^Merged-by: (\S+)$`)
 
@@ -143,7 +143,7 @@ var citation = regexp.MustCompile(`[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)*#\d+`)
 // Merges reads a project's merged history from the merge
 // commits on its default branch, which are its deliveries (srd042 R2.3). A merge is numbered by its place in the branch's
 // first-parent history, so the number is stable; its author is the tracker
-// user its Merged-by trailer names, which tpm issue merge writes, else the
+// user its Merged-by trailer names, which scrum-master issue merge writes, else the
 // merge commit's git author; its merge date is the commit's UTC day, and
 // since is compared with the commit's instant, never a local date; and it closes every
 // issue its message cites, written into the description as

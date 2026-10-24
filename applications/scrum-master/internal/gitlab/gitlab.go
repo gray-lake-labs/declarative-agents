@@ -3,7 +3,7 @@
 // Package gitlab is the glab tracking system: a program's issues, labels,
 // and milestones in GitLab, and each branch reviewed and merged as a merge
 // request, all through the glab CLI and the person's existing login, so
-// tpm stores no token (srd042). GitLab has native due dates, start dates,
+// scrum-master stores no token (srd042). GitLab has native due dates, start dates,
 // group milestones, group labels, and award emoji. Files, tags, branches,
 // and merged history come from the local checkout, as every tracking
 // system reads them.
@@ -45,7 +45,7 @@ func (CLI) Do(method, path string, body any) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		f, err := os.CreateTemp("", "tpm-glab-*.json")
+		f, err := os.CreateTemp("", "scrum-master-glab-*.json")
 		if err != nil {
 			return nil, err
 		}
@@ -468,7 +468,7 @@ func (t *Tracker) CurrentUser() (tracker.User, error) {
 }
 
 // AssignIssue makes user the issue's only assignee; pop's rule that only
-// the caller is assigned stays tpm's (srd041 R9.1).
+// the caller is assigned stays scrum-master's (srd041 R9.1).
 func (t *Tracker) AssignIssue(project string, iid int, user tracker.User) error {
 	uid := user.ID
 	if uid == 0 {
@@ -542,7 +542,7 @@ func (t *Tracker) OpenReview(project, branch, base, title, body string) (string,
 
 // approvalPrefix opens the note an approval leaves on the merge request:
 // GitLab's approvals do not name the commit approved, so the note does.
-const approvalPrefix = "<!-- tpm approve commit="
+const approvalPrefix = "<!-- scrum-master approve commit="
 
 type glNote struct {
 	Body   string `json:"body"`

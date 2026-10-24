@@ -23,7 +23,7 @@ import (
 // command adds or removes it.
 const statusInProgress = "status::in-progress"
 
-// Tracker serves tpm's tracker interface over beads (srd042 R1.1): the issue
+// Tracker serves scrum-master's tracker interface over beads (srd042 R1.1): the issue
 // half from the tracker repository, the code half from the git checkout the
 // command runs in. A project path is an issue's Repository; the code half
 // serves its one checkout whatever project it is asked about.
@@ -90,7 +90,7 @@ func OpenRepository(remote string) (*Tracker, error) {
 			return nil, err
 		}
 		sum := sha256.Sum256([]byte(remote))
-		clone = filepath.Join(cache, "tpm", "trackers", hex.EncodeToString(sum[:6]))
+		clone = filepath.Join(cache, "scrum-master", "trackers", hex.EncodeToString(sum[:6]))
 	}
 	if _, err := os.Stat(filepath.Join(clone, ".git")); err != nil {
 		if err := os.MkdirAll(filepath.Dir(clone), 0o755); err != nil {
@@ -308,7 +308,7 @@ func (t *Tracker) ListNotes(project string, iid int) ([]tracker.Note, error) {
 	}
 	notes := make([]tracker.Note, 0, len(i.Comments))
 	for k, c := range i.Comments {
-		notes = append(notes, tracker.Note{ID: k + 1, Body: c.Text, Author: c.Author, System: c.Author == "tpm"})
+		notes = append(notes, tracker.Note{ID: k + 1, Body: c.Text, Author: c.Author, System: c.Author == "scrum-master" || c.Author == "tpm"})
 	}
 	return notes, nil
 }

@@ -117,7 +117,7 @@ func mergeIssue(rows []Row, b, o, t Issue, now string) Issue {
 			setState(&m, o)
 		} else {
 			m.Comments = append(m.Comments, Comment{
-				ID: newID(), IssueID: m.ID, Author: "tpm", CreatedAt: now,
+				ID: newID(), IssueID: m.ID, Author: "scrum-master", CreatedAt: now,
 				Text: fmt.Sprintf("Refused on merge: %s to %s by %s is not in the srd041 table; the tracker keeps %s.",
 					t.State, o.State, o.StateActor, t.State),
 			})

@@ -26,7 +26,7 @@ func init() {
 var tpmWord = regexp.MustCompile(`(^|[^A-Za-z0-9_])tpm([^A-Za-z0-9_]|$)`)
 
 // InitProfile runs the repository's agent over the init profile in an empty
-// git repository with an empty tracker beside it and no tpm on PATH
+// git repository with an empty tracker beside it and no scrum-master on PATH
 // (GH-29): the run ends in Done with the corpus, the seeded tracker, the
 // skills of the requested agent, and the profiles vendored into
 // .scrum-master; every skill runs its vendored profile with the agent, the
@@ -154,7 +154,7 @@ func init() {
 }
 
 // OnboardProfile runs the repository's agent over the onboard profile in a
-// joining repository of the rig's program, with no tpm on PATH (GH-29): the
+// joining repository of the rig's program, with no scrum-master on PATH (GH-29): the
 // run ends in Done with the registration filed in the system repository,
 // the skills installed, and the profiles vendored, and a second run files
 // no second registration (test: onboard profile run; environment: local).

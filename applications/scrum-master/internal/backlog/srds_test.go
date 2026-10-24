@@ -70,7 +70,7 @@ func TestCheckReadsSRDs(t *testing.T) {
 
 // TestCheckRunsTheSpecToolsShapeCheck reports the parent spec tool's shape
 // findings, such as a VISION field holding the wrong form, and leaves its
-// formatting findings to tpm doctor (#149).
+// formatting findings to scrum-master doctor (#149).
 func TestCheckRunsTheSpecToolsShapeCheck(t *testing.T) {
 	stubSpec(t, []string{
 		"docs/VISION.md: field-shape-mismatch: what_this_does holds a list, want prose",

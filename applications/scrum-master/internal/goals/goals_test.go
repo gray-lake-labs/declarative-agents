@@ -129,7 +129,7 @@ func testPushFilesOneDatedPinnedObjectiveIssue(t *testing.T, tp trackertest.Prog
 		"Environment: dev",
 		"## Requirements\n\n1. A grader scores one agent's trajectories against a written rubric. (R1.1)\n2. ",
 		"(test: grader_scores_fixture_agent; environment: dev)",
-		"## Notes\n\n## Sprint Backlog\n\n<!-- tpm goals sprint-goal release=01.0 serves=obj001-reliable-agents#R1 -->",
+		"## Notes\n\n## Sprint Backlog\n\n<!-- scrum-master goals sprint-goal release=01.0 serves=obj001-reliable-agents#R1 -->",
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("body lacks %q:\n%s", want, body)
@@ -221,7 +221,7 @@ func TestObjectiveIssueIsSprintGoal(t *testing.T) {
 	trackertest.Each(t, func(t *testing.T, tp trackertest.Program) {
 		f, s := fixture(t, tp)
 		old, err := f.CreateIssue(fleet, tracker.NewIssue{Title: "Objective obj001-reliable-agents#R1: Evaluation of one agent (release 01.0)",
-			Description: "body\n\n## Notes\n\n<!-- tpm goals objective=obj001-reliable-agents#R1 release=01.0 -->\n", Labels: []string{"plane::management", "component::fleet"}})
+			Description: "body\n\n## Notes\n\n<!-- scrum-master goals objective=obj001-reliable-agents#R1 release=01.0 -->\n", Labels: []string{"plane::management", "component::fleet"}})
 		if err != nil {
 			t.Fatal(err)
 		}

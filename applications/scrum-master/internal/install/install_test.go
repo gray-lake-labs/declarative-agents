@@ -12,7 +12,7 @@ import (
 )
 
 var testFS = fstest.MapFS{
-	"skills/alpha/SKILL.md": {Data: []byte("---\nname: alpha\ndescription: Do alpha (srd001).\n---\n\n# alpha\n\nRun tpm alpha.\n")},
+	"skills/alpha/SKILL.md": {Data: []byte("---\nname: alpha\ndescription: Do alpha (srd001).\n---\n\n# alpha\n\nRun scrum-master alpha.\n")},
 	"skills/beta/SKILL.md":  {Data: []byte("---\nname: beta\ndescription: Do beta.\n---\n# beta\n")},
 }
 
@@ -80,7 +80,7 @@ func TestEmbeddedSkillsParse(t *testing.T) {
 func wantSkill(t *testing.T, got string) {
 	t.Helper()
 	head := "---\nname: alpha\ndescription: Do alpha (srd001).\n---\n<!-- skill install version=v1 sha256="
-	if !strings.HasPrefix(got, head) || !strings.HasSuffix(got, "-->\n# alpha\n\nRun tpm alpha.\n") {
+	if !strings.HasPrefix(got, head) || !strings.HasSuffix(got, "-->\n# alpha\n\nRun scrum-master alpha.\n") {
 		t.Fatalf("SKILL.md:\n%s", got)
 	}
 	if ours, edited := stamped(got); !ours || edited {
@@ -139,7 +139,7 @@ func TestReinstallForceReplaces(t *testing.T) {
 	os.MkdirAll(filepath.Dir(path), 0o755)
 	os.WriteFile(path, []byte("my own alpha\n"), 0o644)
 	if got := install(t, dir, []string{"claude"}, testSkills(t), "v1", false); got[".claude/skills/alpha/SKILL.md"] != "kept" {
-		t.Fatalf("a file tpm did not write is kept: %v", got)
+		t.Fatalf("a file scrum-master did not write is kept: %v", got)
 	}
 	if got := install(t, dir, []string{"claude"}, testSkills(t), "v1", true); got[".claude/skills/alpha/SKILL.md"] != "replaced" {
 		t.Fatalf("got %v", got)
@@ -157,7 +157,7 @@ func TestReinstallRemovesUneditedStaleSkill(t *testing.T) {
 	os.WriteFile(alphaCursor, []byte(read(t, alphaCursor)+"edit\n"), 0o644)
 	mine := filepath.Join(dir, ".cursor/skills/mine/SKILL.md")
 	os.MkdirAll(filepath.Dir(mine), 0o755)
-	os.WriteFile(mine, []byte("not tpm's\n"), 0o644)
+	os.WriteFile(mine, []byte("not scrum-master's\n"), 0o644)
 
 	only := []Skill{testSkills(t)[1]}
 	got := install(t, dir, Agents, only, "v1", false)
@@ -168,7 +168,7 @@ func TestReinstallRemovesUneditedStaleSkill(t *testing.T) {
 		t.Fatal("edited stale skill was removed")
 	}
 	if _, err := os.Stat(mine); err != nil {
-		t.Fatal("a file tpm did not write was touched")
+		t.Fatal("a file scrum-master did not write was touched")
 	}
 	if _, err := os.Stat(beta); err != nil {
 		t.Fatal("embedded skill was removed")
@@ -252,7 +252,7 @@ func TestInstallIgnoresOwnedFiles(t *testing.T) {
 	os.WriteFile(ignore, []byte("/build/\n"), 0o644)
 	mine := filepath.Join(dir, ".claude/skills/mine/SKILL.md")
 	os.MkdirAll(filepath.Dir(mine), 0o755)
-	os.WriteFile(mine, []byte("not tpm's\n"), 0o644)
+	os.WriteFile(mine, []byte("not scrum-master's\n"), 0o644)
 
 	got := install(t, dir, []string{"cursor", "claude"}, testSkills(t), "v1", false)
 	if got[".git/info/exclude"] != "updated" {
@@ -314,7 +314,7 @@ func TestInstallInWorktreeUsesTheCloneExclude(t *testing.T) {
 	}
 }
 
-// legacyFile is a command file an earlier tpm wrote: its header, a stamp
+// legacyFile is a command file an earlier release wrote: its header, a stamp
 // over the rest, and its body.
 func legacyFile(header, body string) string {
 	return header + "<!-- tpm install version=v0 sha256=" + digest(header+body) + " -->\n" + body

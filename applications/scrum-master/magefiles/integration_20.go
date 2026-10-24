@@ -1,0 +1,163 @@
+// Copyright (c) 2026 Gray Lake Labs
+// SPDX-License-Identifier: MIT-0
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/runtime"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
+)
+
+func init() {
+	integrationTargets = append(integrationTargets, Integration{}.WorkflowProfiles)
+}
+
+// WorkflowProfiles runs the workflows a person ran as tpm commands before
+// GH-37 through their profiles, with the repository's agent and neither tpm
+// nor scrum-master on PATH: comment, admit, approve (as the reviewer),
+// close after a merge that closed nothing, recur, status, labels, and
+// tracker-sync each end in Done with
+// their effect in the tracker (test: workflow profile runs; environment:
+// local).
+func (Integration) WorkflowProfiles() error {
+	r, err := newRigEnv()
+	if err != nil {
+		return err
+	}
+	po1, err := r.project("product-owners/po-1")
+	if err != nil {
+		return err
+	}
+	if err := r.milestone(rigMilestone, rigDue); err != nil {
+		return err
+	}
+	if _, err := r.runWords("issue", "labels", "--group", r.group); err != nil {
+		return err
+	}
+	rel, err := repoRuntime()
+	if err != nil {
+		return err
+	}
+	clone, err := r.clone(po1, "po-1")
+	if err != nil {
+		return err
+	}
+	file := func(title string) (program.FileResult, error) {
+		path := filepath.Join(r.run.Dir, "wf-"+program.Slug(title)+".md")
+		writeFileTo(path, "## Requirements\n\n1. Add the note.\n\n## Acceptance Criteria\n\n- The note exists (test: note_exists; environment: local)\n")
+		var res program.FileResult
+		return res, r.wordsJSON(&res, "issue", "file", "--project", po1, "--title", title, "--body-file", path,
+			"--plane", "data", "--kind", "build", "--component", "po-1", "--milestone", rigMilestone)
+	}
+	c := &check{}
+	run := func(profile, user, dir string, iid int, params map[string]any) string {
+		out, err := r.runWorkflow(rel, profile, user, dir, po1, fmt.Sprint(iid), params)
+		c.expect(err == nil && strings.Contains(out, "final machine state: Done"), "the %s run must end in Done: %v: %s", profile, err, tail17(out))
+		return out
+	}
+
+	work, err := file("Workflow profiles")
+	if err != nil {
+		return err
+	}
+	body := filepath.Join(r.run.Dir, "wf-comment.md")
+	writeFileTo(body, "Picked up for the workflow profiles.\n")
+	run("comment", rigUser, clone, work.IID, map[string]any{"body_file": body})
+	notes, _ := r.notes(po1, work.IID)
+	c.expect(containsNote(notes, "Picked up for the workflow profiles."), "the comment is not on #%d", work.IID)
+	run("admit", rigUser, clone, work.IID, map[string]any{"milestone": rigMilestone})
+
+	var popped program.PopResult
+	if err := r.wordsJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(work.IID), "--dir", clone); err != nil {
+		return err
+	}
+	writeFileTo(filepath.Join(popped.Worktree, "NOTE.md"), "a note\n")
+	if err := r.commitPush(popped.Worktree, "Add the note", "NOTE.md"); err != nil {
+		return err
+	}
+	reviewerClone, err := r.clone(po1, "reviewer-workflow")
+	if err != nil {
+		return err
+	}
+	run("approve", rigReviewer, reviewerClone, work.IID, nil)
+	notes, _ = r.notes(po1, work.IID)
+	c.expect(containsNote(notes, rigReviewer), "no approval by %s on #%d", rigReviewer, work.IID)
+
+	// merge-branch merges and closes nothing, which the close workflow
+	// finishes on the merge commit.
+	if _, err := r.runWords("issue", "merge-branch", "--project", po1, "--issue", fmt.Sprint(work.IID), "--branch", popped.Branch,
+		"--dir", popped.Worktree, "--audit", rigAudit); err != nil {
+		return err
+	}
+	run("close", rigUser, clone, work.IID, nil)
+	c.expect(r.closed(po1, work.IID), "#%d is open after the close workflow", work.IID)
+
+	recurring, err := r.tr.CreateIssue(po1, tracker.NewIssue{Title: "Recurring: workflow audit", Labels: []string{"type::recurring"}, DueDate: rigDue,
+		Description: "Audit the workflows.\n\n## Previous Runs\n\n- none\n"})
+	if err != nil {
+		return err
+	}
+	run("recur", rigUser, clone, recurring.IID, nil)
+	c.expect(r.closed(po1, recurring.IID), "the recurring issue #%d is open after its recur", recurring.IID)
+
+	status := run("status", rigUser, clone, 0, nil)
+	c.expect(strings.Contains(status, po1), "the status run names no %s: %s", po1, tail17(status))
+	run("labels", rigUser, clone, 0, map[string]any{"group": r.group})
+	run("tracker-sync", rigUser, clone, 0, nil)
+	return c.err("workflowProfiles")
+}
+
+// runWorkflow runs the repository's agent over one workflow profile as user
+// from dir, with the rig's tracker, TPM_PROJECT and TPM_ISSUE, the
+// request's parameters, any further environment entries, and no tpm or
+// scrum-master on PATH.
+func (r *rigEnv) runWorkflow(rel runtime.Release, profile, user, dir, project, issue string, params map[string]any, env ...string) (string, error) {
+	outDir, err := os.MkdirTemp(r.run.Dir, profile+"-agent-*")
+	if err != nil {
+		return "", err
+	}
+	args := []string{"--profile", filepath.Join(r.root, "plugin", "agents", profile, "profile.yaml"),
+		"--core-root", rel.CoreRoot(), "--directory", dir, "--output", outDir}
+	if len(params) > 0 {
+		req, _ := json.Marshal(map[string]any{"parameters": params})
+		path := filepath.Join(outDir, "request.json")
+		if err := os.WriteFile(path, req, 0o644); err != nil {
+			return "", err
+		}
+		args = append(args, "--request", path)
+	}
+	cmd := exec.Command(rel.Agent, args...)
+	cmd.Dir = dir
+	cmd.Env = append(os.Environ(),
+		"PATH="+pathWithout("tpm", "scrum-master"),
+		"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
+		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+user),
+		"TPM_USER="+user,
+		"TPM_WEB_BASE="+r.webBase,
+		"TPM_PROJECT="+project,
+		"TPM_ISSUE="+issue,
+	)
+	cmd.Env = append(cmd.Env, env...)
+	var out bytes.Buffer
+	cmd.Stdout, cmd.Stderr = &out, &out
+	err = cmd.Run()
+	return out.String(), err
+}
+
+// containsNote reports whether a note's body or author names text.
+func containsNote(notes []tracker.Note, text string) bool {
+	for _, n := range notes {
+		if strings.Contains(n.Body, text) || n.Author == text {
+			return true
+		}
+	}
+	return false
+}

@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	prefix = "<!-- tpm goals "
+	prefix = "<!-- scrum-master goals "
 	marker = prefix + "sprint-goal "
 	legacy = prefix + "objective="
 )

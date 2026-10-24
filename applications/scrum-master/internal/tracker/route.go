@@ -134,6 +134,6 @@ func (r *Router) CreateBranch(project, branch, ref string) error {
 	return r.For(project).CreateBranch(project, branch, ref)
 }
 
-// UserIn is the person running tpm as the system serving project knows
+// UserIn is the person running scrum-master as the system serving project knows
 // them: their beads name, or their GitHub or GitLab login.
 func UserIn(t Tracker, project string) (User, error) { return For(t, project).CurrentUser() }

@@ -100,7 +100,7 @@ func TestRetiredGroupRunsNothingAndNamesItsReplacement(t *testing.T) {
 	r.Retire("old", "program")
 	var out bytes.Buffer
 	err := r.Run([]string{"old", "file", "--title", "x"}, &out, noTracker)
-	if err == nil || !strings.Contains(err.Error(), "tpm old is now tpm program: run tpm program file") || title != "" {
+	if err == nil || !strings.Contains(err.Error(), "scrum-master old is now scrum-master program: run scrum-master program file") || title != "" {
 		t.Fatalf("retired group: err %v, ran with title %q", err, title)
 	}
 	if strings.Contains(r.usage(), "old") {

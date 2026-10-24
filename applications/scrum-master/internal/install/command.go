@@ -15,7 +15,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/version"
 )
 
-// Version is the tpm version stamped into installed files: the release the
+// Version is the scrum-master version stamped into installed files: the release the
 // binary was published at, else its module version, or dev for a local
 // build (internal/version).
 func Version() string { return version.Current() }
@@ -95,13 +95,13 @@ func init() {
 					fmt.Fprintf(&b, "%-9s %s\n", f.Problem, rel(dir, f.Path))
 				}
 				if len(findings) == 0 {
-					b.WriteString("installed skills match tpm " + version)
+					b.WriteString("installed skills match scrum-master " + version)
 				}
 				if err := ctx.Emit(findings, b.String()); err != nil {
 					return err
 				}
 				if len(findings) > 0 {
-					return fmt.Errorf("%d installed skill file(s) differ from tpm %s; run tpm install", len(findings), version)
+					return fmt.Errorf("%d installed skill file(s) differ from scrum-master %s; run scrum-master install", len(findings), version)
 				}
 				return nil
 			}

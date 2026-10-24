@@ -409,7 +409,7 @@ func (s *Store) merge(base, remote string) error {
 	if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
 		return err
 	}
-	_, err = s.git("commit", "-q", "-m", "tpm: merge the tracker repository")
+	_, err = s.git("commit", "-q", "-m", "scrum-master: merge the tracker repository")
 	return err
 }
 
@@ -569,7 +569,7 @@ func (s *Store) writeFiles(what string, fn func() (bool, error)) (fr Freshness, 
 		if _, err := s.git("add", "-A", "--", ".beads"); err != nil {
 			return fr, false, false, err
 		}
-		if _, err := s.git("commit", "-q", "-m", fmt.Sprintf("tpm: %s (%s)", what, s.User)); err != nil {
+		if _, err := s.git("commit", "-q", "-m", fmt.Sprintf("scrum-master: %s (%s)", what, s.User)); err != nil {
 			return fr, false, false, err
 		}
 		if fr.Offline {
@@ -687,7 +687,7 @@ func (s *Store) statePath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "tpm-beads-sync.json"), nil
+	return filepath.Join(dir, "scrum-master-beads-sync.json"), nil
 }
 
 func (s *Store) state() (syncState, error) {

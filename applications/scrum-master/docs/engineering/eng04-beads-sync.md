@@ -13,7 +13,7 @@ working clone synchronizes with through git. A hosted tracker gives
 every reader the same view because there is one server; a repository
 gives every reader the same view only if the discipline around pulling
 and pushing is stated and held by the tools, not by memory. This
-guideline states that discipline: when tpm synchronizes, how a conflict
+guideline states that discipline: when scrum-master synchronizes, how a conflict
 resolves, and what offline operation promises.
 
 <!-- section: the-tracker-repository -->
@@ -34,11 +34,11 @@ clone reads.
 <!-- section: pull-before-read-push-after-write -->
 ## Pull before read, push after write
 
-Every tpm command that reads the tracker pulls the tracker repository
+Every scrum-master command that reads the tracker pulls the tracker repository
 first; every command that writes pushes immediately after the write, in
 the same invocation. A command is not done until its push lands. The
-rule is in tpm, not in the skills: a skill cannot forget it, and a
-person running tpm by hand gets it for free. Two consequences follow.
+rule is in scrum-master, not in the skills: a skill cannot forget it, and a
+person running scrum-master by hand gets it for free. Two consequences follow.
 First, a command's output always reflects the tracker as of its own
 start, named by the tracker repository commit it pulled. Second, the
 window for conflicting writes is the length of one command, not the
@@ -78,13 +78,13 @@ successful synchronization of any command. What offline operation never
 does is silently present the cache as current, or let two offline
 sessions believe they both hold an assignment: an assignment taken
 offline is provisional, is marked so in the pop's own output, and
-confirms or reports as lost when tpm tracker reconcile runs back online; reconcile also lists the queued writes it pushed and names the tracker commit after the push. Every command's output names the tracker commit it read, and says when that was the cache.
+confirms or reports as lost when scrum-master tracker reconcile runs back online; reconcile also lists the queued writes it pushed and names the tracker commit after the push. Every command's output names the tracker commit it read, and says when that was the cache.
 
 <!-- section: scale -->
 ## Scale
 
 The tracker keeps its issues in one of two layouts, which
-.beads/config.yaml names. With layout: files, the layout tpm init seeds,
+.beads/config.yaml names. With layout: files, the layout scrum-master init seeds,
 each issue is one line of JSON in .beads/issues/<id>.json. A write
 rewrites only the files of the issues it changes, so its diff stays with
 its own issue, and two writers of different issues change different
@@ -101,12 +101,12 @@ git merges them, and when both sides created the same IID the entry keeps
 theirs and the renumbered issue gets a new one. Without the key the
 tracker keeps bd's JSONL in
 .beads/issues.jsonl and every write rewrites the whole file, so a write's
-cost grows with the tracker. tpm tracker migrate moves a JSONL tracker to
+cost grows with the tracker. scrum-master tracker migrate moves a JSONL tracker to
 the files layout, with its index, in one commit, and is run once, when
 no one is writing; on a files tracker that has no index it builds one;
-tpm tracker export writes either layout as JSONL for bd.
+scrum-master tracker export writes either layout as JSONL for bd.
 
-tpm issue file records a new issue and its admission, the lint state and
+scrum-master issue file records a new issue and its admission, the lint state and
 any note, in one write, so filing races once. In the files layout an
 update reads and writes only its issue and its index entry. Every writer
 pushes the same branch, so a push can be rejected because another writer
@@ -125,7 +125,7 @@ measures both layouts at thousands of issues and several writers.
 ## Choosing the backend
 
 TPM_TRACKER, set to the tracker repository's URL, selects the beads
-backend, and tpm requires it. In tpm's code a tracking system is the two
+backend, and scrum-master requires it. In scrum-master's code a tracking system is the two
 halves of the tracker interface, tracker.Issues and tracker.Forge, and
 program's delivery holds a branch's approval and merge; beads supplies
 both halves and the local delivery. The tracker clone lives at
@@ -136,13 +136,13 @@ project's checkout is the sibling of the command's checkout named for the
 project's last path segment, as repositories sit side by side under their
 owner, and a project with no such sibling is served by the command's own
 checkout and its origin. Delivery is a merge commit on the default
-branch citing project#iid, made by tpm issue merge after the audit gate
+branch citing project#iid, made by scrum-master issue merge after the audit gate
 for a docs/ change and, when the policy requires approval, only on
-another person's approval of that very commit, posted with tpm issue
-approve (srd013 R5.5); tpm issue close finds it and closes the issue on it, and refuses a fast-forward or an empty
+another person's approval of that very commit, posted with scrum-master issue
+approve (srd013 R5.5); scrum-master issue close finds it and closes the issue on it, and refuses a fast-forward or an empty
 branch, because neither is a delivery a reviewer can point to. A merge
 also closes every other issue its message cites, such as the Sprint Goal a
-sprint-end merge closes; tpm issue close closes such an issue, which has
+sprint-end merge closes; scrum-master issue close closes such an issue, which has
 no pop branch, on the first merge commit that cites it, matching the
 number exactly. A project's merged history, what reports read as merged branches,
 is the merge commits on its default branch: each numbered by its place in

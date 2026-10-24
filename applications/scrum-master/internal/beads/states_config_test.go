@@ -76,7 +76,7 @@ func TestProgramStatesRowsReplaceTheDefault(t *testing.T) {
 			"| any-open | +urgent | person | none |  |  |\n" +
 				"| any-open | -urgent | person | none |  |  |\n"))
 	})
-	i := Issue{ID: "tpm-1", State: Open}
+	i := Issue{ID: "scrum-master-1", State: Open}
 	if err := s.transition(&i, ActorPerson, "+urgent", "casey"); err != nil {
 		t.Fatalf("the program's own overlay row: %v", err)
 	}
@@ -98,7 +98,7 @@ func TestMalformedStatesRefuseTransitions(t *testing.T) {
 	s.LoadStatesFrom(func() ([]Row, error) {
 		return ParseStates(statesDocument("| open | taken | robot | set |  |  |\n"))
 	})
-	i := Issue{ID: "tpm-1", State: Open}
+	i := Issue{ID: "scrum-master-1", State: Open}
 	err := s.transition(&i, ActorPop, Taken, "casey")
 	if err == nil || !strings.Contains(err.Error(), StatesFile) {
 		t.Fatalf("err = %v, want the file named", err)
@@ -116,7 +116,7 @@ func TestAbsentStatesFileKeepsTheDefault(t *testing.T) {
 			return s
 		}(),
 	} {
-		i := Issue{ID: "tpm-1", State: Open}
+		i := Issue{ID: "scrum-master-1", State: Open}
 		if err := s.transition(&i, ActorPop, Taken, "casey"); err != nil {
 			t.Errorf("%s: default table should let pop take an open issue: %v", name, err)
 		}
@@ -166,7 +166,7 @@ func TestCloseRecordsItsReason(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	closeState, reason := "close", "closed by tpm issue recur without its work"
+	closeState, reason := "close", "closed by scrum-master issue recur without its work"
 	if _, err := tr.UpdateIssue("g/po-1", created.IID, tracker.IssueUpdate{State: &closeState, CloseReason: &reason}); err != nil {
 		t.Fatal(err)
 	}
