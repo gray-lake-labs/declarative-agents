@@ -40,7 +40,9 @@ func TestInstallScriptInstallsAVerifiedRelease(t *testing.T) {
 	const tag = "v0.20990101.1"
 	clone := filepath.Join(t.TempDir(), "monorepo")
 	for _, args := range [][]string{
-		{"clone", "-q", "--no-checkout", root, clone},
+		// --no-tags: a HEAD that is itself a release, as main is right
+		// after mage tag, must not lend the clone its tag (GH-41).
+		{"clone", "-q", "--no-checkout", "--no-tags", root, clone},
 		{"-C", clone, "checkout", "-q", strings.TrimSpace(string(head))},
 		{"-C", clone, "-c", "user.name=t", "-c", "user.email=t@example.invalid", "tag", "-a", tag, "-m", "Release " + tag},
 	} {
