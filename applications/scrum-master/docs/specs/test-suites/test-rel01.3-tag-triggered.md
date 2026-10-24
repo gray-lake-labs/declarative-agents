@@ -65,7 +65,6 @@ go test ./internal/handoff -run '^TestDownstreamTagFilesReferenceUpdateOnce$'
 #### Traces
 
 - [srd014-handoff](../software-requirements/srd014-handoff.md) [AC7](../software-requirements/srd014-handoff.md#ac7)
-- [srd014-handoff](../software-requirements/srd014-handoff.md) [AC4](../software-requirements/srd014-handoff.md#ac4)
 - [srd007-links](../software-requirements/srd007-links.md) [AC5](../software-requirements/srd007-links.md#ac5)
 
 <!-- case: A system tag opens one summary for review | status: specified -->

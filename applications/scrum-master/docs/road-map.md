@@ -708,36 +708,45 @@ as a release on 2026-10-22.
 <!-- release: 05.0 | status: specified -->
 ## 05.0 - Tags trigger handoff and the summary
 
-A downstream release tag files one reference-update issue upstream, and
-a system release tag opens the computed aggregate for the lead's review.
-Moved from 01.2 on 2026-10-18 so the period loop ships first, and renumbered from 01.3 on 2026-10-22, after the releases numbered 03 and 04 shipped before it. Open before
-planning: the deck renders from an approved summary (srd018 R4.1, R6.2)
-but the tag pipeline renders it from the raw aggregate; the pipeline and
-the lead each open a change for review for the stakeholder update; the
-reports configuration has no slide limit; and aggregation runs over ISO
-weeks, not a tag range.
+The release profile runs two steps after its tag word, with the person's
+own access and no CI job or group token. A downstream release tag files
+one reference-update issue in each upstream repository that lists it or
+whose Sprint Goals it closed: through each repository's routed tracking
+system, bd, gh, or glab, found from Cites lines and delivered_by, once per
+tag, an open issue for an earlier tag taking the new one (srd014 R7, R8).
+A system release tag renders the deck from the merged, lead-reviewed
+sprint-end summary and commits it beside the summary, within the reports
+repository's slide_limit, with no review step and no model (srd018 R4.1,
+R10, srd038 R1.4). A failed step names the handoff or release profile to
+re-run and leaves the tag (srd015 R2.4); aggregate also reads the weeks
+between two tags (srd018 R3.7). Moved from 01.2 on 2026-10-18 so the
+period loop ships first, and renumbered from 01.3 on 2026-10-22, after
+the releases numbered 03 and 04 shipped before it.
 
 <!-- field: srds -->
 ### SRDs
 
 - srd007-links
 - srd014-handoff
+- srd015-release
 - srd018-reports
+- srd038-sprint-end
+- srd042-beads-tracker
 
 <!-- field: use_cases -->
 ### Use cases
 
 | id | summary | status | priority |
 | --- | --- | --- | --- |
-| [rel05.0-uc001-reference-update](specs/use-cases/rel05.0-uc001-reference-update.md) | A downstream release tag files one reference-update issue upstream. | specified | P2 |
-| [rel05.0-uc002-release-summary](specs/use-cases/rel05.0-uc002-release-summary.md) | A system release tag opens one summary for review with the computed aggregate and deck; the model drafts the prose during the lead's review. | specified | P2 |
+| [rel05.0-uc001-reference-update](specs/use-cases/rel05.0-uc001-reference-update.md) | A downstream release tag files one reference-update issue upstream, on any tracking system, once per tag. | specified | P2 |
+| [rel05.0-uc002-release-summary](specs/use-cases/rel05.0-uc002-release-summary.md) | A system release tag renders the deck from the approved sprint-end summary and commits it beside it, once. | specified | P2 |
 
 <!-- field: test_suites -->
 ### Test suites
 
 | id | summary | status |
 | --- | --- | --- |
-| [test-rel05.0-tag-triggered](specs/test-suites/test-rel05.0-tag-triggered.md) | Idempotent tag-triggered reference-update issues and summaries for review. | specified |
+| [test-rel05.0-tag-triggered](specs/test-suites/test-rel05.0-tag-triggered.md) | Idempotent tag-triggered reference-update issues on each tracking system, and the deck rendered from the approved summary. | specified |
 
 <!-- field: proof -->
 ### Proof
@@ -752,8 +761,9 @@ weeks, not a tag range.
 
 What the TPM-to-Product-Owner loop does not need yet: done as evidence
 in a named environment and track-goals closing Sprint Goals on it, the
-handoff on merge and the release fan-out (srd014 R1 to R4), the
-stakeholder update as its own artifact (srd018 R6.2) and the roadmap
+handoff on merge, the consume and superseded release fan-out, tracking
+membership, and sweep (srd014 R9), bd's dedup of issues created
+concurrently, the stakeholder update as its own artifact and the roadmap
 forecast (srd018 R11), the daily standup and Daily Scrum, the sprint
 review and retrospective as skills, the waiting and needs-run states
 (srd041 R10), forecasts rolled up from story evidence (srd045 R7), and

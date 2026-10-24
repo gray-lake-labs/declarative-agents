@@ -187,7 +187,7 @@ docs/road-map.md.
 | [rel04.3-uc002-ci-job-on-the-image](specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md) | A CI Job Runs tpm and the Pinned Runtime on the Release's Image | 04.3 | implemented | [test-rel04.3-distribution](specs/test-suites/test-rel04.3-distribution.md) | docs/specs/use-cases/rel04.3-uc002-ci-job-on-the-image.md |
 | [rel04.4-uc001-work-a-story](specs/use-cases/rel04.4-uc001-work-a-story.md) | A Developer Works a Story End to End in One Worktree and One Merge | 04.4 | implemented | [test-rel04.4-story-loop](specs/test-suites/test-rel04.4-story-loop.md) | docs/specs/use-cases/rel04.4-uc001-work-a-story.md |
 | [rel05.0-uc001-reference-update](specs/use-cases/rel05.0-uc001-reference-update.md) | A Downstream Release Files a Reference-Update Issue Upstream | 05.0 | specified | [test-rel05.0-tag-triggered](specs/test-suites/test-rel05.0-tag-triggered.md) | docs/specs/use-cases/rel05.0-uc001-reference-update.md |
-| [rel05.0-uc002-release-summary](specs/use-cases/rel05.0-uc002-release-summary.md) | A System Release Drafts the Summary for Review | 05.0 | specified | [test-rel05.0-tag-triggered](specs/test-suites/test-rel05.0-tag-triggered.md) | docs/specs/use-cases/rel05.0-uc002-release-summary.md |
+| [rel05.0-uc002-release-summary](specs/use-cases/rel05.0-uc002-release-summary.md) | A System Release Renders the Deck from the Approved Summary | 05.0 | specified | [test-rel05.0-tag-triggered](specs/test-suites/test-rel05.0-tag-triggered.md) | docs/specs/use-cases/rel05.0-uc002-release-summary.md |
 
 <!-- field: test_suite_index | form: "typed table" -->
 ## Test suite index

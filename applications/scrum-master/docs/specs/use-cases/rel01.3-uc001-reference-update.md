@@ -56,7 +56,6 @@ tpm release tag creates a release tag in a downstream repository (rel01.2-uc001-
 | T2 | [srd014-handoff](../software-requirements/srd014-handoff.md) [R5.1](../software-requirements/srd014-handoff.md#r51) | S2 traces the handoff marker's idempotency. |
 | T3 | [srd007-links](../software-requirements/srd007-links.md) [R5.5](../software-requirements/srd007-links.md#r55) | S3 traces moving a pinned reference through the inner loop. |
 | T4 | [srd014-handoff](../software-requirements/srd014-handoff.md) [AC7](../software-requirements/srd014-handoff.md#ac7) | S1 and S2 trace this acceptance criterion. |
-| T5 | [srd014-handoff](../software-requirements/srd014-handoff.md) [AC4](../software-requirements/srd014-handoff.md#ac4) | S2 traces this acceptance criterion. |
 | T6 | [srd007-links](../software-requirements/srd007-links.md) [AC5](../software-requirements/srd007-links.md#ac5) | S3 traces this acceptance criterion. |
 
 <!-- field: success_criteria -->
@@ -85,7 +84,6 @@ The issue carries a handoff marker naming the tag, and a second run on the same 
 - [srd014-handoff](../software-requirements/srd014-handoff.md) [R8.3](../software-requirements/srd014-handoff.md#r83)
 - [srd014-handoff](../software-requirements/srd014-handoff.md) [AC7](../software-requirements/srd014-handoff.md#ac7)
 - [srd014-handoff](../software-requirements/srd014-handoff.md) [R5.1](../software-requirements/srd014-handoff.md#r51)
-- [srd014-handoff](../software-requirements/srd014-handoff.md) [AC4](../software-requirements/srd014-handoff.md#ac4)
 
 <!-- sc: S3 -->
 ### S3

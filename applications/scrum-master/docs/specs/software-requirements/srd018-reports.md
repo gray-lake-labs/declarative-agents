@@ -36,7 +36,7 @@ prose.
 <!-- req: R1.1 -->
 ### R1.1
 
-Scaffolds a reports repository: a reports directory per quarter, the report schema, a summaries directory, the configuration reports.md (config format reports-config), and a deck template, and installs the skills for the agents --agent names, as scrum-master init does. The team runs scrum-master reports status-issues each week on a schedule of its own, and scrum-master reports validate before each report merges.
+Scaffolds a reports repository: a reports directory per quarter, the report schema, a summaries directory, the configuration reports.md (config format reports-config, its slide_limit 10 by default), and a deck template, and installs the skills for the agents --agent names, as scrum-master init does. The team runs scrum-master reports status-issues each week on a schedule of its own, and scrum-master reports validate before each report merges.
 
 <!-- req: R1.2 -->
 ### R1.2
@@ -94,13 +94,18 @@ States progress as the ledger state of each Sprint Goal (srd006 R11) and its lat
 
 With --push, files each signal that needs action as an issue in the issue body's work format in the system repository the configuration names (R6.3), unassigned, its body mentioning the person who pushed it (srd041 R9.2), and reports each issue it files with its admission, as scrum-master issue file does.
 
+<!-- req: R3.7 -->
+### R3.7
+
+The ISO week stays aggregate's unit. With --from-tag and --to-tag, the aggregate profile's from_tag and to_tag parameters, aggregate resolves each tag to its commit date and reads the reports whose ISO week ends after the first tag's date and not after the second's, for a standalone re-run over a release.
+
 <!-- req: R4 -->
 ## R4 - scrum-master reports deck
 
 <!-- req: R4.1 -->
 ### R4.1
 
-Renders an approved summary into a slide deck from the template, one slide per outline section, up to the slide limit set in the reports repository's configuration.
+Renders an approved summary into a slide deck from the template, one slide per outline section, up to the slide_limit the reports repository's configuration sets (default 10). A summary whose outline has more sections makes deck exit non-zero naming the sections over the limit; nothing is truncated.
 
 <!-- req: R5 -->
 ## R5 - Common behavior
@@ -118,10 +123,10 @@ Subcommands are in the scrum-master group reports, honour --json and --dry-run, 
 
 The sprint update is a recurring issue (srd001 R8) per member per week. Its Requirements name scrum-master standup activity, fetch, and inbox (srd010) as the facts to draft from; its Acceptance Criteria are a report in the fixed shape that passes scrum-master reports validate, written by the member about their own work only. It closes by its merge, and implement re-creates it for the next week.
 
-<!-- req: R6.2 -->
+<!-- req: R6.2 | status: retired | retired_in: 5 -->
 ### R6.2
 
-The stakeholder update is a recurring issue per lead per period. Its Requirements name scrum-master reports aggregate with the tracker check and the previous roll-up's open risks; its Acceptance Criteria are a summary, an updated risk list, and a deck rendered by scrum-master reports deck, with no comparison or ranking of people. The lead approves the outline on the summary's issue before the summary is written.
+Retired in 05.0 (design.md D12): direction in R11.3.
 
 <!-- req: R6.3 -->
 ### R6.3
@@ -139,7 +144,7 @@ For each person the configuration lists, ensures one status issue (the sprint up
 <!-- req: R7.2 -->
 ### R7.2
 
-Is idempotent: a second run in the same week files nothing. The scheduled CI job runs it each week, so the next instance follows the merge that closed the last one.
+Is idempotent: a second run in the same week files nothing. A scheduled run of the status-issues profile each week, from a person's machine or a scheduled pipeline on the release image, on any tracking system, files the next instance after the merge that closed the last one.
 
 <!-- req: R8 -->
 ## R8 - scrum-master reports week
@@ -160,7 +165,7 @@ The weekly status issue is the sprint update of R6.1, filed in each owner's repo
 <!-- req: R9.2 -->
 ### R9.2
 
-Its due date is the day after the reminder weekday in the reports repository's configuration, Wednesday by default, because the tracker sends its due-date notification the day before an issue is due. The body mentions the person it is for, which makes that person a participant who receives the notification (srd006 R7.1) without assigning them (srd041 R9.1).
+Its due date is the day after the reminder weekday in the reports repository's configuration, Wednesday by default. The body mentions the person it is for, which makes that person a participant who receives the notification (srd006 R7.1) without assigning them (srd041 R9.1).
 
 <!-- req: R9.3 -->
 ### R9.3
@@ -178,20 +183,20 @@ It closes by its merge; the reports repository's scheduled scrum-master reports 
 <!-- req: R10.1 -->
 ### R10.1
 
-A release tag in the system repository triggers a CI pipeline that runs scrum-master reports aggregate over the reports since the previous system release tag and scrum-master reports deck over the result.
+When the system repository tags a release, its sprint-end summary is already merged at docs/sprint-ends/<release>.md, reviewed by the lead (srd038 R1). The release profile's step after the tag word renders the deck from that approved summary with scrum-master reports deck, so R4.1's approved summary and this one are the same document.
 
 <!-- req: R10.2 -->
 ### R10.2
 
-The pipeline pushes a branch to the reports repository with the computed aggregate and deck and files one issue for its review, linked to the open stakeholder update issue (R6.2), and spends no model tokens. When the lead works that issue, the model drafts the summary prose from the reports and the aggregate and iterates on it with the lead (design.md D10). The lead's review is the approval; nothing is published unreviewed.
+The deck is committed beside the summary, as R11.1 treats forecasts: regenerated on each run and never edited by hand. The step opens no branch and no review issue and spends no model tokens; the summary's review before its merge was the approval.
 
 <!-- req: R10.3 -->
 ### R10.3
 
-Run twice on the same tag, the pipeline pushes no second branch and files no second issue.
+Run twice on the same tag, the step leaves the committed deck unchanged and commits nothing.
 
 <!-- req: R11 -->
-## R11 - Direction: forecasts
+## R11 - Direction: forecasts and the stakeholder update
 
 <!-- req: R11.1 -->
 ### R11.1
@@ -202,6 +207,11 @@ Once track-goals runs (06.0), the system release's aggregate also renders a road
 ### R11.2
 
 Until then, reports render no forecast and no burn-up (srd045 R7.2).
+
+<!-- req: R11.3 -->
+### R11.3
+
+The stakeholder update becomes its own recurring artifact per lead per period when 06.0 is planned: a summary, an updated risk list, and a deck, with no comparison or ranking of people. Until then the system release's deck beside its approved summary is the program's update.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -215,7 +225,7 @@ Until then, reports render no forecast and no burn-up (srd045 R7.2).
 <!-- ac: AC1 -->
 ### AC1
 
-init creates the reports repository layout, configuration, and CI in a local checkout once and never overwrites existing reports or summaries.
+init creates the reports repository layout, configuration, and deck template in a local checkout once and never overwrites existing reports or summaries.
 
 <!-- field: traces -->
 #### Traces
@@ -238,7 +248,7 @@ validate passes a well-formed report and fails, non-zero, any report whose front
 <!-- ac: AC3 -->
 ### AC3
 
-aggregate groups a week's or sprint's items by component and reports every listed signal, adds dashboard signals for a sprint, phrases no signal as a comparison of people, reports a team whose reports name no Sprint Goal of its own, counts no merge closing only recurring issues as unreported work, and with --push files each actionable signal as an unassigned issue.
+aggregate groups a week's or sprint's items by component and reports every listed signal, adds dashboard signals for a sprint, phrases no signal as a comparison of people, reports a team whose reports name no Sprint Goal of its own, counts no merge closing only recurring issues as unreported work, with --push files each actionable signal as an unassigned issue, and with --from-tag and --to-tag reads the ISO weeks between the two tags' dates.
 
 <!-- field: traces -->
 #### Traces
@@ -249,11 +259,12 @@ aggregate groups a week's or sprint's items by component and reports every liste
 - [R3.4](#r34)
 - [R3.5](#r35)
 - [R3.6](#r36)
+- [R3.7](#r37)
 
 <!-- ac: AC4 -->
 ### AC4
 
-deck renders an approved summary within the slide limit; every subcommand honours --json and --dry-run and never prompts.
+deck renders an approved summary within the slide limit and exits non-zero naming the sections over it, truncating nothing; every subcommand honours --json and --dry-run and never prompts.
 
 <!-- field: traces -->
 #### Traces
@@ -264,13 +275,12 @@ deck renders an approved summary within the slide limit; every subcommand honour
 <!-- ac: AC5 -->
 ### AC5
 
-The sprint update and the stakeholder update exist only as recurring issues whose acceptance criteria name validate, aggregate, and deck; each closes by its merge and is re-created for the next period; an actionable signal becomes a pushed issue.
+The sprint update exists only as a recurring issue whose acceptance criteria name validate; it closes by its merge and is re-created for the next week; an actionable signal becomes a pushed issue.
 
 <!-- field: traces -->
 #### Traces
 
 - [R6.1](#r61)
-- [R6.2](#r62)
 - [R6.3](#r63)
 
 <!-- ac: AC6 -->
@@ -301,7 +311,7 @@ Each listed person receives one weekly status issue due the day after the remind
 <!-- ac: AC8 -->
 ### AC8
 
-A system release tag runs aggregate and deck in CI and pushes one branch with the computed aggregate and deck to the reports repository, with one issue for its review, linked to the stakeholder update issue; the summary prose is drafted by the model only during the lead's review; a second run on the same tag opens none.
+A system release tag renders the deck from the merged, lead-reviewed sprint-end summary and commits it beside the summary, with no branch, review issue, or model step; a second run on the same tag commits nothing.
 
 <!-- field: traces -->
 #### Traces
@@ -313,10 +323,12 @@ A system release tag runs aggregate and deck in CI and pushes one branch with th
 <!-- ac: AC9 -->
 ### AC9
 
-Release 06.0's planning writes the forecast requirement items from R11.1; until then the interim rule of R11.2 holds.
+Release 06.0's planning writes the forecast requirement items from R11.1 and the stakeholder update's from R11.3; until then the interim rules of R11.2 and R11.3 hold.
 
 <!-- field: traces -->
 #### Traces
 
+- [R6.2](#r62)
 - [R11.1](#r111)
 - [R11.2](#r112)
+- [R11.3](#r113)

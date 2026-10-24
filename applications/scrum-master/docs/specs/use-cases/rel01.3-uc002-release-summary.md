@@ -56,7 +56,7 @@ tpm release tag creates a release tag in the system repository.
 | id | target | reason |
 | --- | --- | --- |
 | T1 | [srd018-reports](../software-requirements/srd018-reports.md) [R10.1](../software-requirements/srd018-reports.md#r101), [R10.2](../software-requirements/srd018-reports.md#r102), [R10.3](../software-requirements/srd018-reports.md#r103) | S1 and S2 trace the release-triggered summary pipeline. |
-| T2 | [srd018-reports](../software-requirements/srd018-reports.md) [R4.1](../software-requirements/srd018-reports.md#r41), [R6.2](../software-requirements/srd018-reports.md#r62) | S1 and S3 trace the deck and the stakeholder update. |
+| T2 | [srd018-reports](../software-requirements/srd018-reports.md) [R4.1](../software-requirements/srd018-reports.md#r41) | S1 and S3 trace the deck. |
 | T3 | [srd018-reports](../software-requirements/srd018-reports.md) [AC8](../software-requirements/srd018-reports.md#ac8) | S1 and S2 trace this acceptance criterion. |
 | T4 | [srd018-reports](../software-requirements/srd018-reports.md) [AC4](../software-requirements/srd018-reports.md#ac4), [AC5](../software-requirements/srd018-reports.md#ac5) | S1 and S3 trace these acceptance criteria. |
 
@@ -96,7 +96,6 @@ The model drafts the summary prose and iterates on it with the lead; the stakeho
 <!-- field: traces -->
 #### Traces
 
-- [srd018-reports](../software-requirements/srd018-reports.md) [R6.2](../software-requirements/srd018-reports.md#r62)
 - [srd018-reports](../software-requirements/srd018-reports.md) [AC5](../software-requirements/srd018-reports.md#ac5)
 
 <!-- field: out_of_scope -->
