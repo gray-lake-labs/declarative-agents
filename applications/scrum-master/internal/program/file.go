@@ -22,7 +22,7 @@ type FileResult struct {
 	// Component is the component the issue is labelled with, given or
 	// derived from the system repository's subsystem SRDs.
 	Component string `json:"component,omitempty"`
-	// Derived explains a plane and kind tpm worked out from the paths.
+	// Derived explains a plane and kind scrum-master worked out from the paths.
 	Derived *Classification `json:"derived,omitempty"`
 	// Milestone is the milestone the issue carries; MilestoneReason says why
 	// a data issue filed without --milestone carries none.
@@ -96,7 +96,7 @@ func CreateLinted(t tracker.Tracker, project string, in tracker.NewIssue, p Poli
 // retrospective's actions, goes on the next milestone by start date. An
 // issue that cuts a release (kind::release) still belongs to the sprint
 // whose release it cuts, so for it an ended sprint stays active. With none,
-// or more than one, it returns no title and the reason; tpm never guesses
+// or more than one, it returns no title and the reason; scrum-master never guesses
 // between sprints.
 func SprintMilestone(t tracker.Tracker, project string, today time.Time, cutsRelease bool) (string, string, error) {
 	ms, err := t.ActiveMilestones(project)

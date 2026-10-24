@@ -136,7 +136,7 @@ func init() {
 	var o DoctorOptions
 	cli.Default.Register(&cli.Command{
 		Group:   "doctor",
-		Summary: "bring a program repository up to date after an upgrade of tpm: missing files, tpm's text, document format, installed skills",
+		Summary: "bring a program repository up to date after an upgrade of scrum-master: missing files, scrum-master's text, document format, installed skills",
 		Flags: func(fs *flag.FlagSet) {
 			o = DoctorOptions{}
 			fs.StringVar(&o.Dir, "dir", "", "the program repository's checkout (default: the git root)")
@@ -159,7 +159,7 @@ func init() {
 }
 
 // humanDoctor names what doctor changed, or would change on a dry run, and
-// the skills tpm install would update; a file left as it was is counted,
+// the skills scrum-master install would update; a file left as it was is counted,
 // not listed.
 func humanDoctor(r DoctorResult) string {
 	var b strings.Builder
@@ -203,13 +203,10 @@ func humanDoctor(r DoctorResult) string {
 	if r.Repair.Skipped != "" {
 		fmt.Fprintf(&b, "repair skipped: %s\n", r.Repair.Skipped)
 	}
-	// The runtime's tag is the parent release tpm pins, not a tpm version,
-	// though both read v0.YYYYMMDD.N (#188).
-	runtime := fmt.Sprintf("runtime (declarative-agents %s, the release this tpm pins)", r.Runtime.Release)
-	if r.Runtime.Problem != "" {
-		fmt.Fprintf(&b, "%s: %s\n", runtime, r.Runtime.Problem)
+	if r.Vendored == "" {
+		fmt.Fprintf(&b, "profiles: none vendored; run the init or onboard profile with the agent\n")
 	} else {
-		fmt.Fprintf(&b, "%s: %s (%s)\n", runtime, r.Runtime.Agent, r.Runtime.From)
+		fmt.Fprintf(&b, "profiles: %s vendored in %s\n", r.Vendored, install.VendorDir)
 	}
 	for _, p := range r.Credentials {
 		var vars []string
@@ -229,7 +226,7 @@ func humanDoctor(r DoctorResult) string {
 	}
 	for _, a := range install.Agents {
 		if agents[a] {
-			fmt.Fprintf(&b, "run tpm install --agent %s to update its skills\n", a)
+			fmt.Fprintf(&b, "run scrum-master install --agent %s to update its skills\n", a)
 		}
 	}
 	if r.DryRun {

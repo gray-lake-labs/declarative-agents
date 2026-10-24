@@ -14,7 +14,7 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Onboard)
 }
 
-// Onboard onboards a new repository into the rig's program: its corpus passes the parent's corpus audit as written, the orientation files are written for the subsystem level with tpm's block appended to the README.md and AGENTS.md it already had, the system repository gets one registration issue and no commit, and a second onboard files none (test-rel01.4-agent-legible-cli, test-rel04.1-orientation-doctor).
+// Onboard onboards a new repository into the rig's program: its corpus passes the parent's corpus audit as written, the orientation files are written for the subsystem level with scrum-master's block appended to the README.md and AGENTS.md it already had, the system repository gets one registration issue and no commit, and a second onboard files none (test-rel01.4-agent-legible-cli, test-rel04.1-orientation-doctor).
 func (Integration) Onboard() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -43,7 +43,7 @@ func (Integration) Onboard() error {
 		return err
 	}
 	// The joining repository already has its own README.md and AGENTS.md;
-	// onboard appends tpm's block after their text (srd043 R3.5).
+	// onboard appends scrum-master's block after their text (srd043 R3.5).
 	own := map[string]string{"README.md": "# store\n\nThe team's own README.\n", scaffold.AgentsFile: "Run the linter before committing.\n"}
 	for f, text := range own {
 		if err := os.WriteFile(filepath.Join(store, f), []byte(text), 0o644); err != nil {
@@ -59,7 +59,7 @@ func (Integration) Onboard() error {
 	}
 	onboard := func() (scaffold.OnboardResult, error) {
 		var res scaffold.OnboardResult
-		return res, r.tpmJSON(&res, "onboard", "--dir", store, "--system", system, "--ref", seedBranch,
+		return res, r.wordsJSON(&res, "onboard", "--dir", store, "--system", system, "--ref", seedBranch,
 			"--subsystem", "srd010-po-1", "--repository", r.webBase+"/rig/product-owners/store", "--agent", "claude")
 	}
 	c := &check{}
@@ -83,13 +83,13 @@ func (Integration) Onboard() error {
 				action = res.Action
 			}
 		}
-		c.expect(action == "appended" && strings.HasPrefix(string(b), text+"\n<!-- tpm:begin"), "%s: %s, the team's text not first:\n%s", f, action, b)
+		c.expect(action == "appended" && strings.HasPrefix(string(b), text+"\n<!-- managed:begin"), "%s: %s, the team's text not first:\n%s", f, action, b)
 	}
 	if err := gitIn(store, "add", "-A"); err != nil {
 		return err
 	}
-	c.expect(runCorpusAudit(store, runStreaming) == nil, "the parent's corpus audit fails on the corpus tpm onboard wrote")
-	c.expect(specCheckAt(store) == nil, "the spec tool's check fails on the corpus tpm onboard wrote")
+	c.expect(runCorpusAudit(store, runStreaming) == nil, "the parent's corpus audit fails on the corpus scrum-master onboard wrote")
+	c.expect(specCheckAt(store) == nil, "the spec tool's check fails on the corpus scrum-master onboard wrote")
 
 	second, err := onboard()
 	if err != nil {
@@ -106,7 +106,10 @@ func (Integration) Onboard() error {
 	}
 	registrations := 0
 	for _, i := range open {
-		if strings.Contains(i.Description, "tpm onboard registers") {
+		// Its own repository's: another target in the same rig may
+		// register one of its own (onboardProfile, GH-29).
+		if strings.Contains(i.Description, "scrum-master onboard registers") && strings.Contains(i.Title, "rig/product-owners/store") &&
+			!strings.Contains(i.Title, "rig/product-owners/store-profile") {
 			registrations++
 		}
 	}

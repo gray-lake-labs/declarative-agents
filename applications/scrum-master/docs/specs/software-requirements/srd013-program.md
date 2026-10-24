@@ -1,6 +1,6 @@
 ---
 id: srd013-program
-title: "Script: issue (tpm issue ...)"
+title: "Script: issue (scrum-master issue ...)"
 ---
 <!-- Copyright (c) 2026 Gray Lake Labs -->
 <!-- SPDX-License-Identifier: MIT-0 -->
@@ -10,7 +10,7 @@ title: "Script: issue (tpm issue ...)"
 
 - The group is named for its object. Every subcommand acts on an issue, and the group was named program before release 01.4, which said nothing about any of them.
 - pop keeps its name. Pull, never push, is the process's rule, and popping an issue is its verb in the skills (implement), the vision, and the states (srd041); under the issue group the command reads as what it does.
-- The old name breaks cleanly. Every caller is a skill embedded in the same tpm (srd037), so an alias would only keep stale skills running; instead tpm program runs nothing and names the fix.
+- The old name breaks cleanly. Every caller is a skill embedded in the same scrum-master (srd037), so an alias would only keep stale skills running; instead scrum-master program runs nothing and names the fix.
 - recur moves here from standup (srd010 R8.2, retired). It closes and reopens a recurring issue, wherever the issue lives and whoever runs it, which is the issue lifecycle, not a person's morning. The marker it writes into an issue body is tracker data, so its text does not change.
 
 <!-- field: problem -->
@@ -39,7 +39,7 @@ recording a release plan belongs to plan.
 - G3: Every issue is taken the same way, claimed by the person who works it, on its own branch, in its own worktree.
 
 <!-- req: R1 -->
-## R1 - tpm issue lint
+## R1 - scrum-master issue lint
 
 <!-- req: R1.1 -->
 ### R1.1
@@ -62,15 +62,15 @@ Runs in CI on issue creation and edit where the tracker allows, and on a schedul
 <!-- req: R2.1 -->
 ### R2.1
 
-Subcommands are in the tpm group issue, honour --json and --dry-run, and never prompt (srd010 R1).
+Subcommands are in the scrum-master group issue, honour --json and --dry-run, and never prompt (srd010 R1).
 
 <!-- req: R2.2 -->
 ### R2.2
 
-tpm program, the group's name before release 01.4, runs no subcommand: it exits non-zero naming tpm issue and tpm install, so a skill installed from an earlier tpm fails with its fix in the message.
+scrum-master program, the group's name before release 01.4, runs no subcommand: it exits non-zero naming scrum-master issue and scrum-master install, so a skill installed from an earlier scrum-master fails with its fix in the message.
 
 <!-- req: R3 -->
-## R3 - tpm issue file
+## R3 - scrum-master issue file
 
 <!-- req: R3.1 -->
 ### R3.1
@@ -85,10 +85,10 @@ With a parent tracking issue given, appends the new issue to its Members section
 <!-- req: R3.3 -->
 ### R3.3
 
-A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. A milestone whose sprint has ended, its sprint-end issue in the project closed, no longer counts: the issue goes on the next milestone by start date, so a retrospective's actions land in the next sprint. An issue that cuts a release (kind::release) is the exception: it belongs to the sprint whose release it cuts, so that sprint's milestone still counts for it after the sprint-end. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins. tpm issue milestone puts an issue already filed in a milestone its project finds and lints it again. A kind given explicitly makes a data issue of that kind, whatever plane its paths alone would give.
+A data issue filed without a milestone and without a type gets the sprint: the active milestone of the project or its ancestor groups whose start date is on or before today and whose due date is on or after it. A milestone whose sprint has ended, its sprint-end issue in the project closed, no longer counts: the issue goes on the next milestone by start date, so a retrospective's actions land in the next sprint. An issue that cuts a release (kind::release) is the exception: it belongs to the sprint whose release it cuts, so that sprint's milestone still counts for it after the sprint-end. With none, or more than one, it is filed without a milestone and the result says why; a milestone given explicitly always wins. scrum-master issue milestone puts an issue already filed in a milestone its project finds and lints it again. A kind given explicitly makes a data issue of that kind, whatever plane its paths alone would give.
 
 <!-- req: R4 -->
-## R4 - tpm issue show
+## R4 - scrum-master issue show
 
 <!-- req: R4.1 -->
 ### R4.1
@@ -96,12 +96,12 @@ A data issue filed without a milestone and without a type gets the sprint: the a
 Returns one issue with its labels, its state per srd041 R1–R32, its sub-issues and their states, its link lines (Upstream, Requires, Cites, Blocked-by, Blocks, Depends-on, Relates-to, Duplicates, Implements; srd007) with track-goals' explanation of each (srd019), its tracking issue if any, and its event comments, including its ledger events for a Sprint Goal.
 
 <!-- req: R5 -->
-## R5 - tpm issue merge
+## R5 - scrum-master issue merge
 
 <!-- req: R5.1 -->
 ### R5.1
 
-Merges a worktree branch into the default branch of the repository's main checkout with a merge commit whose message cites the issue and every open issue named with --closes (one another merge already closed is reported, not cited, since every cited issue reads as closed by the merge), pushes it, and closes each issue on that merge: the merge it made is the one each records, though an earlier merge cites the same reference. tpm issue close, which is not shown the merge, takes the first merge citing the issue made after the issue was created (srd042 R2.3).
+Merges a worktree branch into the default branch of the repository's main checkout with a merge commit whose message cites the issue and every open issue named with --closes (one another merge already closed is reported, not cited, since every cited issue reads as closed by the merge), pushes it, and closes each issue on that merge: the merge it made is the one each records, though an earlier merge cites the same reference. scrum-master issue close, which is not shown the merge, takes the first merge citing the issue made after the issue was created (srd042 R2.3).
 
 <!-- req: R5.2 -->
 ### R5.2
@@ -111,7 +111,7 @@ Refuses when the branch has no commits ahead of the default branch, when the iss
 <!-- req: R5.3 -->
 ### R5.3
 
-For a branch that changes docs/, runs the corpus gate, the policy's audit_command, in the worktree first, and merges nothing when it fails (srd034 R2.2). Without --control the policy is read from the project's own control files; the built-in mage audit becomes tpm backlog check in a repository with no magefiles, which could not run it. The merge's output names the audit it ran, or says no docs/ change meant none. The JSON result always names the audit command and the reason it ran or did not: docs/ changed, or no docs/ change.
+For a branch that changes docs/, runs the corpus gate, the policy's audit_command, in the worktree first, and merges nothing when it fails (srd034 R2.2). Without --control the policy is read from the project's own control files; the built-in mage audit becomes scrum-master backlog check in a repository with no magefiles, which could not run it. The merge's output names the audit it ran, or says no docs/ change meant none. The JSON result always names the audit command and the reason it ran or did not: docs/ changed, or no docs/ change.
 
 <!-- req: R5.4 -->
 ### R5.4
@@ -126,15 +126,15 @@ With the policy's admission.require_approval set, refuses unless the issue carri
 <!-- req: R5.6 -->
 ### R5.6
 
-tpm issue approve posts the approval as the person running it: a comment on the issue naming the tip of the branch at its origin. It refuses the issue's assignee, and posts nothing twice for the same commit.
+scrum-master issue approve posts the approval as the person running it: a comment on the issue naming the tip of the branch at its origin. It refuses the issue's assignee, and posts nothing twice for the same commit.
 
 <!-- req: R5.7 -->
 ### R5.7
 
-merge decomposes into two words the merge profile composes (GH-201, design.md D14): tpm issue merge-branch — the gates, the --no-ff merge citing the issue and each closes, and the push, closing nothing — and tpm issue close-delivered, which closes the issue and each closes reference on the commit the merge word reports and posts a reported_complete event on each closed Sprint Goal (srd038 R2.2). tpm issue merge runs the same code as one command, and tpm issue merge --dry-run is the gate word, running every gate and writing nothing. A close that fails after the push is the machine's PartiallyDelivered state, finished by a re-run of close-delivered with the named commit.
+merge decomposes into two words the merge profile composes (GH-201, design.md D14): scrum-master issue merge-branch — the gates, the --no-ff merge citing the issue and each closes, and the push, closing nothing — and scrum-master issue close-delivered, which closes the issue and each closes reference on the commit the merge word reports and posts a reported_complete event on each closed Sprint Goal (srd038 R2.2). scrum-master issue merge runs the same code as one command, and scrum-master issue merge --dry-run is the gate word, running every gate and writing nothing. A close that fails after the push is the machine's PartiallyDelivered state, finished by a re-run of close-delivered with the named commit.
 
 <!-- req: R6 -->
-## R6 - tpm issue labels
+## R6 - scrum-master issue labels
 
 <!-- req: R6.1 -->
 ### R6.1
@@ -152,7 +152,7 @@ Is idempotent: a second run changes nothing. It never deletes or renames a label
 With --migrate and --control naming the system repository, also relabels issues for a value srd001 renamed: every issue, open or closed, labelled type::epic in the system repository and in every repository its subsystem SRDs declare gains type::tracking and loses type::epic (srd001 R6.6). It is opt-in, writes nothing with --dry-run, and is idempotent. It never deletes or renames the group label itself and never edits the program's control files; it reports when control/labels.md still lists epic, for a plane::control issue to change.
 
 <!-- req: R7 -->
-## R7 - tpm issue pop
+## R7 - scrum-master issue pop
 
 <!-- req: R7.1 -->
 ### R7.1
@@ -177,28 +177,28 @@ Installs into the worktree the skills of every agent installed in the checkout (
 <!-- req: R7.5 -->
 ### R7.5
 
-pop decomposes into four words the pop profile composes (GH-201, GH-204, design.md D14): tpm issue claim — the assignment with pop's refusals, the atomic transaction the word boundary protects, naming the branch to open — tpm issue open-branch, tpm issue add-worktree, and tpm issue install-skills (srd036 R2.3). tpm issue pop runs the same code as one command. Each word reuses what is already in place, so a word that fails after the claim is a partial machine state a re-run of the pop finishes.
+pop decomposes into four words the pop profile composes (GH-201, GH-204, design.md D14): scrum-master issue claim — the assignment with pop's refusals, the atomic transaction the word boundary protects, naming the branch to open — scrum-master issue open-branch, scrum-master issue add-worktree, and scrum-master issue install-skills (srd036 R2.3). scrum-master issue pop runs the same code as one command. Each word reuses what is already in place, so a word that fails after the claim is a partial machine state a re-run of the pop finishes.
 
 <!-- req: R8 -->
-## R8 - tpm issue recur
+## R8 - scrum-master issue recur
 
 <!-- req: R8.1 -->
 ### R8.1
 
-tpm issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). With --summary (or --summary-file), the run's result is the run summary it closes the issue with and the Previous Runs line in place of the outcome, with how the instance closed after it, so a run that merges no file still carries its result forward. An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists. The next instance is admitted as tpm issue file admits an issue, under the policy of --control (the project's own by default), so a recurred data issue starts ready like a freshly filed one.
+scrum-master issue recur closes a recurring issue with a run summary, appends the run to its Previous Runs section, updates its Requires version, and opens the next instance (srd001 R8.3). With --summary (or --summary-file), the run's result is the run summary it closes the issue with and the Previous Runs line in place of the outcome, with how the instance closed after it, so a run that merges no file still carries its result forward. An issue a merge already closed is not closed again; recur only appends the run and opens the next instance, and it opens none when the next instance already exists. The next instance is admitted as scrum-master issue file admits an issue, under the policy of --control (the project's own by default), so a recurred data issue starts ready like a freshly filed one.
 
 <!-- req: R8.2 -->
 ### R8.2
 
-The marker recur writes into the next instance's body, naming the issue it recurs, keeps the text it had as tpm standup recur, so an instance opened before release 01.4 is still found and never opened twice.
+The marker recur writes into the next instance's body, naming the issue it recurs, keeps the text it had as scrum-master standup recur, so an instance opened before release 01.4 is still found and never opened twice.
 
 <!-- req: R9 -->
-## R9 - tpm issue comment
+## R9 - scrum-master issue comment
 
 <!-- req: R9.1 -->
 ### R9.1
 
-tpm issue comment posts the person's text, from --body or --body-file, on an issue as the person running it, through the tracking system serving the project, so a skill writes to an issue only through tpm, such as a completed issue's Actual LOC line. It refuses an issue that does not exist, an empty body, and both body flags at once; a dry run posts nothing.
+scrum-master issue comment posts the person's text, from --body or --body-file, on an issue as the person running it, through the tracking system serving the project, so a skill writes to an issue only through scrum-master, such as a completed issue's Actual LOC line. It refuses an issue that does not exist, an empty body, and both body flags at once; a dry run posts nothing.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -226,7 +226,7 @@ lint sets needs-triage with a listed reason on each failing issue, including a c
 <!-- ac: AC2 -->
 ### AC2
 
-Every issue subcommand honours --json and --dry-run and never prompts; tpm program runs nothing, exits non-zero, and names tpm issue and tpm install.
+Every issue subcommand honours --json and --dry-run and never prompts; scrum-master program runs nothing, exits non-zero, and names scrum-master issue and scrum-master install.
 
 <!-- field: traces -->
 #### Traces
@@ -308,7 +308,7 @@ Under a policy with require_approval, merge refuses with no approval, with only 
 <!-- ac: AC9 -->
 ### AC9
 
-recur closes a recurring issue with its run logged and Requires updated and opens the next instance once, admitted as a filed issue is, closes again nothing a merge closed, and finds an instance whose marker an earlier tpm standup recur wrote.
+recur closes a recurring issue with its run logged and Requires updated and opens the next instance once, admitted as a filed issue is, closes again nothing a merge closed, and finds an instance whose marker an earlier scrum-master standup recur wrote.
 
 <!-- field: traces -->
 #### Traces
@@ -329,7 +329,7 @@ comment posts the person's text on an issue once, on every tracking system, refu
 <!-- ac: AC11 -->
 ### AC11
 
-A run of the merge profile with the pinned runtime over a popped issue with committed work gates, merges, pushes, and closes it, ending in Done; a branch with nothing over the base ends in Refused with tpm's reason; merge-branch closes nothing and close-delivered finishes a delivery from the commit it names.
+A run of the merge profile with the pinned runtime over a popped issue with committed work gates, merges, pushes, and closes it, ending in Done; a branch with nothing over the base ends in Refused with scrum-master's reason; merge-branch closes nothing and close-delivered finishes a delivery from the commit it names.
 
 <!-- field: traces -->
 #### Traces
@@ -339,7 +339,7 @@ A run of the merge profile with the pinned runtime over a popped issue with comm
 <!-- ac: AC12 -->
 ### AC12
 
-A run of the pop profile with the pinned runtime over an admitted issue claims it, opens its branch and worktree, and installs the skills, ending in Done; a closed issue ends in Refused with tpm's reason; the words reuse what exists, so a re-run changes nothing.
+A run of the pop profile with the pinned runtime over an admitted issue claims it, opens its branch and worktree, and installs the skills, ending in Done; a closed issue ends in Refused with scrum-master's reason; the words reuse what exists, so a re-run changes nothing.
 
 <!-- field: traces -->
 #### Traces

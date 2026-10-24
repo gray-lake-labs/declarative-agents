@@ -1,4 +1,4 @@
-<!-- tpm:begin: tpm writes the text down to tpm:end, and tpm doctor refreshes it; write your own notes outside it -->
+<!-- managed:begin: the init and onboard profiles write the text down to managed:end and refresh it on a rerun; write your own notes outside it -->
 # Epics
 
 An epic is a large body of work under a program initiative, typically
@@ -11,15 +11,15 @@ points done.
 ## Documents here
 
 - Name: `epNNN-short-name.md`, numbered in order and never reused.
-- Format: an SRD in the pinned parent release's Markdown format, with the fields docs/constitutions/design.md lists for this level; tpm backlog template --kind epic prints one in that layout.
+- Format: an SRD in the pinned parent release's Markdown format, with the fields docs/constitutions/design.md lists for this level; the draft skill drafts one in that layout.
 - Status: `to_be_agreed` while it is drafted, `agreed` once it passes review, and `retired` when it is replaced. Only agreed documents are planned and rolled up. A retired document keeps its path, because links pin it.
 - Parent: an initiative in the system repository, named by URL. Features and stories name an epic as theirs.
 - Changes go through an issue and the corpus gate, never a direct edit on main.
 
 ## What reads them
 
-- tpm plan candidates lists the stories under an epic in the team's Product Backlog.
+- The plan skill lists the stories under an epic in the team's Product Backlog.
 - Features and stories name an epic as their parent; its progress is the story points of its done stories over those of all its agreed stories.
 
-See tpm help backlog for the whole hierarchy.
-<!-- tpm:end -->
+See README.md at the repository's root for the whole hierarchy.
+<!-- managed:end -->

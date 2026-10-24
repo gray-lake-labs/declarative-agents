@@ -37,8 +37,9 @@ func EmbeddedSkills() ([]Skill, error) {
 
 // profileDoc is the part of a profile.yaml rendering reads.
 type profileDoc struct {
-	Name    string `yaml:"name"`
-	Machine string `yaml:"machine"`
+	Name      string            `yaml:"name"`
+	Machine   string            `yaml:"machine"`
+	Libraries map[string]string `yaml:"libraries"`
 }
 
 // machineDoc is the part of a machine definition rendering reads.
@@ -65,6 +66,10 @@ func ProfileSkills(fsys fs.FS, dir string) ([]Skill, error) {
 		return nil, err
 	}
 	sort.Strings(paths)
+	env, err := ProfileEnv(fsys, dir)
+	if err != nil {
+		return nil, err
+	}
 	var out []Skill
 	for _, p := range paths {
 		pb, err := fs.ReadFile(fsys, p)
@@ -86,7 +91,7 @@ func ProfileSkills(fsys fs.FS, dir string) ([]Skill, error) {
 		if err := yaml.Unmarshal(mb, &m); err != nil {
 			return nil, fmt.Errorf("%s: machine: %w", p, err)
 		}
-		s, err := renderProfileSkill(prof.Name, path.Dir(p), m)
+		s, err := renderProfileSkill(prof.Name, m, env[prof.Name], prof.Libraries["providers"] != "")
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", p, err)
 		}
@@ -96,11 +101,14 @@ func ProfileSkills(fsys fs.FS, dir string) ([]Skill, error) {
 }
 
 // renderProfileSkill is the Skill a machine renders to: the purpose's first
-// paragraph is the description, the rest the introduction, and the states
-// between the initial and the terminal ones are the numbered steps, in the
-// machine's order, each its meaning. The terminal states close the skill, so
-// a reader sees how a run ends, the refusal state among them.
-func renderProfileSkill(name, dir string, m machineDoc) (Skill, error) {
+// paragraph is the description, the rest the introduction, then how to run
+// the vendored profile with the agent and the environment it reads (GH-29),
+// and the states between the initial and the terminal ones are the
+// numbered steps, in the machine's order, each its meaning. The terminal
+// states close the skill, so a reader sees how a run ends, the refusal
+// state among them. A machine with a model keeps the steps for an agent to
+// follow when no model is configured.
+func renderProfileSkill(name string, m machineDoc, env []string, model bool) (Skill, error) {
 	paragraphs := strings.Split(strings.TrimSpace(m.Purpose), "\n\n")
 	if paragraphs[0] == "" {
 		return Skill{}, fmt.Errorf("machine %q has no purpose to render from", m.Name)
@@ -118,7 +126,8 @@ func renderProfileSkill(name, dir string, m machineDoc) (Skill, error) {
 	for _, p := range paragraphs[1:] {
 		b.WriteString("\n" + p + "\n")
 	}
-	fmt.Fprintf(&b, "\nThe steps are the machine states of %s/profile.yaml, in order;\nthe runtime executes the same machine (design.md D14).\n\n", dir)
+	b.WriteString(runSection(name, env, model))
+	fmt.Fprintf(&b, "\nThe steps are the machine states of %s/%s/profile.yaml, in order;\nthe runtime executes the same machine (design.md D14).\n\n", AgentsVendored, name)
 	n := 0
 	for _, st := range m.States {
 		if st.Name == m.InitialState || terminal[st.Name] {
@@ -147,7 +156,7 @@ func renderProfileSkill(name, dir string, m machineDoc) (Skill, error) {
 }
 
 // ProfileEnv is the environment a profile names: every ${VAR} its directory's
-// YAML files read, per profile, sorted. tpm doctor reports which are set, so
+// YAML files read, per profile, sorted. scrum-master doctor reports which are set, so
 // a run's credentials are checked before a run (srd043 R4.7).
 func ProfileEnv(fsys fs.FS, dir string) (map[string][]string, error) {
 	paths, err := fs.Glob(fsys, dir+"/*/profile.yaml")
@@ -220,4 +229,34 @@ func MergeSkills(embedded, rendered []Skill) ([]Skill, error) {
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out, nil
+}
+
+// RunCommand is the command line a skill runs its vendored profile with,
+// from the repository's root.
+func RunCommand(name string) string {
+	return "agent --profile " + AgentsVendored + "/" + name + "/profile.yaml --core-root " + CoreVendored + " --directory ."
+}
+
+// runSection tells an agent how to run the workflow: with the agent, over
+// the profile the repository vendored, and the environment it reads.
+func runSection(name string, env []string, model bool) string {
+	var b strings.Builder
+	b.WriteString("\n## Run\n\n")
+	if model {
+		b.WriteString("The agent runs this workflow with a model, from the repository's root:\n\n")
+	} else {
+		b.WriteString("Run the workflow with the agent, from the repository's root; its\nwords are the machine's states, so do not run them by hand:\n\n")
+	}
+	fmt.Fprintf(&b, "    %s\n", RunCommand(name))
+	if len(env) > 0 {
+		names := strings.Join(env, ", ")
+		if n := len(env); n > 1 {
+			names = strings.Join(env[:n-1], ", ") + " and " + env[n-1]
+		}
+		fmt.Fprintf(&b, "\nIt reads %s from the environment.\n", names)
+	}
+	if model {
+		b.WriteString("\nWithout a model configured for the agent, follow the steps below yourself.\n")
+	}
+	return b.String()
 }

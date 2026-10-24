@@ -18,7 +18,7 @@ import (
 
 func day(offset int) string { return time.Now().AddDate(0, 0, offset).Format("2006-01-02") }
 
-// fileWith runs tpm issue file for a data issue against f and returns
+// fileWith runs scrum-master issue file for a data issue against f and returns
 // the result and the filed issue.
 func fileWith(t *testing.T, f *fake.Fake, extra ...string) (FileResult, tracker.Issue) {
 	t.Helper()
@@ -131,7 +131,7 @@ func TestFileAfterSprintEndTakesTheNextMilestone(t *testing.T) {
 	}
 }
 
-// TestAuditForARepositoryWithoutMage runs tpm backlog check where the
+// TestAuditForARepositoryWithoutMage runs scrum-master backlog check where the
 // built-in mage audit could not run, and keeps a policy's own command.
 func TestAuditForARepositoryWithoutMage(t *testing.T) {
 	dir := t.TempDir()

@@ -9,8 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master"
-	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/cli"
 	_ "github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/commands"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/scaffold"
@@ -30,14 +28,13 @@ func TestAgentsFile(t *testing.T) {
 	}
 	agents := string(b)
 	if !strings.HasPrefix(agents, scaffold.BlockBegin) || !strings.HasSuffix(agents, scaffold.BlockEnd+"\n") {
-		t.Fatalf("AGENTS.md is not one tpm block:\n%s", agents)
+		t.Fatalf("AGENTS.md is not one managed block:\n%s", agents)
 	}
-	for _, g := range cli.Default.Groups() {
-		if !strings.Contains(agents, "- tpm "+g+": ") {
-			t.Errorf("AGENTS.md does not name tpm %s", g)
-		}
+	// Every workflow runs as a skill; AGENTS.md names no command (GH-36).
+	if strings.Contains(agents, "tpm") {
+		t.Errorf("AGENTS.md names scrum-master:\n%s", agents)
 	}
-	skills, err := install.Skills(scrummaster.Plugin, scrummaster.SkillsDir)
+	skills, err := install.EmbeddedSkills()
 	if err != nil {
 		t.Fatal(err)
 	}

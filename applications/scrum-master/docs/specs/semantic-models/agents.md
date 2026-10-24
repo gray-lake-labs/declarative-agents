@@ -23,7 +23,7 @@ A change the Retrospective keeps is a plane::control issue worked against policy
 <!-- field: overall_findings -->
 ## Overall findings
 
-Two earlier rosters named role-specific agents: first twelve, one per role, plane, and time scale, then five, one per role and plane. Both re-specified, under each role's name, what specify, implement, and tpm release already do, and both needed artifact handoffs between agents to explain work that the tracker already moves. Once every unit of work is an issue carrying its own requirements and acceptance criteria, the role decides only which issues a person pulls, which kind already records. The roster collapses to the two loops and the outer-loop skills that feed them.
+Two earlier rosters named role-specific agents: first twelve, one per role, plane, and time scale, then five, one per role and plane. Both re-specified, under each role's name, what specify, implement, and scrum-master release already do, and both needed artifact handoffs between agents to explain work that the tracker already moves. Once every unit of work is an issue carrying its own requirements and acceptance criteria, the role decides only which issues a person pulls, which kind already records. The roster collapses to the two loops and the outer-loop skills that feed them.
 
 <!-- field: operations | form: "tree" -->
 ## Operations
@@ -47,7 +47,7 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
        - does: merges the branch, which closes the issue
        - "gated by mage audit for a change under docs/; a reviewer merges it": null
     1. - skill: implement (release issue)
-       - does: runs tpm release next
+       - does: runs scrum-master release next
        - gate: null
        - "and tag": null
        - "so a tag exists only once the artifact's gate passed (srd008": null
@@ -59,7 +59,7 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
     1. regression tests and benchmarks against the default branch
     1. contract checks at every artifact boundary (srd008)
     1. - track-goals: follows pinned references, collects evidence, posts ledger events, and closes met Sprint Goals (srd019)
-    1. the program dashboard (tpm goals status, srd019)
+    1. the program dashboard (scrum-master goals status, srd019)
     1. the weekly sprint update and the stakeholder update (srd018 R6)
 - outer_loops:
   - definition: The Scrum skills, for the workflows where people decide together. Each reads the tracker, asks people bounded questions, and pushes issues in the issue body's work format for the inner loop to work.
@@ -96,7 +96,7 @@ Two earlier rosters named role-specific agents: first twelve, one per role, plan
 | id | rule |
 | --- | --- |
 | A1 | One inner loop for all work. Code, architecture documents, OpenAPI schemas, infrastructure (Terraform, Helm), papers, research, and reviews all run specify, implement, and the reviewed merge. The issue states the deliverable and its acceptance criteria; implement needs no extension per kind of deliverable. |
-| A2 | Scripts (tpm subcommands) are tools the loops call, not agents. Event-driven scripts (lint, track-goals, handoff) run in CI on tracker events; they are tools the loops depend on, not agents either. |
+| A2 | Scripts (scrum-master subcommands) are tools the loops call, not agents. Event-driven scripts (lint, track-goals, handoff) run in CI on tracker events; they are tools the loops depend on, not agents either. |
 | A3 | People direct agents; agents never direct other agents. Work moves between sessions only through the tracker, as issues, comments, links, and tags, under the same rules as everyone else. |
 | A4 | An agent never assigns work to anyone but the person who ran implement, never approves anything, and never changes a rule except by a merge a person approves. Taking, approving, and rule changes are the three acts the process reserves for people. |
 | A5 | The kind label routes pull: it decides who takes an issue, whether it is offered, and how it is counted (srd001 R20.4). It does not change how the work runs. |

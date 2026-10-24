@@ -49,7 +49,7 @@ func aggregateFixture(t *testing.T, p trackertest.Program) (string, tracker.Trac
 	for i := 0; i < 2; i++ {
 		f.CreateIssue("g/po-2", tracker.NewIssue{Title: "objective"})
 	}
-	f.CreateNote("g/po-2", 2, "Met.\n\n<!-- tpm program event=met objective=obj001 -->")
+	f.CreateNote("g/po-2", 2, "Met.\n\n<!-- scrum-master program event=met objective=obj001 -->")
 	cfg := Config{Team: []Member{{"alice", "g/po-1"}, {"bob", "g/po-2"}, {"carol", "g/po-3"}}, System: "g/system"}
 	cfg.defaults()
 	return dir, f, cfg
@@ -125,7 +125,7 @@ func testActionableSignalIsPushedAsIssue(t *testing.T, p trackertest.Program) {
 		t.Fatalf("res=%+v err=%v", res, err)
 	}
 	i := systemIssues(t, f)[0]
-	for _, want := range []string{"## Requirements", "## Acceptance Criteria", "(test: tpm_reports_aggregate; environment: local)", "tpm reports signal=shared-blocker/scoring-api/scoring-api"} {
+	for _, want := range []string{"## Requirements", "## Acceptance Criteria", "(test: tpm_reports_aggregate; environment: local)", "scrum-master reports signal=shared-blocker/scoring-api/scoring-api"} {
 		if !strings.Contains(i.Description, want) {
 			t.Errorf("issue lacks %q:\n%s", want, i.Description)
 		}
@@ -266,7 +266,7 @@ func TestAggregateSeesATeamWithoutAGoal(t *testing.T) {
 		f.CreateIssue("g/po-3", tracker.NewIssue{Title: "goal"})
 		f.CreateIssue("g/po-4", tracker.NewIssue{Title: "Recurring: sprint end 01.0", Labels: []string{"plane::data", "type::recurring", "kind::release"}})
 		f.CreateIssue("g/po-4", tracker.NewIssue{Title: "Unplanned", Labels: []string{"plane::data", "kind::build"}})
-		cfg := Config{Team: []Member{{"carol", "g/po-3"}, {"erin", "g/po-4"}, {"tpm", "g/system"}}, System: "g/system"}
+		cfg := Config{Team: []Member{{"carol", "g/po-3"}, {"erin", "g/po-4"}, {"scrum-master", "g/system"}}, System: "g/system"}
 		cfg.defaults()
 
 		a, err := Aggregate(f, AggregateInput{Dir: dir, Config: cfg, Policy: program.Defaults(), From: "2026-W41", To: "2026-W42"})

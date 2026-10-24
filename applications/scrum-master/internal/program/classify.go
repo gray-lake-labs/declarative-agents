@@ -11,7 +11,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
-// Classification is the plane and kind tpm derives from the paths a
+// Classification is the plane and kind scrum-master derives from the paths a
 // request names (srd035 R2.2).
 type Classification struct {
 	Plane  string `json:"plane"`
@@ -99,7 +99,7 @@ func Derive(t tracker.Tracker, project, system, ref string, paths []string, give
 			out.Kind = c.Kind
 		} else if out.Plane != "data" {
 			// A stated kind is work: it makes a data issue whatever plane
-			// the paths alone would give, as tpm's own sprint-end issues
+			// the paths alone would give, as scrum-master's own sprint-end issues
 			// are plane::data, kind::release on a planning document.
 			out.Plane = "data"
 			c.Plane, c.Kind, c.Reason = "data", out.Kind, "a stated kind makes a data issue; "+c.Reason

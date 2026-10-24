@@ -1,8 +1,8 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
-// Package sprintend is the tpm side of a sprint-end issue (srd038 R1, R6):
+// Package sprintend is the scrum-master side of a sprint-end issue (srd038 R1, R6):
 // the facts its Requirements summarize, so the model drafts the period's
-// summary from computed state and asks only what tpm cannot know.
+// summary from computed state and asks only what scrum-master cannot know.
 package sprintend
 
 import (
@@ -40,7 +40,7 @@ type SprintGoal struct {
 	Stories []string `json:"stories"`
 }
 
-// Facts is what tpm sprint-end facts returns.
+// Facts is what scrum-master sprint-end facts returns.
 type Facts struct {
 	Project     string              `json:"project"`
 	Aggregate   reports.Aggregation `json:"aggregate"`
@@ -70,7 +70,7 @@ type Input struct {
 }
 
 // MakeFacts lists the repository's Sprint Goals with their ledger and
-// reported status, beside the period's aggregate and the version tpm
+// reported status, beside the period's aggregate and the version scrum-master
 // release next recommends.
 func MakeFacts(in Input) (Facts, error) {
 	f := Facts{Project: in.Project, Aggregate: in.Aggregate, SprintGoals: []SprintGoal{}}

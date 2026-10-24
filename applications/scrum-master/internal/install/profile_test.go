@@ -26,7 +26,7 @@ func TestSkillsRenderFromTheirProfiles(t *testing.T) {
 	for _, s := range skills {
 		names = append(names, s.Name)
 	}
-	want := []string{"draft", "implement", "merge", "plan-push", "plan", "pop", "specify", "sprint-end", "tasks"}
+	want := []string{"admit", "aggregate", "approve", "check", "close", "comment", "draft", "implement", "init", "labels", "merge", "onboard", "peer-read", "plan-push", "plan", "pop", "recur", "release", "reports-init", "specify", "sprint-end", "status-issues", "status", "tasks", "tracker-sync"}
 	if strings.Join(names, " ") != strings.Join(want, " ") {
 		t.Fatalf("profiles rendered %v, want %v", names, want)
 	}
@@ -81,7 +81,7 @@ func TestImplementRenderKeepsItsCommands(t *testing.T) {
 		if s.Name != "implement" {
 			continue
 		}
-		for _, cmd := range []string{"tpm issue pop", "git push", "tpm issue merge", "design.md D10"} {
+		for _, cmd := range []string{"scrum-master issue pop", "git push", "scrum-master issue merge", "design.md D10"} {
 			if !strings.Contains(s.Body, cmd) {
 				t.Errorf("rendered body misses %q", cmd)
 			}
@@ -108,15 +108,45 @@ func TestMergeSkillsRefusesASkillWithTwoSources(t *testing.T) {
 }
 
 func TestRenderProfileSkillRefusesAnEmptyMachine(t *testing.T) {
-	if _, err := renderProfileSkill("x", "plugin/agents/x", machineDoc{Purpose: "", States: []machineState{{Name: "A"}}}); err == nil {
+	if _, err := renderProfileSkill("x", machineDoc{Purpose: "", States: []machineState{{Name: "A"}}}, nil, false); err == nil {
 		t.Error("a machine without a purpose must be refused")
 	}
-	if _, err := renderProfileSkill("x", "plugin/agents/x", machineDoc{Purpose: "p"}); err == nil {
+	if _, err := renderProfileSkill("x", machineDoc{Purpose: "p"}, nil, false); err == nil {
 		t.Error("a machine without states must be refused")
 	}
 	m := machineDoc{Purpose: "p", InitialState: "Idle", States: []machineState{{Name: "Idle"}, {Name: "End"}}, TerminalStates: []string{"End"}}
-	if _, err := renderProfileSkill("x", "plugin/agents/x", m); err == nil {
+	if _, err := renderProfileSkill("x", m, nil, false); err == nil {
 		t.Error("a machine with no steps between initial and terminal states must be refused")
+	}
+}
+
+// A rendered skill runs the vendored profile with the agent and names the
+// environment it reads; a model-free one says not to run its words by hand,
+// a model one keeps its steps for an agent without a model (GH-29).
+func TestRenderedSkillsRunTheVendoredProfile(t *testing.T) {
+	skills, err := ProfileSkills(scrummaster.Plugin, scrummaster.AgentsDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	for _, s := range skills {
+		seen[s.Name] = true
+		if !strings.Contains(s.Body, "    agent --profile .scrum-master/agents/"+s.Name+"/profile.yaml --core-root .scrum-master/agent-core --directory .\n") {
+			t.Errorf("%s: no run line:\n%s", s.Name, s.Body)
+		}
+		switch s.Name {
+		case "pop":
+			if !strings.Contains(s.Body, "do not run them by hand") || !strings.Contains(s.Body, "TPM_ISSUE") {
+				t.Errorf("pop's run section:\n%s", s.Body)
+			}
+		case "plan":
+			if !strings.Contains(s.Body, "follow the steps below yourself") {
+				t.Errorf("plan's run section:\n%s", s.Body)
+			}
+		}
+	}
+	if !seen["pop"] || !seen["plan"] {
+		t.Fatalf("skills = %v", seen)
 	}
 }
 

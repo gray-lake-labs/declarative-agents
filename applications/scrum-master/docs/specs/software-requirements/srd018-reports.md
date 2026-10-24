@@ -1,6 +1,6 @@
 ---
 id: srd018-reports
-title: "Script: reports (tpm reports ...)"
+title: "Script: reports (scrum-master reports ...)"
 ---
 <!-- Copyright (c) 2026 Gray Lake Labs -->
 <!-- SPDX-License-Identifier: MIT-0 -->
@@ -31,12 +31,12 @@ prose.
 - G3: Nothing aggregated ranks or compares people.
 
 <!-- req: R1 -->
-## R1 - tpm reports init
+## R1 - scrum-master reports init
 
 <!-- req: R1.1 -->
 ### R1.1
 
-Scaffolds a reports repository: a reports directory per quarter, the report schema, a summaries directory, the configuration reports.md (config format reports-config), and a deck template, and installs the skills for the agents --agent names, as tpm init does. The team runs tpm reports status-issues each week on a schedule of its own, and tpm reports validate before each report merges.
+Scaffolds a reports repository: a reports directory per quarter, the report schema, a summaries directory, the configuration reports.md (config format reports-config), and a deck template, and installs the skills for the agents --agent names, as scrum-master init does. The team runs scrum-master reports status-issues each week on a schedule of its own, and scrum-master reports validate before each report merges.
 
 <!-- req: R1.2 -->
 ### R1.2
@@ -49,7 +49,7 @@ Is idempotent and never overwrites an existing report or summary.
 Writes into a local checkout of the reports repository (--dir), whose owner commits the scaffold through the inner loop.
 
 <!-- req: R2 -->
-## R2 - tpm reports validate
+## R2 - scrum-master reports validate
 
 <!-- req: R2.1 -->
 ### R2.1
@@ -62,7 +62,7 @@ Checks that each report's body has a Work section and a Blockers section, one en
 Exits non-zero for any report whose front matter disagrees with its body.
 
 <!-- req: R3 -->
-## R3 - tpm reports aggregate
+## R3 - scrum-master reports aggregate
 
 <!-- req: R3.1 -->
 ### R3.1
@@ -77,7 +77,7 @@ Computes signals: blockers shared by two or more reports, blockers older than po
 <!-- req: R3.3 -->
 ### R3.3
 
-For a sprint, adds the dashboard signals of tpm goals status (srd019) as further candidates.
+For a sprint, adds the dashboard signals of scrum-master goals status (srd019) as further candidates.
 
 <!-- req: R3.4 -->
 ### R3.4
@@ -92,10 +92,10 @@ States progress as the ledger state of each Sprint Goal (srd006 R11) and its lat
 <!-- req: R3.6 -->
 ### R3.6
 
-With --push, files each signal that needs action as an issue in the issue body's work format in the system repository the configuration names (R6.3), unassigned, its body mentioning the person who pushed it (srd041 R9.2), and reports each issue it files with its admission, as tpm issue file does.
+With --push, files each signal that needs action as an issue in the issue body's work format in the system repository the configuration names (R6.3), unassigned, its body mentioning the person who pushed it (srd041 R9.2), and reports each issue it files with its admission, as scrum-master issue file does.
 
 <!-- req: R4 -->
-## R4 - tpm reports deck
+## R4 - scrum-master reports deck
 
 <!-- req: R4.1 -->
 ### R4.1
@@ -108,7 +108,7 @@ Renders an approved summary into a slide deck from the template, one slide per o
 <!-- req: R5.1 -->
 ### R5.1
 
-Subcommands are in the tpm group reports, honour --json and --dry-run, and never prompt (srd010 R1).
+Subcommands are in the scrum-master group reports, honour --json and --dry-run, and never prompt (srd010 R1).
 
 <!-- req: R6 -->
 ## R6 - Report audits
@@ -116,12 +116,12 @@ Subcommands are in the tpm group reports, honour --json and --dry-run, and never
 <!-- req: R6.1 -->
 ### R6.1
 
-The sprint update is a recurring issue (srd001 R8) per member per week. Its Requirements name tpm standup activity, fetch, and inbox (srd010) as the facts to draft from; its Acceptance Criteria are a report in the fixed shape that passes tpm reports validate, written by the member about their own work only. It closes by its merge, and implement re-creates it for the next week.
+The sprint update is a recurring issue (srd001 R8) per member per week. Its Requirements name scrum-master standup activity, fetch, and inbox (srd010) as the facts to draft from; its Acceptance Criteria are a report in the fixed shape that passes scrum-master reports validate, written by the member about their own work only. It closes by its merge, and implement re-creates it for the next week.
 
 <!-- req: R6.2 -->
 ### R6.2
 
-The stakeholder update is a recurring issue per lead per period. Its Requirements name tpm reports aggregate with the tracker check and the previous roll-up's open risks; its Acceptance Criteria are a summary, an updated risk list, and a deck rendered by tpm reports deck, with no comparison or ranking of people. The lead approves the outline on the summary's issue before the summary is written.
+The stakeholder update is a recurring issue per lead per period. Its Requirements name scrum-master reports aggregate with the tracker check and the previous roll-up's open risks; its Acceptance Criteria are a summary, an updated risk list, and a deck rendered by scrum-master reports deck, with no comparison or ranking of people. The lead approves the outline on the summary's issue before the summary is written.
 
 <!-- req: R6.3 -->
 ### R6.3
@@ -129,12 +129,12 @@ The stakeholder update is a recurring issue per lead per period. Its Requirement
 A signal from aggregate that needs action is pushed as an issue in the issue body's work format, not carried in the prose of a report.
 
 <!-- req: R7 -->
-## R7 - tpm reports status-issues
+## R7 - scrum-master reports status-issues
 
 <!-- req: R7.1 -->
 ### R7.1
 
-For each person the configuration lists, ensures one status issue (the sprint update of R6.1) exists in their project for the coming ISO week. When the person's latest status issue is closed, it recurs that issue (srd010 R8.2); when there is none, it files a fresh one through tpm issue file.
+For each person the configuration lists, ensures one status issue (the sprint update of R6.1) exists in their project for the coming ISO week. When the person's latest status issue is closed, it recurs that issue (srd010 R8.2); when there is none, it files a fresh one through scrum-master issue file.
 
 <!-- req: R7.2 -->
 ### R7.2
@@ -142,12 +142,12 @@ For each person the configuration lists, ensures one status issue (the sprint up
 Is idempotent: a second run in the same week files nothing. The scheduled CI job runs it each week, so the next instance follows the merge that closed the last one.
 
 <!-- req: R8 -->
-## R8 - tpm reports week
+## R8 - scrum-master reports week
 
 <!-- req: R8.1 -->
 ### R8.1
 
-For a project and a person, returns the project's open Sprint Goal issues (Sprint Goals included) with their due dates and the person's activity since the ISO week began, or since the start of the week --date names, the week taken in UTC: branches merged and issues closed. A merge counts from the later of the week's start and the creation of the project's earliest open or recently closed Sprint Goal, so an earlier run's merges in the same week do not; a project holding no Sprint Goal of its own, the system repository, starts at its own earliest open or recently closed issue, so its planning and registration merges count, and only with no issue of its own takes the teams' earliest instead, the teams being those --control's subsystem SRDs name. The issues closed are those assigned to the person and those a counted merge closes. A merge is the person's when its Merged-by trailer, which tpm issue merge writes, names them, whatever git identity made the commit. These are the facts the status issue's guided script drafts from.
+For a project and a person, returns the project's open Sprint Goal issues (Sprint Goals included) with their due dates and the person's activity since the ISO week began, or since the start of the week --date names, the week taken in UTC: branches merged and issues closed. A merge counts from the later of the week's start and the creation of the project's earliest open or recently closed Sprint Goal, so an earlier run's merges in the same week do not; a project holding no Sprint Goal of its own, the system repository, starts at its own earliest open or recently closed issue, so its planning and registration merges count, and only with no issue of its own takes the teams' earliest instead, the teams being those --control's subsystem SRDs name. The issues closed are those assigned to the person and those a counted merge closes. A merge is the person's when its Merged-by trailer, which scrum-master issue merge writes, names them, whatever git identity made the commit. These are the facts the status issue's guided script drafts from.
 
 <!-- req: R9 -->
 ## R9 - Weekly status issue
@@ -165,12 +165,12 @@ Its due date is the day after the reminder weekday in the reports repository's c
 <!-- req: R9.3 -->
 ### R9.3
 
-Its Requirements section is the guided script the owner works with implement: for each open Sprint Goal issue in the repository, record its status, its problems, and complete or not complete. The output is a report in the srd018 shape that passes tpm reports validate.
+Its Requirements section is the guided script the owner works with implement: for each open Sprint Goal issue in the repository, record its status, its problems, and complete or not complete. The output is a report in the srd018 shape that passes scrum-master reports validate.
 
 <!-- req: R9.4 -->
 ### R9.4
 
-It closes by its merge; the reports repository's scheduled tpm reports status-issues run recurs it with the next week's due date (R7, srd001 R8.3).
+It closes by its merge; the reports repository's scheduled scrum-master reports status-issues run recurs it with the next week's due date (R7, srd001 R8.3).
 
 <!-- req: R10 -->
 ## R10 - Summary on a system release
@@ -178,7 +178,7 @@ It closes by its merge; the reports repository's scheduled tpm reports status-is
 <!-- req: R10.1 -->
 ### R10.1
 
-A release tag in the system repository triggers a CI pipeline that runs tpm reports aggregate over the reports since the previous system release tag and tpm reports deck over the result.
+A release tag in the system repository triggers a CI pipeline that runs scrum-master reports aggregate over the reports since the previous system release tag and scrum-master reports deck over the result.
 
 <!-- req: R10.2 -->
 ### R10.2
@@ -288,7 +288,7 @@ status-issues leaves exactly one status issue per listed person for the coming w
 <!-- ac: AC7 -->
 ### AC7
 
-Each listed person receives one weekly status issue due the day after the reminder weekday, which mentions them without assigning them; worked with implement it produces a report with status, problems, and complete or not complete per open Sprint Goal that passes tpm reports validate, and it is re-created with the next due date.
+Each listed person receives one weekly status issue due the day after the reminder weekday, which mentions them without assigning them; worked with implement it produces a report with status, problems, and complete or not complete per open Sprint Goal that passes scrum-master reports validate, and it is re-created with the next due date.
 
 <!-- field: traces -->
 #### Traces

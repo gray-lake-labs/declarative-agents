@@ -1,6 +1,8 @@
 ---
 id: srd044-help
-title: "Script: help (tpm help)"
+title: "Script: help"
+status: retired
+retired_in: "5.0"
 ---
 <!-- Copyright (c) 2026 Gray Lake Labs -->
 <!-- SPDX-License-Identifier: MIT-0 -->
@@ -15,19 +17,19 @@ title: "Script: help (tpm help)"
 <!-- field: problem -->
 ## Problem
 
-tpm's help is a usage listing: group names and flags. An agent or a person
+scrum-master's help is a usage listing: group names and flags. An agent or a person
 meeting the binary learns nothing from it about the process it implements:
 what a Sprint Goal is, how an issue moves from filed to merged, which
 command serves which step of the release cycle, or where evidence comes
 from. The skills carry some of this, and the corpus all of it, but neither
 travels with the binary into a repository that has not yet installed
-either. An agent that can run only tpm should be able to learn the process
-from tpm.
+either. An agent that can run only scrum-master should be able to learn the process
+from scrum-master.
 
 <!-- field: goals -->
 ## Goals
 
-- G1: tpm help alone gives a reader the process in one read: the planes, the steps of the release cycle, and the command that serves each step.
+- G1: scrum-master help alone gives a reader the process in one read: the planes, the steps of the release cycle, and the command that serves each step.
 - G2: Every group and every load-bearing concept has a page that says what it is for and which commands and SRDs touch it.
 - G3: A page that names a command or an SRD that does not exist fails the audit, so the help cannot drift from the binary or the corpus.
 
@@ -37,22 +39,22 @@ from tpm.
 <!-- req: R1.1 -->
 ### R1.1
 
-tpm help with no argument prints the process page: the three planes, the ten steps of the release cycle as docs/VISION.md draws them, and for each step the tpm group or skill that serves it, where a repository's corpus and control files live, and a pointer to docs/VISION.md.
+scrum-master help with no argument prints the process page: the three planes, the ten steps of the release cycle as docs/VISION.md draws them, and for each step the scrum-master group or skill that serves it, where a repository's corpus and control files live, and a pointer to docs/VISION.md.
 
 <!-- req: R1.2 -->
 ### R1.2
 
-tpm help <group> exists for every tpm group. It prints what the group is for in the process and who runs it, then each subcommand with one sentence and the SRD that specifies it; flags stay with --help.
+scrum-master help <group> exists for every scrum-master group. It prints what the group is for in the process and who runs it, then each subcommand with one sentence and the SRD that specifies it; flags stay with --help.
 
 <!-- req: R1.3 -->
 ### R1.3
 
-tpm help <concept> exists for at least Sprint Goal, admission, approval, milestone, tracker, evidence, release, and recurring issue. Each prints a paragraph, the commands that touch the concept, and the SRD that specifies it.
+scrum-master help <concept> exists for at least Sprint Goal, admission, approval, milestone, tracker, evidence, release, and recurring issue. Each prints a paragraph, the commands that touch the concept, and the SRD that specifies it.
 
 <!-- req: R1.4 -->
 ### R1.4
 
-tpm help --list names every page with its one-line summary, and an unknown page name exits non-zero listing the pages.
+scrum-master help --list names every page with its one-line summary, and an unknown page name exits non-zero listing the pages.
 
 <!-- req: R2 -->
 ## R2 - Output
@@ -73,12 +75,12 @@ The pages are embedded in the binary; help reads no file and no tracker, writes 
 <!-- req: R3.1 -->
 ### R3.1
 
-A gate test in mage audit fails when a page names a tpm command the dispatch table does not hold, or an SRD the corpus does not hold, or when a group has no page.
+A gate test in mage audit fails when a page names a scrum-master command the dispatch table does not hold, or an SRD the corpus does not hold, or when a group has no page.
 
 <!-- req: R3.2 -->
 ### R3.2
 
-The subcommands tpm help <group> lists are exactly the group's subcommands in the dispatch table.
+The subcommands scrum-master help <group> lists are exactly the group's subcommands in the dispatch table.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -93,7 +95,7 @@ The subcommands tpm help <group> lists are exactly the group's subcommands in th
 <!-- ac: AC1 -->
 ### AC1
 
-tpm help prints the planes, the ten release-cycle steps with the group or skill serving each, the corpus and control locations, and the pointer to VISION; every group and the listed concepts have pages; --list names them all, and an unknown name exits non-zero with the list.
+scrum-master help prints the planes, the ten release-cycle steps with the group or skill serving each, the corpus and control locations, and the pointer to VISION; every group and the listed concepts have pages; --list names them all, and an unknown name exits non-zero with the list.
 
 <!-- field: traces -->
 #### Traces

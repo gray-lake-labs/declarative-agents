@@ -85,10 +85,10 @@ func (d localDelivery) approval(issueProject string, iid int, branch, tip, merge
 	}
 	short := func(c string) string { return c[:min(12, len(c))] }
 	if stale != "" {
-		return "", fmt.Errorf("the approval of %s#%d is for %s, and %s is now at %s; ask for a new approval with tpm issue approve (srd013 R5.5)",
+		return "", fmt.Errorf("the approval of %s#%d is for %s, and %s is now at %s; ask for a new approval with scrum-master issue approve (srd013 R5.5)",
 			issueProject, iid, short(stale), branch, short(tip))
 	}
-	return "", fmt.Errorf("no approval of %s at %s from someone other than %s; ask a reviewer to run tpm issue approve (srd013 R5.5)",
+	return "", fmt.Errorf("no approval of %s at %s from someone other than %s; ask a reviewer to run scrum-master issue approve (srd013 R5.5)",
 		branch, short(tip), strings.Join(excluded, ", "))
 }
 
@@ -141,10 +141,10 @@ func (d reviewDelivery) approval(issueProject string, iid int, branch, tip, merg
 	}
 	short := func(c string) string { return c[:min(12, len(c))] }
 	if stale != "" {
-		return "", fmt.Errorf("the review of %s approved %s, and it is now at %s; ask for a new approval with tpm issue approve (srd013 R5.5)",
+		return "", fmt.Errorf("the review of %s approved %s, and it is now at %s; ask for a new approval with scrum-master issue approve (srd013 R5.5)",
 			branch, short(stale), short(tip))
 	}
-	return "", fmt.Errorf("no approval of %s at %s from someone other than %s; ask a reviewer to run tpm issue approve (srd013 R5.5)",
+	return "", fmt.Errorf("no approval of %s at %s from someone other than %s; ask a reviewer to run scrum-master issue approve (srd013 R5.5)",
 		branch, short(tip), strings.Join(excluded, ", "))
 }
 
@@ -155,7 +155,7 @@ func (d reviewDelivery) merge(main, base, branch, message string) (string, error
 	}
 	commit, err := d.rv.Merge(d.project, branch, strings.TrimSpace(tip), message)
 	if err != nil {
-		return "", fmt.Errorf("the host refused to merge %s; if its branch protection requires a review, ask for one with tpm issue approve: %w", branch, err)
+		return "", fmt.Errorf("the host refused to merge %s; if its branch protection requires a review, ask for one with scrum-master issue approve: %w", branch, err)
 	}
 	run := func(args ...string) (string, error) {
 		out, err := d.git.Run(main, args...)

@@ -3,7 +3,7 @@
 # The specify profile's model binding: the model acts only in the Draft
 # state (design.md D10), reading TPM_MODEL, TPM_RESPONSE_PROFILE, and
 # OLLAMA_URL with the defaults the parent's executor ships (srd043 R4.7).
-unit: tpm-specify-llm-default
+unit: scrum-master-specify-llm-default
 imports:
 - /opt/agent-core/tools/units/types-core.yaml
 tools:
@@ -47,8 +47,8 @@ tools:
     response_profile: ${TPM_RESPONSE_PROFILE:-qwen}
     max_time: 600
     system_prompt: |
-      You are the specify workflow of tpm: one request becomes one admitted
-      issue. tpm picks the labels, files, and lints; your one step is writing
+      You are the specify workflow of scrum-master: one request becomes one admitted
+      issue. scrum-master picks the labels, files, and lints; your one step is writing
       the body (design.md D10, srd035).
 
       Write the request as a title and a body with ## Requirements (numbered
@@ -59,13 +59,13 @@ tools:
 
       Constraints:
       - List the paths the request changes, as the request names them, and
-        pass each as a path parameter of tpm_issue_file
+        pass each as a path parameter of issue_file
       - Ask the person only for what is missing: the kind of project work
         when no path is under docs/ or control/, and the test of a criterion
         that names none; ask nothing else and no confirmation
-      - File with tpm_issue_file; tpm sets the plane, kind, and component
+      - File with issue_file; the word sets the plane, kind, and component
       - When admission did not admit it, fix the body from the reasons and
-        run tpm_issue_lint
+        run issue_lint
 
       Call done with the issue's reference, its plane, kind, and component,
       and the admission verdict.

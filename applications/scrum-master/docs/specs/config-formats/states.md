@@ -8,7 +8,7 @@ title: Issue states
 <!-- field: purpose -->
 ## Purpose
 
-Declares the srd041 issue state machine as data: every transition the beads tracker makes is one row of this file, fired by the row's one actor, with its assignee effect. tpm init writes the built-in default to control/states.md, tpm doctor restores a missing one, and the tracker reads the program's rows from main on the first transition, so a program can see and extend its own table — an overlay row of its own among them — without a tpm change (GH-130). A file that does not parse, or a row the format does not list, refuses every transition with its reason rather than silently falling back to the default. The srd041 invariants (R9) are not rows and always hold: only pop sets an assignee, and only the caller; a person's moves on a taken issue are the assignee's alone.
+Declares the srd041 issue state machine as data: every transition the beads tracker makes is one row of this file, fired by the row's one actor, with its assignee effect. scrum-master init writes the built-in default to control/states.md, scrum-master doctor restores a missing one, and the tracker reads the program's rows from main on the first transition, so a program can see and extend its own table — an overlay row of its own among them — without a scrum-master change (GH-130). A file that does not parse, or a row the format does not list, refuses every transition with its reason rather than silently falling back to the default. The srd041 invariants (R9) are not rows and always hold: only pop sets an assignee, and only the caller; a person's moves on a taken issue are the assignee's alone.
 
 <!-- field: schema -->
 ## Schema

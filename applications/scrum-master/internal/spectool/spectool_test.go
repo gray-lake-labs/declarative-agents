@@ -59,9 +59,9 @@ func TestModuleOfReadsTheDeclaredPath(t *testing.T) {
 // or objective document, at any depth under its directory, with the SRD
 // declaration under the scope of its kind (design.md hierarchy).
 func TestSpecToolReadsObjectivesAsSRDs(t *testing.T) {
-	m := regexp.MustCompile(`hierarchyPath = regexp.MustCompile\(("[^"]+")\)`).FindStringSubmatch(Main)
+	m := regexp.MustCompile(`hierarchyPath = regexp.MustCompile\(("[^"]+")\)`).FindStringSubmatch(Program("main", "m"))
 	if m == nil {
-		t.Fatal("Main declares no hierarchyPath")
+		t.Fatal("the program declares no hierarchyPath")
 	}
 	pattern, err := strconv.Unquote(m[1])
 	if err != nil {
@@ -85,8 +85,8 @@ func TestSpecToolReadsObjectivesAsSRDs(t *testing.T) {
 		}
 	}
 	for _, want := range []string{`declarations["srd"]`, `"objective"`, `"story"`} {
-		if !strings.Contains(Main, want) {
-			t.Errorf("Main lacks %s", want)
+		if !strings.Contains(Program("main", "m"), want) {
+			t.Errorf("the program lacks %s", want)
 		}
 	}
 }

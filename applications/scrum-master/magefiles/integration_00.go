@@ -16,7 +16,7 @@ func init() {
 	)
 }
 
-// Labels runs tpm issue labels on the rig group twice: the first run creates the schema; the second changes nothing (test-rel00.0-push).
+// Labels runs scrum-master issue labels on the rig group twice: the first run creates the schema; the second changes nothing (test-rel00.0-push).
 func (Integration) Labels() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -25,7 +25,7 @@ func (Integration) Labels() error {
 	c := &check{}
 	group := r.group
 	var first, second []program.LabelResult
-	if err := r.tpmJSON(&first, "issue", "labels", "--group", group); err != nil {
+	if err := r.wordsJSON(&first, "issue", "labels", "--group", group); err != nil {
 		return err
 	}
 	count := func(res []program.LabelResult, action string) int {
@@ -39,7 +39,7 @@ func (Integration) Labels() error {
 	}
 	c.expect(count(first, "created") > 0, "first run created nothing: %+v", first)
 	c.expect(count(first, "updated") == 0, "first run updated labels without --update")
-	if err := r.tpmJSON(&second, "issue", "labels", "--group", group); err != nil {
+	if err := r.wordsJSON(&second, "issue", "labels", "--group", group); err != nil {
 		return err
 	}
 	c.expect(count(second, "created") == 0 && count(second, "updated") == 0, "second run changed labels: %+v", second)
@@ -58,7 +58,7 @@ func (Integration) Labels() error {
 	return c.err("labels")
 }
 
-// Push files a project request and a docs/ request through tpm issue file --path, without --milestone, and proves plane, kind, component, the active sprint milestone, admission, and no assignee (test-rel00.0-push).
+// Push files a project request and a docs/ request through scrum-master issue file --path, without --milestone, and proves plane, kind, component, the active sprint milestone, admission, and no assignee (test-rel00.0-push).
 func (Integration) Push() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -80,7 +80,7 @@ func (Integration) Push() error {
 	if err := r.milestone(rigMilestone, rigDue); err != nil {
 		return err
 	}
-	if _, err := r.runTPM("issue", "labels", "--group", r.group); err != nil {
+	if _, err := r.runWords("issue", "labels", "--group", r.group); err != nil {
 		return err
 	}
 	c := &check{}
@@ -91,7 +91,7 @@ func (Integration) Push() error {
 		var res program.FileResult
 		args := append([]string{"issue", "file", "--project", po1, "--system", system, "--ref", seedBranch,
 			"--title", title, "--body-file", filepath.Join(dir, "push.md")}, extra...)
-		return res, r.tpmJSON(&res, args...)
+		return res, r.wordsJSON(&res, args...)
 	}
 
 	project, err := file("Grader for one agent", "--path", "internal/grader/grader.go", "--kind", "build")

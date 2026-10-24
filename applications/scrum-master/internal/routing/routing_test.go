@@ -44,7 +44,7 @@ https://github.com/acme/program-tracker.git
 `
 
 // TestParseReadsTheDocument reads the default and overrides, and the
-// document tpm writes reads back the same (#158).
+// document scrum-master writes reads back the same (#158).
 func TestParseReadsTheDocument(t *testing.T) {
 	c, err := Parse([]byte(example))
 	if err != nil {
@@ -194,7 +194,7 @@ func TestOpenRoutesOverridesAndHonoursTheEnvironment(t *testing.T) {
 	}
 }
 
-// TestOpenWithoutAnOpenerSaysSo names a system this tpm cannot open yet.
+// TestOpenWithoutAnOpenerSaysSo names a system this scrum-master cannot open yet.
 func TestOpenWithoutAnOpenerSaysSo(t *testing.T) {
 	prev := openers[GitHub]
 	delete(openers, GitHub)

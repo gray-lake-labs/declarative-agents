@@ -21,7 +21,7 @@ type Dependency struct {
 	CreatedBy   string `json:"created_by,omitempty"`
 }
 
-// The dependency types tpm writes, bd's names.
+// The dependency types scrum-master writes, bd's names.
 const (
 	DependencyBlocks  = "blocks"
 	DependencyRelated = "related"

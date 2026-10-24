@@ -110,7 +110,7 @@ func TestPopOfflineIsProvisional(t *testing.T) {
 func TestCloseNeedsTheBeadsTracker(t *testing.T) {
 	f := fake.New()
 	i := admitted(f, "Score one agent")
-	if _, err := Close(f, ExecGit{}, "g/po-1", i.IID, ".", "", false); err == nil || !strings.Contains(err.Error(), "tpm issue close serves the beads tracker") {
+	if _, err := Close(f, ExecGit{}, "g/po-1", i.IID, ".", "", false); err == nil || !strings.Contains(err.Error(), "scrum-master issue close serves the beads tracker") {
 		t.Fatalf("close on a tracker without merges = %v, want a refusal naming the beads tracker", err)
 	}
 }

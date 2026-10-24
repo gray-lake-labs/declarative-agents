@@ -6,11 +6,11 @@
 # upserts by marker or ensures by title, so a re-run of any word — or of
 # the whole machine — updates and creates nothing. TPM_SYSTEM, TPM_VERSION,
 # and TPM_END come from the environment; TPM_REF defaults to main.
-unit: tpm-plan-push-declarations
+unit: scrum-master-plan-push-declarations
 tools:
-- name: tpm_plan_milestone
+- name: plan_milestone
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - plan
   - milestone
@@ -44,17 +44,17 @@ tools:
     description: Every push word upserts, so a re-run updates and creates nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
-    message_shape: 'tpm_plan_milestone: <error>'
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
+    message_shape: 'plan_milestone: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: the road map names no such release, its publication has no milestone or tag, or tpm exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
+    condition: the road map names no such release, its publication has no milestone or tag, or the word exits non-zero
+    message_shape: <the word's refusal reason, as printed>
     state_after_failure: what the earlier words pushed stands; a re-run of the push finishes it
 
-- name: tpm_plan_sprint_issue
+- name: plan_sprint_issue
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - plan
   - sprint-issue
@@ -88,17 +88,17 @@ tools:
     description: Every push word upserts, so a re-run updates and creates nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
-    message_shape: 'tpm_plan_sprint_issue: <error>'
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
+    message_shape: 'plan_sprint_issue: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: the sprint issue cannot be filed or updated and tpm exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
+    condition: the sprint issue cannot be filed or updated and the word exits non-zero
+    message_shape: <the word's refusal reason, as printed>
     state_after_failure: what the earlier words pushed stands; a re-run of the push finishes it
 
-- name: tpm_plan_sprint_ends
+- name: plan_sprint_ends
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - plan
   - sprint-ends
@@ -132,17 +132,17 @@ tools:
     description: Every push word upserts, so a re-run updates and creates nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
-    message_shape: 'tpm_plan_sprint_ends: <error>'
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
+    message_shape: 'plan_sprint_ends: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: a sprint-end issue cannot be filed or updated and tpm exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
+    condition: a sprint-end issue cannot be filed or updated and the word exits non-zero
+    message_shape: <the word's refusal reason, as printed>
     state_after_failure: what the earlier words pushed stands; a re-run of the push finishes it
 
-- name: tpm_plan_events
+- name: plan_events
   type: exec
-  binary: tpm
+  binary: scrum-master
   args:
   - plan
   - events
@@ -176,10 +176,10 @@ tools:
     description: Every push word upserts, so a re-run updates and creates nothing.
   errors:
   - signal: CommandError
-    condition: the tpm binary cannot be started or an environment variable is unset
-    message_shape: 'tpm_plan_events: <error>'
+    condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
+    message_shape: 'plan_events: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: an event cannot be posted and tpm exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
+    condition: an event cannot be posted and the word exits non-zero
+    message_shape: <the word's refusal reason, as printed>
     state_after_failure: what the earlier words pushed stands; a re-run of the push finishes it

@@ -34,7 +34,7 @@ type Skill struct {
 var Agents = []string{"cursor", "claude", "copilot"}
 
 // target is where an agent reads Agent Skills, <skills>/<name>/SKILL.md,
-// and where an earlier tpm wrote command files, which install removes
+// and where an earlier release wrote command files, which install removes
 // (srd037 R2.2, R3.3).
 type target struct {
 	skills       string
@@ -95,7 +95,9 @@ func parse(src string) (Skill, error) {
 	return s, nil
 }
 
-var stampPattern = regexp.MustCompile(`(?m)^<!-- tpm install version=(\S+) sha256=([0-9a-f]{64}) -->\n`)
+// stampPattern reads a skill's stamp, the current one or the tpm stamp an
+// earlier release wrote (GH-36).
+var stampPattern = regexp.MustCompile(`(?m)^<!-- (?:skill|tpm) install version=(\S+) sha256=([0-9a-f]{64}) -->\n`)
 
 func digest(s string) string {
 	h := sha256.Sum256([]byte(s))
@@ -103,7 +105,7 @@ func digest(s string) string {
 }
 
 // Render is the SKILL.md an agent receives: the skill's front matter, then
-// the stamp naming the tpm version and the checksum of everything but the
+// the stamp naming the scrum-master version and the checksum of everything but the
 // stamp line, then the body. Front matter must open the file, so the stamp
 // follows it. Every agent receives the same text.
 func Render(agent string, s Skill, version string) string {
@@ -114,7 +116,7 @@ func Render(agent string, s Skill, version string) string {
 	}
 	header := "---\n" + head + "\n---\n"
 	unstamped := header + s.Body
-	stamp := fmt.Sprintf("<!-- tpm install version=%s sha256=%s -->\n", version, digest(unstamped))
+	stamp := fmt.Sprintf("<!-- skill install version=%s sha256=%s -->\n", version, digest(unstamped))
 	return header + stamp + s.Body
 }
 
@@ -135,14 +137,14 @@ func Path(dir, agent, name string) string {
 	return filepath.Join(dir, filepath.FromSlash(targets[agent].skills), name, "SKILL.md")
 }
 
-// installedFile is a file carrying tpm's stamp in an agent's skills
+// installedFile is a file carrying scrum-master's stamp in an agent's skills
 // directory or in its earlier command layout.
 type installedFile struct {
 	name, path     string
 	legacy, edited bool
 }
 
-// stampedFiles lists every file tpm stamped for an agent under dir. Files
+// stampedFiles lists every file scrum-master stamped for an agent under dir. Files
 // without the stamp are never listed, so install leaves them alone.
 func stampedFiles(dir, agent string) ([]installedFile, error) {
 	t := targets[agent]
@@ -215,11 +217,11 @@ func ParseAgents(values []string) ([]string, error) {
 }
 
 // Install writes every skill for every agent under dir (srd037 R2, R3). A
-// file tpm wrote and nobody edited is rewritten when it differs; an edited
-// file, or one tpm did not write, is kept unless force; a stamped file whose
+// file scrum-master wrote and nobody edited is rewritten when it differs; an edited
+// file, or one scrum-master did not write, is kept unless force; a stamped file whose
 // skill is no longer embedded is removed only when unedited. Outside the
 // agents' skills directories it writes only its block in the clone's
-// .git/info/exclude, which lists exactly the files tpm owns (R6). A dry run
+// .git/info/exclude, which lists exactly the files scrum-master owns (R6). A dry run
 // writes nothing.
 func Install(dir string, agents []string, skills []Skill, version string, force, dryRun bool) ([]Result, error) {
 	exclude, err := excludePath(dir)
@@ -250,9 +252,9 @@ func Install(dir string, agents []string, skills []Skill, version string, force,
 				case force:
 					r.Action = "replaced"
 				case ours:
-					r.Action, r.Reason = "kept", "edited since tpm wrote it; --force replaces it"
+					r.Action, r.Reason = "kept", "edited since scrum-master wrote it; --force replaces it"
 				default:
-					r.Action, r.Reason = "kept", "not written by tpm; --force replaces it"
+					r.Action, r.Reason = "kept", "not written by scrum-master; --force replaces it"
 				}
 			}
 			if !dryRun && r.Action != "unchanged" && r.Action != "kept" {
@@ -274,7 +276,7 @@ func Install(dir string, agents []string, skills []Skill, version string, force,
 			if st.edited {
 				r.Action, r.Reason = "kept", "no longer embedded but edited; remove it by hand"
 				if st.legacy {
-					r.Reason = "an earlier tpm's command file, edited since; remove it by hand"
+					r.Reason = "an earlier release's command file, edited since; remove it by hand"
 				}
 			} else {
 				r.Action = "removed"
@@ -298,11 +300,15 @@ func Install(dir string, agents []string, skills []Skill, version string, force,
 }
 
 const (
-	ignoreBegin = "# tpm install: skill commands from the local tpm binary"
-	ignoreEnd   = "# end tpm install"
+	ignoreBegin = "# skill install: the skill files the init and onboard profiles install"
+	ignoreEnd   = "# end skill install"
 )
 
-// owned is every file tpm owns once a run's results apply: the stamped
+// legacyIgnore is the block an earlier release wrote, which a run finds and
+// rewrites under the current markers (GH-37).
+var legacyIgnore = [2]string{"# tpm install: skill commands from the local tpm binary", "# end tpm install"}
+
+// owned is every file scrum-master owns once a run's results apply: the stamped
 // files already in any agent's directory, plus what the run wrote, less
 // what it removed. A dry run reports the block it would write.
 func owned(dir string, results []Result) []string {
@@ -337,7 +343,7 @@ func owned(dir string, results []Result) []string {
 func excludePath(dir string) (string, error) {
 	out, err := exec.Command("git", "-C", dir, "rev-parse", "--git-path", "info/exclude").Output()
 	if err != nil {
-		return "", fmt.Errorf("%s is not a git repository; tpm install writes into a clone", dir)
+		return "", fmt.Errorf("%s is not a git repository; scrum-master install writes into a clone", dir)
 	}
 	path := strings.TrimSpace(string(out))
 	if !filepath.IsAbs(path) {
@@ -346,7 +352,7 @@ func excludePath(dir string) (string, error) {
 	return path, nil
 }
 
-// ignoreFile splits the exclude file into the lines before tpm's block, the
+// ignoreFile splits the exclude file into the lines before scrum-master's block, the
 // block's entries, and the lines after it.
 func ignoreFile(path string) (before, entries, after []string, err error) {
 	b, err := os.ReadFile(path)
@@ -357,19 +363,22 @@ func ignoreFile(path string) (before, entries, after []string, err error) {
 		return nil, nil, nil, err
 	}
 	lines := strings.Split(strings.TrimSuffix(string(b), "\n"), "\n")
-	begin := slices.Index(lines, ignoreBegin)
+	begin, endMarker := slices.Index(lines, ignoreBegin), ignoreEnd
+	if begin < 0 {
+		begin, endMarker = slices.Index(lines, legacyIgnore[0]), legacyIgnore[1]
+	}
 	if begin < 0 {
 		return lines, nil, nil, nil
 	}
-	end := slices.Index(lines[begin:], ignoreEnd)
+	end := slices.Index(lines[begin:], endMarker)
 	if end < 0 {
 		return lines[:begin], lines[begin+1:], nil, nil
 	}
 	return lines[:begin], lines[begin+1 : begin+end], lines[begin+end+1:], nil
 }
 
-// updateIgnore rewrites tpm's block in the exclude file to list exactly the
-// files tpm owns (srd037 R6). Lines outside the block stay as they are.
+// updateIgnore rewrites scrum-master's block in the exclude file to list exactly the
+// files scrum-master owns (srd037 R6). Lines outside the block stay as they are.
 func updateIgnore(path string, paths []string, dryRun bool) (Result, error) {
 	r := Result{Path: path}
 	before, entries, after, err := ignoreFile(path)
@@ -482,7 +491,7 @@ func Check(dir string, agents []string, skills []Skill, version string) ([]Findi
 }
 
 // InstalledAgents are the agents for which dir holds at least one file
-// carrying tpm's stamp, in either layout.
+// carrying scrum-master's stamp, in either layout.
 func InstalledAgents(dir string) []string {
 	var out []string
 	for _, agent := range Agents {

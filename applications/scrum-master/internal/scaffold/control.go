@@ -27,7 +27,7 @@ var labelAxes = []struct{ name, prefix, exclusive, required string }{
 }
 
 // LabelsDocument renders labels as control/labels.md in the labels config
-// format, so tpm issue labels reads back exactly labels.
+// format, so scrum-master issue labels reads back exactly labels.
 func LabelsDocument(labels []tracker.Label) string {
 	var b strings.Builder
 	b.WriteString("---\nid: labels\ntitle: Label schema\n---\n\n")
@@ -215,7 +215,7 @@ func appendRow(text, axis string, cells []string) (string, error) {
 }
 
 // PolicyDocument renders p as control/policy.md in the policy config format:
-// the settings tpm's policy reader takes from the file, the named admission
+// the settings scrum-master's policy reader takes from the file, the named admission
 // rules among them, so removing a rule from the file disables it (srd013
 // R1.1).
 func PolicyDocument(p program.Policy) string {

@@ -13,7 +13,7 @@ import (
 
 // PeerReadMarker marks the comment that approves a release issue as a peer
 // read (srd015 R1.2).
-const PeerReadMarker = "<!-- tpm release peer-read -->"
+const PeerReadMarker = "<!-- scrum-master release peer-read -->"
 
 // ApproveResult is what approve reports.
 type ApproveResult struct {

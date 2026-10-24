@@ -56,8 +56,8 @@ var skeleton = []string{
 }
 
 // orientationMarkers are the begin and end lines every orientation file
-// carries around tpm's text (srd043 R3.5).
-var orientationMarkers = []string{"<!-- tpm:begin", "<!-- tpm:end -->"}
+// carries around scrum-master's text (srd043 R3.5).
+var orientationMarkers = []string{"<!-- managed:begin", BlockEnd}
 
 func TestInitWritesOrientation(t *testing.T) {
 	dir := repo(t)
@@ -144,7 +144,7 @@ func TestInitWritesControlFiles(t *testing.T) {
 	// removing one from the file disables it (GH-130).
 	want.AdmissionRules = program.RuleNames()
 	if g := want.Gate("corpus"); len(g) != 2 || g[0].Command != ProgramAudit || g[1].Kind != "peer-read" || want.AuditCommand != ProgramAudit {
-		t.Fatalf("init's corpus gate = %+v, audit %q; want tpm backlog check and a peer read", g, want.AuditCommand)
+		t.Fatalf("init's corpus gate = %+v, audit %q; want scrum-master backlog check and a peer read", g, want.AuditCommand)
 	}
 	policy, err := program.LoadPolicy(f, "g/system", "main")
 	if err != nil || !reflect.DeepEqual(policy, want) {
@@ -322,7 +322,9 @@ func TestScaffoldWritesParentPin(t *testing.T) {
 func TestTemplatesNameNoProject(t *testing.T) {
 	forbidden := []string{"scrum-master", "gray-lake", "nokia", "github", "gitlab", "anthropic", "homeostat"}
 	check := func(name string, b []byte) {
-		lower := strings.ToLower(string(b))
+		// The policy's corpus gate is the words' own command, the one name
+		// a program runs them by (GH-32).
+		lower := strings.ToLower(strings.ReplaceAll(string(b), ProgramAudit, ""))
 		for _, w := range forbidden {
 			if strings.Contains(lower, w) {
 				t.Errorf("%s names %q", name, w)

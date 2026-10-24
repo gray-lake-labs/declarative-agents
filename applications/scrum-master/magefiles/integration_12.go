@@ -17,14 +17,14 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Backlog)
 }
 
-// Backlog builds tpm, inits a system repository, lays a theme, initiatives, an epic, a feature, stories, and an engineering document into it, and proves tpm backlog list names them all with their kinds and a story's points and rank, tpm backlog check passes them and fails once a story loses its points, neither writes to the repository, and AGENTS.md lists the draft skill (test-rel04.2-draft). It needs no rig and no network.
+// Backlog builds scrum-master, inits a system repository, lays a theme, initiatives, an epic, a feature, stories, and an engineering document into it, and proves scrum-master backlog list names them all with their kinds and a story's points and rank, scrum-master backlog check passes them and fails once a story loses its points, neither writes to the repository, and AGENTS.md lists the draft skill (test-rel04.2-draft). It needs no rig and no network.
 func (Integration) Backlog() error {
 	root, err := repositoryRoot()
 	if err != nil {
 		return err
 	}
 	c := &check{}
-	tmp, err := os.MkdirTemp("", "tpm-backlog-")
+	tmp, err := os.MkdirTemp("", "scrum-master-backlog-")
 	if err != nil {
 		return err
 	}
@@ -32,9 +32,9 @@ func (Integration) Backlog() error {
 	if tmp, err = filepath.EvalSymlinks(tmp); err != nil {
 		return err
 	}
-	bin, repo := filepath.Join(tmp, "tpm"), filepath.Join(tmp, "system")
-	if err := runStreaming(root, "go", "build", "-o", bin, "./cmd/tpm"); err != nil {
-		return fmt.Errorf("build tpm: %w", err)
+	bin, repo := filepath.Join(tmp, "scrum-master"), filepath.Join(tmp, "system")
+	if err := runStreaming(root, "go", "build", "-o", bin, "./magefiles/words"); err != nil {
+		return fmt.Errorf("build the words: %w", err)
 	}
 	run := func(args ...string) (string, error) {
 		cmd := exec.Command(bin, args...)
@@ -49,7 +49,7 @@ func (Integration) Backlog() error {
 		return fmt.Errorf("git init: %w: %s", err, out)
 	}
 	if out, err := run("init", "--dir", repo); err != nil {
-		return fmt.Errorf("tpm init: %w: %s", err, out)
+		return fmt.Errorf("scrum-master init: %w: %s", err, out)
 	}
 	if err := copyTree(filepath.Join(root, "testdata", "hierarchy", "valid"), repo); err != nil {
 		return err

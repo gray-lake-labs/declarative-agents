@@ -162,7 +162,7 @@ subsystem SRDs
 }
 
 // TestConfigFormatExamplesDecode holds the labels and policy config formats
-// to their own examples: each example is a config document tpm reads.
+// to their own examples: each example is a config document scrum-master reads.
 func TestConfigFormatExamplesDecode(t *testing.T) {
 	f := fake.New()
 	f.AddFile("g/system", "main", LabelsFile, specExample(t, "labels"))

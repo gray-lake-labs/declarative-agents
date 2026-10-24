@@ -121,7 +121,7 @@ func (f *fixture) remoteIssues() []Issue {
 }
 
 // fixtureFiles reports whether the fixtures keep one file per issue, the
-// layout tpm init now seeds. BEADS_FIXTURE_LAYOUT=jsonl runs the package on
+// layout scrum-master init now seeds. BEADS_FIXTURE_LAYOUT=jsonl runs the package on
 // bd's single JSONL file instead, which TestJSONLLayoutSuite does.
 func fixtureFiles() bool { return os.Getenv("BEADS_FIXTURE_LAYOUT") != "jsonl" }
 

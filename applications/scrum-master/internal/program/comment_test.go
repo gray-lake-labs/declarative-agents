@@ -13,7 +13,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/trackertest"
 )
 
-// TestIssueCommentPostsANote is srd013 R9: tpm issue comment posts the
+// TestIssueCommentPostsANote is srd013 R9: scrum-master issue comment posts the
 // person's text on an issue once, on every tracking system, refuses an
 // empty body and both body flags, and a dry run posts nothing (#188).
 func TestIssueCommentPostsANote(t *testing.T) {

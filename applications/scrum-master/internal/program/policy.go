@@ -30,20 +30,20 @@ type Policy struct {
 	// Acceptance Criteria; any issue with a Cites line must carry them too.
 	RequireAC []string
 	// AdmissionRules are the named admission rules that apply (config format
-	// policy, admission.rules); nil applies every rule tpm implements, so a
+	// policy, admission.rules); nil applies every rule scrum-master implements, so a
 	// program disables one by naming the rest (srd013 R1.1).
 	AdmissionRules   []string
 	RequireMilestone bool
-	// RequireApproval makes tpm issue merge refuse a branch without another
+	// RequireApproval makes scrum-master issue merge refuse a branch without another
 	// person's approval of its tip (srd013 R5.5); off, merge records an
 	// approval when one exists and merges without one.
 	RequireApproval  bool
 	ManagementFilers []string // usernames; empty or ["leads"]: not checked
 	TriageLabel      string
-	// AuditCommand is the corpus gate tpm issue merge runs, in the worktree, on a
+	// AuditCommand is the corpus gate scrum-master issue merge runs, in the worktree, on a
 	// branch that changes docs/ (srd013 R5.3).
 	AuditCommand string
-	// Releases and DefinitionOfDone drive tpm release (srd015, srd008 R2).
+	// Releases and DefinitionOfDone drive scrum-master release (srd015, srd008 R2).
 	Releases         Releases
 	DefinitionOfDone map[string][]Check
 	Escalation       Escalation
@@ -111,12 +111,12 @@ func canonicalTypes(vals []string) []string {
 	return out
 }
 
-// BacklogAudit is the corpus gate a repository without mage runs: tpm's own
+// BacklogAudit is the corpus gate a repository without mage runs: scrum-master's own
 // hierarchy gate (srd045 R8.2).
-const BacklogAudit = "tpm backlog check"
+const BacklogAudit = WordsBinary + " backlog check"
 
 // AuditFor is the audit a docs/ merge in the worktree at dir runs under p:
-// the policy's command, except that the built-in mage audit becomes tpm
+// the policy's command, except that the built-in mage audit becomes scrum-master
 // backlog check in a repository with no magefiles, which could not run it
 // (srd013 R5.3).
 func AuditFor(p Policy, dir string) string {

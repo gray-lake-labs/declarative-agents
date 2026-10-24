@@ -35,7 +35,7 @@ func planned(t *testing.T, p trackertest.Program) (PushInput, tracker.Tracker, i
 		t.Fatal(err)
 	}
 	objective, err := f.CreateIssue(fleet, tracker.NewIssue{Title: "Objective R2", Labels: []string{"plane::management"},
-		Description: "Objective R2\n\n<!-- tpm goals objective=obj001-reliable-agents#R2 release=01.0 -->"})
+		Description: "Objective R2\n\n<!-- scrum-master goals objective=obj001-reliable-agents#R2 release=01.0 -->"})
 	if err != nil {
 		t.Fatal(err)
 	}

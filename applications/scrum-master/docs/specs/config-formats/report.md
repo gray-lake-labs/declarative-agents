@@ -8,7 +8,7 @@ title: Weekly status report
 <!-- field: purpose -->
 ## Purpose
 
-Holds one person's status for one week in a fixed, machine-checkable shape, so tpm reports validate can check it and tpm reports aggregate can read a week or a period of them against the tracker (srd018 R2, R3). The body is what the person said; the front matter is an index derived from the body, so the two cannot drift.
+Holds one person's status for one week in a fixed, machine-checkable shape, so scrum-master reports validate can check it and scrum-master reports aggregate can read a week or a period of them against the tracker (srd018 R2, R3). The body is what the person said; the front matter is an index derived from the body, so the two cannot drift.
 
 <!-- field: schema -->
 ## Schema
@@ -95,7 +95,7 @@ The "## Blockers" section, one entry per blocker, in the same key: value form. K
 ## Validation rules
 
 - Every key named above is present in every entry, and values hold no semicolon.
-- The front matter equals what the body derives; tpm reports validate fails a report where it does not (srd018 R2.2).
+- The front matter equals what the body derives; scrum-master reports validate fails a report where it does not (srd018 R2.2).
 - A report says what its author did and what blocks it; it never rates another person.
 
 <!-- field: config_files -->

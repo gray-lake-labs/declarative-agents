@@ -24,7 +24,7 @@ type PushResult struct {
 }
 
 func signalMarker(s Signal) string {
-	return fmt.Sprintf("<!-- tpm reports signal=%s -->", s.Key())
+	return fmt.Sprintf("<!-- scrum-master reports signal=%s -->", s.Key())
 }
 
 // SignalIssue is the issue an actionable signal becomes, in do-work's input
@@ -41,7 +41,7 @@ func SignalIssue(s Signal) tracker.NewIssue {
 
 ## Acceptance Criteria
 
-- The next tpm reports aggregate no longer reports %s for %s (test: tpm_reports_aggregate; environment: local)
+- The next scrum-master reports aggregate no longer reports %s for %s (test: tpm_reports_aggregate; environment: local)
 `, s.Detail, s.Kind, s.Week, signalMarker(s), s.Kind, s.Subject, s.Kind, s.Subject)
 	return tracker.NewIssue{Title: fmt.Sprintf("Signal: %s on %s", s.Kind, s.Subject), Description: body,
 		Labels: append(program.Labels("management", "", "", s.Component), program.Op(program.OpReport))}

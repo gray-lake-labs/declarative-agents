@@ -23,7 +23,7 @@ const fixtures = "../../testdata/hierarchy"
 
 func noTracker() (tracker.Tracker, error) { return nil, errors.New("backlog reads no tracker") }
 
-func tpm(args ...string) (string, error) {
+func run(args ...string) (string, error) {
 	var out bytes.Buffer
 	err := cli.Default.Run(args, &out, noTracker)
 	return out.String(), err
@@ -54,7 +54,7 @@ func TestListNamesEveryDocument(t *testing.T) {
 }
 
 func TestListKeepsOneKind(t *testing.T) {
-	out, err := tpm("backlog", "list", "--dir", filepath.Join(fixtures, "valid"), "--kind", "story", "--json")
+	out, err := run("backlog", "list", "--dir", filepath.Join(fixtures, "valid"), "--kind", "story", "--json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,20 +70,20 @@ func TestListKeepsOneKind(t *testing.T) {
 			t.Errorf("entry %+v", e)
 		}
 	}
-	if _, err := tpm("backlog", "list", "--dir", fixtures, "--kind", "task"); !errors.Is(err, cli.ErrUsage) {
+	if _, err := run("backlog", "list", "--dir", fixtures, "--kind", "task"); !errors.Is(err, cli.ErrUsage) {
 		t.Errorf("unknown kind: %v, want a usage error", err)
 	}
 }
 
 func TestListEmptyRepository(t *testing.T) {
-	out, err := tpm("backlog", "list", "--dir", t.TempDir(), "--json")
+	out, err := run("backlog", "list", "--dir", t.TempDir(), "--json")
 	if err != nil || strings.TrimSpace(out) != "[]" {
 		t.Errorf("empty repository: %q, %v", out, err)
 	}
 }
 
 func TestCheckPassesValid(t *testing.T) {
-	out, err := tpm("backlog", "check", "--dir", filepath.Join(fixtures, "valid"))
+	out, err := run("backlog", "check", "--dir", filepath.Join(fixtures, "valid"))
 	if err != nil || !strings.HasPrefix(out, "hierarchy gate: pass, ") {
 		t.Errorf("valid fixture: %q, %v", out, err)
 	}
@@ -108,7 +108,7 @@ func TestCheckIsTheGate(t *testing.T) {
 			rel, _ := filepath.Rel(dir, f.File)
 			gate = append(gate, rel+": "+f.Field+": "+f.Message)
 		}
-		out, err := tpm("backlog", "check", "--dir", dir, "--json")
+		out, err := run("backlog", "check", "--dir", dir, "--json")
 		if err == nil {
 			t.Errorf("%s: check passed a malformed repository", c.Name())
 		}
@@ -129,10 +129,10 @@ func TestCheckIsTheGate(t *testing.T) {
 func TestCheckWritesNothing(t *testing.T) {
 	dir := filepath.Join(fixtures, "valid")
 	before := snapshot(t, dir)
-	if _, err := tpm("backlog", "check", "--dir", dir); err != nil {
+	if _, err := run("backlog", "check", "--dir", dir); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := tpm("backlog", "list", "--dir", dir); err != nil {
+	if _, err := run("backlog", "list", "--dir", dir); err != nil {
 		t.Fatal(err)
 	}
 	if after := snapshot(t, dir); !reflect.DeepEqual(before, after) {

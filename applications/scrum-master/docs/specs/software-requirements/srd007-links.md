@@ -164,7 +164,7 @@ Blocks and Blocked-by are one link seen from its two ends: a Blocks line on A na
 <!-- req: R6.3 -->
 ### R6.3
 
-Depends-on names an item whose output this one needs while both proceed, and Relates-to an item that shares context. tpm issue show (srd013) reports both; neither makes an issue waiting.
+Depends-on names an item whose output this one needs while both proceed, and Relates-to an item that shares context. scrum-master issue show (srd013) reports both; neither makes an issue waiting.
 
 <!-- req: R6.4 -->
 ### R6.4
@@ -195,7 +195,7 @@ A document has at most one parent, of the kind above it: an initiative's parent 
 <!-- req: R8.1 -->
 ### R8.1
 
-tpm issue lint (srd013 R1) reports a link line whose target is malformed, a cross-repository target that is not pinned (R5.3), and a second Duplicates or Implements line.
+scrum-master issue lint (srd013 R1) reports a link line whose target is malformed, a cross-repository target that is not pinned (R5.3), and a second Duplicates or Implements line.
 
 <!-- req: R8.2 -->
 ### R8.2

@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
 // Package standup holds the person's daily and recurring tracker steps
-// (srd010). It implements tpm issue recur (srd013 R8), formerly tpm
+// (srd010). It implements scrum-master issue recur (srd013 R8), formerly scrum-master
 // standup recur.
 package standup
 
@@ -24,7 +24,7 @@ type RecurOptions struct {
 	// Summary is the run's result: it closes an open instance as its run
 	// summary and follows the outcome on the Previous Runs line.
 	Summary string
-	// Policy admits the next instance, as tpm issue file admits an issue.
+	// Policy admits the next instance, as scrum-master issue file admits an issue.
 	Policy program.Policy
 	Now    time.Time
 	DryRun bool
@@ -45,12 +45,12 @@ type RecurResult struct {
 	DryRun   bool `json:"dry_run"`
 }
 
-// The marker keeps the text tpm standup recur wrote: it is tracker data that
-// finds the next instance, including one an earlier tpm opened (srd013 R8.2).
-var recursPattern = regexp.MustCompile(`\n*<!-- tpm standup recurs \S+ -->\n?`)
+// The marker keeps the text scrum-master standup recur wrote: it is tracker data that
+// finds the next instance, including one an earlier release opened (srd013 R8.2).
+var recursPattern = regexp.MustCompile(`\n*<!-- scrum-master standup recurs \S+ -->\n?`)
 
 func recursMarker(project string, iid int) string {
-	return fmt.Sprintf("<!-- tpm standup recurs %s#%d -->", project, iid)
+	return fmt.Sprintf("<!-- scrum-master standup recurs %s#%d -->", project, iid)
 }
 
 // Recur opens the next instance of a recurring issue (srd013 R8.1, srd001
@@ -99,7 +99,7 @@ func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurRes
 	outcome := "closed by its merge"
 	if i.State != "closed" {
 		r.Closed = true
-		outcome = "closed by tpm issue recur without its work"
+		outcome = "closed by scrum-master issue recur without its work"
 	}
 	summary := strings.Join(strings.Fields(o.Summary), " ")
 	run := fmt.Sprintf("- %s#%d (due %s): %s.", project, iid, orNone(i.DueDate), outcome)
@@ -109,7 +109,7 @@ func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurRes
 		// of its own (GH-20).
 		how := "Closed by its merge."
 		if r.Closed {
-			how = "Closed by tpm issue recur."
+			how = "Closed by scrum-master issue recur."
 		}
 		if !strings.HasSuffix(summary, ".") && !strings.HasSuffix(summary, "!") && !strings.HasSuffix(summary, "?") {
 			summary += "."
@@ -131,9 +131,9 @@ func Recur(t tracker.Tracker, project string, iid int, o RecurOptions) (RecurRes
 		// The reason says what the close was, without contradicting the
 		// run's summary: recur closed it, and the summary says what ran
 		// (GH-22).
-		reason := "closed by tpm issue recur, without a merge; the next instance is due " + r.DueDate
+		reason := "closed by scrum-master issue recur, without a merge; the next instance is due " + r.DueDate
 		if o.Summary != "" {
-			reason = "closed by tpm issue recur after the run its summary records, without a merge; the next instance is due " + r.DueDate
+			reason = "closed by scrum-master issue recur after the run its summary records, without a merge; the next instance is due " + r.DueDate
 		}
 		if _, err := t.UpdateIssue(project, iid, tracker.IssueUpdate{State: ptr("close"), CloseReason: &reason}); err != nil {
 			return r, err

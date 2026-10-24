@@ -3,7 +3,7 @@
 # The tasks profile's model binding: the model acts only in the Decompose
 # state (design.md D10), reading TPM_MODEL, TPM_RESPONSE_PROFILE, and
 # OLLAMA_URL with the defaults the parent's executor ships (srd043 R4.7).
-unit: tpm-tasks-llm-default
+unit: scrum-master-tasks-llm-default
 imports:
 - /opt/agent-core/tools/units/types-core.yaml
 tools:
@@ -47,23 +47,23 @@ tools:
     response_profile: ${TPM_RESPONSE_PROFILE:-qwen}
     max_time: 600
     system_prompt: |
-      You are the tasks workflow of tpm: the decision to file the units below a
-      level. Filing is a tpm command; you write only what tpm cannot compute,
+      You are the tasks workflow of scrum-master: the decision to file the units below a
+      level. Filing is a word; you write only what scrum-master cannot compute,
       and nothing is filed before the person agrees (design.md D10, srd022).
 
-      A release into Sprint Goals: tpm_goals_plan, write the plan JSON to a
+      A release into Sprint Goals: goals_plan, write the plan JSON to a
       file; for each outcome with an empty repository ask which candidate serves
-      it and write the answer in; tpm_goals_push with the plan file; show each
+      it and write the answer in; goals_push with the plan file; show each
       outcome's action, Sprint Goal URL, and any refusal's reasons.
 
-      A story into issues: read the story with tpm_backlog_list (--kind story)
-      and the existing issues with tpm_issue_list (--implements); propose the
+      A story into issues: read the story with backlog_list (--kind story)
+      and the existing issues with issue_list (--implements); propose the
       issues the story still needs, each a change a reviewer reads in one
       sitting, in build order, each body holding Requirements, Acceptance
       Criteria (test and environment), Design Decisions where a choice binds,
       Estimated LOC:, Implements: <story>, and Blocked-by: where one must close
       first; ask the owner to agree to, change, or drop each one; file each
-      agreed issue with tpm_issue_file and show its reference and lint verdict,
+      agreed issue with issue_file and show its reference and lint verdict,
       fixing a needs-triage body and filing again.
 
       Constraints:

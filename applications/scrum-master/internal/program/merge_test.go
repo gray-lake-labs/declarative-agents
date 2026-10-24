@@ -91,7 +91,7 @@ func TestMergeDeliversOnBeads(t *testing.T) {
 func TestMergeNeedsTheBeadsTracker(t *testing.T) {
 	f := fake.New()
 	i := admitted(f, "Score one agent")
-	if _, err := Merge(f, ExecGit{}, "g/po-1", "g/po-1", i.IID, "1-score-one-agent", ".", MergeGate{}, nil, false); err == nil || !strings.Contains(err.Error(), "tpm issue merge serves the beads tracker") {
+	if _, err := Merge(f, ExecGit{}, "g/po-1", "g/po-1", i.IID, "1-score-one-agent", ".", MergeGate{}, nil, false); err == nil || !strings.Contains(err.Error(), "scrum-master issue merge serves the beads tracker") {
 		t.Fatalf("merge on a tracker without local merges = %v, want a refusal naming the beads tracker", err)
 	}
 }

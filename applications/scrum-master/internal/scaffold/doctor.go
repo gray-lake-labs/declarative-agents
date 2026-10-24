@@ -3,6 +3,7 @@
 package scaffold
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -20,24 +21,26 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/spectool"
 )
 
-// DoctorOptions are what tpm doctor is given.
+// DoctorOptions are what scrum-master doctor is given.
 type DoctorOptions struct {
 	Dir     string
-	Version string // the running tpm's version, which installed skills are checked against
+	Version string // the running scrum-master's version, which installed skills are checked against
 	DryRun  bool
 }
 
-// DoctorResult is what tpm doctor reports: the repository's level, what
-// happened to each file tpm scaffolds there, the installed skills that
-// differ from this tpm, the repair of the documents' format, and the
-// declarative-agents runtime at the release tpm pins.
+// DoctorResult is what scrum-master doctor reports: the repository's level, what
+// happened to each file scrum-master scaffolds there, the installed skills that
+// differ from this scrum-master, the repair of the documents' format, and the
+// release whose profiles the repository vendored (GH-34).
 type DoctorResult struct {
-	Dir     string            `json:"dir"`
-	Level   string            `json:"level"`
-	Files   []Result          `json:"files"`
-	Skills  []install.Finding `json:"skills,omitempty"`
-	Repair  RepairResult      `json:"repair"`
-	Runtime runtime.Status    `json:"runtime"`
+	Dir    string            `json:"dir"`
+	Level  string            `json:"level"`
+	Files  []Result          `json:"files"`
+	Skills []install.Finding `json:"skills,omitempty"`
+	Repair RepairResult      `json:"repair"`
+	// Vendored is the release .scrum-master holds, from its manifest; empty
+	// when the repository vendored none.
+	Vendored string `json:"vendored,omitempty"`
 	// Credentials is, per shipped profile, every environment variable its
 	// declarations read and whether each is set here, so a run's model and
 	// tracker credentials are checked before a run (srd043 R4.7, GH-135).
@@ -99,13 +102,12 @@ func profileCredentials() ([]ProfileEnv, error) {
 }
 
 // specTool runs the spec tool at a repository's pin, lookGo finds the Go
-// toolchain the tool is built with, built reports a tool already built at a
-// release, and inspectRuntime reads the runtime at one; tests replace them.
+// toolchain the tool is built with, and built reports a tool already built
+// at a release; tests replace them.
 var (
-	specTool       = spectool.Run
-	lookGo         = func() error { _, err := exec.LookPath("go"); return err }
-	built          = runtime.Built
-	inspectRuntime = runtime.Inspect
+	specTool = spectool.Run
+	lookGo   = func() error { _, err := exec.LookPath("go"); return err }
+	built    = runtime.Built
 )
 
 // notCanonical ends the line the tool's check prints for a document fmt
@@ -124,17 +126,18 @@ func repair(dir string, dryRun bool) RepairResult {
 			}
 		}
 	}
-	if lookGo() != nil {
+	// In the agent the check runs in process and needs no Go (GH-33).
+	if spectool.InProcess == nil && lookGo() != nil {
 		tag, err := spectool.Pinned(dir)
 		if err != nil || !built(tag) {
-			r.Skipped = "no Go toolchain on PATH and no spec tool built at the pinned release; install Go, or run tpm install --runtime with Go where tpm pins the same release"
+			r.Skipped = "no Go toolchain on PATH and no spec tool built at the pinned release; run the check with the agent, which carries it, or install Go"
 			return r
 		}
 	}
 	skip := func(err error) {
 		r.Skipped = err.Error()
 		if strings.Contains(r.Skipped, "no corpus document matches") {
-			r.Skipped = "git tracks no corpus document here; commit the documents, then run tpm doctor again"
+			r.Skipped = "git tracks no corpus document here; commit the documents, then run scrum-master doctor again"
 		}
 	}
 	if !dryRun {
@@ -171,7 +174,7 @@ const (
 	subsystemSRDPath = "docs/specs/software-requirements/srd001-subsystem.md"
 )
 
-// Level reads a program repository's level from the files tpm wrote there:
+// Level reads a program repository's level from the files scrum-master wrote there:
 // system when the policy or the system SRD is present, subsystem when the
 // subsystem SRD is (srd043 R4.1).
 func Level(dir string) (string, error) {
@@ -185,14 +188,14 @@ func Level(dir string) (string, error) {
 	case exists(subsystemSRDPath):
 		return "subsystem", nil
 	}
-	return "", fmt.Errorf("%s holds neither %s, %s, nor %s, so it is no program repository tpm laid down; run tpm init or tpm onboard there",
+	return "", fmt.Errorf("%s holds neither %s, %s, nor %s, so it is no program repository scrum-master laid down; run scrum-master init or scrum-master onboard there",
 		dir, program.PolicyFile, systemSRDPath, subsystemSRDPath)
 }
 
-// extendLabels adds to a kept control/labels.md the axes and values tpm's
+// extendLabels adds to a kept control/labels.md the axes and values scrum-master's
 // defaults list that it lacks, and reports the file extended with them; a
 // file that does not parse is kept and its reason reported (srd043 R4.2).
-// The tracker's labels come from tpm issue labels, which the reason names.
+// The tracker's labels come from scrum-master issue labels, which the reason names.
 func extendLabels(dir string, files []Result, dryRun bool) error {
 	i := slices.IndexFunc(files, func(f Result) bool { return f.Path == program.LabelsFile })
 	if i < 0 || files[i].Action != "kept" {
@@ -205,14 +208,14 @@ func extendLabels(dir string, files []Result, dryRun bool) error {
 	}
 	out, added, err := ExtendLabels(doc, program.DefaultLabels())
 	if err != nil {
-		files[i].Reason = "does not parse, so doctor cannot add the labels tpm's defaults list: " + err.Error()
+		files[i].Reason = "does not parse, so doctor cannot add the labels scrum-master's defaults list: " + err.Error()
 		return nil
 	}
 	if len(added) == 0 {
 		return nil
 	}
 	files[i].Action, files[i].Labels = "extended", added
-	files[i].Reason = "adds " + strings.Join(added, ", ") + "; run tpm issue labels --control <system repository> to create them in the tracker"
+	files[i].Reason = "adds " + strings.Join(added, ", ") + "; run scrum-master issue labels --control <system repository> to create them in the tracker"
 	if dryRun {
 		return nil
 	}
@@ -222,11 +225,11 @@ func extendLabels(dir string, files []Result, dryRun bool) error {
 // skillProblems are the install findings doctor reports (srd043 R4.3).
 var skillProblems = map[string]bool{"missing": true, "outdated": true, "edited": true, "stale": true}
 
-// Doctor brings a repository an older tpm laid down up to date: it writes
-// the files this tpm scaffolds at the repository's level that are missing,
+// Doctor brings a repository an older release laid down up to date: it writes
+// the files this scrum-master scaffolds at the repository's level that are missing,
 // refreshes the orientation files' managed blocks, keeps every other file,
 // repairs the documents to the pinned format, and reports the installed
-// skills tpm install would change and the runtime at the release tpm pins
+// skills scrum-master install would change and the runtime at the release scrum-master pins
 // (srd043 R4).
 // It files nothing and touches no tracker.
 func Doctor(o DoctorOptions) (DoctorResult, error) {
@@ -268,10 +271,11 @@ func Doctor(o DoctorOptions) (DoctorResult, error) {
 		}
 	}
 	r.Repair = repair(o.Dir, o.DryRun)
-	if rel, ok, _ := runtime.Sibling(o.Dir, nil); ok {
-		r.Runtime = runtime.Status{Release: rel.Tag, Agent: rel.Agent, From: "repository"}
-	} else {
-		r.Runtime = inspectRuntime(runtime.RepoPin(o.Dir))
+	if b, err := os.ReadFile(filepath.Join(o.Dir, install.ManifestFile)); err == nil {
+		var m install.Manifest
+		if json.Unmarshal(b, &m) == nil {
+			r.Vendored = m.Release
+		}
 	}
 	if r.Credentials, err = profileCredentials(); err != nil {
 		return r, err

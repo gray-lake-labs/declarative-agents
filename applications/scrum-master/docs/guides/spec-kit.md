@@ -110,7 +110,7 @@ Maintaining our own process is not free. Spec Kit has a large community,
 support for many agents, and maintainers whose job it is; ours has one
 corpus and the people who use it. We keep that cost down in two ways. The
 inner loop is not ours to reinvent: specify and implement are thin scripts
-over tpm, and Spec Kit is an acceptable substitute inside any
+over scrum-master, and Spec Kit is an acceptable substitute inside any
 repository. What this corpus specifies is only the layer Spec Kit does not
 attempt: levels, Sprint Goals, evidence, environments, and review. If Spec
 Kit grows that layer, we should read it closely and drop whatever of ours it

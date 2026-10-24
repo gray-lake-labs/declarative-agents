@@ -89,7 +89,7 @@ func MakeBacklog(dir string, assumed int) (Backlog, error) {
 	return b, nil
 }
 
-// BacklogResult is what tpm plan backlog reports.
+// BacklogResult is what scrum-master plan backlog reports.
 type BacklogResult struct {
 	Issue   string   `json:"issue"`
 	Stories []string `json:"stories"`
@@ -177,7 +177,7 @@ func withBacklog(description, lines string) (string, error) {
 	start := i + len(heading)
 	rest := description[start:]
 	end := len(rest)
-	for _, stop := range []string{"\n## ", "\n<!-- tpm goals "} {
+	for _, stop := range []string{"\n## ", "\n<!-- scrum-master goals "} {
 		if j := strings.Index(rest, stop); j >= 0 && j < end {
 			end = j + 1
 		}

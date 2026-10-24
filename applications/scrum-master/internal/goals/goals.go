@@ -37,7 +37,7 @@ func init() {
 		if a.system == "" || a.release == "" {
 			return nil, Sources{}, fmt.Errorf("%w: needs --system and --release", cli.ErrUsage)
 		}
-		// goals reads the corpus through the tracker, which tpm routes from
+		// goals reads the corpus through the tracker, which scrum-master routes from
 		// the working directory.
 		if a.dir != "." {
 			if err := os.Chdir(a.dir); err != nil {
@@ -83,7 +83,7 @@ func init() {
 		Group: "goals", Name: "push", Summary: "file one Sprint Goal per team and post planned events",
 		Flags: func(fs *flag.FlagSet) {
 			common(fs)
-			fs.StringVar(&a.planFile, "plan", "", "confirmed plan JSON from tpm goals plan (required)")
+			fs.StringVar(&a.planFile, "plan", "", "confirmed plan JSON from scrum-master goals plan (required)")
 			fs.StringVar(&a.control, "control", "", "program repository holding control/ files; defaults to --system")
 		},
 		Run: func(ctx *cli.Context) error {
@@ -103,7 +103,7 @@ func init() {
 				return err
 			}
 			if p.Release != s.Release.Version || p.Tag != s.Release.Tag {
-				return fmt.Errorf("plan is for %s at %s, the road-map has %s at %s; run tpm goals plan again", p.Release, p.Tag, s.Release.Version, s.Release.Tag)
+				return fmt.Errorf("plan is for %s at %s, the road-map has %s at %s; run scrum-master goals plan again", p.Release, p.Tag, s.Release.Version, s.Release.Tag)
 			}
 			control := a.control
 			if control == "" {

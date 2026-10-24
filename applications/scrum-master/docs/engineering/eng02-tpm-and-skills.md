@@ -1,6 +1,6 @@
 ---
 id: eng02-tpm-and-skills
-title: "tpm and Skills: Code Does the Workflow, the Model Does Language"
+title: "scrum-master and Skills: Code Does the Workflow, the Model Does Language"
 ---
 <!-- Copyright (c) 2026 Gray Lake Labs -->
 <!-- SPDX-License-Identifier: MIT-0 -->
@@ -10,14 +10,14 @@ title: "tpm and Skills: Code Does the Workflow, the Model Does Language"
 
 Every token the model spends on a step a program could do is cost with no
 benefit, and a step the model does is a step that can come out
-differently each time. The tpm binary exists to take those steps away from
+differently each time. The words exist to take those steps away from
 the model. This guideline states where the boundary sits (design.md
 D10), what a skill file may contain, and how mage audit holds the line.
 
 <!-- section: the-boundary -->
 ## The boundary
 
-tpm does everything a program can: fetching facts from the tracker and
+scrum-master does everything a program can: fetching facts from the tracker and
 the repository, deriving state, recommending a choice, filing and
 linking issues, validating files, computing aggregates, tagging, and
 posting events. Every subcommand takes --json and --dry-run and never
@@ -33,8 +33,8 @@ The model does three kinds of work, and only these.
 
 Table: Model tasks.
 
-A choice among options tpm computed is not generation. The skill shows
-tpm's recommendation and relays the person's answer back to tpm.
+A choice among options scrum-master computed is not generation. The skill shows
+scrum-master's recommendation and relays the person's answer back to scrum-master.
 
 <!-- section: skill-file-shape -->
 ## Skill file shape
@@ -46,12 +46,12 @@ description saying what the skill does and when to use it, and
 nothing agent-specific; every agent reads the same SKILL.md. A skill
 file is at most 50 lines, stricter than the 500 lines Agent Skills
 recommends. Its
-steps are either a tpm command,
-a question relayed to the person with tpm's recommendation, or one of
-the three model tasks named as such. Facts come only from tpm --json
+steps are either a scrum-master command,
+a question relayed to the person with scrum-master's recommendation, or one of
+the three model tasks named as such. Facts come only from scrum-master --json
 output; a skill never reads the tracker or the repository on its own.
 Anything longer than 50 lines, or any step that computes, filters,
-formats, or decides by rule, belongs in tpm.
+formats, or decides by rule, belongs in scrum-master.
 
 <!-- section: the-audit-gate -->
 ## The audit gate
@@ -65,10 +65,10 @@ use case marks which of its flow steps are model steps, so a review
 sees the model's share of a release at a glance.
 
 <!-- section: moving-a-step-into-tpm -->
-## Moving a step into tpm
+## Moving a step into scrum-master
 
 When a skill or a use case flow gives the model a step outside the
-three tasks, we file an issue that names the step, specify the tpm
+three tasks, we file an issue that names the step, specify the scrum-master
 subcommand that does it in the owning SRD, and shrink the skill to a
 call of that subcommand. The SRD change comes first (D1).
 

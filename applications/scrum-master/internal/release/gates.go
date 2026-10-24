@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 // Package release cuts a tag only after a repository's declared gates pass:
 // the gates file, the stage runner, and the v0.YYYYMMDD.N tag sequence
-// (eng03). scrum-master's mage tag drives it; tpm release reuses the tagging.
+// (eng03). scrum-master's mage tag drives it; scrum-master release reuses the tagging.
 package release
 
 import (

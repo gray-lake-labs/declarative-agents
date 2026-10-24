@@ -21,7 +21,7 @@ Specifications lead implementation. A new skill or a change to one starts with a
 <!-- article: D2 -->
 ### D2 - Every file is Markdown with tags
 
-Every file is Markdown with marker tags. Structured artifacts use the format the pinned declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's hierarchy documents (themes, initiatives, epics, features, and stories), which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides, except a program repository's orientation files, which tpm writes where a first-time reader looks: README.md and AGENTS.md at the root and a README.md in each hierarchy folder and in docs/engineering/ (srd043 R1.6, R2.4). Four files are not Markdown because a consumer outside this corpus requires their format: docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the corpus audit executes; plugin/plugin.json, which the Agent Plugins 1.0 standard names; and .golangci.yml, which the repository's lint gate reads by path. A program repository tpm scaffolds also keeps docs/external-pins.yaml, pinning the release of this repository its corpus follows (srd043 R3.3); this corpus needs none, because the format library and the audit are siblings in this repository (GH-190). The declarative-agents profiles under plugin/agents/ are YAML for the same reason: the pinned runtime reads them (D14).
+Every file is Markdown with marker tags. Structured artifacts use the format the pinned declarative-agents release declares (its eng10): VISION, ARCHITECTURE, SPECIFICATIONS, road-map, SRDs, use cases, test suites, semantic models, config formats, constitutions including this one, engineering guidelines, and a program's hierarchy documents (themes, initiatives, epics, features, and stories), which are SRDs in that format. A document holds only the fields the pinned release declares, in its order; data the process needs that no field is named for goes in the declared field the schema below names for it. scrum-master's configuration files are config documents (D11). Prose a person reads start to finish is Markdown under docs/guides, except a program repository's orientation files, which the init and onboard profiles write where a first-time reader looks: README.md and AGENTS.md at the root and a README.md in each hierarchy folder and in docs/engineering/ (srd043 R1.6, R2.4). Four files are not Markdown because a consumer outside this corpus requires their format: docs/external-checkouts.yaml, which mage audit writes for one run and git ignores; docs/corpus-charter.yaml, which the corpus audit executes; plugin/plugin.json, which the Agent Plugins 1.0 standard names; and .golangci.yml, which the repository's lint gate reads by path. A program repository the init profile lays down also keeps docs/external-pins.yaml, pinning the release of this repository its corpus follows (srd043 R3.3); this corpus needs none, because the format library and the audit are siblings in this repository (GH-190). The declarative-agents profiles under plugin/agents/ are YAML for the same reason: the pinned runtime reads them (D14).
 
 <!-- article: D3 -->
 ### D3 - Traceability
@@ -61,7 +61,7 @@ A reference to a requirement, interface, or SRD in another repository is a URL p
 <!-- article: D10 -->
 ### D10 - Code does the workflow; the model does language
 
-Every step a program can do is a tpm subcommand: fetching facts, deriving state, filing and linking issues, validating files, computing aggregates, tagging, and posting events. A skill is a thin script, at most 50 lines, that calls tpm subcommands with --json and relays the person's choices among the options tpm computes. The model does three kinds of work only: turning loose conversation into a structured file, combining several files into one summary, and iterating on that content with the person. A specification that gives the model any other step is refused, and the step moves into tpm. This extends D5: facts are fetched by code, judgment is asked, and language is the only thing the model writes.
+Every step a program can do is a word: fetching facts, deriving state, filing and linking issues, validating files, computing aggregates, tagging, and posting events. A skill is a thin script, at most 50 lines, that runs words with --json and relays the person's choices among the options the words compute. The model does three kinds of work only: turning loose conversation into a structured file, combining several files into one summary, and iterating on that content with the person. A specification that gives the model any other step is refused, and the step moves into a word. This extends D5: facts are fetched by code, judgment is asked, and language is the only thing the model writes.
 
 <!-- article: D11 -->
 ### D11 - Configuration is Markdown with tags
@@ -76,12 +76,12 @@ An SRD whose release is not the next one holds its problem, goals, non-goals, an
 <!-- article: D13 -->
 ### D13 - The trunk is the monorepo
 
-Decided 2026-10-22 (GH-189) and landed with GH-190: tpm is an application of this repository, applications/scrum-master, imported with its history. There is no parent to track from outside — the format library, the runtime, and this corpus are siblings at one tag, mage audit runs the sibling agent built from agent-core, and a document problem the format cannot express is solved by changing the format here. Program repositories remain satellites by design: each pins this repository's release in its docs/external-pins.yaml, and tpm install --runtime fetches at that pin; inside this repository the sibling is the release and nothing downloads.
+Decided 2026-10-22 (GH-189) and landed with GH-190: scrum-master is an application of this repository, applications/scrum-master, imported with its history. There is no parent to track from outside — the format library, the runtime, and this corpus are siblings at one tag, mage audit runs the sibling agent built from agent-core, and a document problem the format cannot express is solved by changing the format here. Program repositories remain satellites by design: each pins this repository's release in its docs/external-pins.yaml and vendors that release's profiles in .scrum-master, which install.sh's agent runs (GH-34); inside this repository the sibling is the release and nothing downloads.
 
 <!-- article: D14 -->
 ### D14 - A skill is a profile
 
-A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: the machine's states are the skill's steps, its tools are the tpm commands the skill runs with --json, a tpm refusal is a terminal state carrying tpm's reason, and the model acts only in the machine's work state, extending D10 from instruction to enforcement. The profile is the source of truth: mage audit validates every shipped profile with the pinned runtime's --validate-config, and tpm install renders such a skill's SKILL.md from its machine, so an agent that does not run the runtime follows the same steps the runtime executes. D10's 50-line limit binds authored skill scripts; a rendered SKILL.md is generated data, bounded by its machine. implement was the pilot (GH-135); the remaining five converted on its evidence (GH-198).
+A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: the machine's states are the skill's steps, its tools are the words the skill runs with --json, which the agent serves in its own process (GH-27), a word's refusal is a terminal state carrying the word's reason, and the model acts only in the machine's work state, extending D10 from instruction to enforcement. The profile is the source of truth: mage audit validates every shipped profile with the pinned runtime's --validate-config, and the skill install renders such a skill's SKILL.md from its machine, so an agent that does not run the runtime follows the same steps the runtime executes. D10's 50-line limit binds authored skill scripts; a rendered SKILL.md is generated data, bounded by its machine. implement was the pilot (GH-135); the remaining five converted on its evidence (GH-198).
 
 <!-- field: schema | form: "tree" -->
 ## Schema
@@ -130,7 +130,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
 - sprint_end_summary:
   - location: docs/sprint-ends/RELEASE.md in each repository whose sprint-end issue closes the period
   - sections: the period's summary in prose, then a Stories done section listing each story the owner reports done as project#story, or None.
-  - purpose: Closes a period. The sprint-end skill writes it in the sprint-end issue's worktree, tpm sprint-end stories writes its Stories done section, and tpm issue merge refuses a summary not in this format (srd038 R2.4). Its issue is the sprint-end issue, plane::data with kind::release (srd038 R1.1).
+  - purpose: Closes a period. The sprint-end skill writes it in the sprint-end issue's worktree, the sprint-end stories word writes its Stories done section, and the merge refuses a summary not in this format (srd038 R2.4). Its issue is the sprint-end issue, plane::data with kind::release (srd038 R1.1).
 - roadmap:
   - location: docs/road-map.md
   - required_fields:
@@ -140,7 +140,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - program_release_fields:
     - deliverables: the initiative items the release proves, inNNN-short-name#Rn.m (objNNN-short-name#Rn.m for an objective document), listed before release
     - release.publication: tag (the release tag Cites lines pin) and milestone, as tree items
-  - release_statuses: specified (planned), implemented (built and proven by its test suite), released (tagged and handed off); tpm backlog check refuses any other (srd045 R8.2)
+  - release_statuses: specified (planned), implemented (built and proven by its test suite), released (tagged and handed off); the corpus gate refuses any other (srd045 R8.2)
   - purpose: Assigns SRDs and use cases to releases and status values. In a program's system repository a release also names the initiative items it proves and its tag and milestone, in program_release_fields (srd034 R3.1).
 - srd:
   - location: docs/specs/software-requirements/srdNNN-short-name.md
@@ -184,7 +184,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
     1. repository
     1. path
   - numbering: same as srd
-  - purpose: Declares one subsystem, its owner (a Product Owner, the owner item of context), and its components, each a row of implementation_targets by repository URL and path. Component label values (component::<name>) come from these rows. The system SRD tpm init writes has the same two fields, declaring the system repository a component of the program owned by the technical program manager.
+  - purpose: Declares one subsystem, its owner (a Product Owner, the owner item of context), and its components, each a row of implementation_targets by repository URL and path. Component label values (component::<name>) come from these rows. The system SRD the init profile writes has the same two fields, declaring the system repository a component of the program owned by the technical program manager.
 - environment_srd:
   - location: docs/specs/software-requirements/srdNNN-env-name.md in the test-subsystem repository
   - required_fields:
@@ -216,7 +216,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - targets: a same-repository document id, or a URL pinned to a release tag (D9) for a document in another repository
   - purpose: The vertical and horizontal links of the planning hierarchy, written as context items of each hierarchy document; an issue carries the same links as body lines (srd007). Progress rolls up through parent, never through anchors.
 - theme:
-  - location: docs/specs/themes/thNNN-short-name.md in the system (TPM) repository; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document
+  - location: docs/specs/themes/thNNN-short-name.md in the system (TPM) repository; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document
   - format: an SRD in the pinned release's Markdown format (D2), as every hierarchy document is; scrum-master's format tools read it with the release's SRD declaration
   - required_fields:
     1. id
@@ -240,7 +240,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - acceptance_criteria_fields: same as srd
   - purpose: A strategic goal area for months to years, owned by the technical program manager. Initiatives name it as their parent, and reports group the initiatives and epics beneath it.
 - initiative:
-  - location: docs/specs/initiatives/inNNN-short-name.md in the system (TPM) repository; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document; an objective document at docs/specs/objectives/objNNN-short-name.md is read as an initiative without change
+  - location: docs/specs/initiatives/inNNN-short-name.md in the system (TPM) repository; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document; an objective document at docs/specs/objectives/objNNN-short-name.md is read as an initiative without change
   - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id
@@ -276,7 +276,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - acceptance_criteria_note: tests and applicability are required (D8); applicability names the environment. Until the program's environment SRDs exist, it names a chain stage D8 lists and the audit cannot resolve it (srd034 R1.5). A test written "name (R1.1, R1.2)" names the items it proves, so a criterion two teams' items share puts only each team's tests on its Sprint Goal; a test without items proves every item the criterion traces (GH-20).
   - purpose: A multi-team outcome over several quarters, the program's Product Goal, owned by the technical program manager. Its parent is a theme; epics name it as theirs. plan places its outcomes in a release and tasks cites them, pinned, on each team's Sprint Goal (srd034).
 - epic:
-  - location: docs/specs/epics/epNNN-short-name.md, in the system (TPM) repository when it spans teams or in a subsystem repository when one team owns it; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document
+  - location: docs/specs/epics/epNNN-short-name.md, in the system (TPM) repository when it spans teams or in a subsystem repository when one team owns it; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document
   - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id
@@ -304,7 +304,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - acceptance_criteria_fields: same as srd
   - purpose: A large body of work spanning several sprints, typically one to three months, owned by a Product Owner. Its parent is an initiative; features and stories name it as theirs, and its progress is the share of its descendants' story points done (srd045). Not a unit of work (D4) and not a tracker object.
 - feature:
-  - location: docs/specs/features/ftNNN-short-name.md in the owning team's repository; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document
+  - location: docs/specs/features/ftNNN-short-name.md in the owning team's repository; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document
   - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id
@@ -331,7 +331,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - acceptance_criteria_fields: same as srd
   - purpose: An optional layer, a distinct capability within an epic spanning two to four sprints, used when an epic is too large to break straight into stories. Its parent, an epic, is required; stories name it as theirs.
 - story:
-  - location: docs/specs/stories/stNNN-short-name.md in the owning team's repository; the folder's README.md, which tpm writes, explains the level and is not itself a hierarchy document
+  - location: docs/specs/stories/stNNN-short-name.md in the owning team's repository; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document
   - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id

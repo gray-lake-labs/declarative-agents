@@ -12,7 +12,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
-// The operations that file issues. Each issue tpm files carries the one that
+// The operations that file issues. Each issue scrum-master files carries the one that
 // filed it as an op:: label, set at creation and never changed (srd001 R34).
 const (
 	OpFile    = "file"
@@ -49,13 +49,13 @@ func DefaultLabels() []tracker.Label {
 		{Name: "kind::defect", Color: "#d9534f", Description: "An artifact is wrong"},
 		{Name: "kind::request", Color: "#d10069", Description: "An artifact lacks something"},
 		{Name: "kind::question", Color: "#a8d695", Description: "Needs an answer, not a change"},
-		{Name: Op(OpFile), Color: "#95a5a6", Description: "Filed by tpm issue file"},
-		{Name: Op(OpPlan), Color: "#95a5a6", Description: "Filed by tpm plan push"},
-		{Name: Op(OpGoals), Color: "#95a5a6", Description: "Filed by tpm goals push"},
-		{Name: Op(OpOnboard), Color: "#95a5a6", Description: "Filed by tpm onboard"},
-		{Name: Op(OpReport), Color: "#95a5a6", Description: "Filed by tpm reports aggregate --push"},
-		{Name: Op(OpStatus), Color: "#95a5a6", Description: "Filed by tpm reports status"},
-		{Name: Op(OpRecur), Color: "#95a5a6", Description: "Opened by tpm issue recur"},
+		{Name: Op(OpFile), Color: "#95a5a6", Description: "Filed by issue file"},
+		{Name: Op(OpPlan), Color: "#95a5a6", Description: "Filed by plan push"},
+		{Name: Op(OpGoals), Color: "#95a5a6", Description: "Filed by goals push"},
+		{Name: Op(OpOnboard), Color: "#95a5a6", Description: "Filed by onboard"},
+		{Name: Op(OpReport), Color: "#95a5a6", Description: "Filed by reports aggregate --push"},
+		{Name: Op(OpStatus), Color: "#95a5a6", Description: "Filed by reports status"},
+		{Name: Op(OpRecur), Color: "#95a5a6", Description: "Opened by issue recur"},
 		{Name: "needs-triage", Color: "#cc338b", Description: "Failed admission; not ready"},
 		{Name: "status::in-progress", Color: "#428bca", Description: "The assignee started it"},
 		{Name: "waiting", Color: "#e6e6fa", Description: "A link is unsatisfied; set by track-goals"},
@@ -211,7 +211,7 @@ func MigrateTypes(t tracker.Tracker, projects []string, dryRun bool) ([]TypeMigr
 }
 
 // StaleTypes lists the earlier type names control/labels.md in the program
-// repository at ref still lists. tpm never edits a control file; a
+// repository at ref still lists. scrum-master never edits a control file; a
 // plane::control issue changes it (srd013 R6.3).
 func StaleTypes(t tracker.Tracker, project, ref string) ([]string, error) {
 	b, err := t.GetFile(project, LabelsFile, ref)

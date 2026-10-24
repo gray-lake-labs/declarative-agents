@@ -45,7 +45,7 @@ type MergeResult struct {
 	// the one-command merge's JSON it would read as "closed nothing" beside
 	// closed (GH-20).
 	ToClose string `json:"-"`
-	// Refused is why tpm refused the merge, set on the JSON a refusal
+	// Refused is why scrum-master refused the merge, set on the JSON a refusal
 	// emits; the exit status is non-zero (GH-22).
 	Refused string `json:"refused,omitempty"`
 	DryRun  bool   `json:"dry_run"`
@@ -81,7 +81,7 @@ func Merge(t tracker.Tracker, git Git, project, issueProject string, iid int, br
 func MergeBranch(t tracker.Tracker, git Git, project, issueProject string, iid int, branch, dir string, gate MergeGate, closes []string, dryRun bool) (MergeResult, error) {
 	r := MergeResult{Project: project, IID: iid, Branch: branch, DryRun: dryRun}
 	if _, ok := tracker.For(t, issueProject).(MergeCloser); !ok {
-		return r, fmt.Errorf("this tracker does not close issues on a local merge; tpm issue merge serves the beads tracker")
+		return r, fmt.Errorf("this tracker does not close issues on a local merge; scrum-master issue merge serves the beads tracker")
 	}
 	if issueProject != project {
 		r.IssueProject = issueProject

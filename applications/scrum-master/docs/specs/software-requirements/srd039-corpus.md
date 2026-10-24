@@ -8,10 +8,10 @@ title: "Shared: reading the corpus and config documents"
 <!-- field: problem -->
 ## Problem
 
-tpm reads a program's road map, SRDs, and initiatives, and its own
+scrum-master reads a program's road map, SRDs, and initiatives, and its own
 configuration files, all in the marker form the pinned parent
 declarative-agents release declares. This repository consumes that release
-only through its audit and its format tools, never as a Go module, so tpm
+only through its audit and its format tools, never as a Go module, so scrum-master
 carries its own reader for the form. A reader that drifts from what the
 release's converter and formatter write reads a document wrong without
 saying so.
@@ -19,8 +19,8 @@ saying so.
 <!-- field: goals -->
 ## Goals
 
-- G1: tpm reads every corpus document and config document a program holds in the form the pinned release writes.
-- G2: A config document tpm writes reads back as the value it was written from.
+- G1: scrum-master reads every corpus document and config document a program holds in the form the pinned release writes.
+- G2: A config document scrum-master writes reads back as the value it was written from.
 
 <!-- req: R1 -->
 ## R1 - Markdown documents

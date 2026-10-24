@@ -23,11 +23,11 @@ import (
 const githubRigRepo = "gray-lake-labs/tpm-gh-rig"
 
 // Github runs the opt-in GitHub rig: with gh logged in (GH_TOKEN), it
-// builds tpm, and with TPM_TRACKER=gh in a checkout of the rig repository
-// proves tpm issue labels writes the schema into the repository, tpm issue
-// file files an admitted issue on a dated milestone, tpm issue pop opens
+// builds scrum-master, and with TPM_TRACKER=gh in a checkout of the rig repository
+// proves scrum-master issue labels writes the schema into the repository, scrum-master issue
+// file files an admitted issue on a dated milestone, scrum-master issue pop opens
 // the branch with a draft pull request, GitHub itself refuses the author's
-// own approval, and under the default policy tpm issue merge merges the
+// own approval, and under the default policy scrum-master issue merge merges the
 // author's own pull request and closes the issue. A second person's
 // approval, and the refusals of a policy that requires one, are proven
 // offline (internal/github), since the rig has one identity. It never joins
@@ -43,11 +43,11 @@ func (Integration) Github() error {
 		fmt.Printf("github rig as %s in %s\n", strings.TrimSpace(string(out)), repo)
 	}
 	if exec.Command("gh", "repo", "view", repo).Run() != nil {
-		if out, err := exec.Command("gh", "repo", "create", repo, "--private", "--add-readme", "--description", "tpm's GitHub rig: disposable issues and pull requests").CombinedOutput(); err != nil {
+		if out, err := exec.Command("gh", "repo", "create", repo, "--private", "--add-readme", "--description", "scrum-master's GitHub rig: disposable issues and pull requests").CombinedOutput(); err != nil {
 			return fmt.Errorf("create %s: %v: %s", repo, err, out)
 		}
 	}
-	root, err := os.MkdirTemp("", "tpm-github-rig-")
+	root, err := os.MkdirTemp("", "scrum-master-github-rig-")
 	if err != nil {
 		return err
 	}
@@ -55,8 +55,8 @@ func (Integration) Github() error {
 	if root, err = filepath.EvalSymlinks(root); err != nil {
 		return err
 	}
-	bin := filepath.Join(root, "tpm")
-	if err := runStreaming(".", "go", "build", "-o", bin, "./cmd/tpm"); err != nil {
+	bin := filepath.Join(root, "scrum-master")
+	if err := runStreaming(".", "go", "build", "-o", bin, "./magefiles/words"); err != nil {
 		return err
 	}
 	clone := filepath.Join(root, filepath.Base(repo))
@@ -75,7 +75,7 @@ func (Integration) Github() error {
 			return err
 		}
 	}
-	tpm := func(dir string, args ...string) ([]byte, error) {
+	words := func(dir string, args ...string) ([]byte, error) {
 		cmd := exec.Command(bin, args...)
 		cmd.Dir = dir
 		cmd.Env = append(os.Environ(), "TPM_TRACKER=gh")
@@ -83,14 +83,14 @@ func (Integration) Github() error {
 		cmd.Stderr = &errb
 		out, err := cmd.Output()
 		if err != nil {
-			return out, fmt.Errorf("tpm %s: %w: %s", strings.Join(args, " "), err, errb.String())
+			return out, fmt.Errorf("scrum-master %s: %w: %s", strings.Join(args, " "), err, errb.String())
 		}
 		return out, nil
 	}
 	c := &check{}
 	stamp := time.Now().UTC().Format("20060102T150405Z")
 
-	if _, err := tpm(clone, "issue", "labels", "--group", repo); err != nil {
+	if _, err := words(clone, "issue", "labels", "--group", repo); err != nil {
 		return err
 	}
 	gh := github.New(clone, github.CLI{}, nil)
@@ -109,7 +109,7 @@ func (Integration) Github() error {
 	body := filepath.Join(root, "issue.md")
 	writeFileTo(body, "## Requirements\n\n1. Add the rig note.\n\n## Acceptance Criteria\n\n- The note exists (test: note_exists; environment: local)\n")
 	var filed program.FileResult
-	out, err := tpm(clone, "issue", "file", "--project", repo, "--title", "Rig run "+stamp, "--body-file", body,
+	out, err := words(clone, "issue", "file", "--project", repo, "--title", "Rig run "+stamp, "--body-file", body,
 		"--plane", "data", "--kind", "build", "--component", "rig", "--milestone", milestone, "--json")
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func (Integration) Github() error {
 	c.expect(filed.IID > 0 && filed.Lint.Admitted, "file: %+v", filed)
 
 	var popped program.PopResult
-	if out, err = tpm(clone, "issue", "pop", "--project", repo, "--issue", fmt.Sprint(filed.IID), "--dir", clone, "--json"); err != nil {
+	if out, err = words(clone, "issue", "pop", "--project", repo, "--issue", fmt.Sprint(filed.IID), "--dir", clone, "--json"); err != nil {
 		return err
 	}
 	if err := json.Unmarshal(out, &popped); err != nil {
@@ -144,7 +144,7 @@ func (Integration) Github() error {
 	// The default policy requires no approval, so the one identity merges
 	// its own pull request (srd013 R5.5).
 	var merged program.MergeResult
-	if out, err = tpm(popped.Worktree, "issue", "merge", "--project", repo, "--issue", fmt.Sprint(filed.IID), "--dir", popped.Worktree, "--json"); err != nil {
+	if out, err = words(popped.Worktree, "issue", "merge", "--project", repo, "--issue", fmt.Sprint(filed.IID), "--dir", popped.Worktree, "--json"); err != nil {
 		c.expect(false, "merge of the author's own pull request under the default policy: %v", err)
 		exec.Command("gh", "pr", "close", popped.Branch, "--repo", repo, "--delete-branch").Run()
 		closed := "close"

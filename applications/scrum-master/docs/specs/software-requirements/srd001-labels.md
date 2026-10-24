@@ -194,7 +194,7 @@ A tracking issue that spans components lives in the program's own repository; a 
 <!-- req: R6.6 -->
 ### R6.6
 
-type::epic, the value's earlier name, is read as an alias of type::tracking: an issue labelled type::epic is a tracking issue, and a program's control files that list epic keep their meaning. tpm writes type::tracking on every issue it files, and tpm issue labels --migrate relabels issues that still carry type::epic (srd013 R6.3).
+type::epic, the value's earlier name, is read as an alias of type::tracking: an issue labelled type::epic is a tracking issue, and a program's control files that list epic keep their meaning. scrum-master writes type::tracking on every issue it files, and scrum-master issue labels --migrate relabels issues that still carry type::epic (srd013 R6.3).
 
 <!-- req: R7 -->
 ## R7 - type::sprint
@@ -429,12 +429,12 @@ The kind routes pull: it decides who takes an issue, whether it is offered, and 
 <!-- req: R21.1 -->
 ### R21.1
 
-Component values come from the subsystem SRDs in the system repository: each component a subsystem SRD declares (design.md subsystem_srd) is one label component::<name>. The system SRD tpm init writes declares the system repository the same way (srd043 R1.1). This corpus defines no value, and no policy file lists them a second time.
+Component values come from the subsystem SRDs in the system repository: each component a subsystem SRD declares (design.md subsystem_srd) is one label component::<name>. The system SRD scrum-master init writes declares the system repository the same way (srd043 R1.1). This corpus defines no value, and no policy file lists them a second time.
 
 <!-- req: R21.2 -->
 ### R21.2
 
-Every issue other than a sprint issue carries exactly one component label. An issue with none or with more than one is labelled needs-triage by admission (R23) and stays out of the backlog. Until a subsystem SRD declares a component, as in a program tpm init has just laid down, there is no value to choose, and an issue with no component label is admitted.
+Every issue other than a sprint issue carries exactly one component label. An issue with none or with more than one is labelled needs-triage by admission (R23) and stays out of the backlog. Until a subsystem SRD declares a component, as in a program scrum-master init has just laid down, there is no value to choose, and an issue with no component label is admitted.
 
 <!-- req: R21.3 -->
 ### R21.3
@@ -638,7 +638,7 @@ It carries Requirements and Acceptance Criteria, and its branch changes docs/ an
 <!-- req: R34.1 -->
 ### R34.1
 
-Every issue tpm files carries one op::<operation> label naming the operation that filed it: op::file (tpm issue file), op::plan (tpm plan push), op::goals (tpm goals push), op::onboard (tpm onboard), op::report (an actionable signal from tpm reports), op::status (a weekly status issue), and op::recur (the next instance tpm issue recur opens).
+Every issue scrum-master files carries one op::<operation> label naming the operation that filed it: op::file (scrum-master issue file), op::plan (scrum-master plan push), op::goals (scrum-master goals push), op::onboard (scrum-master onboard), op::report (an actionable signal from scrum-master reports), op::status (a weekly status issue), and op::recur (the next instance scrum-master issue recur opens).
 
 <!-- req: R34.2 -->
 ### R34.2
@@ -648,7 +648,7 @@ The label is set when the issue is created and never changed: an issue outlives 
 <!-- req: R34.3 -->
 ### R34.3
 
-Admission fails an issue with more than one op:: label and requires none, so issues filed before the axis existed are still admitted. A program whose control/labels.md predates the axis gets it from tpm doctor (srd043 R4.2), and its labels in the tracker from tpm issue labels.
+Admission fails an issue with more than one op:: label and requires none, so issues filed before the axis existed are still admitted. A program whose control/labels.md predates the axis gets it from scrum-master doctor (srd043 R4.2), and its labels in the tracker from scrum-master issue labels.
 
 <!-- field: goals -->
 ## Goals

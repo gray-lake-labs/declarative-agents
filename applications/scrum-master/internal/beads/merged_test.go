@@ -74,7 +74,7 @@ func TestMergedHistoryFromMergeCommits(t *testing.T) {
 }
 
 // TestMergeIsAttributedByItsTrailer reads a merge's author from the
-// Merged-by trailer tpm issue merge writes, not from the git identity that
+// Merged-by trailer scrum-master issue merge writes, not from the git identity that
 // made the commit.
 func TestMergeIsAttributedByItsTrailer(t *testing.T) {
 	tr := newTestTracker(t, "alice")

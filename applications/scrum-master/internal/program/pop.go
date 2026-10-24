@@ -69,7 +69,7 @@ type PopResult struct {
 	Checkout string `json:"checkout"`
 	Assigned bool   `json:"assigned"` // pop assigned the caller now
 	// Provisional is an assignment taken while the tracker repository was
-	// unreachable; tpm tracker reconcile confirms it or reports it lost.
+	// unreachable; scrum-master tracker reconcile confirms it or reports it lost.
 	Provisional bool `json:"provisional,omitempty"`
 	Created     bool `json:"branch_created"` // pop created the branch now
 	Added       bool `json:"worktree_added"` // pop added the worktree now

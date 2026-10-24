@@ -9,12 +9,22 @@ import (
 )
 
 // The GitHub repository releases are published to, and the organization
-// account they are published as (eng03).
+// account they are published as (eng03). A fork that releases elsewhere,
+// such as an internal GitLab one, names its forge, project, account, and
+// image registry in the environment variables below instead (GH-31).
 const (
 	releaseRepo    = "gray-lake-labs/declarative-agents"
 	releaseAccount = "gray-lake-labs-owner"
 	releaseImage   = "ghcr.io/gray-lake-labs/scrum-master"
 )
+
+// releaseSetting is the environment's value for name, else fallback.
+func releaseSetting(name, fallback string) string {
+	if v := os.Getenv(name); v != "" {
+		return v
+	}
+	return fallback
+}
 
 // Tag runs the gates in release-gates.md and, when every gate passes,
 // creates the next v0.YYYYMMDD.N tag at HEAD, pushes it as the file says,
@@ -37,7 +47,7 @@ func TagDryRun() error {
 	return r.DryRun()
 }
 
-// Publish publishes the tag at HEAD once it is on origin: the release binaries and SHA256SUMS on its GitHub release, then its image; a part already published is checked and kept, so a rerun completes a partial release (eng03).
+// Publish publishes the tag at HEAD once it is on origin: the release assets and SHA256SUMS on its release — on GitHub, or the forge SCRUM_MASTER_RELEASE_FORGE names — then its image; a part already published is checked and kept, so a rerun completes a partial release (eng03).
 func Publish() error {
 	p, err := scrumMasterPublisher(false)
 	if err != nil {
@@ -62,13 +72,13 @@ func PublishDryRun() error {
 	return p.PublishImage(tag)
 }
 
-// CrossBuild builds tpm for every release platform and keeps nothing, so a release fails its gates before tagging when a platform does not build (eng03).
+// CrossBuild builds the release — the agent for every platform and the profiles archive — and keeps nothing, so a release fails its gates before tagging when a platform does not build (eng03).
 func CrossBuild() error {
 	p, err := scrumMasterPublisher(true)
 	if err != nil {
 		return err
 	}
-	dist, err := os.MkdirTemp("", "tpm-cross-build-")
+	dist, err := os.MkdirTemp("", "scrum-master-cross-build-")
 	if err != nil {
 		return err
 	}
@@ -106,9 +116,10 @@ func scrumMasterPublisher(dryRun bool) (release.Publisher, error) {
 		Git:       release.ExecGit(root),
 		Run:       release.ExecCommand,
 		Out:       os.Stdout,
-		Repo:      releaseRepo,
-		Account:   releaseAccount,
+		Forge:     releaseSetting("SCRUM_MASTER_RELEASE_FORGE", release.ForgeGitHub),
+		Repo:      releaseSetting("SCRUM_MASTER_RELEASE_REPO", releaseRepo),
+		Account:   releaseSetting("SCRUM_MASTER_RELEASE_ACCOUNT", releaseAccount),
 		DryRun:    dryRun,
-		ImageRepo: releaseImage,
+		ImageRepo: releaseSetting("SCRUM_MASTER_RELEASE_IMAGE", releaseImage),
 	}, nil
 }

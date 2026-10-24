@@ -12,7 +12,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/runtime"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/scaffold"
 )
 
@@ -20,13 +19,13 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.Doctor)
 }
 
-// Doctor builds tpm, inits a system repository, turns it into one an older tpm laid down (README.md deleted, AGENTS.md the owner's without a block, a block rewritten around the owner's notes, a document out of canonical form), and proves tpm doctor's dry run writes nothing, its run restores README.md, appends the block to AGENTS.md, refreshes the block and keeps the notes, and repairs the document so the parent's corpus audit and the spec tool's check pass, and a second run changes nothing, and that it reports the runtime at the release tpm pins and refuses a TPM_AGENT that is not that release's binary (test-rel04.1-orientation-doctor, test-rel04.3-distribution). It needs no rig.
+// Doctor builds scrum-master, inits a system repository, turns it into one an older release laid down (README.md deleted, AGENTS.md the owner's without a block, a block rewritten around the owner's notes, a document out of canonical form), and proves scrum-master doctor's dry run writes nothing, its run restores README.md, appends the block to AGENTS.md, refreshes the block and keeps the notes, and repairs the document so the parent's corpus audit and the spec tool's check pass, and a second run changes nothing, and that it reports a repository that vendored no profiles (test-rel04.1-orientation-doctor, test-rel04.3-distribution; GH-34). It needs no rig.
 func (Integration) Doctor() error {
 	root, err := repositoryRoot()
 	if err != nil {
 		return err
 	}
-	tmp, err := os.MkdirTemp("", "tpm-doctor-")
+	tmp, err := os.MkdirTemp("", "scrum-master-doctor-")
 	if err != nil {
 		return err
 	}
@@ -34,9 +33,9 @@ func (Integration) Doctor() error {
 	if tmp, err = filepath.EvalSymlinks(tmp); err != nil {
 		return err
 	}
-	bin, repo := filepath.Join(tmp, "tpm"), filepath.Join(tmp, "system")
-	if err := runStreaming(root, "go", "build", "-o", bin, "./cmd/tpm"); err != nil {
-		return fmt.Errorf("build tpm: %w", err)
+	bin, repo := filepath.Join(tmp, "scrum-master"), filepath.Join(tmp, "system")
+	if err := runStreaming(root, "go", "build", "-o", bin, "./magefiles/words"); err != nil {
+		return fmt.Errorf("build the words: %w", err)
 	}
 	env := append(os.Environ(),
 		"GIT_AUTHOR_NAME=operator", "GIT_AUTHOR_EMAIL=operator@example.invalid",
@@ -67,8 +66,8 @@ func (Integration) Doctor() error {
 		return err
 	}
 
-	// What an older tpm left: no README.md, an AGENTS.md the owner wrote
-	// without tpm's block, an epics README whose block is an older text
+	// What an older release left: no README.md, an AGENTS.md the owner wrote
+	// without scrum-master's block, an epics README whose block is an older text
 	// between the owner's notes, and a VISION out of canonical form.
 	if err := os.Remove(filepath.Join(repo, "README.md")); err != nil {
 		return err
@@ -98,14 +97,14 @@ func (Integration) Doctor() error {
 	}
 	start, end := strings.Index(string(labels), "\n<!-- field: op -->"), strings.Index(string(labels), "\n<!-- field: state -->")
 	if start < 0 || end < start {
-		return fmt.Errorf("tpm init's control/labels.md has no op axis before state")
+		return fmt.Errorf("scrum-master init's control/labels.md has no op axis before state")
 	}
 	olderLabels := strings.Replace(string(labels[:start])+string(labels[end:]), "| build | #428bca |", "| build | #000000 |", 1)
 	if err := os.WriteFile(labelsPath, []byte(olderLabels), 0o644); err != nil {
 		return err
 	}
 	// A system SRD with no context or implementation targets, and a policy
-	// with no corpus gate, as tpm init wrote them before #117.
+	// with no corpus gate, as scrum-master init wrote them before #117.
 	srdPath := filepath.Join(repo, "docs", "specs", "software-requirements", "srd001-system.md")
 	srd, err := os.ReadFile(srdPath)
 	if err != nil {
@@ -114,7 +113,7 @@ func (Integration) Doctor() error {
 	ctx, targets := strings.Index(string(srd), "<!-- field: context"), strings.Index(string(srd), "\n<!-- field: implementation_targets")
 	problem := strings.Index(string(srd), "<!-- field: problem")
 	if ctx < 0 || targets < 0 || problem < ctx {
-		return fmt.Errorf("tpm init's system SRD has no context before problem or no implementation targets")
+		return fmt.Errorf("scrum-master init's system SRD has no context before problem or no implementation targets")
 	}
 	olderSRD := string(srd[:ctx]) + string(srd[problem:targets])
 	policyPath := filepath.Join(repo, "control", "policy.md")
@@ -124,7 +123,7 @@ func (Integration) Doctor() error {
 	}
 	corpusGate, defaultGate := strings.Index(string(policy), "\n<!-- field: corpus -->"), strings.Index(string(policy), "\n<!-- field: default -->")
 	if corpusGate < 0 || defaultGate < corpusGate {
-		return fmt.Errorf("tpm init's policy has no corpus gate before the default one")
+		return fmt.Errorf("scrum-master init's policy has no corpus gate before the default one")
 	}
 	olderPolicy := string(policy[:corpusGate]) + string(policy[defaultGate:])
 	for path, text := range map[string]string{srdPath: olderSRD, policyPath: olderPolicy} {
@@ -140,7 +139,7 @@ func (Integration) Doctor() error {
 		out, err := cmd.Output()
 		var exit *exec.ExitError
 		if errors.As(err, &exit) {
-			return r, fmt.Errorf("tpm doctor: %w: %s", err, exit.Stderr)
+			return r, fmt.Errorf("scrum-master doctor: %w: %s", err, exit.Stderr)
 		}
 		if err != nil {
 			return r, err
@@ -168,13 +167,7 @@ func (Integration) Doctor() error {
 		return err
 	}
 	expectChanges(c, dry, "dry run")
-	pin := runtime.DefaultPin()
-	c.expect(dry.Runtime.Release == pin && (dry.Runtime.Agent != "") != (dry.Runtime.Problem != ""), "dry run: runtime %+v", dry.Runtime)
-	foreign, err := doctorEnv([]string{runtime.AgentEnv + "=" + bin}, "--dry-run")
-	if err != nil {
-		return err
-	}
-	c.expect(foreign.Runtime.Agent == "" && strings.Contains(foreign.Runtime.Problem, pin), "a TPM_AGENT that is not the release's binary: runtime %+v", foreign.Runtime)
+	c.expect(dry.Vendored == "", "dry run: a repository that vendored nothing reports %q", dry.Vendored)
 	_, statErr := os.Stat(filepath.Join(repo, "README.md"))
 	b, _ := os.ReadFile(epics)
 	v, _ := os.ReadFile(vision)
@@ -195,18 +188,18 @@ func (Integration) Doctor() error {
 	v, _ = os.ReadFile(vision)
 	c.expect(string(v) == string(canonical), "VISION not repaired to its canonical form")
 	a, _ := os.ReadFile(filepath.Join(repo, scaffold.AgentsFile))
-	c.expect(strings.HasPrefix(string(a), ownAgents+"\n<!-- tpm:begin"), "AGENTS.md: the owner's text not first:\n%s", a)
+	c.expect(strings.HasPrefix(string(a), ownAgents+"\n<!-- managed:begin"), "AGENTS.md: the owner's text not first:\n%s", a)
 	srdAfter, _ := os.ReadFile(srdPath)
 	policyAfter, _ := os.ReadFile(policyPath)
-	c.expect(string(srdAfter) == string(srd) && string(policyAfter) == string(policy), "doctor did not restore what tpm init writes:\n%s\n%s", srdAfter, policyAfter)
+	c.expect(string(srdAfter) == string(srd) && string(policyAfter) == string(policy), "doctor did not restore what scrum-master init writes:\n%s\n%s", srdAfter, policyAfter)
 	lb, _ = os.ReadFile(labelsPath)
 	c.expect(strings.Contains(string(lb), "<!-- field: op -->") && strings.Contains(string(lb), "| recur |") && strings.Contains(string(lb), "| build | #000000 |"),
 		"control/labels.md not extended, or the recolor lost:\n%s", lb)
 	if err := sh("git", "add", "-A"); err != nil {
 		return err
 	}
-	c.expect(runCorpusAudit(repo, runStreaming) == nil, "the parent's corpus audit fails after tpm doctor")
-	c.expect(specCheckAt(repo) == nil, "the spec tool's check fails after tpm doctor")
+	c.expect(runCorpusAudit(repo, runStreaming) == nil, "the parent's corpus audit fails after scrum-master doctor")
+	c.expect(specCheckAt(repo) == nil, "the spec tool's check fails after scrum-master doctor")
 
 	second, err := doctor()
 	if err != nil {

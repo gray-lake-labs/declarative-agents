@@ -81,7 +81,7 @@ func testStatusIssueDueAfterReminderWeekdayMentionsOwner(t *testing.T, p tracker
 			t.Errorf("labels %v lack %s", i.Labels, l)
 		}
 	}
-	for _, want := range []string{"@po-1:", "## Requirements", "tpm reports week --project " + po1 + " --user po-1", "reports/2026-Q4/2026-W42-po-1.md",
+	for _, want := range []string{"@po-1:", "## Requirements", "scrum-master reports week --project " + po1 + " --user po-1", "reports/2026-Q4/2026-W42-po-1.md",
 		"--project g/reports --issue-project " + po1, "## Acceptance Criteria", "## Recurrence", "day after Wednesday", "## Previous Runs"} {
 		if !strings.Contains(i.Description, want) {
 			t.Errorf("body lacks %q", want)
@@ -150,7 +150,7 @@ func testWeekListsOpenObjectivesAndActivity(t *testing.T, p trackertest.Program)
 		bt.Store.Now = func() time.Time { return monday.AddDate(0, 0, -7) } // the period began the week before
 	}
 	obj, _ := f.CreateIssue(po1, tracker.NewIssue{Title: "Score one agent", DueDate: "2026-11-06",
-		Description: "Body\n\n<!-- tpm goals objective=obj001-a:R1 release=01.0 -->"})
+		Description: "Body\n\n<!-- scrum-master goals objective=obj001-a:R1 release=01.0 -->"})
 	if isBeads {
 		bt.Store.Now = time.Now
 	}
@@ -192,7 +192,7 @@ func TestWeekCountsOnlyThePeriodsMerges(t *testing.T) {
 	f := p.Tracker().(*beads.Tracker)
 	f.Store.Now = func() time.Time { return time.Date(2026, 10, 13, 9, 0, 0, 0, time.UTC) }
 	if _, err := f.CreateIssue(po1, tracker.NewIssue{Title: "Score one agent", DueDate: "2026-11-06",
-		Description: "Body\n\n<!-- tpm goals objective=obj001-a:R1 release=01.0 -->"}); err != nil {
+		Description: "Body\n\n<!-- scrum-master goals objective=obj001-a:R1 release=01.0 -->"}); err != nil {
 		t.Fatal(err)
 	}
 	r, err := Week(f, po1, "po-1", monday.AddDate(0, 0, 3), nil)
@@ -210,22 +210,22 @@ func TestWeekCountsOnlyThePeriodsMerges(t *testing.T) {
 func TestWeekOfTheSystemTakesTheTeamsPeriod(t *testing.T) {
 	const system = "g/system"
 	p := trackertest.NewBeads(t)
-	p.AddMerge(system, tracker.Merge{IID: 1, Title: "An earlier run's plan", Author: "tpm", MergedAt: "2026-10-12"})
-	p.AddMerge(system, tracker.Merge{IID: 2, Title: "This period's registration", Author: "tpm", MergedAt: "2026-10-14"})
+	p.AddMerge(system, tracker.Merge{IID: 1, Title: "An earlier run's plan", Author: "scrum-master", MergedAt: "2026-10-12"})
+	p.AddMerge(system, tracker.Merge{IID: 2, Title: "This period's registration", Author: "scrum-master", MergedAt: "2026-10-14"})
 	f := p.Tracker().(*beads.Tracker)
 	f.Store.Now = func() time.Time { return time.Date(2026, 10, 13, 9, 0, 0, 0, time.UTC) }
 	if _, err := f.CreateIssue(po1, tracker.NewIssue{Title: "Score one agent", DueDate: "2026-11-06",
-		Description: "Body\n\n<!-- tpm goals objective=obj001-a:R1 release=01.0 -->"}); err != nil {
+		Description: "Body\n\n<!-- scrum-master goals objective=obj001-a:R1 release=01.0 -->"}); err != nil {
 		t.Fatal(err)
 	}
-	r, err := Week(f, system, "tpm", monday.AddDate(0, 0, 3), []string{po1})
+	r, err := Week(f, system, "scrum-master", monday.AddDate(0, 0, 3), []string{po1})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(r.Merged) != 1 || r.Merged[0].Title != "This period's registration" {
 		t.Fatalf("merged %+v, want only this period's", r.Merged)
 	}
-	if r, _ = Week(f, system, "tpm", monday.AddDate(0, 0, 3), nil); len(r.Merged) != 2 {
+	if r, _ = Week(f, system, "scrum-master", monday.AddDate(0, 0, 3), nil); len(r.Merged) != 2 {
 		t.Fatalf("without the teams, merged %+v; want the whole week", r.Merged)
 	}
 }
@@ -238,8 +238,8 @@ func TestWeekOfTheSystemTakesTheTeamsPeriod(t *testing.T) {
 func TestWeekOfTheSystemCountsItsOwnWork(t *testing.T) {
 	const system = "g/system"
 	p := trackertest.NewBeads(t)
-	p.AddMerge(system, tracker.Merge{IID: 1, Title: "An earlier run's plan", Author: "tpm", MergedAt: "2026-10-12"})
-	p.AddMerge(system, tracker.Merge{IID: 2, Title: "Register the teams", Author: "tpm", MergedAt: "2026-10-14", Description: "Closes g/system#2"})
+	p.AddMerge(system, tracker.Merge{IID: 1, Title: "An earlier run's plan", Author: "scrum-master", MergedAt: "2026-10-12"})
+	p.AddMerge(system, tracker.Merge{IID: 2, Title: "Register the teams", Author: "scrum-master", MergedAt: "2026-10-14", Description: "Closes g/system#2"})
 	f := p.Tracker().(*beads.Tracker)
 	f.Store.Now = func() time.Time { return time.Date(2026, 10, 13, 9, 0, 0, 0, time.UTC) }
 	if _, err := f.CreateIssue(system, tracker.NewIssue{Title: "Plan release 01.0"}); err != nil {
@@ -253,7 +253,7 @@ func TestWeekOfTheSystemCountsItsOwnWork(t *testing.T) {
 	if _, err := f.UpdateIssue(system, registration.IID, tracker.IssueUpdate{State: &closed}); err != nil {
 		t.Fatal(err)
 	}
-	r, err := Week(f, system, "tpm", monday.AddDate(0, 0, 3), []string{po1})
+	r, err := Week(f, system, "scrum-master", monday.AddDate(0, 0, 3), []string{po1})
 	if err != nil {
 		t.Fatal(err)
 	}

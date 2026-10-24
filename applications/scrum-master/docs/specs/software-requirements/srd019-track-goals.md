@@ -1,6 +1,6 @@
 ---
 id: srd019-track-goals
-title: "Script: track-goals (tpm goals ...)"
+title: "Script: track-goals (scrum-master goals ...)"
 ---
 <!-- Copyright (c) 2026 Gray Lake Labs -->
 <!-- SPDX-License-Identifier: MIT-0 -->
@@ -134,7 +134,7 @@ Retired in 01.2 (design.md D12).
 Retired in 01.2 (design.md D12).
 
 <!-- req: R6 -->
-## R6 - tpm goals verify
+## R6 - scrum-master goals verify
 
 <!-- req: R6.1 | status: retired | retired_in: 1.2 -->
 ### R6.1
@@ -147,7 +147,7 @@ Retired in 01.2 (design.md D12).
 Retired in 01.2 (design.md D12).
 
 <!-- req: R7 -->
-## R7 - tpm goals status
+## R7 - scrum-master goals status
 
 <!-- req: R7.1 | status: retired | retired_in: 1.2 -->
 ### R7.1

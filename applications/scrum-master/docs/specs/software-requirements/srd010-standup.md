@@ -1,6 +1,6 @@
 ---
 id: srd010-standup
-title: "Script: standup (tpm standup ...)"
+title: "Script: standup (scrum-master standup ...)"
 ---
 <!-- Copyright (c) 2026 Gray Lake Labs -->
 <!-- SPDX-License-Identifier: MIT-0 -->
@@ -31,7 +31,7 @@ the daily-scrum skill (srd020) holds the conversation.
 <!-- req: R1.1 -->
 ### R1.1
 
-Subcommands are in the tpm group standup. Each reads the person config, the program's label schema, and the policy file, and reaches the tracker through the tracker's Go client with the token of the tracker CLI's existing login.
+Subcommands are in the scrum-master group standup. Each reads the person config, the program's label schema, and the policy file, and reaches the tracker through the tracker's Go client with the token of the tracker CLI's existing login.
 
 <!-- req: R1.2 -->
 ### R1.2
@@ -49,7 +49,7 @@ No subcommand prompts. A subcommand missing an input exits non-zero naming the i
 Subcommands act only on issues assigned to the caller, except fetch and activity, which read, and adhoc, which creates.
 
 <!-- req: R2 -->
-## R2 - tpm standup fetch
+## R2 - scrum-master standup fetch
 
 <!-- req: R2.1 -->
 ### R2.1
@@ -62,7 +62,7 @@ Returns the caller's open and recently closed issues across the group: identifie
 Marks each issue done-since (closed since last run), overdue (open, due date past), and due-soon (open, due within 7 days).
 
 <!-- req: R3 -->
-## R3 - tpm standup activity
+## R3 - scrum-master standup activity
 
 <!-- req: R3.1 -->
 ### R3.1
@@ -70,7 +70,7 @@ Marks each issue done-since (closed since last run), overdue (open, due date pas
 Returns the caller's pushes, merged requests, and closed issues across the group since a given date, defaulting to last run.
 
 <!-- req: R4 -->
-## R4 - tpm standup inbox
+## R4 - scrum-master standup inbox
 
 <!-- req: R4.1 -->
 ### R4.1
@@ -78,7 +78,7 @@ Returns the caller's pushes, merged requests, and closed issues across the group
 Returns the caller's pending tracker to-dos and every event comment (srd006) on issues the caller authored or is assigned since last run, with event name, keys, issue, and author.
 
 <!-- req: R5 -->
-## R5 - tpm standup unblocked
+## R5 - scrum-master standup unblocked
 
 <!-- req: R5.1 -->
 ### R5.1
@@ -86,7 +86,7 @@ Returns the caller's pending tracker to-dos and every event comment (srd006) on 
 Returns the caller's issues whose waiting flag track-goals cleared since last run (srd007 R3.2), and those still waiting with the dependency each waits on.
 
 <!-- req: R6 -->
-## R6 - tpm standup score
+## R6 - scrum-master standup score
 
 <!-- req: R6.1 -->
 ### R6.1
@@ -104,35 +104,35 @@ Returns issues grouped focus (60 and up), progress (30 to 59), and time-permitti
 <!-- req: R7.1 -->
 ### R7.1
 
-tpm standup log adds time spent to an issue and writes a dated note with the given text.
+scrum-master standup log adds time spent to an issue and writes a dated note with the given text.
 
 <!-- req: R7.2 -->
 ### R7.2
 
-tpm standup start sets status::in-progress (srd041 R5); tpm standup stop clears it.
+scrum-master standup start sets status::in-progress (srd041 R5); scrum-master standup stop clears it.
 
 <!-- req: R7.3 -->
 ### R7.3
 
-tpm standup block sets blocked with the given note as a comment; tpm standup unblock clears it (srd041 R6).
+scrum-master standup block sets blocked with the given note as a comment; scrum-master standup unblock clears it (srd041 R6).
 
 <!-- req: R7.4 -->
 ### R7.4
 
-tpm standup done closes an issue only when its assignee has no unmerged branch for it and the issue's kind has no merge finishing condition (question, handoff with a recorded decision); every other close is by merge (srd041 R9.3).
+scrum-master standup done closes an issue only when its assignee has no unmerged branch for it and the issue's kind has no merge finishing condition (question, handoff with a recorded decision); every other close is by merge (srd041 R9.3).
 
 <!-- req: R8 -->
-## R8 - tpm standup adhoc
+## R8 - scrum-master standup adhoc
 
 <!-- req: R8.1 -->
 ### R8.1
 
-tpm standup adhoc creates an issue in the caller's tracker project with the next ad-hoc identifier, the given title, due date, estimate, source, and urgency, through tpm issue file (srd019). It sets no assignee; the caller pops it with implement (srd041 R9.1).
+scrum-master standup adhoc creates an issue in the caller's tracker project with the next ad-hoc identifier, the given title, due date, estimate, source, and urgency, through scrum-master issue file (srd019). It sets no assignee; the caller pops it with implement (srd041 R9.1).
 
 <!-- req: R8.2 | status: retired | retired_in: 1.4 | replaced_by: ["srd013-program R8.1"] -->
 ### R8.2
 
-Retired in 01.4: recur moved to the issue group as tpm issue recur (srd013 R8).
+Retired in 01.4: recur moved to the issue group as scrum-master issue recur (srd013 R8).
 
 <!-- req: R9 -->
 ## R9 - Last run
@@ -140,7 +140,7 @@ Retired in 01.4: recur moved to the issue group as tpm issue recur (srd013 R8).
 <!-- req: R9.1 -->
 ### R9.1
 
-tpm standup finish records the time of a completed morning run in the person config, which inbox, unblocked, and fetch use as since.
+scrum-master standup finish records the time of a completed morning run in the person config, which inbox, unblocked, and fetch use as since.
 
 <!-- field: non_goals -->
 ## Non-goals

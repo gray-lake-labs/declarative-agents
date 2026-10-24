@@ -5,7 +5,7 @@ package beads
 import "testing"
 
 // TestRecordsMergeByLaterWriter holds mergeRecords to the eng04 rule for
-// tpm's record files: a record one side changed takes that side, a record
+// scrum-master's record files: a record one side changed takes that side, a record
 // both changed takes the later writer, and a record only one side added is
 // kept.
 func TestRecordsMergeByLaterWriter(t *testing.T) {

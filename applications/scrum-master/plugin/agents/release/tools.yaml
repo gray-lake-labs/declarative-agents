@@ -1,0 +1,7 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
+# Tool selection for the release machine: no model anywhere (GH-37).
+tools:
+  - release_next
+  - release_gate
+  - release_tag

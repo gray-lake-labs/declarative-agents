@@ -112,7 +112,7 @@ func (Integration) SprintPlanning() error {
 	c := &check{}
 	base := []string{"--system", system, "--release", rigRelease, "--ref", seedBranch}
 	var p goals.Plan
-	if err := r.tpmJSON(&p, append([]string{"goals", "plan"}, base...)...); err != nil {
+	if err := r.wordsJSON(&p, append([]string{"goals", "plan"}, base...)...); err != nil {
 		return err
 	}
 	for i := range p.Objectives {
@@ -121,7 +121,7 @@ func (Integration) SprintPlanning() error {
 	planFile := filepath.Join(r.run.Dir, "sprint-planning-plan.json")
 	writeJSONTo(planFile, p)
 	var pushed []goals.Pushed
-	if err := r.tpmJSON(&pushed, append([]string{"goals", "push", "--plan", planFile}, base...)...); err != nil {
+	if err := r.wordsJSON(&pushed, append([]string{"goals", "push", "--plan", planFile}, base...)...); err != nil {
 		return err
 	}
 	// One result per outcome (#152): two outcomes, one Sprint Goal.
@@ -148,7 +148,7 @@ func (Integration) SprintPlanning() error {
 	}
 	writeFileTo(filepath.Join(clone, "docs", "road-map.md"), string(roadMap))
 	var cand plan.Candidates
-	if err := r.tpmJSON(&cand, "plan", "candidates", "--dir", clone); err != nil {
+	if err := r.wordsJSON(&cand, "plan", "candidates", "--dir", clone); err != nil {
 		return err
 	}
 	b := cand.Backlog
@@ -160,11 +160,11 @@ func (Integration) SprintPlanning() error {
 
 	chosen := "st002-store-scores,st003-scorecard-page"
 	push := []string{"plan", "backlog", "--project", po1, "--release", rigRelease, "--stories", chosen, "--dir", clone}
-	if _, err := r.runTPM(append(push, "--dry-run")...); err != nil {
+	if _, err := r.runWords(append(push, "--dry-run")...); err != nil {
 		return err
 	}
 	var first plan.BacklogResult
-	if err := r.tpmJSON(&first, push...); err != nil {
+	if err := r.wordsJSON(&first, push...); err != nil {
 		return err
 	}
 	c.expect(first.Action == "updated" && first.Planned, "first backlog push %+v", first)
@@ -191,7 +191,7 @@ func (Integration) SprintPlanning() error {
 	}
 	c.expect(withStories == 1, "%d planned events name the stories, want 1", withStories)
 	var again plan.BacklogResult
-	if err := r.tpmJSON(&again, push...); err != nil {
+	if err := r.wordsJSON(&again, push...); err != nil {
 		return err
 	}
 	c.expect(again.Action == "unchanged" && !again.Planned, "second backlog push %+v", again)

@@ -10,7 +10,7 @@ title: "AI-Native Scrum: Scrum Without the Administrative Work"
 
 This repository specifies and implements AI-native Scrum: a
 project-agnostic version of Scrum in which the administrative work is done
-by scripts and AI agents instead of people. tpm, the Go binary built here,
+by scripts and AI agents instead of people. scrum-master, the Go binary built here,
 is that implementation, and the skills are thin scripts over it. Most of
 what Scrum asks people to do outside the work itself is moving facts:
 saying what was done yesterday, updating the board, estimating, reporting
@@ -137,7 +137,7 @@ tag. An idea or an incident between sprints enters as a filed issue. So
 the chain from intent to evidence is initiative, epic, story, issue,
 merge, release, and evidence on the Sprint Goal's ledger.
 
-The process defines, and tpm and the skills implement:
+The process defines, and scrum-master and the skills implement:
 
 - Levels and owners: system (technical program manager), subsystem
   (Product Owner), component (Developers), and the test subsystem (Scrum
@@ -157,7 +157,7 @@ The process defines, and tpm and the skills implement:
   makes every issue self-describing, and a state machine over it that says
   which transitions are legal and who may make them.
 - An inner loop every role uses for every kind of work: specify,
-  implement, the reviewed merge, and tpm release. Audits
+  implement, the reviewed merge, and scrum-master release. Audits
   (regression tests, contract checks, the sprint and stakeholder updates)
   are recurring issues worked by the same loop.
 - Outer-loop skills for the decisions people make together: plan a

@@ -110,7 +110,7 @@ item gets done, the same for every role and every kind of work: `tasks`
 turns a chosen story into issues, `specify` files an issue with its
 Requirements, Acceptance Criteria, and Design Decisions, `implement`
 takes it into a worktree and builds it, a merge, approved by
-another person when the policy requires it, closes it, and `tpm release tag` tags a release once its
+another person when the policy requires it, closes it, and `scrum-master release tag` tags a release once its
 gate passed. The inner
 loop is described in [ai-native-sdlc.md](ai-native-sdlc.md). Audits are
 recurring items the same loop works on a schedule; `track-goals` is the
@@ -168,7 +168,7 @@ rules. The one relationship between roles that is not mediated by the
 tracker is the push of intent: the owner of each level pushes Sprint Goals to the level below,
 citing the requirements they must satisfy at a release tag.
 
-![One three-week release cycle, read left to right, one row per role. Technical program manager: 1, plan picks the system requirements the next release will hold; 2, tasks pushes one Sprint Goal per subsystem and to the test subsystem, citing requirements pinned to the tag. Product Owner: 3, writes requirements with an agent through specify and implement, each criterion naming its test and environment; 4, plan places them in a release of the subsystem's road-map and posts planned on the Sprint Goal. Developers: 5, tasks turns the planned release into issues; 6, specify and implement build each issue, a person approves every merge, and local tests are the first evidence; 7, tpm release tags the component release. Scrum Master: 8, promotion by CI/CD installs the pinned set in dev, upgrades it in staging and production PoC, and runs the suites; 9, track-goals nightly posts evidence on each Sprint Goal. The Sprint Goal is the ledger of planned, evidence, and met; 10, sprint-review judges the Increment against it at the end of the period, and unmet Sprint Goals move to the next release.](../../figures/release-cycle.png)
+![One three-week release cycle, read left to right, one row per role. Technical program manager: 1, plan picks the system requirements the next release will hold; 2, tasks pushes one Sprint Goal per subsystem and to the test subsystem, citing requirements pinned to the tag. Product Owner: 3, writes requirements with an agent through specify and implement, each criterion naming its test and environment; 4, plan places them in a release of the subsystem's road-map and posts planned on the Sprint Goal. Developers: 5, tasks turns the planned release into issues; 6, specify and implement build each issue, a person approves every merge, and local tests are the first evidence; 7, scrum-master release tags the component release. Scrum Master: 8, promotion by CI/CD installs the pinned set in dev, upgrades it in staging and production PoC, and runs the suites; 9, track-goals nightly posts evidence on each Sprint Goal. The Sprint Goal is the ledger of planned, evidence, and met; 10, sprint-review judges the Increment against it at the end of the period, and unmet Sprint Goals move to the next release.](../../figures/release-cycle.png)
 
 The rest of this page takes one column at a time, from the slowest to the
 fastest, and one accountability at a time within it, with a diagram wherever
@@ -182,7 +182,7 @@ AI-native SDLC playbook in [sdlc-playbook.md](sdlc-playbook.md).
 
 Three conventions hold in every diagram on this page. An arrow from a person
 to the scripts is a skill the person runs; it asks only what the tracker
-cannot know. An arrow from the scripts to the tracker is a tpm subcommand; it
+cannot know. An arrow from the scripts to the tracker is a scrum-master subcommand; it
 fetches facts or writes changes and never asks anything. And the only arrow
 that assigns work is `implement`, run by the person taking it. Subsystems
 are placeholders: alpha produces a shared schema, beta consumes it, and both
@@ -210,7 +210,7 @@ sequenceDiagram
     participant T as Tracker
 
     TPM->>S: plan in the system repository
-    S->>T: road-map, system SRDs, tpm goals status
+    S->>T: road-map, system SRDs, scrum-master goals status
     S-->>TPM: recommended requirements for system release 1.4
     TPM->>S: confirmed
     S->>T: road-map entry merged through the inner loop, milestone 1.4
@@ -294,8 +294,8 @@ sequenceDiagram
     participant T as Tracker
 
     PO->>S: sprint-review
-    S->>T: tpm goals status and tpm goals verify for the release
-    S->>T: tpm reports aggregate for the period
+    S->>T: scrum-master goals status and scrum-master goals verify for the release
+    S->>T: scrum-master reports aggregate for the period
     loop each Sprint Goal
         S-->>PO: ledger state and latest evidence, recommend accept or not
         PO->>S: accepted or not
@@ -323,7 +323,7 @@ sequenceDiagram
     participant T as Tracker
 
     SM->>S: sprint-retrospective
-    S->>T: tpm goals status and tpm reports aggregate, this period and the last
+    S->>T: scrum-master goals status and scrum-master reports aggregate, this period and the last
     S->>T: current policy and label schema, last retro's issues
     S-->>Team: evidence age up in alpha, two gate failures in staging
     Team->>S: what hurt: upgrade tests ran only nightly
@@ -341,7 +341,7 @@ sequenceDiagram
 Developers turn each chosen story into issues with
 `tasks`, each in the issue body's work format. Through the period, the weekly
 sprint update and the stakeholder update are audits: recurring issues worked
-by the inner loop from tpm standup and tpm reports output, which reads the
+by the inner loop from scrum-master standup and scrum-master reports output, which reads the
 ledger rather than counting closed issues.
 
 ```mermaid
@@ -358,11 +358,11 @@ sequenceDiagram
     Dev->>S: accepted
     S->>T: specify for each, unassigned, lint passes
     Dev->>S: implement on this week's sprint update item
-    S->>T: tpm standup activity, fetch, and inbox for the week
-    S->>S: implement drafts the report, tpm reports validate passes
+    S->>T: scrum-master standup activity, fetch, and inbox for the week
+    S->>S: implement drafts the report, scrum-master reports validate passes
     S->>T: reviewed merge of the report, next week's item re-created
     Lead->>S: implement on the stakeholder update item
-    S->>T: tpm reports aggregate over the ledger
+    S->>T: scrum-master reports aggregate over the ledger
     S->>T: summary, risks, and deck merged after the outline is approved
 ```
 
@@ -371,7 +371,7 @@ sequenceDiagram
 ### Product Owner (management plane): observe only
 
 The management plane does not act at this time scale. The dashboard is
-regenerated from the ledger by `tpm goals status`; the owner reads it and
+regenerated from the ledger by `scrum-master goals status`; the owner reads it and
 answers the cross-level questions it raises, and never takes, moves,
 labels, or closes an issue. This is what lets execution run headless on the
 last release and policy when nobody manages it.
@@ -379,7 +379,7 @@ last release and policy when nobody manages it.
 ### Scrum Master (control plane): promotion and the evidence audit
 
 At this time scale the control plane is automation applying the rules
-continuously: `tpm issue lint` admits new issues or marks them
+continuously: `scrum-master issue lint` admits new issues or marks them
 needs-triage, the test subsystem's pipelines promote pinned sets along the
 environment chain, and track-goals follows pinned references, posts
 evidence, closes met Sprint Goals, and keeps every issue's waiting flag true
@@ -389,7 +389,7 @@ The figure below expands step 8 of the release cycle into the systems that
 carry it out. Where the release cycle shows people and agents, this one
 shows GitLab, its pipelines, Argo CD, and the GKE clusters on GCP.
 
-![Step 8, promotion: the systems that carry a release along the environment chain. Four rows, one per system: GitLab (repositories and registry), GitLab CI/CD (pipelines), Argo CD (one per cluster), and GKE on GCP (one project and cluster per environment). 8.1, the tag tpm release puts on a component repository starts the tag pipeline from infrastructure/gitlab, which lints, tests, and builds the image; 8.2, it pushes the image to the container registry; 8.3, it triggers the promotion pipeline in test/environments with the project and tag; 8.4, the promotion pipeline commits the new version into the dev pinned set in the environments repository, which holds one pinned set per environment; 8.5, Argo CD in dev syncs to that pinned set; 8.6, it installs the system fresh on the dev cluster; when Argo CD reports healthy, the suite pipeline runs, 8.7, the install, contract, and regression suites against dev and keeps the results as test reports; 8.8, when they are green, the staging pinned set is committed and Argo CD upgrades the running system in staging, where upgrade and regression suites run; 8.9, when staging is green, the production PoC pinned set is committed and Argo CD upgrades it, where upgrade and smoke suites run. The test reports feed step 9, track-goals, which posts evidence on the Sprint Goal nightly. Fill shows ownership: the product scrum owns the component repository; the test scrum owns the environments repository, its pipelines, and the Argo CD applications; the infrastructure scrum owns the GitLab structure, the CI templates, the registry, the GCP projects, the GKE clusters, and Argo CD itself. Clusters pull images from the registry; handoff to customer R&D is outside the figure and needs a person's approval.](../../figures/promotion-systems.png)
+![Step 8, promotion: the systems that carry a release along the environment chain. Four rows, one per system: GitLab (repositories and registry), GitLab CI/CD (pipelines), Argo CD (one per cluster), and GKE on GCP (one project and cluster per environment). 8.1, the tag scrum-master release puts on a component repository starts the tag pipeline from infrastructure/gitlab, which lints, tests, and builds the image; 8.2, it pushes the image to the container registry; 8.3, it triggers the promotion pipeline in test/environments with the project and tag; 8.4, the promotion pipeline commits the new version into the dev pinned set in the environments repository, which holds one pinned set per environment; 8.5, Argo CD in dev syncs to that pinned set; 8.6, it installs the system fresh on the dev cluster; when Argo CD reports healthy, the suite pipeline runs, 8.7, the install, contract, and regression suites against dev and keeps the results as test reports; 8.8, when they are green, the staging pinned set is committed and Argo CD upgrades the running system in staging, where upgrade and regression suites run; 8.9, when staging is green, the production PoC pinned set is committed and Argo CD upgrades it, where upgrade and smoke suites run. The test reports feed step 9, track-goals, which posts evidence on the Sprint Goal nightly. Fill shows ownership: the product scrum owns the component repository; the test scrum owns the environments repository, its pipelines, and the Argo CD applications; the infrastructure scrum owns the GitLab structure, the CI templates, the registry, the GCP projects, the GKE clusters, and Argo CD itself. Clusters pull images from the registry; handoff to customer R&D is outside the figure and needs a person's approval.](../../figures/promotion-systems.png)
 
 ```mermaid
 sequenceDiagram
@@ -399,12 +399,12 @@ sequenceDiagram
     participant S as Scripts
     participant T as Tracker
 
-    P->>T: alpha 0.2.0 tagged by tpm release tag
+    P->>T: alpha 0.2.0 tagged by scrum-master release tag
     CI->>CI: dev: fresh install of system 1.4 pinned set with alpha 0.2.0
     CI->>CI: subsystem and system suites pass in dev
     CI->>CI: staging trigger is nightly: upgrade alpha on the running system
     CI->>CI: upgrade suites pass in staging
-    CI->>S: tpm goals run, nightly
+    CI->>S: scrum-master goals run, nightly
     S->>T: resolve Cites system@v1.4.0 R2.1 on alpha's Sprint Goal
     S->>T: evidence event: R2.1, test ingest_fresh, dev, set 1.4-a0.2, pass
     S->>T: met event; Sprint Goal closed
@@ -432,10 +432,10 @@ sequenceDiagram
     participant T as Tracker
 
     P->>S: daily-scrum
-    S->>T: tpm standup fetch and tpm standup activity
-    S->>T: tpm standup inbox for overnight evidence findings
-    S->>T: tpm standup unblocked
-    S->>T: tpm standup score and the last tpm goals run
+    S->>T: scrum-master standup fetch and scrum-master standup activity
+    S->>T: scrum-master standup inbox for overnight evidence findings
+    S->>T: scrum-master standup unblocked
+    S->>T: scrum-master standup score and the last scrum-master goals run
     S-->>P: in progress, evidence findings on my Sprint Goals, still waiting
     S-->>P: scored plan
     S-->>P: anything blocking, recommended none
@@ -443,8 +443,8 @@ sequenceDiagram
     S->>T: specify, kind question in alpha, Upstream from my issue
     S-->>P: any interrupts since yesterday
     P->>S: two hours on a production incident
-    S->>T: tpm standup adhoc, unassigned, and tpm standup log
-    S->>T: tpm standup finish records last run
+    S->>T: scrum-master standup adhoc, unassigned, and scrum-master standup log
+    S->>T: scrum-master standup finish records last run
     P->>S: implement on the next ready issue
 ```
 
@@ -461,12 +461,12 @@ sequenceDiagram
 
     A->>S: specify
     S-->>A: plane, kind, component, requirements, criteria with test and environment
-    S->>T: tpm issue file, unassigned
-    S->>T: tpm issue lint
+    S->>T: scrum-master issue file, unassigned
+    S->>T: scrum-master issue lint
     alt a label, section, test, or environment is missing
         T-->>A: needs-triage with the failures listed
         A->>T: fixes the issue
-        S->>T: tpm issue lint clears needs-triage
+        S->>T: scrum-master issue lint clears needs-triage
     end
     Note over T: open, unassigned, admitted: the issue is ready
     P->>S: implement
@@ -494,22 +494,22 @@ sequenceDiagram
     participant T as Tracker
 
     P->>S: the release issue's steps
-    S->>T: tpm release next
+    S->>T: scrum-master release next
     S-->>P: recommend major, the diff removes a field beta reads
     P->>S: major
-    S->>T: tpm release gate runs the declared checks in their environments
+    S->>T: scrum-master release gate runs the declared checks in their environments
     T-->>P: unit tests pass locally, contract tests pass in dev, peer read pending
     Note over P,T: the run stops until another person approves the release issue
-    S->>T: gate again, all evidence passes; tpm release tag 2.0.0, breaking
+    S->>T: gate again, all evidence passes; scrum-master release tag 2.0.0, breaking
     T->>CI: new tag
-    CI->>S: tpm handoff on-release
+    CI->>S: scrum-master handoff on-release
     S->>T: beta cites schema@v1.4.0, so beta is a consumer
     S->>T: consume issue in beta with Requires 2.0.0 and Cites schema@v2.0.0
-    CI->>S: tpm goals run
+    CI->>S: scrum-master goals run
     C->>S: daily-scrum shows the consume issue
     C->>S: implement
     S->>T: merge closes it; the citation moves to v2.0.0 by reviewed merge
-    CI->>S: tpm handoff on-merge
+    CI->>S: scrum-master handoff on-merge
     S->>T: downstream-done event on the release issue, mentions P
 ```
 
@@ -530,13 +530,13 @@ sequenceDiagram
         P->>T: answer event comment, mentions C
     else the artifact is wrong
         C->>S: specify in alpha, kind defect, Upstream to the producing issue
-        S->>T: tpm issue file in the alpha repository
-        S->>T: tpm issue lint admits it
+        S->>T: scrum-master issue file in the alpha repository
+        S->>T: scrum-master issue lint admits it
         P->>S: daily-scrum shows the defect
         alt alpha accepts
             P->>S: implement
             S->>T: merge closes the defect
-            CI->>S: tpm handoff on-merge, downstream-done event to C
+            CI->>S: scrum-master handoff on-merge, downstream-done event to C
         else alpha declines
             P->>T: closes with the reason as the last comment
         end

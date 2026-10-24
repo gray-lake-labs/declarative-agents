@@ -137,7 +137,7 @@ Reopening is a person's action and returns the issue to open, so admission check
 <!-- req: R8.1 -->
 ### R8.1
 
-The transitions table is the complete state machine, held as data in control/states.md (config format states): tpm embeds the default — the table this document shows — writes it at init, and the beads tracker reads the program's own rows from main, so a program extends its table, an overlay row of its own among them, without a tpm change (GH-130). A script that is asked to make a change the rows do not list refuses and reports the attempted transition, and a file that does not parse refuses every transition with its reason.
+The transitions table is the complete state machine, held as data in control/states.md (config format states): scrum-master embeds the default — the table this document shows — writes it at init, and the beads tracker reads the program's own rows from main, so a program extends its table, an overlay row of its own among them, without a scrum-master change (GH-130). A script that is asked to make a change the rows do not list refuses and reports the attempted transition, and a file that does not parse refuses every transition with its reason.
 
 <!-- req: R8.2 -->
 ### R8.2

@@ -1,6 +1,6 @@
 ---
 id: srd037-install
-title: "Script: install (tpm install)"
+title: "Script: install (scrum-master install)"
 ---
 <!-- Copyright (c) 2026 Gray Lake Labs -->
 <!-- SPDX-License-Identifier: MIT-0 -->
@@ -10,41 +10,38 @@ title: "Script: install (tpm install)"
 
 The skills are what an agent runs: Cursor, Claude Code, or GitHub
 Copilot, in the repository a developer works in. Copied by hand, a
-skill falls out of step with the tpm it calls: a renamed flag, a new
+skill falls out of step with the scrum-master it calls: a renamed flag, a new
 subcommand, a refusal the skill does not expect. Every repository then
 carries a slightly different process.
 
 The skills ship as one Agent Plugins 1.0 package (agent-plugins.org),
 plugin/ in this repository: a plugin.json manifest and one Agent Skills
 directory per skill (agentskills.io). A client that loads Agent Plugins
-can install the package as it is. tpm install makes the binary the one
-source of the same skills for every agent: the package is embedded in tpm
-when it is built, and tpm install writes each skill as an Agent Skills
+can install the package as it is. scrum-master install makes the binary the one
+source of the same skills for every agent: the package is embedded in scrum-master
+when it is built, and scrum-master install writes each skill as an Agent Skills
 directory where each agent reads skills. Every
-installed file names the tpm version and the source checksum it came
-from, so a later install updates what tpm wrote and keeps what a person
-edited. The installed files belong to the tpm each developer has
-installed, not to the repository, so git ignores them, and tpm install
+installed file names the scrum-master version and the source checksum it came
+from, so a later install updates what scrum-master wrote and keeps what a person
+edited. The installed files belong to the scrum-master each developer has
+installed, not to the repository, so git ignores them, and scrum-master install
 --check tells the developer when they no longer match the local binary.
 
-The skills will run as declarative-agent workflows, and a profile runs
-only against the declarative-agents runtime it was written for: the
-agent binary and the agent-core tree its paths resolve against. Today
-only this repository's mage audit fetches that runtime, so a developer's
-machine or a CI job has no way to get the release tpm's profiles need.
-tpm already embeds the parent release its corpus pins, the one tpm init
-writes into a new corpus (srd043 R3.3), so tpm install --runtime can fetch
-exactly that release, verified, into the cache mage audit and the spec
-tool already use, and leave the runtime a separate binary so tpm keeps its
-small dependency set.
+The skills run as declarative-agent workflows, and a profile runs only
+against the declarative-agents runtime it was written for: the agent and
+the agent-core declarations its paths resolve against. A release ships
+both — the agent, which serves the scrum-master words in its own process,
+and the profiles archive — and a program repository vendors the profiles
+and those declarations into .scrum-master, so every skill runs what the
+repository has checked in (GH-29, GH-34).
 
 <!-- field: goals -->
 ## Goals
 
-- G1: A tpm release carries exactly the skills written against its subcommands, as a conforming Agent Plugins 1.0 package.
+- G1: A scrum-master release carries exactly the skills written against its subcommands, as a conforming Agent Plugins 1.0 package.
 - G2: One command places the skills where Cursor, Claude Code, or GitHub Copilot reads them.
 - G3: The installed skills never enter the repository; git ignores them, and the developer learns of drift locally.
-- G4: One command readies the declarative-agents runtime at the release tpm pins, verified against the release's checksums, on any machine tpm runs on.
+- G4: One script installs the agent and the release's profiles, verified against the release's checksums, on any machine, and a repository vendors the profiles its skills run.
 
 <!-- req: R1 -->
 ## R1 - Embedding
@@ -57,7 +54,7 @@ The binary embeds the plugin package plugin/ at build time: its plugin.json and 
 <!-- req: R1.2 -->
 ### R1.2
 
-tpm install --list names every embedded skill with its description.
+scrum-master install --list names every embedded skill with its description.
 
 <!-- req: R1.3 -->
 ### R1.3
@@ -67,7 +64,7 @@ plugin/ conforms to Agent Plugins 1.0: plugin.json at its root is a JSON object 
 <!-- req: R1.4 -->
 ### R1.4
 
-The binary also embeds plugin/agents/<name>/: the declarative-agents profile of a skill whose workflow is a profile (design.md D14). tpm install renders that skill's SKILL.md from the profile's machine — the purpose's first paragraph is the description, the states between the initial and the terminal ones the numbered steps in the machine's order, the terminal states its ending — and refuses a name that is both an embedded SKILL.md and a profile. The rendered skill installs, stamps, checks, and uninstalls as any other (R2 to R6).
+The binary also embeds plugin/agents/<name>/: the declarative-agents profile of a skill whose workflow is a profile (design.md D14). scrum-master install renders that skill's SKILL.md from the profile's machine — the purpose's first paragraph is the description, the states between the initial and the terminal ones the numbered steps in the machine's order, the terminal states its ending — and refuses a name that is both an embedded SKILL.md and a profile. The rendered skill installs, stamps, checks, and uninstalls as any other (R2 to R6).
 
 <!-- req: R2 -->
 ## R2 - Targets
@@ -88,7 +85,7 @@ Each agent receives every skill as an Agent Skills directory with the skill's ow
 <!-- req: R3.1 -->
 ### R3.1
 
-Every installed SKILL.md carries a comment naming the tpm version and the checksum of the text tpm wrote, less the comment itself, on the first line after its front matter, which must open the file.
+Every installed SKILL.md carries a comment naming the scrum-master version and the checksum of the text scrum-master wrote, less the comment itself, on the first line after its front matter, which must open the file.
 
 <!-- req: R3.2 -->
 ### R3.2
@@ -98,7 +95,7 @@ A later install rewrites a file whose content still matches its stamp, keeps a f
 <!-- req: R3.3 -->
 ### R3.3
 
-A skill no longer embedded is removed only when its installed file is unedited; an edited one is reported and kept. A file tpm stamped in an earlier layout (.cursor/commands, .claude/commands, .github/prompts) is removed the same way.
+A skill no longer embedded is removed only when its installed file is unedited; an edited one is reported and kept. A file scrum-master stamped in an earlier layout (.cursor/commands, .claude/commands, .github/prompts) is removed the same way.
 
 <!-- req: R4 -->
 ## R4 - Check
@@ -106,7 +103,7 @@ A skill no longer embedded is removed only when its installed file is unedited; 
 <!-- req: R4.1 -->
 ### R4.1
 
-tpm install --check writes nothing, names each installed file that is missing, outdated against the binary, edited, stale (a stamped file whose skill is no longer embedded), or unignored (a stamped file the exclude block does not list), and exits non-zero when any is.
+scrum-master install --check writes nothing, names each installed file that is missing, outdated against the binary, edited, stale (a stamped file whose skill is no longer embedded), or unignored (a stamped file the exclude block does not list), and exits non-zero when any is.
 
 <!-- req: R5 -->
 ## R5 - Common behavior
@@ -127,54 +124,54 @@ Writes nothing outside --dir and the clone's git directory. Outside the agents' 
 <!-- req: R6.1 -->
 ### R6.1
 
-tpm install keeps one block in the clone's .git/info/exclude, the path git rev-parse --git-path info/exclude names, so every linked worktree of the clone shares it. The block sits between the lines "# tpm install: skill commands from the local tpm binary" and "# end tpm install" and lists exactly the files tpm owns (those carrying its stamp), one anchored path per line, sorted. A file without the stamp is never listed, so a command the repository owns stays tracked. tpm install and --check refuse a --dir that is not a git repository.
+scrum-master install keeps one block in the clone's .git/info/exclude, the path git rev-parse --git-path info/exclude names, so every linked worktree of the clone shares it. The block sits between the lines "# skill install: the skill files the init and onboard profiles install" and "# end skill install", or the "# tpm install" lines an earlier release wrote, which a run rewrites, and lists exactly the files scrum-master owns (those carrying its stamp), one anchored path per line, sorted. A file without the stamp is never listed, so a command the repository owns stays tracked. scrum-master install and --check refuse a --dir that is not a git repository.
 
 <!-- req: R6.2 -->
 ### R6.2
 
-Each install rewrites the block from the files tpm owns after the run, drops a removed stale skill, and leaves every line outside the block as it was. With no exclude file, it creates one holding only the block.
+Each install rewrites the block from the files scrum-master owns after the run, drops a removed stale skill, and leaves every line outside the block as it was. With no exclude file, it creates one holding only the block.
 
 <!-- req: R6.3 -->
 ### R6.3
 
-The installed files are untracked, so a new worktree of the clone has none; tpm issue pop installs the checkout's agents into each worktree it creates (srd013 R7.4), and the shared exclude block already lists their paths.
+The installed files are untracked, so a new worktree of the clone has none; scrum-master issue pop installs the checkout's agents into each worktree it creates (srd013 R7.4), and the shared exclude block already lists their paths.
 
 <!-- req: R7 -->
-## R7 - Runtime
+## R7 - The agent and the profiles
 
 <!-- req: R7.1 -->
 ### R7.1
 
-tpm install --runtime lays out the runtime (GH-190). Inside this repository, the sibling is the release: the agent builds from agent-core into agent-core/bin and nothing downloads. Elsewhere it fetches the release of github.com/gray-lake-labs/declarative-agents that the surrounding repository pins in its docs/external-pins.yaml — else this tpm's own release, or the newest release with published binaries when this tpm is not a release build — the release's agent binary for the host's operating system and architecture, and the release's source, laid out as the spec tool lays it out (srd040 R1.1). Fetched parts land in that release's directory under the user cache directory, scrum-master/release/<tag>/, so each is downloaded once per tag on a machine.
+A release ships the agent, composed with the scrum-master words (GH-27), for each platform the runtime publishes, and the profiles archive — the profiles, agent-core's tools tree, and the release — under one SHA256SUMS (GH-34). install.sh installs the agent and unpacks the profiles into SCRUM_MASTER_HOME, by default under the user's data directory. Inside this repository, the sibling is the release: the agent builds from agent-core into the release cache and nothing downloads (GH-190).
 
 <!-- req: R7.2 -->
 ### R7.2
 
-Every downloaded binary is held to the SHA-256 the release's SHA256SUMS lists for it before it is written executable, and a cached one is reused only while it still matches; a mismatch is refused naming the asset and both checksums. A host the release publishes no agent for is refused naming the platforms it publishes.
+install.sh holds the agent and the profiles archive to the SHA-256 the release's SHA256SUMS lists for each before it installs either; a mismatch is refused naming the asset and both checksums, and nothing is written. A host the release publishes no agent for is refused naming the platforms it publishes.
 
 <!-- req: R7.3 -->
 ### R7.3
 
-With a Go toolchain on PATH, tpm install --runtime also builds the spec tool at the release into the same directory (srd040 R1.1), so tpm doctor repairs a corpus at that pin later without Go (srd043 R4.5). Without Go it reports the spec tool as not built and why, and fetches the rest.
+The agent runs the words and the corpus gate's shape check in its own process (GH-33), so a machine with the agent and no Go toolchain runs every profile and the gate.
 
 <!-- req: R7.4 -->
 ### R7.4
 
-TPM_AGENT names an agent binary already on the machine, for an offline or pinned environment. tpm uses it in place of the cached agent only when its SHA-256 is the one the pinned release's SHA256SUMS lists for the host, since the published binaries report no version of their own; any other binary is refused naming the pinned release. The checksums come from the release's directory when cached, and are downloaded otherwise; offline with neither, the binary is refused and the missing checksums are named.
+scrum-master install --profiles vendors the release's profiles and the agent-core declarations they read into the repository's .scrum-master, with a manifest of the release and each file's digest (GH-29). It copies from SCRUM_MASTER_HOME, or this repository's own tree inside the repository that ships agent-core; a rerun keeps a file a person edited, rewrites one the release changed, and removes one the release dropped. scrum-master install --profiles --check holds every vendored file to the manifest and fails on one edited or missing (GH-35).
 
 <!-- req: R7.5 -->
 ### R7.5
 
-tpm install --runtime reports the release, the agent's path and where it came from (TPM_AGENT or the cache), the source root a profile runs against (the agent's --core-root), and the spec tool's path or why it is absent. It honours --json and --dry-run; a dry run names what it would download and writes nothing.
+The vendoring reports the release and each file's action, created, updated, unchanged, kept, or removed. It honours --json and --dry-run; a dry run writes nothing.
 
 <!-- field: non_goals -->
 ## Non-goals
 
-- Distributing the tpm binary itself; that is the release of tpm, its binaries and container image (eng03).
-- Embedding the runtime in tpm; it stays a separate binary, so tpm depends on none of agent-core's packages.
-- Model credentials; the profiles that need them name them (GH-135), and tpm stores none.
+- Publishing a release itself; that is the release of scrum-master, its assets and container image (eng03).
+- Linking agent-core into the words' own module; the agent links the words at build time instead (GH-27), so the application depends on none of agent-core's packages.
+- Model credentials; the profiles that need them name them (GH-135), and scrum-master stores none.
 - Agents other than Cursor, Claude Code, and GitHub Copilot.
-- Per-repository templating; repository-specific values come from tpm at run time.
+- Per-repository templating; repository-specific values come from scrum-master at run time.
 
 <!-- field: acceptance_criteria -->
 ## Acceptance criteria
@@ -239,7 +236,7 @@ install honours --json and --dry-run, never prompts, and writes nothing outside 
 <!-- ac: AC6 -->
 ### AC6
 
-After an install, git ignores every installed file and nothing else: git status shows no change, in the main checkout and in a linked worktree; a command without the stamp in the same directory is not ignored; lines outside the block are unchanged; a directory that is not a git repository is refused; a worktree tpm issue pop creates receives the checkout's installed agents and stays clean.
+After an install, git ignores every installed file and nothing else: git status shows no change, in the main checkout and in a linked worktree; a command without the stamp in the same directory is not ignored; lines outside the block are unchanged; a directory that is not a git repository is refused; a worktree scrum-master issue pop creates receives the checkout's installed agents and stays clean.
 
 <!-- field: traces -->
 #### Traces
@@ -251,7 +248,7 @@ After an install, git ignores every installed file and nothing else: git status 
 <!-- ac: AC7 -->
 ### AC7
 
-On a machine with no runtime, tpm install --runtime leaves a verified agent for the host and the release's source in the cache directory mage audit uses, builds the spec tool when Go is on PATH and says why not otherwise, and reports their paths; a second run downloads nothing; a tampered cached binary is fetched again, a tampered download is refused naming both checksums, an unpublished platform is refused naming the published ones, and a TPM_AGENT that is not the pinned release's binary is refused naming the release.
+A release carries the agent for each published platform and the profiles archive under one SHA256SUMS; install.sh, with no Go on PATH, installs both at the tag, the init profile runs from them with only the agent, and a tampered download is refused naming both checksums with nothing written; the vendored profiles validate against the vendored core root, and a rerun of the vendoring changes nothing.
 
 <!-- field: traces -->
 #### Traces

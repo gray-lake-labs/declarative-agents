@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
-// Package tracker is tpm's tracker boundary. Every package that reads or
+// Package tracker is scrum-master's tracker boundary. Every package that reads or
 // writes issues goes through the Tracker interface: production uses the
 // beads tracker (internal/beads), and tests use it or the fake in
 // internal/tracker/fake.
@@ -12,7 +12,7 @@ import "errors"
 // not exist.
 var ErrNotFound = errors.New("not found")
 
-// Issue is the part of a tracker issue tpm reads.
+// Issue is the part of a tracker issue scrum-master reads.
 type Issue struct {
 	Project     string   `json:"project"`
 	IID         int      `json:"iid"`

@@ -1,8 +1,8 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
 # The tasks skill as a declarative-agents profile (GH-198, design.md D14):
-# the decomposition machine around the person's agreement, tpm words as its tools.
-# tpm install renders the SKILL.md from this machine, and mage audit
+# the decomposition machine around the person's agreement, words as its tools.
+# scrum-master install renders the SKILL.md from this machine, and mage audit
 # validates the profile at the pin.
 name: tasks
 machine: machine.yaml

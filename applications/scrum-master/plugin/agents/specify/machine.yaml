@@ -6,7 +6,7 @@ purpose: |-
   when a person describes work, a bug, or a requirements change and asks to
   file, push, or open an issue for it.
 
-  Invoking this profile files the issue. tpm picks the labels, files, and
+  Invoking this profile files the issue. scrum-master picks the labels, files, and
   lints; the one model step is writing the body (design.md D10, srd035). The
   input is the request, the project path of this repository, and the system
   repository path. A question the skill allows is asked in the conversation
@@ -16,12 +16,12 @@ configuration:
   tools: plugin/agents/specify/tools.yaml
   llm_configs: plugin/agents/specify/llm/*.yaml
 invariants:
-- tpm sets the plane, kind, and component from the paths; the model never does
+- the word sets the plane, kind, and component from the paths; the model never does
 - The model acts only in the Draft state, through the declared tools
-- A tpm refusal is fed back to the model, which fixes the body and lints again
+- A the word refusal is fed back to the model, which fixes the body and lints again
 - Nothing is asked of the person but the kind of project work and a missing test
 lifecycle: |-
-  1. Idle → Draft (Seed): the model writes the body and files through tpm
+  1. Idle → Draft (Seed): the model writes the body and files through scrum-master
   2. Draft ↔ Parse: the model loop — invoke_llm, parse_response, $tool
   3. Parse → Done (TaskCompleted): the model called done with the issue's
      reference and admission verdict
@@ -42,10 +42,10 @@ states:
     the request changes, as the request names them. Ask the person only for
     what is missing — the kind of project work when no path is under docs/ or
     control/, and the test of a criterion that names none — and nothing else.
-    File with tpm_issue_file (--project, --system, --title, --body-file, one
-    --path per named path, --kind when asked); tpm sets the plane, kind, and
+    File with issue_file (--project, --system, --title, --body-file, one
+    --path per named path, --kind when asked); the word sets the plane, kind, and
     component from the paths. When admission did not admit it, the reasons
-    come back: fix the body and run tpm_issue_lint, then call done.
+    come back: fix the body and run issue_lint, then call done.
 - name: Parse
   meaning: |
     The model's response is parsed into one tool call. A parse failure is
@@ -57,7 +57,7 @@ states:
     admission admitted it are the run's report (srd035).
 - name: Failed
   run_status: failed
-  meaning: Terminal. An infrastructure error outside tpm's refusals.
+  meaning: Terminal. An infrastructure error outside the word's refusals.
 - name: BudgetExceeded
   run_status: budget_exceeded
   meaning: Terminal. The iteration or parse-error budget was exhausted.
@@ -73,7 +73,7 @@ signals:
 - name: ToolDone
   trigger: A tool executed successfully.
 - name: ToolFailed
-  trigger: A tool executed but reported failure — for tpm words, a refusal the model fixes.
+  trigger: A tool executed but reported failure — for words, a refusal the model fixes.
 - name: ParseFailed
   trigger: The model response could not be parsed as a valid tool call.
 - name: TaskCompleted

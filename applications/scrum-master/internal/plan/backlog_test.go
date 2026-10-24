@@ -102,7 +102,7 @@ func TestPushWritesSprintBacklogOnce(t *testing.T) {
 			t.Fatalf("push %+v %v", r, err)
 		}
 		got, _ := f.GetIssue("g/po-1", goal.IID)
-		for _, want := range []string{"Owner notes.", "## Sprint Backlog\n\n- st001-score-trajectories Score trajectories (5 points)\n- st002-store-scores Store scores (3 points)\n\n<!-- tpm goals sprint-goal"} {
+		for _, want := range []string{"Owner notes.", "## Sprint Backlog\n\n- st001-score-trajectories Score trajectories (5 points)\n- st002-store-scores Store scores (3 points)\n\n<!-- scrum-master goals sprint-goal"} {
 			if !strings.Contains(got.Description, want) {
 				t.Errorf("description lacks %q:\n%s", want, got.Description)
 			}

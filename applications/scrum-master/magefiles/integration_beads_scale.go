@@ -50,7 +50,7 @@ type scaleCase struct {
 	CloneSeconds float64            `json:"fresh_clone_seconds"`
 }
 
-// BeadsScale builds tpm, seeds a tracker repository with thousands of issues, times the common commands against it, runs concurrent writers filing and popping issues, and reports command times, failures, the tracker's size, and a fresh clone's time; it fails only on a lost write or a duplicate ID (GH-129). Opt-in: set BEADS_SCALE_ISSUES, BEADS_SCALE_WRITERS, and BEADS_SCALE_OPS to change the sizes.
+// BeadsScale builds scrum-master, seeds a tracker repository with thousands of issues, times the common commands against it, runs concurrent writers filing and popping issues, and reports command times, failures, the tracker's size, and a fresh clone's time; it fails only on a lost write or a duplicate ID (GH-129). Opt-in: set BEADS_SCALE_ISSUES, BEADS_SCALE_WRITERS, and BEADS_SCALE_OPS to change the sizes.
 func (Integration) BeadsScale() error {
 	root, err := repositoryRoot()
 	if err != nil {
@@ -75,7 +75,7 @@ func (Integration) BeadsScale() error {
 	if layout != beads.LayoutFiles && layout != "jsonl" {
 		return fmt.Errorf("%s=%q: want files or jsonl", scaleLayoutEnv, layout)
 	}
-	tmp, err := os.MkdirTemp("", "tpm-beads-scale-")
+	tmp, err := os.MkdirTemp("", "scrum-master-beads-scale-")
 	if err != nil {
 		return err
 	}
@@ -83,9 +83,9 @@ func (Integration) BeadsScale() error {
 	if tmp, err = filepath.EvalSymlinks(tmp); err != nil {
 		return err
 	}
-	bin := filepath.Join(tmp, "tpm")
-	if err := runStreaming(root, "go", "build", "-o", bin, "./cmd/tpm"); err != nil {
-		return fmt.Errorf("build tpm: %w", err)
+	bin := filepath.Join(tmp, "scrum-master")
+	if err := runStreaming(root, "go", "build", "-o", bin, "./magefiles/words"); err != nil {
+		return fmt.Errorf("build the words: %w", err)
 	}
 	var cases []scaleCase
 	var failures []string
@@ -188,7 +188,7 @@ func scaleRun(dir, bin, layout string, n, k, ops int) (scaleCase, error) {
 	}
 
 	// Every writer, the sequential one first, has its own code checkout,
-	// named for the project as tpm expects, and its own tracker clone.
+	// named for the project as scrum-master expects, and its own tracker clone.
 	writer := func(name string) (string, []string, error) {
 		home := filepath.Join(dir, name)
 		checkout := filepath.Join(home, "po-1")
@@ -214,7 +214,7 @@ func scaleRun(dir, bin, layout string, n, k, ops int) (scaleCase, error) {
 		start := time.Now()
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			return time.Since(start), fmt.Errorf("tpm %s: %w: %s", strings.Join(args, " "), err, strings.TrimSpace(string(out)))
+			return time.Since(start), fmt.Errorf("scrum-master %s: %w: %s", strings.Join(args, " "), err, strings.TrimSpace(string(out)))
 		}
 		return time.Since(start), nil
 	}
@@ -375,7 +375,7 @@ func scaleRun(dir, bin, layout string, n, k, ops int) (scaleCase, error) {
 	return c, nil
 }
 
-// scaleEnv is the environment of one person's git and tpm runs.
+// scaleEnv is the environment of one person's git and scrum-master runs.
 func scaleEnv(user string) []string {
 	return append(os.Environ(), "GIT_AUTHOR_NAME="+user, "GIT_AUTHOR_EMAIL="+user+"@example.invalid",
 		"GIT_COMMITTER_NAME="+user, "GIT_COMMITTER_EMAIL="+user+"@example.invalid")
@@ -404,7 +404,7 @@ func writeScaleIssues(dir, layout string, n, reserved int) (int, error) {
 	}
 	var lines []string
 	for iid := 1; iid <= n; iid++ {
-		id := fmt.Sprintf("tpm-%08x", iid*2654435761%(1<<32))
+		id := fmt.Sprintf("scrum-master-%08x", iid*2654435761%(1<<32))
 		i := beads.Issue{ID: id, IID: iid, Repository: scaleProject, Title: fmt.Sprintf("Seeded issue %d", iid), Description: scaleBody,
 			Status: "open", State: beads.Ready, Labels: []string{"plane::data", "kind::build", "component::po-1", "op::file"},
 			Release: "01.0", CreatedAt: "2026-10-01T09:00:00Z", UpdatedAt: "2026-10-02T09:00:00Z", CreatedBy: "seed"}
@@ -414,7 +414,7 @@ func writeScaleIssues(dir, layout string, n, reserved int) (int, error) {
 		for e := range 5 {
 			i.Comments = append(i.Comments, beads.Comment{ID: fmt.Sprintf("%s-c%d", id, e), IssueID: id, Author: "seed",
 				CreatedAt: "2026-10-02T09:00:00Z",
-				Text:      fmt.Sprintf("Planned for release 01.0; evidence counts in local for 1 requirement(s).\n\n<!-- tpm program event=planned release=01.0 requirement=https://example.invalid/g/system/-/blob/corpus/v0.1.0/docs/specs/initiatives/in001-x.md#R1.%d environment=local -->", e)})
+				Text:      fmt.Sprintf("Planned for release 01.0; evidence counts in local for 1 requirement(s).\n\n<!-- scrum-master program event=planned release=01.0 requirement=https://example.invalid/g/system/-/blob/corpus/v0.1.0/docs/specs/initiatives/in001-x.md#R1.%d environment=local -->", e)})
 		}
 		i.Type = "issue"
 		b, err := json.Marshal(i)
@@ -490,7 +490,7 @@ func scaleReports(dir, bin, cwd string, env []string) error {
 	cmd := exec.Command(bin, "reports", "init", "--dir", dir, "--system", "g/system", "--member", "solo="+scaleProject)
 	cmd.Dir, cmd.Env = cwd, env
 	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("tpm reports init: %w: %s", err, out)
+		return fmt.Errorf("scrum-master reports init: %w: %s", err, out)
 	}
 	return nil
 }

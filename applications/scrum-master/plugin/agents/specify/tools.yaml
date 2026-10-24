@@ -1,11 +1,11 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# Tool selection for the specify workflow. The tpm words and file words are
+# Tool selection for the specify workflow. The words and file words are
 # model-invoked in the Draft state via $tool dispatch (design.md D10, D14).
 tools:
-  # tpm words -- model-invoked
-  - tpm_issue_file
-  - tpm_issue_lint
+  # words -- model-invoked
+  - issue_file
+  - issue_lint
 
   # File words -- the body is written to issue.md
   - read

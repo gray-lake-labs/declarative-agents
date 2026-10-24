@@ -4,20 +4,25 @@ package scaffold
 
 import (
 	"bytes"
+	"slices"
 	"strings"
 )
 
-// BlockBegin and BlockEnd bound tpm's text in an orientation file. A later
-// tpm replaces what lies between them and keeps every line outside them
-// (srd043 R3.5).
+// BlockBegin and BlockEnd bound the managed text in an orientation file. A
+// later run replaces what lies between them and keeps every line outside
+// them (srd043 R3.5). They name no project, as the templates do (GH-36).
 const (
-	BlockBegin = "<!-- tpm:begin: tpm writes the text down to tpm:end, and tpm doctor refreshes it; write your own notes outside it -->"
-	BlockEnd   = "<!-- tpm:end -->"
+	BlockBegin = "<!-- managed:begin: the init and onboard profiles write the text down to managed:end and refresh it on a rerun; write your own notes outside it -->"
+	BlockEnd   = "<!-- managed:end -->"
 )
 
-// blockBeginPrefix matches a begin line whatever note it carries, so a
-// reworded note still opens the block.
-const blockBeginPrefix = "<!-- tpm:begin"
+// blockBeginPrefixes match a begin line whatever note it carries, so a
+// reworded note still opens the block; the tpm marker an earlier release
+// wrote still opens one, and a rerun replaces it (GH-36).
+var blockBeginPrefixes = []string{"<!-- managed:begin", "<!-- tpm:begin"}
+
+// blockEnds close a block: the current marker and the earlier one.
+var blockEnds = []string{BlockEnd, "<!-- tpm:end -->"}
 
 // splitManaged cuts content around its managed block: the lines before the
 // begin line, the block from the begin line through the end line, and the
@@ -28,9 +33,9 @@ func splitManaged(content []byte) (before, block, after []byte, ok bool) {
 	for i, l := range lines {
 		t := strings.TrimSpace(string(l))
 		switch {
-		case begin < 0 && strings.HasPrefix(t, blockBeginPrefix):
+		case begin < 0 && slices.ContainsFunc(blockBeginPrefixes, func(p string) bool { return strings.HasPrefix(t, p) }):
 			begin = i
-		case begin >= 0 && t == BlockEnd:
+		case begin >= 0 && slices.Contains(blockEnds, t):
 			end = i
 		}
 		if end >= 0 {

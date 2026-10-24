@@ -7,34 +7,34 @@ purpose: |-
   asks to work, take, or pop an issue or a story in this repository, or to
   finish and merge the work.
 
-  Invoking this profile takes the work. tpm decides whether it can be taken
+  Invoking this profile takes the work. scrum-master decides whether it can be taken
   and does every step around the work; the model acts only in the Work state
-  and closes nothing itself (design.md D10, srd036). Every tpm command runs
+  and closes nothing itself (design.md D10, srd036). Every word runs
   with --json against the project TPM_PROJECT names, under the policy of the
   system repository TPM_CONTROL names; TPM_ISSUE names the issue. A refusal
-  from tpm ends the run in the Refused state with tpm's reason.
+  from scrum-master ends the run in the Refused state with the word's reason.
 configuration:
   machine: plugin/agents/implement/machine.yaml
   tools: plugin/agents/implement/tools.yaml
   llm_configs: plugin/agents/implement/llm/*.yaml
 invariants:
-- tpm decides admission, assignment, approval, and closing; the model never does
+- scrum-master decides admission, assignment, approval, and closing; the model never does
 - The model acts only in the Work state, through the declared tools
-- A tpm refusal is terminal, with tpm's reason as the run's last output
+- A the word refusal is terminal, with the word's reason as the run's last output
 - Every tool result is fed back to the model before the next reasoning step
 - File edits trigger a re-read nudge to prevent stale context
 - The done tool hands control back to the machine, which pushes and merges
 lifecycle: |-
-  1. Idle → Pop (Seed): tpm issue pop takes the issue
+  1. Idle → Pop (Seed): scrum-master issue pop takes the issue
   2. Pop → Work (ToolDone): the model builds the change in the worktree
-  3. Pop → Refused (ToolFailed): tpm refused the pop; its reason ends the run
+  3. Pop → Refused (ToolFailed): the word refused the pop; its reason ends the run
   4. Work ↔ Parse: the model loop — invoke_llm, parse_response, $tool dispatch
   5. Parse → Push (TaskCompleted): the model called done; git push publishes
      the branch
-  6. Push → Merge (ToolDone): tpm issue merge audits, merges, and closes
+  6. Push → Merge (ToolDone): scrum-master issue merge audits, merges, and closes
   7. Merge → Done (ToolDone): the merge commit and the closed issues are the
      run's report
-  8. Merge → Refused (ToolFailed): tpm refused the merge — an unapproved tip
+  8. Merge → Refused (ToolFailed): the word refused the merge — an unapproved tip
      under require_approval, or a failed audit — and its reason ends the run
 initial_state: Idle
 budget:
@@ -46,10 +46,10 @@ states:
   meaning: Initial state before the issue is taken.
 - name: Pop
   meaning: |
-    Take the issue: tpm issue pop --issue assigns only the caller and creates
+    Take the issue: scrum-master issue pop --issue assigns only the caller and creates
     or reuses the branch <iid>-<slug> and its worktree (srd013 R7). A further
     story issue joins the same worktree and branch with --worktree. A refusal
-    is shown with its reason and the run stops; tpm, not the model, decides
+    is shown with its reason and the run stops; scrum-master, not the model, decides
     whether the issue can be taken (srd036 R2.1, R4.1).
 - name: Work
   meaning: |
@@ -69,11 +69,11 @@ states:
   meaning: |
     Publish the branch: git push -u origin HEAD. Under require_approval a
     reviewer, not the author, reads the pushed tip against the Acceptance
-    Criteria and approves it with tpm issue approve in their checkout
+    Criteria and approves it with scrum-master issue approve in their checkout
     (srd036 R3.1); the merge refuses an unapproved or outdated approval.
 - name: Merge
   meaning: |
-    Finish: tpm issue merge audits a docs/ change, merges the branch (under
+    Finish: scrum-master issue merge audits a docs/ change, merges the branch (under
     require_approval, only a branch approved at its tip), pushes, and closes
     each issue (srd013 R5.5, srd036 R3.1). The model closes nothing itself
     (srd036 R3.3).
@@ -85,12 +85,12 @@ states:
 - name: Refused
   run_status: failed
   meaning: |
-    Terminal. tpm refused a step — the pop of an inadmissible issue, or a
+    Terminal. the word refused a step — the pop of an inadmissible issue, or a
     merge without the approval the policy requires — and the refusal's reason,
-    as tpm printed it, is the run's last output (srd036 R2.1, R4.2).
+    as the word printed it, is the run's last output (srd036 R2.1, R4.2).
 - name: Failed
   run_status: failed
-  meaning: Terminal. An infrastructure error outside tpm's refusals.
+  meaning: Terminal. An infrastructure error outside the word's refusals.
 - name: BudgetExceeded
   run_status: budget_exceeded
   meaning: Terminal. The iteration or parse-error budget was exhausted.
@@ -107,7 +107,7 @@ signals:
 - name: ToolDone
   trigger: A tool executed successfully.
 - name: ToolFailed
-  trigger: A tool executed but reported failure — for tpm tools, a refusal.
+  trigger: A tool executed but reported failure — for the words, a refusal.
 - name: ParseFailed
   trigger: The model response could not be parsed as a valid tool call.
 - name: TaskCompleted
@@ -122,7 +122,7 @@ transitions:
 - state: Idle
   signal: Seed
   next: Pop
-  action: tpm_issue_pop
+  action: issue_pop
   summary: true
 - state: Pop
   signal: ToolDone
@@ -162,7 +162,7 @@ transitions:
 - state: Push
   signal: ToolDone
   next: Merge
-  action: tpm_issue_merge
+  action: issue_merge
   summary: true
 - state: Push
   signal: ToolFailed

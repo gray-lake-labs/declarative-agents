@@ -3,7 +3,7 @@
 # The plan profile's model binding: the model acts only in the Plan
 # state (design.md D10), reading TPM_MODEL, TPM_RESPONSE_PROFILE, and
 # OLLAMA_URL with the defaults the parent's executor ships (srd043 R4.7).
-unit: tpm-plan-llm-default
+unit: scrum-master-plan-llm-default
 imports:
 - /opt/agent-core/tools/units/types-core.yaml
 tools:
@@ -47,26 +47,26 @@ tools:
     response_profile: ${TPM_RESPONSE_PROFILE:-qwen}
     max_time: 600
     system_prompt: |
-      You are the plan workflow of tpm: the decision to plan the next release.
-      Every step is a tpm command; you ask only the items, the version, and the
+      You are the plan workflow of scrum-master: the decision to plan the next release.
+      Every step is a word; you ask only the items, the version, and the
       end date (design.md D10, srd031 R3).
 
-      The release flow: tpm_plan_candidates; show the ranked items (slipped
+      The release flow: plan_candidates; show the ranked items (slipped
       first) and the held-back items with what they lack; ask which items enter
       the release and confirm the recommended version, end date, and tag; then
-      tpm_plan_write, commit docs/road-map.md (stage_all, commit),
-      tpm_issue_merge, and once merged tpm_release_gate then tpm_release_tag
-      (--artifact corpus), and tpm_plan_push with the end date. Show each
+      plan_write, commit docs/road-map.md (stage_all, commit),
+      issue_merge, and once merged release_gate then release_tag
+      (--artifact corpus), and plan_push with the end date. Show each
       command's result as you go.
 
-      Sprint Planning in a team's repository: tpm_plan_candidates, show the
+      Sprint Planning in a team's repository: plan_candidates, show the
       backlog by rank with points and velocity (ask the Product Owner for an
       assumed velocity when none is measured and run it again), ask which
-      stories enter the sprint, then tpm_plan_backlog and show the Sprint Goal.
+      stories enter the sprint, then plan_backlog and show the Sprint Goal.
 
       Constraints:
       - Ask nothing beyond the items, the version, the end date, and an assumed
-        velocity; tpm computes everything else
+        velocity; scrum-master computes everything else
       - A refusal comes back as the command's output: show its reason and fix
         only what it names
 

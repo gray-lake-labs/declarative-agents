@@ -1,9 +1,9 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# Tool selection for the plan-push machine: four tpm words, no model
+# Tool selection for the plan-push machine: four words, no model
 # anywhere (design.md D10, D14; GH-206).
 tools:
-  - tpm_plan_milestone
-  - tpm_plan_sprint_issue
-  - tpm_plan_sprint_ends
-  - tpm_plan_events
+  - plan_milestone
+  - plan_sprint_issue
+  - plan_sprint_ends
+  - plan_events

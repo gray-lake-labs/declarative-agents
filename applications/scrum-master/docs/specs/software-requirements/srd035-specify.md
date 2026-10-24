@@ -16,7 +16,7 @@ against.
 
 specify turns one request into one admitted issue in the issue body's
 work format. The model does the one thing a program cannot: it structures the
-request into the issue body. tpm does the rest: it picks the plane, kind,
+request into the issue body. scrum-master does the rest: it picks the plane, kind,
 and component, files the issue unassigned, and lints it. The plane decides
 what the issue is: plane::data for project work, plane::management for a
 change to the requirements or the plan under docs/, and plane::control for
@@ -74,12 +74,12 @@ Asks for no confirmation before filing.
 <!-- req: R4.1 -->
 ### R4.1
 
-Files the issue with tpm issue file (srd013 R3.1): unassigned, with its plane, kind on a data issue, component, and the sprint milestone on a data issue, and linted before it returns.
+Files the issue with scrum-master issue file (srd013 R3.1): unassigned, with its plane, kind on a data issue, component, and the sprint milestone on a data issue, and linted before it returns.
 
 <!-- req: R4.2 -->
 ### R4.2
 
-Reports the issue URL, the plane, kind, and component tpm labelled it with, and whether admission admitted it, with the reasons when it did not.
+Reports the issue URL, the plane, kind, and component scrum-master labelled it with, and whether admission admitted it, with the reasons when it did not.
 
 <!-- req: R5 -->
 ## R5 - Refusals
@@ -105,7 +105,7 @@ As a skill, is at most 50 lines (design.md D10).
 <!-- req: R6.1 -->
 ### R6.1
 
-The workflow is a declarative-agents profile, plugin/agents/specify/ (design.md D14): the machine's states carry the skill's steps, the tpm commands are model-dispatched tools with typed parameters, and the model acts only in the Draft state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and tpm install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
+The workflow is a declarative-agents profile, plugin/agents/specify/ (design.md D14): the machine's states carry the skill's steps, the scrum-master commands are model-dispatched tools with typed parameters, and the model acts only in the Draft state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and scrum-master install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -143,7 +143,7 @@ The skill asks only for a missing plane, kind, or test, and never for confirmati
 <!-- ac: AC3 -->
 ### AC3
 
-The issue is filed unassigned through tpm issue file and linted; the skill reports its URL, its plane, kind, and component, and its admission, with reasons.
+The issue is filed unassigned through scrum-master issue file and linted; the skill reports its URL, its plane, kind, and component, and its admission, with reasons.
 
 <!-- field: traces -->
 #### Traces

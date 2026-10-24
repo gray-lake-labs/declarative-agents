@@ -151,7 +151,7 @@ func TestStateTableReplaysOnBeads(t *testing.T) {
 func TestObjectiveIssueIsSprintGoal(t *testing.T) {
 	old := ready("sm-1")
 	old.Labels = []string{"plane::management"}
-	old.Description = "body\n<!-- tpm goals objective=obj001-reliable-agents#R1 release=01.0 -->\n"
+	old.Description = "body\n<!-- scrum-master goals objective=obj001-reliable-agents#R1 release=01.0 -->\n"
 	plain := ready("sm-2")
 	plain.Labels = []string{"plane::management"}
 	f := newFixture(t, old, plain)

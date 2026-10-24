@@ -18,10 +18,10 @@ import (
 // recurring data issue whose work is a review of the week (srd018 R6.1).
 var StatusLabels = []string{"plane::data", "type::recurring", "kind::review"}
 
-var statusPattern = regexp.MustCompile(`<!-- tpm reports status week=(\S+) user=(\S+) -->`)
+var statusPattern = regexp.MustCompile(`<!-- scrum-master reports status week=(\S+) user=(\S+) -->`)
 
 func statusMarker(week, user string) string {
-	return fmt.Sprintf("<!-- tpm reports status week=%s user=%s -->", week, user)
+	return fmt.Sprintf("<!-- scrum-master reports status week=%s user=%s -->", week, user)
 }
 
 // DueDate is the day after the reminder weekday in the ISO week starting at
@@ -66,19 +66,19 @@ func StatusBody(cfg Config, m Member, reportsProject string, weekStart time.Time
 
 ## Requirements
 
-1. Run `+"`tpm reports week --project %[4]s --user %[1]s%[10]s --json`"+` for this repository's open Sprint Goals and your activity this week.
+1. Run `+"`scrum-master reports week --project %[4]s --user %[1]s%[10]s --json`"+` for this repository's open Sprint Goals and your activity this week.
 2. Model step (structure): for each open Sprint Goal, ask and record its status (on-track, at-risk, blocked, or done), its problems, and whether it is complete; record what blocks the work.
-3. Run `+"`tpm issue pop --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s --dir <reports checkout>`"+`, and in the worktree it opens write %[7]s in the report format (schema/report.md).
-4. Run `+"`tpm reports validate --dir <reports checkout> %[7]s`"+` and fix what it reports.
-5. Commit and push the branch; when the program's policy requires approval, ask a reviewer to run `+"`tpm issue approve --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s`"+`. Then run `+"`tpm issue merge --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s --dir <reports checkout>`"+`; the merge closes this issue.
+3. Run `+"`scrum-master issue pop --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s --dir <reports checkout>`"+`, and in the worktree it opens write %[7]s in the report format (schema/report.md).
+4. Run `+"`scrum-master reports validate --dir <reports checkout> %[7]s`"+` and fix what it reports.
+5. Commit and push the branch; when the program's policy requires approval, ask a reviewer to run `+"`scrum-master issue approve --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s`"+`. Then run `+"`scrum-master issue merge --project %[5]s --issue-project %[4]s --issue <this issue> --branch %[6]s --dir <reports checkout>`"+`; the merge closes this issue.
 
 ## Acceptance Criteria
 
-- %[7]s in %[5]s covers every open Sprint Goal of %[4]s and passes tpm reports validate (test: tpm_reports_validate; environment: local)
+- %[7]s in %[5]s covers every open Sprint Goal of %[4]s and passes scrum-master reports validate (test: tpm_reports_validate; environment: local)
 
 ## Recurrence
 
-Weekly, due the day after %[8]s. After its merge closes it, the reports repository's scheduled tpm reports status-issues run opens the next week's instance.
+Weekly, due the day after %[8]s. After its merge closes it, the reports repository's scheduled scrum-master reports status-issues run opens the next week's instance.
 
 ## Previous Runs
 

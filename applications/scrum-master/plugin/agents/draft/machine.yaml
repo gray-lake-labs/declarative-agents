@@ -9,7 +9,7 @@ purpose: |-
   initiative, epic, feature, or story, or to describe how a system or
   subsystem is built.
 
-  Invoking this profile starts the conversation. tpm reads and checks the
+  Invoking this profile starts the conversation. scrum-master reads and checks the
   hierarchy; the model writes only the document and iterates on it with the
   person, asking what the description leaves open (design.md D10, srd046).
   The input is the description (a file or text) and the level to write. A
@@ -19,14 +19,14 @@ configuration:
   tools: plugin/agents/draft/tools.yaml
   llm_configs: plugin/agents/draft/llm/*.yaml
 invariants:
-- tpm reads and checks the hierarchy; the model writes only the document
+- scrum-master reads and checks the hierarchy; the model writes only the document
 - The model acts only in the Converse state, through the declared tools
 - Nothing is written until the person answers or accepts the recommendations
 - The document never commits or merges here; it reaches main through the repository's own issue
 lifecycle: |-
-  1. Idle → Survey (Seed): tpm backlog list reads the hierarchy
+  1. Idle → Survey (Seed): scrum-master backlog list reads the hierarchy
   2. Survey → Converse (ToolDone): the model drafts with the person
-  3. Survey → Refused (ToolFailed): tpm refused the survey; its reason ends
+  3. Survey → Refused (ToolFailed): the word refused the survey; its reason ends
      the run
   4. Converse ↔ Parse: the model loop — invoke_llm, parse_response, $tool
   5. Parse → Done (TaskCompleted): the model called done with the document
@@ -41,7 +41,7 @@ states:
   meaning: Initial state before the hierarchy is read.
 - name: Survey
   meaning: |
-    Read the hierarchy with tpm backlog list and the level's fields in
+    Read the hierarchy with scrum-master backlog list and the level's fields in
     docs/constitutions/design.md, so the draft lands under the right parent
     with the fields its level requires (srd046).
 - name: Converse
@@ -64,9 +64,9 @@ states:
        confirmation.
     4. Write the document at the level's location with status to_be_agreed (an
        engineering document has no status; name it in ARCHITECTURE.md's
-       related documents). Run tpm_backlog_check and fix every finding.
+       related documents). Run backlog_check and fix every finding.
     5. Show the document and revise it with the person, running
-       tpm_backlog_check after each revision.
+       backlog_check after each revision.
     6. Offer the next level down (initiatives under a theme, epics under an
        initiative, features or stories under an epic) and draft each child
        with this skill.
@@ -85,11 +85,11 @@ states:
 - name: Refused
   run_status: failed
   meaning: |
-    Terminal. tpm refused the hierarchy survey, and the refusal's reason, as
-    tpm printed it, is the run's last output.
+    Terminal. the word refused the hierarchy survey, and the refusal's reason, as
+    the word printed it, is the run's last output.
 - name: Failed
   run_status: failed
-  meaning: Terminal. An infrastructure error outside tpm's refusals.
+  meaning: Terminal. An infrastructure error outside the word's refusals.
 - name: BudgetExceeded
   run_status: budget_exceeded
   meaning: Terminal. The iteration or parse-error budget was exhausted.
@@ -106,7 +106,7 @@ signals:
 - name: ToolDone
   trigger: A tool executed successfully.
 - name: ToolFailed
-  trigger: A tool executed but reported failure — for tpm words, a refusal the model fixes.
+  trigger: A tool executed but reported failure — for words, a refusal the model fixes.
 - name: ParseFailed
   trigger: The model response could not be parsed as a valid tool call.
 - name: TaskCompleted
@@ -121,7 +121,7 @@ transitions:
 - state: Idle
   signal: Seed
   next: Survey
-  action: tpm_backlog_list
+  action: backlog_list
   summary: true
 - state: Survey
   signal: ToolDone

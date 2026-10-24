@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
 
-// Package version holds the release a tpm binary was published at. The
+// Package version holds the release the words were published at. The
 // application is a nested module of the repository, so the repository's
 // release tag never reaches the module's build info; the Publisher stamps
 // it here with -ldflags instead, and everything that names the running

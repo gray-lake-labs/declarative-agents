@@ -12,7 +12,7 @@ Specification index for the AI-native scrum process. The requirements are
 complete: 27 SRDs, six config formats, and four semantic models. srd001 to
 srd008 define the control plane, the Sprint Goal ledger, pinned references,
 and done as evidence in a named environment; srd010 to srd019 define one
-script each as a tpm subcommand group and contain no question to a person,
+script each as a scrum-master subcommand group and contain no question to a person,
 srd019 being the track-goals audit; srd020 to srd033 define the five
 outer-loop skills, each stating what it reads, what it asks, and which
 issues it pushes or events it posts. srd034 makes a Sprint Goal a document
@@ -23,32 +23,32 @@ the reference-update issue on a downstream release is srd014's. srd035 and srd03
 inner loop on GitLab: specify files one admitted issue whose plane says
 whether it is project work or a requirements change, and implement takes
 it into its own branch and worktree until its merge closes it.
-srd037 is the Agent Plugins 1.0 package of the skills and tpm install,
-which writes the skills embedded in tpm for Cursor, Claude Code, or
+srd037 is the Agent Plugins 1.0 package of the skills and scrum-master install,
+which writes the skills embedded in scrum-master for Cursor, Claude Code, or
 GitHub Copilot, and with --runtime fetches the declarative-agents
-runtime at the release tpm pins. srd039 is the shared reader of corpus and config
+runtime at the release scrum-master pins. srd039 is the shared reader of corpus and config
 documents (internal/corpus), srd040 the format tools and format gates in
 magefiles, and srd041 the states and transitions of an issue. srd043 is
-tpm init and tpm onboard, which lay down a program's corpus, and tpm
-doctor, which brings it up to date after tpm is upgraded, and srd044
-tpm help, which teaches the process from the binary. srd046 is the draft skill, which turns a description into one planning document at any level in conversation with its owner. srd045 makes an epic document the Product Backlog for multi-sprint work, from which plan derives Sprint Goals at a velocity read from the ledger, and holds direction only until 06.0 is planned. srd039 and
+scrum-master init and scrum-master onboard, which lay down a program's corpus, and scrum-master
+doctor, which brings it up to date after scrum-master is upgraded, and srd044
+help, which taught the process from the binary and is now retired: the README init writes carries its process map (GH-37). srd046 is the draft skill, which turns a description into one planning document at any level in conversation with its owner. srd045 makes an epic document the Product Backlog for multi-sprint work, from which plan derives Sprint Goals at a velocity read from the ledger, and holds direction only until 06.0 is planned. srd039 and
 srd040 specify shared code and tooling no use case cites, so the road map
 lists them under the release that built them. An SRD whose release is
 not yet planned holds its direction only (design.md D12): its items are
-retired, and an interim rule says what tpm does until they are rewritten.
+retired, and an interim rule says what scrum-master does until they are rewritten.
 The skills take Spec Kit's names (specify, plan, tasks, implement): tasks
 breaks a level into the units below it, down to a story's issues, and
 implement builds them. Every repository of a consuming program carries the same
-corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 03.1, and 04.0 to 04.4 are implemented; 05.0 and 06.0 are specified. Release 03.1 lets each repository name its tracking system, bd, gh, or glab. Release 04.0 aligns the planning documents with the agile hierarchy and renames the objective issue the Sprint Goal. Release 04.1 makes a program repository explain itself and adds tpm doctor. Release 04.2 adds the draft skill and tpm backlog list and check. Release 04.3 ships tpm as release binaries and a container image (eng03) and adds tpm install --runtime and doctor's runtime report. Release 04.4 works a story end to end in one worktree and one merge.
+corpus shape (design.md D7). Release 00 (00.0 to 00.3), releases 01.0 to 01.2 and 01.4, 03.0, 03.1, and 04.0 to 04.4 are implemented; 05.0 and 06.0 are specified. Release 03.1 lets each repository name its tracking system, bd, gh, or glab. Release 04.0 aligns the planning documents with the agile hierarchy and renames the objective issue the Sprint Goal. Release 04.1 makes a program repository explain itself and adds scrum-master doctor. Release 04.2 adds the draft skill and scrum-master backlog list and check. Release 04.3 ships scrum-master as release binaries and a container image (eng03) and adds scrum-master install --runtime and doctor's runtime report. Release 04.4 works a story end to end in one worktree and one merge.
 
 Releases are planned by use case, and a use case cites only the
 requirement items its release delivers. Release 00 is the inner loop
 on GitLab in four dot releases: 00.0 labels and push, 00.1 pop and merge,
-00.2 changes under docs/ through the audit gate, 00.3 tpm install. Release 01 builds the
+00.2 changes under docs/ through the audit gate, 00.3 scrum-master install. Release 01 builds the
 interaction between the technical program manager and the Product
 Owners in three dot releases: 01.0 Sprint Goals reach the Product Owner, 01.1 status comes back
 weekly, 01.2 the sprint end releases and plans the next period, and 01.4
-the agent-legible CLI: tpm help, the issue group, and tpm init and
+the agent-legible CLI: help (since retired), the issue group, and scrum-master init and
 onboard. A release's major number names its theme, not its order (the
 road map lists the build order). 05.0, numbered 01.3 until 2026-10-22,
 holds tags that trigger handoff and the summary; 06.0, numbered 02.0,
@@ -74,7 +74,7 @@ docs/road-map.md.
 | "04.0" | The agile hierarchy | 3 | 3 | implemented |
 | "04.1" | A repository that explains itself | 1 | 1 | implemented |
 | "04.2" | A planning document drafted in conversation | 1 | 1 | implemented |
-| "04.3" | tpm ships to machines and to CI | 2 | 2 | implemented |
+| "04.3" | scrum-master ships to machines and to CI | 2 | 2 | implemented |
 | "04.4" | Work a story end to end | 1 | 1 | implemented |
 | "05.0" | Tags trigger handoff and the summary | 0 | 2 | specified |
 | "06.0" | Evidence, handoff, and cadence | 0 | 0 | specified |
@@ -108,12 +108,12 @@ docs/road-map.md.
 | [srd006-events](specs/software-requirements/srd006-events.md) | docs/specs/software-requirements/srd006-events.md | Comment events | 01.0 |
 | [srd007-links](specs/software-requirements/srd007-links.md) | docs/specs/software-requirements/srd007-links.md | Dependency links | 01.0 |
 | [srd008-gates](specs/software-requirements/srd008-gates.md) | docs/specs/software-requirements/srd008-gates.md | Definition of done: evidence in a named environment | 06.0 |
-| [srd010-standup](specs/software-requirements/srd010-standup.md) | docs/specs/software-requirements/srd010-standup.md | Script: standup (tpm standup ...) | 01.1 |
-| [srd013-program](specs/software-requirements/srd013-program.md) | docs/specs/software-requirements/srd013-program.md | Script: issue (tpm issue ...) | 00.0 |
-| [srd014-handoff](specs/software-requirements/srd014-handoff.md) | docs/specs/software-requirements/srd014-handoff.md | Script: handoff (tpm handoff ...) | 05.0 |
-| [srd015-release](specs/software-requirements/srd015-release.md) | docs/specs/software-requirements/srd015-release.md | Script: release (tpm release ...) | 01.2 |
-| [srd018-reports](specs/software-requirements/srd018-reports.md) | docs/specs/software-requirements/srd018-reports.md | Script: reports (tpm reports ...) | 01.1 |
-| [srd019-track-goals](specs/software-requirements/srd019-track-goals.md) | docs/specs/software-requirements/srd019-track-goals.md | Script: track-goals (tpm goals ...) | 06.0 |
+| [srd010-standup](specs/software-requirements/srd010-standup.md) | docs/specs/software-requirements/srd010-standup.md | Script: standup (scrum-master standup ...) | 01.1 |
+| [srd013-program](specs/software-requirements/srd013-program.md) | docs/specs/software-requirements/srd013-program.md | Script: issue (scrum-master issue ...) | 00.0 |
+| [srd014-handoff](specs/software-requirements/srd014-handoff.md) | docs/specs/software-requirements/srd014-handoff.md | Script: handoff (scrum-master handoff ...) | 05.0 |
+| [srd015-release](specs/software-requirements/srd015-release.md) | docs/specs/software-requirements/srd015-release.md | Script: release (scrum-master release ...) | 01.2 |
+| [srd018-reports](specs/software-requirements/srd018-reports.md) | docs/specs/software-requirements/srd018-reports.md | Script: reports (scrum-master reports ...) | 01.1 |
+| [srd019-track-goals](specs/software-requirements/srd019-track-goals.md) | docs/specs/software-requirements/srd019-track-goals.md | Script: track-goals (scrum-master goals ...) | 06.0 |
 | [srd020-daily-scrum](specs/software-requirements/srd020-daily-scrum.md) | docs/specs/software-requirements/srd020-daily-scrum.md | Skill: daily-scrum | 06.0 |
 | [srd022-tasks](specs/software-requirements/srd022-tasks.md) | docs/specs/software-requirements/srd022-tasks.md | Skill: tasks | 01.0 |
 | [srd031-plan](specs/software-requirements/srd031-plan.md) | docs/specs/software-requirements/srd031-plan.md | Skill: plan | 01.2 |
@@ -122,14 +122,14 @@ docs/road-map.md.
 | [srd034-initiatives](specs/software-requirements/srd034-initiatives.md) | docs/specs/software-requirements/srd034-initiatives.md | Initiatives and the Sprint Goal loop | 01.0 |
 | [srd035-specify](specs/software-requirements/srd035-specify.md) | docs/specs/software-requirements/srd035-specify.md | Skill: specify | 00.0 |
 | [srd036-implement](specs/software-requirements/srd036-implement.md) | docs/specs/software-requirements/srd036-implement.md | Skill: implement | 00.1 |
-| [srd037-install](specs/software-requirements/srd037-install.md) | docs/specs/software-requirements/srd037-install.md | Script: install (tpm install) | 00.3 |
+| [srd037-install](specs/software-requirements/srd037-install.md) | docs/specs/software-requirements/srd037-install.md | Script: install (scrum-master install) | 00.3 |
 | [srd038-sprint-end](specs/software-requirements/srd038-sprint-end.md) | docs/specs/software-requirements/srd038-sprint-end.md | Skill: sprint-end | 01.2 |
 | [srd039-corpus](specs/software-requirements/srd039-corpus.md) | docs/specs/software-requirements/srd039-corpus.md | Shared: corpus and config documents (internal/corpus) | 01.0 |
 | [srd040-format-tools](specs/software-requirements/srd040-format-tools.md) | docs/specs/software-requirements/srd040-format-tools.md | Tooling: mage convert, fmt, specCheck, and the format gates | 01.2 |
 | [srd041-states](specs/software-requirements/srd041-states.md) | docs/specs/software-requirements/srd041-states.md | States and transitions of an issue | 00.1 |
 | [srd042-beads-tracker](specs/software-requirements/srd042-beads-tracker.md) | docs/specs/software-requirements/srd042-beads-tracker.md | Beads tracker: the program's facts live in a repository | 03.0 |
-| [srd043-init-onboard](specs/software-requirements/srd043-init-onboard.md) | docs/specs/software-requirements/srd043-init-onboard.md | Script: init, onboard, and doctor (tpm init, tpm onboard, tpm doctor) | 01.4 |
-| [srd044-help](specs/software-requirements/srd044-help.md) | docs/specs/software-requirements/srd044-help.md | Script: help (tpm help) | 01.4 |
+| [srd043-init-onboard](specs/software-requirements/srd043-init-onboard.md) | docs/specs/software-requirements/srd043-init-onboard.md | Script: init, onboard, and doctor (scrum-master init, scrum-master onboard, scrum-master doctor) | 01.4 |
+| [srd044-help](specs/software-requirements/srd044-help.md) | docs/specs/software-requirements/srd044-help.md | Script: help | 01.4 |
 | [srd045-backlog](specs/software-requirements/srd045-backlog.md) | docs/specs/software-requirements/srd045-backlog.md | The backlog hierarchy: themes, initiatives, epics, features, and stories | 04.0 |
 | [srd046-draft](specs/software-requirements/srd046-draft.md) | docs/specs/software-requirements/srd046-draft.md | Skill: draft | 04.2 |
 
@@ -218,12 +218,12 @@ docs/road-map.md.
 | --- | --- |
 | GAP1 | Use cases exist for releases 00, 01, 03, and 04, and for 05.0, which is specified. Release 06.0 has none: srd008, srd019, srd020, srd032, and srd033 hold its direction only (design.md D12), and their items and use cases are written when 06.0 is planned. |
 | GAP2 | Test suites exist for releases 00, 01, 03, 04, and 05.0. test-rel00.0-push, test-rel00.1-pop, test-rel00.2-docs-change, test-rel00.3-install, test-rel01.0-objectives, test-rel01.1-weekly-status, test-rel01.2-sprint-end, test-rel01.4-agent-legible-cli, and the suites of 03.0, 03.1, and 04.0 to 04.4 are implemented; test-rel05.0-tag-triggered is specified, and acceptance criteria outside them have no test case yet. |
-| GAP3 | The audit is the parent's specification-critic corpus-audit agent, run by mage audit after the repository gate tests. It does not yet run in CI on changes to docs/ (srd034 R2.2); tpm issue merge runs it before each merge; this repository has no pipeline. |
+| GAP3 | The audit is the parent's specification-critic corpus-audit agent, run by mage audit after the repository gate tests. It does not yet run in CI on changes to docs/ (srd034 R2.2); scrum-master issue merge runs it before each merge; this repository has no pipeline. |
 | GAP4 | Open decision. The promotion trigger for each environment (each subsystem release, nightly from the latest releases, or both) is declared per environment SRD; no default is chosen yet. |
 | GAP5 | Open decision. The channel by which evidence from customer R&D environments returns to the Sprint Goal ledger is not specified (srd008, srd019 non-goals). |
 | GAP6 | Open decision. Release 01.4 renames the program group to issue, moves recur into it from standup, and adds init, onboard, and help (srd013, srd043, srd044). The other subcommand groups (standup, goals, handoff, release, reports, plan, sprint-end) are rationalized when 06.0 rewrites track-goals (srd019). |
 | GAP7 | The corpus's own SRDs omit test and environment on acceptance criteria (design.md srd acceptance_criteria_note) until the test subsystem's environment SRDs exist. |
 | GAP8 | The parent corpus audit does not read the hierarchy directories (docs/specs/themes/, initiatives/, epics/, features/, stories/, and objectives/), so a magefiles gate test validates those documents against design.md and srd045 R6.1 inside mage audit (srd034 R2.1). A hierarchy document is scrum-master's type written as an SRD in the parent's format, so the gate is scrum-master's own, not a gap the parent closes. |
-| GAP9 | tpm issue lint does not yet run in CI on issue creation or on a schedule (srd013 R1.3); that needs a released tpm binary the program's pipelines can run, which release 04.3's image provides (eng03). |
+| GAP9 | scrum-master issue lint does not yet run in CI on issue creation or on a schedule (srd013 R1.3); that needs a released agent the program's pipelines can run, which the image provides (eng03). |
 | GAP11 | Open decision. srd041 has lint rows only out of open and needs-triage, so an issue already past admission that later fails a re-lint has no transition. On GitLab and on beads lint sets or clears the needs-triage label alone and leaves the state; whether such an issue should leave the backlog is undecided. |
 | GAP12 | Roll-up across repositories (srd045 R3.4): a story in another repository whose parent is in this one is not discovered from the parent until a program registry names every repository; roll-up counts what it reads and says so. |

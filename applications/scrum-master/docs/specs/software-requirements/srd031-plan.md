@@ -56,7 +56,7 @@ The repository's SRDs, in the system repository the agreed initiatives (srd034 R
 <!-- req: R2.3 -->
 ### R2.3
 
-tpm goals status (srd019) for what is met, proving, or slipped, and the latest release tags. Before track-goals runs in the program, the period aggregate names what slipped: a Sprint Goal its slipped-commitment signal (srd018 R3.2) names, and one its progress shows neither met nor reported complete at the period's end. What slips is each item such a goal cites; a goal that cites no item of an outcome it serves slips the whole outcome, so an item another goal of the same outcome delivered is not carried over.
+scrum-master goals status (srd019) for what is met, proving, or slipped, and the latest release tags. Before track-goals runs in the program, the period aggregate names what slipped: a Sprint Goal its slipped-commitment signal (srd018 R3.2) names, and one its progress shows neither met nor reported complete at the period's end. What slips is each item such a goal cites; a goal that cites no item of an outcome it serves slips the whole outcome, so an item another goal of the same outcome delivered is not carried over.
 
 <!-- req: R2.4 -->
 ### R2.4
@@ -69,7 +69,7 @@ Waiting dependencies as track-goals explains them (srd019), so a requirement tha
 <!-- req: R3.1 -->
 ### R3.1
 
-Asks the owner which requirements, or in the system repository which initiative items, enter the next release, recommending slipped ones first, then those that serve the Sprint Goals with the earliest upstream release, then the rest in road-map order. tpm plan candidates computes the ranking.
+Asks the owner which requirements, or in the system repository which initiative items, enter the next release, recommending slipped ones first, then those that serve the Sprint Goals with the earliest upstream release, then the rest in road-map order. scrum-master plan candidates computes the ranking.
 
 <!-- req: R3.2 -->
 ### R3.2
@@ -82,7 +82,7 @@ Asks for the release's version and end date, recommending the next minor version
 <!-- req: R4.1 -->
 ### R4.1
 
-The release entry in docs/road-map.md, listing its requirements by id, or in the system repository its initiative items in deliverables and its milestone and tag in release.publication, written by tpm plan write in the worktree of a plane::management issue filed with specify, and merged through the inner loop, so the plan is a reviewed change. A release plan write adds is a whole record: its status, a title, a line saying what it delivers, on which milestone, under which tag, then its fields in the parent schema's order, deliverables, the previous release's srds, and release; a record it replaces keeps its other fields, reordered the same way. A placeholder sentence tpm init left, in the record or the road map's overview, is replaced with text that says what the road map holds. In a team's repository, candidates recommend no end date or tag, which are the system's. The sentence plan write puts in the record's prose, naming its items, milestone, and tag, is rewritten on every write, so a republish's tag reads the same in prose and in release.publication. A release record's status is specified, implemented, or released (design.md roadmap).
+The release entry in docs/road-map.md, listing its requirements by id, or in the system repository its initiative items in deliverables and its milestone and tag in release.publication, written by scrum-master plan write in the worktree of a plane::management issue filed with specify, and merged through the inner loop, so the plan is a reviewed change. A release plan write adds is a whole record: its status, a title, a line saying what it delivers, on which milestone, under which tag, then its fields in the parent schema's order, deliverables, the previous release's srds, and release; a record it replaces keeps its other fields, reordered the same way. A placeholder sentence scrum-master init left, in the record or the road map's overview, is replaced with text that says what the road map holds. In a team's repository, candidates recommend no end date or tag, which are the system's. The sentence plan write puts in the record's prose, naming its items, milestone, and tag, is rewritten on every write, so a republish's tag reads the same in prose and in release.publication. A release record's status is specified, implemented, or released (design.md roadmap).
 
 <!-- req: R4.2 -->
 ### R4.2
@@ -102,17 +102,17 @@ Returns each requirement or initiative item whose acceptance criteria lack a tes
 <!-- req: R4.5 -->
 ### R4.5
 
-In the system repository, once the release entry merges, a documents-only release of the system repository, gated by mage audit and tagged by tpm release tag with the tag release.publication names (srd015 R2, srd034 R2.3), so tasks pins its Cites lines to the agreed text.
+In the system repository, once the release entry merges, a documents-only release of the system repository, gated by mage audit and tagged by scrum-master release tag with the tag release.publication names (srd015 R2, srd034 R2.3), so tasks pins its Cites lines to the agreed text.
 
 <!-- req: R4.6 -->
 ### R4.6
 
-tpm plan push dates the milestone, sets the sprint issue (srd001 R7) with one checklist item per Sprint Goal, posts the planned events, and files one sprint-end issue (srd038 R1.1) in each releasing repository due on the milestone end date; a second run updates and creates nothing.
+scrum-master plan push dates the milestone, sets the sprint issue (srd001 R7) with one checklist item per Sprint Goal, posts the planned events, and files one sprint-end issue (srd038 R1.1) in each releasing repository due on the milestone end date; a second run updates and creates nothing.
 
 <!-- req: R4.7 -->
 ### R4.7
 
-push decomposes into four words the plan-push profile composes (GH-201, GH-206, design.md D14): tpm plan milestone, tpm plan sprint-issue, tpm plan sprint-ends, and tpm plan events. tpm plan push runs the same code as one command. Each word rereads the road map and recomputes its scope, and each upserts by marker or ensures by title, so a re-run of a word, the machine, or the command updates and creates nothing, and a word that fails after another is a partial machine state a re-run finishes.
+push decomposes into four words the plan-push profile composes (GH-201, GH-206, design.md D14): scrum-master plan milestone, scrum-master plan sprint-issue, scrum-master plan sprint-ends, and scrum-master plan events. scrum-master plan push runs the same code as one command. Each word rereads the road map and recomputes its scope, and each upserts by marker or ensures by title, so a re-run of a word, the machine, or the command updates and creates nothing, and a word that fails after another is a partial machine state a re-run finishes.
 
 <!-- req: R5 -->
 ## R5 - Refusals
@@ -148,7 +148,7 @@ Retired in 04.0 with R6.1.
 <!-- req: R6.4 -->
 ### R6.4
 
-In a team's repository, tpm plan candidates also lists the team's Product Backlog (srd045 R5.1): its agreed stories that are not done, by rank, with their points, the team's velocity (srd045 R5.3), and, recommended in rank order, the stories whose points fit it.
+In a team's repository, scrum-master plan candidates also lists the team's Product Backlog (srd045 R5.1): its agreed stories that are not done, by rank, with their points, the team's velocity (srd045 R5.3), and, recommended in rank order, the stories whose points fit it.
 
 <!-- req: R6.5 -->
 ### R6.5
@@ -158,7 +158,7 @@ Asks the Product Owner which stories enter the sprint, recommending those of R6.
 <!-- req: R6.6 -->
 ### R6.6
 
-tpm plan backlog writes the chosen stories, with their points, into the Sprint Backlog section of the team's Sprint Goal and posts a planned event naming them (srd034 R3.5); a second run with the same stories changes nothing.
+scrum-master plan backlog writes the chosen stories, with their points, into the Sprint Backlog section of the team's Sprint Goal and posts a planned event naming them (srd034 R3.5); a second run with the same stories changes nothing.
 
 <!-- req: R7 -->
 ## R7 - The workflow as a profile
@@ -166,7 +166,7 @@ tpm plan backlog writes the chosen stories, with their points, into the Sprint B
 <!-- req: R7.1 -->
 ### R7.1
 
-The workflow is a declarative-agents profile, plugin/agents/plan/ (design.md D14): the machine's states carry the skill's steps, the tpm commands are model-dispatched tools with typed parameters, and the model acts only in the Plan state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and tpm install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
+The workflow is a declarative-agents profile, plugin/agents/plan/ (design.md D14): the machine's states carry the skill's steps, the scrum-master commands are model-dispatched tools with typed parameters, and the model acts only in the Plan state (design.md D10). mage audit validates the profile with the pinned runtime's --validate-config, and scrum-master install renders the skill's SKILL.md from the machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps.
 
 <!-- field: non_goals -->
 ## Non-goals
@@ -256,7 +256,7 @@ The plan profile validates with the pinned runtime, and the installed SKILL.md p
 <!-- ac: AC7 -->
 ### AC7
 
-A run of the plan-push profile with the pinned runtime dates the milestone, files the sprint and sprint-end issues, and posts the planned events, ending in Done; a second run ends in Done and the one-command push after it reports everything unchanged; a road map without the release ends in Refused with tpm's reason.
+A run of the plan-push profile with the pinned runtime dates the milestone, files the sprint and sprint-end issues, and posts the planned events, ending in Done; a second run ends in Done and the one-command push after it reports everything unchanged; a road map without the release ends in Refused with scrum-master's reason.
 
 <!-- field: traces -->
 #### Traces

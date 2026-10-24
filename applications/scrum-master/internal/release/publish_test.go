@@ -30,7 +30,10 @@ func (f *fakeTools) run(_ string, env []string, name string, args ...string) (st
 	switch {
 	case name == "go":
 		out := args[slices.Index(args, "-o")+1]
-		return "", os.WriteFile(out, []byte("tpm "+strings.Join(env, " ")), 0o755)
+		// The workspace is a fresh temporary directory each build, which a
+		// -trimpath binary does not carry.
+		env = slices.DeleteFunc(slices.Clone(env), func(e string) bool { return strings.HasPrefix(e, "GOWORK=") })
+		return "", os.WriteFile(out, []byte("agent "+strings.Join(env, " ")), 0o755)
 	case name == "gh" && args[0] == "auth":
 		return "token", nil
 	case name == "gh" && args[0] == "api":
@@ -79,7 +82,24 @@ func tagged(t *testing.T, tag string) (string, Git) {
 }
 
 func publisher(dir string, git Git, f *fakeTools, out io.Writer) Publisher {
-	return Publisher{Root: dir, Git: git, Run: f.run, Out: out, Repo: "org/repo", Account: "org-owner"}
+	return Publisher{Root: dir, Git: git, Run: f.run, Out: out, Repo: "org/repo", Account: "org-owner", Core: coreFixture(dir)}
+}
+
+// coreFixture lays out the least a release build reads beside an
+// application at root: agent-core's go.mod and tools tree, and the
+// application's go.mod and profiles. It returns the agent-core directory.
+func coreFixture(root string) string {
+	core := filepath.Join(filepath.Dir(root), filepath.Base(root)+"-agent-core")
+	for path, body := range map[string]string{
+		filepath.Join(core, "go.mod"):                                  "module example.com/core\n\ngo 1.26\n",
+		filepath.Join(core, "tools", "builtin", "done.yaml"):           "done\n",
+		filepath.Join(root, "go.mod"):                                  "module example.com/app\n\ngo 1.26\n",
+		filepath.Join(root, "plugin", "agents", "pop", "profile.yaml"): "name: pop\n",
+	} {
+		os.MkdirAll(filepath.Dir(path), 0o755)
+		os.WriteFile(path, []byte(body), 0o644)
+	}
+	return core
 }
 
 func sha(data []byte) string {
@@ -98,15 +118,20 @@ func TestBuildWritesEveryPlatformAndItsSums(t *testing.T) {
 	for _, a := range assets {
 		names = append(names, a.Name)
 	}
-	want := []string{"tpm_linux_amd64", "tpm_linux_arm64", "tpm_darwin_amd64", "tpm_darwin_arm64", "tpm_windows_amd64.exe", "tpm_windows_arm64.exe", SumsFile}
+	want := []string{"agent_linux_amd64", "agent_linux_arm64", "agent_darwin_amd64", "agent_darwin_arm64", ProfilesArchive, SumsFile}
 	if !slices.Equal(names, want) {
 		t.Fatalf("assets %v, want %v", names, want)
 	}
 	sums, _ := os.ReadFile(filepath.Join(dist, SumsFile))
-	for _, a := range assets[:6] {
+	for _, a := range assets[:5] {
 		data, _ := os.ReadFile(a.Path)
-		if !strings.Contains(string(data), "CGO_ENABLED=0") || !strings.Contains(string(sums), sha(data)+"  "+a.Name+"\n") {
-			t.Fatalf("%s: %q not listed in\n%s", a.Name, data, sums)
+		if !strings.Contains(string(sums), sha(data)+"  "+a.Name+"\n") {
+			t.Fatalf("%s not listed in\n%s", a.Name, sums)
+		}
+	}
+	for _, a := range assets[:4] {
+		if data, _ := os.ReadFile(a.Path); !strings.Contains(string(data), "CGO_ENABLED=0") {
+			t.Fatalf("%s: %q", a.Name, data)
 		}
 	}
 }
@@ -118,7 +143,7 @@ func TestPublishCreatesTheReleaseWithEveryAsset(t *testing.T) {
 	if err := publisher(dir, git, f, &out).Publish(); err != nil {
 		t.Fatalf("%v\n%s", err, out.String())
 	}
-	if !f.created || len(f.uploaded) != 7 || !slices.Contains(f.uploaded, SumsFile) {
+	if !f.created || len(f.uploaded) != 6 || !slices.Contains(f.uploaded, SumsFile) {
 		t.Fatalf("created %v, uploaded %v", f.created, f.uploaded)
 	}
 }
@@ -133,7 +158,7 @@ func TestPublishCompletesAPartialRelease(t *testing.T) {
 	if err := p.Publish(); err != nil {
 		t.Fatal(err)
 	}
-	if f.created || len(f.uploaded) != 5 || slices.Contains(f.uploaded, assets[0].Name) {
+	if f.created || len(f.uploaded) != 4 || slices.Contains(f.uploaded, assets[0].Name) {
 		t.Fatalf("created %v, uploaded %v", f.created, f.uploaded)
 	}
 

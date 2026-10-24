@@ -35,7 +35,7 @@ func TestRecurReopensWithNextDueDateAndPreviousRuns(t *testing.T) {
 		if next.Title != first.Title || !slices.Equal(next.Labels, append(labels, "op::recur")) || next.DueDate != "2026-10-22" || next.Milestone != "rig-01.0" {
 			t.Fatalf("next instance %+v", next)
 		}
-		if !strings.Contains(next.Description, "## Recurrence") || !strings.Contains(next.Description, "- g/po-1#1 (due 2026-10-15): closed by tpm issue recur without its work.") || strings.Contains(next.Description, "- none") {
+		if !strings.Contains(next.Description, "## Recurrence") || !strings.Contains(next.Description, "- g/po-1#1 (due 2026-10-15): closed by scrum-master issue recur without its work.") || strings.Contains(next.Description, "- none") {
 			t.Fatalf("next body:\n%s", next.Description)
 		}
 
@@ -52,7 +52,7 @@ func TestRecurReopensWithNextDueDateAndPreviousRuns(t *testing.T) {
 		}
 		body, _ := f.GetIssue("g/po-1", third.Next)
 		if strings.Count(body.Description, "\n- g/po-1#") != 2 || !strings.Contains(body.Description, "#2 (due 2026-10-22): closed by its merge.") ||
-			strings.Count(body.Description, "<!-- tpm standup recurs") != 1 {
+			strings.Count(body.Description, "<!-- scrum-master standup recurs") != 1 {
 			t.Fatalf("third body:\n%s", body.Description)
 		}
 	})
@@ -79,14 +79,14 @@ func TestRecurOpensNextInstanceOnce(t *testing.T) {
 }
 
 // An instance opened before recur moved to the issue group carries the
-// marker tpm standup recur wrote; recur must find it and open none.
+// marker scrum-master standup recur wrote; recur must find it and open none.
 func TestRecurFindsEarlierMarker(t *testing.T) {
 	trackertest.Each(t, func(t *testing.T, p trackertest.Program) {
 		f := p.Tracker()
 		first, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: audit", Labels: []string{"type::recurring"}, DueDate: "2026-10-15",
 			Description: "Audit.\n\n## Previous Runs\n\n- none\n"})
 		earlier, _ := f.CreateIssue("g/po-1", tracker.NewIssue{Title: "Recurring: audit", Labels: []string{"type::recurring"}, DueDate: "2026-10-22",
-			Description: "Audit.\n\n## Previous Runs\n\n- g/po-1#1 (due 2026-10-15): closed by tpm standup recur without its work.\n\n<!-- tpm standup recurs g/po-1#1 -->\n"})
+			Description: "Audit.\n\n## Previous Runs\n\n- g/po-1#1 (due 2026-10-15): closed by scrum-master standup recur without its work.\n\n<!-- scrum-master standup recurs g/po-1#1 -->\n"})
 		r, err := Recur(f, "g/po-1", first.IID, RecurOptions{Now: time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC)})
 		all, _ := f.ListIssues("g/po-1", tracker.IssueQuery{State: "all"})
 		if err != nil || !r.Existing || r.Next != earlier.IID || len(all) != 2 {
@@ -112,13 +112,13 @@ func TestRecurCarriesTheRunsSummary(t *testing.T) {
 			t.Fatalf("notes %+v", notes)
 		}
 		next, _ := f.GetIssue("g/po-1", r.Next)
-		if !strings.Contains(next.Description, ": Day 3: the grader is blocked on trajectories. Closed by tpm issue recur.\n") || strings.Contains(next.Description, "without its work") {
+		if !strings.Contains(next.Description, ": Day 3: the grader is blocked on trajectories. Closed by scrum-master issue recur.\n") || strings.Contains(next.Description, "without its work") {
 			t.Fatalf("next body:\n%s", next.Description)
 		}
 	})
 }
 
-// TestRecurAdmitsTheNextInstance holds recur to the admission tpm issue
+// TestRecurAdmitsTheNextInstance holds recur to the admission scrum-master issue
 // file runs: a recurred data issue is admitted as a freshly filed one is,
 // so on beads it starts ready, not open (srd013 R8.1, srd041 R1.1).
 func TestRecurAdmitsTheNextInstance(t *testing.T) {

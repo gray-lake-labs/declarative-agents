@@ -14,7 +14,7 @@ import (
 )
 
 // checkoutWithWorktree is a git checkout with one commit and a linked
-// worktree beside it, as tpm issue pop leaves them.
+// worktree beside it, as scrum-master issue pop leaves them.
 func checkoutWithWorktree(t *testing.T) (checkout, worktree string, git func(dir string, args ...string) string) {
 	t.Helper()
 	base, _ := filepath.EvalSymlinks(t.TempDir())
@@ -49,7 +49,7 @@ func TestPopInstallsSkillsIntoWorktree(t *testing.T) {
 	}
 	for _, s := range skills {
 		b, err := os.ReadFile(filepath.Join(worktree, ".claude/skills", s.Name, "SKILL.md"))
-		if err != nil || !strings.Contains(string(b), "<!-- tpm install version=") {
+		if err != nil || !strings.Contains(string(b), "<!-- skill install version=") {
 			t.Fatalf("%s not installed in the worktree: %v", s.Name, err)
 		}
 	}

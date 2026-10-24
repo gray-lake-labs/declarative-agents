@@ -24,7 +24,7 @@ import (
 // recurring data issue whose work is a release (srd038 R1.1).
 var SprintEndLabels = []string{"plane::data", "type::recurring", "kind::release"}
 
-// PushInput is one tpm plan push: the release the road map in Dir holds,
+// PushInput is one scrum-master plan push: the release the road map in Dir holds,
 // dated by End, pushed to the system repository and the repositories its
 // subsystem SRDs declare.
 type PushInput struct {
@@ -39,7 +39,7 @@ type PushInput struct {
 	DryRun  bool
 }
 
-// PushResult is what tpm plan push did.
+// PushResult is what scrum-master plan push did.
 type PushResult struct {
 	Release   Release `json:"release"`
 	Milestone string  `json:"milestone"` // created, updated, unchanged
@@ -98,7 +98,7 @@ func loadPushPlan(t tracker.Tracker, in PushInput) (pushPlan, error) {
 	}
 	i := slices.IndexFunc(releases, func(r goals.Release) bool { return r.Version == in.Version })
 	if i < 0 {
-		return p, fmt.Errorf("%s names no release %s; write it with tpm plan write first", RoadMap, in.Version)
+		return p, fmt.Errorf("%s names no release %s; write it with scrum-master plan write first", RoadMap, in.Version)
 	}
 	p.r = Release{Version: in.Version, Items: releases[i].Objectives, Milestone: releases[i].Milestone, Tag: releases[i].Tag}
 	if p.r.Milestone == "" || p.r.Tag == "" {
@@ -276,10 +276,10 @@ func groupsOf(items []string, docs []*objectives.Document) []group {
 }
 
 func sprintMarker(version string) string {
-	return fmt.Sprintf("<!-- tpm plan sprint release=%s -->", version)
+	return fmt.Sprintf("<!-- scrum-master plan sprint release=%s -->", version)
 }
 func sprintEndMarker(version string) string {
-	return fmt.Sprintf("<!-- tpm plan sprint-end release=%s -->", version)
+	return fmt.Sprintf("<!-- scrum-master plan sprint-end release=%s -->", version)
 }
 
 var checked = regexp.MustCompile(`(?m)^- \[x\] (\S+?):`)
@@ -335,12 +335,12 @@ func SprintEndBody(version, end string) string {
 
 ## Requirements
 
-1. Run `+"`tpm sprint-end facts --json`"+` in this repository's checkout for the period's aggregate, each objective issue's ledger and reported status, and the recommended version.
+1. Run `+"`scrum-master sprint-end facts --json`"+` in this repository's checkout for the period's aggregate, each objective issue's ledger and reported status, and the recommended version.
 2. Model step (combine): draft the period's summary from the period's reports and that output.
 3. Ask the owner whether anything in the summary, the objectives, or the release should change, and apply what the owner names in the worktree.
-4. Commit the summary at docs/sprint-ends/%[1]s.md and merge it with `+"`tpm issue merge`"+`, adding `+"`--closes`"+` for each objective the owner reports complete; the merge closes this issue.
+4. Commit the summary at docs/sprint-ends/%[1]s.md and merge it with `+"`scrum-master issue merge`"+`, adding `+"`--closes`"+` for each objective the owner reports complete; the merge closes this issue.
 5. Ask the owner to confirm the release and its version. With no confirmation, or nothing to release, stop: the merge alone closes this issue.
-6. Once the summary merges, run `+"`tpm release gate`"+` and `+"`tpm release tag`"+` on main with this issue as the release issue.
+6. Once the summary merges, run `+"`scrum-master release gate`"+` and `+"`scrum-master release tag`"+` on main with this issue as the release issue.
 
 ## Acceptance Criteria
 
@@ -348,7 +348,7 @@ func SprintEndBody(version, end string) string {
 
 ## Recurrence
 
-Once per period. tpm plan push for the next release files the next sprint-end issue.
+Once per period. scrum-master plan push for the next release files the next sprint-end issue.
 
 ## Previous Runs
 

@@ -157,7 +157,7 @@ go test ./internal/scaffold -run '^Test(Scaffold(RerunChangesNothing|KeepsEdited
 
 - [srd043-init-onboard](../software-requirements/srd043-init-onboard.md) [AC4](../software-requirements/srd043-init-onboard.md#ac4)
 
-<!-- case: help pages teach the process | status: implemented -->
+<!-- case: help pages teach the process | status: retired -->
 ### help pages teach the process
 
 <!-- field: use_case -->
@@ -190,7 +190,7 @@ go test ./internal/help -run '^TestHelp(ProcessPage|GroupPages|ConceptPages|List
 - [srd044-help](../software-requirements/srd044-help.md) [AC1](../software-requirements/srd044-help.md#ac1)
 - [srd044-help](../software-requirements/srd044-help.md) [AC2](../software-requirements/srd044-help.md#ac2)
 
-<!-- case: help cannot drift from the binary or the corpus | status: implemented -->
+<!-- case: help cannot drift from the binary or the corpus | status: retired -->
 ### help cannot drift from the binary or the corpus
 
 <!-- field: use_case -->
@@ -236,7 +236,7 @@ mage integration:issueGroup
 <!-- field: go_test -->
 #### Go test
 
-go test ./cmd/tpm -run '^Test(IssueGroupServesSubcommands|ProgramGroupRefusesWithPointer)$'
+go test ./words -run '^Test(IssueGroupServesSubcommands|ProgramGroupRefusesWithPointer)$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs

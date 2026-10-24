@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
-// Package plan is the tpm side of plan in the system repository
+// Package plan is the scrum-master side of plan in the system repository
 // (srd031): it ranks the objective items the next release could prove and
 // writes the chosen release into the road map. Nothing here is a model
 // step (design.md D10).
@@ -43,7 +43,7 @@ type Item struct {
 	Missing []string `json:"missing,omitempty"`   // test, environment
 }
 
-// Candidates is what tpm plan candidates returns (srd031 R2, R3).
+// Candidates is what scrum-master plan candidates returns (srd031 R2, R3).
 type Candidates struct {
 	Latest          string `json:"latest_release,omitempty"`
 	Version         string `json:"recommended_version"`
@@ -139,7 +139,7 @@ func MakeCandidates(in Input) (Candidates, error) {
 	})
 	c.Items = items
 	if n := len(releases); n > 0 && unplanned(releases[n-1]) {
-		// tpm init lays down 01.0 with no items and no tag: that record is
+		// scrum-master init lays down 01.0 with no items and no tag: that record is
 		// the next release, not a released one.
 		c.Version = releases[n-1].Version
 		if n > 1 {
@@ -249,7 +249,7 @@ func slippedOutcomes(in Input) (map[string]bool, error) {
 }
 
 // teamRepository reports whether the checkout at dir is a team's
-// repository, by the subsystem SRD tpm onboard writes there.
+// repository, by the subsystem SRD scrum-master onboard writes there.
 func teamRepository(dir string) bool {
 	_, err := os.Stat(filepath.Join(dir, "docs", "specs", "software-requirements", "srd001-subsystem.md"))
 	return err == nil

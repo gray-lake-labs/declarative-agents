@@ -146,7 +146,7 @@ func (c *ExecCmd) ExecuteContext(ctx context.Context) core.Result {
 	if err := c.checkPrecondition(ctx, dir); err != nil {
 		return core.Result{Output: err.Error(), Signal: core.ToolFailed, CommandName: c.def.Name}
 	}
-	run := subprocess.Run(ctx, subprocess.Spec{
+	run := c.run(ctx, subprocess.Spec{
 		Binary:           c.def.Binary,
 		Args:             c.buildArgs(),
 		Dir:              dir,

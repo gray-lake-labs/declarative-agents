@@ -10,13 +10,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
-	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/runtime"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker/fake"
 )
 
-// older is a system repository as an older tpm laid it down: the skeleton
+// older is a system repository as an older release laid it down: the skeleton
 // without the orientation files.
 func older(t *testing.T) string {
 	t.Helper()
@@ -116,7 +116,7 @@ func TestDoctorReportsStaleSkills(t *testing.T) {
 			t.Errorf("finding %+v", f)
 		}
 	}
-	if h := humanDoctor(r); !strings.Contains(h, "run tpm install --agent claude") {
+	if h := humanDoctor(r); !strings.Contains(h, "run scrum-master install --agent claude") {
 		t.Errorf("report does not name the fix:\n%s", h)
 	}
 	current, err := Doctor(DoctorOptions{Dir: dir, Version: "v0.1"})
@@ -153,7 +153,7 @@ func TestDoctorSecondRunChangesNothing(t *testing.T) {
 }
 
 func TestDoctorRefusesNonProgram(t *testing.T) {
-	if _, err := Doctor(DoctorOptions{Dir: repo(t)}); err == nil || !strings.Contains(err.Error(), "run tpm init or tpm onboard") {
+	if _, err := Doctor(DoctorOptions{Dir: repo(t)}); err == nil || !strings.Contains(err.Error(), "run scrum-master init or scrum-master onboard") {
 		t.Fatalf("empty repository: %v", err)
 	}
 	if _, err := Doctor(DoctorOptions{Dir: t.TempDir()}); err == nil || !strings.Contains(err.Error(), "not a git repository") {
@@ -185,9 +185,6 @@ func init() {
 	specTool = func(string, string, string) ([]string, error) { return nil, nil }
 	lookGo = func() error { return nil }
 	built = func(string) bool { return false }
-	inspectRuntime = func(tag string) runtime.Status {
-		return runtime.Status{Release: tag, Problem: "the checksums of " + tag + " are not cached; run tpm install --runtime"}
-	}
 }
 
 // stubTool replaces the spec tool for one test with one that answers each
@@ -322,7 +319,7 @@ func TestDoctorExtendsLabels(t *testing.T) {
 	want := []string{"kind::question", "op::file", "op::plan", "op::goals", "op::onboard", "op::report", "op::status", "op::recur"}
 
 	dry, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
-	if f := labelsResult(dry); err != nil || f.Action != "extended" || !slices.Equal(f.Labels, want) || !strings.Contains(f.Reason, "tpm issue labels") {
+	if f := labelsResult(dry); err != nil || f.Action != "extended" || !slices.Equal(f.Labels, want) || !strings.Contains(f.Reason, "scrum-master issue labels") {
 		t.Fatalf("dry run: %+v, %v", f, err)
 	}
 	if b, _ := os.ReadFile(path); string(b) != before {
@@ -386,8 +383,8 @@ func TestExtendLabelsLeavesACompleteFile(t *testing.T) {
 	}
 }
 
-// TestDoctorUpgradesTheSystem adds what tpm init now writes to a system
-// repository an older tpm laid down: the system SRD's context and its
+// TestDoctorUpgradesTheSystem adds what scrum-master init now writes to a system
+// repository an older release laid down: the system SRD's context and its
 // component row, and the corpus release's peer read, keeping the owner's
 // text; a dry run writes nothing and a second run changes nothing.
 func TestDoctorUpgradesTheSystem(t *testing.T) {
@@ -515,28 +512,18 @@ func TestRepairPrebuiltWithoutGo(t *testing.T) {
 	}
 }
 
-func TestDoctorRuntime(t *testing.T) {
+// Doctor names the release the repository vendored, or that it vendored
+// none (GH-34).
+func TestDoctorReportsTheVendoredRelease(t *testing.T) {
 	dir := older(t)
-	pin := runtime.DefaultPin()
 	r, err := Doctor(DoctorOptions{Dir: dir, DryRun: true})
-	if err != nil || r.Runtime.Release != pin || r.Runtime.Agent != "" || !strings.Contains(r.Runtime.Problem, "tpm install --runtime") {
-		t.Fatalf("no runtime: %+v, %v", r.Runtime, err)
+	if err != nil || r.Vendored != "" || !strings.Contains(humanDoctor(r), "profiles: none vendored") {
+		t.Fatalf("nothing vendored: %+v, %v\n%s", r.Vendored, err, humanDoctor(r))
 	}
-	if h := humanDoctor(r); !strings.Contains(h, "runtime (declarative-agents "+pin+", the release this tpm pins): ") || !strings.Contains(h, "tpm install --runtime") {
-		t.Errorf("report without a runtime:\n%s", h)
-	}
-	var asked string
-	prev := inspectRuntime
-	inspectRuntime = func(tag string) runtime.Status {
-		asked = tag
-		return runtime.Status{Release: tag, Agent: "/cache/agent", From: runtime.FromCache}
-	}
-	t.Cleanup(func() { inspectRuntime = prev })
-	r, err = Doctor(DoctorOptions{Dir: dir})
-	if err != nil || asked != pin || r.Runtime.Agent != "/cache/agent" || r.Runtime.Problem != "" {
-		t.Fatalf("a cached runtime: %+v, asked %q, %v", r.Runtime, asked, err)
-	}
-	if h := humanDoctor(r); !strings.Contains(h, "runtime (declarative-agents "+pin+", the release this tpm pins): /cache/agent (cache)") {
-		t.Errorf("report with a runtime:\n%s", h)
+	os.MkdirAll(filepath.Join(dir, install.VendorDir), 0o755)
+	os.WriteFile(filepath.Join(dir, install.ManifestFile), []byte(`{"release":"v1.2.3","files":{}}`), 0o644)
+	r, err = Doctor(DoctorOptions{Dir: dir, DryRun: true})
+	if err != nil || r.Vendored != "v1.2.3" || !strings.Contains(humanDoctor(r), "profiles: v1.2.3 vendored in .scrum-master") {
+		t.Fatalf("vendored: %+v, %v\n%s", r.Vendored, err, humanDoctor(r))
 	}
 }

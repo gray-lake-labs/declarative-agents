@@ -171,7 +171,7 @@ func init() {
 				b.WriteString(gateLine(c) + "\n")
 			}
 			if r.AwaitingPeerRead {
-				fmt.Fprintf(&b, "every check but the peer read passed; %s is tagged after tpm release approve\n", r.Tag)
+				fmt.Fprintf(&b, "every check but the peer read passed; %s is tagged after scrum-master release approve\n", r.Tag)
 			}
 			if err := ctx.Emit(r, b.String()); err != nil {
 				return err
@@ -242,7 +242,7 @@ func init() {
 	})
 }
 
-// gateLine is one check of the gate as tpm release gate prints it: the
+// gateLine is one check of the gate as scrum-master release gate prints it: the
 // result, the test, the environment when one applies, and the reason when
 // there is one, with no trailing space (srd015 R1.3). A peer read has no
 // environment; its "none" stays in the JSON and the evidence event.

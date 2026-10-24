@@ -8,7 +8,7 @@ purpose: |-
   initiatives downstream, or a Developer turns a chosen story into issues.
 
   Invoking this profile is the decision to file the units below. Filing is a
-  tpm command; the model writes only what tpm cannot compute, and nothing is
+  word; the model writes only what scrum-master cannot compute, and nothing is
   filed before the person agrees (design.md D10, srd022). A question the
   skill allows is asked in the conversation that invoked it.
 configuration:
@@ -16,13 +16,13 @@ configuration:
   tools: plugin/agents/tasks/tools.yaml
   llm_configs: plugin/agents/tasks/llm/*.yaml
 invariants:
-- Filing is a tpm command; the model writes only what tpm cannot compute
+- Filing is a word; the model writes only what scrum-master cannot compute
 - The model acts only in the Decompose state, through the declared tools
 - Nothing is filed before the person agrees
-- A tpm refusal is fed back to the model, which shows its reason; a refused outcome is fixed upstream and the skill run again
+- A the word refusal is fed back to the model, which shows its reason; a refused outcome is fixed upstream and the skill run again
 lifecycle: |-
   1. Idle → Decompose (Seed): the model breaks the level down through
-     the tpm words
+     the words
   2. Decompose ↔ Parse: the model loop — invoke_llm, parse_response, $tool
   3. Parse → Done (TaskCompleted): the model called done with what was
      filed
@@ -36,29 +36,29 @@ states:
   meaning: Initial state before the request is read.
 - name: Decompose
   meaning: |
-    Break the level down through tpm; nothing files before the person agrees.
+    Break the level down through scrum-master; nothing files before the person agrees.
     A release into Sprint Goals (input: the system repository and the road-map
     release version):
-    1. Run tpm_goals_plan (--system, --release) and save its plan JSON. On an
+    1. Run goals_plan (--system, --release) and save its plan JSON. On an
        error, show it and stop.
     2. For each outcome with an empty repository, ask which of its candidates
        serves it and write the answer in. Ask nothing else.
-    3. Run tpm_goals_push (--system, --release, --plan).
+    3. Run goals_push (--system, --release, --plan).
     4. Show each outcome's action, its Sprint Goal's URL, and any refusal's
        reasons; a refused outcome is fixed in the initiative or the subsystem
        SRDs and this skill run again.
     A story into issues (input: this repository's project path, the story id or
     the Sprint Goal listing the chosen stories, its milestone, and the system
     repository):
-    1. Read the story with tpm_backlog_list (--kind story) and the issues
-       already implementing it with tpm_issue_list (--implements).
+    1. Read the story with backlog_list (--kind story) and the issues
+       already implementing it with issue_list (--implements).
     2. Propose the issues the story still needs, each a change a reviewer reads
        in one sitting, in build order: Requirements, Acceptance Criteria naming
        a test and an environment, Design Decisions where a choice binds,
        Estimated LOC:, Implements: <story>, and Blocked-by: for an issue that
        must close first.
     3. Ask the owner to agree to, change, or drop each one.
-    4. File each agreed issue with tpm_issue_file (--milestone, --kind) and
+    4. File each agreed issue with issue_file (--milestone, --kind) and
        show its reference and lint verdict; fix a needs-triage body and file
        again.
 - name: Parse
@@ -72,7 +72,7 @@ states:
     lint verdict, is the run's report (srd022).
 - name: Failed
   run_status: failed
-  meaning: Terminal. An infrastructure error outside tpm's refusals.
+  meaning: Terminal. An infrastructure error outside the word's refusals.
 - name: BudgetExceeded
   run_status: budget_exceeded
   meaning: Terminal. The iteration or parse-error budget was exhausted.
@@ -88,7 +88,7 @@ signals:
 - name: ToolDone
   trigger: A tool executed successfully.
 - name: ToolFailed
-  trigger: A tool executed but reported failure — for tpm words, a refusal the model fixes.
+  trigger: A tool executed but reported failure — for words, a refusal the model fixes.
 - name: ParseFailed
   trigger: The model response could not be parsed as a valid tool call.
 - name: TaskCompleted

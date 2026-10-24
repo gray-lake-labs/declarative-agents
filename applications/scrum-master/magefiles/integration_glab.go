@@ -23,10 +23,10 @@ import (
 // logged in, it works in one private project, rig, under the group
 // GLAB_RIG_GROUP names, creating the group (as a subgroup of its parent)
 // and the project on first use and reusing them after. With
-// TPM_TRACKER=glab it builds tpm and proves tpm issue labels writes the
-// schema as group labels, tpm issue file files an admitted issue on a
-// dated group milestone, tpm issue pop opens the branch with a draft merge
-// request, and under the default policy tpm issue merge merges the author's
+// TPM_TRACKER=glab it builds scrum-master and proves scrum-master issue labels writes the
+// schema as group labels, scrum-master issue file files an admitted issue on a
+// dated group milestone, scrum-master issue pop opens the branch with a draft merge
+// request, and under the default policy scrum-master issue merge merges the author's
 // own merge request and closes the issue. A second person's approval, and
 // the refusals of a policy that requires one, are proven offline
 // (internal/gitlab), since the rig has one identity. It never joins mage
@@ -62,7 +62,7 @@ func (Integration) Glab() error {
 			return fmt.Errorf("neither %s nor its parent group exists: %w", group, err)
 		}
 		b, err := api.Do("POST", "groups", map[string]any{"name": path.Base(group), "path": path.Base(group), "parent_id": parent.ID, "visibility": "private",
-			"description": "tpm's GitLab rig: disposable issues and merge requests"})
+			"description": "scrum-master's GitLab rig: disposable issues and merge requests"})
 		if err != nil {
 			return err
 		}
@@ -80,7 +80,7 @@ func (Integration) Glab() error {
 			return err
 		}
 	}
-	root, err := os.MkdirTemp("", "tpm-glab-rig-")
+	root, err := os.MkdirTemp("", "scrum-master-glab-rig-")
 	if err != nil {
 		return err
 	}
@@ -88,8 +88,8 @@ func (Integration) Glab() error {
 	if root, err = filepath.EvalSymlinks(root); err != nil {
 		return err
 	}
-	bin := filepath.Join(root, "tpm")
-	if err := runStreaming(".", "go", "build", "-o", bin, "./cmd/tpm"); err != nil {
+	bin := filepath.Join(root, "scrum-master")
+	if err := runStreaming(".", "go", "build", "-o", bin, "./magefiles/words"); err != nil {
 		return err
 	}
 	clone := filepath.Join(root, "rig")
@@ -106,7 +106,7 @@ func (Integration) Glab() error {
 			return err
 		}
 	}
-	tpm := func(dir string, args ...string) ([]byte, error) {
+	words := func(dir string, args ...string) ([]byte, error) {
 		cmd := exec.Command(bin, args...)
 		cmd.Dir = dir
 		cmd.Env = append(os.Environ(), "TPM_TRACKER=glab")
@@ -114,7 +114,7 @@ func (Integration) Glab() error {
 		cmd.Stderr = &errb
 		out, err := cmd.Output()
 		if err != nil {
-			return out, fmt.Errorf("tpm %s: %w: %s", strings.Join(args, " "), err, errb.String())
+			return out, fmt.Errorf("scrum-master %s: %w: %s", strings.Join(args, " "), err, errb.String())
 		}
 		return out, nil
 	}
@@ -122,7 +122,7 @@ func (Integration) Glab() error {
 	stamp := time.Now().UTC().Format("20060102T150405Z")
 	gl := gitlab.New(clone, api)
 
-	if _, err := tpm(clone, "issue", "labels", "--group", group); err != nil {
+	if _, err := words(clone, "issue", "labels", "--group", group); err != nil {
 		return err
 	}
 	ls, err := gl.GroupLabels(group)
@@ -140,7 +140,7 @@ func (Integration) Glab() error {
 	body := filepath.Join(root, "issue.md")
 	writeFileTo(body, "## Requirements\n\n1. Add the rig note.\n\n## Acceptance Criteria\n\n- The note exists (test: note_exists; environment: local)\n")
 	var filed program.FileResult
-	out, err := tpm(clone, "issue", "file", "--project", project, "--title", "Rig run "+stamp, "--body-file", body,
+	out, err := words(clone, "issue", "file", "--project", project, "--title", "Rig run "+stamp, "--body-file", body,
 		"--plane", "data", "--kind", "build", "--component", "rig", "--milestone", milestone, "--json")
 	if err != nil {
 		return err
@@ -151,7 +151,7 @@ func (Integration) Glab() error {
 	c.expect(filed.IID > 0 && filed.Lint.Admitted, "file: %+v", filed)
 
 	var popped program.PopResult
-	if out, err = tpm(clone, "issue", "pop", "--project", project, "--issue", fmt.Sprint(filed.IID), "--dir", clone, "--json"); err != nil {
+	if out, err = words(clone, "issue", "pop", "--project", project, "--issue", fmt.Sprint(filed.IID), "--dir", clone, "--json"); err != nil {
 		return err
 	}
 	if err := json.Unmarshal(out, &popped); err != nil {
@@ -176,7 +176,7 @@ func (Integration) Glab() error {
 	// The default policy requires no approval, so the one identity merges
 	// its own merge request (srd013 R5.5).
 	var merged program.MergeResult
-	if out, err = tpm(popped.Worktree, "issue", "merge", "--project", project, "--issue", fmt.Sprint(filed.IID), "--dir", popped.Worktree, "--json"); err != nil {
+	if out, err = words(popped.Worktree, "issue", "merge", "--project", project, "--issue", fmt.Sprint(filed.IID), "--dir", popped.Worktree, "--json"); err != nil {
 		c.expect(false, "merge of the author's own merge request under the default policy: %v", err)
 		for _, m := range mrs {
 			api.Do("PUT", fmt.Sprintf("projects/%s/merge_requests/%d", url.PathEscape(project), m.IID), map[string]string{"state_event": "close"})

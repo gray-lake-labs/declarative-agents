@@ -21,7 +21,7 @@ func init() {
 
 // weeklyEnv is what both release 01.1 targets share: the system, reports,
 // and po-1 repositories, the rig user, and a reports clone scaffolded by
-// tpm reports init.
+// scrum-master reports init.
 type weeklyEnv struct {
 	*rigEnv
 	system, reports, po1, user, clone string
@@ -45,21 +45,30 @@ func newWeeklyEnv(cloneName string) (*weeklyEnv, error) {
 	if err := r.seedSystem(e.system, e.po1, po2); err != nil {
 		return nil, err
 	}
-	if _, err := r.runTPM("issue", "labels", "--group", r.group); err != nil {
+	if _, err := r.runWords("issue", "labels", "--group", r.group); err != nil {
 		return nil, err
 	}
 	if e.clone, err = r.clone(e.reports, cloneName); err != nil {
 		return nil, err
 	}
-	_, err = r.runTPM("reports", "init", "--dir", e.clone, "--member", e.user+"="+e.po1, "--system", e.system)
-	return e, err
+	// The reports repository is laid down by its workflow, with the agent
+	// (GH-37).
+	rel, err := repoRuntime()
+	if err != nil {
+		return nil, err
+	}
+	out, err := r.runWorkflow(rel, "reports-init", e.user, e.clone, e.reports, "", map[string]any{"members": e.user + "=" + e.po1}, "TPM_SYSTEM="+e.system)
+	if err != nil || !strings.Contains(out, "final machine state: Done") {
+		return e, fmt.Errorf("the reports-init run: %v: %s", err, tail17(out))
+	}
+	return e, nil
 }
 
 // objectiveIssue files an open objective issue in project, as tasks
 // would, and returns its reference.
 func (e *weeklyEnv) objectiveIssue(project, title string) (string, int, error) {
 	i, err := e.tr.CreateIssue(project, tracker.NewIssue{Title: title,
-		Description: "An objective.\n\n<!-- tpm goals objective=obj001-reliable-agents:R1 release=" + rigRelease + " -->",
+		Description: "An objective.\n\n<!-- scrum-master goals objective=obj001-reliable-agents:R1 release=" + rigRelease + " -->",
 		DueDate:     time.Now().AddDate(0, 0, 21).Format(time.DateOnly)})
 	if err != nil {
 		return "", 0, err
@@ -67,7 +76,7 @@ func (e *weeklyEnv) objectiveIssue(project, title string) (string, int, error) {
 	return fmt.Sprintf("%s#%d", project, i.IID), i.IID, nil
 }
 
-// WeeklyStatus files a status issue for the rig user, works it into a validated report merged in the reports repository with tpm issue merge, and proves the merge closes it and the next week's run recurs it with the next due date (test-rel01.1-weekly-status).
+// WeeklyStatus files a status issue for the rig user, works it into a validated report merged in the reports repository with scrum-master issue merge, and proves the merge closes it and the next week's run recurs it with the next due date (test-rel01.1-weekly-status).
 func (Integration) WeeklyStatus() error {
 	e, err := newWeeklyEnv("reports-weekly")
 	if err != nil {
@@ -80,7 +89,7 @@ func (Integration) WeeklyStatus() error {
 	}
 
 	var filed []reports.StatusResult
-	if err := e.tpmJSON(&filed, "reports", "status-issues", "--dir", e.clone, "--reports", e.reports, "--ref", seedBranch); err != nil {
+	if err := e.wordsJSON(&filed, "reports", "status-issues", "--dir", e.clone, "--reports", e.reports, "--ref", seedBranch); err != nil {
 		return err
 	}
 	c.expect(len(filed) == 1 && filed[0].Action == "filed" && filed[0].Admitted, "status-issues: %+v", filed)
@@ -96,13 +105,13 @@ func (Integration) WeeklyStatus() error {
 	c.expect(len(issue.Assignees) == 0 && strings.Contains(issue.Description, "@"+e.user), "assignees %d; mention present %v", len(issue.Assignees), strings.Contains(issue.Description, "@"+e.user))
 	c.expect(strings.Contains(issue.Description, "## Recurrence") && slices.Contains(issue.Labels, "type::recurring"), "recurrence section or label missing")
 	var again []reports.StatusResult
-	if err := e.tpmJSON(&again, "reports", "status-issues", "--dir", e.clone, "--reports", e.reports, "--ref", seedBranch); err != nil {
+	if err := e.wordsJSON(&again, "reports", "status-issues", "--dir", e.clone, "--reports", e.reports, "--ref", seedBranch); err != nil {
 		return err
 	}
 	c.expect(len(again) == 1 && again[0].Action == "exists", "second run: %+v", again)
 
 	var week reports.WeekResult
-	if err := e.tpmJSON(&week, "reports", "week", "--project", e.po1, "--user", e.user); err != nil {
+	if err := e.wordsJSON(&week, "reports", "week", "--project", e.po1, "--user", e.user); err != nil {
 		return err
 	}
 	found := false
@@ -122,10 +131,10 @@ func (Integration) WeeklyStatus() error {
 		return err
 	}
 	writeFileTo(filepath.Join(e.clone, path), strings.Replace(report, "- po-1", "- wrong", 1))
-	_, err = e.runTPM("reports", "validate", "--dir", e.clone, path)
+	_, err = e.runWords("reports", "validate", "--dir", e.clone, path)
 	c.expect(err != nil && strings.Contains(err.Error(), "break the report format"), "validate of a mismatched report: %v", err)
 	writeFileTo(filepath.Join(e.clone, path), report)
-	if _, err := e.runTPM("reports", "validate", "--dir", e.clone, path); err != nil {
+	if _, err := e.runWords("reports", "validate", "--dir", e.clone, path); err != nil {
 		return err
 	}
 	if err := e.commitPush(e.clone, "Weekly status "+status.Week, path); err != nil {
@@ -135,7 +144,7 @@ func (Integration) WeeklyStatus() error {
 		return err
 	}
 	var merged program.MergeResult
-	if err := e.tpmJSON(&merged, "issue", "merge", "--project", e.reports, "--issue-project", e.po1,
+	if err := e.wordsJSON(&merged, "issue", "merge", "--project", e.reports, "--issue-project", e.po1,
 		"--issue", fmt.Sprint(status.IID), "--branch", branch, "--dir", e.clone); err != nil {
 		return err
 	}
@@ -144,7 +153,7 @@ func (Integration) WeeklyStatus() error {
 
 	var next []reports.StatusResult
 	nextDay := start.AddDate(0, 0, 7).Format("2006-01-02")
-	if err := e.tpmJSON(&next, "reports", "status-issues", "--dir", e.clone, "--reports", e.reports, "--ref", seedBranch, "--date", nextDay); err != nil {
+	if err := e.wordsJSON(&next, "reports", "status-issues", "--dir", e.clone, "--reports", e.reports, "--ref", seedBranch, "--date", nextDay); err != nil {
 		return err
 	}
 	c.expect(len(next) == 1 && next[0].Action == "recurred", "next week: %+v", next)
@@ -157,6 +166,16 @@ func (Integration) WeeklyStatus() error {
 		c.expect(n.DueDate == next[0].DueDate && next[0].Week == reports.ISOWeek(want), "next instance due %s week %s", n.DueDate, next[0].Week)
 		c.expect(strings.Contains(n.Description, fmt.Sprintf("%s#%d (due %s): closed by its merge.", e.po1, status.IID, status.DueDate)), "next instance lacks the run in Previous Runs")
 	}
+	// The program manager's status issues as a workflow, with the agent
+	// (GH-37): a third week's, filed once.
+	rel, err := repoRuntime()
+	if err != nil {
+		return err
+	}
+	thirdDay := start.AddDate(0, 0, 14).Format("2006-01-02")
+	out, serr := e.runWorkflow(rel, "status-issues", e.user, e.clone, e.reports, "", map[string]any{"ref": seedBranch, "date": thirdDay},
+		"TPM_REPORTS="+e.reports)
+	c.expect(serr == nil && strings.Contains(out, "final machine state: Done"), "the status-issues run: %v: %s", serr, tail17(out))
 	return c.err("weeklyStatus")
 }
 
@@ -180,7 +199,7 @@ func (Integration) Reports() error {
 	if err != nil {
 		return err
 	}
-	if err := e.tr.CreateNote(po2, metIID, "Met.\n\n<!-- tpm program event=met objective=obj001 -->"); err != nil {
+	if err := e.tr.CreateNote(po2, metIID, "Met.\n\n<!-- scrum-master program event=met objective=obj001 -->"); err != nil {
 		return err
 	}
 	if err := e.mergedWork(e.po1, "Unreported cache fix", "Closes #999"); err != nil {
@@ -205,7 +224,7 @@ func (Integration) Reports() error {
 
 	from, to := reports.ISOWeek(lastWeek), reports.ISOWeek(thisWeek)
 	var a reports.Aggregation
-	if err := e.tpmJSON(&a, "reports", "aggregate", "--dir", e.clone, "--from", from, "--to", to, "--ref", seedBranch); err != nil {
+	if err := e.wordsJSON(&a, "reports", "aggregate", "--dir", e.clone, "--from", from, "--to", to, "--ref", seedBranch); err != nil {
 		return err
 	}
 	kinds := map[string]int{}
@@ -223,7 +242,7 @@ func (Integration) Reports() error {
 	c.expect(progress[met] == "met" && progress[claimed] == "reported complete", "progress %v", progress)
 
 	var pushed reports.Aggregation
-	if err := e.tpmJSON(&pushed, "reports", "aggregate", "--dir", e.clone, "--from", from, "--to", to, "--ref", seedBranch, "--push"); err != nil {
+	if err := e.wordsJSON(&pushed, "reports", "aggregate", "--dir", e.clone, "--from", from, "--to", to, "--ref", seedBranch, "--push"); err != nil {
 		return err
 	}
 	filed := 0
@@ -234,12 +253,19 @@ func (Integration) Reports() error {
 	}
 	c.expect(filed > 0, "--push filed nothing: %+v", pushed.Pushed)
 	var repeat reports.Aggregation
-	if err := e.tpmJSON(&repeat, "reports", "aggregate", "--dir", e.clone, "--from", from, "--to", to, "--ref", seedBranch, "--push"); err != nil {
+	if err := e.wordsJSON(&repeat, "reports", "aggregate", "--dir", e.clone, "--from", from, "--to", to, "--ref", seedBranch, "--push"); err != nil {
 		return err
 	}
 	for _, p := range repeat.Pushed {
 		c.expect(p.Action == "exists", "a second --push filed %s again", p.Key)
 	}
+	// The program manager's aggregate as a workflow, with the agent (GH-37).
+	rel, err := repoRuntime()
+	if err != nil {
+		return err
+	}
+	out, aerr := e.runWorkflow(rel, "aggregate", e.user, e.clone, e.reports, "", map[string]any{"from": from, "to": to, "ref": seedBranch})
+	c.expect(aerr == nil && strings.Contains(out, "final machine state: Done"), "the aggregate run: %v: %s", aerr, tail17(out))
 	return c.err("reports")
 }
 

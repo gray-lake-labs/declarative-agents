@@ -24,7 +24,7 @@ import (
 // Regression creates, uses, and destroys the regression rig
 // (docs/engineering/eng01-regression-rig.md): a program on local disk, a
 // beads tracker repository and one code repository per project, that the
-// integration targets run tpm against with no network.
+// integration targets run scrum-master against with no network.
 type Regression mg.Namespace
 
 // Aliases makes the full run `mage regression`.
@@ -41,7 +41,7 @@ const (
 	rigCurrent  = "current.json"
 	// rigGroup is the program group every rig project sits under.
 	rigGroup = "rig"
-	// rigUser runs tpm and files and works the issues; rigReviewer is the
+	// rigUser runs scrum-master and files and works the issues; rigReviewer is the
 	// other person a peer read needs.
 	rigUser     = "operator"
 	rigReviewer = "reviewer"
@@ -157,7 +157,7 @@ func currentRun(root string) (rigRun, error) {
 
 // buildRig lays out a run: the tracker repository, and for each project a
 // bare origin and a checkout, the checkouts side by side under checkouts/
-// with work/, the checkout tpm runs in, so the beads tracker finds each
+// with work/, the checkout scrum-master runs in, so the beads tracker finds each
 // project's checkout as a sibling.
 func buildRig(dir string) error {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -256,10 +256,10 @@ type rigEnv struct {
 	root    string
 	run     rigRun
 	group   string
-	tpm     string
+	words   string
 	webBase string
 	user    string
-	// tr is the tracker the target reads and writes beside tpm, as rigUser.
+	// tr is the tracker the target reads and writes beside scrum-master, as rigUser.
 	tr *beads.Tracker
 }
 
@@ -272,15 +272,15 @@ func newRigEnv() (*rigEnv, error) {
 	if err != nil {
 		return nil, err
 	}
-	bin := filepath.Join(run.Dir, "tpm")
-	if err := runStreaming(root, "go", "build", "-o", bin, "./cmd/tpm"); err != nil {
-		return nil, fmt.Errorf("build tpm: %w", err)
+	bin := filepath.Join(run.Dir, "scrum-master")
+	if err := runStreaming(root, "go", "build", "-o", bin, "./magefiles/words"); err != nil {
+		return nil, fmt.Errorf("build the words: %w", err)
 	}
 	clone, err := cloneAs(filepath.Join(run.Dir, "tracker.git"), filepath.Join(run.Dir, "tracker-target"), rigUser)
 	if err != nil {
 		return nil, err
 	}
-	return &rigEnv{root: root, run: run, group: rigGroup, tpm: bin, webBase: rigWebBase, user: rigUser,
+	return &rigEnv{root: root, run: run, group: rigGroup, words: bin, webBase: rigWebBase, user: rigUser,
 		tr: beads.NewTracker(clone, rigUser, filepath.Join(run.Dir, "checkouts", "work"))}, nil
 }
 
@@ -300,26 +300,26 @@ func (r *rigEnv) origin(project string) string {
 	return filepath.Join(r.run.Dir, "origins", path.Base(project)+".git")
 }
 
-// runTPM runs the built tpm on the rig's tracker as rigUser and returns stdout.
-func (r *rigEnv) runTPM(args ...string) ([]byte, error) { return r.runTPMAs(rigUser, args...) }
+// runWords runs the built scrum-master on the rig's tracker as rigUser and returns stdout.
+func (r *rigEnv) runWords(args ...string) ([]byte, error) { return r.runWordsAs(rigUser, args...) }
 
-// runTPMAs runs tpm as user, from the work checkout, with that person's own
+// runWordsAs runs scrum-master as user, from the work checkout, with that person's own
 // clone of the tracker repository.
-func (r *rigEnv) runTPMAs(user string, args ...string) ([]byte, error) {
-	cmd := exec.Command(r.tpm, args...)
+func (r *rigEnv) runWordsAs(user string, args ...string) ([]byte, error) {
+	cmd := exec.Command(r.words, args...)
 	cmd.Dir = filepath.Join(r.run.Dir, "checkouts", "work")
 	cmd.Env = append(os.Environ(), "TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
 		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+user), "TPM_USER="+user, "TPM_WEB_BASE="+r.webBase)
 	var out, errb bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errb
 	if err := cmd.Run(); err != nil {
-		return out.Bytes(), fmt.Errorf("tpm %s: %w: %s", strings.Join(args, " "), err, errb.String())
+		return out.Bytes(), fmt.Errorf("scrum-master %s: %w: %s", strings.Join(args, " "), err, errb.String())
 	}
 	return out.Bytes(), nil
 }
 
-func (r *rigEnv) tpmJSON(into any, args ...string) error {
-	out, err := r.runTPM(append(args, "--json")...)
+func (r *rigEnv) wordsJSON(into any, args ...string) error {
+	out, err := r.runWords(append(args, "--json")...)
 	if err != nil {
 		return err
 	}
@@ -375,7 +375,7 @@ func (r *rigEnv) remoteBranch(project, branch string) bool {
 }
 
 // milestone ensures a group milestone on the rig group, started yesterday,
-// so it is the active sprint tpm issue file defaults to.
+// so it is the active sprint scrum-master issue file defaults to.
 func (r *rigEnv) milestone(title, due string) error {
 	_, err := r.tr.EnsureMilestone(r.group, tracker.Milestone{Title: title,
 		StartDate: time.Now().AddDate(0, 0, -1).Format(time.DateOnly), DueDate: due})
@@ -438,7 +438,7 @@ func (r *rigEnv) approve(project, issueProject string, iid int, branch string) e
 	if branch != "" {
 		args = append(args, "--branch", branch)
 	}
-	_, err = r.runTPMAs(rigReviewer, args...)
+	_, err = r.runWordsAs(rigReviewer, args...)
 	return err
 }
 

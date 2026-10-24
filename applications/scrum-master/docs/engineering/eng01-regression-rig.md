@@ -14,7 +14,7 @@ run every release's regression against a real program that the run builds
 and removes, so each run starts from a known layout and leaves nothing
 behind. Since the tracker became beads (srd042), that program needs no
 service at all: a tracker repository and the code repositories, as git
-repositories on local disk, are everything tpm reads and writes. The rig
+repositories on local disk, are everything scrum-master reads and writes. The rig
 therefore needs no network, no credentials, and no paid tier, and a full
 regression runs in under a minute.
 
@@ -37,7 +37,7 @@ an empty .beads/issues.jsonl; and, for each rig project, a bare origin
 under origins/ and a checkout under checkouts/, all named for the
 project's last path segment. The projects are rig/system, rig/reports,
 rig/product-owners/po-1, and rig/product-owners/po-2. The checkouts sit
-side by side with work/, the checkout tpm runs in, which is how the beads
+side by side with work/, the checkout scrum-master runs in, which is how the beads
 tracker finds a project's checkout (eng04-beads-sync, Choosing the
 backend). Fixtures go on a seed branch apart from main, which the
 targets' merges change; a target that clones a repository clones it under
@@ -46,18 +46,18 @@ clones/, so pop's worktrees land beside the clone inside the run.
 <!-- section: people -->
 ## People
 
-tpm runs as the rig's operator, with TPM_TRACKER naming the run's tracker
+scrum-master runs as the rig's operator, with TPM_TRACKER naming the run's tracker
 repository and the operator's own clone of it in TPM_TRACKER_CLONE. A
-step another person takes, such as a release's peer read, runs tpm as the
+step another person takes, such as a release's peer read, runs scrum-master as the
 reviewer with the reviewer's own clone, so the two people's writes meet
 only in the tracker repository, as they would on two machines. A target
-reads and writes the tracker beside tpm through the beads tracker in Go,
+reads and writes the tracker beside scrum-master through the beads tracker in Go,
 through yet another clone.
 
 <!-- section: delivery -->
 ## Delivery
 
-Work reaches a default branch only through tpm issue merge, as on any
+Work reaches a default branch only through scrum-master issue merge, as on any
 beads program: the audit gate for a docs/ change, a --no-ff merge citing
 the issue and what it closes, a push, and the closes. The rig's
 repositories carry no magefile, so a marker file, docs/BROKEN, stands in
@@ -67,7 +67,7 @@ for a failing mage audit.
 ## Unit tests
 
 The rig itself is plain git and the beads tracker, which their own tests
-cover; the tests every tpm package runs on both trackers through
+cover; the tests every scrum-master package runs on both trackers through
 internal/trackertest build the same kind of program per test. mage
 regression is what proves the commands end to end, through the built
 binary and the environment a person's machine gives it.
@@ -92,7 +92,7 @@ program module infra/modules/program, with local state under
 .regression/gitlab-<run-id>: a private group rig-<run-id> holding a tracker
 repository, system, reports, and the product-owner repositories. The run
 clones each repository, makes the tracker's first commit, and installs the
-skills into each with tpm install.
+skills into each with scrum-master install.
 
 The workload runs at least four workers at once, each with its own clone
 of the tracker and its own checkouts, because a beads tracker is not safe
@@ -121,10 +121,10 @@ the organization (GH_TOKEN) and the network, so it never joins mage
 regression. It works in one private repository, gray-lake-labs/tpm-gh-rig,
 created on first use and reused, since the organization's token may create
 repositories but not delete them; GITHUB_RIG_REPO names another. With
-TPM_TRACKER=gh it builds tpm and proves tpm issue labels writes the schema
-into the repository, tpm issue file files an admitted issue on a dated
-milestone, tpm issue pop opens the branch with a draft pull request,
-GitHub refuses the author's own approval, and under the default policy tpm
+TPM_TRACKER=gh it builds scrum-master and proves scrum-master issue labels writes the schema
+into the repository, scrum-master issue file files an admitted issue on a dated
+milestone, scrum-master issue pop opens the branch with a draft pull request,
+GitHub refuses the author's own approval, and under the default policy scrum-master
 issue merge merges the author's own pull request and closes the issue. A
 second person's approval, and the refusals of a policy that requires one,
 are proven offline in internal/github, against a fake GitHub with two
@@ -137,10 +137,10 @@ mage integration:glab proves the glab tracking system against GitLab the
 same way: glab logged in, the network, never mage regression. It works in
 one private project, rig, under the group GLAB_RIG_GROUP names, creating
 the group as a subgroup of its parent and the project on first use and
-reusing them after. With TPM_TRACKER=glab it proves tpm issue labels writes
-the schema as group labels, tpm issue file files an admitted issue on a
-dated group milestone, tpm issue pop opens the branch with a draft merge
-request, and under the default policy tpm issue merge merges the author's
+reusing them after. With TPM_TRACKER=glab it proves scrum-master issue labels writes
+the schema as group labels, scrum-master issue file files an admitted issue on a
+dated group milestone, scrum-master issue pop opens the branch with a draft merge
+request, and under the default policy scrum-master issue merge merges the author's
 own merge request and closes the issue. A second person's approval, and
 the refusals of a policy that requires one, are proven offline in
 internal/gitlab.
@@ -152,7 +152,7 @@ The regression proves beads with a handful of issues. mage
 integration:beadsScale measures it at a program's size, and is opt-in for
 the same reason as the GitLab variant: it is slow, and it measures rather
 than proves, so it never joins mage regression or a release gate. It
-needs no rig; it builds tpm and works in a temporary directory.
+needs no rig; it builds scrum-master and works in a temporary directory.
 
 For each tracker size and each number of writers, it seeds a bare tracker
 repository with that many issues in one commit, each with five comments
@@ -161,7 +161,7 @@ BEADS_SCALE_LAYOUT names, files by default or jsonl. It times issue file, issue 
 --dry-run, and sprint-end facts against it with one writer, three runs
 each, keeping the median. Then it starts the writers at once, each with
 its own tracker clone and code checkout, each filing new issues and
-popping its own ready ones through the tpm binary, and records each
+popping its own ready ones through the rig's words harness, and records each
 command's time. Afterwards it reads the tracker's main and counts the
 filed issues missing from it and the IDs and IIDs that repeat, packs the
 tracker repository, measures its size, and times a fresh clone.

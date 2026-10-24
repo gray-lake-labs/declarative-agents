@@ -41,7 +41,7 @@ func period(t *testing.T, p trackertest.Program) (string, tracker.Tracker, repor
 	p.AddRepository(po1)
 	f := p.Tracker()
 	f.CreateIssue(po1, tracker.NewIssue{Title: "Objective R1", Labels: []string{"plane::management"},
-		Description: "Objective R1\n\n<!-- tpm goals objective=obj001-reliable-agents#R1 release=01.0 -->"})
+		Description: "Objective R1\n\n<!-- scrum-master goals objective=obj001-reliable-agents#R1 release=01.0 -->"})
 	f.CreateIssue(po1, tracker.NewIssue{Title: "Recurring: sprint end 01.0", Labels: []string{"type::recurring"},
 		Description: plan.SprintEndBody("01.0", "2026-11-06")})
 	cfg := reports.Config{Team: []reports.Member{{Username: "lead", Project: po1}}, ReminderWeekday: "wednesday", StatusIssueTitle: "x"}
@@ -156,7 +156,7 @@ func localMergeCloses(t *testing.T, f tracker.Tracker, checkout string) {
 
 func TestSprintEndReleasesOnlyAfterConfirmation(t *testing.T) {
 	body := plan.SprintEndBody("01.1", "2026-11-27")
-	steps := []string{"tpm sprint-end facts", "docs/sprint-ends/01.1.md", "tpm issue merge", "--closes", "confirm the release and its version", "the merge alone closes this issue", "Once the summary merges", "tpm release gate"}
+	steps := []string{"scrum-master sprint-end facts", "docs/sprint-ends/01.1.md", "scrum-master issue merge", "--closes", "confirm the release and its version", "the merge alone closes this issue", "Once the summary merges", "scrum-master release gate"}
 	at := -1
 	for _, s := range steps {
 		i := strings.Index(body, s)
@@ -202,7 +202,7 @@ func TestSystemFactsGatherTheTeams(t *testing.T) {
 		f := p.Tracker()
 		const team = "g/agent-ops"
 		goal, err := f.CreateIssue(team, tracker.NewIssue{Title: "Sprint Goal: deploy", Labels: []string{"plane::management"},
-			Description: "Goal\n\n## Sprint Backlog\n\n- st001-deploy Deploy (3 points)\n\n<!-- tpm goals sprint-goal release=01.0 serves=in001-x#R1 -->\n"})
+			Description: "Goal\n\n## Sprint Backlog\n\n- st001-deploy Deploy (3 points)\n\n<!-- scrum-master goals sprint-goal release=01.0 serves=in001-x#R1 -->\n"})
 		if err != nil {
 			t.Fatal(err)
 		}

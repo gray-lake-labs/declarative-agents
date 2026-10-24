@@ -1,8 +1,8 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
 # The sprint-end skill as a declarative-agents profile (GH-198, design.md D14):
-# the period-closing machine around the owner's confirmations, tpm words as its tools.
-# tpm install renders the SKILL.md from this machine, and mage audit
+# the period-closing machine around the owner's confirmations, words as its tools.
+# scrum-master install renders the SKILL.md from this machine, and mage audit
 # validates the profile at the pin.
 name: sprint-end
 machine: machine.yaml
@@ -12,6 +12,7 @@ tool_config_dirs:
   - /opt/agent-core/tools/builtin/filesystem
 tool_declarations:
   - declarations.yaml
+  - release-declarations.yaml
   - llm/default.yaml
   - /opt/agent-core/tools/builtin/report-parse-error.yaml
   - /opt/agent-core/tools/builtin/reset-history.yaml

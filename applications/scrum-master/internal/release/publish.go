@@ -5,7 +5,6 @@ package release
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -14,17 +13,19 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/runtime"
 )
 
 // Platform is one operating system and architecture a release binary is
 // built for.
 type Platform struct{ OS, Arch string }
 
-// Platforms are the release binaries' platforms (eng03).
+// Platforms are the agent's platforms, the ones the runtime publishes
+// (eng03).
 var Platforms = []Platform{
 	{"linux", "amd64"}, {"linux", "arm64"},
 	{"darwin", "amd64"}, {"darwin", "arm64"},
-	{"windows", "amd64"}, {"windows", "arm64"},
 }
 
 // AssetName is a release binary's name, the convention the declarative-agents
@@ -78,12 +79,18 @@ type Publisher struct {
 	// ImageRepo is where the tag's image is pushed, such as
 	// ghcr.io/owner/name; empty publishes no image.
 	ImageRepo string
+	// Core is the agent-core the agent builds from; empty is the one beside
+	// the application, ../../agent-core.
+	Core string
+	// Forge is where the release is published, ForgeGitHub (the default)
+	// or ForgeGitLab, as an internal fork publishes (GH-31).
+	Forge string
 }
 
-// VersionPackage is where a release's version is stamped in tpm; the agent's
-// is agent-core's internal/version, under the module path its go.mod
-// declares. Both are nested modules of the repository, so their build info
-// never carries its tag (GH-18).
+// VersionPackage is where a release's version is stamped in the words,
+// which the agent links; agent-core's is its internal/version, under the
+// module path its go.mod declares. Both are nested modules of the
+// repository, so their build info never carries its tag (GH-18).
 const VersionPackage = "github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/version"
 
 // agentVersionPackage is agent-core's version package, read from the module
@@ -101,65 +108,69 @@ func agentVersionPackage(core string) (string, error) {
 	return "", fmt.Errorf("%s/go.mod declares no module", core)
 }
 
-// Build cross-builds ./cmd/tpm for each platform into dist and writes
-// SHA256SUMS over the binaries. Go stamps the version from the commit's tag.
+// Build cross-builds the release into dist (eng03): the agent, composed
+// with this application's words (GH-27), for each platform, and the
+// profiles archive (GH-34), with SHA256SUMS over them. The tag's version is
+// stamped into the agent: agent-core is a nested module, so its build info
+// never carries the repository's tag (GH-18).
 func (p Publisher) Build(dist string, platforms []Platform) ([]Asset, error) {
 	if err := os.MkdirAll(dist, 0o755); err != nil {
 		return nil, err
 	}
+	core := p.Core
+	if core == "" {
+		var err error
+		if core, err = filepath.Abs(filepath.Join(p.Root, "..", "..", "agent-core")); err != nil {
+			return nil, err
+		}
+	}
+	comp, err := runtime.Compose(core, p.Root)
+	if err != nil {
+		return nil, fmt.Errorf("the release builds the agent from the agent-core beside the application: %w", err)
+	}
+	defer comp.Cleanup()
+	tag, _ := p.releaseTag()
 	var assets []Asset
 	var sums strings.Builder
-	for _, pl := range platforms {
-		a := Asset{Name: AssetName("tpm", pl), Path: filepath.Join(dist, AssetName("tpm", pl))}
-		env := []string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}
-		args := []string{"build", "-trimpath"}
-		if tag, err := p.releaseTag(); err == nil && tag != "" {
-			// The application is a nested module (GH-190): the repository's
-			// release tag is not its buildinfo version, so the build stamps it.
-			args = append(args, "-ldflags", "-X "+VersionPackage+".Release="+tag)
-		}
-		args = append(args, "-o", a.Path, "./cmd/tpm")
-		if _, err := p.Run(p.Root, env, "go", args...); err != nil {
-			return nil, fmt.Errorf("build tpm for %s/%s: %w", pl.OS, pl.Arch, err)
-		}
+	add := func(a Asset) error {
 		sum, err := fileSum(a.Path)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		a.Sum = sum
 		fmt.Fprintf(&sums, "%s  %s\n", sum, a.Name)
 		assets = append(assets, a)
+		return nil
 	}
-	// The release also carries the runtime: the sibling agent-core's agent
-	// for every platform the parent ecosystem publishes, in the same
-	// SHA256SUMS, so a program repository's tpm install --runtime fetches
-	// agent and checksums from one release (GH-14; srd037 R7).
-	if core, err := filepath.Abs(filepath.Join(p.Root, "..", "..", "agent-core")); err == nil {
-		if _, statErr := os.Stat(filepath.Join(core, "cmd", "agent")); statErr == nil {
-			for _, pl := range []Platform{{OS: "darwin", Arch: "amd64"}, {OS: "darwin", Arch: "arm64"}, {OS: "linux", Arch: "amd64"}, {OS: "linux", Arch: "arm64"}} {
-				a := Asset{Name: AssetName("agent", pl), Path: filepath.Join(dist, AssetName("agent", pl))}
-				env := []string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}
-				agentArgs := []string{"build", "-trimpath"}
-				if tag, err := p.releaseTag(); err == nil && tag != "" {
-					pkg, err := agentVersionPackage(core)
-					if err != nil {
-						return nil, err
-					}
-					agentArgs = append(agentArgs, "-ldflags", "-X "+pkg+".Version="+tag)
-				}
-				agentArgs = append(agentArgs, "-o", a.Path, "./cmd/agent")
-				if _, err := p.Run(core, env, "go", agentArgs...); err != nil {
-					return nil, fmt.Errorf("build agent for %s/%s: %w", pl.OS, pl.Arch, err)
-				}
-				sum, err := fileSum(a.Path)
-				if err != nil {
-					return nil, err
-				}
-				a.Sum = sum
-				fmt.Fprintf(&sums, "%s  %s\n", sum, a.Name)
-				assets = append(assets, a)
+	for _, pl := range platforms {
+		a := Asset{Name: AssetName("agent", pl), Path: filepath.Join(dist, AssetName("agent", pl))}
+		env := append([]string{"CGO_ENABLED=0", "GOOS=" + pl.OS, "GOARCH=" + pl.Arch}, comp.Env...)
+		args := append([]string{"build", "-trimpath"}, comp.Flags...)
+		if tag != "" {
+			pkg, err := agentVersionPackage(core)
+			if err != nil {
+				return nil, err
 			}
+			args = append(args, "-ldflags", "-X "+pkg+".Version="+tag+" -X "+VersionPackage+".Release="+tag)
 		}
+		args = append(args, "-o", a.Path, "./cmd/agent")
+		if _, err := p.Run(comp.Dir, env, "go", args...); err != nil {
+			return nil, fmt.Errorf("build agent for %s/%s: %w", pl.OS, pl.Arch, err)
+		}
+		if err := add(a); err != nil {
+			return nil, err
+		}
+	}
+	archive := Asset{Name: ProfilesArchive, Path: filepath.Join(dist, ProfilesArchive)}
+	release := tag
+	if release == "" {
+		release = "dev"
+	}
+	if err := WriteProfilesArchive(archive.Path, filepath.Join(p.Root, "plugin", "agents"), filepath.Join(core, "tools"), release); err != nil {
+		return nil, err
+	}
+	if err := add(archive); err != nil {
+		return nil, err
 	}
 	path := filepath.Join(dist, SumsFile)
 	if err := os.WriteFile(path, []byte(sums.String()), 0o644); err != nil {
@@ -214,21 +225,14 @@ func (p Publisher) headTag() (string, error) {
 	return strings.Fields(tags)[0], nil
 }
 
-// CheckAccount fails unless gh, with the organization's token, answers as
-// the account releases are made as, so nothing on a release names a person.
+// CheckAccount fails unless the forge, as the organization, answers as the
+// account releases are made as, so nothing on a release names a person.
 func (p Publisher) CheckAccount() error {
-	env, err := p.ghEnv()
+	h, err := p.host()
 	if err != nil {
 		return err
 	}
-	login, err := p.Run(p.Root, env, "gh", "api", "user", "-q", ".login")
-	if err != nil {
-		return err
-	}
-	if login != p.Account {
-		return fmt.Errorf("gh answers as %s, not %s; a release is made only as the organization", login, p.Account)
-	}
-	return nil
+	return h.check()
 }
 
 func (p Publisher) ghEnv() ([]string, error) {
@@ -245,8 +249,8 @@ type publishedAsset struct {
 	Digest string `json:"digest"`
 }
 
-// Binaries builds the release binaries at tag and creates the tag's GitHub
-// release with them, uploading only what it lacks and refusing an asset
+// Binaries builds the release binaries at tag and creates the tag's release
+// on the forge with them, uploading only what it lacks and refusing an asset
 // already there whose checksum differs. A dry run builds them and names
 // what it would create and upload.
 func (p Publisher) Binaries(tag string) error {
@@ -276,15 +280,15 @@ func (p Publisher) Binaries(tag string) error {
 	if err := p.CheckAccount(); err != nil {
 		return err
 	}
-	env, err := p.ghEnv()
+	h, err := p.host()
 	if err != nil {
 		return err
 	}
-	view, err := p.Run(p.Root, env, "gh", "release", "view", tag, "--repo", p.Repo, "--json", "assets")
+	exists, published, _, err := h.release(tag)
 	if err != nil {
-		if !strings.Contains(err.Error(), "release not found") {
-			return err
-		}
+		return err
+	}
+	if !exists {
 		notes, err := p.Git("tag", "-l", "--format=%(contents)", tag)
 		if err != nil {
 			return err
@@ -293,26 +297,36 @@ func (p Publisher) Binaries(tag string) error {
 		if err := os.WriteFile(notesFile, []byte(notes+"\n"), 0o644); err != nil {
 			return err
 		}
-		if _, err := p.Run(p.Root, env, "gh", "release", "create", tag, "--repo", p.Repo, "--verify-tag", "--title", tag, "--notes-file", notesFile); err != nil {
+		if err := h.create(tag, notesFile); err != nil {
 			return err
 		}
 		fmt.Fprintf(p.Out, "publish: created the release %s\n", tag)
-		view = `{"assets":[]}`
 	}
-	var published struct {
-		Assets []publishedAsset `json:"assets"`
-	}
-	if err := json.Unmarshal([]byte(view), &published); err != nil {
-		return fmt.Errorf("gh release view %s: %w", tag, err)
+	// A forge that records no digest holds an asset already there to the
+	// SHA256SUMS on the release; with none, nothing there can be verified.
+	var sums map[string]string
+	if len(published) > 0 && published[0].Digest == "" {
+		got, ok, err := publishedSums(h, tag, filepath.Join(dist, "published"))
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return fmt.Errorf("the release %s holds assets but no %s to verify them by; remove them, then run mage publish again", tag, SumsFile)
+		}
+		sums = got
 	}
 	var upload []string
 	for _, a := range assets {
-		i := slices.IndexFunc(published.Assets, func(pa publishedAsset) bool { return pa.Name == a.Name })
+		i := slices.IndexFunc(published, func(pa publishedAsset) bool { return pa.Name == a.Name })
 		if i < 0 {
 			upload = append(upload, a.Path)
 			continue
 		}
-		if got := strings.TrimPrefix(published.Assets[i].Digest, "sha256:"); got != a.Sum {
+		got := strings.TrimPrefix(published[i].Digest, "sha256:")
+		if got == "" {
+			got = sums[a.Name]
+		}
+		if got != a.Sum {
 			return fmt.Errorf("%s on the release %s has checksum %s, but this build's is %s; refusing to replace it", a.Name, tag, got, a.Sum)
 		}
 		fmt.Fprintf(p.Out, "publish: kept %s, already on the release\n", a.Name)
@@ -321,7 +335,7 @@ func (p Publisher) Binaries(tag string) error {
 		fmt.Fprintf(p.Out, "publish: the release %s already holds every binary\n", tag)
 		return nil
 	}
-	if _, err := p.Run(p.Root, env, "gh", append([]string{"release", "upload", tag, "--repo", p.Repo}, upload...)...); err != nil {
+	if err := h.upload(tag, upload); err != nil {
 		return fmt.Errorf("upload to the release %s: %w; run mage publish again to complete it", tag, err)
 	}
 	fmt.Fprintf(p.Out, "publish: uploaded %d assets to the release %s\n", len(upload), tag)

@@ -15,9 +15,9 @@ issue to a change: the person who works it takes it, works on its own
 branch in its own worktree, and the merge that lands the branch
 closes it.
 
-implement is that path. tpm claims the issue for the caller and opens its
+implement is that path. scrum-master claims the issue for the caller and opens its
 branch and worktree (srd013 R7); the work in the worktree is the person's
-or their agent's; tpm merges the branch, which closes the issue
+or their agent's; scrum-master merges the branch, which closes the issue
 (srd013 R5). A change under docs/, a design change or a planning change,
 passes the corpus gate before it merges (srd034 R2.2).
 
@@ -42,7 +42,7 @@ Started by the person who will work an open issue, in the issue's repository.
 <!-- req: R2.1 -->
 ### R2.1
 
-Runs tpm issue pop (srd013 R7), which assigns only the caller and creates or reuses the branch <iid>-<slug> and its worktree. A refusal is shown with its reason and the skill stops.
+Runs scrum-master issue pop (srd013 R7), which assigns only the caller and creates or reuses the branch <iid>-<slug> and its worktree. A refusal is shown with its reason and the skill stops.
 
 <!-- req: R2.2 -->
 ### R2.2
@@ -60,7 +60,7 @@ The worktree carries the skills of every agent installed in the checkout pop ran
 <!-- req: R3.1 -->
 ### R3.1
 
-When the work is committed and pushed, runs tpm issue merge (srd013 R5), which runs the corpus gate for a docs/ change, merges the branch, and closes the issue. When the program's policy requires approval, the skill first asks a reviewer to approve the tip with tpm issue approve, and asks again when merge refuses an approval of an earlier commit.
+When the work is committed and pushed, runs scrum-master issue merge (srd013 R5), which runs the corpus gate for a docs/ change, merges the branch, and closes the issue. When the program's policy requires approval, the skill first asks a reviewer to approve the tip with scrum-master issue approve, and asks again when merge refuses an approval of an earlier commit.
 
 <!-- req: R3.2 -->
 ### R3.2
@@ -78,7 +78,7 @@ The issue closes when its branch merges (srd041 R7.1); the skill closes nothing 
 <!-- req: R4.1 -->
 ### R4.1
 
-Asks nothing: tpm decides whether the issue can be taken, and the issue body holds the steps. A question an issue's own Requirements ask, such as a sprint-end issue's confirmation (srd038 R1.3), belongs to the work, not to pop.
+Asks nothing: scrum-master decides whether the issue can be taken, and the issue body holds the steps. A question an issue's own Requirements ask, such as a sprint-end issue's confirmation (srd038 R1.3), belongs to the work, not to pop.
 
 <!-- req: R4.2 -->
 ### R4.2
@@ -91,12 +91,12 @@ As a skill, is at most 50 lines and has no model step; the work in the worktree 
 <!-- req: R5.1 -->
 ### R5.1
 
-tpm issue list --implements lists the open issues whose Implements line names a story, or with --epic every story under an epic in the hierarchy, in the stories' rank order and then by IID, and lists apart an issue a Blocked-by line holds behind an open issue.
+scrum-master issue list --implements lists the open issues whose Implements line names a story, or with --epic every story under an epic in the hierarchy, in the stories' rank order and then by IID, and lists apart an issue a Blocked-by line holds behind an open issue.
 
 <!-- req: R5.2 -->
 ### R5.2
 
-tpm issue pop --worktree claims an issue into a worktree an earlier pop opened, on that worktree's branch, with pop's refusals and assignment and without opening a branch or worktree of its own.
+scrum-master issue pop --worktree claims an issue into a worktree an earlier pop opened, on that worktree's branch, with pop's refusals and assignment and without opening a branch or worktree of its own.
 
 <!-- req: R5.3 -->
 ### R5.3
@@ -114,22 +114,22 @@ Works one story by default, and a whole epic's stories only when the person asks
 <!-- req: R6.1 -->
 ### R6.1
 
-The workflow is a declarative-agents profile, plugin/agents/implement/, whose machine's states are the skill's steps and whose tools are the tpm commands the skill runs, each with --json; the model acts only in the Work state (design.md D10, D14). mage audit validates every shipped profile with the pinned runtime's --validate-config.
+The workflow is a declarative-agents profile, plugin/agents/implement/, whose machine's states are the skill's steps and whose tools are the scrum-master commands the skill runs, each with --json; the model acts only in the Work state (design.md D10, D14). mage audit validates every shipped profile with the pinned runtime's --validate-config.
 
 <!-- req: R6.2 -->
 ### R6.2
 
-tpm install renders the implement SKILL.md from the profile's machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps the runtime executes.
+scrum-master install renders the implement SKILL.md from the profile's machine (srd037 R1.4), so an agent that does not run the runtime follows the same steps the runtime executes.
 
 <!-- req: R6.3 -->
 ### R6.3
 
-A tpm refusal ends a run in the Refused terminal state with tpm's reason as the run's summary, and pop reports the issue's body, so the Work state holds the Requirements and Acceptance Criteria without a tracker round-trip.
+A scrum-master refusal ends a run in the Refused terminal state with scrum-master's reason as the run's summary, and pop reports the issue's body, so the Work state holds the Requirements and Acceptance Criteria without a tracker round-trip.
 
 <!-- field: non_goals -->
 ## Non-goals
 
-- Re-creating a recurring issue after its run; that is release 01.1 (tpm issue recur).
+- Re-creating a recurring issue after its run; that is release 01.1 (scrum-master issue recur).
 - Approving; a reviewer reads the branch and approves it (srd013 R5.6).
 
 <!-- field: acceptance_criteria -->
@@ -196,7 +196,7 @@ A story's open issues list in order with a blocked one apart; the second is clai
 <!-- ac: AC6 -->
 ### AC6
 
-A run of the profile with the pinned runtime over an admitted issue pops, works, pushes, merges, and closes it; a pop the admission refuses ends the run in Refused with tpm's reason; the installed implement SKILL.md presents the machine's states as its steps.
+A run of the profile with the pinned runtime over an admitted issue pops, works, pushes, merges, and closes it; a pop the admission refuses ends the run in Refused with scrum-master's reason; the installed implement SKILL.md presents the machine's states as its steps.
 
 <!-- field: traces -->
 #### Traces

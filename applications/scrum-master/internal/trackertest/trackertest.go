@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Gray Lake Labs
 // SPDX-License-Identifier: MIT-0
-// Package trackertest runs one test against every tracker tpm serves: the
+// Package trackertest runs one test against every tracker scrum-master serves: the
 // in-memory fake and a beads tracker over real git repositories on local disk
 // (srd042 R1.1). A test describes its program through Program and asserts
 // through the tracker interface, never a backend's internals.

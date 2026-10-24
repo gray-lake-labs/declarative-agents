@@ -42,7 +42,7 @@ func gitlabWorkload(env *gitlabEnv) error {
 		for k := 0; k < createsPerWorker; k++ {
 			title := fmt.Sprintf("%s create %d", w.user, k)
 			var res program.FileResult
-			err := w.tpmJSON(&res, "issue", "file", "--project", po1, "--title", title, "--body-file", body, "--plane", "data", "--kind", "build")
+			err := w.wordsJSON(&res, "issue", "file", "--project", po1, "--title", title, "--body-file", body, "--plane", "data", "--kind", "build")
 			mu.Lock()
 			c.expect(err == nil && res.IID > 0, "%s: file %q: %+v %v", w.user, title, res, err)
 			reported[title] = res.IID
@@ -77,7 +77,7 @@ func gitlabWorkload(env *gitlabEnv) error {
 	for _, key := range []string{"system", "reports", "product-owners/po-2"} {
 		project := env.projectPath(key)
 		var res program.FileResult
-		if err := operator.tpmJSON(&res, "issue", "file", "--project", project, "--title", "Contended in "+path.Base(key), "--body-file", body, "--plane", "management"); err != nil {
+		if err := operator.wordsJSON(&res, "issue", "file", "--project", project, "--title", "Contended in "+path.Base(key), "--body-file", body, "--plane", "management"); err != nil {
 			return err
 		}
 		targets = append(targets, &contended{key: key, project: project, iid: res.IID})
@@ -86,7 +86,7 @@ func gitlabWorkload(env *gitlabEnv) error {
 		for n := range targets {
 			t := targets[(n+w.index())%len(targets)]
 			var res program.PopResult
-			err := w.tpmJSON(&res, "issue", "pop", "--project", t.project, "--issue", fmt.Sprint(t.iid), "--dir", w.checkout(path.Base(t.key)))
+			err := w.wordsJSON(&res, "issue", "pop", "--project", t.project, "--issue", fmt.Sprint(t.iid), "--dir", w.checkout(path.Base(t.key)))
 			mu.Lock()
 			if err == nil && res.Assigned {
 				c.expect(t.winner == nil, "%s#%d was taken by both %s and %s", t.project, t.iid, userOf(t.winner), w.user)
@@ -115,7 +115,7 @@ func gitlabWorkload(env *gitlabEnv) error {
 	// another takes the issue online, and reconcile reports the loss.
 	offline, online := workers[gitlabWorkers-1], workers[1]
 	var x program.FileResult
-	if err := operator.tpmJSON(&x, "issue", "file", "--project", po1, "--title", "Taken while offline", "--body-file", body, "--plane", "management"); err != nil {
+	if err := operator.wordsJSON(&x, "issue", "file", "--project", po1, "--title", "Taken while offline", "--body-file", body, "--plane", "management"); err != nil {
 		return err
 	}
 	// The worker last synced after the issue was filed; offline, it knows
@@ -127,10 +127,10 @@ func gitlabWorkload(env *gitlabEnv) error {
 		return err
 	}
 	var stale program.PopResult
-	err = offline.tpmJSON(&stale, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(x.IID), "--dir", offline.checkout("po-1"))
+	err = offline.wordsJSON(&stale, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(x.IID), "--dir", offline.checkout("po-1"))
 	c.expect(err == nil && stale.Provisional, "offline pop: %+v %v, want provisional", stale, err)
 	var taken program.PopResult
-	err = online.tpmJSON(&taken, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(x.IID), "--dir", online.checkout("po-1"))
+	err = online.wordsJSON(&taken, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(x.IID), "--dir", online.checkout("po-1"))
 	c.expect(err == nil && taken.Assigned && !taken.Provisional, "online pop: %+v %v", taken, err)
 	if err := env.git(offline.trackerClone(), "remote", "set-url", "origin", env.tracker); err != nil {
 		return err
@@ -138,7 +138,7 @@ func gitlabWorkload(env *gitlabEnv) error {
 	var rec struct {
 		Reconciled []beads.Reconciled `json:"reconciled"`
 	}
-	err = offline.tpmJSON(&rec, "tracker", "reconcile")
+	err = offline.wordsJSON(&rec, "tracker", "reconcile")
 	id := strings.TrimPrefix(x.WebURL, "beads:")
 	lost := false
 	for _, r := range rec.Reconciled {
@@ -189,7 +189,7 @@ func gitlabWorkload(env *gitlabEnv) error {
 }
 
 // deliver commits in the winner's worktree, pushes the branch, has the
-// reviewer approve it, and merges it with tpm issue merge.
+// reviewer approve it, and merges it with scrum-master issue merge.
 func deliver(env *gitlabEnv, winner, reviewer *gitlabWorker, key, project string, iid int, pop program.PopResult) error {
 	writeFileTo(filepath.Join(pop.Worktree, "rig", fmt.Sprintf("%d.md", iid)), "Delivered by "+winner.user+".\n")
 	for _, args := range [][]string{{"add", "-A"}, {"commit", "-q", "-m", fmt.Sprintf("Deliver #%d", iid)}, {"push", "-q", "-u", "origin", pop.Branch}} {
@@ -201,10 +201,10 @@ func deliver(env *gitlabEnv, winner, reviewer *gitlabWorker, key, project string
 	if err := env.git(dir, "fetch", "-q", "origin"); err != nil {
 		return err
 	}
-	if _, err := reviewer.tpm("issue", "approve", "--project", project, "--issue", fmt.Sprint(iid), "--branch", pop.Branch, "--dir", dir); err != nil {
+	if _, err := reviewer.run("issue", "approve", "--project", project, "--issue", fmt.Sprint(iid), "--branch", pop.Branch, "--dir", dir); err != nil {
 		return err
 	}
-	_, err := winner.tpm("issue", "merge", "--project", project, "--issue", fmt.Sprint(iid), "--branch", pop.Branch, "--dir", pop.Worktree)
+	_, err := winner.run("issue", "merge", "--project", project, "--issue", fmt.Sprint(iid), "--branch", pop.Branch, "--dir", pop.Worktree)
 	return err
 }
 
