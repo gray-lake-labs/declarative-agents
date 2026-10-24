@@ -18,10 +18,16 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/routing"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/spectool"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
 func init() { program.Words = Run }
+
+// SetSpecTool runs the corpus gate's shape check with run, the spec tool's
+// program an agent build linked in, instead of a tool built from a
+// release's source (GH-33).
+func SetSpecTool(run func(args []string, stdout, stderr io.Writer) int) { spectool.InProcess = run }
 
 // Binary is the name the profiles' exec declarations give the words.
 const Binary = program.WordsBinary

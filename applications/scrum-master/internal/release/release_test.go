@@ -96,8 +96,12 @@ func TestStageFailureStopsLaterStages(t *testing.T) {
 			t.Fatal("a later stage ran after a failure")
 		}
 	}
-	if !strings.Contains(out.String(), "[bad] line one\n[bad] line two\n") {
-		t.Fatalf("output not prefixed by gate:\n%s", out.String())
+	// A stage's gates run at once, so their lines interleave; each line
+	// carries its gate's name.
+	for _, line := range []string{"[bad] line one\n", "[bad] line two\n", "[ok] line one\n", "[ok] line two\n"} {
+		if !strings.Contains(out.String(), line) {
+			t.Fatalf("output not prefixed by gate:\n%s", out.String())
+		}
 	}
 }
 

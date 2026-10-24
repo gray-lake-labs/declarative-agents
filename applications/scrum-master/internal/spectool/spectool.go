@@ -61,8 +61,13 @@ func Pinned(root string) (string, error) {
 // the repository at dir, at the release dir pins: it lays out the release's
 // source and builds the tool once per tag, then returns the lines the tool
 // printed. A non-nil error with lines means the tool ran and reported
-// problems.
+// problems. In an agent built with the words, the agent's own copy of the
+// program runs in process instead, with no source laid out and no Go
+// toolchain (GH-33).
 func Run(dir, command, scope string) ([]string, error) {
+	if InProcess != nil {
+		return runInProcess(dir, command, scope)
+	}
 	tag, err := Pinned(dir)
 	if err != nil {
 		return nil, err
@@ -84,6 +89,33 @@ func Run(dir, command, scope string) ([]string, error) {
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	out, err := cmd.Output()
+	return report(out, stderr.Bytes(), err)
+}
+
+// InProcess runs the program in this process — its command and scope as
+// args — when an agent build linked it in (GH-33); nil otherwise.
+var InProcess func(args []string, stdout, stderr io.Writer) int
+
+// runInProcess runs InProcess over scope in the repository at dir, which
+// the program reads as its working directory.
+func runInProcess(dir, command, scope string) ([]string, error) {
+	prev, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	if err := os.Chdir(dir); err != nil {
+		return nil, err
+	}
+	defer os.Chdir(prev)
+	var out, stderr bytes.Buffer
+	if code := InProcess([]string{command, scope}, &out, &stderr); code != 0 {
+		err = fmt.Errorf("exit status %d", code)
+	}
+	return report(out.Bytes(), stderr.Bytes(), err)
+}
+
+// report is a run's printed lines, and its failure in the tool's words.
+func report(out, stderr []byte, err error) ([]string, error) {
 	var lines []string
 	for _, l := range strings.Split(strings.TrimSpace(string(out)), "\n") {
 		if l != "" {
@@ -91,7 +123,7 @@ func Run(dir, command, scope string) ([]string, error) {
 		}
 	}
 	if err != nil {
-		if msg := strings.TrimPrefix(strings.TrimSpace(stderr.String()), "spectool: "); msg != "" {
+		if msg := strings.TrimPrefix(strings.TrimSpace(string(stderr)), "spectool: "); msg != "" {
 			return lines, fmt.Errorf("%s", msg)
 		}
 		return lines, fmt.Errorf("run the spec tool: %w", err)
@@ -180,10 +212,10 @@ func gitQuiet(dir string, args ...string) error {
 	return nil
 }
 
-// Binary is where the spec tool built from this Main lives
+// Binary is where the spec tool built from this Program lives
 // under a release's directory.
 func Binary(dir string) string {
-	sum := sha256.Sum256([]byte(Main))
+	sum := sha256.Sum256([]byte(Program("main", "")))
 	return filepath.Join(dir, "spectool-built-"+hex.EncodeToString(sum[:6]))
 }
 
@@ -244,19 +276,28 @@ func writeSource(dir, releaseSource string) error {
 			return err
 		}
 	}
-	main := strings.ReplaceAll(Main, "RELEASE_MODULE", module)
-	return os.WriteFile(filepath.Join(dir, "main.go"), []byte(main), 0o644)
+	return os.WriteFile(filepath.Join(dir, "main.go"), []byte(Program("main", module)), 0o644)
 }
 
-// Main is the tool: it lists the tracked documents with git, picks
-// each one's declaration from the release's built-in declarations, indexes
-// the corpus so references link across documents, and converts, formats, or
-// diagnoses each one.
-const Main = `package main
+// Program is the tool's source in package pkg, importing the release's
+// library from module: it lists the tracked documents with git, picks each
+// one's declaration from the release's built-in declarations, indexes the
+// corpus so references link across documents, and converts, formats, or
+// diagnoses each one. Built as main it is the spec tool; an agent built
+// with the words links it as a package and runs the check in process
+// (GH-33).
+func Program(pkg, module string) string {
+	src := "package " + pkg + "\n\n" + programImports + programBody
+	if pkg == "main" {
+		src += programMain
+	}
+	return strings.ReplaceAll(src, "RELEASE_MODULE", module)
+}
 
-import (
+const programImports = `import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -265,7 +306,13 @@ import (
 	"RELEASE_MODULE/pkg/spec/markdown"
 )
 
-// hierarchyPath names a hierarchy document (theme, initiative, epic,
+`
+
+const programMain = `
+func main() { os.Exit(Run(os.Args[1:], os.Stdout, os.Stderr)) }
+`
+
+const programBody = `// hierarchyPath names a hierarchy document (theme, initiative, epic,
 // feature, story) or an objective document, scrum-master's types written as
 // SRDs in the release's format; the release declares no location for them,
 // so the tool reads them with the SRD declaration (design.md hierarchy).
@@ -294,21 +341,30 @@ func declarationFor(declarations markdown.Declarations, path string, source bool
 	return d, d.Type(), true
 }
 
-func main() {
-	if len(os.Args) != 3 {
-		fmt.Fprintln(os.Stderr, "usage: spectool convert|fmt|check <scope>")
-		os.Exit(2)
+// Run is the tool on one command line, its command and scope: findings go
+// to stdout, a failure to stderr, and the exit code is returned.
+func Run(args []string, stdout, stderr io.Writer) int {
+	if len(args) != 2 {
+		fmt.Fprintln(stderr, "usage: spectool convert|fmt|check <scope>")
+		return 2
 	}
-	command, scope := os.Args[1], os.Args[2]
+	if err := run(args[0], args[1], stdout); err != nil {
+		fmt.Fprintln(stderr, "spectool: "+err.Error())
+		return 1
+	}
+	return 0
+}
+
+func run(command, scope string, out io.Writer) error {
 	declarations, err := markdown.Default()
 	if err != nil {
-		fail(err)
+		return err
 	}
-	out, err := exec.Command("git", "ls-files", "*.yaml", "*.md").Output()
+	tracked, err := exec.Command("git", "ls-files", "*.yaml", "*.md").Output()
 	if err != nil {
-		fail(fmt.Errorf("list the tracked documents: %w", err))
+		return fmt.Errorf("list the tracked documents: %w", err)
 	}
-	paths := strings.Fields(string(out))
+	paths := strings.Fields(string(tracked))
 	links := markdown.LinkIndexes{}
 	for _, path := range paths {
 		if _, _, ok := declarationFor(declarations, path, false); ok && strings.HasSuffix(path, ".md") {
@@ -328,21 +384,21 @@ func main() {
 			matched++
 			data, err := os.ReadFile(path)
 			if err != nil {
-				fail(err)
+				return err
 			}
 			md, report, err := d.ConvertYAML(data, path)
 			if err != nil {
-				fmt.Println("FAIL " + err.Error())
+				fmt.Fprintln(out, "FAIL " + err.Error())
 				problems++
 				continue
 			}
 			if err := os.WriteFile(report.Target, md, 0o644); err != nil {
-				fail(err)
+				return err
 			}
 			if err := os.Remove(path); err != nil {
-				fail(err)
+				return err
 			}
-			fmt.Println(strings.Join(report.Lines(), "\n"))
+			fmt.Fprintln(out, strings.Join(report.Lines(), "\n"))
 		case (command == "fmt" || command == "check") && strings.HasSuffix(path, ".md"):
 			d, docType, ok := declarationFor(declarations, path, false)
 			if !ok || !inScope(path, docType, scope) {
@@ -351,61 +407,57 @@ func main() {
 			matched++
 			data, err := os.ReadFile(path)
 			if err != nil {
-				fail(err)
+				return err
 			}
 			formatted, findings, err := d.FormatLinked(data, path, links.For(path))
 			if err != nil && command == "check" {
 				// A document that does not parse is a finding about it; the
 				// rest of the corpus is still checked (srd045 R8.2).
-				fmt.Println(path + ": parse: " + strings.TrimPrefix(err.Error(), path+": "))
+				fmt.Fprintln(out, path + ": parse: " + strings.TrimPrefix(err.Error(), path+": "))
 				problems++
 				continue
 			}
 			if err != nil {
-				fail(err)
+				return err
 			}
 			if command == "check" {
 				for _, f := range d.Diagnose(data, path) {
-					fmt.Println(f.String())
+					fmt.Fprintln(out, f.String())
 					problems++
 				}
 				if formatted != nil && !bytes.Equal(formatted, data) {
-					fmt.Println(path + ": not-canonical: run mage fmt")
+					fmt.Fprintln(out, path + ": not-canonical: run mage fmt")
 					problems++
 				}
 				continue
 			}
 			if formatted == nil {
 				for _, f := range findings {
-					fmt.Println(f.String())
+					fmt.Fprintln(out, f.String())
 				}
 				problems++
 				continue
 			}
 			if !bytes.Equal(formatted, data) {
 				if err := os.WriteFile(path, formatted, 0o644); err != nil {
-					fail(err)
+					return err
 				}
-				fmt.Println("formatted " + path)
+				fmt.Fprintln(out, "formatted " + path)
 			}
 		}
 	}
 	if matched == 0 {
-		fail(fmt.Errorf("no corpus document matches %q", scope))
+		return fmt.Errorf("no corpus document matches %q", scope)
 	}
 	if problems > 0 {
-		fail(fmt.Errorf("%d problem(s) in %d document(s)", problems, matched))
+		return fmt.Errorf("%d problem(s) in %d document(s)", problems, matched)
 	}
+	return nil
 }
 
 // inScope reads a scope as all, a document type, a directory, or a path.
 func inScope(path, documentType, scope string) bool {
 	scope = strings.TrimSuffix(scope, "/")
 	return scope == "all" || scope == documentType || path == scope || strings.HasPrefix(path, scope+"/")
-}
-
-func fail(err error) {
-	fmt.Fprintln(os.Stderr, "spectool: "+err.Error())
-	os.Exit(1)
 }
 `

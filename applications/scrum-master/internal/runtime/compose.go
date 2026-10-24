@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/spectool"
 )
 
 // Composition is how to build the agent that serves the words in its own
@@ -36,16 +38,22 @@ package main
 import (
 	"context"
 
-	"%s/pkg/inprocess"
-	"%s/words"
+	"%[1]s/cmd/agent/internal/scrummasterspec"
+	"%[1]s/pkg/inprocess"
+	"%[2]s/words"
 )
 
 func init() {
 	inprocess.Register(words.Binary, func(_ context.Context, c inprocess.Call) int {
 		return words.Run(c.Dir, c.Args, c.Out)
 	})
+	words.SetSpecTool(scrummasterspec.Run)
 }
 `
+
+// specPackage is where the overlay puts the spec tool's program, as a
+// package of agent-core's cmd/agent (GH-33).
+const specPackage = "scrummasterspec"
 
 // Compose prepares the composed build of the agent in core, the agent-core
 // module, with the words of app, this application's module.
@@ -72,12 +80,19 @@ func Compose(core, app string) (Composition, error) {
 	cleanup := func() { os.RemoveAll(dir) }
 	work := fmt.Sprintf("go %s\n\nuse (\n\t%s\n\t%s\n)\n", laterGo(coreGo, appGo), core, app)
 	file := filepath.Join(dir, "zz_scrum_master_words.go")
-	overlay, err := json.Marshal(map[string]map[string]string{"Replace": {filepath.Join(core, "cmd", "agent", filepath.Base(file)): file}})
+	spec := filepath.Join(dir, specPackage+".go")
+	overlay, err := json.Marshal(map[string]map[string]string{"Replace": {
+		filepath.Join(core, "cmd", "agent", filepath.Base(file)):                        file,
+		filepath.Join(core, "cmd", "agent", "internal", specPackage, specPackage+".go"): spec,
+	}})
 	if err == nil {
 		err = os.WriteFile(filepath.Join(dir, "go.work"), []byte(work), 0o644)
 	}
 	if err == nil {
 		err = os.WriteFile(file, []byte(fmt.Sprintf(registration, coreMod, appMod)), 0o644)
+	}
+	if err == nil {
+		err = os.WriteFile(spec, []byte(spectool.Program(specPackage, coreMod)), 0o644)
 	}
 	if err == nil {
 		err = os.WriteFile(filepath.Join(dir, "overlay.json"), overlay, 0o644)
