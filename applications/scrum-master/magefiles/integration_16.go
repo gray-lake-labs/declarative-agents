@@ -22,8 +22,11 @@ func init() {
 // (GH-201, srd013 R5.7) — the first machine with no model state: a popped
 // issue with committed work gates, merges, pushes, and closes through the
 // three scrum-master words, ending in Done with the issue closed; a branch with
-// nothing over the base ends in Refused with scrum-master's reason (test: merge
-// profile run, merge profile refusal; environment: local).
+// nothing over the base ends in Refused with scrum-master's reason; and from a
+// team checkout beside the system repository's, whose policy requires
+// approval, an unapproved branch ends in Refused and merges once a reviewer
+// approves it (GH-46) (test: merge profile run, merge profile refusal, team
+// merge requires approval; environment: local).
 func (Integration) MergeProfile() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -93,6 +96,54 @@ func (Integration) MergeProfile() error {
 	c.expect(strings.Contains(out, "final machine state: Refused"), "the run must end in Refused: %s", tail16(out))
 	c.expect(strings.Contains(out, "no commits over"), "the Refused state must carry scrum-master's reason: %s", tail16(out))
 	c.expect(!r.closed(po1, empty.IID), "the refused issue must stay open")
+
+	// The system's policy governs a team repository's merge (GH-46): the
+	// system checkout holds the trackers document and a policy requiring
+	// approval, and the team's checkout sits beside it.
+	system, err := r.project("system")
+	if err != nil {
+		return err
+	}
+	sys := r.checkout(system)
+	if err := gitIn(sys, "fetch", "-q", "origin"); err != nil {
+		return err
+	}
+	if err := gitIn(sys, "checkout", "-q", "-B", "main", "origin/main"); err != nil {
+		return err
+	}
+	writeFileTo(filepath.Join(sys, "control", "trackers.md"), "---\nid: trackers\ntitle: Tracking systems\n---\n\n<!-- field: version -->\n## Version\n\n1\n\n"+
+		"<!-- field: default -->\n## Default\n\n<!-- field: system -->\n### System\n\nbd\n\n<!-- field: tracker_repository -->\n### Tracker repository\n\n"+
+		filepath.Join(r.run.Dir, "tracker.git")+"\n")
+	writeFileTo(filepath.Join(sys, program.PolicyFile), "---\nid: policy\ntitle: Rig policy\n---\n\n<!-- field: admission -->\n## Admission\n\n"+
+		"<!-- field: require_approval -->\n### Require approval\n\ntrue\n")
+	if err := r.commitPush(sys, "Require approval before merge", "control/trackers.md", program.PolicyFile); err != nil {
+		return err
+	}
+	team := filepath.Join(r.run.Dir, "checkouts", "po-1-team")
+	if err := gitIn(r.run.Dir, "clone", "-q", r.origin(po1), team); err != nil {
+		return err
+	}
+	governed, err := file("Merge profile under the system policy")
+	if err != nil {
+		return err
+	}
+	if err := r.wordsJSON(&popped, "issue", "pop", "--project", po1, "--issue", fmt.Sprint(governed.IID), "--dir", team); err != nil {
+		return err
+	}
+	writeFileTo(filepath.Join(popped.Worktree, "GOVERNED.md"), "# Governed\n")
+	if err := r.commitPush(popped.Worktree, "Add the governed note", "GOVERNED.md"); err != nil {
+		return err
+	}
+	out, runErr = r.runMergeAgent(rel, po1, popped.Worktree, governed.IID)
+	c.expect(runErr != nil && strings.Contains(out, "final machine state: Refused") && strings.Contains(out, "approv"),
+		"an unapproved team merge under the system's policy must end in Refused for the approval: %s", tail16(out))
+	c.expect(!r.closed(po1, governed.IID), "the unapproved team merge must leave its issue open")
+	if err := r.approve(po1, po1, governed.IID, ""); err != nil {
+		return err
+	}
+	out, runErr = r.runMergeAgent(rel, po1, popped.Worktree, governed.IID)
+	c.expect(runErr == nil && strings.Contains(out, "final machine state: Done"), "the approved team merge must end in Done: %v: %s", runErr, tail16(out))
+	c.expect(r.closed(po1, governed.IID), "the approved team merge must close %s#%d", po1, governed.IID)
 	return c.err("mergeProfile")
 }
 

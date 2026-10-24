@@ -26,7 +26,7 @@ func init() {
 			fs.StringVar(&args.title, "title", "", "the next title; empty keeps the issue's")
 			fs.StringVar(&args.summary, "summary", "", "the run's result: closes an open instance and goes on the Previous Runs line")
 			fs.StringVar(&args.summaryFile, "summary-file", "", "a file holding the run's result, in place of --summary")
-			fs.StringVar(&args.control, "control", "", "project holding control/policy.md, which admits the next instance; empty is --project")
+			fs.StringVar(&args.control, "control", "", "project holding control/policy.md, which admits the next instance; empty is the system repository beside the checkout, else --project")
 			fs.StringVar(&args.ref, "ref", "main", "ref of the control files")
 		},
 		Run: func(ctx *cli.Context) error {
@@ -48,11 +48,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			control := args.control
-			if control == "" {
-				control = args.project
-			}
-			p, err := program.LoadPolicy(t, control, args.ref)
+			p, err := program.LoadPolicy(t, program.ControlFor(args.control, ".", args.project), args.ref)
 			if err != nil {
 				return err
 			}

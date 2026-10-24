@@ -68,7 +68,9 @@ repository has exactly one system, so project#iid names one issue; a
 group's entry serves every project under it that no closer entry names.
 SCRUM_MASTER_TRACKER replaces the default for one person's run, never an override,
 and with no such file it alone names the system every project uses. scrum-master reads the file from the checkout, else from the one sibling
-checkout that holds it, worktrees of one repository counting as one.
+checkout that holds it, worktrees of one repository counting as one. That
+checkout is the system repository's, and a word that reads the policy
+without --control reads it there, from any repository of the program.
 
 <!-- req: R1.4 -->
 ### R1.4

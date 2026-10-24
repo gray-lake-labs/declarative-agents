@@ -28,7 +28,7 @@ func init() {
 			fs.StringVar(&a.to, "to", "", "the period's last week, YYYY-Www (required)")
 			fs.StringVar(&a.dir, "dir", ".", "the repository's checkout, for its release tags")
 			fs.StringVar(&a.artifact, "artifact", "", "the artifact the repository releases (required)")
-			fs.StringVar(&a.control, "control", "", "program repository holding control/policy.md; empty uses the defaults")
+			fs.StringVar(&a.control, "control", "", "program repository holding control/policy.md; empty is the system repository beside the checkout, else the defaults")
 			fs.StringVar(&a.ref, "ref", "main", "ref of the control files")
 		},
 		Run: func(ctx *cli.Context) error {
@@ -40,8 +40,8 @@ func init() {
 				return err
 			}
 			p := program.Defaults()
-			if a.control != "" {
-				if p, err = program.LoadPolicy(t, a.control, a.ref); err != nil {
+			if control := program.ControlFor(a.control, a.dir, ""); control != "" {
+				if p, err = program.LoadPolicy(t, control, a.ref); err != nil {
 					return err
 				}
 			}
