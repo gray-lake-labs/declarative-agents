@@ -107,7 +107,7 @@ func RepoTags(dir string) ([]string, error) {
 }
 
 func init() {
-	var args struct{ artifact, control, ref, dir string }
+	var args struct{ artifact, control, ref, dir, chosen string }
 	common := func(fs *flag.FlagSet) {
 		fs.StringVar(&args.artifact, "artifact", "", "artifact a subsystem SRD declares (required)")
 		fs.StringVar(&args.control, "control", "", "program repository holding control/policy.md; empty is the system repository beside the checkout, else the defaults")
@@ -224,7 +224,10 @@ func init() {
 
 	cli.Default.Register(&cli.Command{
 		Group: "release", Name: "next", Summary: "report the latest version and the next candidates with their class",
-		Flags: common,
+		Flags: func(fs *flag.FlagSet) {
+			common(fs)
+			fs.StringVar(&args.chosen, "version", "", "a candidate version to release in place of the recommendation (GH-47)")
+		},
 		Run: func(ctx *cli.Context) error {
 			p, err := policy(ctx)
 			if err != nil {
@@ -237,6 +240,11 @@ func init() {
 			n, err := Recommendation(p.Releases, args.artifact, args.dir, tags)
 			if err != nil {
 				return err
+			}
+			if args.chosen != "" {
+				if err := n.Choose(args.chosen); err != nil {
+					return err
+				}
 			}
 			return ctx.Emit(n, n.Human())
 		},

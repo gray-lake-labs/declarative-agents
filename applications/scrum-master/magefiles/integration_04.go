@@ -172,5 +172,19 @@ major-and-minor-before-1.0
 	c.expect(rerr == nil && strings.Contains(out, "final machine state: Done"), "the release run: %v: %s", rerr, tail17(out))
 	_, terr = r.remoteTag(po1, "grader/v0.1.1")
 	c.expect(terr == nil, "the release run left no grader/v0.1.1 at the origin: %v", terr)
+
+	// A chosen version (GH-47): another fix calls for a patch, and the
+	// request chooses the minor instead, which the gate and tag use.
+	writeFileTo(filepath.Join(wf, "FIX2.md"), "another fix\n")
+	if err := r.commitPush(wf, "Fix the grader's rounding again", "FIX2.md"); err != nil {
+		return err
+	}
+	out, rerr = r.runWorkflow(rel, "release", rigUser, wf, po1, ref, map[string]any{"version": "0.2.0"},
+		"SCRUM_MASTER_ARTIFACT=grader", "SCRUM_MASTER_CONTROL="+system, "SCRUM_MASTER_REF="+seedBranch)
+	c.expect(rerr == nil && strings.Contains(out, "final machine state: Done"), "the chosen-version release run: %v: %s", rerr, tail17(out))
+	_, terr = r.remoteTag(po1, "grader/v0.2.0")
+	c.expect(terr == nil, "the chosen-version release left no grader/v0.2.0 at the origin: %v", terr)
+	_, terr = r.remoteTag(po1, "grader/v0.1.2")
+	c.expect(terr != nil, "the chosen-version release tagged the recommended grader/v0.1.2 too")
 	return c.err("release")
 }

@@ -104,6 +104,7 @@ transitions:
   signal: Seed
   next: Gate
   action: merge_gate
+  label: gate
   summary: true
 - state: Gate
   signal: ToolDone

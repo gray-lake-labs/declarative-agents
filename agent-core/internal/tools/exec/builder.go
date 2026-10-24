@@ -40,10 +40,27 @@ type ExecBuilder struct {
 func (b *ExecBuilder) Build(res core.Result) core.Command {
 	mappings := b.Def.ExtractParamMappings()
 	params := make(map[string]string)
+	lists := make(map[string][]string)
 	var sources []catalog.ParamMapping
 	for _, pm := range mappings {
 		if pm.Source != "" {
 			sources = append(sources, pm)
+			continue
+		}
+		if pm.List {
+			vals := ExtractListParam(res.Output, pm.Name)
+			if len(vals) == 0 && pm.Required {
+				return &FailedParamCmd{ToolName: b.Def.Name, Missing: pm.Name}
+			}
+			if len(vals) > 0 {
+				lists[pm.Name] = vals
+			}
+			continue
+		}
+		if pm.BoolFlag {
+			if ExtractBoolParam(res.Output, pm.Name) || (pm.Default == "true" && !hasParam(res.Output, pm.Name)) {
+				params[pm.Name] = "true"
+			}
 			continue
 		}
 		val := ExtractStringParam(res.Output, pm.Name)
@@ -62,7 +79,7 @@ func (b *ExecBuilder) Build(res core.Result) core.Command {
 			params[pm.Name] = val
 		}
 	}
-	return &ExecCmd{def: b.Def, root: b.Root, rootFunc: b.RootFunc, params: params, sources: sources}
+	return &ExecCmd{def: b.Def, root: b.Root, rootFunc: b.RootFunc, params: params, lists: lists, sources: sources}
 }
 
 // BuildReverser returns an exec command configured only for receipt-driven Undo:
@@ -78,9 +95,12 @@ type ExecCmd struct {
 	root     string
 	rootFunc func() string
 	params   map[string]string
-	sources  []catalog.ParamMapping
-	view     core.CommandStateView
-	rec      monitor.ToolMetricsRecorder
+	// lists holds array parameters, each element its own argv entry
+	// (srd023 R2.12).
+	lists   map[string][]string
+	sources []catalog.ParamMapping
+	view    core.CommandStateView
+	rec     monitor.ToolMetricsRecorder
 }
 
 func (c *ExecCmd) Name() string { return c.def.Name }
@@ -192,6 +212,12 @@ func (c *ExecCmd) resolveSourceParams() error {
 		if err != nil {
 			return fmt.Errorf("parameter %q from %q: %w", pm.Name, pm.Source, err)
 		}
+		if pm.List {
+			if err := c.resolveSourceList(pm, value); err != nil {
+				return err
+			}
+			continue
+		}
 		resolved, ok := value.(string)
 		if !ok {
 			return fmt.Errorf(
@@ -208,6 +234,46 @@ func (c *ExecCmd) resolveSourceParams() error {
 		if resolved != "" {
 			c.params[pm.Name] = resolved
 		}
+	}
+	return nil
+}
+
+// resolveSourceList maps an array parameter's source, a JSON array of
+// strings or numbers, or a lone string, to its elements (srd023 R2.12).
+func (c *ExecCmd) resolveSourceList(pm catalog.ParamMapping, value interface{}) error {
+	if c.lists == nil {
+		c.lists = make(map[string][]string)
+	}
+	delete(c.lists, pm.Name)
+	var vals []string
+	add := func(e interface{}) error {
+		switch v := e.(type) {
+		case string:
+			if v != "" {
+				vals = append(vals, v)
+			}
+		case float64:
+			vals = append(vals, strconv.FormatFloat(v, 'f', -1, 64))
+		case nil:
+		default:
+			return fmt.Errorf("parameter %q from %q holds %T, want strings", pm.Name, pm.Source, e)
+		}
+		return nil
+	}
+	if arr, ok := value.([]interface{}); ok {
+		for _, e := range arr {
+			if err := add(e); err != nil {
+				return err
+			}
+		}
+	} else if err := add(value); err != nil {
+		return err
+	}
+	if len(vals) == 0 && pm.Required {
+		return fmt.Errorf("required parameter %q from %q resolved to no elements", pm.Name, pm.Source)
+	}
+	if len(vals) > 0 {
+		c.lists[pm.Name] = vals
 	}
 	return nil
 }
@@ -229,6 +295,12 @@ func (c *ExecCmd) execDir() string {
 func (c *ExecCmd) buildArgs() []string {
 	args := append([]string(nil), c.def.Args...)
 	for _, pm := range c.def.ExtractParamMappings() {
+		if vals, ok := c.lists[pm.Name]; ok {
+			for _, val := range vals {
+				args = appendMappedArg(args, pm, val)
+			}
+			continue
+		}
 		val, ok := c.params[pm.Name]
 		if !ok {
 			continue

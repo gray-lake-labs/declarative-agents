@@ -3,6 +3,7 @@
 package release
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
@@ -116,5 +117,24 @@ v{version}
 	}
 	if g := program.Defaults().Gate("anything"); len(g) != 1 || g[0].Command != "go test ./..." {
 		t.Fatalf("default gate %+v", g)
+	}
+}
+
+// A chosen candidate replaces the recommendation the gate and tag read,
+// and says so; a version that is no candidate is refused (GH-47).
+func TestNextChoosesACandidate(t *testing.T) {
+	n := Next(program.Defaults().Releases, "a", []string{"a/v0.2.3"})
+	n.Recommend([]string{"Add the scorer"}, false)
+	if n.RecommendedVersion != "0.3.0" {
+		t.Fatalf("recommended %q, want the minor 0.3.0", n.RecommendedVersion)
+	}
+	if err := n.Choose("0.2.4"); err != nil {
+		t.Fatal(err)
+	}
+	if n.RecommendedVersion != "0.2.4" || n.Chosen != "0.2.4" || !strings.Contains(n.Reason, "chosen: patch 0.2.4 over the recommended 0.3.0") {
+		t.Fatalf("after choosing the patch: %+v", n)
+	}
+	if err := n.Choose("0.9.9"); err == nil || !strings.Contains(err.Error(), "not a candidate") {
+		t.Fatalf("a version no candidate names = %v, want a refusal", err)
 	}
 }

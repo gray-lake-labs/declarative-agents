@@ -187,8 +187,8 @@ func init() {
 	})
 
 	var claimArgs struct {
-		project, issueProject, control, ref string
-		iid                                 int
+		project, issueProject, branch, control, ref string
+		iid                                         int
 	}
 	cli.Default.Register(&cli.Command{
 		Group: "issue", Name: "claim", Summary: "the claim word: assign the issue to the caller with pop's refusals, naming the branch to open (GH-204)",
@@ -196,6 +196,7 @@ func init() {
 			fs.StringVar(&claimArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&claimArgs.iid, "issue", 0, "issue IID (required)")
 			fs.StringVar(&claimArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
+			fs.StringVar(&claimArgs.branch, "branch", "", "the branch to open in place of the one named for the issue (GH-47)")
 			fs.StringVar(&claimArgs.control, "control", "", "program repository holding control/ files; empty is the system repository beside the checkout, else the defaults")
 			fs.StringVar(&claimArgs.ref, "ref", "main", "ref of the control files")
 		},
@@ -219,7 +220,16 @@ func init() {
 			if err != nil {
 				return err
 			}
-			return ctx.Emit(r, fmt.Sprintf("%s#%d claimed; open its branch %s with scrum-master issue open-branch", issueProject, r.IID, r.Branch))
+			if claimArgs.branch != "" {
+				r.Branch = claimArgs.branch
+			}
+			// issue_project is always in the output, empty for --project,
+			// so the pop profile's later words can read it (GH-47).
+			out := struct {
+				PopResult
+				IssueProject string `json:"issue_project"`
+			}{r, r.IssueProject}
+			return ctx.Emit(out, fmt.Sprintf("%s#%d claimed; open its branch %s with scrum-master issue open-branch", issueProject, r.IID, r.Branch))
 		},
 	})
 
@@ -543,7 +553,14 @@ func init() {
 			} else if !r.Merged {
 				human = fmt.Sprintf("%s was already merged on %s; closed %s", r.Branch, r.Commit, strings.Join(r.Closed, ", "))
 			}
-			return ctx.Emit(r, human)
+			// closes and issue_project are always in the output, so the
+			// merge profile's later words can read them from the gate (GH-47).
+			out := struct {
+				MergeResult
+				IssueProject string   `json:"issue_project"`
+				Closes       []string `json:"closes"`
+			}{r, r.IssueProject, append([]string{}, mergeArgs.closes...)}
+			return ctx.Emit(out, human)
 		},
 	})
 

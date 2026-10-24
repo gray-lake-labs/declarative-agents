@@ -16,8 +16,15 @@ tools:
   - --control=${SCRUM_MASTER_CONTROL}
   - --ref=${SCRUM_MASTER_REF}
   visibility: internal
-  description: 'Name the release''s candidates and the one the commits since the latest tag call for (srd015 R3.1).'
+  description: 'Name the release''s candidates and the one the commits since the latest tag call for (srd015 R3.1), or the candidate the request chose.'
   category: boundary
+  parameters:
+    type: object
+    properties:
+      version:
+        type: string
+        description: 'A candidate version to release in place of the recommendation, such as a patch republish against a minor recommendation; the gate and tag then read it.'
+        flag: --version
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
