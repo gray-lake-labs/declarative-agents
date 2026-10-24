@@ -12,8 +12,9 @@ status: specified
 
 Each run starts with mage regression:up creating the repositories below in
 a fresh rig run on local disk and ends with mage regression:down removing them.
-The tag stages push a downstream tag and a system tag and prove the
-reference-update issue and the summary's branch and review issue, each idempotent.
+The tag stages push a downstream tag and a system tag through the release
+profile and prove the reference-update issue and the deck rendered beside
+the approved summary, each idempotent.
 
 <!-- field: traces -->
 ## Traces
@@ -67,8 +68,8 @@ go test ./internal/handoff -run '^TestDownstreamTagFilesReferenceUpdateOnce$'
 - [srd014-handoff](../software-requirements/srd014-handoff.md) [AC6](../software-requirements/srd014-handoff.md#ac6)
 - [srd007-links](../software-requirements/srd007-links.md) [AC5](../software-requirements/srd007-links.md#ac5)
 
-<!-- case: A system tag opens one summary for review | status: specified -->
-### A system tag opens one summary for review
+<!-- case: A system tag renders the deck from the approved summary | status: specified -->
+### A system tag renders the deck from the approved summary
 
 <!-- field: use_case -->
 #### Use case
@@ -83,16 +84,17 @@ mage integration:releaseSummary
 <!-- field: go_test -->
 #### Go test
 
-go test ./internal/reports -run '^TestSystemTagOpensOneSummaryMergeRequest$'
+go test ./internal/reports -run '^TestSystemTagRendersDeckFromApprovedSummaryOnce$'
 
 <!-- field: expected_outputs | form: "tree" -->
 #### Expected outputs
 
-- range: reports since the previous system release tag
-- merge_request: one, with the computed aggregate and deck, linked to the stakeholder update issue
-- model_tokens_in_ci: 0
-- deck_slides: within the configured limit
-- second_run: no second branch or review issue
+- source: the merged sprint-end summary at docs/sprint-ends/RELEASE.md
+- deck: committed beside the summary, one slide per outline section, within slide_limit
+- over_limit: non-zero exit naming the sections over slide_limit, nothing truncated, the tag stands
+- branches_or_review_issues: none
+- model_tokens: 0
+- second_run: nothing committed
 
 <!-- field: traces -->
 #### Traces

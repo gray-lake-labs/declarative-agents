@@ -41,6 +41,11 @@ Popped, its Requirements direct the work in order: summarize the period from scr
 
 The owner's confirmation of the release and its version is asked before the release is pushed and never assumed. The release is gated and tagged on main after the sprint-end merge lands, so the tag names a merged revision; the gate is the policy's default definition_of_done unless the repository releases an artifact it declares (srd008 R2). A repository with nothing to release closes the sprint-end issue by that merge alone, with the summary committed and no tag (a merge close, srd041 R9.3).
 
+<!-- req: R1.4 -->
+### R1.4
+
+In the system repository, the summary at docs/sprint-ends/RELEASE.md follows the outline-section summary format the reports repository's deck template reads, one section per slide, so the release profile's step after the system tag renders the deck from it (srd018 R4.1, R10.1).
+
 <!-- req: R2 -->
 ## R2 - Closing a Sprint Goal before track-goals runs
 
@@ -84,7 +89,7 @@ The workflow is a declarative-agents profile, plugin/agents/sprint-end/ (design.
 <!-- ac: AC1 -->
 ### AC1
 
-Each releasing repository has one sprint-end issue per period, filed by scrum-master plan push and due on the milestone end date; worked, it summarizes the period, asks the owner what to change, and closes by the merge that commits the summary; the release is gated and tagged on main only after that merge and the owner's confirmation, or not at all.
+Each releasing repository has one sprint-end issue per period, filed by scrum-master plan push and due on the milestone end date; worked, it summarizes the period, asks the owner what to change, and closes by the merge that commits the summary; the release is gated and tagged on main only after that merge and the owner's confirmation, or not at all; in the system repository the summary's outline is the deck's.
 
 <!-- field: traces -->
 #### Traces
@@ -92,6 +97,7 @@ Each releasing repository has one sprint-end issue per period, filed by scrum-ma
 - [R1.1](#r11)
 - [R1.2](#r12)
 - [R1.3](#r13)
+- [R1.4](#r14)
 
 <!-- ac: AC2 -->
 ### AC2

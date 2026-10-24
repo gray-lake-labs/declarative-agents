@@ -65,6 +65,19 @@ string
 
 The system repository's project path: where the policy lives and where aggregate --push files actionable signals.
 
+<!-- schema_entry: slide_limit -->
+### slide_limit
+
+<!-- field: type -->
+#### Type
+
+integer
+
+<!-- field: description -->
+#### Description
+
+The most slides scrum-master reports deck renders from a summary, one per outline section. A summary whose outline has more sections makes deck exit non-zero naming the sections over the limit; nothing is truncated (srd018 R4.1). Default 10.
+
 <!-- field: config_file_layout -->
 ## Config file layout
 
@@ -101,4 +114,9 @@ Recurring: weekly status {week}
 ## System
 
 group/system
+
+<!-- field: slide_limit -->
+## Slide limit
+
+10
 ```
