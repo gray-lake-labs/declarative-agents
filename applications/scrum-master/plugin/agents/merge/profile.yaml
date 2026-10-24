@@ -6,7 +6,7 @@
 # command; this machine runs it as explicit states, so a close that fails
 # after the push is a state a person can see and finish, not a buried
 # error. mage audit validates the profile at the pin, and a run starts in
-# the issue's worktree with TPM_PROJECT and TPM_ISSUE set.
+# the issue's worktree with SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE set.
 name: merge
 machine: machine.yaml
 tools:

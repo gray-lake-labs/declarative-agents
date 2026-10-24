@@ -13,6 +13,7 @@ import (
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/cli"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/legacyenv"
 )
 
 func init() {
@@ -219,6 +220,9 @@ func humanDoctor(r DoctorResult) string {
 		}
 		fmt.Fprintf(&b, "profile %s reads: %s\n", p.Profile, strings.Join(vars, ", "))
 	}
+	for _, name := range r.LegacyEnv {
+		fmt.Fprintf(&b, "%s is set: rename it %s; the TPM_ names are read only where the new one is unset\n", name, legacyenv.Renamed(name))
+	}
 	agents := map[string]bool{}
 	for _, f := range r.Skills {
 		fmt.Fprintf(&b, "skill %-9s %s %s\n", f.Problem, f.Agent, f.Path)
@@ -278,16 +282,16 @@ func gitRoot() (string, error) {
 }
 
 // person is who the tracker's writes are made as, as the beads tracker
-// resolves it: TPM_USER, else git's user.name.
+// resolves it: SCRUM_MASTER_USER, else git's user.name.
 func person() (string, error) {
-	if u := strings.TrimSpace(os.Getenv("TPM_USER")); u != "" {
+	if u := strings.TrimSpace(os.Getenv("SCRUM_MASTER_USER")); u != "" {
 		return u, nil
 	}
 	out, err := exec.Command("git", "config", "user.name").Output()
 	if u := strings.TrimSpace(string(out)); err == nil && u != "" {
 		return u, nil
 	}
-	return "", fmt.Errorf("no person for the tracker's writes: set TPM_USER or git config user.name")
+	return "", fmt.Errorf("no person for the tracker's writes: set SCRUM_MASTER_USER or git config user.name")
 }
 
 // skillFiles counts the skill files among an install's results; the

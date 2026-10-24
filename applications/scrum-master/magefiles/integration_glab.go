@@ -23,7 +23,7 @@ import (
 // logged in, it works in one private project, rig, under the group
 // GLAB_RIG_GROUP names, creating the group (as a subgroup of its parent)
 // and the project on first use and reusing them after. With
-// TPM_TRACKER=glab it builds scrum-master and proves scrum-master issue labels writes the
+// SCRUM_MASTER_TRACKER=glab it builds scrum-master and proves scrum-master issue labels writes the
 // schema as group labels, scrum-master issue file files an admitted issue on a
 // dated group milestone, scrum-master issue pop opens the branch with a draft merge
 // request, and under the default policy scrum-master issue merge merges the author's
@@ -109,7 +109,7 @@ func (Integration) Glab() error {
 	words := func(dir string, args ...string) ([]byte, error) {
 		cmd := exec.Command(bin, args...)
 		cmd.Dir = dir
-		cmd.Env = append(os.Environ(), "TPM_TRACKER=glab")
+		cmd.Env = append(os.Environ(), "SCRUM_MASTER_TRACKER=glab")
 		var errb bytes.Buffer
 		cmd.Stderr = &errb
 		out, err := cmd.Output()

@@ -62,6 +62,22 @@ func TestDoctorAddsMissing(t *testing.T) {
 	}
 }
 
+// A TPM_ variable still set is named with the SCRUM_MASTER_ name it moves
+// to (GH-38).
+func TestDoctorNamesTheOldVariables(t *testing.T) {
+	t.Setenv("TPM_USER", "a-member")
+	r, err := Doctor(DoctorOptions{Dir: older(t)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Contains(r.LegacyEnv, "TPM_USER") {
+		t.Fatalf("legacy env %v names no TPM_USER", r.LegacyEnv)
+	}
+	if h := humanDoctor(r); !strings.Contains(h, "TPM_USER is set: rename it SCRUM_MASTER_USER") {
+		t.Errorf("doctor's report does not name the rename:\n%s", h)
+	}
+}
+
 func TestDoctorRefreshesBlock(t *testing.T) {
 	dir := repo(t)
 	if _, err := Init(InitOptions{Dir: dir}); err != nil {

@@ -4,8 +4,8 @@
 # sprint issue, the sprint-end issues, and the planned events. Each word
 # rereads the road map in the checkout and recomputes its scope, and each
 # upserts by marker or ensures by title, so a re-run of any word — or of
-# the whole machine — updates and creates nothing. TPM_SYSTEM, TPM_VERSION,
-# and TPM_END come from the environment; TPM_REF defaults to main.
+# the whole machine — updates and creates nothing. SCRUM_MASTER_SYSTEM, SCRUM_MASTER_VERSION,
+# and SCRUM_MASTER_END come from the environment; SCRUM_MASTER_REF defaults to main.
 unit: scrum-master-plan-push-declarations
 tools:
 - name: plan_milestone
@@ -16,13 +16,13 @@ tools:
   - milestone
   - --json
   - --system
-  - ${TPM_SYSTEM}
+  - ${SCRUM_MASTER_SYSTEM}
   - --version
-  - ${TPM_VERSION}
+  - ${SCRUM_MASTER_VERSION}
   - --end
-  - ${TPM_END}
+  - ${SCRUM_MASTER_END}
   - --ref
-  - ${TPM_REF:-main}
+  - ${SCRUM_MASTER_REF:-main}
   visibility: internal
   description: Date the release's milestone in the program group and each releasing repository's group outside it (srd031 R4.2).
   category: boundary
@@ -60,13 +60,13 @@ tools:
   - sprint-issue
   - --json
   - --system
-  - ${TPM_SYSTEM}
+  - ${SCRUM_MASTER_SYSTEM}
   - --version
-  - ${TPM_VERSION}
+  - ${SCRUM_MASTER_VERSION}
   - --end
-  - ${TPM_END}
+  - ${SCRUM_MASTER_END}
   - --ref
-  - ${TPM_REF:-main}
+  - ${SCRUM_MASTER_REF:-main}
   visibility: internal
   description: Keep the release's one sprint issue with its exit checklist, found by its marker; a ticked item stays ticked (srd001 R7).
   category: boundary
@@ -104,13 +104,13 @@ tools:
   - sprint-ends
   - --json
   - --system
-  - ${TPM_SYSTEM}
+  - ${SCRUM_MASTER_SYSTEM}
   - --version
-  - ${TPM_VERSION}
+  - ${SCRUM_MASTER_VERSION}
   - --end
-  - ${TPM_END}
+  - ${SCRUM_MASTER_END}
   - --ref
-  - ${TPM_REF:-main}
+  - ${SCRUM_MASTER_REF:-main}
   visibility: internal
   description: Keep one sprint-end issue per releasing repository, each found by its marker (srd038 R1.1).
   category: boundary
@@ -148,13 +148,13 @@ tools:
   - events
   - --json
   - --system
-  - ${TPM_SYSTEM}
+  - ${SCRUM_MASTER_SYSTEM}
   - --version
-  - ${TPM_VERSION}
+  - ${SCRUM_MASTER_VERSION}
   - --end
-  - ${TPM_END}
+  - ${SCRUM_MASTER_END}
   - --ref
-  - ${TPM_REF:-main}
+  - ${SCRUM_MASTER_REF:-main}
   visibility: internal
   description: Post a planned event on each open Sprint Goal the release moves, once (srd031 R4.3).
   category: boundary

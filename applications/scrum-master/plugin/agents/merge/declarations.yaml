@@ -4,7 +4,7 @@
 # nothing, the merge word, and the close word. The commit and the closes
 # flow from the merge word's JSON output into the close word's parameters —
 # the runtime extracts a declared parameter from the previous result — so
-# nothing is retyped between steps. TPM_PROJECT and TPM_ISSUE come from the
+# nothing is retyped between steps. SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE come from the
 # environment; an optional value is a parameter, never a ${VAR} arg (the
 # GH-135 finding).
 unit: scrum-master-merge-declarations
@@ -18,9 +18,9 @@ tools:
   - --dry-run
   - --json
   - --project
-  - ${TPM_PROJECT}
+  - ${SCRUM_MASTER_PROJECT}
   - --issue
-  - ${TPM_ISSUE}
+  - ${SCRUM_MASTER_ISSUE}
   visibility: internal
   description: Run every delivery gate and write nothing — the issue and closes open, commits over the base, the summary format, the audit on a docs/ change, the approval the policy requires (srd013 R5.3, R5.5).
   category: boundary
@@ -58,9 +58,9 @@ tools:
   - merge-branch
   - --json
   - --project
-  - ${TPM_PROJECT}
+  - ${SCRUM_MASTER_PROJECT}
   - --issue
-  - ${TPM_ISSUE}
+  - ${SCRUM_MASTER_ISSUE}
   visibility: internal
   description: Merge the branch --no-ff into the default branch with a message citing the issue and each closes, and push it; close nothing (GH-201, srd013 R5.7).
   category: boundary
@@ -98,9 +98,9 @@ tools:
   - close-delivered
   - --json
   - --project
-  - ${TPM_PROJECT}
+  - ${SCRUM_MASTER_PROJECT}
   - --issue
-  - ${TPM_ISSUE}
+  - ${SCRUM_MASTER_ISSUE}
   visibility: internal
   description: Close the issue and each closes reference on the merge commit, and report complete each closed Sprint Goal (GH-201, srd013 R5.7, srd038 R2.2).
   category: boundary

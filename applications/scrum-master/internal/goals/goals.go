@@ -15,12 +15,12 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
-// WebBase is the web root repositories are cited under, TPM_WEB_BASE: a
+// WebBase is the web root repositories are cited under, SCRUM_MASTER_WEB_BASE: a
 // pinned citation is <web base>/<project>/-/blob/<tag>/<path> (srd007).
 func WebBase() (string, error) {
-	base := strings.TrimSuffix(strings.TrimSpace(os.Getenv("TPM_WEB_BASE")), "/")
+	base := strings.TrimSuffix(strings.TrimSpace(os.Getenv("SCRUM_MASTER_WEB_BASE")), "/")
 	if base == "" {
-		return "", errors.New("no web base for citations: set TPM_WEB_BASE to the web root repositories are cited under")
+		return "", errors.New("no web base for citations: set SCRUM_MASTER_WEB_BASE to the web root repositories are cited under")
 	}
 	return base, nil
 }

@@ -57,7 +57,7 @@ func newWeeklyEnv(cloneName string) (*weeklyEnv, error) {
 	if err != nil {
 		return nil, err
 	}
-	out, err := r.runWorkflow(rel, "reports-init", e.user, e.clone, e.reports, "", map[string]any{"members": e.user + "=" + e.po1}, "TPM_SYSTEM="+e.system)
+	out, err := r.runWorkflow(rel, "reports-init", e.user, e.clone, e.reports, "", map[string]any{"members": e.user + "=" + e.po1}, "SCRUM_MASTER_SYSTEM="+e.system)
 	if err != nil || !strings.Contains(out, "final machine state: Done") {
 		return e, fmt.Errorf("the reports-init run: %v: %s", err, tail17(out))
 	}
@@ -174,7 +174,7 @@ func (Integration) WeeklyStatus() error {
 	}
 	thirdDay := start.AddDate(0, 0, 14).Format("2006-01-02")
 	out, serr := e.runWorkflow(rel, "status-issues", e.user, e.clone, e.reports, "", map[string]any{"ref": seedBranch, "date": thirdDay},
-		"TPM_REPORTS="+e.reports)
+		"SCRUM_MASTER_REPORTS="+e.reports)
 	c.expect(serr == nil && strings.Contains(out, "final machine state: Done"), "the status-issues run: %v: %s", serr, tail17(out))
 	return c.err("weeklyStatus")
 }

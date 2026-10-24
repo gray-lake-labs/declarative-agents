@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# The comment machine's words (GH-37). TPM_PROJECT and TPM_ISSUE name the issue; optional flags are
+# The comment machine's words (GH-37). SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE name the issue; optional flags are
 # parameters from the run's request, never ${VAR} args (GH-135).
 unit: scrum-master-comment-declarations
 tools:
@@ -12,9 +12,9 @@ tools:
   - comment
   - --json
   - --project
-  - ${TPM_PROJECT}
+  - ${SCRUM_MASTER_PROJECT}
   - --issue
-  - ${TPM_ISSUE}
+  - ${SCRUM_MASTER_ISSUE}
   visibility: internal
   description: 'Post a comment on the issue as the caller.'
   category: boundary

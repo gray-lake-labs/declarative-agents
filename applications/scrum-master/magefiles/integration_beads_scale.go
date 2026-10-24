@@ -203,7 +203,7 @@ func scaleRun(dir, bin, layout string, n, k, ops int) (scaleCase, error) {
 		if err := git(home, "clone", "-q", "--no-local", tracker, filepath.Join(home, "tracker-clone")); err != nil {
 			return "", nil, err
 		}
-		env := append(scaleEnv(name), "TPM_TRACKER="+tracker, "TPM_TRACKER_CLONE="+filepath.Join(home, "tracker-clone"), "TPM_USER="+name)
+		env := append(scaleEnv(name), "SCRUM_MASTER_TRACKER="+tracker, "SCRUM_MASTER_TRACKER_CLONE="+filepath.Join(home, "tracker-clone"), "SCRUM_MASTER_USER="+name)
 		return checkout, env, nil
 	}
 	body := filepath.Join(dir, "body.md")

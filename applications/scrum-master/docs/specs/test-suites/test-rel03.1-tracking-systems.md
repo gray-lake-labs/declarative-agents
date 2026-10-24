@@ -56,7 +56,7 @@ go test ./internal/routing ./internal/tracker
 
 - default: a project no override names is served by the default system
 - override: the longest matching path wins
-- environment: TPM_TRACKER replaces the default only
+- environment: SCRUM_MASTER_TRACKER replaces the default only
 - refused: a path mapped twice, an unknown system, or bd named as an override
 - found: the file in the checkout, else in a sibling checkout
 - rig: every command of mage integration:pop reaches bd through the default, with no override

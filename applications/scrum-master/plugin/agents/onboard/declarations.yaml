@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT-0
 # The onboard machine's words (GH-29): lay down a joining repository, file
 # its registration in the system repository, and install its skills, then
-# vendor the profiles. TPM_SYSTEM and TPM_SUBSYSTEM name where it joins;
+# vendor the profiles. SCRUM_MASTER_SYSTEM and SCRUM_MASTER_SUBSYSTEM name where it joins;
 # optional flags are parameters from the run's request, never ${VAR} args
 # (GH-135).
 unit: scrum-master-onboard-declarations
@@ -14,9 +14,9 @@ tools:
   - onboard
   - --json
   - --system
-  - ${TPM_SYSTEM}
+  - ${SCRUM_MASTER_SYSTEM}
   - --subsystem
-  - ${TPM_SUBSYSTEM}
+  - ${SCRUM_MASTER_SUBSYSTEM}
   visibility: internal
   description: Lay down a repository joining the program — corpus and orientation — file its registration in the system repository, and install the skills for the named agents (srd034, srd037); a rerun files nothing more.
   category: boundary

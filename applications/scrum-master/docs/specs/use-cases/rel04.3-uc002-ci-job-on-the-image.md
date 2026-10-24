@@ -21,7 +21,7 @@ at tpm's pin with the spec tool built into the image.
 <!-- field: actor -->
 ## Actor
 
-The technical program manager or a Product Owner, who writes the CI job; the job runs as the service user TPM_USER names.
+The technical program manager or a Product Owner, who writes the CI job; the job runs as the service user SCRUM_MASTER_USER names.
 
 <!-- field: trigger -->
 ## Trigger
@@ -91,4 +91,4 @@ On the image, with no Go toolchain, tpm doctor reports the runtime with its path
 ## Assumptions
 
 - A1: Every step is a tpm subcommand, the runtime's own validation, or the runner's, and spends no model tokens (design.md D10).
-- A2: Writes a job makes are attributed to the service user TPM_USER names, and srd041's approval rule holds, so a job never approves its own merge.
+- A2: Writes a job makes are attributed to the service user SCRUM_MASTER_USER names, and srd041's approval rule holds, so a job never approves its own merge.

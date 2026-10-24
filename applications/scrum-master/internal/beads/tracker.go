@@ -68,22 +68,22 @@ func NewTracker(clone, user, code string) *Tracker {
 	return t
 }
 
-// Configured reports whether TPM_TRACKER names a tracker repository.
-func Configured() bool { return strings.TrimSpace(os.Getenv("TPM_TRACKER")) != "" }
+// Configured reports whether SCRUM_MASTER_TRACKER names a tracker repository.
+func Configured() bool { return strings.TrimSpace(os.Getenv("SCRUM_MASTER_TRACKER")) != "" }
 
-// FromEnv opens the beads tracker TPM_TRACKER names. Its clone is
-// TPM_TRACKER_CLONE, else a directory under the user cache, cloned on first
-// use; the person is TPM_USER, else git's user.name; the code half serves
+// FromEnv opens the beads tracker SCRUM_MASTER_TRACKER names. Its clone is
+// SCRUM_MASTER_TRACKER_CLONE, else a directory under the user cache, cloned on first
+// use; the person is SCRUM_MASTER_USER, else git's user.name; the code half serves
 // the checkout around the working directory.
 func FromEnv() (*Tracker, error) {
-	return OpenRepository(strings.TrimSpace(os.Getenv("TPM_TRACKER")))
+	return OpenRepository(strings.TrimSpace(os.Getenv("SCRUM_MASTER_TRACKER")))
 }
 
 // OpenRepository opens the beads tracker whose tracker repository is remote, cloned
-// at TPM_TRACKER_CLONE or under the user cache directory, for TPM_USER or
+// at SCRUM_MASTER_TRACKER_CLONE or under the user cache directory, for SCRUM_MASTER_USER or
 // git's user.name.
 func OpenRepository(remote string) (*Tracker, error) {
-	clone := strings.TrimSpace(os.Getenv("TPM_TRACKER_CLONE"))
+	clone := strings.TrimSpace(os.Getenv("SCRUM_MASTER_TRACKER_CLONE"))
 	if clone == "" {
 		cache, err := os.UserCacheDir()
 		if err != nil {
@@ -100,11 +100,11 @@ func OpenRepository(remote string) (*Tracker, error) {
 			return nil, fmt.Errorf("clone the tracker repository %s: %w: %s", remote, err, strings.TrimSpace(string(out)))
 		}
 	}
-	user := strings.TrimSpace(os.Getenv("TPM_USER"))
+	user := strings.TrimSpace(os.Getenv("SCRUM_MASTER_USER"))
 	if user == "" {
 		out, err := exec.Command("git", "config", "user.name").Output()
 		if user = strings.TrimSpace(string(out)); err != nil || user == "" {
-			return nil, errors.New("no person for the beads tracker: set TPM_USER or git config user.name")
+			return nil, errors.New("no person for the beads tracker: set SCRUM_MASTER_USER or git config user.name")
 		}
 	}
 	code, err := os.Getwd()

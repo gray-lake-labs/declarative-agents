@@ -39,7 +39,7 @@ func (Integration) Init() error {
 	if err := runStreaming(root, "go", "build", "-o", bin, "./magefiles/words"); err != nil {
 		return fmt.Errorf("build the words: %w", err)
 	}
-	env := append(os.Environ(), "TPM_USER=operator",
+	env := append(os.Environ(), "SCRUM_MASTER_USER=operator",
 		"GIT_AUTHOR_NAME=operator", "GIT_AUTHOR_EMAIL=operator@example.invalid",
 		"GIT_COMMITTER_NAME=operator", "GIT_COMMITTER_EMAIL=operator@example.invalid")
 	sh := func(dir string, name string, args ...string) error {

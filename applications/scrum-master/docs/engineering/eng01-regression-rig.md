@@ -46,8 +46,8 @@ clones/, so pop's worktrees land beside the clone inside the run.
 <!-- section: people -->
 ## People
 
-scrum-master runs as the rig's operator, with TPM_TRACKER naming the run's tracker
-repository and the operator's own clone of it in TPM_TRACKER_CLONE. A
+scrum-master runs as the rig's operator, with SCRUM_MASTER_TRACKER naming the run's tracker
+repository and the operator's own clone of it in SCRUM_MASTER_TRACKER_CLONE. A
 step another person takes, such as a release's peer read, runs scrum-master as the
 reviewer with the reviewer's own clone, so the two people's writes meet
 only in the tracker repository, as they would on two machines. A target
@@ -121,7 +121,7 @@ the organization (GH_TOKEN) and the network, so it never joins mage
 regression. It works in one private repository, gray-lake-labs/tpm-gh-rig,
 created on first use and reused, since the organization's token may create
 repositories but not delete them; GITHUB_RIG_REPO names another. With
-TPM_TRACKER=gh it builds scrum-master and proves scrum-master issue labels writes the schema
+SCRUM_MASTER_TRACKER=gh it builds scrum-master and proves scrum-master issue labels writes the schema
 into the repository, scrum-master issue file files an admitted issue on a dated
 milestone, scrum-master issue pop opens the branch with a draft pull request,
 GitHub refuses the author's own approval, and under the default policy scrum-master
@@ -137,7 +137,7 @@ mage integration:glab proves the glab tracking system against GitLab the
 same way: glab logged in, the network, never mage regression. It works in
 one private project, rig, under the group GLAB_RIG_GROUP names, creating
 the group as a subgroup of its parent and the project on first use and
-reusing them after. With TPM_TRACKER=glab it proves scrum-master issue labels writes
+reusing them after. With SCRUM_MASTER_TRACKER=glab it proves scrum-master issue labels writes
 the schema as group labels, scrum-master issue file files an admitted issue on a
 dated group milestone, scrum-master issue pop opens the branch with a draft merge
 request, and under the default policy scrum-master issue merge merges the author's

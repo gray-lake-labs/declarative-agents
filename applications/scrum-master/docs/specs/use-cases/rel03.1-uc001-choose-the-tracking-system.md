@@ -40,7 +40,7 @@ A person runs tpm issue file, pop, or merge for a project.
 <!-- field: flow -->
 ## Flow
 
-- F1: tpm reads control/trackers.md from the checkout or its sibling system repository and picks the system serving the project by its longest matching override, else the default; TPM_TRACKER overrides the default only.
+- F1: tpm reads control/trackers.md from the checkout or its sibling system repository and picks the system serving the project by its longest matching override, else the default; SCRUM_MASTER_TRACKER overrides the default only.
 - F2: tpm issue file files the issue on that system with its labels and milestone; on gh, a due or start date is a line of the description, and a group's labels and milestones go to each of its repositories.
 - F3: tpm issue pop claims the issue, opens its branch and worktree, and on gh or glab opens a draft pull or merge request with one empty commit.
 - F4: The person commits and pushes; when the policy sets admission.require_approval, a reviewer approves the head commit (a pull request review on gh, an approval with a note naming the commit on glab).

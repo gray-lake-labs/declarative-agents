@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# The status-issues machine's words (GH-37). TPM_REPORTS names the reports repository's checkout; optional flags are
+# The status-issues machine's words (GH-37). SCRUM_MASTER_REPORTS names the reports repository's checkout; optional flags are
 # parameters from the run's request, never ${VAR} args (GH-135).
 unit: scrum-master-status-issues-declarations
 tools:
@@ -12,7 +12,7 @@ tools:
   - status-issues
   - --json
   - --reports
-  - ${TPM_REPORTS}
+  - ${SCRUM_MASTER_REPORTS}
   visibility: internal
   description: 'File one status issue per listed person for the coming week, once (srd018 R7).'
   category: boundary

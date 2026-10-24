@@ -4,10 +4,10 @@
 # the push that publishes the branch. Each word runs in the agent's own
 # process (GH-27, GH-32) with --json; a non-zero exit is the word's refusal, and the machine routes it to
 # the Refused terminal state with the word's reason as the output (srd036 R2.1,
-# R4.2). The words read TPM_PROJECT, TPM_ISSUE, and TPM_CHECKOUT (the
+# R4.2). The words read SCRUM_MASTER_PROJECT, SCRUM_MASTER_ISSUE, and SCRUM_MASTER_CHECKOUT (the
 # project's clone, from which pop opens or reuses the issue's worktree, the
 # run's workspace) from the environment; scrum-master
-# itself reads TPM_TRACKER and TPM_USER (srd043), so the profile names every
+# itself reads SCRUM_MASTER_TRACKER and SCRUM_MASTER_USER (srd043), so the profile names every
 # variable a run reads. The control files come from --project's defaults: the
 # loader drops an argument whose variable is unset, which would corrupt the
 # flag list, so an optional flag stays out of a declaration (a GH-135 pilot
@@ -22,11 +22,11 @@ tools:
   - pop
   - --json
   - --project
-  - ${TPM_PROJECT}
+  - ${SCRUM_MASTER_PROJECT}
   - --issue
-  - ${TPM_ISSUE}
+  - ${SCRUM_MASTER_ISSUE}
   - --dir
-  - ${TPM_CHECKOUT}
+  - ${SCRUM_MASTER_CHECKOUT}
   visibility: internal
   description: Take the issue scrum-master was asked for — assign only the caller and create or reuse its branch and worktree (srd013 R7).
   category: boundary
@@ -102,9 +102,9 @@ tools:
   - merge
   - --json
   - --project
-  - ${TPM_PROJECT}
+  - ${SCRUM_MASTER_PROJECT}
   - --issue
-  - ${TPM_ISSUE}
+  - ${SCRUM_MASTER_ISSUE}
   visibility: internal
   description: Finish the work — audit a docs/ change, merge the approved branch, push, and close each issue (srd013 R5.5).
   category: boundary

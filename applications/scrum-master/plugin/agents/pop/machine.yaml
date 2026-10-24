@@ -8,7 +8,7 @@ purpose: |-
 
   This machine has no model state: a pop is deterministic, words all
   the way down (design.md D10, D14; GH-201, GH-204). The run starts in the
-  project's clone; TPM_PROJECT and TPM_ISSUE name the issue. A refusal from
+  project's clone; SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE name the issue. A refusal from
   the claim — a closed issue, someone else's, a data issue admission has
   not admitted — ends the run in Refused with the word's reason; a word that
   fails after the claim ends in a partial state a re-run finishes, since

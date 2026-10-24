@@ -37,7 +37,7 @@ string
 <!-- field: description -->
 #### Description
 
-The tracking system of every repository no override names: bd, gh, or glab. TPM_TRACKER replaces it for one person's run, never an override: a git URL or path names bd with that tracker repository, and gh or glab names that system.
+The tracking system of every repository no override names: bd, gh, or glab. SCRUM_MASTER_TRACKER replaces it for one person's run, never an override: a git URL or path names bd with that tracker repository, and gh or glab names that system.
 
 <!-- schema_entry: default.tracker_repository -->
 ### default.tracker_repository

@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# The reports-init machine's words (GH-37). TPM_SYSTEM names the system repository; the run starts in the reports repository's checkout; optional flags are
+# The reports-init machine's words (GH-37). SCRUM_MASTER_SYSTEM names the system repository; the run starts in the reports repository's checkout; optional flags are
 # parameters from the run's request, never ${VAR} args (GH-135).
 unit: scrum-master-reports-init-declarations
 tools:
@@ -12,7 +12,7 @@ tools:
   - init
   - --json
   - --system
-  - ${TPM_SYSTEM}
+  - ${SCRUM_MASTER_SYSTEM}
   visibility: internal
   description: 'Lay down the reports repository''s config and format for the listed team (srd018 R1).'
   category: boundary

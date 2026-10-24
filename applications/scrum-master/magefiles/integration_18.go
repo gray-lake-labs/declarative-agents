@@ -103,14 +103,14 @@ func (r *rigEnv) runPlanPushAgent(rel runtime.Release, system, clone, version, e
 	cmd.Dir = clone
 	cmd.Env = append(os.Environ(),
 		"PATH="+pathWithout("tpm", "scrum-master"),
-		"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
-		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
-		"TPM_USER="+r.user,
-		"TPM_WEB_BASE="+r.webBase,
-		"TPM_SYSTEM="+system,
-		"TPM_VERSION="+version,
-		"TPM_END="+end,
-		"TPM_REF="+seedBranch,
+		"SCRUM_MASTER_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
+		"SCRUM_MASTER_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
+		"SCRUM_MASTER_USER="+r.user,
+		"SCRUM_MASTER_WEB_BASE="+r.webBase,
+		"SCRUM_MASTER_SYSTEM="+system,
+		"SCRUM_MASTER_VERSION="+version,
+		"SCRUM_MASTER_END="+end,
+		"SCRUM_MASTER_REF="+seedBranch,
 	)
 	var out bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &out

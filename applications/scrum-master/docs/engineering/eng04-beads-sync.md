@@ -104,7 +104,8 @@ tracker keeps bd's JSONL in
 cost grows with the tracker. scrum-master tracker migrate moves a JSONL tracker to
 the files layout, with its index, in one commit, and is run once, when
 no one is writing; on a files tracker that has no index it builds one;
-scrum-master tracker export writes either layout as JSONL for bd.
+scrum-master tracker export writes either layout as JSONL for bd. The
+tracker-migrate and tracker-export profiles run the two.
 
 scrum-master issue file records a new issue and its admission, the lint state and
 any note, in one write, so filing races once. In the files layout an
@@ -124,13 +125,13 @@ measures both layouts at thousands of issues and several writers.
 <!-- section: choosing-the-backend -->
 ## Choosing the backend
 
-TPM_TRACKER, set to the tracker repository's URL, selects the beads
+SCRUM_MASTER_TRACKER, set to the tracker repository's URL, selects the beads
 backend, and scrum-master requires it. In scrum-master's code a tracking system is the two
 halves of the tracker interface, tracker.Issues and tracker.Forge, and
 program's delivery holds a branch's approval and merge; beads supplies
 both halves and the local delivery. The tracker clone lives at
-TPM_TRACKER_CLONE, or under the user cache directory, cloned on first use.
-The person is TPM_USER, or git's user.name. TPM_WEB_BASE is the web root repositories are cited under, which goals and plan need to write a pinned citation. Issues come from the tracker
+SCRUM_MASTER_TRACKER_CLONE, or under the user cache directory, cloned on first use.
+The person is SCRUM_MASTER_USER, or git's user.name. SCRUM_MASTER_WEB_BASE is the web root repositories are cited under, which goals and plan need to write a pinned citation. Issues come from the tracker
 repository; files, branches, tags, and comparisons come from git: a
 project's checkout is the sibling of the command's checkout named for the
 project's last path segment, as repositories sit side by side under their

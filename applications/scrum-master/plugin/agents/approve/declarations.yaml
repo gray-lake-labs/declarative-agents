@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# The approve machine's words (GH-37). TPM_PROJECT and TPM_ISSUE name the issue; optional flags are
+# The approve machine's words (GH-37). SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE name the issue; optional flags are
 # parameters from the run's request, never ${VAR} args (GH-135).
 unit: scrum-master-approve-declarations
 tools:
@@ -12,9 +12,9 @@ tools:
   - approve
   - --json
   - --project
-  - ${TPM_PROJECT}
+  - ${SCRUM_MASTER_PROJECT}
   - --issue
-  - ${TPM_ISSUE}
+  - ${SCRUM_MASTER_ISSUE}
   visibility: internal
   description: 'Approve the issue''s branch at its tip, as a reviewer other than its assignee (srd041 R9).'
   category: boundary

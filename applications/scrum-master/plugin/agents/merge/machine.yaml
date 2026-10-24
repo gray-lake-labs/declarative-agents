@@ -9,7 +9,7 @@ purpose: |-
 
   This machine has no model state: delivery is deterministic, words all
   the way down (design.md D10, D14; GH-201). The run starts in the issue's
-  worktree; TPM_PROJECT and TPM_ISSUE name the issue. A refusal from a gate
+  worktree; SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE name the issue. A refusal from a gate
   — a failed audit, a missing approval, a branch with no commits — ends the
   run in Refused with the word's reason, and a merge whose closes did not land
   ends in PartiallyDelivered, naming what a re-run of close-delivered

@@ -15,6 +15,7 @@ import (
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/legacyenv"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/routing"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/runtime"
@@ -45,6 +46,9 @@ type DoctorResult struct {
 	// declarations read and whether each is set here, so a run's model and
 	// tracker credentials are checked before a run (srd043 R4.7, GH-135).
 	Credentials []ProfileEnv `json:"credentials,omitempty"`
+	// LegacyEnv is the TPM_ variables set here, each read under its
+	// SCRUM_MASTER_ name until the setup renames it (GH-38).
+	LegacyEnv []string `json:"legacy_env,omitempty"`
 	// Trackers is the program's tracking systems, per control/trackers.md,
 	// and each problem reaching them (srd042).
 	Trackers *routing.Report `json:"trackers,omitempty"`
@@ -280,6 +284,7 @@ func Doctor(o DoctorOptions) (DoctorResult, error) {
 	if r.Credentials, err = profileCredentials(); err != nil {
 		return r, err
 	}
+	r.LegacyEnv = legacyenv.Set()
 	if agents := install.InstalledAgents(o.Dir); len(agents) > 0 {
 		skills, err := install.EmbeddedSkills()
 		if err != nil {

@@ -131,8 +131,8 @@ public transparency log. Signing returns when a consumer requires it,
 keyless from a CI identity once releases publish from a pipeline.
 
 A CI job reads tracker and model credentials from masked CI variables
-(TPM_TRACKER, TPM_USER, and what each profile names), and its writes are
-attributed to the service user TPM_USER names, never to a person; srd041's
+(SCRUM_MASTER_TRACKER, SCRUM_MASTER_USER, and what each profile names), and its writes are
+attributed to the service user SCRUM_MASTER_USER names, never to a person; srd041's
 approval rule still holds, so CI never approves its own merge. The README
 shows a GitLab CI job on the image, pulling from ghcr or from a program's
 own registry mirror.

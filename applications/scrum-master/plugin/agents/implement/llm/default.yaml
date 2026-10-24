@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT-0
 # The implement profile's model binding. The model acts only in the Work
 # state (design.md D10), so invoke_llm and parse_response build their tool
-# manifest there. The binding reads TPM_MODEL, TPM_RESPONSE_PROFILE, and
+# manifest there. The binding reads SCRUM_MASTER_MODEL, SCRUM_MASTER_RESPONSE_PROFILE, and
 # OLLAMA_URL from the environment, with the same defaults the parent's
 # executor ships, so the profile names every model credential a run reads
 # (srd043 R4.7).
@@ -43,11 +43,11 @@ tools:
     message_shape: 'invoke_llm: <provider/model>: <error>'
     state_after_failure: conversation history unchanged unless the provider response was already appended
   config:
-    model: ${TPM_MODEL:-qwen3.6:35b-mlx}
+    model: ${SCRUM_MASTER_MODEL:-qwen3.6:35b-mlx}
     dialect: /opt/providers/chat-dialect.yaml
     provider_url: ${OLLAMA_URL:-http://localhost:11434}
     manifest_state: Work
-    response_profile: ${TPM_RESPONSE_PROFILE:-qwen}
+    response_profile: ${SCRUM_MASTER_RESPONSE_PROFILE:-qwen}
     max_time: 600
     system_prompt: |
       You are the work step of scrum-master's implement workflow. The issue was taken

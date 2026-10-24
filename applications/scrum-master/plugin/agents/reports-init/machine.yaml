@@ -7,7 +7,7 @@ purpose: |-
   manager asks to set up the weekly status reports.
 
   This machine has no model state: scrum-master reports init (design.md
-  D10, D14; GH-37). TPM_SYSTEM names the system repository; the run starts
+  D10, D14; GH-37). SCRUM_MASTER_SYSTEM names the system repository; the run starts
   in the reports repository's checkout.
 configuration:
   machine: plugin/agents/reports-init/machine.yaml

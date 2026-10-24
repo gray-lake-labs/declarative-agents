@@ -149,8 +149,8 @@ func TestFindLooksHereThenAtSiblings(t *testing.T) {
 }
 
 // TestOpenRoutesOverridesAndHonoursTheEnvironment opens the default and
-// each override behind a router, lets TPM_TRACKER replace the default but
-// not an override, and with no document opens what TPM_TRACKER names.
+// each override behind a router, lets SCRUM_MASTER_TRACKER replace the default but
+// not an override, and with no document opens what SCRUM_MASTER_TRACKER names.
 func TestOpenRoutesOverridesAndHonoursTheEnvironment(t *testing.T) {
 	opened := map[string]*fake.Fake{}
 	for _, name := range []string{Beads, GitHub, GitLab} {
@@ -168,7 +168,7 @@ func TestOpenRoutesOverridesAndHonoursTheEnvironment(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(system, File), []byte(example), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("TPM_TRACKER", "")
+	t.Setenv("SCRUM_MASTER_TRACKER", "")
 	got, err := Open(system)
 	if err != nil {
 		t.Fatal(err)
@@ -177,20 +177,20 @@ func TestOpenRoutesOverridesAndHonoursTheEnvironment(t *testing.T) {
 	if !ok || r.Default != opened[Beads] || r.For("acme/delivery/fleet") != opened[GitHub] || r.For("acme/scoring/api") != opened[GitLab] {
 		t.Fatalf("router = %+v", got)
 	}
-	t.Setenv("TPM_TRACKER", "glab")
+	t.Setenv("SCRUM_MASTER_TRACKER", "glab")
 	got, _ = Open(system)
 	if r := got.(*tracker.Router); r.Default != opened[GitLab] || r.For("acme/delivery/fleet") != opened[GitHub] {
-		t.Fatal("TPM_TRACKER did not replace only the default")
+		t.Fatal("SCRUM_MASTER_TRACKER did not replace only the default")
 	}
 
 	bare := t.TempDir()
-	t.Setenv("TPM_TRACKER", "")
+	t.Setenv("SCRUM_MASTER_TRACKER", "")
 	if _, err := Open(bare); err == nil || !strings.Contains(err.Error(), "no tracker") {
-		t.Fatalf("no document, no TPM_TRACKER: %v", err)
+		t.Fatalf("no document, no SCRUM_MASTER_TRACKER: %v", err)
 	}
-	t.Setenv("TPM_TRACKER", "/srv/tracker.git")
+	t.Setenv("SCRUM_MASTER_TRACKER", "/srv/tracker.git")
 	if got, err := Open(bare); err != nil || got != opened[Beads] {
-		t.Fatalf("no document, TPM_TRACKER set: %v, %v", got, err)
+		t.Fatalf("no document, SCRUM_MASTER_TRACKER set: %v, %v", got, err)
 	}
 }
 
@@ -203,7 +203,7 @@ func TestOpenWithoutAnOpenerSaysSo(t *testing.T) {
 			openers[GitHub] = prev
 		}
 	})
-	t.Setenv("TPM_TRACKER", "gh")
+	t.Setenv("SCRUM_MASTER_TRACKER", "gh")
 	if _, err := Open(t.TempDir()); err == nil || !strings.Contains(err.Error(), "no gh tracking system") {
 		t.Fatalf("open gh = %v", err)
 	}
