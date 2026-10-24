@@ -2284,6 +2284,32 @@ applications/scrum-master/plugin/agents/draft/profile.yaml
 
 workflow_machine
 
+<!-- tpm_entry: tpm-init -->
+#### tpm-init
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/init/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- tpm_entry: tpm-onboard -->
+#### tpm-onboard
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/onboard/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
 <!-- field: deployment_realizations -->
 ## Deployment realizations
 

@@ -33,6 +33,21 @@ Then fetch the declarative-agents runtime the skills' profiles run on, at the re
 tpm install --runtime
 ```
 
+## Start a program with the agent
+
+A program repository runs its workflows with the agent: each installed skill runs `agent --profile .scrum-master/agents/<name>/profile.yaml --core-root .scrum-master/agent-core --directory .` over the profiles the repository vendored, and the agent runs tpm's words in its own process. The one workflow a person runs directly is `init` in a system repository, or `onboard` in a repository joining a program: it lays the repository down, installs the skills, and vendors the profiles and the agent-core declarations they read into `.scrum-master`, with a manifest naming the release. Commit `.scrum-master` with the rest; rerun the same profile to check the repository and to take a new release, which keeps every file a person edited and reports what drifted.
+
+With the runtime fetched as above, put its `agent` on `PATH` and run `init` from the release's source (`TPM_SYSTEM` and `TPM_SUBSYSTEM` name where an `onboard` joins):
+
+```bash
+report=$(tpm install --runtime --json)
+core=$(printf '%s' "$report" | sed -n 's/.*"core_root": "\([^"]*\)".*/\1/p')
+ln -sf "$(printf '%s' "$report" | sed -n 's/.*"agent": "\([^"]*\)".*/\1/p')" "$HOME/.local/bin/agent"
+agent --profile "$core/../applications/scrum-master/plugin/agents/init/profile.yaml" --core-root "$core" --directory .
+```
+
+A run's request file (`--request`, `{"parameters": {...}}`) names the agents whose skills install (`agent`, default `all`) and, for `init`, the tracker to seed (`tracker`, `group`, `prefix`).
+
 ## Run tpm in CI
 
 Each release also publishes an image, `ghcr.io/gray-lake-labs/scrum-master:<tag>`, for linux/amd64 and linux/arm64: tpm, the declarative-agents runtime at the release tpm pins, the spec tool, git, and git-crypt, with no Go toolchain, running as a non-root user. Pin it by the digest the release's notes list. A GitLab CI job uses it directly:

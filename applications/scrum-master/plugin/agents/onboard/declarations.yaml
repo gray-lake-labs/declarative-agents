@@ -1,0 +1,106 @@
+# Copyright (c) 2026 Gray Lake Labs
+# SPDX-License-Identifier: MIT-0
+# The onboard machine's words (GH-29): lay down a joining repository, file
+# its registration in the system repository, and install its skills, then
+# vendor the profiles. TPM_SYSTEM and TPM_SUBSYSTEM name where it joins;
+# optional flags are parameters from the run's request, never ${VAR} args
+# (GH-135).
+unit: tpm-onboard-declarations
+tools:
+- name: tpm_onboard
+  type: exec
+  binary: tpm
+  args:
+  - onboard
+  - --json
+  - --system
+  - ${TPM_SYSTEM}
+  - --subsystem
+  - ${TPM_SUBSYSTEM}
+  visibility: internal
+  description: Lay down a repository joining the program — corpus and orientation — file its registration in the system repository, and install the skills for the named agents (srd034, srd037); a rerun files nothing more.
+  category: boundary
+  parameters:
+    type: object
+    properties:
+      agent:
+        type: string
+        description: The agents whose skills install, cursor, claude, copilot, or all.
+        flag: --agent
+        default: all
+      ref:
+        type: string
+        description: The ref of the system repository's SRDs and control files, when not main.
+        flag: --ref
+      repository:
+        type: string
+        description: The repository's URL, when not its origin.
+        flag: --repository
+      path:
+        type: string
+        description: The component's path in the repository.
+        flag: --path
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: tpm onboard's JSON report — the files, the registration issue, and the skills.
+    schema:
+      type: string
+  side_effects:
+  - kind: filesystem_write
+    target: repository
+    description: Writes the corpus, the orientation files, and the skills; an edited file is kept.
+  - kind: external_api_call
+    target: tracker
+    description: Files the registration issue in the system repository, once.
+  reversibility:
+    classification: irreversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: The files are the person's to commit or discard; the registration closes with its merge.
+  errors:
+  - signal: CommandError
+    condition: the tpm binary cannot be started or an environment variable is unset
+    message_shape: 'tpm_onboard: <error>'
+    state_after_failure: nothing written by a process that did not start
+  - signal: ToolFailed
+    condition: tpm refuses the onboarding and exits non-zero
+    message_shape: <tpm's reason, as printed>
+    state_after_failure: the repository is as tpm's refusal left it
+
+- name: tpm_vendor
+  type: exec
+  binary: tpm
+  args:
+  - install
+  - --profiles
+  - --json
+  visibility: internal
+  description: Vendor the release's profiles and agent-core declarations into .scrum-master, which the installed skills run, and report what drifted (GH-29).
+  category: boundary
+  signature:
+    emits: [ToolDone, ToolFailed, CommandError]
+  output:
+    description: The vendoring's JSON report — the release and each file's action, created, updated, unchanged, kept, or removed.
+    schema:
+      type: string
+  side_effects:
+  - kind: filesystem_write
+    target: repository
+    description: Writes .scrum-master/agents, .scrum-master/agent-core/tools, and .scrum-master/manifest.json; an edited file is kept.
+  reversibility:
+    classification: irreversible
+    requires_confirmation: false
+  undo:
+    strategy: noop
+    description: The vendored tree is the person's to commit or discard; a rerun rewrites what nobody edited.
+  errors:
+  - signal: CommandError
+    condition: the tpm binary cannot be started
+    message_shape: 'tpm_vendor: <error>'
+    state_after_failure: nothing written by a process that did not start
+  - signal: ToolFailed
+    condition: the release's source is not on this host, or a write fails
+    message_shape: <tpm's reason, as printed>
+    state_after_failure: the repository is laid down; a rerun vendors what is missing

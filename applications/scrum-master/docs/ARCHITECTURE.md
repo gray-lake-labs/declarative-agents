@@ -471,6 +471,13 @@ The tpm words the profiles name run in the agent's own process (GH-27). agent-co
 
 Four alternatives were rejected. Moving the agent's main into an importable package would change a path some sixty agent-core documents and gates name. Having agent-core's main import this application would make the core depend on one of its applications. A build-tagged file in agent-core would put the application in agent-core's module requirements. A separate tools executable would keep a second binary to version, pin, and install: tpm under another name. The profiles keep binary: tpm until step 2 of GH-25 moves every profile; the declarations stay exec, so a profile still runs with a tpm on PATH under an agent built without the words.
 
+<!-- decision: 16 -->
+### 16 - A program repository vendors the profiles it runs
+
+A program repository keeps the profiles its skills run, and the agent-core declarations they read, in .scrum-master, with a manifest naming the release and each file's digest (GH-29). Every skill runs agent --profile .scrum-master/agents/<name>/profile.yaml --core-root .scrum-master/agent-core from the repository's root, so a repository runs the profiles it has checked in, on any host, and a release changes it only through a reviewed commit. The init and onboard profiles lay a repository down, install its skills, and vendor; a rerun of either keeps every file a person edited and reports what drifted, the check tpm doctor makes today.
+
+Two alternatives were rejected. Running the profiles from the runtime's cache would make a repository's behavior depend on what the host fetched last, and a skill would name a host's path. Vendoring only the profiles would leave the agent-core declarations they read to the host, so a skill would still name a host's core root; the declarations the profiles read are agent-core's tools tree, about half a megabyte, small enough to keep with them.
+
 <!-- field: technology_choices -->
 ## Technology choices
 

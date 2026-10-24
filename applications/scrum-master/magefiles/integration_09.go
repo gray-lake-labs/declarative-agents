@@ -106,7 +106,10 @@ func (Integration) Onboard() error {
 	}
 	registrations := 0
 	for _, i := range open {
-		if strings.Contains(i.Description, "tpm onboard registers") {
+		// Its own repository's: another target in the same rig may
+		// register one of its own (onboardProfile, GH-29).
+		if strings.Contains(i.Description, "tpm onboard registers") && strings.Contains(i.Title, "rig/product-owners/store") &&
+			!strings.Contains(i.Title, "rig/product-owners/store-profile") {
 			registrations++
 		}
 	}
