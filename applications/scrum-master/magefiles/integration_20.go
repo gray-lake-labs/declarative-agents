@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
@@ -26,7 +27,10 @@ func init() {
 // close after a merge that closed nothing, recur, status, labels,
 // tracker-sync, tracker-migrate, and tracker-export each end in Done with
 // their effect in the tracker or, for the export, the file holding every
-// issue (test: workflow profile runs; environment: local).
+// issue; pop opens a chosen branch, and merge closes two other issues as it
+// delivers (GH-47); issue-file files a recurring issue, and backlog-list
+// and issue-lint run as a model skill's steps would without a model (GH-48)
+// (test: workflow profile runs; environment: local).
 func (Integration) WorkflowProfiles() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -107,6 +111,63 @@ func (Integration) WorkflowProfiles() error {
 	}
 	run("recur", rigUser, clone, recurring.IID, nil)
 	c.expect(r.closed(po1, recurring.IID), "the recurring issue #%d is open after its recur", recurring.IID)
+
+	// GH-47: pop on a chosen branch, then one merge closing two other
+	// issues, each given as a request parameter.
+	chosen, err := file("Workflow chosen branch")
+	if err != nil {
+		return err
+	}
+	run("pop", rigUser, clone, chosen.IID, map[string]any{"branch": "chosen-branch"})
+	worktree := ""
+	if list, err := gitOut(clone, "worktree", "list", "--porcelain"); err == nil {
+		dir := ""
+		for _, line := range strings.Split(list, "\n") {
+			if d, ok := strings.CutPrefix(line, "worktree "); ok {
+				dir = d
+			}
+			if line == "branch refs/heads/chosen-branch" {
+				worktree = dir
+			}
+		}
+	}
+	c.expect(worktree != "", "pop with branch chosen-branch left no worktree on it")
+	if worktree != "" {
+		writeFileTo(filepath.Join(worktree, "CHOSEN.md"), "chosen\n")
+		if err := r.commitPush(worktree, "Add the chosen note", "CHOSEN.md"); err != nil {
+			return err
+		}
+		first, err := file("Workflow closed by the merge, first")
+		if err != nil {
+			return err
+		}
+		second, err := file("Workflow closed by the merge, second")
+		if err != nil {
+			return err
+		}
+		run("merge", rigUser, worktree, chosen.IID, map[string]any{"branch": "chosen-branch",
+			"closes": []string{fmt.Sprintf("%s#%d", po1, first.IID), fmt.Sprintf("%s#%d", po1, second.IID)}})
+		for _, iid := range []int{chosen.IID, first.IID, second.IID} {
+			c.expect(r.closed(po1, iid), "%s#%d is open after the merge that closes it", po1, iid)
+		}
+	}
+
+	// GH-48: the model-free profiles a model skill's steps name.
+	scrumBody := filepath.Join(r.run.Dir, "wf-recurring.md")
+	writeFileTo(scrumBody, "Hold the Daily Scrum.\n\n## Recurrence\n\nEvery weekday.\n\n## Previous Runs\n\n- none\n")
+	before, _ := r.issues(po1)
+	run("issue-file", rigUser, clone, 0, map[string]any{"project": po1, "title": "Recurring: daily scrum", "body_file": scrumBody,
+		"type": "recurring", "plane": "management", "milestone": rigMilestone, "due": rigDue})
+	after, _ := r.issues(po1)
+	recurringIID := 0
+	for _, i := range after {
+		if i.Title == "Recurring: daily scrum" && slices.Contains(i.Labels, "type::recurring") && i.DueDate == rigDue {
+			recurringIID = i.IID
+		}
+	}
+	c.expect(recurringIID != 0 && len(after) == len(before)+1, "issue-file filed no recurring issue with its due date: %d issues before, %d after", len(before), len(after))
+	run("backlog-list", rigUser, clone, 0, nil)
+	run("issue-lint", rigUser, clone, 0, map[string]any{"project": po1, "issue": recurringIID})
 
 	status := run("status", rigUser, clone, 0, nil)
 	c.expect(strings.Contains(status, po1), "the status run names no %s: %s", po1, tail17(status))

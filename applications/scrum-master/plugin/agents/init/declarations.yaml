@@ -11,6 +11,7 @@ tools:
   args:
   - init
   - --json
+  - --require-profiles
   visibility: internal
   description: Lay down the program's system repository — corpus, control files, orientation — and install the skills for the named agents (srd034, srd037); a rerun changes only what drifted.
   category: boundary
@@ -19,9 +20,9 @@ tools:
     properties:
       agent:
         type: string
-        description: The agents whose skills install, cursor, claude, copilot, or all.
+        description: The agents whose skills install, cursor, claude, copilot, or all; empty is the agents the repository already uses, refused when it uses none.
         flag: --agent
-        default: all
+        default: detect
       tracker:
         type: string
         description: A tracker repository to seed when it has no commits.

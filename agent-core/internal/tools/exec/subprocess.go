@@ -6,6 +6,7 @@ package exec
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Nokia-Bell-Labs/declarative-agents/agent-core/internal/runtime/core"
@@ -58,6 +59,68 @@ func ExtractStringParam(jsonOutput, key string) string {
 		return v
 	}
 	return ""
+}
+
+// ExtractListParam extracts an array parameter from a JSON tool request as
+// its elements' text: strings as they are, numbers in decimal. A lone
+// string is a list of one (srd023 R2.12).
+func ExtractListParam(jsonOutput, key string) []string {
+	var params struct {
+		Parameters map[string]interface{} `json:"parameters"`
+	}
+	if err := json.Unmarshal([]byte(jsonOutput), &params); err != nil {
+		return nil
+	}
+	var out []string
+	add := func(v interface{}) {
+		switch e := v.(type) {
+		case string:
+			if e != "" {
+				out = append(out, e)
+			}
+		case float64:
+			out = append(out, strconv.FormatFloat(e, 'f', -1, 64))
+		}
+	}
+	switch v := params.Parameters[key].(type) {
+	case []interface{}:
+		for _, e := range v {
+			add(e)
+		}
+	default:
+		add(v)
+	}
+	return out
+}
+
+// ExtractBoolParam reports whether a JSON tool request sets a parameter
+// true, as a JSON boolean or the string "true" (srd023 R2.4).
+func ExtractBoolParam(jsonOutput, key string) bool {
+	var params struct {
+		Parameters map[string]interface{} `json:"parameters"`
+	}
+	if err := json.Unmarshal([]byte(jsonOutput), &params); err != nil {
+		return false
+	}
+	switch v := params.Parameters[key].(type) {
+	case bool:
+		return v
+	case string:
+		return v == "true"
+	}
+	return false
+}
+
+// hasParam reports whether a JSON tool request names the parameter at all.
+func hasParam(jsonOutput, key string) bool {
+	var params struct {
+		Parameters map[string]interface{} `json:"parameters"`
+	}
+	if err := json.Unmarshal([]byte(jsonOutput), &params); err != nil {
+		return false
+	}
+	_, ok := params.Parameters[key]
+	return ok
 }
 
 // ExtractIntParam extracts an integer parameter from a JSON tool request.

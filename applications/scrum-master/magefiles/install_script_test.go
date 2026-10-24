@@ -99,10 +99,15 @@ func TestInstallScriptInstallsAVerifiedRelease(t *testing.T) {
 		t.Errorf("install.sh did not name the next step:\n%s", out)
 	}
 
-	// With only the agent installed, the init profile lays a repository down.
+	// With only the agent installed, the init profile lays a repository down,
+	// installing the skills of the one agent the repository already uses
+	// (GH-49).
 	repo := filepath.Join(t.TempDir(), "system")
 	if out, err := exec.Command("git", "init", "-q", "-b", "main", repo).CombinedOutput(); err != nil {
 		t.Fatalf("git init: %v: %s", err, out)
+	}
+	if err := os.MkdirAll(filepath.Join(repo, ".claude"), 0o755); err != nil {
+		t.Fatal(err)
 	}
 	run := exec.Command(filepath.Join(prefix, "agent"), "--profile", filepath.Join(home, "agents", "init", "profile.yaml"),
 		"--core-root", filepath.Join(home, "agent-core"), "--directory", repo, "--output", t.TempDir())
@@ -113,6 +118,14 @@ func TestInstallScriptInstallsAVerifiedRelease(t *testing.T) {
 	}
 	if b, err := os.ReadFile(filepath.Join(repo, ".scrum-master", "manifest.json")); err != nil || !strings.Contains(string(b), tag) {
 		t.Fatalf("the init run vendored no profiles at %s: %v\n%s", tag, err, b)
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".claude", "skills", "pop", "SKILL.md")); err != nil {
+		t.Fatalf("the init run installed no claude skill in a repository using claude: %v", err)
+	}
+	for _, other := range []string{".cursor", ".github"} {
+		if _, err := os.Stat(filepath.Join(repo, other)); !os.IsNotExist(err) {
+			t.Fatalf("the init run wrote %s in a repository using only claude", other)
+		}
 	}
 
 	// The same release from a GitLab project, as an internal fork publishes

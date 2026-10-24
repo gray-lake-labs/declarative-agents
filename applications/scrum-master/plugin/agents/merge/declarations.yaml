@@ -3,8 +3,10 @@
 # The merge machine's words (GH-201, srd013 R5.7): the gate that writes
 # nothing, the merge word, and the close word. The commit and the closes
 # flow from the merge word's JSON output into the close word's parameters —
-# the runtime extracts a declared parameter from the previous result — so
-# nothing is retyped between steps. SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE come from the
+# the runtime extracts a declared parameter from the previous result — and
+# the request's closes, issue_project, and branch reach the gate, whose
+# output carries them to the later words (GH-47), so nothing is retyped
+# between steps. SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE come from the
 # environment; an optional value is a parameter, never a ${VAR} arg (the
 # GH-135 finding).
 unit: scrum-master-merge-declarations
@@ -24,6 +26,23 @@ tools:
   visibility: internal
   description: Run every delivery gate and write nothing — the issue and closes open, commits over the base, the summary format, the audit on a docs/ change, the approval the policy requires (srd013 R5.3, R5.5).
   category: boundary
+  parameters:
+    type: object
+    properties:
+      closes:
+        type: array
+        items:
+          type: string
+        description: Other issues the merge closes, each project#iid (srd038 R2.1).
+        flag: --closes
+      issue_project:
+        type: string
+        description: The project holding the issue, when not SCRUM_MASTER_PROJECT, such as a status issue merged in the reports repository (srd013 R5.4).
+        flag: --issue-project
+      branch:
+        type: string
+        description: The branch to merge; empty is the issue's pop branch.
+        flag: --branch
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
@@ -64,6 +83,26 @@ tools:
   visibility: internal
   description: Merge the branch --no-ff into the default branch with a message citing the issue and each closes, and push it; close nothing (GH-201, srd013 R5.7).
   category: boundary
+  parameters:
+    type: object
+    properties:
+      closes:
+        type: array
+        items:
+          type: string
+        description: The closes the gate checked, from its output.
+        flag: --closes
+        source: $from(gate).closes
+      issue_project:
+        type: string
+        description: The issue's project the gate checked, from its output.
+        flag: --issue-project
+        source: $from(gate).issue_project
+      branch:
+        type: string
+        description: The branch the gate checked, from its output.
+        flag: --branch
+        source: $from(gate).branch
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
@@ -117,6 +156,11 @@ tools:
         description: The other issues the merge closes, comma-separated, from the merge word's output.
         flag: --closes
         source: $from(deliver).closes
+      issue_project:
+        type: string
+        description: The issue's project the gate checked, from its output.
+        flag: --issue-project
+        source: $from(gate).issue_project
     required: [commit]
   signature:
     emits: [ToolDone, ToolFailed, CommandError]

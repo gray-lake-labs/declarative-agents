@@ -85,6 +85,7 @@ transitions:
   next: Next
   action: release_next
   label: next
+  report_output: $.recommended_version
   summary: true
 - state: Next
   signal: ToolFailed
@@ -101,6 +102,8 @@ transitions:
   signal: ToolDone
   next: Tag
   action: release_tag
+  label: released
+  report_output: $.tag
   summary: true
 - state: Tag
   signal: ToolFailed

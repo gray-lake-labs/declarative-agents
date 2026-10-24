@@ -198,6 +198,47 @@ type Result struct {
 	Reason string `json:"reason,omitempty"`
 }
 
+// Detect is the --agent value that installs the skills of the agents the
+// repository already uses (GH-49): the ones whose marks DetectAgents finds.
+const Detect = "detect"
+
+// agentMarks are what shows a repository uses an agent: its own directory
+// for cursor and claude; for copilot, which shares .github with CI, its
+// instructions or skills there.
+var agentMarks = map[string][]string{
+	"cursor":  {".cursor"},
+	"claude":  {".claude", "CLAUDE.md"},
+	"copilot": {".github/copilot-instructions.md", ".github/skills", ".github/prompts"},
+}
+
+// DetectAgents is the agents the repository at dir already uses, in
+// Agents' order.
+func DetectAgents(dir string) []string {
+	var out []string
+	for _, a := range Agents {
+		for _, mark := range agentMarks[a] {
+			if _, err := os.Stat(filepath.Join(dir, mark)); err == nil {
+				out = append(out, a)
+				break
+			}
+		}
+	}
+	return out
+}
+
+// ResolveAgents is the --agent values for the repository at dir: detect
+// alone names the agents it already uses and refuses when it uses none;
+// any other values expand as ParseAgents does.
+func ResolveAgents(values []string, dir string) ([]string, error) {
+	if len(values) == 1 && values[0] == Detect {
+		if agents := DetectAgents(dir); len(agents) > 0 {
+			return agents, nil
+		}
+		return nil, errors.New("the repository uses no agent scrum-master knows (no .cursor, .claude or CLAUDE.md, or copilot's instructions or skills under .github); name the agents with --agent: cursor, claude, copilot, or all")
+	}
+	return ParseAgents(values)
+}
+
 // ParseAgents expands the --agent values; all names every agent.
 func ParseAgents(values []string) ([]string, error) {
 	var out []string

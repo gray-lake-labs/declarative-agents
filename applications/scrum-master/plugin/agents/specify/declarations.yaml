@@ -37,8 +37,10 @@ tools:
         description: File holding the body.
         flag: --body-file
       path:
-        type: string
-        description: A path the request changes; plane and kind follow from it.
+        type: array
+        items:
+          type: string
+        description: The paths the request changes; plane and kind follow from the set.
         flag: --path
       kind:
         type: string

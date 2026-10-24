@@ -28,7 +28,8 @@ var tpmWord = regexp.MustCompile(`(?i)(^|[^a-z0-9_])tpm([^a-z0-9_]|$)|\bTPM_`)
 
 // InitProfile runs the repository's agent over the init profile in an empty
 // git repository with an empty tracker beside it and no scrum-master on PATH
-// (GH-29): the run ends in Done with the corpus, the seeded tracker, the
+// (GH-29): with no profiles installed to vendor, it refuses and writes
+// nothing (GH-49); with them, the run ends in Done with the corpus, the seeded tracker, the
 // skills of the requested agent, and the profiles vendored into
 // .scrum-master; every skill runs its vendored profile with the agent, the
 // vendored profiles validate against the vendored core root, a second run
@@ -81,6 +82,29 @@ func (Integration) InitProfile() error {
 		return b.String(), err
 	}
 	c := &check{}
+
+	// With no profiles to vendor, init refuses before its first write
+	// (GH-49): the repository and the tracker stay empty.
+	bare, empty := filepath.Join(tmp, "unvendored"), filepath.Join(tmp, "no-profiles")
+	if _, err := sh(tmp, "git", "init", "-q", "-b", "main", bare); err != nil {
+		return err
+	}
+	refuse := exec.Command(rel.Agent, "--profile", filepath.Join(rel.Src, "applications", "scrum-master", "plugin", "agents", "init", "profile.yaml"),
+		"--core-root", rel.CoreRoot(), "--directory", bare, "--output", filepath.Join(tmp, "unvendored-run"), "--request", request)
+	refuse.Dir = bare
+	for _, kv := range env {
+		if !strings.HasPrefix(kv, install.SourceEnv+"=") {
+			refuse.Env = append(refuse.Env, kv)
+		}
+	}
+	refuse.Env = append(refuse.Env, install.HomeEnv+"="+empty)
+	refused, rerr := refuse.CombinedOutput()
+	written, _ := os.ReadDir(bare)
+	c.expect(rerr != nil && strings.Contains(string(refused), "final machine state: Refused") && strings.Contains(string(refused), "nothing was written"),
+		"init without profiles must refuse before writing: %v: %s", rerr, tail17(string(refused)))
+	c.expect(len(written) == 1, "init without profiles wrote into the repository: %v", written)
+	_, seeded := exec.Command("git", "--git-dir", tracker, "rev-parse", "--verify", "-q", "main").Output()
+	c.expect(seeded != nil, "init without profiles seeded the tracker")
 
 	out, runErr := run(filepath.Join(rel.Src, "applications", "scrum-master", "plugin", "agents", "init", "profile.yaml"), rel.CoreRoot(), "first")
 	c.expect(runErr == nil && strings.Contains(out, "final machine state: Done"), "the init run must end in Done: %v: %s", runErr, tail17(out))
