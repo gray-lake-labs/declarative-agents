@@ -5,7 +5,6 @@ package release
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -83,6 +82,9 @@ type Publisher struct {
 	// Core is the agent-core the agent builds from; empty is the one beside
 	// the application, ../../agent-core.
 	Core string
+	// Forge is where the release is published, ForgeGitHub (the default)
+	// or ForgeGitLab, as an internal fork publishes (GH-31).
+	Forge string
 }
 
 // VersionPackage is where a release's version is stamped in the words,
@@ -223,21 +225,14 @@ func (p Publisher) headTag() (string, error) {
 	return strings.Fields(tags)[0], nil
 }
 
-// CheckAccount fails unless gh, with the organization's token, answers as
-// the account releases are made as, so nothing on a release names a person.
+// CheckAccount fails unless the forge, as the organization, answers as the
+// account releases are made as, so nothing on a release names a person.
 func (p Publisher) CheckAccount() error {
-	env, err := p.ghEnv()
+	h, err := p.host()
 	if err != nil {
 		return err
 	}
-	login, err := p.Run(p.Root, env, "gh", "api", "user", "-q", ".login")
-	if err != nil {
-		return err
-	}
-	if login != p.Account {
-		return fmt.Errorf("gh answers as %s, not %s; a release is made only as the organization", login, p.Account)
-	}
-	return nil
+	return h.check()
 }
 
 func (p Publisher) ghEnv() ([]string, error) {
@@ -254,8 +249,8 @@ type publishedAsset struct {
 	Digest string `json:"digest"`
 }
 
-// Binaries builds the release binaries at tag and creates the tag's GitHub
-// release with them, uploading only what it lacks and refusing an asset
+// Binaries builds the release binaries at tag and creates the tag's release
+// on the forge with them, uploading only what it lacks and refusing an asset
 // already there whose checksum differs. A dry run builds them and names
 // what it would create and upload.
 func (p Publisher) Binaries(tag string) error {
@@ -285,15 +280,15 @@ func (p Publisher) Binaries(tag string) error {
 	if err := p.CheckAccount(); err != nil {
 		return err
 	}
-	env, err := p.ghEnv()
+	h, err := p.host()
 	if err != nil {
 		return err
 	}
-	view, err := p.Run(p.Root, env, "gh", "release", "view", tag, "--repo", p.Repo, "--json", "assets")
+	exists, published, _, err := h.release(tag)
 	if err != nil {
-		if !strings.Contains(err.Error(), "release not found") {
-			return err
-		}
+		return err
+	}
+	if !exists {
 		notes, err := p.Git("tag", "-l", "--format=%(contents)", tag)
 		if err != nil {
 			return err
@@ -302,26 +297,36 @@ func (p Publisher) Binaries(tag string) error {
 		if err := os.WriteFile(notesFile, []byte(notes+"\n"), 0o644); err != nil {
 			return err
 		}
-		if _, err := p.Run(p.Root, env, "gh", "release", "create", tag, "--repo", p.Repo, "--verify-tag", "--title", tag, "--notes-file", notesFile); err != nil {
+		if err := h.create(tag, notesFile); err != nil {
 			return err
 		}
 		fmt.Fprintf(p.Out, "publish: created the release %s\n", tag)
-		view = `{"assets":[]}`
 	}
-	var published struct {
-		Assets []publishedAsset `json:"assets"`
-	}
-	if err := json.Unmarshal([]byte(view), &published); err != nil {
-		return fmt.Errorf("gh release view %s: %w", tag, err)
+	// A forge that records no digest holds an asset already there to the
+	// SHA256SUMS on the release; with none, nothing there can be verified.
+	var sums map[string]string
+	if len(published) > 0 && published[0].Digest == "" {
+		got, ok, err := publishedSums(h, tag, filepath.Join(dist, "published"))
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return fmt.Errorf("the release %s holds assets but no %s to verify them by; remove them, then run mage publish again", tag, SumsFile)
+		}
+		sums = got
 	}
 	var upload []string
 	for _, a := range assets {
-		i := slices.IndexFunc(published.Assets, func(pa publishedAsset) bool { return pa.Name == a.Name })
+		i := slices.IndexFunc(published, func(pa publishedAsset) bool { return pa.Name == a.Name })
 		if i < 0 {
 			upload = append(upload, a.Path)
 			continue
 		}
-		if got := strings.TrimPrefix(published.Assets[i].Digest, "sha256:"); got != a.Sum {
+		got := strings.TrimPrefix(published[i].Digest, "sha256:")
+		if got == "" {
+			got = sums[a.Name]
+		}
+		if got != a.Sum {
 			return fmt.Errorf("%s on the release %s has checksum %s, but this build's is %s; refusing to replace it", a.Name, tag, got, a.Sum)
 		}
 		fmt.Fprintf(p.Out, "publish: kept %s, already on the release\n", a.Name)
@@ -330,7 +335,7 @@ func (p Publisher) Binaries(tag string) error {
 		fmt.Fprintf(p.Out, "publish: the release %s already holds every binary\n", tag)
 		return nil
 	}
-	if _, err := p.Run(p.Root, env, "gh", append([]string{"release", "upload", tag, "--repo", p.Repo}, upload...)...); err != nil {
+	if err := h.upload(tag, upload); err != nil {
 		return fmt.Errorf("upload to the release %s: %w; run mage publish again to complete it", tag, err)
 	}
 	fmt.Fprintf(p.Out, "publish: uploaded %d assets to the release %s\n", len(upload), tag)

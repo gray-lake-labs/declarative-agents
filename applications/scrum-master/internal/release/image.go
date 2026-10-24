@@ -121,7 +121,7 @@ func (p Publisher) Check() error {
 
 // PublishImage builds the image for every image platform from the release
 // binaries Binaries built, pushes it as ImageRepo:tag and latest, and adds
-// its digest to the GitHub release's notes, which pipelines pin from. An
+// its digest to the release's notes, which pipelines pin from. An
 // image already at tag is kept. A dry run names the build and runs nothing.
 func (p Publisher) PublishImage(tag string) error {
 	ref := p.ImageRepo + ":" + tag
@@ -141,13 +141,12 @@ func (p Publisher) PublishImage(tag string) error {
 	if err := p.CheckImageTools(); err != nil {
 		return err
 	}
-	env, err := p.ghEnv()
+	h, err := p.host()
 	if err != nil {
 		return err
 	}
-	if _, err := p.Run(p.Root, append(env, "ACCOUNT="+p.Account), "sh", "-c",
-		`printf %s "$GH_TOKEN" | docker login ghcr.io --username "$ACCOUNT" --password-stdin`); err != nil {
-		return fmt.Errorf("log in to ghcr.io as %s: %w", p.Account, err)
+	if err := h.registryLogin(p.ImageRepo); err != nil {
+		return err
 	}
 	digest, err := p.Run(p.Root, nil, "docker", "buildx", "imagetools", "inspect", ref, "--format", "{{.Manifest.Digest}}")
 	if err == nil && digest != "" {
@@ -171,12 +170,12 @@ func (p Publisher) PublishImage(tag string) error {
 		}
 		fmt.Fprintf(p.Out, "publish: pushed %s@%s\n", ref, digest)
 	}
-	return p.noteDigest(tag, env, p.ImageRepo+"@"+digest)
+	return p.noteDigest(tag, h, p.ImageRepo+"@"+digest)
 }
 
 // noteDigest adds the image's pinned reference to the release's notes, once.
-func (p Publisher) noteDigest(tag string, env []string, pinned string) error {
-	notes, err := p.Run(p.Root, env, "gh", "release", "view", tag, "--repo", p.Repo, "--json", "body", "-q", ".body")
+func (p Publisher) noteDigest(tag string, h host, pinned string) error {
+	_, _, notes, err := h.release(tag)
 	if err != nil {
 		return err
 	}
@@ -188,7 +187,7 @@ func (p Publisher) noteDigest(tag string, env []string, pinned string) error {
 	if err := os.WriteFile(file, []byte(notes+"\n\nImage: "+pinned+"\n"), 0o644); err != nil {
 		return err
 	}
-	if _, err := p.Run(p.Root, env, "gh", "release", "edit", tag, "--repo", p.Repo, "--notes-file", file); err != nil {
+	if err := h.setNotes(tag, file); err != nil {
 		return err
 	}
 	fmt.Fprintf(p.Out, "publish: listed %s on the release %s\n", pinned, tag)

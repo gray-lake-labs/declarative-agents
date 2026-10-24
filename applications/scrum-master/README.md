@@ -27,6 +27,8 @@ curl -fsSL https://raw.githubusercontent.com/gray-lake-labs/declarative-agents/m
 
 No Go toolchain is needed: the agent runs the words, and the corpus gate's shape check, in its own process.
 
+To install from a GitLab fork's releases, such as an internal one, set `SCRUM_MASTER_RELEASE_FORGE=gitlab` and `SCRUM_MASTER_RELEASE_URL` to the project's URL, with `GITLAB_TOKEN` for a private project; `docs/engineering/eng03-releasing-scrum-master.md` says how the fork publishes them.
+
 ## Start a program with the agent
 
 A program repository runs its workflows with the agent: each installed skill runs `agent --profile .scrum-master/agents/<name>/profile.yaml --core-root .scrum-master/agent-core --directory .` over the profiles the repository vendored. The one workflow a person runs directly is `init` in a system repository, or `onboard` in a repository joining a program: it lays the repository down, installs the skills, and vendors the profiles and the agent-core declarations they read into `.scrum-master`, with a manifest naming the release. Commit `.scrum-master` with the rest; rerun the same profile to check the repository and to take a new release, which keeps every file a person edited and reports what drifted.

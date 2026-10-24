@@ -58,9 +58,16 @@ func TestInstallScriptInstallsAVerifiedRelease(t *testing.T) {
 	served := map[string]string{}
 	for _, a := range assets {
 		served["/download/"+tag+"/"+a.Name] = a.Path
+		// A GitLab project serves a release's assets here, and a private
+		// one only with a token (GH-31).
+		served["/group/declarative-agents/-/releases/"+tag+"/downloads/"+a.Name] = a.Path
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path, ok := served[r.URL.Path]
+		if strings.Contains(r.URL.Path, "/-/releases/") && r.Header.Get("PRIVATE-TOKEN") != "t0ken" {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
 		if !ok {
 			http.NotFound(w, r)
 			return
@@ -106,6 +113,23 @@ func TestInstallScriptInstallsAVerifiedRelease(t *testing.T) {
 	}
 	if b, err := os.ReadFile(filepath.Join(repo, ".scrum-master", "manifest.json")); err != nil || !strings.Contains(string(b), tag) {
 		t.Fatalf("the init run vendored no profiles at %s: %v\n%s", tag, err, b)
+	}
+
+	// The same release from a GitLab project, as an internal fork publishes
+	// it: installed with the project's token, refused without (GH-31).
+	gitlab := func(token string) (string, error) {
+		cmd := exec.Command("sh", filepath.Join(root, "applications", "scrum-master", "install.sh"), tag)
+		cmd.Env = []string{"PATH=/usr/bin:/bin", "HOME=" + t.TempDir(), "AGENT_PREFIX=" + filepath.Join(t.TempDir(), "bin"),
+			"SCRUM_MASTER_HOME=" + filepath.Join(t.TempDir(), "home"), "SCRUM_MASTER_RELEASE_FORGE=gitlab",
+			"SCRUM_MASTER_RELEASE_URL=" + srv.URL + "/group/declarative-agents", "GITLAB_TOKEN=" + token}
+		out, err := cmd.CombinedOutput()
+		return string(out), err
+	}
+	if out, err := gitlab("t0ken"); err != nil || !strings.Contains(out, "installed the scrum-master profiles "+tag) {
+		t.Fatalf("install.sh from a GitLab project: %v\n%s", err, out)
+	}
+	if out, err := gitlab(""); err == nil {
+		t.Fatalf("a private GitLab project's release installed with no token:\n%s", out)
 	}
 
 	tampered := filepath.Join(t.TempDir(), "tampered")

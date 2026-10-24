@@ -3,6 +3,7 @@
 package release
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
 	"os"
@@ -51,8 +52,17 @@ func (f *fakeImageTools) run(dir string, env []string, name string, args ...stri
 		return "", os.WriteFile(meta, []byte(`{"containerimage.digest":"sha256:abc"}`), 0o644)
 	case name == "docker":
 		return "", nil
-	case name == "gh" && len(args) > 1 && args[1] == "view" && slices.Contains(args, "body"):
-		return f.notes, nil
+	case name == "gh" && len(args) > 1 && args[1] == "view":
+		// The image tests' release always exists: its notes are f.notes.
+		view := map[string]any{"assets": []any{}}
+		if out, err := f.fakeTools.run(dir, env, name, args...); err == nil {
+			if err := json.Unmarshal([]byte(out), &view); err != nil {
+				return "", err
+			}
+		}
+		view["body"] = f.notes
+		b, err := json.Marshal(view)
+		return string(b), err
 	case name == "gh" && len(args) > 1 && args[1] == "edit":
 		b, err := os.ReadFile(args[slices.Index(args, "--notes-file")+1])
 		f.notes = string(b)

@@ -137,6 +137,32 @@ approval rule still holds, so CI never approves its own merge. The README
 shows a GitLab CI job on the image, pulling from ghcr or from a program's
 own registry mirror.
 
+<!-- section: releasing-from-a-gitlab-fork -->
+## Releasing from a GitLab fork
+
+A fork of this repository on GitLab, such as an internal one, releases the
+same assets and image from its own project, so a program inside a network
+that cannot reach GitHub installs from it and no package is published
+from the upstream public repository (GH-31). mage tag and mage publish
+read four environment variables in place of this repository's GitHub
+values:
+
+| Variable | Names |
+|---|---|
+| SCRUM_MASTER_RELEASE_FORGE | gitlab, where the release is published through glab |
+| SCRUM_MASTER_RELEASE_REPO | the fork's project, group/name |
+| SCRUM_MASTER_RELEASE_ACCOUNT | the account releases are made as, which glab must answer as |
+| SCRUM_MASTER_RELEASE_IMAGE | the image in the fork's container registry |
+
+Table: The settings a GitLab fork releases with.
+
+glab reads GITLAB_TOKEN, the organization's token, and docker logs in to
+the fork's registry with it. A GitLab release link records no digest, so
+a rerun holds each asset already on the release to the release's own
+SHA256SUMS, and refuses one it cannot verify. A program installs from the
+fork with SCRUM_MASTER_RELEASE_FORGE=gitlab and SCRUM_MASTER_RELEASE_URL
+naming the project; install.sh sends GITLAB_TOKEN to read a private one.
+
 <!-- section: versions -->
 ## Versions
 

@@ -10,12 +10,15 @@
 # the agent installs into, by default $HOME/.local/bin. SCRUM_MASTER_HOME is
 # where the profiles unpack, by default $XDG_DATA_HOME/scrum-master or
 # $HOME/.local/share/scrum-master. SCRUM_MASTER_RELEASE_URL is where the
-# releases are published.
+# releases are published. SCRUM_MASTER_RELEASE_FORGE=gitlab reads them from a
+# GitLab project instead, such as an internal fork (GH-31): the URL is then
+# the project's, and GITLAB_TOKEN, when set, reads a private one.
 set -eu
 
 tag=${1:-latest}
 prefix=${AGENT_PREFIX:-$HOME/.local/bin}
 home=${SCRUM_MASTER_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/scrum-master}
+forge=${SCRUM_MASTER_RELEASE_FORGE:-github}
 base=${SCRUM_MASTER_RELEASE_URL:-https://github.com/gray-lake-labs/declarative-agents/releases}
 
 case $(uname -s) in
@@ -31,17 +34,30 @@ esac
 agent=agent_${os}_${arch}
 profiles=scrum-master-profiles.tar.gz
 
-if [ "$tag" = latest ]; then
-  url=$base/latest/download
-else
-  url=$base/download/$tag
-fi
+case $forge in
+  github)
+    if [ "$tag" = latest ]; then url=$base/latest/download; else url=$base/download/$tag; fi ;;
+  gitlab)
+    if [ -z "${SCRUM_MASTER_RELEASE_URL:-}" ]; then
+      echo "install.sh: name the GitLab project with SCRUM_MASTER_RELEASE_URL" >&2; exit 1
+    fi
+    if [ "$tag" = latest ]; then url=$base/-/releases/permalink/latest/downloads; else url=$base/-/releases/$tag/downloads; fi ;;
+  *) echo "install.sh: no forge $forge; use github or gitlab" >&2; exit 1 ;;
+esac
+
+fetch() {
+  if [ "$forge" = gitlab ] && [ -n "${GITLAB_TOKEN:-}" ]; then
+    curl -fsSL --header "PRIVATE-TOKEN: $GITLAB_TOKEN" -o "$1" "$2"
+  else
+    curl -fsSL -o "$1" "$2"
+  fi
+}
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
-curl -fsSL -o "$work/SHA256SUMS" "$url/SHA256SUMS"
+fetch "$work/SHA256SUMS" "$url/SHA256SUMS"
 for asset in "$agent" "$profiles"; do
-  curl -fsSL -o "$work/$asset" "$url/$asset"
+  fetch "$work/$asset" "$url/$asset"
   want=$(awk -v a="$asset" '$2 == a || $2 == "*" a { print $1 }' "$work/SHA256SUMS")
   if command -v sha256sum >/dev/null 2>&1; then
     got=$(sha256sum "$work/$asset" | awk '{ print $1 }')
