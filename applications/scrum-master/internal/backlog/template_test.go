@@ -46,6 +46,16 @@ func TestTemplatesPassTheGate(t *testing.T) {
 	if f := hierarchy.Validate(docs); len(f) != 0 {
 		t.Fatalf("the templates fail the gate: %+v", f)
 	}
+	var epic *hierarchy.Doc
+	for _, d := range docs {
+		if d.Kind == hierarchy.Epic {
+			epic = d
+		}
+	}
+	// A nested list numbers every item "1." (GH-24).
+	if epic == nil || len(epic.Links["depends_on"]) != 2 {
+		t.Fatalf("the epic template's depends_on does not read as two links: %+v", epic)
+	}
 	if _, err := Template("no-such-kind"); err == nil {
 		t.Fatal("an unknown kind must be refused")
 	}
@@ -56,7 +66,7 @@ func TestTemplatesPassTheGate(t *testing.T) {
 // from its errors (GH-22).
 func TestVisionAndArchitectureTemplates(t *testing.T) {
 	for kind, fields := range map[string][]string{
-		"vision":       {"executive_summary", "problem", "what_this_does", "why_we_build_this", "success_criteria", "not"},
+		"vision":       {"executive_summary", "problem", "what_this_does", "why_we_build_this", "success_criteria", "not", "canonical_documents"},
 		"architecture": {"overview", "interfaces", "components", "design_decisions", "technology_choices", "project_structure", "implementation_status", "related_documents"},
 	} {
 		doc, err := Template(kind)
