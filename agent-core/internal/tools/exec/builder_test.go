@@ -459,3 +459,57 @@ func TestRegisterToolDefs(t *testing.T) {
 	_, ok := reg.Resolve("greet")
 	assert.True(t, ok)
 }
+
+// An array parameter maps each element to its own flag occurrence, and a
+// lone string to one; a bool_flag maps a JSON true, never false
+// (srd023 R2.4, R2.12).
+func TestExecBuilderMapsArraysAndBooleans(t *testing.T) {
+	td := catalog.ToolDef{
+		Name:   "file_issue",
+		Binary: "echo",
+		Parameters: map[string]interface{}{
+			"type": "object",
+			"properties": map[string]interface{}{
+				"path":   map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}, "flag": "--path", "position": 1},
+				"closes": map[string]interface{}{"type": "array", "flag": "--closes", "position": 2},
+				"push":   map[string]interface{}{"type": "boolean", "flag": "--push", "bool_flag": true, "position": 3},
+				"update": map[string]interface{}{"type": "boolean", "flag": "--update", "bool_flag": true, "position": 4},
+			},
+		},
+	}
+	build := func(request string) []string {
+		return (&ExecBuilder{Def: td, Root: "/tmp"}).Build(core.Result{Output: request}).(*ExecCmd).buildArgs()
+	}
+	assert.Equal(t, []string{"--path", "docs/a.md", "--path", "docs/b.md", "--closes", "g/p#3", "--push"},
+		build(`{"parameters":{"path":["docs/a.md","docs/b.md"],"closes":"g/p#3","push":true,"update":false}}`))
+	assert.Equal(t, []string{"--update"}, build(`{"parameters":{"push":"false","update":"true"}}`))
+	assert.Empty(t, build(`{"parameters":{"path":[]}}`))
+}
+
+// An array parameter's source, a JSON array in an earlier step's output,
+// maps each element to its own flag occurrence (srd023 R2.12).
+func TestExecBuilderMapsAnArraySource(t *testing.T) {
+	td := catalog.ToolDef{
+		Name:   "merge_branch",
+		Binary: "echo",
+		Parameters: map[string]interface{}{
+			"type": "object",
+			"properties": map[string]interface{}{
+				"closes": map[string]interface{}{"type": "array", "flag": "--closes", "source": "$from(gate).closes"},
+			},
+		},
+	}
+	run := func(gate string) []string {
+		cmd := (&ExecBuilder{Def: td, Root: t.TempDir()}).Build(core.Result{Output: `{}`}).(*ExecCmd)
+		cmd.SetCommandState(core.NewCommandStateView(core.Execution{{
+			CommandName: "merge_gate",
+			Label:       "gate",
+			Result: core.ResultDigest{Output: gate, RedactionVersion: core.OutputRedactionVersion1,
+				RedactionStatus: core.OutputRedactionApplied},
+		}}))
+		require.NoError(t, cmd.resolveSourceParams())
+		return cmd.buildArgs()
+	}
+	assert.Equal(t, []string{"--closes", "g/p#3", "--closes", "g/p#4"}, run(`{"closes":["g/p#3","g/p#4"]}`))
+	assert.Empty(t, run(`{"closes":[]}`))
+}

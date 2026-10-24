@@ -37,9 +37,63 @@ func EmbeddedSkills() ([]Skill, error) {
 
 // profileDoc is the part of a profile.yaml rendering reads.
 type profileDoc struct {
-	Name      string            `yaml:"name"`
-	Machine   string            `yaml:"machine"`
-	Libraries map[string]string `yaml:"libraries"`
+	Name             string            `yaml:"name"`
+	Machine          string            `yaml:"machine"`
+	Libraries        map[string]string `yaml:"libraries"`
+	ToolDeclarations []string          `yaml:"tool_declarations"`
+}
+
+// declarationsDoc is the part of a tool declarations file rendering reads.
+type declarationsDoc struct {
+	Tools []struct {
+		Name   string   `yaml:"name"`
+		Type   string   `yaml:"type"`
+		Binary string   `yaml:"binary"`
+		Args   []string `yaml:"args"`
+	} `yaml:"tools"`
+}
+
+// wordAliases names the profile that runs a model profile's word where the
+// profile is not the word's name with dashes (GH-48).
+var wordAliases = map[string]string{"issue_pop": "pop", "issue_merge": "merge"}
+
+// modelFreeSteps is, for a model profile, how a coding agent runs each of
+// its exec words without a model (GH-48): the model-free profile named for
+// the word, or the word's own command line when it is not a scrum-master
+// word.
+func modelFreeSteps(fsys fs.FS, dir string, prof profileDoc, names map[string]bool) ([]string, error) {
+	var out []string
+	for _, f := range prof.ToolDeclarations {
+		if path.IsAbs(f) || strings.HasPrefix(f, "..") {
+			continue // agent-core's own tools, which no word is
+		}
+		b, err := fs.ReadFile(fsys, path.Join(dir, prof.Name, f))
+		if err != nil {
+			return nil, err
+		}
+		var d declarationsDoc
+		if err := yaml.Unmarshal(b, &d); err != nil {
+			return nil, fmt.Errorf("%s: %w", f, err)
+		}
+		for _, t := range d.Tools {
+			if t.Type != "exec" {
+				continue
+			}
+			profile, ok := wordAliases[t.Name]
+			if !ok {
+				profile = strings.ReplaceAll(t.Name, "_", "-")
+			}
+			switch {
+			case names[profile]:
+				out = append(out, fmt.Sprintf("- %s: `%s --request request.json`", t.Name, RunCommand(profile)))
+			case t.Binary != "scrum-master":
+				out = append(out, fmt.Sprintf("- %s: `%s`", t.Name, strings.Join(append([]string{t.Binary}, t.Args...), " ")))
+			default:
+				return nil, fmt.Errorf("%s's word %s has no model-free profile %s", prof.Name, t.Name, profile)
+			}
+		}
+	}
+	return out, nil
 }
 
 // machineDoc is the part of a machine definition rendering reads.
@@ -70,6 +124,10 @@ func ProfileSkills(fsys fs.FS, dir string) ([]Skill, error) {
 	if err != nil {
 		return nil, err
 	}
+	names := map[string]bool{}
+	for _, p := range paths {
+		names[path.Base(path.Dir(p))] = true
+	}
 	var out []Skill
 	for _, p := range paths {
 		pb, err := fs.ReadFile(fsys, p)
@@ -91,7 +149,13 @@ func ProfileSkills(fsys fs.FS, dir string) ([]Skill, error) {
 		if err := yaml.Unmarshal(mb, &m); err != nil {
 			return nil, fmt.Errorf("%s: machine: %w", p, err)
 		}
-		s, err := renderProfileSkill(prof.Name, m, env[prof.Name], prof.Libraries["providers"] != "")
+		var steps []string
+		if prof.Libraries["providers"] != "" {
+			if steps, err = modelFreeSteps(fsys, dir, prof, names); err != nil {
+				return nil, fmt.Errorf("%s: %w", p, err)
+			}
+		}
+		s, err := renderProfileSkill(prof.Name, m, env[prof.Name], prof.Libraries["providers"] != "", steps)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", p, err)
 		}
@@ -108,7 +172,7 @@ func ProfileSkills(fsys fs.FS, dir string) ([]Skill, error) {
 // states close the skill, so a reader sees how a run ends, the refusal
 // state among them. A machine with a model keeps the steps for an agent to
 // follow when no model is configured.
-func renderProfileSkill(name string, m machineDoc, env []string, model bool) (Skill, error) {
+func renderProfileSkill(name string, m machineDoc, env []string, model bool, steps []string) (Skill, error) {
 	paragraphs := strings.Split(strings.TrimSpace(m.Purpose), "\n\n")
 	if paragraphs[0] == "" {
 		return Skill{}, fmt.Errorf("machine %q has no purpose to render from", m.Name)
@@ -126,7 +190,7 @@ func renderProfileSkill(name string, m machineDoc, env []string, model bool) (Sk
 	for _, p := range paragraphs[1:] {
 		b.WriteString("\n" + p + "\n")
 	}
-	b.WriteString(runSection(name, env, model))
+	b.WriteString(runSection(name, env, model, steps))
 	fmt.Fprintf(&b, "\nThe steps are the machine states of %s/%s/profile.yaml, in order;\nthe runtime executes the same machine (design.md D14).\n\n", AgentsVendored, name)
 	n := 0
 	for _, st := range m.States {
@@ -239,7 +303,7 @@ func RunCommand(name string) string {
 
 // runSection tells an agent how to run the workflow: with the agent, over
 // the profile the repository vendored, and the environment it reads.
-func runSection(name string, env []string, model bool) string {
+func runSection(name string, env []string, model bool, steps []string) string {
 	var b strings.Builder
 	b.WriteString("\n## Run\n\n")
 	if model {
@@ -256,7 +320,9 @@ func runSection(name string, env []string, model bool) string {
 		fmt.Fprintf(&b, "\nIt reads %s from the environment.\n", names)
 	}
 	if model {
-		b.WriteString("\nWithout a model configured for the agent, follow the steps below yourself.\n")
+		b.WriteString("\nWithout a model configured for the agent, do the model's part yourself:\nwrite what it would write, and run each of its words through the\nmodel-free profile named for it, the word's parameters in the request\n(request.json holding {\"parameters\": {...}}):\n\n")
+		b.WriteString(strings.Join(steps, "\n") + "\n")
+		b.WriteString("\nThe steps below say what each word is for.\n")
 	}
 	return b.String()
 }

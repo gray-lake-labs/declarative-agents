@@ -336,10 +336,13 @@ type ParamMapping struct {
 	Flag       string
 	Positional bool
 	BoolFlag   bool
-	Default    string
-	Source     string
-	Required   bool
-	Position   int
+	// List is a parameter of type array: each element maps to its own
+	// flag occurrence or positional argument (srd023 R2.12).
+	List     bool
+	Default  string
+	Source   string
+	Required bool
+	Position int
 }
 
 // ToolSelectionFile is the YAML structure for a tool selection file.
@@ -450,6 +453,9 @@ func (td *ToolDef) ExtractParamMappings() []ParamMapping {
 		}
 		if b, ok := pMap["bool_flag"].(bool); ok {
 			pm.BoolFlag = b
+		}
+		if t, ok := pMap["type"].(string); ok && t == "array" {
+			pm.List = true
 		}
 		if d, ok := pMap["default"].(string); ok {
 			pm.Default = d

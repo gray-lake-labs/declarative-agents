@@ -107,10 +107,10 @@ func RepoTags(dir string) ([]string, error) {
 }
 
 func init() {
-	var args struct{ artifact, control, ref, dir string }
+	var args struct{ artifact, control, ref, dir, chosen string }
 	common := func(fs *flag.FlagSet) {
 		fs.StringVar(&args.artifact, "artifact", "", "artifact a subsystem SRD declares (required)")
-		fs.StringVar(&args.control, "control", "", "program repository holding control/policy.md; empty uses the defaults")
+		fs.StringVar(&args.control, "control", "", "program repository holding control/policy.md; empty is the system repository beside the checkout, else the defaults")
 		fs.StringVar(&args.ref, "ref", "main", "ref of the control files")
 		fs.StringVar(&args.dir, "dir", ".", "the artifact repository's local checkout")
 	}
@@ -118,14 +118,15 @@ func init() {
 		if args.artifact == "" {
 			return program.Policy{}, fmt.Errorf("%w: name the artifact with --artifact", cli.ErrUsage)
 		}
-		if args.control == "" {
+		control := program.ControlFor(args.control, args.dir, "")
+		if control == "" {
 			return program.Defaults(), nil
 		}
 		t, err := ctx.Tracker()
 		if err != nil {
 			return program.Policy{}, err
 		}
-		return program.LoadPolicy(t, args.control, args.ref)
+		return program.LoadPolicy(t, control, args.ref)
 	}
 
 	var gateArgs struct{ version, issue string }
@@ -223,7 +224,10 @@ func init() {
 
 	cli.Default.Register(&cli.Command{
 		Group: "release", Name: "next", Summary: "report the latest version and the next candidates with their class",
-		Flags: common,
+		Flags: func(fs *flag.FlagSet) {
+			common(fs)
+			fs.StringVar(&args.chosen, "version", "", "a candidate version to release in place of the recommendation (GH-47)")
+		},
 		Run: func(ctx *cli.Context) error {
 			p, err := policy(ctx)
 			if err != nil {
@@ -236,6 +240,11 @@ func init() {
 			n, err := Recommendation(p.Releases, args.artifact, args.dir, tags)
 			if err != nil {
 				return err
+			}
+			if args.chosen != "" {
+				if err := n.Choose(args.chosen); err != nil {
+					return err
+				}
 			}
 			return ctx.Emit(n, n.Human())
 		},

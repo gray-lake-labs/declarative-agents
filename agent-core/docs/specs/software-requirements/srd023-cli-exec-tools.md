@@ -124,7 +124,7 @@ The positional extension SHALL append a parameter value as a positional argument
 <!-- req: R2.4 -->
 ### R2.4
 
-The bool_flag extension SHALL be boolean; when true and the parameter value is true, the flag value is appended without a following value.
+The bool_flag extension SHALL be boolean; when true and the parameter value is true, a JSON true or the string "true", the flag value is appended without a following value. A false value, or an absent one without a true default, appends nothing.
 
 <!-- req: R2.5 -->
 ### R2.5
@@ -160,6 +160,11 @@ Integer parameters mapped to argv SHALL retain their decimal representation so e
 ### R2.11
 
 A resolved parameter that declares no flag, positional, or bool_flag extension SHALL contribute no argv entry. Its value SHALL remain available to non-argv consumers such as env expansion.
+
+<!-- req: R2.12 -->
+### R2.12
+
+A parameter of type array SHALL map each element, a string or a number in decimal, to its own argv entry: the flag and the element for each element under the flag extension, the element alone under the positional extension, in the array's order. A lone string given for an array parameter SHALL map as an array of one, and an empty array SHALL contribute nothing.
 
 <!-- req: R3 -->
 ## R3 - Subprocess execution
@@ -439,7 +444,7 @@ Exec declarations support name, type, binary, args, dir, precondition, output_ca
 <!-- ac: AC2 -->
 ### AC2
 
-Parameter mapping converts JSON string and integer tool parameters into deterministic argv using flag, positional, bool_flag, default, position, and optional command-state source extensions while stripping those extensions from the LLM-visible schema. Omitting source preserves immediately previous Result mapping.
+Parameter mapping converts JSON string, integer, boolean, and array tool parameters into deterministic argv using flag, positional, bool_flag, default, position, and optional command-state source extensions, an array element per flag occurrence while stripping those extensions from the LLM-visible schema. Omitting source preserves immediately previous Result mapping.
 
 <!-- field: traces -->
 #### Traces
@@ -455,6 +460,7 @@ Parameter mapping converts JSON string and integer tool parameters into determin
 - [R2.9](#r29)
 - [R2.10](#r210)
 - [R2.11](#r211)
+- [R2.12](#r212)
 
 <!-- ac: AC3 -->
 ### AC3

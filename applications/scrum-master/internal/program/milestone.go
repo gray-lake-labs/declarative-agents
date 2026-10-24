@@ -44,7 +44,7 @@ func init() {
 			fs.StringVar(&a.project, "project", "", "project path (required)")
 			fs.IntVar(&a.iid, "issue", 0, "issue IID (required)")
 			fs.StringVar(&a.milestone, "milestone", "", "milestone title (required)")
-			fs.StringVar(&a.control, "control", "", "program repository holding control/ files; empty uses the defaults")
+			fs.StringVar(&a.control, "control", "", "program repository holding control/ files; empty is the system repository beside the checkout, else the defaults")
 			fs.StringVar(&a.ref, "ref", "main", "ref of the control files")
 		},
 		Run: func(ctx *cli.Context) error {
@@ -55,7 +55,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			p, err := LoadPolicy(t, a.control, a.ref)
+			p, err := LoadPolicy(t, ControlFor(a.control, ".", ""), a.ref)
 			if err != nil {
 				return err
 			}

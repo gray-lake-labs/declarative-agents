@@ -166,6 +166,16 @@ func vendorSource(dir string) (VendorSource, error) {
 		CoreTools: filepath.Join(home, "agent-core", "tools")}, nil
 }
 
+// CheckSource refuses, writing nothing, when the repository at dir has no
+// release to vendor the profiles from (GH-49), so init and onboard can
+// refuse before their first write rather than after.
+func CheckSource(dir string) error {
+	if _, err := vendorSource(dir); err != nil {
+		return fmt.Errorf("%w; nothing was written", err)
+	}
+	return nil
+}
+
 // checkVendored is install --profiles --check: the vendored files that
 // differ from the manifest, a failure when there are any (GH-35).
 func checkVendored(ctx *cli.Context, dir string) error {

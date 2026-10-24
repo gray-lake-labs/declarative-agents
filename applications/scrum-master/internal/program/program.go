@@ -131,7 +131,7 @@ func init() {
 			fs.StringVar(&popArgs.branch, "branch", "", "the branch to open; empty names it from the issue")
 			fs.StringVar(&popArgs.dir, "dir", ".", "a directory in the local checkout of the project")
 			fs.StringVar(&popArgs.worktree, "worktree", "", "claim the issue into this worktree another pop opened, on its branch, so a story's issues share one branch (srd036)")
-			fs.StringVar(&popArgs.control, "control", "", "program repository holding control/ files; empty uses the defaults")
+			fs.StringVar(&popArgs.control, "control", "", "program repository holding control/ files; empty is the system repository beside the checkout, else the defaults")
 			fs.StringVar(&popArgs.ref, "ref", "main", "ref of the control files")
 		},
 		Run: func(ctx *cli.Context) error {
@@ -142,7 +142,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			p, err := LoadPolicy(t, popArgs.control, popArgs.ref)
+			p, err := LoadPolicy(t, ControlFor(popArgs.control, popArgs.dir, ""), popArgs.ref)
 			if err != nil {
 				return err
 			}
@@ -187,8 +187,8 @@ func init() {
 	})
 
 	var claimArgs struct {
-		project, issueProject, control, ref string
-		iid                                 int
+		project, issueProject, branch, control, ref string
+		iid                                         int
 	}
 	cli.Default.Register(&cli.Command{
 		Group: "issue", Name: "claim", Summary: "the claim word: assign the issue to the caller with pop's refusals, naming the branch to open (GH-204)",
@@ -196,7 +196,8 @@ func init() {
 			fs.StringVar(&claimArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&claimArgs.iid, "issue", 0, "issue IID (required)")
 			fs.StringVar(&claimArgs.issueProject, "issue-project", "", "project holding the issue, when not --project")
-			fs.StringVar(&claimArgs.control, "control", "", "program repository holding control/ files; empty uses the defaults")
+			fs.StringVar(&claimArgs.branch, "branch", "", "the branch to open in place of the one named for the issue (GH-47)")
+			fs.StringVar(&claimArgs.control, "control", "", "program repository holding control/ files; empty is the system repository beside the checkout, else the defaults")
 			fs.StringVar(&claimArgs.ref, "ref", "main", "ref of the control files")
 		},
 		Run: func(ctx *cli.Context) error {
@@ -207,7 +208,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			p, err := LoadPolicy(t, claimArgs.control, claimArgs.ref)
+			p, err := LoadPolicy(t, ControlFor(claimArgs.control, ".", ""), claimArgs.ref)
 			if err != nil {
 				return err
 			}
@@ -219,7 +220,16 @@ func init() {
 			if err != nil {
 				return err
 			}
-			return ctx.Emit(r, fmt.Sprintf("%s#%d claimed; open its branch %s with scrum-master issue open-branch", issueProject, r.IID, r.Branch))
+			if claimArgs.branch != "" {
+				r.Branch = claimArgs.branch
+			}
+			// issue_project is always in the output, empty for --project,
+			// so the pop profile's later words can read it (GH-47).
+			out := struct {
+				PopResult
+				IssueProject string `json:"issue_project"`
+			}{r, r.IssueProject}
+			return ctx.Emit(out, fmt.Sprintf("%s#%d claimed; open its branch %s with scrum-master issue open-branch", issueProject, r.IID, r.Branch))
 		},
 	})
 
@@ -469,7 +479,7 @@ func init() {
 			fs.StringVar(&mergeArgs.branch, "branch", "", "branch to merge; empty uses the current branch of the working directory")
 			fs.StringVar(&mergeArgs.audit, "audit", "", "corpus gate command for a docs/ change; empty uses the policy's audit_command, scrum-master backlog check in a repository without magefiles")
 			fs.StringVar(&mergeArgs.dir, "dir", ".", "the worktree holding the branch, where the audit runs")
-			fs.StringVar(&mergeArgs.control, "control", "", "program repository holding control/ files; empty reads them from --project, else the defaults")
+			fs.StringVar(&mergeArgs.control, "control", "", "program repository holding control/ files; empty is the system repository beside the checkout, else --project, else the defaults")
 			fs.StringVar(&mergeArgs.ref, "ref", "main", "ref of the control files")
 			fs.Var(&mergeArgs.closes, "closes", "another issue the merge closes, project#iid; repeat for each (srd038 R2.1)")
 		},
@@ -491,11 +501,7 @@ func init() {
 			if err != nil {
 				return refuse(err)
 			}
-			control := mergeArgs.control
-			if control == "" {
-				control = mergeArgs.project
-			}
-			p, err := LoadPolicy(t, control, mergeArgs.ref)
+			p, err := LoadPolicy(t, ControlFor(mergeArgs.control, mergeArgs.dir, mergeArgs.project), mergeArgs.ref)
 			if err != nil {
 				return refuse(err)
 			}
@@ -547,7 +553,14 @@ func init() {
 			} else if !r.Merged {
 				human = fmt.Sprintf("%s was already merged on %s; closed %s", r.Branch, r.Commit, strings.Join(r.Closed, ", "))
 			}
-			return ctx.Emit(r, human)
+			// closes and issue_project are always in the output, so the
+			// merge profile's later words can read them from the gate (GH-47).
+			out := struct {
+				MergeResult
+				IssueProject string   `json:"issue_project"`
+				Closes       []string `json:"closes"`
+			}{r, r.IssueProject, append([]string{}, mergeArgs.closes...)}
+			return ctx.Emit(out, human)
 		},
 	})
 
@@ -568,7 +581,7 @@ func init() {
 			fs.StringVar(&mbArgs.branch, "branch", "", "branch to merge; empty uses the current branch of the working directory")
 			fs.StringVar(&mbArgs.audit, "audit", "", "corpus gate command for a docs/ change; empty uses the policy's audit_command")
 			fs.StringVar(&mbArgs.dir, "dir", ".", "the worktree holding the branch, where the audit runs")
-			fs.StringVar(&mbArgs.control, "control", "", "program repository holding control/ files; empty reads them from --project, else the defaults")
+			fs.StringVar(&mbArgs.control, "control", "", "program repository holding control/ files; empty is the system repository beside the checkout, else --project, else the defaults")
 			fs.StringVar(&mbArgs.ref, "ref", "main", "ref of the control files")
 			fs.Var(&mbArgs.closes, "closes", "another issue the merge cites and close-delivered closes, project#iid; repeat for each")
 		},
@@ -590,11 +603,7 @@ func init() {
 			if err != nil {
 				return refuse(err)
 			}
-			control := mbArgs.control
-			if control == "" {
-				control = mbArgs.project
-			}
-			p, err := LoadPolicy(t, control, mbArgs.ref)
+			p, err := LoadPolicy(t, ControlFor(mbArgs.control, mbArgs.dir, mbArgs.project), mbArgs.ref)
 			if err != nil {
 				return refuse(err)
 			}
@@ -694,7 +703,7 @@ func init() {
 			fs.StringVar(&lintArgs.project, "project", "", "project path (required)")
 			fs.IntVar(&lintArgs.iid, "issue", 0, "issue IID; or use --since")
 			fs.StringVar(&lintArgs.since, "since", "", "lint every issue updated since YYYY-MM-DD")
-			fs.StringVar(&lintArgs.control, "control", "", "program repository holding control/ files; empty uses the defaults")
+			fs.StringVar(&lintArgs.control, "control", "", "program repository holding control/ files; empty is the system repository beside the checkout, else the defaults")
 			fs.StringVar(&lintArgs.ref, "ref", "main", "ref of the control files")
 		},
 		Run: func(ctx *cli.Context) error {
@@ -705,7 +714,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			p, err := LoadPolicy(t, lintArgs.control, lintArgs.ref)
+			p, err := LoadPolicy(t, ControlFor(lintArgs.control, ".", ""), lintArgs.ref)
 			if err != nil {
 				return err
 			}
@@ -755,7 +764,7 @@ func init() {
 			fs.StringVar(&fileArgs.component, "component", "", "component")
 			fs.StringVar(&fileArgs.milestone, "milestone", "", "milestone title")
 			fs.StringVar(&fileArgs.due, "due", "", "due date YYYY-MM-DD")
-			fs.StringVar(&fileArgs.control, "control", "", "program repository holding control/ files")
+			fs.StringVar(&fileArgs.control, "control", "", "program repository holding control/ files; empty is --system, else the system repository beside the checkout")
 			fs.StringVar(&fileArgs.ref, "ref", "main", "ref of the control files")
 		},
 		Run: func(ctx *cli.Context) error {
@@ -774,7 +783,7 @@ func init() {
 			if control == "" {
 				control = fileArgs.system
 			}
-			p, err := LoadPolicy(t, control, fileArgs.ref)
+			p, err := LoadPolicy(t, ControlFor(control, ".", ""), fileArgs.ref)
 			if err != nil {
 				return err
 			}

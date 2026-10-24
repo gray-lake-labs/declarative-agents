@@ -6,7 +6,9 @@
 # parameters through $from selectors — the runtime extracts a declared
 # parameter from a labeled step's output — so nothing is retyped between
 # steps. SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE come from the environment; an optional
-# value is a parameter, never a ${VAR} arg (the GH-135 finding).
+# value is a parameter, never a ${VAR} arg (the GH-135 finding). The
+# request's issue_project and branch reach the claim, whose output carries
+# them on (GH-47).
 unit: scrum-master-pop-declarations
 tools:
 - name: claim
@@ -23,6 +25,17 @@ tools:
   visibility: internal
   description: Assign the issue to the caller with pop's refusals — closed, someone else's, a data issue not admitted — and name the branch to open (srd013 R7.1, srd041 R9.1).
   category: boundary
+  parameters:
+    type: object
+    properties:
+      issue_project:
+        type: string
+        description: The project holding the issue, when not SCRUM_MASTER_PROJECT, such as a status issue taken in the reports repository (srd018 R6.1).
+        flag: --issue-project
+      branch:
+        type: string
+        description: The branch to open in place of the one named for the issue.
+        flag: --branch
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
@@ -71,6 +84,11 @@ tools:
         description: The branch to open, from the claim word's output.
         flag: --branch
         source: $from(claim).branch
+      issue_project:
+        type: string
+        description: The issue's project, from the claim word's output.
+        flag: --issue-project
+        source: $from(claim).issue_project
     required: [branch]
   signature:
     emits: [ToolDone, ToolFailed, CommandError]

@@ -68,12 +68,12 @@ The init profile writes thirteen files that need no further work, besides the ve
    ```bash
    export SCRUM_MASTER_TRACKER=<tracker remote> SCRUM_MASTER_USER=<your name in the tracker>
    home="${SCRUM_MASTER_HOME:-$HOME/.local/share/scrum-master}"
-   printf '{"parameters": {"tracker": "%s", "group": "<program group>"}}' "$SCRUM_MASTER_TRACKER" > /tmp/init.json
+   printf '{"parameters": {"tracker": "%s", "group": "<program group>", "agent": "<cursor, claude, copilot, or all>"}}' "$SCRUM_MASTER_TRACKER" > /tmp/init.json
    agent --profile "$home/agents/init/profile.yaml" --core-root "$home/agent-core" --directory . --request /tmp/init.json
    git add -A && git commit -m "Lay down the program" && git push origin main
    ```
 
-   The init profile makes the tracker's first commit and creates the program's labels there. Without a tracker in its request it says that no tracker was seeded, and no issue can be filed until one is.
+   Without `agent`, the init profile installs the skills of the agents the repository already uses (a `.cursor` or `.claude` directory, `CLAUDE.md`, or copilot's instructions under `.github`), and refuses when it uses none. It refuses, writing nothing, when no release's profiles are installed. The init profile makes the tracker's first commit and creates the program's labels there. Without a tracker in its request it says that no tracker was seeded, and no issue can be filed until one is.
 
    The environment variables were named `TPM_` until GH-38. A `TPM_` name is still read where its `SCRUM_MASTER_` name is unset, and the check skill names each one a setup still sets, so a CI job can move at its own pace.
 

@@ -32,6 +32,33 @@ type NextResult struct {
 	// release profile's gate and tag read (GH-37).
 	RecommendedVersion string `json:"recommended_version,omitempty"`
 	Reason             string `json:"reason"`
+	// Chosen is the candidate version a person chose over the
+	// recommendation; the release profile's gate and tag then read it as
+	// recommended_version (GH-47).
+	Chosen string `json:"chosen,omitempty"`
+}
+
+// Choose makes version, one of the candidates, the version the release
+// gates and tags in place of the recommendation, and says so in Reason.
+func (n *NextResult) Choose(version string) error {
+	for _, c := range n.Candidates {
+		if c.Version != version {
+			continue
+		}
+		recommended := n.RecommendedVersion
+		n.Chosen, n.RecommendedVersion = version, version
+		if recommended == "" {
+			n.Reason += "; chosen: " + c.Bump + " " + version
+		} else if recommended != version {
+			n.Reason += "; chosen: " + c.Bump + " " + version + " over the recommended " + recommended
+		}
+		return nil
+	}
+	versions := make([]string, 0, len(n.Candidates))
+	for _, c := range n.Candidates {
+		versions = append(versions, c.Version)
+	}
+	return fmt.Errorf("%s is not a candidate for %s; choose one of %s", version, n.Artifact, strings.Join(versions, ", "))
 }
 
 // Recommend picks the bump the commits since the latest release call for
