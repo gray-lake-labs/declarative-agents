@@ -58,6 +58,9 @@ func init() {
 			fs.BoolVar(&profiles, "profiles", false, "vendor the release's profiles and agent-core declarations into "+VendorDir+", which the skills run (GH-29)")
 		},
 		Run: func(ctx *cli.Context) error {
+			if profiles && check {
+				return checkVendored(ctx, dir)
+			}
 			if profiles {
 				return vendorProfiles(ctx, dir, force)
 			}
@@ -161,6 +164,35 @@ func vendorSource(dir string) (VendorSource, error) {
 	}
 	return VendorSource{Release: strings.TrimSpace(string(release)), Agents: filepath.Join(home, "agents"),
 		CoreTools: filepath.Join(home, "agent-core", "tools")}, nil
+}
+
+// checkVendored is install --profiles --check: the vendored files that
+// differ from the manifest, a failure when there are any (GH-35).
+func checkVendored(ctx *cli.Context, dir string) error {
+	var err error
+	if dir == "" {
+		if dir, err = gitRoot(); err != nil {
+			return err
+		}
+	}
+	findings, err := CheckVendored(dir)
+	if err != nil {
+		return err
+	}
+	var b strings.Builder
+	for _, f := range findings {
+		fmt.Fprintf(&b, "%-9s %s\n", f.Problem, rel(dir, f.Path))
+	}
+	if len(findings) == 0 {
+		b.WriteString("the vendored profiles match the manifest")
+	}
+	if err := ctx.Emit(findings, b.String()); err != nil {
+		return err
+	}
+	if len(findings) > 0 {
+		return fmt.Errorf("%d vendored file(s) differ from %s; rerun the init or onboard profile, or restore them", len(findings), ManifestFile)
+	}
+	return nil
 }
 
 // vendorProfiles is install --profiles: the vendoring, reported per file,

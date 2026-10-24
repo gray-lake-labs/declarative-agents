@@ -2284,6 +2284,19 @@ applications/scrum-master/plugin/agents/draft/profile.yaml
 
 workflow_machine
 
+<!-- tpm_entry: tpm-check -->
+#### tpm-check
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/check/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
 <!-- tpm_entry: tpm-init -->
 #### tpm-init
 

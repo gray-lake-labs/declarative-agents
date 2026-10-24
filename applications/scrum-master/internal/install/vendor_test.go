@@ -86,3 +86,30 @@ func TestVendorDryRunWritesNothing(t *testing.T) {
 		t.Fatal("a dry run wrote " + VendorDir)
 	}
 }
+
+// The vendored check names a file edited since it was vendored and one
+// missing, reads no release, and refuses a repository that vendored
+// nothing (GH-35).
+func TestCheckVendoredNamesEditedAndMissingFiles(t *testing.T) {
+	src, dir := t.TempDir(), t.TempDir()
+	if _, err := CheckVendored(dir); err == nil {
+		t.Fatal("a repository that vendored nothing must be refused")
+	}
+	writeTree(t, src, map[string]string{"agents/pop/profile.yaml": "name: pop\n", "agents/pop/machine.yaml": "m\n", "tools/x.yaml": "x\n"})
+	if _, err := Vendor(dir, VendorSource{Release: "v1", Agents: filepath.Join(src, "agents"), CoreTools: filepath.Join(src, "tools")}, false, false); err != nil {
+		t.Fatal(err)
+	}
+	if f, err := CheckVendored(dir); err != nil || len(f) != 0 {
+		t.Fatalf("a fresh vendoring: %v %v", f, err)
+	}
+	writeTree(t, dir, map[string]string{".scrum-master/agents/pop/profile.yaml": "name: mine\n"})
+	os.Remove(filepath.Join(dir, ".scrum-master/agents/pop/machine.yaml"))
+	f, err := CheckVendored(dir)
+	got := map[string]string{}
+	for _, x := range f {
+		got[rel(dir, x.Path)] = x.Problem
+	}
+	if err != nil || len(f) != 2 || got[".scrum-master/agents/pop/profile.yaml"] != "edited" || got[".scrum-master/agents/pop/machine.yaml"] != "missing" {
+		t.Fatalf("findings %v, %v", got, err)
+	}
+}

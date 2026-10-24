@@ -24,9 +24,10 @@ func init() {
 // (GH-29): the run ends in Done with the corpus, the seeded tracker, the
 // skills of the requested agent, and the profiles vendored into
 // .scrum-master; every skill runs its vendored profile with the agent, the
-// vendored profiles validate against the vendored core root, and a second
-// run from the vendored init profile changes nothing (test: init profile
-// run; environment: local).
+// vendored profiles validate against the vendored core root, a second run
+// from the vendored init profile changes nothing, and the vendored check
+// profile passes, then names an edited vendored profile (test: init profile
+// run, check profile run; environment: local).
 func (Integration) InitProfile() error {
 	rel, err := repoRuntime()
 	if err != nil {
@@ -106,6 +107,20 @@ func (Integration) InitProfile() error {
 	c.expect(runErr == nil && strings.Contains(out, "final machine state: Done"), "the rerun from the vendored profile must end in Done: %v: %s", runErr, tail17(out))
 	status, err := sh(repo, "git", "status", "--porcelain")
 	c.expect(err == nil && strings.TrimSpace(status) == "", "the rerun changed the repository: %s %v", status, err)
+
+	// The check CI runs (GH-35): it passes on the repository as laid down,
+	// and an edited vendored profile ends it in VendoredDrifted.
+	check := filepath.Join(repo, install.AgentsVendored, "check", "profile.yaml")
+	core := filepath.Join(repo, install.CoreVendored)
+	out, runErr = run(check, core, "check")
+	c.expect(runErr == nil && strings.Contains(out, "final machine state: Done"), "the check must pass on the laid-down repository: %v: %s", runErr, tail17(out))
+	edited := filepath.Join(repo, install.AgentsVendored, "pop", "profile.yaml")
+	if err := os.WriteFile(edited, []byte("name: pop # edited\n"), 0o644); err != nil {
+		return err
+	}
+	out, runErr = run(check, core, "check-drifted")
+	c.expect(runErr != nil && strings.Contains(out, "final machine state: VendoredDrifted") && strings.Contains(out, "pop/profile.yaml"),
+		"an edited vendored profile must end the check in VendoredDrifted, naming it: %v: %s", runErr, tail17(out))
 	return c.err("initProfile")
 }
 

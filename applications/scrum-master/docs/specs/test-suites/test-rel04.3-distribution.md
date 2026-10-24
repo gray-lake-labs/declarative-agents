@@ -155,6 +155,7 @@ go test ./internal/release -run '^TestImage|^TestPublishPushes|^TestPublishKeeps
 - profiles: the release's profiles under SCRUM_MASTER_HOME
 - no_go: the image carries no Go toolchain and no mage, and runs as a non-root user
 - init: the init profile runs over a mounted checkout, and a vendored profile validates against the vendored core root
+- check: the vendored check profile, a CI job's run, passes over the checkout (GH-35)
 
 <!-- field: traces -->
 #### Traces

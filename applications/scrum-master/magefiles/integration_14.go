@@ -15,7 +15,7 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/release"
 )
 
-// Image builds the release for Linux on this machine's architecture, builds the release image from it as mage publish does, and proves the image's agent is the release's, the profiles are unpacked at the release, it carries no Go toolchain or mage and runs as a non-root user, the init profile runs over a mounted checkout with only the image's agent, and the profiles it vendored validate against the vendored core root (test-rel04.3-distribution, GH-34). It needs docker with buildx, and no rig.
+// Image builds the release for Linux on this machine's architecture, builds the release image from it as mage publish does, and proves the image's agent is the release's, the profiles are unpacked at the release, it carries no Go toolchain or mage and runs as a non-root user, the init profile runs over a mounted checkout with only the image's agent, the profiles it vendored validate against the vendored core root, and the check profile a CI job runs passes over that checkout (test-rel04.3-distribution, GH-34, GH-35). It needs docker with buildx, and no rig.
 func (Integration) Image() error {
 	root, err := repositoryRoot()
 	if err != nil {
@@ -70,6 +70,8 @@ func (Integration) Image() error {
 	c.expect(err == nil && strings.Contains(initRun, "final machine state: Done"), "the init profile in the image: %q, %v", initRun, err)
 	valid, err := inImage(`agent --validate-config --profile /work/.scrum-master/agents/pop/profile.yaml --core-root /work/.scrum-master/agent-core`)
 	c.expect(err == nil && strings.Contains(valid, "config valid"), "a vendored profile in the image: %q, %v", valid, err)
+	check, err := inImage(`git -C /work add -A && agent --profile /work/.scrum-master/agents/check/profile.yaml --core-root /work/.scrum-master/agent-core --directory /work --output /tmp/out 2>&1 | tail -3`)
+	c.expect(err == nil && strings.Contains(check, "final machine state: Done"), "the check profile in the image: %q, %v", check, err)
 	return c.err("image")
 }
 

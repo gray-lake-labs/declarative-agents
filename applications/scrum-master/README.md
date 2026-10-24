@@ -42,7 +42,14 @@ A run's request file (`--request`, `{"parameters": {...}}`) names the agents who
 
 ## Run in CI
 
-Each release also publishes an image, `ghcr.io/gray-lake-labs/scrum-master:<tag>`, for linux/amd64 and linux/arm64: the agent, built with the scrum-master words, and the release's profiles under `SCRUM_MASTER_HOME`, with git and git-crypt, no Go toolchain, running as a non-root user. Pin it by the digest the release's notes list. A CI job runs a profile with the agent over its checkout; the check profile, the corpus gate and the repository's drift for CI, comes with GH-35.
+Each release also publishes an image, `ghcr.io/gray-lake-labs/scrum-master:<tag>`, for linux/amd64 and linux/arm64: the agent, built with the scrum-master words, and the release's profiles under `SCRUM_MASTER_HOME`, with git and git-crypt, no Go toolchain, running as a non-root user. Pin it by the digest the release's notes list. A CI job runs the repository's vendored check profile with the agent over its checkout: the corpus gate, the vendored profiles held to their manifest, and doctor's drift report, writing nothing. A GitLab CI job uses it directly:
+
+```yaml
+scrum-master-check:
+  image: ghcr.io/gray-lake-labs/scrum-master@<digest>
+  script:
+    - agent --profile .scrum-master/agents/check/profile.yaml --core-root .scrum-master/agent-core --directory .
+```
 
 To pull from the program's own registry instead, copy it there once per release, for example with `docker buildx imagetools create --tag <registry>/scrum-master:<tag> ghcr.io/gray-lake-labs/scrum-master@<digest>`. Tracker credentials (`TPM_TRACKER`, `TPM_USER`) and any model credentials a profile names come from masked CI variables; `TPM_USER` names a service user, never a person.
 

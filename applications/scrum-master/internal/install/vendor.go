@@ -197,3 +197,34 @@ func sortedKeys[V any](m map[string]V) []string {
 	sort.Strings(keys)
 	return keys
 }
+
+// CheckVendored reports each vendored file that differs from the manifest:
+// edited, since its digest is not the one vendored, or missing. It reads no
+// release, so a repository checks the same wherever it runs (GH-35). A
+// repository that vendored nothing is an error.
+func CheckVendored(dir string) ([]Finding, error) {
+	b, err := os.ReadFile(filepath.Join(dir, ManifestFile))
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, errors.New("nothing is vendored in " + VendorDir + "; run the init or onboard profile")
+	} else if err != nil {
+		return nil, err
+	}
+	var m Manifest
+	if err := json.Unmarshal(b, &m); err != nil {
+		return nil, err
+	}
+	var findings []Finding
+	for _, rel := range sortedKeys(m.Files) {
+		path := filepath.Join(dir, filepath.FromSlash(rel))
+		have, err := os.ReadFile(path)
+		switch {
+		case errors.Is(err, fs.ErrNotExist):
+			findings = append(findings, Finding{Path: path, Problem: "missing"})
+		case err != nil:
+			return nil, err
+		case digest(string(have)) != m.Files[rel]:
+			findings = append(findings, Finding{Path: path, Problem: "edited"})
+		}
+	}
+	return findings, nil
+}
