@@ -21,7 +21,7 @@ func init() {
 // ImplementProfile runs the pinned declarative-agents runtime over the
 // implement profile in the rig (GH-135, srd036 R6): a pop the admission
 // refuses ends the run in the Refused state with scrum-master's reason, and, when
-// TPM_IMPLEMENT_MODEL names a model the OLLAMA_URL provider serves, a full
+// SCRUM_MASTER_IMPLEMENT_MODEL names a model the OLLAMA_URL provider serves, a full
 // run pops, works, merges, and closes an issue (test: implement refusal,
 // implement profile run).
 func (Integration) ImplementProfile() error {
@@ -66,9 +66,9 @@ func (Integration) ImplementProfile() error {
 	c.expect(strings.Contains(out, "Refused"), "the run must end in the Refused state: %s", tail(out))
 	c.expect(strings.Contains(out, "not admitted"), "the Refused state must carry scrum-master's reason: %s", tail(out))
 
-	model := os.Getenv("TPM_IMPLEMENT_MODEL")
+	model := os.Getenv("SCRUM_MASTER_IMPLEMENT_MODEL")
 	if model == "" {
-		fmt.Println("implement profile full run skipped: set TPM_IMPLEMENT_MODEL (and OLLAMA_URL) to a model that can work the rig issue")
+		fmt.Println("implement profile full run skipped: set SCRUM_MASTER_IMPLEMENT_MODEL (and OLLAMA_URL) to a model that can work the rig issue")
 		return c.err("implementProfile")
 	}
 
@@ -109,16 +109,16 @@ func (r *rigEnv) runImplementAgent(rel runtime.Release, project, checkout, works
 	cmd.Dir = workspace
 	cmd.Env = append(os.Environ(),
 		"PATH="+pathWithout("tpm", "scrum-master"),
-		"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
-		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
-		"TPM_USER="+r.user,
-		"TPM_WEB_BASE="+r.webBase,
-		"TPM_PROJECT="+project,
-		"TPM_ISSUE="+fmt.Sprint(iid),
-		"TPM_CHECKOUT="+checkout,
+		"SCRUM_MASTER_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
+		"SCRUM_MASTER_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
+		"SCRUM_MASTER_USER="+r.user,
+		"SCRUM_MASTER_WEB_BASE="+r.webBase,
+		"SCRUM_MASTER_PROJECT="+project,
+		"SCRUM_MASTER_ISSUE="+fmt.Sprint(iid),
+		"SCRUM_MASTER_CHECKOUT="+checkout,
 	)
 	if model != "" {
-		cmd.Env = append(cmd.Env, "TPM_MODEL="+model)
+		cmd.Env = append(cmd.Env, "SCRUM_MASTER_MODEL="+model)
 	}
 	var out bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &out

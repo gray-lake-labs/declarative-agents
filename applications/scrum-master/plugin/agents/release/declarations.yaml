@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# The release machine's words (GH-37). TPM_ARTIFACT names the artifact and TPM_ISSUE its release issue, project#iid; TPM_CONTROL and TPM_REF, when set, name the control files every word reads, as --flag=value args the loader drops whole when unset; optional flags are
+# The release machine's words (GH-37). SCRUM_MASTER_ARTIFACT names the artifact and SCRUM_MASTER_ISSUE its release issue, project#iid; SCRUM_MASTER_CONTROL and SCRUM_MASTER_REF, when set, name the control files every word reads, as --flag=value args the loader drops whole when unset; optional flags are
 # parameters from the run's request, never ${VAR} args (GH-135).
 unit: scrum-master-release-declarations
 tools:
@@ -12,9 +12,9 @@ tools:
   - next
   - --json
   - --artifact
-  - ${TPM_ARTIFACT}
-  - --control=${TPM_CONTROL}
-  - --ref=${TPM_REF}
+  - ${SCRUM_MASTER_ARTIFACT}
+  - --control=${SCRUM_MASTER_CONTROL}
+  - --ref=${SCRUM_MASTER_REF}
   visibility: internal
   description: 'Name the release''s candidates and the one the commits since the latest tag call for (srd015 R3.1).'
   category: boundary
@@ -49,11 +49,11 @@ tools:
   - gate
   - --json
   - --artifact
-  - ${TPM_ARTIFACT}
+  - ${SCRUM_MASTER_ARTIFACT}
   - --issue
-  - ${TPM_ISSUE}
-  - --control=${TPM_CONTROL}
-  - --ref=${TPM_REF}
+  - ${SCRUM_MASTER_ISSUE}
+  - --control=${SCRUM_MASTER_CONTROL}
+  - --ref=${SCRUM_MASTER_REF}
   visibility: internal
   description: 'Run the release''s gates for the recommended version and post their evidence on the release issue (srd015 R1).'
   category: boundary
@@ -99,11 +99,11 @@ tools:
   - tag
   - --json
   - --artifact
-  - ${TPM_ARTIFACT}
+  - ${SCRUM_MASTER_ARTIFACT}
   - --issue
-  - ${TPM_ISSUE}
-  - --control=${TPM_CONTROL}
-  - --ref=${TPM_REF}
+  - ${SCRUM_MASTER_ISSUE}
+  - --control=${SCRUM_MASTER_CONTROL}
+  - --ref=${SCRUM_MASTER_REF}
   visibility: internal
   description: 'Tag the release once its gate passed (srd015 R2).'
   category: boundary

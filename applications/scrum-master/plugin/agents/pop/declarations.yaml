@@ -5,7 +5,7 @@
 # worktree flow from each word's JSON output into the next word's
 # parameters through $from selectors — the runtime extracts a declared
 # parameter from a labeled step's output — so nothing is retyped between
-# steps. TPM_PROJECT and TPM_ISSUE come from the environment; an optional
+# steps. SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE come from the environment; an optional
 # value is a parameter, never a ${VAR} arg (the GH-135 finding).
 unit: scrum-master-pop-declarations
 tools:
@@ -17,9 +17,9 @@ tools:
   - claim
   - --json
   - --project
-  - ${TPM_PROJECT}
+  - ${SCRUM_MASTER_PROJECT}
   - --issue
-  - ${TPM_ISSUE}
+  - ${SCRUM_MASTER_ISSUE}
   visibility: internal
   description: Assign the issue to the caller with pop's refusals — closed, someone else's, a data issue not admitted — and name the branch to open (srd013 R7.1, srd041 R9.1).
   category: boundary
@@ -57,9 +57,9 @@ tools:
   - open-branch
   - --json
   - --project
-  - ${TPM_PROJECT}
+  - ${SCRUM_MASTER_PROJECT}
   - --issue
-  - ${TPM_ISSUE}
+  - ${SCRUM_MASTER_ISSUE}
   visibility: internal
   description: Create or reuse the issue's branch from the default branch and, on a hosted tracker, open or find its review (srd013 R7.5).
   category: boundary

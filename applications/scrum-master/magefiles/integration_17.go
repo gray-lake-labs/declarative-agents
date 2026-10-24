@@ -107,12 +107,12 @@ func (r *rigEnv) runPopAgent(rel runtime.Release, project, clone string, iid int
 	cmd.Dir = clone
 	cmd.Env = append(os.Environ(),
 		"PATH="+pathWithout("tpm", "scrum-master"),
-		"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
-		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
-		"TPM_USER="+r.user,
-		"TPM_WEB_BASE="+r.webBase,
-		"TPM_PROJECT="+project,
-		"TPM_ISSUE="+fmt.Sprint(iid),
+		"SCRUM_MASTER_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
+		"SCRUM_MASTER_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
+		"SCRUM_MASTER_USER="+r.user,
+		"SCRUM_MASTER_WEB_BASE="+r.webBase,
+		"SCRUM_MASTER_PROJECT="+project,
+		"SCRUM_MASTER_ISSUE="+fmt.Sprint(iid),
 	)
 	var out bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &out

@@ -166,7 +166,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - acceptance_criteria_note: tests and an environment are required in SRDs of consuming programs (D8); the criterion's applicability names its environment. This corpus specifies the process itself and has no environments yet, so its own SRDs omit them until the test subsystem's environment SRDs exist.
   - purpose: Defines one skill's requirements with checkable criteria.
 - subsystem_srd:
-  - location: docs/specs/software-requirements/srdNNN-short-name.md in the system (TPM) repository
+  - location: docs/specs/software-requirements/srdNNN-short-name.md in the system repository
   - required_fields:
     1. id
     1. title
@@ -216,7 +216,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - targets: a same-repository document id, or a URL pinned to a release tag (D9) for a document in another repository
   - purpose: The vertical and horizontal links of the planning hierarchy, written as context items of each hierarchy document; an issue carries the same links as body lines (srd007). Progress rolls up through parent, never through anchors.
 - theme:
-  - location: docs/specs/themes/thNNN-short-name.md in the system (TPM) repository; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document
+  - location: docs/specs/themes/thNNN-short-name.md in the system repository; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document
   - format: an SRD in the pinned release's Markdown format (D2), as every hierarchy document is; scrum-master's format tools read it with the release's SRD declaration
   - required_fields:
     1. id
@@ -240,7 +240,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - acceptance_criteria_fields: same as srd
   - purpose: A strategic goal area for months to years, owned by the technical program manager. Initiatives name it as their parent, and reports group the initiatives and epics beneath it.
 - initiative:
-  - location: docs/specs/initiatives/inNNN-short-name.md in the system (TPM) repository; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document; an objective document at docs/specs/objectives/objNNN-short-name.md is read as an initiative without change
+  - location: docs/specs/initiatives/inNNN-short-name.md in the system repository; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document; an objective document at docs/specs/objectives/objNNN-short-name.md is read as an initiative without change
   - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id
@@ -276,7 +276,7 @@ A skill's workflow is a declarative-agents profile under plugin/agents/<name>/: 
   - acceptance_criteria_note: tests and applicability are required (D8); applicability names the environment. Until the program's environment SRDs exist, it names a chain stage D8 lists and the audit cannot resolve it (srd034 R1.5). A test written "name (R1.1, R1.2)" names the items it proves, so a criterion two teams' items share puts only each team's tests on its Sprint Goal; a test without items proves every item the criterion traces (GH-20).
   - purpose: A multi-team outcome over several quarters, the program's Product Goal, owned by the technical program manager. Its parent is a theme; epics name it as theirs. plan places its outcomes in a release and tasks cites them, pinned, on each team's Sprint Goal (srd034).
 - epic:
-  - location: docs/specs/epics/epNNN-short-name.md, in the system (TPM) repository when it spans teams or in a subsystem repository when one team owns it; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document
+  - location: docs/specs/epics/epNNN-short-name.md, in the system repository when it spans teams or in a subsystem repository when one team owns it; the folder's README.md, which the init and onboard profiles write, explains the level and is not itself a hierarchy document
   - format: an SRD in the pinned release's Markdown format (D2)
   - required_fields:
     1. id

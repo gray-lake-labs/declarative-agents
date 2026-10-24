@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 // Package routing opens the tracking systems a program configures in
 // control/trackers.md, one per repository (srd042), and routes each
-// project to its own. With no such file, the one system TPM_TRACKER names
+// project to its own. With no such file, the one system SCRUM_MASTER_TRACKER names
 // serves every project, as before routing existed.
 package routing
 
@@ -166,7 +166,7 @@ type Opener func(System) (tracker.Tracker, error)
 var openers = map[string]Opener{
 	Beads: func(s System) (tracker.Tracker, error) {
 		if s.TrackerRepository == "" {
-			return nil, errors.New("bd needs its tracker repository: set tracker_repository in " + File + " or TPM_TRACKER")
+			return nil, errors.New("bd needs its tracker repository: set tracker_repository in " + File + " or SCRUM_MASTER_TRACKER")
 		}
 		return beads.OpenRepository(s.TrackerRepository)
 	},
@@ -193,7 +193,7 @@ func open(s System) (tracker.Tracker, error) {
 	return o(s)
 }
 
-// Override is what TPM_TRACKER says about the default system: a git URL or
+// Override is what SCRUM_MASTER_TRACKER says about the default system: a git URL or
 // path is bd's tracker repository, and gh or glab names that system. It
 // overrides the file's default, never its overrides.
 func Override(env string) (System, bool) {
@@ -207,18 +207,18 @@ func Override(env string) (System, bool) {
 }
 
 // Open opens the tracking systems for a command run in dir: with no
-// trackers document, the one TPM_TRACKER names, exactly as before routing;
-// with one, its default (TPM_TRACKER overriding it) and each override,
+// trackers document, the one SCRUM_MASTER_TRACKER names, exactly as before routing;
+// with one, its default (SCRUM_MASTER_TRACKER overriding it) and each override,
 // behind a router when any override exists.
 func Open(dir string) (tracker.Tracker, error) {
 	path, err := Find(dir)
 	if err != nil {
 		return nil, err
 	}
-	env, set := Override(os.Getenv("TPM_TRACKER"))
+	env, set := Override(os.Getenv("SCRUM_MASTER_TRACKER"))
 	if path == "" {
 		if !set {
-			return nil, errors.New("no tracker: set TPM_TRACKER to the tracker repository, or write " + File + " in the system repository (eng04-beads-sync)")
+			return nil, errors.New("no tracker: set SCRUM_MASTER_TRACKER to the tracker repository, or write " + File + " in the system repository (eng04-beads-sync)")
 		}
 		env.Dir = dir
 		return open(env)

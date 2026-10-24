@@ -8,8 +8,8 @@ purpose: |-
 
   This machine has no model state: scrum-master release next then scrum-
   master release gate then scrum-master release tag (design.md D10, D14;
-  GH-37). TPM_ARTIFACT names the artifact and TPM_ISSUE its release issue,
-  project#iid; TPM_CONTROL and TPM_REF, when set, name the control files
+  GH-37). SCRUM_MASTER_ARTIFACT names the artifact and SCRUM_MASTER_ISSUE its release issue,
+  project#iid; SCRUM_MASTER_CONTROL and SCRUM_MASTER_REF, when set, name the control files
   every word reads, as --flag=value args the loader drops whole when
   unset.
 configuration:

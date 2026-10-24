@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
 # The sprint-end profile's model binding: the model acts only in the Summarize
-# state (design.md D10), reading TPM_MODEL, TPM_RESPONSE_PROFILE, and
+# state (design.md D10), reading SCRUM_MASTER_MODEL, SCRUM_MASTER_RESPONSE_PROFILE, and
 # OLLAMA_URL with the defaults the parent's executor ships (srd043 R4.7).
 unit: scrum-master-sprint-end-llm-default
 imports:
@@ -40,11 +40,11 @@ tools:
     message_shape: 'invoke_llm: <provider/model>: <error>'
     state_after_failure: conversation history unchanged unless the provider response was already appended
   config:
-    model: ${TPM_MODEL:-qwen3.6:35b-mlx}
+    model: ${SCRUM_MASTER_MODEL:-qwen3.6:35b-mlx}
     dialect: /opt/providers/chat-dialect.yaml
     provider_url: ${OLLAMA_URL:-http://localhost:11434}
     manifest_state: Summarize
-    response_profile: ${TPM_RESPONSE_PROFILE:-qwen}
+    response_profile: ${SCRUM_MASTER_RESPONSE_PROFILE:-qwen}
     max_time: 600
     system_prompt: |
       You are the sprint-end workflow of scrum-master: the period closes through the

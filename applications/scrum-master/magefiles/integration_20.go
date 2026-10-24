@@ -23,10 +23,10 @@ func init() {
 // WorkflowProfiles runs the workflows a person ran as tpm commands before
 // GH-37 through their profiles, with the repository's agent and neither tpm
 // nor scrum-master on PATH: comment, admit, approve (as the reviewer),
-// close after a merge that closed nothing, recur, status, labels, and
-// tracker-sync each end in Done with
-// their effect in the tracker (test: workflow profile runs; environment:
-// local).
+// close after a merge that closed nothing, recur, status, labels,
+// tracker-sync, tracker-migrate, and tracker-export each end in Done with
+// their effect in the tracker or, for the export, the file holding every
+// issue (test: workflow profile runs; environment: local).
 func (Integration) WorkflowProfiles() error {
 	r, err := newRigEnv()
 	if err != nil {
@@ -112,11 +112,17 @@ func (Integration) WorkflowProfiles() error {
 	c.expect(strings.Contains(status, po1), "the status run names no %s: %s", po1, tail17(status))
 	run("labels", rigUser, clone, 0, map[string]any{"group": r.group})
 	run("tracker-sync", rigUser, clone, 0, nil)
+	run("tracker-migrate", rigUser, clone, 0, nil)
+	export := filepath.Join(r.run.Dir, "wf-export.jsonl")
+	run("tracker-export", rigUser, clone, 0, map[string]any{"out": export})
+	exported, _ := os.ReadFile(export)
+	c.expect(strings.Contains(string(exported), "Workflow profiles") && strings.Contains(string(exported), "Recurring: workflow audit"),
+		"the export names not every issue: %s", exported)
 	return c.err("workflowProfiles")
 }
 
 // runWorkflow runs the repository's agent over one workflow profile as user
-// from dir, with the rig's tracker, TPM_PROJECT and TPM_ISSUE, the
+// from dir, with the rig's tracker, SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE, the
 // request's parameters, any further environment entries, and no tpm or
 // scrum-master on PATH.
 func (r *rigEnv) runWorkflow(rel runtime.Release, profile, user, dir, project, issue string, params map[string]any, env ...string) (string, error) {
@@ -138,12 +144,12 @@ func (r *rigEnv) runWorkflow(rel runtime.Release, profile, user, dir, project, i
 	cmd.Dir = dir
 	cmd.Env = append(os.Environ(),
 		"PATH="+pathWithout("tpm", "scrum-master"),
-		"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
-		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+user),
-		"TPM_USER="+user,
-		"TPM_WEB_BASE="+r.webBase,
-		"TPM_PROJECT="+project,
-		"TPM_ISSUE="+issue,
+		"SCRUM_MASTER_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
+		"SCRUM_MASTER_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+user),
+		"SCRUM_MASTER_USER="+user,
+		"SCRUM_MASTER_WEB_BASE="+r.webBase,
+		"SCRUM_MASTER_PROJECT="+project,
+		"SCRUM_MASTER_ISSUE="+issue,
 	)
 	cmd.Env = append(cmd.Env, env...)
 	var out bytes.Buffer

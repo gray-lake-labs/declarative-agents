@@ -21,9 +21,10 @@ func init() {
 	integrationTargets = append(integrationTargets, Integration{}.InitProfile)
 }
 
-// tpmWord is tpm as a word, the retired binary's name; TPM_ variables and
-// tool names such as a_tpm_b are not it.
-var tpmWord = regexp.MustCompile(`(^|[^A-Za-z0-9_])tpm([^A-Za-z0-9_]|$)`)
+// tpmWord is tpm as a word, the retired binary's name, in either case, or
+// a TPM_ variable, which GH-38 renamed SCRUM_MASTER_; tool names such as
+// a_tpm_b are not it.
+var tpmWord = regexp.MustCompile(`(?i)(^|[^a-z0-9_])tpm([^a-z0-9_]|$)|\bTPM_`)
 
 // InitProfile runs the repository's agent over the init profile in an empty
 // git repository with an empty tracker beside it and no scrum-master on PATH
@@ -48,7 +49,7 @@ func (Integration) InitProfile() error {
 		return err
 	}
 	repo, tracker := filepath.Join(tmp, "system"), filepath.Join(tmp, "tracker.git")
-	env := append(os.Environ(), "PATH="+pathWithout("tpm", "scrum-master"), install.SourceEnv+"="+rel.Src, "TPM_USER=operator",
+	env := append(os.Environ(), "PATH="+pathWithout("tpm", "scrum-master"), install.SourceEnv+"="+rel.Src, "SCRUM_MASTER_USER=operator",
 		"GIT_AUTHOR_NAME=operator", "GIT_AUTHOR_EMAIL=operator@example.invalid",
 		"GIT_COMMITTER_NAME=operator", "GIT_COMMITTER_EMAIL=operator@example.invalid")
 	sh := func(dir, name string, args ...string) (string, error) {
@@ -206,12 +207,12 @@ func (Integration) OnboardProfile() error {
 		cmd.Env = append(os.Environ(),
 			"PATH="+pathWithout("tpm", "scrum-master"),
 			install.SourceEnv+"="+rel.Src,
-			"TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
-			"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
-			"TPM_USER="+r.user,
-			"TPM_WEB_BASE="+r.webBase,
-			"TPM_SYSTEM="+system,
-			"TPM_SUBSYSTEM=srd010-po-1",
+			"SCRUM_MASTER_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
+			"SCRUM_MASTER_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+r.user),
+			"SCRUM_MASTER_USER="+r.user,
+			"SCRUM_MASTER_WEB_BASE="+r.webBase,
+			"SCRUM_MASTER_SYSTEM="+system,
+			"SCRUM_MASTER_SUBSYSTEM=srd010-po-1",
 		)
 		var b bytes.Buffer
 		cmd.Stdout, cmd.Stderr = &b, &b

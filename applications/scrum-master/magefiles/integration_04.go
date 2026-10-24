@@ -168,7 +168,7 @@ major-and-minor-before-1.0
 	if err := r.commitPush(wf, "Fix the grader's rounding", "FIX.md"); err != nil {
 		return err
 	}
-	out, rerr := r.runWorkflow(rel, "release", rigUser, wf, po1, ref, nil, "TPM_ARTIFACT=grader", "TPM_CONTROL="+system, "TPM_REF="+seedBranch)
+	out, rerr := r.runWorkflow(rel, "release", rigUser, wf, po1, ref, nil, "SCRUM_MASTER_ARTIFACT=grader", "SCRUM_MASTER_CONTROL="+system, "SCRUM_MASTER_REF="+seedBranch)
 	c.expect(rerr == nil && strings.Contains(out, "final machine state: Done"), "the release run: %v: %s", rerr, tail17(out))
 	_, terr = r.remoteTag(po1, "grader/v0.1.1")
 	c.expect(terr == nil, "the release run left no grader/v0.1.1 at the origin: %v", terr)

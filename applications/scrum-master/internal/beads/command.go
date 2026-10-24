@@ -23,7 +23,7 @@ func init() {
 			}
 			b, ok := t.(*Tracker)
 			if !ok {
-				return fmt.Errorf("scrum-master tracker reconcile serves the beads tracker; set TPM_TRACKER")
+				return fmt.Errorf("scrum-master tracker reconcile serves the beads tracker; set SCRUM_MASTER_TRACKER")
 			}
 			if ctx.DryRun {
 				return fmt.Errorf("%w: reconcile pushes queued writes and has no dry run", cli.ErrUsage)
@@ -112,7 +112,7 @@ func beadsTracker(ctx *cli.Context) (*Tracker, error) {
 	}
 	b, ok := t.(*Tracker)
 	if !ok {
-		return nil, fmt.Errorf("the tracker commands serve the beads tracker; set TPM_TRACKER")
+		return nil, fmt.Errorf("the tracker commands serve the beads tracker; set SCRUM_MASTER_TRACKER")
 	}
 	return b, nil
 }

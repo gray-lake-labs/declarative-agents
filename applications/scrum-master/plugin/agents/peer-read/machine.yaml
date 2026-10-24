@@ -7,7 +7,7 @@ purpose: |-
   release issue. Use when a reviewer asks to approve a release.
 
   This machine has no model state: scrum-master release approve (design.md
-  D10, D14; GH-37). TPM_PROJECT and TPM_ISSUE name the release issue.
+  D10, D14; GH-37). SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE name the release issue.
 configuration:
   machine: plugin/agents/peer-read/machine.yaml
   tools: plugin/agents/peer-read/tools.yaml

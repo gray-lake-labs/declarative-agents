@@ -11,8 +11,8 @@ purpose: |-
 
   This machine has no model state: the push is deterministic, words all
   the way down (design.md D10, D14; GH-201, GH-206). The run starts in the
-  system repository's checkout holding the written road map; TPM_SYSTEM,
-  TPM_VERSION, and TPM_END name the release and its end date. A road map
+  system repository's checkout holding the written road map; SCRUM_MASTER_SYSTEM,
+  SCRUM_MASTER_VERSION, and SCRUM_MASTER_END name the release and its end date. A road map
   without the release ends the run in Refused with the word's reason; every word
   upserts, so a failure after the milestone is a partial state a re-run
   finishes.

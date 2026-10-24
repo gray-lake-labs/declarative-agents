@@ -67,10 +67,10 @@ func Init(o InitOptions) (InitResult, error) {
 		files[n] = b
 	}
 	// The program's tracking system, when init knows it: the tracker
-	// repository it seeds, else the one TPM_TRACKER names (srd042).
+	// repository it seeds, else the one SCRUM_MASTER_TRACKER names (srd042).
 	if s, ok := routing.Override(o.Tracker); ok {
 		files[routing.File] = routing.Document(routing.Config{Default: s})
-	} else if s, ok := routing.Override(os.Getenv("TPM_TRACKER")); ok {
+	} else if s, ok := routing.Override(os.Getenv("SCRUM_MASTER_TRACKER")); ok {
 		files[routing.File] = routing.Document(routing.Config{Default: s})
 	}
 	if r.Files, err = write(o.Dir, files, o.Force, o.DryRun); err != nil {
@@ -99,7 +99,7 @@ func Init(o InitOptions) (InitResult, error) {
 }
 
 // NoTracker is what init reports when it is given no tracker repository and
-// TPM_TRACKER names none: the issue workflow cannot run until one exists.
+// SCRUM_MASTER_TRACKER names none: the issue workflow cannot run until one exists.
 const NoTracker = "no tracker repository seeded; issues cannot be filed until one exists: rerun with --tracker and --group"
 
 // seedTracker makes an empty tracker repository's first commit, holding the

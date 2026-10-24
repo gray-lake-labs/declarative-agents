@@ -311,8 +311,8 @@ func (w *gitlabWorker) run(args ...string) ([]byte, error) {
 	cmd := exec.Command(w.env.words, args...)
 	cmd.Dir = w.checkout("work")
 	cmd.Env = append(append(os.Environ(), w.env.auth...),
-		"TPM_TRACKER="+w.env.tracker, "TPM_TRACKER_CLONE="+w.trackerClone(),
-		"TPM_USER="+w.user, "TPM_WEB_BASE="+w.env.base,
+		"SCRUM_MASTER_TRACKER="+w.env.tracker, "SCRUM_MASTER_TRACKER_CLONE="+w.trackerClone(),
+		"SCRUM_MASTER_USER="+w.user, "SCRUM_MASTER_WEB_BASE="+w.env.base,
 		"GIT_AUTHOR_NAME="+w.user, "GIT_AUTHOR_EMAIL="+w.user+"@example.invalid",
 		"GIT_COMMITTER_NAME="+w.user, "GIT_COMMITTER_EMAIL="+w.user+"@example.invalid")
 	var out, errb bytes.Buffer

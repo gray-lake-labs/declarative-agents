@@ -66,7 +66,7 @@ A program names each repository's tracking system in control/trackers.md
 or glab, and overrides for the projects or groups that use another. A
 repository has exactly one system, so project#iid names one issue; a
 group's entry serves every project under it that no closer entry names.
-TPM_TRACKER replaces the default for one person's run, never an override,
+SCRUM_MASTER_TRACKER replaces the default for one person's run, never an override,
 and with no such file it alone names the system every project uses. scrum-master reads the file from the checkout, else from the one sibling
 checkout that holds it, worktrees of one repository counting as one.
 
@@ -149,8 +149,8 @@ eight hex digits, and scrum-master when the file sets none. An ID is never renam
 The file's layout key names how issues are stored: files keeps each issue
 in .beads/issues/<id>.json, with an index under .beads/index/ from each
 repository's IIDs to IDs, and without the key every issue is in
-.beads/issues.jsonl; both are read and written, and scrum-master tracker migrate
-moves the second to the first.
+.beads/issues.jsonl; both are read and written, and scrum-master tracker migrate,
+which the tracker-migrate profile runs, moves the second to the first.
 
 <!-- req: R3.2 -->
 ### R3.2

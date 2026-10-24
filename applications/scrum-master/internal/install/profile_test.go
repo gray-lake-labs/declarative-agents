@@ -26,7 +26,7 @@ func TestSkillsRenderFromTheirProfiles(t *testing.T) {
 	for _, s := range skills {
 		names = append(names, s.Name)
 	}
-	want := []string{"admit", "aggregate", "approve", "check", "close", "comment", "draft", "implement", "init", "labels", "merge", "onboard", "peer-read", "plan-push", "plan", "pop", "recur", "release", "reports-init", "specify", "sprint-end", "status-issues", "status", "tasks", "tracker-sync"}
+	want := []string{"admit", "aggregate", "approve", "check", "close", "comment", "draft", "implement", "init", "labels", "merge", "onboard", "peer-read", "plan-push", "plan", "pop", "recur", "release", "reports-init", "specify", "sprint-end", "status-issues", "status", "tasks", "tracker-export", "tracker-migrate", "tracker-sync"}
 	if strings.Join(names, " ") != strings.Join(want, " ") {
 		t.Fatalf("profiles rendered %v, want %v", names, want)
 	}
@@ -136,7 +136,7 @@ func TestRenderedSkillsRunTheVendoredProfile(t *testing.T) {
 		}
 		switch s.Name {
 		case "pop":
-			if !strings.Contains(s.Body, "do not run them by hand") || !strings.Contains(s.Body, "TPM_ISSUE") {
+			if !strings.Contains(s.Body, "do not run them by hand") || !strings.Contains(s.Body, "SCRUM_MASTER_ISSUE") {
 				t.Errorf("pop's run section:\n%s", s.Body)
 			}
 		case "plan":
@@ -155,14 +155,14 @@ func TestRenderedSkillsRunTheVendoredProfile(t *testing.T) {
 func TestProfileEnvIgnoresComments(t *testing.T) {
 	fsys := fstest.MapFS{
 		"agents/x/profile.yaml":      {Data: []byte("name: x\n")},
-		"agents/x/declarations.yaml": {Data: []byte("# never a ${VAR} arg\nargs:\n- ${TPM_PROJECT}\nmodel: ${TPM_MODEL:-qwen}\n")},
+		"agents/x/declarations.yaml": {Data: []byte("# never a ${VAR} arg\nargs:\n- ${SCRUM_MASTER_PROJECT}\nmodel: ${SCRUM_MASTER_MODEL:-qwen}\n")},
 	}
 	env, err := ProfileEnv(fsys, "agents")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := strings.Join(env["x"], " "); got != "TPM_MODEL TPM_PROJECT" {
-		t.Fatalf("variables = %q, want TPM_MODEL TPM_PROJECT", got)
+	if got := strings.Join(env["x"], " "); got != "SCRUM_MASTER_MODEL SCRUM_MASTER_PROJECT" {
+		t.Fatalf("variables = %q, want SCRUM_MASTER_MODEL SCRUM_MASTER_PROJECT", got)
 	}
 }
 

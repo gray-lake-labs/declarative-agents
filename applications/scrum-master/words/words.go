@@ -16,13 +16,20 @@ import (
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/cli"
 	_ "github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/commands"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
+	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/legacyenv"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/program"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/routing"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/spectool"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/tracker"
 )
 
-func init() { program.Words = Run }
+// The words read SCRUM_MASTER_ variables, and the TPM_ names they had
+// before GH-38 where a new one is unset; the package initializes before
+// an agent build loads a profile, so its references see them too.
+func init() {
+	program.Words = Run
+	legacyenv.Adopt()
+}
 
 // SetSpecTool runs the corpus gate's shape check with run, the spec tool's
 // program an agent build linked in, instead of a tool built from a

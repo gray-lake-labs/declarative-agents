@@ -308,8 +308,8 @@ func (r *rigEnv) runWords(args ...string) ([]byte, error) { return r.runWordsAs(
 func (r *rigEnv) runWordsAs(user string, args ...string) ([]byte, error) {
 	cmd := exec.Command(r.words, args...)
 	cmd.Dir = filepath.Join(r.run.Dir, "checkouts", "work")
-	cmd.Env = append(os.Environ(), "TPM_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
-		"TPM_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+user), "TPM_USER="+user, "TPM_WEB_BASE="+r.webBase)
+	cmd.Env = append(os.Environ(), "SCRUM_MASTER_TRACKER="+filepath.Join(r.run.Dir, "tracker.git"),
+		"SCRUM_MASTER_TRACKER_CLONE="+filepath.Join(r.run.Dir, "tracker-"+user), "SCRUM_MASTER_USER="+user, "SCRUM_MASTER_WEB_BASE="+r.webBase)
 	var out, errb bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errb
 	if err := cmd.Run(); err != nil {

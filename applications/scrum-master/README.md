@@ -33,7 +33,7 @@ To install from a GitLab fork's releases, such as an internal one, set `SCRUM_MA
 
 A program repository runs its workflows with the agent: each installed skill runs `agent --profile .scrum-master/agents/<name>/profile.yaml --core-root .scrum-master/agent-core --directory .` over the profiles the repository vendored. The one workflow a person runs directly is `init` in a system repository, or `onboard` in a repository joining a program: it lays the repository down, installs the skills, and vendors the profiles and the agent-core declarations they read into `.scrum-master`, with a manifest naming the release. Commit `.scrum-master` with the rest; rerun the same profile to check the repository and to take a new release, which keeps every file a person edited and reports what drifted.
 
-Run `init` from the installed profiles (`TPM_SYSTEM` and `TPM_SUBSYSTEM` name where an `onboard` joins):
+Run `init` from the installed profiles (`SCRUM_MASTER_SYSTEM` and `SCRUM_MASTER_SUBSYSTEM` name where an `onboard` joins):
 
 ```bash
 home="${SCRUM_MASTER_HOME:-$HOME/.local/share/scrum-master}"
@@ -53,7 +53,7 @@ scrum-master-check:
     - agent --profile .scrum-master/agents/check/profile.yaml --core-root .scrum-master/agent-core --directory .
 ```
 
-To pull from the program's own registry instead, copy it there once per release, for example with `docker buildx imagetools create --tag <registry>/scrum-master:<tag> ghcr.io/gray-lake-labs/scrum-master@<digest>`. Tracker credentials (`TPM_TRACKER`, `TPM_USER`) and any model credentials a profile names come from masked CI variables; `TPM_USER` names a service user, never a person.
+To pull from the program's own registry instead, copy it there once per release, for example with `docker buildx imagetools create --tag <registry>/scrum-master:<tag> ghcr.io/gray-lake-labs/scrum-master@<digest>`. Tracker credentials (`SCRUM_MASTER_TRACKER`, `SCRUM_MASTER_USER`) and any model credentials a profile names come from masked CI variables; `SCRUM_MASTER_USER` names a service user, never a person.
 
 ## Seed a program repository from an architecture document
 
@@ -66,16 +66,18 @@ The init profile writes thirteen files that need no further work, besides the ve
 1. Create an empty tracker repository for the program (for example `<program>-tracker`). Then, in the program's repository, with the seed committed, lay down the corpus, seed the tracker, and commit the init profile's output:
 
    ```bash
-   export TPM_TRACKER=<tracker remote> TPM_USER=<your name in the tracker>
+   export SCRUM_MASTER_TRACKER=<tracker remote> SCRUM_MASTER_USER=<your name in the tracker>
    home="${SCRUM_MASTER_HOME:-$HOME/.local/share/scrum-master}"
-   printf '{"parameters": {"tracker": "%s", "group": "<program group>"}}' "$TPM_TRACKER" > /tmp/init.json
+   printf '{"parameters": {"tracker": "%s", "group": "<program group>"}}' "$SCRUM_MASTER_TRACKER" > /tmp/init.json
    agent --profile "$home/agents/init/profile.yaml" --core-root "$home/agent-core" --directory . --request /tmp/init.json
    git add -A && git commit -m "Lay down the program" && git push origin main
    ```
 
    The init profile makes the tracker's first commit and creates the program's labels there. Without a tracker in its request it says that no tracker was seeded, and no issue can be filed until one is.
 
-   A repository can use GitHub or GitLab instead of a tracker repository: name it `gh` or `glab` in the system repository's `control/trackers.md`, or run with `TPM_TRACKER=gh` or `TPM_TRACKER=glab`. scrum-master then drives that CLI with your existing login: `gh`'s token needs the `repo` and `read:org` scopes, and `glab`'s the `api` scope (`gh auth status` and `glab auth status` show them); the check skill reports a missing or logged-out CLI.
+   The environment variables were named `TPM_` until GH-38. A `TPM_` name is still read where its `SCRUM_MASTER_` name is unset, and the check skill names each one a setup still sets, so a CI job can move at its own pace.
+
+   A repository can use GitHub or GitLab instead of a tracker repository: name it `gh` or `glab` in the system repository's `control/trackers.md`, or run with `SCRUM_MASTER_TRACKER=gh` or `SCRUM_MASTER_TRACKER=glab`. scrum-master then drives that CLI with your existing login: `gh`'s token needs the `repo` and `read:org` scopes, and `glab`'s the `api` scope (`gh auth status` and `glab auth status` show them); the check skill reports a missing or logged-out CLI.
 
 2. File the generation issue with the specify skill and pop it into its own branch and worktree with the pop skill. The issue names the documents it changes; a planning document among them makes it a `plane::management` issue. Its body:
 
@@ -89,7 +91,7 @@ The init profile writes thirteen files that need no further work, besides the ve
 
    - The hierarchy gate passes (test: scrum-master backlog check; environment: local)
    EOF
-   agent --profile .scrum-master/agents/pop/profile.yaml --core-root .scrum-master/agent-core --directory .   # with TPM_PROJECT and TPM_ISSUE set
+   agent --profile .scrum-master/agents/pop/profile.yaml --core-root .scrum-master/agent-core --directory .   # with SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE set
    ```
 
    The issue needs no `component::` label: the program's subsystem SRDs declare no component until the hierarchy and its SRDs exist. The pop workflow reports the worktree it opened, a sibling of the checkout. Steps 3 to 5 run there.
@@ -125,7 +127,7 @@ The init profile writes thirteen files that need no further work, besides the ve
 
    ```bash
    git add -A && git commit -m "Generate the program from the seed" && git push -u origin HEAD
-   TPM_USER=<reviewer> agent --profile .scrum-master/agents/approve/profile.yaml --core-root .scrum-master/agent-core --directory .   # the reviewer, under require_approval
+   SCRUM_MASTER_USER=<reviewer> agent --profile .scrum-master/agents/approve/profile.yaml --core-root .scrum-master/agent-core --directory .   # the reviewer, under require_approval
    agent --profile .scrum-master/agents/merge/profile.yaml --core-root .scrum-master/agent-core --directory .
    ```
 

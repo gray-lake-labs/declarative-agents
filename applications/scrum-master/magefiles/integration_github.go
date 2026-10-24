@@ -23,7 +23,7 @@ import (
 const githubRigRepo = "gray-lake-labs/tpm-gh-rig"
 
 // Github runs the opt-in GitHub rig: with gh logged in (GH_TOKEN), it
-// builds scrum-master, and with TPM_TRACKER=gh in a checkout of the rig repository
+// builds scrum-master, and with SCRUM_MASTER_TRACKER=gh in a checkout of the rig repository
 // proves scrum-master issue labels writes the schema into the repository, scrum-master issue
 // file files an admitted issue on a dated milestone, scrum-master issue pop opens
 // the branch with a draft pull request, GitHub itself refuses the author's
@@ -78,7 +78,7 @@ func (Integration) Github() error {
 	words := func(dir string, args ...string) ([]byte, error) {
 		cmd := exec.Command(bin, args...)
 		cmd.Dir = dir
-		cmd.Env = append(os.Environ(), "TPM_TRACKER=gh")
+		cmd.Env = append(os.Environ(), "SCRUM_MASTER_TRACKER=gh")
 		var errb bytes.Buffer
 		cmd.Stderr = &errb
 		out, err := cmd.Output()

@@ -2440,6 +2440,32 @@ applications/scrum-master/plugin/agents/status-issues/profile.yaml
 
 workflow_machine
 
+<!-- scrum_master_entry: scrum-master-tracker-export -->
+#### scrum-master-tracker-export
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/tracker-export/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
+<!-- scrum_master_entry: scrum-master-tracker-migrate -->
+#### scrum-master-tracker-migrate
+
+<!-- field: profile -->
+##### Profile
+
+applications/scrum-master/plugin/agents/tracker-migrate/profile.yaml
+
+<!-- field: classification -->
+##### Classification
+
+workflow_machine
+
 <!-- scrum_master_entry: scrum-master-tracker-sync -->
 #### scrum-master-tracker-sync
 

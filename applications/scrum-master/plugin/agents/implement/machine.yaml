@@ -10,8 +10,8 @@ purpose: |-
   Invoking this profile takes the work. scrum-master decides whether it can be taken
   and does every step around the work; the model acts only in the Work state
   and closes nothing itself (design.md D10, srd036). Every word runs
-  with --json against the project TPM_PROJECT names, under the policy of the
-  system repository TPM_CONTROL names; TPM_ISSUE names the issue. A refusal
+  with --json against the project SCRUM_MASTER_PROJECT names, under the policy of the
+  system repository SCRUM_MASTER_CONTROL names; SCRUM_MASTER_ISSUE names the issue. A refusal
   from scrum-master ends the run in the Refused state with the word's reason.
 configuration:
   machine: plugin/agents/implement/machine.yaml

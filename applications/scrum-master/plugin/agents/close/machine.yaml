@@ -8,7 +8,7 @@ purpose: |-
   whose work is already merged.
 
   This machine has no model state: scrum-master issue close (design.md
-  D10, D14; GH-37). TPM_PROJECT and TPM_ISSUE name the issue.
+  D10, D14; GH-37). SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE name the issue.
 configuration:
   machine: plugin/agents/close/machine.yaml
   tools: plugin/agents/close/tools.yaml

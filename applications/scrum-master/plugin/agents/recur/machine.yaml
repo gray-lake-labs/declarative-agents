@@ -7,7 +7,7 @@ purpose: |-
   instance of a recurring issue.
 
   This machine has no model state: scrum-master issue recur (design.md
-  D10, D14; GH-37). TPM_PROJECT and TPM_ISSUE name the recurring issue.
+  D10, D14; GH-37). SCRUM_MASTER_PROJECT and SCRUM_MASTER_ISSUE name the recurring issue.
 configuration:
   machine: plugin/agents/recur/machine.yaml
   tools: plugin/agents/recur/tools.yaml
