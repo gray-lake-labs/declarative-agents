@@ -7,7 +7,7 @@ purpose: |-
   then the profiles they run, vendored. Run it once with the agent to start
   a program; rerun it to check the repository and take a new release.
 
-  This machine has no model state: two tpm words (design.md D10, D14;
+  This machine has no model state: two words (design.md D10, D14;
   GH-29). The first lays the repository down and installs its skills; the
   second vendors the release's profiles and agent-core declarations into
   .scrum-master, which every skill runs with the agent. A rerun is the
@@ -17,15 +17,15 @@ configuration:
   machine: plugin/agents/init/machine.yaml
   tools: plugin/agents/init/tools.yaml
 invariants:
-- Every step is a tpm word; no model acts anywhere in this machine
+- Every step is a word; no model acts anywhere in this machine
 - A file a person edited is kept, by both words
 - A rerun of the whole machine on an up-to-date repository changes nothing
 lifecycle: |-
-  1. Idle → Scaffold (Seed): tpm init lays the repository down and installs
+  1. Idle → Scaffold (Seed): scrum-master init lays the repository down and installs
      the skills
-  2. Scaffold → Vendor (ToolDone): tpm install --profiles vendors the
+  2. Scaffold → Vendor (ToolDone): scrum-master install --profiles vendors the
      profiles into .scrum-master
-  3. Scaffold → Refused (ToolFailed): tpm's reason ends the run
+  3. Scaffold → Refused (ToolFailed): the word's reason ends the run
   4. Vendor → Done (ToolDone); Vendor → NotVendored (ToolFailed)
 initial_state: Idle
 budget:
@@ -36,13 +36,13 @@ states:
   meaning: Initial state before the repository is laid down.
 - name: Scaffold
   meaning: |
-    The init word: tpm init writes the system repository's corpus, control
+    The init word: scrum-master init writes the system repository's corpus, control
     files, and orientation, seeds the tracker when one is named, and
     installs the skills for the named agents, all by default; a file a
     person edited is kept.
 - name: Vendor
   meaning: |
-    The vendor word: tpm install --profiles copies the release's profiles
+    The vendor word: scrum-master install --profiles copies the release's profiles
     into .scrum-master/agents and the agent-core declarations they read
     into .scrum-master/agent-core, with a manifest naming the release, and
     reports each file created, updated, unchanged, kept, or removed.
@@ -54,7 +54,7 @@ states:
 - name: Refused
   run_status: failed
   meaning: |
-    Terminal. tpm init refused, and its reason, as printed, is the run's
+    Terminal. scrum-master init refused, and its reason, as printed, is the run's
     last output; nothing was vendored.
 - name: NotVendored
   run_status: failed
@@ -64,7 +64,7 @@ states:
     reason is reported, and a rerun vendors them.
 - name: Failed
   run_status: failed
-  meaning: Terminal. An infrastructure error outside tpm's refusals.
+  meaning: Terminal. An infrastructure error outside the word's refusals.
 terminal_states:
 - Done
 - Refused
@@ -74,22 +74,22 @@ signals:
 - name: Seed
   trigger: Loop initialization.
 - name: ToolDone
-  trigger: A tpm word executed successfully.
+  trigger: A word executed successfully.
 - name: ToolFailed
-  trigger: A tpm word reported failure — a refusal with its reason.
+  trigger: A word reported failure — a refusal with its reason.
 - name: CommandError
   trigger: Infrastructure-level error (not a tool failure).
 transitions:
 - state: Idle
   signal: Seed
   next: Scaffold
-  action: tpm_init
+  action: init
   label: scaffold
   summary: true
 - state: Scaffold
   signal: ToolDone
   next: Vendor
-  action: tpm_vendor
+  action: vendor
   label: vendor
   summary: true
 - state: Scaffold

@@ -57,7 +57,7 @@ var skeleton = []string{
 
 // orientationMarkers are the begin and end lines every orientation file
 // carries around tpm's text (srd043 R3.5).
-var orientationMarkers = []string{"<!-- tpm:begin", "<!-- tpm:end -->"}
+var orientationMarkers = []string{"<!-- managed:begin", BlockEnd}
 
 func TestInitWritesOrientation(t *testing.T) {
 	dir := repo(t)

@@ -1,13 +1,13 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# The specify workflow's tpm words, dispatched by the model in the Draft
+# The specify workflow's words, dispatched by the model in the Draft
 # state. Optional flags are parameters, never ${VAR} args: the loader drops
 # an argument whose variable is unset, which corrupts the flag list (the
-# GH-135 pilot finding). A non-zero exit is tpm's refusal, fed back to the
+# GH-135 pilot finding). A non-zero exit is the word's refusal, fed back to the
 # model, which fixes the body and lints again (srd035).
-unit: tpm-specify-declarations
+unit: scrum-master-specify-declarations
 tools:
-- name: tpm_issue_file
+- name: issue_file
   type: exec
   binary: scrum-master
   args:
@@ -15,7 +15,7 @@ tools:
   - file
   - --json
   visibility: external
-  description: File one unassigned issue and lint it; tpm sets the plane, kind, and component from the paths (srd035, srd013).
+  description: File one unassigned issue and lint it; the word sets the plane, kind, and component from the paths (srd035, srd013).
   category: boundary
   parameters:
     type: object
@@ -52,7 +52,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm issue file's JSON report — the issue's reference, labels, and admission verdict.
+    description: scrum-master issue file's JSON report — the issue's reference, labels, and admission verdict.
     schema:
       type: string
   side_effects:
@@ -68,14 +68,14 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_issue_file: <error>'
+    message_shape: 'issue_file: <error>'
     state_after_failure: nothing was filed by a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the filing and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker is as tpm's refusal left it
+    condition: the word refuses the filing and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker is as the word's refusal left it
 
-- name: tpm_issue_lint
+- name: issue_lint
   type: exec
   binary: scrum-master
   args:
@@ -104,7 +104,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm issue lint's JSON verdict with each admission reason.
+    description: scrum-master issue lint's JSON verdict with each admission reason.
     schema:
       type: string
   side_effects:
@@ -120,9 +120,9 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_issue_lint: <error>'
+    message_shape: 'issue_lint: <error>'
     state_after_failure: nothing was linted by a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the lint and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker is as tpm's refusal left it
+    condition: the word refuses the lint and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker is as the word's refusal left it

@@ -4,9 +4,9 @@
 # release gate, and the tag. Kept apart from declarations.yaml, which holds
 # the workflow's own words, so neither file outgrows the declaration-style
 # limit. Optional flags are parameters, never ${VAR} args (GH-135).
-unit: tpm-plan-release-declarations
+unit: scrum-master-plan-release-declarations
 tools:
-- name: tpm_issue_merge
+- name: issue_merge
   type: exec
   binary: scrum-master
   args:
@@ -39,7 +39,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm issue merge's JSON report.
+    description: scrum-master issue merge's JSON report.
     schema:
       type: string
   side_effects:
@@ -51,18 +51,18 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: tpm's own policy governs what follows; the run reverses nothing.
+    description: the words' own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_issue_merge: <error>'
+    message_shape: 'issue_merge: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the merge — a failed audit or a missing approval — and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker and the checkout are as tpm's refusal left them
+    condition: the word refuses the merge — a failed audit or a missing approval — and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as the word's refusal left them
 
-- name: tpm_release_gate
+- name: release_gate
   type: exec
   binary: scrum-master
   args:
@@ -99,7 +99,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm release gate's JSON report.
+    description: scrum-master release gate's JSON report.
     schema:
       type: string
   side_effects:
@@ -111,18 +111,18 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: tpm's own policy governs what follows; the run reverses nothing.
+    description: the words' own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_release_gate: <error>'
+    message_shape: 'release_gate: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: a gate fails or tpm refuses, exiting non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker and the checkout are as tpm's refusal left them
+    condition: a gate fails or the word refuses, exiting non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as the word's refusal left them
 
-- name: tpm_release_tag
+- name: release_tag
   type: exec
   binary: scrum-master
   args:
@@ -159,7 +159,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm release tag's JSON report.
+    description: scrum-master release tag's JSON report.
     schema:
       type: string
   side_effects:
@@ -171,13 +171,13 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: tpm's own policy governs what follows; the run reverses nothing.
+    description: the words' own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_release_tag: <error>'
+    message_shape: 'release_tag: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the tag — no passing gate, or the version exists — and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker and the checkout are as tpm's refusal left them
+    condition: the word refuses the tag — no passing gate, or the version exists — and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as the word's refusal left them

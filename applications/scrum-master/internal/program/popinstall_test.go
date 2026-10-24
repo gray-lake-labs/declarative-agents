@@ -49,7 +49,7 @@ func TestPopInstallsSkillsIntoWorktree(t *testing.T) {
 	}
 	for _, s := range skills {
 		b, err := os.ReadFile(filepath.Join(worktree, ".claude/skills", s.Name, "SKILL.md"))
-		if err != nil || !strings.Contains(string(b), "<!-- tpm install version=") {
+		if err != nil || !strings.Contains(string(b), "<!-- skill install version=") {
 			t.Fatalf("%s not installed in the worktree: %v", s.Name, err)
 		}
 	}

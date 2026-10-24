@@ -129,7 +129,7 @@ func charterFile() ([]byte, error) {
 	var b strings.Builder
 	b.WriteString("# The checks the parent's specification-corpus audit gates this corpus on.\n" +
 		"# The audit binds docs/corpus-charter.yaml relative to the directory it\n" +
-		"# audits, so this file decides what gates here. tpm init wrote it with the\n" +
+		"# audits, so this file decides what gates here. The init profile wrote it with the\n" +
 		"# checks a new corpus passes; add a check here as the corpus grows into it.\n" +
 		"id: program-corpus-charter\ntitle: Program Specification Corpus Checks\nchecks:\n")
 	for _, c := range own.Checks {

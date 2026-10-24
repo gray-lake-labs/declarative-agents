@@ -1,13 +1,13 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# The plan workflow's tpm words, dispatched by the model in the Plan state.
+# The plan workflow's words, dispatched by the model in the Plan state.
 # Optional flags are parameters, never ${VAR} args: the loader drops an
 # argument whose variable is unset, which corrupts the flag list (the GH-135
-# pilot finding). A non-zero exit is tpm's refusal, fed back to the model
+# pilot finding). A non-zero exit is the word's refusal, fed back to the model
 # (design.md D14).
-unit: tpm-plan-declarations
+unit: scrum-master-plan-declarations
 tools:
-- name: tpm_plan_candidates
+- name: plan_candidates
   type: exec
   binary: scrum-master
   args:
@@ -30,7 +30,7 @@ tools:
         flag: --system
       aggregate:
         type: string
-        description: The period's tpm reports aggregate --json output.
+        description: The period's scrum-master reports aggregate --json output.
         flag: --aggregate
       velocity:
         type: integer
@@ -43,7 +43,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm plan candidates's JSON report.
+    description: scrum-master plan candidates's JSON report.
     schema:
       type: string
   side_effects:
@@ -55,18 +55,18 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: tpm's own policy governs what follows; the run reverses nothing.
+    description: the words' own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_plan_candidates: <error>'
+    message_shape: 'plan_candidates: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the ranking and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker and the checkout are as tpm's refusal left them
+    condition: the word refuses the ranking and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as the word's refusal left them
 
-- name: tpm_plan_write
+- name: plan_write
   type: exec
   binary: scrum-master
   args:
@@ -111,7 +111,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm plan write's JSON report.
+    description: scrum-master plan write's JSON report.
     schema:
       type: string
   side_effects:
@@ -123,18 +123,18 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: tpm's own policy governs what follows; the run reverses nothing.
+    description: the words' own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_plan_write: <error>'
+    message_shape: 'plan_write: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the write and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker and the checkout are as tpm's refusal left them
+    condition: the word refuses the write and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as the word's refusal left them
 
-- name: tpm_plan_push
+- name: plan_push
   type: exec
   binary: scrum-master
   args:
@@ -171,7 +171,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm plan push's JSON report.
+    description: scrum-master plan push's JSON report.
     schema:
       type: string
   side_effects:
@@ -183,18 +183,18 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: tpm's own policy governs what follows; the run reverses nothing.
+    description: the words' own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_plan_push: <error>'
+    message_shape: 'plan_push: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the push and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker and the checkout are as tpm's refusal left them
+    condition: the word refuses the push and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as the word's refusal left them
 
-- name: tpm_plan_backlog
+- name: plan_backlog
   type: exec
   binary: scrum-master
   args:
@@ -227,7 +227,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm plan backlog's JSON report.
+    description: scrum-master plan backlog's JSON report.
     schema:
       type: string
   side_effects:
@@ -239,13 +239,13 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: tpm's own policy governs what follows; the run reverses nothing.
+    description: the words' own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_plan_backlog: <error>'
+    message_shape: 'plan_backlog: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the update and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker and the checkout are as tpm's refusal left them
+    condition: the word refuses the update and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as the word's refusal left them

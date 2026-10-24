@@ -79,7 +79,7 @@ func TestEmbeddedSkillsParse(t *testing.T) {
 // front matter, the stamp after it, then the body.
 func wantSkill(t *testing.T, got string) {
 	t.Helper()
-	head := "---\nname: alpha\ndescription: Do alpha (srd001).\n---\n<!-- tpm install version=v1 sha256="
+	head := "---\nname: alpha\ndescription: Do alpha (srd001).\n---\n<!-- skill install version=v1 sha256="
 	if !strings.HasPrefix(got, head) || !strings.HasSuffix(got, "-->\n# alpha\n\nRun tpm alpha.\n") {
 		t.Fatalf("SKILL.md:\n%s", got)
 	}

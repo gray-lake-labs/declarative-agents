@@ -95,7 +95,9 @@ func parse(src string) (Skill, error) {
 	return s, nil
 }
 
-var stampPattern = regexp.MustCompile(`(?m)^<!-- tpm install version=(\S+) sha256=([0-9a-f]{64}) -->\n`)
+// stampPattern reads a skill's stamp, the current one or the tpm stamp an
+// earlier release wrote (GH-36).
+var stampPattern = regexp.MustCompile(`(?m)^<!-- (?:skill|tpm) install version=(\S+) sha256=([0-9a-f]{64}) -->\n`)
 
 func digest(s string) string {
 	h := sha256.Sum256([]byte(s))
@@ -114,7 +116,7 @@ func Render(agent string, s Skill, version string) string {
 	}
 	header := "---\n" + head + "\n---\n"
 	unstamped := header + s.Body
-	stamp := fmt.Sprintf("<!-- tpm install version=%s sha256=%s -->\n", version, digest(unstamped))
+	stamp := fmt.Sprintf("<!-- skill install version=%s sha256=%s -->\n", version, digest(unstamped))
 	return header + stamp + s.Body
 }
 

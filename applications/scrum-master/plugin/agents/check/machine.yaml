@@ -85,12 +85,12 @@ transitions:
 - state: Idle
   signal: Seed
   next: Gate
-  action: tpm_gate
+  action: gate
   summary: true
 - state: Gate
   signal: ToolDone
   next: Vendored
-  action: tpm_vendored
+  action: vendored
   summary: true
 - state: Gate
   signal: ToolFailed
@@ -98,7 +98,7 @@ transitions:
 - state: Vendored
   signal: ToolDone
   next: Doctor
-  action: tpm_doctor
+  action: doctor
   summary: true
 - state: Vendored
   signal: ToolFailed

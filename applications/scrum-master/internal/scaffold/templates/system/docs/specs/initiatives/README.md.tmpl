@@ -1,4 +1,4 @@
-<!-- tpm:begin: tpm writes the text down to tpm:end, and tpm doctor refreshes it; write your own notes outside it -->
+<!-- managed:begin: the init and onboard profiles write the text down to managed:end and refresh it on a rerun; write your own notes outside it -->
 # Initiatives
 
 An initiative is an outcome several teams deliver over several quarters:
@@ -11,15 +11,15 @@ read as an initiative.
 ## Documents here
 
 - Name: `inNNN-short-name.md`, numbered in order and never reused.
-- Format: an SRD in the pinned parent release's Markdown format, with the fields docs/constitutions/design.md lists for this level; tpm backlog template --kind initiative prints one in that layout.
+- Format: an SRD in the pinned parent release's Markdown format, with the fields docs/constitutions/design.md lists for this level; the draft skill drafts one in that layout.
 - Status: `to_be_agreed` while it is drafted, `agreed` once it passes review, and `retired` when it is replaced. Only agreed documents are planned and rolled up. A retired document keeps its path, because links pin it.
 - Parent: a theme. Epics name an initiative as theirs.
 - Changes go through an issue and the corpus gate, never a direct edit on main.
 
 ## What reads them
 
-- tpm goals plan and tpm goals push (the tasks skill) turn a release's initiative items into one Sprint Goal per team.
-- tpm plan candidates and tpm plan write (the plan skill) place initiative items in a release on docs/road-map.md.
+- The tasks skill turns a release's initiative items into one Sprint Goal per team.
+- The plan skill places initiative items in a release on docs/road-map.md.
 
-See tpm help backlog for the whole hierarchy.
-<!-- tpm:end -->
+See README.md at the repository's root for the whole hierarchy.
+<!-- managed:end -->

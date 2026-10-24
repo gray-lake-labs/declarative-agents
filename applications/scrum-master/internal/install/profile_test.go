@@ -81,7 +81,7 @@ func TestImplementRenderKeepsItsCommands(t *testing.T) {
 		if s.Name != "implement" {
 			continue
 		}
-		for _, cmd := range []string{"tpm issue pop", "git push", "tpm issue merge", "design.md D10"} {
+		for _, cmd := range []string{"scrum-master issue pop", "git push", "scrum-master issue merge", "design.md D10"} {
 			if !strings.Contains(s.Body, cmd) {
 				t.Errorf("rendered body misses %q", cmd)
 			}

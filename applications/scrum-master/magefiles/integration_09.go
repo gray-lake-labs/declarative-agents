@@ -83,7 +83,7 @@ func (Integration) Onboard() error {
 				action = res.Action
 			}
 		}
-		c.expect(action == "appended" && strings.HasPrefix(string(b), text+"\n<!-- tpm:begin"), "%s: %s, the team's text not first:\n%s", f, action, b)
+		c.expect(action == "appended" && strings.HasPrefix(string(b), text+"\n<!-- managed:begin"), "%s: %s, the team's text not first:\n%s", f, action, b)
 	}
 	if err := gitIn(store, "add", "-A"); err != nil {
 		return err

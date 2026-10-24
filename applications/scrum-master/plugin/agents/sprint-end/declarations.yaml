@@ -1,13 +1,13 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# The sprint-end workflow's tpm words, dispatched by the model in the Summarize state.
+# The sprint-end workflow's words, dispatched by the model in the Summarize state.
 # Optional flags are parameters, never ${VAR} args: the loader drops an
 # argument whose variable is unset, which corrupts the flag list (the GH-135
-# pilot finding). A non-zero exit is tpm's refusal, fed back to the model
+# pilot finding). A non-zero exit is the word's refusal, fed back to the model
 # (design.md D14).
-unit: tpm-sprint-end-declarations
+unit: scrum-master-sprint-end-declarations
 tools:
-- name: tpm_sprint_end_facts
+- name: sprint_end_facts
   type: exec
   binary: scrum-master
   args:
@@ -52,7 +52,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm sprint-end facts's JSON report.
+    description: scrum-master sprint-end facts's JSON report.
     schema:
       type: string
   side_effects:
@@ -64,18 +64,18 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: tpm's own policy governs what follows; the run reverses nothing.
+    description: the words' own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_sprint_end_facts: <error>'
+    message_shape: 'sprint_end_facts: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the gathering and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker and the checkout are as tpm's refusal left them
+    condition: the word refuses the gathering and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as the word's refusal left them
 
-- name: tpm_sprint_end_stories
+- name: sprint_end_stories
   type: exec
   binary: scrum-master
   args:
@@ -108,7 +108,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm sprint-end stories's JSON report.
+    description: scrum-master sprint-end stories's JSON report.
     schema:
       type: string
   side_effects:
@@ -120,13 +120,13 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: tpm's own policy governs what follows; the run reverses nothing.
+    description: the words' own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_sprint_end_stories: <error>'
+    message_shape: 'sprint_end_stories: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the record and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker and the checkout are as tpm's refusal left them
+    condition: the word refuses the record and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as the word's refusal left them

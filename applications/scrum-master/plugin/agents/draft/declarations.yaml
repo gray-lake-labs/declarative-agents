@@ -1,13 +1,13 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# The draft workflow's tpm words: the survey the machine runs first and the check the model dispatches in the Converse state.
+# The draft workflow's words: the survey the machine runs first and the check the model dispatches in the Converse state.
 # Optional flags are parameters, never ${VAR} args: the loader drops an
 # argument whose variable is unset, which corrupts the flag list (the GH-135
-# pilot finding). A non-zero exit is tpm's refusal, fed back to the model
+# pilot finding). A non-zero exit is the word's refusal, fed back to the model
 # (design.md D14).
-unit: tpm-draft-declarations
+unit: scrum-master-draft-declarations
 tools:
-- name: tpm_backlog_check
+- name: backlog_check
   type: exec
   binary: scrum-master
   args:
@@ -27,7 +27,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm backlog check's JSON report.
+    description: scrum-master backlog check's JSON report.
     schema:
       type: string
   side_effects:
@@ -39,17 +39,17 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: tpm's own policy governs what follows; the run reverses nothing.
+    description: the words' own policy governs what follows; the run reverses nothing.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_backlog_check: <error>'
+    message_shape: 'backlog_check: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: the check finds problems or tpm refuses, exiting non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker and the checkout are as tpm's refusal left them
-- name: tpm_backlog_list
+    condition: the check finds problems or the word refuses, exiting non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker and the checkout are as the word's refusal left them
+- name: backlog_list
   type: exec
   binary: scrum-master
   args:
@@ -62,7 +62,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm backlog list's JSON report of the hierarchy.
+    description: scrum-master backlog list's JSON report of the hierarchy.
     schema:
       type: string
   side_effects:
@@ -78,9 +78,9 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_backlog_list: <error>'
+    message_shape: 'backlog_list: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the listing and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the checkout is as tpm's refusal left it
+    condition: the word refuses the listing and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the checkout is as the word's refusal left it

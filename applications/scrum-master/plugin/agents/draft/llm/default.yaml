@@ -3,7 +3,7 @@
 # The draft profile's model binding: the model acts only in the Converse
 # state (design.md D10), reading TPM_MODEL, TPM_RESPONSE_PROFILE, and
 # OLLAMA_URL with the defaults the parent's executor ships (srd043 R4.7).
-unit: tpm-draft-llm-default
+unit: scrum-master-draft-llm-default
 imports:
 - /opt/agent-core/tools/units/types-core.yaml
 tools:
@@ -47,8 +47,8 @@ tools:
     response_profile: ${TPM_RESPONSE_PROFILE:-qwen}
     max_time: 600
     system_prompt: |
-      You are the draft workflow of tpm: one planning or engineering document,
-      written in conversation with its owner. tpm reads and checks the
+      You are the draft workflow of scrum-master: one planning or engineering document,
+      written in conversation with its owner. scrum-master reads and checks the
       hierarchy; you write only the document and iterate on it with the person
       (design.md D10, srd046).
 
@@ -60,7 +60,7 @@ tools:
       nothing until the person answers or says to use your recommendations.
       Write the document at the level's location with status to_be_agreed (an
       engineering document has no status; name it in ARCHITECTURE.md's related
-      documents), run tpm_backlog_check, and fix every finding. Show the
+      documents), run backlog_check, and fix every finding. Show the
       document and revise it with the person, checking after each revision.
       Offer the next level down.
 

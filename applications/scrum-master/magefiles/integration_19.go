@@ -6,9 +6,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
@@ -18,6 +20,10 @@ import (
 func init() {
 	integrationTargets = append(integrationTargets, Integration{}.InitProfile)
 }
+
+// tpmWord is tpm as a word, the retired binary's name; TPM_ variables and
+// tool names such as a_tpm_b are not it.
+var tpmWord = regexp.MustCompile(`(^|[^A-Za-z0-9_])tpm([^A-Za-z0-9_]|$)`)
 
 // InitProfile runs the repository's agent over the init profile in an empty
 // git repository with an empty tracker beside it and no tpm on PATH
@@ -33,7 +39,7 @@ func (Integration) InitProfile() error {
 	if err != nil {
 		return err
 	}
-	tmp, err := os.MkdirTemp("", "tpm-init-profile-")
+	tmp, err := os.MkdirTemp("", "scrum-master-init-profile-")
 	if err != nil {
 		return err
 	}
@@ -97,6 +103,25 @@ func (Integration) InitProfile() error {
 		c.expect(err == nil, "%s does not validate against the vendored core root: %v: %s", p, err, o)
 	}
 
+	// Nothing the run wrote names tpm, the binary the words no longer have
+	// (GH-36).
+	named := 0
+	filepath.WalkDir(repo, func(p string, d fs.DirEntry, err error) error {
+		switch {
+		case err != nil:
+			return err
+		case d.IsDir() && d.Name() == ".git":
+			return filepath.SkipDir
+		case d.IsDir():
+			return nil
+		}
+		if b, err := os.ReadFile(p); err == nil && tpmWord.Match(b) {
+			named++
+			c.expect(false, "%s names tpm", p)
+		}
+		return nil
+	})
+	c.expect(named == 0, "%d written files name tpm", named)
 	if _, err := sh(repo, "git", "add", "-A"); err != nil {
 		return err
 	}

@@ -128,7 +128,7 @@ func expectOrientation(c *check, dir string, has, lacks []string) {
 	}
 	for _, p := range paths {
 		b, err := os.ReadFile(filepath.Join(dir, p))
-		c.expect(err == nil && strings.Contains(string(b), "<!-- tpm:begin") && strings.Contains(string(b), scaffold.BlockEnd),
+		c.expect(err == nil && strings.Contains(string(b), "<!-- managed:begin") && strings.Contains(string(b), scaffold.BlockEnd),
 			"%s: no orientation file with a tpm block: %v", p, err)
 	}
 	for _, f := range lacks {
@@ -138,6 +138,6 @@ func expectOrientation(c *check, dir string, has, lacks []string) {
 	architecture, _ := os.ReadFile(filepath.Join(dir, "docs", "ARCHITECTURE.md"))
 	c.expect(strings.Contains(string(architecture), "docs/engineering/"), "ARCHITECTURE.md does not name docs/engineering/")
 	agents, _ := os.ReadFile(filepath.Join(dir, scaffold.AgentsFile))
-	c.expect(strings.Contains(string(agents), "Mermaid in a fenced code block") && strings.Contains(string(agents), "- tpm doctor: "),
-		"AGENTS.md lacks the figure rule or tpm doctor")
+	c.expect(strings.Contains(string(agents), "Mermaid in a fenced code block") && strings.Contains(string(agents), "rerun the init or onboard profile"),
+		"AGENTS.md lacks the figure rule or the rerun that brings the repository up to date")
 }

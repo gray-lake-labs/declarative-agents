@@ -6,63 +6,40 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/cli"
-	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/help"
 	"github.com/gray-lake-labs/declarative-agents/applications/scrum-master/internal/install"
 )
 
-// AgentsFile is the orientation file that tells an agent which tpm commands
-// and skills work on the repository and the rules for changing it (srd043
-// R1.6).
+// AgentsFile is the orientation file that tells an agent which skills work
+// on the repository and the rules for changing it (srd043 R1.6).
 const AgentsFile = "AGENTS.md"
 
-// agentsFile renders AGENTS.md for a repository at level from the binary's
-// dispatch table, its help pages, and its embedded skills, so it names what
-// this tpm runs and cannot drift from it.
+// agentsFile renders AGENTS.md for a repository at level from the embedded
+// skills, so it names what the vendored profiles run and cannot drift from
+// them. It names no command: every workflow runs as a skill, the agent over
+// a profile in .scrum-master (GH-36).
 func agentsFile(level string) ([]byte, error) {
-	pages, err := help.Pages()
-	if err != nil {
-		return nil, err
-	}
-	summaries := map[string]string{}
-	for _, p := range pages {
-		summaries[p.Name] = p.Summary
-	}
 	skills, err := install.EmbeddedSkills()
 	if err != nil {
 		return nil, err
 	}
 	var b strings.Builder
 	b.WriteString(BlockBegin + "\n# Agent instructions\n\n")
-	fmt.Fprintf(&b, "This is a program's %s repository, run with tpm, the command-line tool of\n", level)
-	b.WriteString("the AI-native scrum process. Read README.md first: it says what the\n" +
-		"repository holds and how the planning hierarchy nests.\n\n")
+	fmt.Fprintf(&b, "This is a program's %s repository, run with the agent and the AI-native\n", level)
+	b.WriteString("scrum process's profiles, vendored in .scrum-master. Read README.md first:\n" +
+		"it says what the repository holds, how the planning hierarchy nests, and\n" +
+		"which skill serves each step of the process.\n\n")
 	b.WriteString("## Rules\n\n" +
-		"- Every change starts as an issue: file it with the specify skill or tpm issue file, take it with the implement skill or tpm issue pop, and deliver it with tpm issue merge. Never commit to main directly.\n" +
+		"- Every change starts as an issue: file it with the specify skill, take it with the pop or implement skill, and deliver it with the merge skill. Never commit to main directly.\n" +
 		"- A change under docs/ is a change of intent: the corpus gate must pass before it merges.\n" +
-		"- Pass --control <system repository> to every tpm command that takes it, so the program's control/policy.md and control/labels.md apply instead of tpm's defaults.\n" +
-		"- Fetch facts with tpm and its --json output; never read or edit tracker files by hand. tpm does the workflow, and the model writes only language (docs/constitutions/design.md D10).\n" +
-		"- Every document follows docs/constitutions/design.md: Markdown with marker tags, in the format of the parent release docs/external-pins.yaml pins. After upgrading tpm, run tpm doctor to add missing files and repair the format.\n" +
+		"- Run a workflow through its skill: each runs the agent over its profile in .scrum-master, and the profile's words fetch the facts and write the tracker. Never read or edit tracker files by hand. The words do the workflow, and the model writes only language (docs/constitutions/design.md D10).\n" +
+		"- Every document follows docs/constitutions/design.md: Markdown with marker tags, in the format of the parent release docs/external-pins.yaml pins. After taking a new release, rerun the init or onboard profile to add missing files and repair the format; the check skill reports what drifted.\n" +
 		"- Every figure is Mermaid in a fenced code block inside the Markdown document that shows it. Put no generated image file, and no other diagram source, under docs/.\n\n")
-	b.WriteString("## Skills\n\nInstall them for your agent with tpm install --agent <agent>.\n\n")
+	b.WriteString("## Skills\n\nThe init or onboard profile installs them for your agent; rerun it to update them.\n\n")
 	// Every skill serves both levels: tasks files a release's Sprint Goals
 	// at the system and a story's issues in a team's repository (#188).
 	for _, s := range skills {
 		desc, _, _ := strings.Cut(s.Description, " Use when")
 		fmt.Fprintf(&b, "- %s: %s\n", s.Name, desc)
-	}
-	b.WriteString("\n## tpm commands\n\nRun tpm help for the process and tpm help <group> for one group.\n\n")
-	for _, g := range cli.Default.Groups() {
-		summary := summaries[g]
-		if g == "help" {
-			summary = "the process, each group, and each concept, from the binary"
-		}
-		if summary == "" {
-			if cs := cli.Default.Commands(g); len(cs) > 0 {
-				summary = cs[0].Summary
-			}
-		}
-		fmt.Fprintf(&b, "- tpm %s: %s\n", g, summary)
 	}
 	b.WriteString(BlockEnd + "\n")
 	return []byte(b.String()), nil

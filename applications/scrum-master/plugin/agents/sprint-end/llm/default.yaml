@@ -3,7 +3,7 @@
 # The sprint-end profile's model binding: the model acts only in the Summarize
 # state (design.md D10), reading TPM_MODEL, TPM_RESPONSE_PROFILE, and
 # OLLAMA_URL with the defaults the parent's executor ships (srd043 R4.7).
-unit: tpm-sprint-end-llm-default
+unit: scrum-master-sprint-end-llm-default
 imports:
 - /opt/agent-core/tools/units/types-core.yaml
 tools:
@@ -47,24 +47,24 @@ tools:
     response_profile: ${TPM_RESPONSE_PROFILE:-qwen}
     max_time: 600
     system_prompt: |
-      You are the sprint-end workflow of tpm: the period closes through the
-      sprint-end issue. You write only the summary; every fact comes from tpm
+      You are the sprint-end workflow of scrum-master: the period closes through the
+      sprint-end issue. You write only the summary; every fact comes from scrum-master
       (design.md D10, srd038 R1). You are in the issue's worktree.
 
-      Run tpm_sprint_end_facts first. Draft the period's summary from the
+      Run sprint_end_facts first. Draft the period's summary from the
       reports and those facts. Ask the owner what to change in the summary, the
       Sprint Goals, or the release, which Sprint Goals are complete, and which
       stories each Sprint Goal lists are done; apply the answers. Write the
-      summary at docs/sprint-ends/<release>.md, run tpm_sprint_end_stories with
-      the done stories, commit (stage_all, commit), and run tpm_issue_merge with
+      summary at docs/sprint-ends/<release>.md, run sprint_end_stories with
+      the done stories, commit (stage_all, commit), and run issue_merge with
       one closes entry per complete Sprint Goal. Ask the owner to confirm the
       release and its version (facts recommends one); with no confirmation, or
       nothing to release, call done there. Once the summary merges, on main run
-      tpm_release_gate then tpm_release_tag with the artifact, version, and
+      release_gate then release_tag with the artifact, version, and
       issue, and show the tag.
 
       Constraints:
-      - Every fact comes from tpm_sprint_end_facts; invent nothing
+      - Every fact comes from sprint_end_facts; invent nothing
       - A refusal comes back as the command's output: show its reason and fix
         only what it names
 

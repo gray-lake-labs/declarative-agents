@@ -115,7 +115,7 @@ func (Integration) Install() error {
 		text := string(b)
 		name := filepath.Base(filepath.Dir(path))
 		head, _, _ := strings.Cut(strings.TrimPrefix(text, "---\n"), "\n---\n")
-		c.expect(strings.HasPrefix(text, "---\nname: "+name+"\ndescription: ") && strings.Contains(text, "\n---\n<!-- tpm install version="),
+		c.expect(strings.HasPrefix(text, "---\nname: "+name+"\ndescription: ") && strings.Contains(text, "\n---\n<!-- skill install version="),
 			"%s: not the skill's own Agent Skills front matter followed by the stamp", path)
 		c.expect(!strings.Contains(head, "tpm install"), "%s: the stamp is inside the front matter", path)
 	}

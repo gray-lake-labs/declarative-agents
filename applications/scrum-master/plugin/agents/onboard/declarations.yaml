@@ -5,9 +5,9 @@
 # vendor the profiles. TPM_SYSTEM and TPM_SUBSYSTEM name where it joins;
 # optional flags are parameters from the run's request, never ${VAR} args
 # (GH-135).
-unit: tpm-onboard-declarations
+unit: scrum-master-onboard-declarations
 tools:
-- name: tpm_onboard
+- name: onboard
   type: exec
   binary: scrum-master
   args:
@@ -43,7 +43,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm onboard's JSON report — the files, the registration issue, and the skills.
+    description: scrum-master onboard's JSON report — the files, the registration issue, and the skills.
     schema:
       type: string
   side_effects:
@@ -62,14 +62,14 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
-    message_shape: 'tpm_onboard: <error>'
+    message_shape: 'onboard: <error>'
     state_after_failure: nothing written by a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the onboarding and exits non-zero
-    message_shape: <tpm's reason, as printed>
-    state_after_failure: the repository is as tpm's refusal left it
+    condition: the word refuses the onboarding and exits non-zero
+    message_shape: <the word's reason, as printed>
+    state_after_failure: the repository is as the word's refusal left it
 
-- name: tpm_vendor
+- name: vendor
   type: exec
   binary: scrum-master
   args:
@@ -98,9 +98,9 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_vendor: <error>'
+    message_shape: 'vendor: <error>'
     state_after_failure: nothing written by a process that did not start
   - signal: ToolFailed
     condition: the release's source is not on this host, or a write fails
-    message_shape: <tpm's reason, as printed>
+    message_shape: <the word's reason, as printed>
     state_after_failure: the repository is laid down; a rerun vendors what is missing

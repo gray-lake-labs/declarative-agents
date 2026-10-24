@@ -3,9 +3,9 @@
 # The init machine's words (GH-29): lay down the system repository and
 # install its skills, then vendor the profiles. Optional flags are
 # parameters from the run's request, never ${VAR} args (GH-135).
-unit: tpm-init-declarations
+unit: scrum-master-init-declarations
 tools:
-- name: tpm_init
+- name: init
   type: exec
   binary: scrum-master
   args:
@@ -37,7 +37,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm init's JSON report — every file it wrote or kept, the skills, and the tracker.
+    description: scrum-master init's JSON report — every file it wrote or kept, the skills, and the tracker.
     schema:
       type: string
   side_effects:
@@ -56,14 +56,14 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_init: <error>'
+    message_shape: 'init: <error>'
     state_after_failure: nothing written by a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the init and exits non-zero
-    message_shape: <tpm's reason, as printed>
-    state_after_failure: the repository is as tpm's refusal left it
+    condition: the word refuses the init and exits non-zero
+    message_shape: <the word's reason, as printed>
+    state_after_failure: the repository is as the word's refusal left it
 
-- name: tpm_vendor
+- name: vendor
   type: exec
   binary: scrum-master
   args:
@@ -92,9 +92,9 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_vendor: <error>'
+    message_shape: 'vendor: <error>'
     state_after_failure: nothing written by a process that did not start
   - signal: ToolFailed
     condition: the release's source is not on this host, or a write fails
-    message_shape: <tpm's reason, as printed>
+    message_shape: <the word's reason, as printed>
     state_after_failure: the repository is laid down; a rerun vendors what is missing

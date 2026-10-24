@@ -7,9 +7,9 @@
 # nothing is retyped between steps. TPM_PROJECT and TPM_ISSUE come from the
 # environment; an optional value is a parameter, never a ${VAR} arg (the
 # GH-135 finding).
-unit: tpm-merge-declarations
+unit: scrum-master-merge-declarations
 tools:
-- name: tpm_merge_gate
+- name: merge_gate
   type: exec
   binary: scrum-master
   args:
@@ -27,7 +27,7 @@ tools:
   signature:
     emits: [ToolDone, ToolFailed, CommandError]
   output:
-    description: tpm issue merge --dry-run's JSON report of what would merge.
+    description: scrum-master issue merge --dry-run's JSON report of what would merge.
     schema:
       type: string
   side_effects:
@@ -43,14 +43,14 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
-    message_shape: 'tpm_merge_gate: <error>'
+    message_shape: 'merge_gate: <error>'
     state_after_failure: nothing ran in a process that did not start
   - signal: ToolFailed
-    condition: a gate refuses — a failed audit, a missing approval, a closed issue, a branch with nothing over the base — and tpm exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
+    condition: a gate refuses — a failed audit, a missing approval, a closed issue, a branch with nothing over the base — and the word exits non-zero
+    message_shape: <the word's refusal reason, as printed>
     state_after_failure: nothing merged; the worktree and the tracker are unchanged
 
-- name: tpm_merge_branch
+- name: merge_branch
   type: exec
   binary: scrum-master
   args:
@@ -83,14 +83,14 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
-    message_shape: 'tpm_merge_branch: <error>'
+    message_shape: 'merge_branch: <error>'
     state_after_failure: nothing merged by a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the merge and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
+    condition: the word refuses the merge and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
     state_after_failure: the branch and the default branch are as the refusal left them
 
-- name: tpm_close_delivered
+- name: close_delivered
   type: exec
   binary: scrum-master
   args:
@@ -137,9 +137,9 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words — or the commit parameter is missing
-    message_shape: 'tpm_close_delivered: <error>'
+    message_shape: 'close_delivered: <error>'
     state_after_failure: nothing closed by a process that did not start
   - signal: ToolFailed
-    condition: a close does not land and tpm exits non-zero
+    condition: a close does not land and the word exits non-zero
     message_shape: 'merged <commit>, but <reference> did not close: <reason>'
     state_after_failure: the merge stands; a re-run with the same commit finishes the delivery

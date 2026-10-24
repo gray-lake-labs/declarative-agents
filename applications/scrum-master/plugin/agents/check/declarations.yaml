@@ -3,9 +3,9 @@
 # The check machine's words (GH-35): each reads the checkout the run starts
 # in and writes nothing; a non-zero exit is a finding, and the machine ends
 # the run in the state that names it.
-unit: tpm-check-declarations
+unit: scrum-master-check-declarations
 tools:
-- name: tpm_gate
+- name: gate
   type: exec
   binary: scrum-master
   args:
@@ -31,14 +31,14 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_gate: <error>'
+    message_shape: 'gate: <error>'
     state_after_failure: nothing ran in a word that did not start
   - signal: ToolFailed
     condition: the gate finds a problem in a document
     message_shape: <the findings, as printed>
     state_after_failure: the checkout is unchanged
 
-- name: tpm_vendored
+- name: vendored
   type: exec
   binary: scrum-master
   args:
@@ -65,14 +65,14 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_vendored: <error>'
+    message_shape: 'vendored: <error>'
     state_after_failure: nothing ran in a word that did not start
   - signal: ToolFailed
     condition: a vendored file was edited or is missing, or nothing is vendored
     message_shape: <the findings, as printed>
     state_after_failure: the checkout is unchanged
 
-- name: tpm_doctor
+- name: doctor
   type: exec
   binary: scrum-master
   args:
@@ -98,7 +98,7 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_doctor: <error>'
+    message_shape: 'doctor: <error>'
     state_after_failure: nothing ran in a word that did not start
   - signal: ToolFailed
     condition: doctor cannot read the repository

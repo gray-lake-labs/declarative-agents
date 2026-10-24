@@ -131,3 +131,14 @@ func TestInitAppendsToOrientationWithoutBlock(t *testing.T) {
 		t.Fatalf("an edited VISION was %s", actions(r.Files)["docs/VISION.md"])
 	}
 }
+
+// A block an earlier release wrote between tpm markers is found and
+// replaced with the current markers, keeping the owner's text (GH-36).
+func TestRefreshReplacesALegacyBlock(t *testing.T) {
+	cur := []byte("owner above\n<!-- tpm:begin: tpm writes the text -->\nold\n<!-- tpm:end -->\nowner below\n")
+	fresh := []byte(BlockBegin + "\nnew\n" + BlockEnd + "\n")
+	merged, how, ok := refreshManaged(cur, fresh)
+	if !ok || how != "refreshed" || string(merged) != "owner above\n"+BlockBegin+"\nnew\n"+BlockEnd+"\nowner below\n" {
+		t.Fatalf("%v %q\n%s", ok, how, merged)
+	}
+}

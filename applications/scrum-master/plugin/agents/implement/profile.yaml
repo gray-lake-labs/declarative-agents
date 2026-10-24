@@ -1,8 +1,8 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
 # The implement skill as a declarative-agents profile (GH-135): the workflow
-# around the work is this machine, its tpm commands are its tools, and the
-# model acts only in the Work state (design.md D10). tpm install --agent
+# around the work is this machine, its words are its tools, and the
+# model acts only in the Work state (design.md D10). scrum-master install --agent
 # renders the SKILL.md agents read from this profile's machine, and mage
 # audit validates the profile with the pinned runtime's --validate-config.
 # A run starts in the issue's worktree: the runtime's workspace is fixed at

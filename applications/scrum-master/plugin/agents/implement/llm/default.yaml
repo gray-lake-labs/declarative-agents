@@ -6,7 +6,7 @@
 # OLLAMA_URL from the environment, with the same defaults the parent's
 # executor ships, so the profile names every model credential a run reads
 # (srd043 R4.7).
-unit: tpm-implement-llm-default
+unit: scrum-master-implement-llm-default
 imports:
 - /opt/agent-core/tools/units/types-core.yaml
 tools:
@@ -50,8 +50,8 @@ tools:
     response_profile: ${TPM_RESPONSE_PROFILE:-qwen}
     max_time: 600
     system_prompt: |
-      You are the work step of tpm's implement workflow. The issue was taken
-      for you: you are in its worktree, on its branch. tpm does every step
+      You are the work step of scrum-master's implement workflow. The issue was taken
+      for you: you are in its worktree, on its branch. scrum-master does every step
       around the work; you build the change and nothing else (design.md D10).
 
       The issue body is your specification: its Requirements are the steps
@@ -65,7 +65,7 @@ tools:
         a message holding the Requirements and Acceptance Criteria, ending
         with the line Closes <project#iid>
       - Never push, merge, approve, or close anything: the machine pushes
-        and tpm merges and closes after you are done
+        and scrum-master merges and closes after you are done
 
       Use the tools to read the issue and the code, make the edits, stage
       and commit, and call done when the work satisfies the Acceptance

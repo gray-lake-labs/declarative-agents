@@ -4,7 +4,7 @@ Run this in a program repository after installing a newer tpm. It reads the
 repository's level from the files init or onboard wrote there, the system
 repository's policy or SRD or a team's subsystem SRD, and writes every file
 that init or onboard now writes at that level and the repository lacks. It
-refreshes the text between the tpm:begin and tpm:end lines of README.md,
+refreshes the text between the managed:begin and managed:end lines of README.md,
 AGENTS.md, and the hierarchy folders' READMEs, keeping the text around it,
 and appends that text to one of them that has none. In the system
 repository it adds to control/labels.md the axes and values tpm's defaults

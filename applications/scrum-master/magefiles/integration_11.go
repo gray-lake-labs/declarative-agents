@@ -188,7 +188,7 @@ func (Integration) Doctor() error {
 	v, _ = os.ReadFile(vision)
 	c.expect(string(v) == string(canonical), "VISION not repaired to its canonical form")
 	a, _ := os.ReadFile(filepath.Join(repo, scaffold.AgentsFile))
-	c.expect(strings.HasPrefix(string(a), ownAgents+"\n<!-- tpm:begin"), "AGENTS.md: the owner's text not first:\n%s", a)
+	c.expect(strings.HasPrefix(string(a), ownAgents+"\n<!-- managed:begin"), "AGENTS.md: the owner's text not first:\n%s", a)
 	srdAfter, _ := os.ReadFile(srdPath)
 	policyAfter, _ := os.ReadFile(policyPath)
 	c.expect(string(srdAfter) == string(srd) && string(policyAfter) == string(policy), "doctor did not restore what tpm init writes:\n%s\n%s", srdAfter, policyAfter)

@@ -8,8 +8,8 @@ purpose: |-
   close the period.
 
   The sprint-end issue's Requirements are the steps; this profile names the
-  tpm word for each. The model writes only the summary; every fact comes from
-  tpm (design.md D10, srd038 R1). The input is the project path, the
+  word for each. The model writes only the summary; every fact comes from
+  scrum-master (design.md D10, srd038 R1). The input is the project path, the
   sprint-end issue, the program's system repository, a reports checkout, the
   period's first and last ISO weeks, and the artifact the repository
   releases. A question the skill allows is asked in the conversation that
@@ -19,13 +19,13 @@ configuration:
   tools: plugin/agents/sprint-end/tools.yaml
   llm_configs: plugin/agents/sprint-end/llm/*.yaml
 invariants:
-- Every fact comes from tpm sprint-end facts; the model writes only the summary
+- Every fact comes from scrum-master sprint-end facts; the model writes only the summary
 - The model acts only in the Summarize state, through the declared tools
 - The merge closes the issue and the complete Sprint Goals; the model closes nothing itself
 - No release without the owner's confirmation of the version
 lifecycle: |-
   1. Idle → Summarize (Seed): the model closes the period through the
-     tpm words
+     words
   2. Summarize ↔ Parse: the model loop — invoke_llm, parse_response, $tool
   3. Parse → Done (TaskCompleted): the model called done with the merge,
      the closed Sprint Goals, and the tag when one was confirmed
@@ -39,9 +39,9 @@ states:
   meaning: Initial state before the request is read.
 - name: Summarize
   meaning: |
-    Close the period through tpm, in the issue's worktree.
+    Close the period through scrum-master, in the issue's worktree.
     1. Take the issue with implement and work in its worktree.
-    2. Run tpm_sprint_end_facts (--project, --reports, --from, --to,
+    2. Run sprint_end_facts (--project, --reports, --from, --to,
        --artifact, --control).
     3. Draft the period's summary from the reports and those facts; this is
        the one model-written text.
@@ -49,14 +49,14 @@ states:
        release, which Sprint Goals are complete, and which stories each Sprint
        Goal lists are done. Apply the answers in the worktree.
     5. Write the summary at docs/sprint-ends/<release>.md, run
-       tpm_sprint_end_stories (--release, --done; a story of another team as
-       project#story), commit it (stage_all, commit), and run tpm_issue_merge
+       sprint_end_stories (--release, --done; a story of another team as
+       project#story), commit it (stage_all, commit), and run issue_merge
        with one closes entry per Sprint Goal the owner reports complete; the
        merge closes the issue and those Sprint Goals.
     6. Ask the owner to confirm the release and its version (facts recommends
        one). With no confirmation, or nothing to release, stop here.
-    7. Once the summary merges, on main: tpm_release_gate, then
-       tpm_release_tag, both with the artifact, the version, and the issue.
+    7. Once the summary merges, on main: release_gate, then
+       release_tag, both with the artifact, the version, and the issue.
        Show the tag.
 - name: Parse
   meaning: |
@@ -69,7 +69,7 @@ states:
     when the owner confirmed one are the run's report (srd038).
 - name: Failed
   run_status: failed
-  meaning: Terminal. An infrastructure error outside tpm's refusals.
+  meaning: Terminal. An infrastructure error outside the word's refusals.
 - name: BudgetExceeded
   run_status: budget_exceeded
   meaning: Terminal. The iteration or parse-error budget was exhausted.
@@ -85,7 +85,7 @@ signals:
 - name: ToolDone
   trigger: A tool executed successfully.
 - name: ToolFailed
-  trigger: A tool executed but reported failure — for tpm words, a refusal the model fixes.
+  trigger: A tool executed but reported failure — for words, a refusal the model fixes.
 - name: ParseFailed
   trigger: The model response could not be parsed as a valid tool call.
 - name: TaskCompleted

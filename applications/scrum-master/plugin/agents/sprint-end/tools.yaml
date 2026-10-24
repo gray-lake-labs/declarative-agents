@@ -1,14 +1,14 @@
 # Copyright (c) 2026 Gray Lake Labs
 # SPDX-License-Identifier: MIT-0
-# Tool selection for the sprint-end workflow. The tpm words and file words are
+# Tool selection for the sprint-end workflow. The words and file words are
 # model-invoked in the Summarize state via $tool dispatch (design.md D10, D14).
 tools:
-  # tpm words -- model-invoked
-  - tpm_sprint_end_facts
-  - tpm_sprint_end_stories
-  - tpm_issue_merge
-  - tpm_release_gate
-  - tpm_release_tag
+  # words -- model-invoked
+  - sprint_end_facts
+  - sprint_end_stories
+  - issue_merge
+  - release_gate
+  - release_tag
 
   # File words
   - read

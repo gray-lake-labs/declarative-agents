@@ -7,9 +7,9 @@
 # parameter from a labeled step's output — so nothing is retyped between
 # steps. TPM_PROJECT and TPM_ISSUE come from the environment; an optional
 # value is a parameter, never a ${VAR} arg (the GH-135 finding).
-unit: tpm-pop-declarations
+unit: scrum-master-pop-declarations
 tools:
-- name: tpm_claim
+- name: claim
   type: exec
   binary: scrum-master
   args:
@@ -38,18 +38,18 @@ tools:
     requires_confirmation: false
   undo:
     strategy: noop
-    description: A claim is released by the person with tpm, not reversed by the run.
+    description: A claim is released by the person with scrum-master, not reversed by the run.
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
-    message_shape: 'tpm_claim: <error>'
+    message_shape: 'claim: <error>'
     state_after_failure: nothing was assigned by a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the claim and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
-    state_after_failure: the tracker is as tpm's refusal left it
+    condition: the word refuses the claim and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
+    state_after_failure: the tracker is as the word's refusal left it
 
-- name: tpm_open_branch
+- name: open_branch
   type: exec
   binary: scrum-master
   args:
@@ -91,14 +91,14 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words — or an environment variable is unset
-    message_shape: 'tpm_open_branch: <error>'
+    message_shape: 'open_branch: <error>'
     state_after_failure: nothing opened by a process that did not start
   - signal: ToolFailed
-    condition: tpm refuses the branch and exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
+    condition: the word refuses the branch and exits non-zero
+    message_shape: <the word's refusal reason, as printed>
     state_after_failure: the claim stands; a re-run of the pop finishes it
 
-- name: tpm_add_worktree
+- name: add_worktree
   type: exec
   binary: scrum-master
   args:
@@ -136,14 +136,14 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_add_worktree: <error>'
+    message_shape: 'add_worktree: <error>'
     state_after_failure: nothing added by a process that did not start
   - signal: ToolFailed
-    condition: the worktree cannot be added and tpm exits non-zero
-    message_shape: <tpm's refusal reason, as printed>
+    condition: the worktree cannot be added and the word exits non-zero
+    message_shape: <the word's refusal reason, as printed>
     state_after_failure: the claim and the branch stand; a re-run of the pop finishes it
 
-- name: tpm_install_skills
+- name: install_skills
   type: exec
   binary: scrum-master
   args:
@@ -186,9 +186,9 @@ tools:
   errors:
   - signal: CommandError
     condition: the word cannot start — this agent does not serve the scrum-master words
-    message_shape: 'tpm_install_skills: <error>'
+    message_shape: 'install_skills: <error>'
     state_after_failure: nothing written by a process that did not start
   - signal: ToolFailed
-    condition: the install fails and tpm exits non-zero
+    condition: the install fails and the word exits non-zero
     message_shape: <the install error, as printed>
-    state_after_failure: the pop stands; the reason is reported, as tpm issue pop behaves
+    state_after_failure: the pop stands; the reason is reported, as scrum-master issue pop behaves
